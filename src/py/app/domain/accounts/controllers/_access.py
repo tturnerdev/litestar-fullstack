@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Annotated, Any, cast
+from typing import TYPE_CHECKING, Annotated, Any
 
 from advanced_alchemy.exceptions import DuplicateKeyError
 from advanced_alchemy.utils.text import slugify
@@ -47,13 +47,11 @@ if TYPE_CHECKING:
     from litestar.security.jwt import OAuth2Login, Token
 
     from app.domain.accounts.services import (
-        EmailVerificationTokenService,
         PasswordResetService,
         RoleService,
         UserService,
     )
     from app.lib.email import AppEmailService
-    from app.lib.email.service import UserProtocol
     from app.lib.settings import AppSettings
 
 logger = logging.getLogger(__name__)
@@ -397,9 +395,8 @@ class AccessController(Controller):
         request: Request[m.User, Token, Any],
         users_service: UserService,
         roles_service: RoleService,
-        verification_service: EmailVerificationTokenService,
-        app_email_service: AppEmailService,
         data: AccountRegister,
+        app_mailer: AppEmailService,
     ) -> User:
         """User Signup.
 
@@ -407,9 +404,11 @@ class AccessController(Controller):
             request: Request
             users_service: User Service
             roles_service: Role Service
-            verification_service: Email Verification Service
-            app_email_service: Email service for sending verification emails
             data: Account Register Data
+            app_mailer: Email service for sending notifications
+
+        Raises:
+            ClientException: If user with this email already exists
 
         Returns:
             User
@@ -426,21 +425,18 @@ class AccessController(Controller):
             user = await users_service.create(user_data)
         except DuplicateKeyError as exc:
             raise ClientException(detail="User with this email already exists", status_code=409) from exc
-        request.app.emit(event_id="user_created", user_id=user.id)
-
-        _, verification_token = await verification_service.create_verification_token(user_id=user.id, email=user.email)
-        await app_email_service.send_verification_email(cast("UserProtocol", user), verification_token)
+        request.app.emit(event_id="user_created", user_id=user.id, mailer=app_mailer)
 
         return users_service.to_schema(user, schema_type=User)
 
     @post(operation_id="ForgotPassword", path="/api/access/forgot-password", exclude_from_auth=True, security=[])
     async def forgot_password(
         self,
-        data: ForgotPasswordRequest,
-        request: Request[m.User, Token, Any],
         users_service: UserService,
         password_reset_service: PasswordResetService,
-        app_email_service: AppEmailService,
+        app_mailer: AppEmailService,
+        request: Request[m.User, Token, Any],
+        data: ForgotPasswordRequest,
     ) -> PasswordResetSent:
         """Initiate password reset flow.
 
@@ -449,15 +445,11 @@ class AccessController(Controller):
             request: HTTP request object
             users_service: User service
             password_reset_service: Password reset service
-            app_email_service: Email service for sending reset emails
+            app_mailer: Email service for sending notifications
 
         Returns:
             Response indicating reset email status
         """
-
-        ip_address = request.client.host if request.client else "unknown"
-        user_agent = request.headers.get("user-agent", "unknown")
-
         user = await users_service.get_one_or_none(email=data.email)
 
         if user is None or not user.is_active:
@@ -470,15 +462,7 @@ class AccessController(Controller):
                 message="Too many password reset requests. Please try again later", expires_in_minutes=60
             )
 
-        _, reset_token = await password_reset_service.create_reset_token(
-            user_id=user.id, ip_address=ip_address, user_agent=user_agent
-        )
-
-        await app_email_service.send_password_reset_email(
-            user=cast("UserProtocol", user),
-            reset_token=reset_token,
-            expires_in_minutes=60,
-        )
+        request.app.emit(event_id="password_reset_requested", user_id=user.id, mailer=app_mailer)
 
         return PasswordResetSent(
             message="If the email exists, a password reset link has been sent", expires_in_minutes=60
@@ -516,7 +500,8 @@ class AccessController(Controller):
         data: ResetPasswordRequest,
         users_service: UserService,
         password_reset_service: PasswordResetService,
-        app_email_service: AppEmailService,
+        request: Request[m.User, Token, Any],
+        app_mailer: AppEmailService,
     ) -> PasswordResetComplete:
         """Complete password reset with token.
 
@@ -524,7 +509,8 @@ class AccessController(Controller):
             data: Password reset request data
             users_service: User service
             password_reset_service: Password reset service
-            app_email_service: Email service for sending confirmation emails
+            request: HTTP request object
+            app_mailer: Email service for sending notifications
 
         Returns:
             Password reset confirmation
@@ -545,6 +531,6 @@ class AccessController(Controller):
 
         user = await users_service.reset_password_with_token(user_id=reset_token.user_id, new_password=data.password)
 
-        await app_email_service.send_password_reset_confirmation_email(cast("UserProtocol", user))
+        request.app.emit(event_id="password_reset_completed", user_id=user.id, mailer=app_mailer)
 
         return PasswordResetComplete(message="Password has been successfully reset", user_id=user.id)

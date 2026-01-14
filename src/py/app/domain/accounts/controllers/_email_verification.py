@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any
 
-from litestar import Controller, get, post
+from litestar import Controller, Request, get, post
 from litestar.di import Provide
 from litestar.status_codes import HTTP_200_OK, HTTP_201_CREATED
 
@@ -20,9 +20,11 @@ from app.domain.accounts.schemas import (
 if TYPE_CHECKING:
     from uuid import UUID
 
+    from litestar.security.jwt import Token
+
+    from app.db import models as m
     from app.domain.accounts.services import EmailVerificationTokenService, UserService
     from app.lib.email import AppEmailService
-    from app.lib.email.service import UserProtocol
 
 
 class EmailVerificationController(Controller):
@@ -38,10 +40,10 @@ class EmailVerificationController(Controller):
     @post("/request", status_code=HTTP_201_CREATED)
     async def request_verification(
         self,
-        data: EmailVerificationRequest,
         users_service: UserService,
-        verification_service: EmailVerificationTokenService,
-        app_email_service: AppEmailService,
+        app_mailer: AppEmailService,
+        request: Request[m.User, Token, Any],
+        data: EmailVerificationRequest,
     ) -> EmailVerificationSent:
         """Request email verification for a user."""
 
@@ -52,11 +54,9 @@ class EmailVerificationController(Controller):
         if user.is_verified:
             return EmailVerificationSent(message="Email is already verified")
 
-        _, token = await verification_service.create_verification_token(user_id=user.id, email=user.email)
+        request.app.emit(event_id="verification_requested", user_id=user.id, mailer=app_mailer)
 
-        await app_email_service.send_verification_email(cast("UserProtocol", user), token)
-
-        return EmailVerificationSent(message="Verification email sent", token=token)
+        return EmailVerificationSent(message="Verification email sent")
 
     @post("/verify", status_code=HTTP_200_OK)
     async def verify_email(
