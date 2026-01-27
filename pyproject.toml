@@ -67,6 +67,7 @@ linting = [
   "types-passlib",
   "types-pyyaml",
   "pyright",
+  "codespell>=2.4.1",
 ]
 test = [
   "bump-my-version",
@@ -80,6 +81,8 @@ test = [
   "polyfactory",
   "aiosqlite",
   "asyncpg",
+  "anyio",
+  "pytest-anyio",
 ]
 
 
@@ -223,8 +226,9 @@ exclude = [
   "dist",
   "node_modules",
   "venv",
-  '__pycache__',
+  "__pycache__",
   "src/py/app/db/migrations/versions/*.py",
+  "src/py/app/server/static",
 ]
 fix = true
 line-length = 120
@@ -315,8 +319,8 @@ ban-relative-imports = "all"
 strict-imports = false
 
 [tool.codespell]
-ignore-words-list = "alog,selectin,selectinload"
-skip = 'uv.lock, package-lock.json, src/js/web/bun.lock, src/js/templates/bun.lock'
+ignore-words-list = "alog,selectin,selectinload,asend"
+skip = 'uv.lock,package-lock.json,*/bun.lock,node_modules,.venv,.agent,./src/py/app/server/static/*,*.txt,*.js,*.css,*.map,*.json,htmlcov'
 
 [tool.mypy]
 disallow_any_generics = false
@@ -329,6 +333,7 @@ exclude = '''(?x)(
 |^.venv/
 |^node_modules/
 |^migrations/
+|^src/py/app/server/static/
 )
 '''
 implicit_reexport = false
@@ -371,7 +376,7 @@ module = ["app.db.migrations.*", "app.lib.dto.*"]
 [tool.pyright]
 disableBytesTypePromotions = true
 exclude = ["src/py/app/db/migrations"]
-include = ["src/py/app", "src/py/tests"]
+include = ["src/py/app", "src/py/tests", "tools"]
 pythonVersion = "3.11"
 reportMissingTypeStubs = false
 reportPrivateImportUsage = false

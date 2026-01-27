@@ -169,6 +169,12 @@ export const AdminTeamDetailSchema = {
       default: 0,
       type: "integer",
     },
+    members: {
+      items: {
+        $ref: "#/components/schemas/AdminTeamMember",
+      },
+      type: "array",
+    },
     name: {
       type: "string",
     },
@@ -192,6 +198,23 @@ export const AdminTeamDetailSchema = {
   },
   required: ["createdAt", "id", "name", "slug", "updatedAt"],
   title: "AdminTeamDetail",
+  type: "object",
+} as const;
+
+export const AdminTeamMemberSchema = {
+  properties: {
+    isOwner: {
+      type: "boolean",
+    },
+    role: {
+      type: "string",
+    },
+    user: {
+      $ref: "#/components/schemas/User",
+    },
+  },
+  required: ["isOwner", "role", "user"],
+  title: "AdminTeamMember",
   type: "object",
 } as const;
 
@@ -318,9 +341,9 @@ export const AdminUserDetailSchema = {
         },
       ],
     },
-    oauthProviders: {
+    oauthAccounts: {
       items: {
-        type: "string",
+        $ref: "#/components/schemas/OauthAccount",
       },
       type: "array",
     },
@@ -336,13 +359,13 @@ export const AdminUserDetailSchema = {
     },
     roles: {
       items: {
-        type: "string",
+        $ref: "#/components/schemas/UserRole",
       },
       type: "array",
     },
     teams: {
       items: {
-        type: "string",
+        $ref: "#/components/schemas/UserTeam",
       },
       type: "array",
     },
@@ -434,21 +457,21 @@ export const AdminUserSummarySchema = {
 
 export const AdminUserUpdateSchema = {
   properties: {
-    is_active: {
+    isActive: {
       oneOf: [
         {
           type: "boolean",
         },
       ],
     },
-    is_superuser: {
+    isSuperuser: {
       oneOf: [
         {
           type: "boolean",
         },
       ],
     },
-    is_verified: {
+    isVerified: {
       oneOf: [
         {
           type: "boolean",
@@ -1181,7 +1204,7 @@ export const SystemHealthSchema = {
       type: "string",
     },
     version: {
-      default: "0.2.0",
+      default: "0.3.0",
       type: "string",
     },
   },
