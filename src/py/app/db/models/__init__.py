@@ -1,5 +1,9 @@
 from app.db.models._audit_log import AuditLog
 from app.db.models._email_verification_token import EmailVerificationToken
+from app.db.models._fax_email_route import FaxEmailRoute
+from app.db.models._fax_enums import FaxDirection, FaxStatus
+from app.db.models._fax_message import FaxMessage
+from app.db.models._fax_number import FaxNumber
 from app.db.models._oauth_account import UserOAuthAccount
 from app.db.models._password_reset_token import PasswordResetToken
 from app.db.models._refresh_token import RefreshToken
@@ -16,6 +20,11 @@ from app.db.models._user_role import UserRole
 __all__ = (
     "AuditLog",
     "EmailVerificationToken",
+    "FaxDirection",
+    "FaxEmailRoute",
+    "FaxMessage",
+    "FaxNumber",
+    "FaxStatus",
     "PasswordResetToken",
     "RefreshToken",
     "Role",
