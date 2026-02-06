@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING, Any
 
+from advanced_alchemy.filters import LimitOffset
 from litestar import Controller, get
 from litestar.di import Provide
 
@@ -102,8 +103,8 @@ class DashboardController(Controller):
         cutoff_time = datetime.now(UTC) - timedelta(hours=hours)
         results, total = await audit_service.list_and_count(
             m.AuditLog.created_at >= cutoff_time,
+            LimitOffset(limit=limit, offset=0),
             order_by=[m.AuditLog.created_at.desc()],
-            limit=limit,
         )
 
         items = [
