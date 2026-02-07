@@ -652,6 +652,321 @@ export const DashboardStatsSchema = {
   type: "object",
 } as const;
 
+export const DeviceSchema = {
+  properties: {
+    deviceType: {
+      type: "string",
+    },
+    firmwareVersion: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    ipAddress: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    isActive: {
+      default: true,
+      type: "boolean",
+    },
+    lastSeenAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    lines: {
+      items: {
+        $ref: "#/components/schemas/DeviceLineAssignment",
+      },
+      type: "array",
+    },
+    macAddress: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    manufacturer: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    model: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    name: {
+      type: "string",
+    },
+    provisionedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    sipServer: {
+      type: "string",
+    },
+    sipUsername: {
+      type: "string",
+    },
+    status: {
+      type: "string",
+    },
+    teamId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    userId: {
+      format: "uuid",
+      type: "string",
+    },
+  },
+  required: [
+    "deviceType",
+    "id",
+    "name",
+    "sipServer",
+    "sipUsername",
+    "status",
+    "userId",
+  ],
+  title: "Device",
+  type: "object",
+} as const;
+
+export const DeviceCreateSchema = {
+  properties: {
+    deviceType: {
+      type: "string",
+    },
+    macAddress: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    manufacturer: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    model: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    name: {
+      type: "string",
+    },
+    sipUsername: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    teamId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: ["deviceType", "name"],
+  title: "DeviceCreate",
+  type: "object",
+} as const;
+
+export const DeviceLineAssignmentSchema = {
+  properties: {
+    extensionId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    isActive: {
+      default: true,
+      type: "boolean",
+    },
+    label: {
+      type: "string",
+    },
+    lineNumber: {
+      type: "integer",
+    },
+    lineType: {
+      type: "string",
+    },
+  },
+  required: ["id", "label", "lineNumber", "lineType"],
+  title: "DeviceLineAssignment",
+  type: "object",
+} as const;
+
+export const DeviceUpdateSchema = {
+  properties: {
+    configJson: {
+      oneOf: [
+        {
+          type: "object",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    firmwareVersion: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    ipAddress: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    isActive: {
+      oneOf: [
+        {
+          type: "boolean",
+        },
+      ],
+    },
+    macAddress: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    manufacturer: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    model: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    name: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+  },
+  required: [],
+  title: "DeviceUpdate",
+  type: "object",
+} as const;
+
 export const EmailVerificationConfirmSchema = {
   properties: {
     token: {

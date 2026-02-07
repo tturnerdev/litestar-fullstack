@@ -176,6 +176,70 @@ export type DashboardStats = {
 };
 
 /**
+ * Device
+ */
+export type Device = {
+  deviceType: string;
+  firmwareVersion?: string | null;
+  id: string;
+  ipAddress?: string | null;
+  isActive?: boolean;
+  lastSeenAt?: string | null;
+  lines?: Array<DeviceLineAssignment>;
+  macAddress?: string | null;
+  manufacturer?: string | null;
+  model?: string | null;
+  name: string;
+  provisionedAt?: string | null;
+  sipServer: string;
+  sipUsername: string;
+  status: string;
+  teamId?: string | null;
+  userId: string;
+};
+
+/**
+ * DeviceCreate
+ */
+export type DeviceCreate = {
+  deviceType: string;
+  macAddress?: string | null;
+  manufacturer?: string | null;
+  model?: string | null;
+  name: string;
+  sipUsername?: string | null;
+  teamId?: string | null;
+};
+
+/**
+ * DeviceLineAssignment
+ */
+export type DeviceLineAssignment = {
+  extensionId?: string | null;
+  id: string;
+  isActive?: boolean;
+  label: string;
+  lineNumber: number;
+  lineType: string;
+};
+
+/**
+ * DeviceUpdate
+ */
+export type DeviceUpdate = {
+  configJson?: {
+    [key: string]: unknown;
+  } | null;
+  firmwareVersion?: string | null;
+  ipAddress?: string | null;
+  isActive?: boolean;
+  macAddress?: string | null;
+  manufacturer?: string | null;
+  model?: string | null;
+  name?: string;
+};
+
+/**
  * EmailVerificationConfirm
  */
 export type EmailVerificationConfirm = {
@@ -968,8 +1032,8 @@ export type AdminListAuditLogsData = {
     sortOrder?: "asc" | "desc" | null;
     targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -1049,8 +1113,8 @@ export type AdminGetTargetAuditLogsData = {
     sortOrder?: "asc" | "desc" | null;
     targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -1129,8 +1193,8 @@ export type AdminGetUserAuditLogsData = {
     sortOrder?: "asc" | "desc" | null;
     targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -1815,6 +1879,239 @@ export type OAuthConfigResponses = {
 
 export type OAuthConfigResponse =
   OAuthConfigResponses[keyof OAuthConfigResponses];
+
+export type ListDevicesData = {
+  body?: never;
+  path?: never;
+  query?: {
+    ids?: Array<string> | null;
+    createdBefore?: string | null;
+    createdAfter?: string | null;
+    updatedBefore?: string | null;
+    updatedAfter?: string | null;
+    /**
+     * Field to search
+     */
+    searchString?: string | null;
+    /**
+     * Search should be case sensitive
+     */
+    searchIgnoreCase?: boolean | null;
+    currentPage?: number;
+    pageSize?: number;
+    /**
+     * Order by field
+     */
+    orderBy?: string | null;
+    /**
+     * Field to search
+     */
+    sortOrder?: "asc" | "desc" | null;
+  };
+  url: "/api/devices";
+};
+
+export type ListDevicesErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type ListDevicesError = ListDevicesErrors[keyof ListDevicesErrors];
+
+export type ListDevicesResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: {
+    items?: Array<Device>;
+    /**
+     * Maximal number of items to send.
+     */
+    limit?: number;
+    /**
+     * Offset from the beginning of the query.
+     */
+    offset?: number;
+    /**
+     * Total number of items.
+     */
+    total?: number;
+  };
+};
+
+export type ListDevicesResponse =
+  ListDevicesResponses[keyof ListDevicesResponses];
+
+export type CreateDeviceData = {
+  body: DeviceCreate;
+  path?: never;
+  query?: never;
+  url: "/api/devices";
+};
+
+export type CreateDeviceErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type CreateDeviceError = CreateDeviceErrors[keyof CreateDeviceErrors];
+
+export type CreateDeviceResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: Device;
+};
+
+export type CreateDeviceResponse =
+  CreateDeviceResponses[keyof CreateDeviceResponses];
+
+export type DeleteDeviceData = {
+  body?: never;
+  path: {
+    /**
+     * Device ID
+     *
+     * The device to delete.
+     */
+    device_id: string;
+  };
+  query?: never;
+  url: "/api/devices/{device_id}";
+};
+
+export type DeleteDeviceErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type DeleteDeviceError = DeleteDeviceErrors[keyof DeleteDeviceErrors];
+
+export type DeleteDeviceResponses = {
+  /**
+   * Request fulfilled, nothing follows
+   */
+  204: void;
+};
+
+export type DeleteDeviceResponse =
+  DeleteDeviceResponses[keyof DeleteDeviceResponses];
+
+export type GetDeviceData = {
+  body?: never;
+  path: {
+    /**
+     * Device ID
+     *
+     * The device to retrieve.
+     */
+    device_id: string;
+  };
+  query?: never;
+  url: "/api/devices/{device_id}";
+};
+
+export type GetDeviceErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type GetDeviceError = GetDeviceErrors[keyof GetDeviceErrors];
+
+export type GetDeviceResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: Device;
+};
+
+export type GetDeviceResponse = GetDeviceResponses[keyof GetDeviceResponses];
+
+export type UpdateDeviceData = {
+  body: DeviceUpdate;
+  path: {
+    /**
+     * Device ID
+     *
+     * The device to update.
+     */
+    device_id: string;
+  };
+  query?: never;
+  url: "/api/devices/{device_id}";
+};
+
+export type UpdateDeviceErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type UpdateDeviceError = UpdateDeviceErrors[keyof UpdateDeviceErrors];
+
+export type UpdateDeviceResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: Device;
+};
+
+export type UpdateDeviceResponse =
+  UpdateDeviceResponses[keyof UpdateDeviceResponses];
 
 export type ApiEmailVerificationRequestRequestVerificationData = {
   body: EmailVerificationRequest;

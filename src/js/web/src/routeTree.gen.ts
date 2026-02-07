@@ -25,13 +25,17 @@ import { Route as PublicForgotPasswordRouteImport } from './routes/_public/forgo
 import { Route as PublicAboutRouteImport } from './routes/_public/about'
 import { Route as AppTeamsRouteImport } from './routes/_app/teams'
 import { Route as AppHomeRouteImport } from './routes/_app/home'
+import { Route as AppDevicesRouteImport } from './routes/_app/devices'
 import { Route as AppAdminRouteImport } from './routes/_app/admin'
 import { Route as AppTeamsIndexRouteImport } from './routes/_app/teams/index'
 import { Route as AppProfileIndexRouteImport } from './routes/_app/profile/index'
+import { Route as AppDevicesIndexRouteImport } from './routes/_app/devices/index'
 import { Route as AppAdminIndexRouteImport } from './routes/_app/admin/index'
 import { Route as AppTeamsNewRouteImport } from './routes/_app/teams/new'
 import { Route as AppTeamsTeamIdRouteImport } from './routes/_app/teams/$teamId'
+import { Route as AppDevicesNewRouteImport } from './routes/_app/devices/new'
 import { Route as AppAdminAuditRouteImport } from './routes/_app/admin/audit'
+import { Route as AppDevicesDeviceIdIndexRouteImport } from './routes/_app/devices/$deviceId/index'
 import { Route as AppAdminUsersIndexRouteImport } from './routes/_app/admin/users/index'
 import { Route as AppAdminTeamsIndexRouteImport } from './routes/_app/admin/teams/index'
 import { Route as PublicAuthGoogleCallbackRouteImport } from './routes/_public/auth/google/callback'
@@ -118,6 +122,11 @@ const AppHomeRoute = AppHomeRouteImport.update({
   path: '/home',
   getParentRoute: () => AppRoute,
 } as any)
+const AppDevicesRoute = AppDevicesRouteImport.update({
+  id: '/devices',
+  path: '/devices',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAdminRoute = AppAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -132,6 +141,11 @@ const AppProfileIndexRoute = AppProfileIndexRouteImport.update({
   id: '/profile/',
   path: '/profile/',
   getParentRoute: () => AppRoute,
+} as any)
+const AppDevicesIndexRoute = AppDevicesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppDevicesRoute,
 } as any)
 const AppAdminIndexRoute = AppAdminIndexRouteImport.update({
   id: '/',
@@ -148,10 +162,20 @@ const AppTeamsTeamIdRoute = AppTeamsTeamIdRouteImport.update({
   path: '/$teamId',
   getParentRoute: () => AppTeamsRoute,
 } as any)
+const AppDevicesNewRoute = AppDevicesNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AppDevicesRoute,
+} as any)
 const AppAdminAuditRoute = AppAdminAuditRouteImport.update({
   id: '/audit',
   path: '/audit',
   getParentRoute: () => AppAdminRoute,
+} as any)
+const AppDevicesDeviceIdIndexRoute = AppDevicesDeviceIdIndexRouteImport.update({
+  id: '/$deviceId/',
+  path: '/$deviceId/',
+  getParentRoute: () => AppDevicesRoute,
 } as any)
 const AppAdminUsersIndexRoute = AppAdminUsersIndexRouteImport.update({
   id: '/users/',
@@ -196,6 +220,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/admin': typeof AppAdminRouteWithChildren
+  '/devices': typeof AppDevicesRouteWithChildren
   '/home': typeof AppHomeRoute
   '/teams': typeof AppTeamsRouteWithChildren
   '/about': typeof PublicAboutRoute
@@ -209,9 +234,11 @@ export interface FileRoutesByFullPath {
   '/terms': typeof PublicTermsRoute
   '/verify-email': typeof PublicVerifyEmailRoute
   '/admin/audit': typeof AppAdminAuditRoute
+  '/devices/new': typeof AppDevicesNewRoute
   '/teams/$teamId': typeof AppTeamsTeamIdRouteWithChildren
   '/teams/new': typeof AppTeamsNewRoute
   '/admin/': typeof AppAdminIndexRoute
+  '/devices/': typeof AppDevicesIndexRoute
   '/profile/': typeof AppProfileIndexRoute
   '/teams/': typeof AppTeamsIndexRoute
   '/admin/teams/$teamId': typeof AppAdminTeamsTeamIdRoute
@@ -220,6 +247,7 @@ export interface FileRoutesByFullPath {
   '/auth/google/callback': typeof PublicAuthGoogleCallbackRoute
   '/admin/teams/': typeof AppAdminTeamsIndexRoute
   '/admin/users/': typeof AppAdminUsersIndexRoute
+  '/devices/$deviceId/': typeof AppDevicesDeviceIdIndexRoute
   '/teams/$teamId/invitations/$invitationId/accept': typeof AppTeamsTeamIdInvitationsInvitationIdAcceptRoute
 }
 export interface FileRoutesByTo {
@@ -237,9 +265,11 @@ export interface FileRoutesByTo {
   '/terms': typeof PublicTermsRoute
   '/verify-email': typeof PublicVerifyEmailRoute
   '/admin/audit': typeof AppAdminAuditRoute
+  '/devices/new': typeof AppDevicesNewRoute
   '/teams/$teamId': typeof AppTeamsTeamIdRouteWithChildren
   '/teams/new': typeof AppTeamsNewRoute
   '/admin': typeof AppAdminIndexRoute
+  '/devices': typeof AppDevicesIndexRoute
   '/profile': typeof AppProfileIndexRoute
   '/teams': typeof AppTeamsIndexRoute
   '/admin/teams/$teamId': typeof AppAdminTeamsTeamIdRoute
@@ -248,6 +278,7 @@ export interface FileRoutesByTo {
   '/auth/google/callback': typeof PublicAuthGoogleCallbackRoute
   '/admin/teams': typeof AppAdminTeamsIndexRoute
   '/admin/users': typeof AppAdminUsersIndexRoute
+  '/devices/$deviceId': typeof AppDevicesDeviceIdIndexRoute
   '/teams/$teamId/invitations/$invitationId/accept': typeof AppTeamsTeamIdInvitationsInvitationIdAcceptRoute
 }
 export interface FileRoutesById {
@@ -257,6 +288,7 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/_public': typeof PublicRouteWithChildren
   '/_app/admin': typeof AppAdminRouteWithChildren
+  '/_app/devices': typeof AppDevicesRouteWithChildren
   '/_app/home': typeof AppHomeRoute
   '/_app/teams': typeof AppTeamsRouteWithChildren
   '/_public/about': typeof PublicAboutRoute
@@ -270,9 +302,11 @@ export interface FileRoutesById {
   '/_public/terms': typeof PublicTermsRoute
   '/_public/verify-email': typeof PublicVerifyEmailRoute
   '/_app/admin/audit': typeof AppAdminAuditRoute
+  '/_app/devices/new': typeof AppDevicesNewRoute
   '/_app/teams/$teamId': typeof AppTeamsTeamIdRouteWithChildren
   '/_app/teams/new': typeof AppTeamsNewRoute
   '/_app/admin/': typeof AppAdminIndexRoute
+  '/_app/devices/': typeof AppDevicesIndexRoute
   '/_app/profile/': typeof AppProfileIndexRoute
   '/_app/teams/': typeof AppTeamsIndexRoute
   '/_app/admin/teams/$teamId': typeof AppAdminTeamsTeamIdRoute
@@ -281,6 +315,7 @@ export interface FileRoutesById {
   '/_public/auth/google/callback': typeof PublicAuthGoogleCallbackRoute
   '/_app/admin/teams/': typeof AppAdminTeamsIndexRoute
   '/_app/admin/users/': typeof AppAdminUsersIndexRoute
+  '/_app/devices/$deviceId/': typeof AppDevicesDeviceIdIndexRoute
   '/_app/teams/$teamId/invitations/$invitationId/accept': typeof AppTeamsTeamIdInvitationsInvitationIdAcceptRoute
 }
 export interface FileRouteTypes {
@@ -289,6 +324,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/admin'
+    | '/devices'
     | '/home'
     | '/teams'
     | '/about'
@@ -302,9 +338,11 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verify-email'
     | '/admin/audit'
+    | '/devices/new'
     | '/teams/$teamId'
     | '/teams/new'
     | '/admin/'
+    | '/devices/'
     | '/profile/'
     | '/teams/'
     | '/admin/teams/$teamId'
@@ -313,6 +351,7 @@ export interface FileRouteTypes {
     | '/auth/google/callback'
     | '/admin/teams/'
     | '/admin/users/'
+    | '/devices/$deviceId/'
     | '/teams/$teamId/invitations/$invitationId/accept'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -330,9 +369,11 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verify-email'
     | '/admin/audit'
+    | '/devices/new'
     | '/teams/$teamId'
     | '/teams/new'
     | '/admin'
+    | '/devices'
     | '/profile'
     | '/teams'
     | '/admin/teams/$teamId'
@@ -341,6 +382,7 @@ export interface FileRouteTypes {
     | '/auth/google/callback'
     | '/admin/teams'
     | '/admin/users'
+    | '/devices/$deviceId'
     | '/teams/$teamId/invitations/$invitationId/accept'
   id:
     | '__root__'
@@ -349,6 +391,7 @@ export interface FileRouteTypes {
     | '/_app'
     | '/_public'
     | '/_app/admin'
+    | '/_app/devices'
     | '/_app/home'
     | '/_app/teams'
     | '/_public/about'
@@ -362,9 +405,11 @@ export interface FileRouteTypes {
     | '/_public/terms'
     | '/_public/verify-email'
     | '/_app/admin/audit'
+    | '/_app/devices/new'
     | '/_app/teams/$teamId'
     | '/_app/teams/new'
     | '/_app/admin/'
+    | '/_app/devices/'
     | '/_app/profile/'
     | '/_app/teams/'
     | '/_app/admin/teams/$teamId'
@@ -373,6 +418,7 @@ export interface FileRouteTypes {
     | '/_public/auth/google/callback'
     | '/_app/admin/teams/'
     | '/_app/admin/users/'
+    | '/_app/devices/$deviceId/'
     | '/_app/teams/$teamId/invitations/$invitationId/accept'
   fileRoutesById: FileRoutesById
 }
@@ -497,6 +543,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppHomeRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/devices': {
+      id: '/_app/devices'
+      path: '/devices'
+      fullPath: '/devices'
+      preLoaderRoute: typeof AppDevicesRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/admin': {
       id: '/_app/admin'
       path: '/admin'
@@ -517,6 +570,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/profile/'
       preLoaderRoute: typeof AppProfileIndexRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/_app/devices/': {
+      id: '/_app/devices/'
+      path: '/'
+      fullPath: '/devices/'
+      preLoaderRoute: typeof AppDevicesIndexRouteImport
+      parentRoute: typeof AppDevicesRoute
     }
     '/_app/admin/': {
       id: '/_app/admin/'
@@ -539,12 +599,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppTeamsTeamIdRouteImport
       parentRoute: typeof AppTeamsRoute
     }
+    '/_app/devices/new': {
+      id: '/_app/devices/new'
+      path: '/new'
+      fullPath: '/devices/new'
+      preLoaderRoute: typeof AppDevicesNewRouteImport
+      parentRoute: typeof AppDevicesRoute
+    }
     '/_app/admin/audit': {
       id: '/_app/admin/audit'
       path: '/audit'
       fullPath: '/admin/audit'
       preLoaderRoute: typeof AppAdminAuditRouteImport
       parentRoute: typeof AppAdminRoute
+    }
+    '/_app/devices/$deviceId/': {
+      id: '/_app/devices/$deviceId/'
+      path: '/$deviceId'
+      fullPath: '/devices/$deviceId/'
+      preLoaderRoute: typeof AppDevicesDeviceIdIndexRouteImport
+      parentRoute: typeof AppDevicesRoute
     }
     '/_app/admin/users/': {
       id: '/_app/admin/users/'
@@ -620,6 +694,22 @@ const AppAdminRouteWithChildren = AppAdminRoute._addFileChildren(
   AppAdminRouteChildren,
 )
 
+interface AppDevicesRouteChildren {
+  AppDevicesNewRoute: typeof AppDevicesNewRoute
+  AppDevicesIndexRoute: typeof AppDevicesIndexRoute
+  AppDevicesDeviceIdIndexRoute: typeof AppDevicesDeviceIdIndexRoute
+}
+
+const AppDevicesRouteChildren: AppDevicesRouteChildren = {
+  AppDevicesNewRoute: AppDevicesNewRoute,
+  AppDevicesIndexRoute: AppDevicesIndexRoute,
+  AppDevicesDeviceIdIndexRoute: AppDevicesDeviceIdIndexRoute,
+}
+
+const AppDevicesRouteWithChildren = AppDevicesRoute._addFileChildren(
+  AppDevicesRouteChildren,
+)
+
 interface AppTeamsTeamIdRouteChildren {
   AppTeamsTeamIdInvitationsInvitationIdAcceptRoute: typeof AppTeamsTeamIdInvitationsInvitationIdAcceptRoute
 }
@@ -651,6 +741,7 @@ const AppTeamsRouteWithChildren = AppTeamsRoute._addFileChildren(
 
 interface AppRouteChildren {
   AppAdminRoute: typeof AppAdminRouteWithChildren
+  AppDevicesRoute: typeof AppDevicesRouteWithChildren
   AppHomeRoute: typeof AppHomeRoute
   AppTeamsRoute: typeof AppTeamsRouteWithChildren
   AppProfileIndexRoute: typeof AppProfileIndexRoute
@@ -658,6 +749,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppAdminRoute: AppAdminRouteWithChildren,
+  AppDevicesRoute: AppDevicesRouteWithChildren,
   AppHomeRoute: AppHomeRoute,
   AppTeamsRoute: AppTeamsRouteWithChildren,
   AppProfileIndexRoute: AppProfileIndexRoute,
