@@ -24,6 +24,24 @@ export function AppLayout() {
     if (pathname.startsWith("/teams/")) {
       return { eyebrow: "Workspace", title: currentTeam?.name ?? "Team" }
     }
+    if (pathname === "/fax") {
+      return { eyebrow: "Communications", title: "Fax" }
+    }
+    if (pathname === "/fax/numbers") {
+      return { eyebrow: "Communications", title: "Fax Numbers" }
+    }
+    if (pathname.startsWith("/fax/numbers/")) {
+      return { eyebrow: "Communications", title: "Fax Number Details" }
+    }
+    if (pathname === "/fax/messages") {
+      return { eyebrow: "Communications", title: "Fax Messages" }
+    }
+    if (pathname.startsWith("/fax/messages/")) {
+      return { eyebrow: "Communications", title: "Message Details" }
+    }
+    if (pathname === "/fax/send") {
+      return { eyebrow: "Communications", title: "Send Fax" }
+    }
     if (pathname.startsWith("/admin")) {
       return { eyebrow: "Operations", title: "Admin" }
     }
