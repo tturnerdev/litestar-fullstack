@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { Home, ShieldCheck, Users } from "lucide-react"
+import { Home, Phone, ShieldCheck, Users } from "lucide-react"
 import type * as React from "react"
 import { useEffect, useMemo } from "react"
 import { NavMain } from "@/components/nav-main"
@@ -51,6 +51,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         items: [
           { title: "All teams", to: "/teams" },
           { title: "Create new", to: "/teams/new" },
+        ],
+      },
+      {
+        title: "Voice",
+        to: "/voice",
+        icon: Phone,
+        items: [
+          { title: "Phone Numbers", to: "/voice/phone-numbers" },
+          { title: "Extensions", to: "/voice/extensions" },
         ],
       },
     ]

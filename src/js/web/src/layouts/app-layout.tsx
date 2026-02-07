@@ -24,6 +24,18 @@ export function AppLayout() {
     if (pathname.startsWith("/teams/")) {
       return { eyebrow: "Workspace", title: currentTeam?.name ?? "Team" }
     }
+    if (pathname.startsWith("/voice/extensions/")) {
+      return { eyebrow: "Voice", title: "Extension Settings" }
+    }
+    if (pathname === "/voice/extensions") {
+      return { eyebrow: "Voice", title: "Extensions" }
+    }
+    if (pathname === "/voice/phone-numbers") {
+      return { eyebrow: "Voice", title: "Phone Numbers" }
+    }
+    if (pathname.startsWith("/voice")) {
+      return { eyebrow: "Voice", title: "Voice Settings" }
+    }
     if (pathname.startsWith("/admin")) {
       return { eyebrow: "Operations", title: "Admin" }
     }
