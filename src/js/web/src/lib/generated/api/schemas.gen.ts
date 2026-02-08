@@ -654,6 +654,16 @@ export const DashboardStatsSchema = {
 
 export const DeviceSchema = {
   properties: {
+    deviceModel: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     deviceType: {
       type: "string",
     },
@@ -722,16 +732,6 @@ export const DeviceSchema = {
         },
       ],
     },
-    model: {
-      oneOf: [
-        {
-          type: "string",
-        },
-        {
-          type: "null",
-        },
-      ],
-    },
     name: {
       type: "string",
     },
@@ -786,6 +786,16 @@ export const DeviceSchema = {
 
 export const DeviceCreateSchema = {
   properties: {
+    deviceModel: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     deviceType: {
       type: "string",
     },
@@ -800,16 +810,6 @@ export const DeviceCreateSchema = {
       ],
     },
     manufacturer: {
-      oneOf: [
-        {
-          type: "string",
-        },
-        {
-          type: "null",
-        },
-      ],
-    },
-    model: {
       oneOf: [
         {
           type: "string",
@@ -897,6 +897,16 @@ export const DeviceUpdateSchema = {
         },
       ],
     },
+    deviceModel: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     firmwareVersion: {
       oneOf: [
         {
@@ -935,16 +945,6 @@ export const DeviceUpdateSchema = {
       ],
     },
     manufacturer: {
-      oneOf: [
-        {
-          type: "string",
-        },
-        {
-          type: "null",
-        },
-      ],
-    },
-    model: {
       oneOf: [
         {
           type: "string",

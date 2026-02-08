@@ -179,6 +179,7 @@ export type DashboardStats = {
  * Device
  */
 export type Device = {
+  deviceModel?: string | null;
   deviceType: string;
   firmwareVersion?: string | null;
   id: string;
@@ -188,7 +189,6 @@ export type Device = {
   lines?: Array<DeviceLineAssignment>;
   macAddress?: string | null;
   manufacturer?: string | null;
-  model?: string | null;
   name: string;
   provisionedAt?: string | null;
   sipServer: string;
@@ -202,10 +202,10 @@ export type Device = {
  * DeviceCreate
  */
 export type DeviceCreate = {
+  deviceModel?: string | null;
   deviceType: string;
   macAddress?: string | null;
   manufacturer?: string | null;
-  model?: string | null;
   name: string;
   sipUsername?: string | null;
   teamId?: string | null;
@@ -230,12 +230,12 @@ export type DeviceUpdate = {
   configJson?: {
     [key: string]: unknown;
   } | null;
+  deviceModel?: string | null;
   firmwareVersion?: string | null;
   ipAddress?: string | null;
   isActive?: boolean;
   macAddress?: string | null;
   manufacturer?: string | null;
-  model?: string | null;
   name?: string;
 };
 
@@ -1030,10 +1030,10 @@ export type AdminListAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -1111,10 +1111,10 @@ export type AdminGetTargetAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -1191,10 +1191,10 @@ export type AdminGetUserAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };

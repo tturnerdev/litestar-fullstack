@@ -43,7 +43,7 @@ class Device(UUIDv7AuditBase):
         index=True,
     )
     mac_address: Mapped[str | None] = mapped_column(String(length=17), nullable=True, default=None)
-    model: Mapped[str | None] = mapped_column(String(length=100), nullable=True, default=None)
+    device_model: Mapped[str | None] = mapped_column(String(length=100), nullable=True, default=None)
     manufacturer: Mapped[str | None] = mapped_column(String(length=100), nullable=True, default=None)
     firmware_version: Mapped[str | None] = mapped_column(String(length=50), nullable=True, default=None)
     ip_address: Mapped[str | None] = mapped_column(String(length=45), nullable=True, default=None)

@@ -1,8 +1,8 @@
 """add device tables
 
-Revision ID: fcfd4018c67e
+Revision ID: b1cf87cc0066
 Revises: dc54b25d8b6c
-Create Date: 2026-02-06 14:02:45.177494
+Create Date: 2026-02-08 03:58:49.084828
 
 """
 import warnings
@@ -27,7 +27,7 @@ sa.StoredObject = StoredObject  # pyright: ignore
 sa.PasswordHash = PasswordHash  # pyright: ignore
 
 # revision identifiers, used by Alembic.
-revision = 'fcfd4018c67e'
+revision = 'b1cf87cc0066'
 down_revision = 'dc54b25d8b6c'
 branch_labels = None
 depends_on = None
@@ -57,7 +57,7 @@ def schema_upgrades() -> None:
     sa.Column('name', sa.String(length=255), nullable=False),
     sa.Column('device_type', sa.String(length=50), nullable=False),
     sa.Column('mac_address', sa.String(length=17), nullable=True),
-    sa.Column('model', sa.String(length=100), nullable=True),
+    sa.Column('device_model', sa.String(length=100), nullable=True),
     sa.Column('manufacturer', sa.String(length=100), nullable=True),
     sa.Column('firmware_version', sa.String(length=50), nullable=True),
     sa.Column('ip_address', sa.String(length=45), nullable=True),

@@ -113,7 +113,7 @@ function DeviceDetailPage() {
               </div>
               <div>
                 <p className="text-muted-foreground">Model</p>
-                <p>{data.model ?? "—"}</p>
+                <p>{data.deviceModel ?? "—"}</p>
               </div>
               <div>
                 <p className="text-muted-foreground">Manufacturer</p>

@@ -31,7 +31,7 @@ class Device(CamelizedBaseStruct):
     status: str
     team_id: UUID | None = None
     mac_address: str | None = None
-    model: str | None = None
+    device_model: str | None = None
     manufacturer: str | None = None
     firmware_version: str | None = None
     ip_address: str | None = None
@@ -47,7 +47,7 @@ class DeviceCreate(CamelizedBaseStruct):
     name: str
     device_type: str
     mac_address: str | None = None
-    model: str | None = None
+    device_model: str | None = None
     manufacturer: str | None = None
     sip_username: str | None = None
     team_id: UUID | None = None
@@ -59,7 +59,7 @@ class DeviceUpdate(CamelizedBaseStruct, omit_defaults=True):
     name: str | msgspec.UnsetType = msgspec.UNSET
     is_active: bool | msgspec.UnsetType = msgspec.UNSET
     mac_address: str | msgspec.UnsetType | None = msgspec.UNSET
-    model: str | msgspec.UnsetType | None = msgspec.UNSET
+    device_model: str | msgspec.UnsetType | None = msgspec.UNSET
     manufacturer: str | msgspec.UnsetType | None = msgspec.UNSET
     firmware_version: str | msgspec.UnsetType | None = msgspec.UNSET
     ip_address: str | msgspec.UnsetType | None = msgspec.UNSET

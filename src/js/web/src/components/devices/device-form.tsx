@@ -23,7 +23,7 @@ const createDeviceSchema = z.object({
   name: z.string().min(1, "Device name is required"),
   deviceType: z.string().min(1, "Device type is required"),
   macAddress: z.string().optional(),
-  model: z.string().optional(),
+  deviceModel: z.string().optional(),
   manufacturer: z.string().optional(),
 })
 
@@ -39,7 +39,7 @@ export function CreateDeviceForm() {
       name: "",
       deviceType: "",
       macAddress: "",
-      model: "",
+      deviceModel: "",
       manufacturer: "",
     },
   })
@@ -50,7 +50,7 @@ export function CreateDeviceForm() {
         name: data.name,
         deviceType: data.deviceType,
         macAddress: data.macAddress || undefined,
-        model: data.model || undefined,
+        deviceModel: data.deviceModel || undefined,
         manufacturer: data.manufacturer || undefined,
       })
       router.invalidate()
@@ -117,7 +117,7 @@ export function CreateDeviceForm() {
         />
         <FormField
           control={form.control}
-          name="model"
+          name="deviceModel"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Model</FormLabel>
