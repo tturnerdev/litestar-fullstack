@@ -7,6 +7,10 @@ from app.db.models._device_type import DeviceType
 from app.db.models._do_not_disturb import DoNotDisturb
 from app.db.models._email_verification_token import EmailVerificationToken
 from app.db.models._extension import Extension
+from app.db.models._fax_email_route import FaxEmailRoute
+from app.db.models._fax_enums import FaxDirection, FaxStatus
+from app.db.models._fax_message import FaxMessage
+from app.db.models._fax_number import FaxNumber
 from app.db.models._forwarding_rule import ForwardingRule
 from app.db.models._oauth_account import UserOAuthAccount
 from app.db.models._password_reset_token import PasswordResetToken
@@ -42,6 +46,11 @@ __all__ = (
     "DoNotDisturb",
     "EmailVerificationToken",
     "Extension",
+    "FaxDirection",
+    "FaxEmailRoute",
+    "FaxMessage",
+    "FaxNumber",
+    "FaxStatus",
     "ForwardingDestinationType",
     "ForwardingRule",
     "ForwardingRuleType",
