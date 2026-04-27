@@ -34,7 +34,6 @@ from app.domain.accounts.schemas import (
     PasswordResetSent,
     ResetPasswordRequest,
     ResetTokenValidation,
-    TokenRefresh,
     User,
 )
 from app.domain.accounts.services import RefreshTokenService
@@ -216,7 +215,7 @@ class AccessController(Controller):
         refresh_token_service: RefreshTokenService,
         users_service: UserService,
         settings: AppSettings,
-    ) -> Response[TokenRefresh]:
+    ) -> Response[OAuth2Login]:
         """Refresh access token using refresh token.
 
         Implements token rotation - the old refresh token is revoked

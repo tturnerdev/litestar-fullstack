@@ -96,7 +96,11 @@ client.interceptors.error.use(async (error, response, request, options) => {
 
     try {
       // Attempt to refresh the token
-      await client.post({ url: "/api/access/refresh" })
+      const refreshResponse = await client.post({ url: "/api/access/refresh" })
+      const refreshData = refreshResponse.data as { access_token?: string } | undefined
+      if (refreshData?.access_token) {
+        window.localStorage.setItem("access_token", refreshData.access_token)
+      }
       processQueue(null)
       // Retry the original request
       const method = options.method ?? "GET"
@@ -104,7 +108,9 @@ client.interceptors.error.use(async (error, response, request, options) => {
     } catch (refreshError) {
       processQueue(refreshError as Error)
       // Refresh failed - clear auth state and redirect to login
-      // But only if we're not already on the login page
+      window.localStorage.removeItem("access_token")
+      const { useAuthStore } = await import("@/lib/auth")
+      useAuthStore.setState({ user: null, currentTeam: null, isAuthenticated: false })
       queryClient.clear()
       if (window.location.pathname !== "/login") {
         window.location.href = "/login"

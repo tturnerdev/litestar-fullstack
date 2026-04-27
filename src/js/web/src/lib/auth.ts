@@ -113,6 +113,11 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true })
         try {
           const { data: user } = await accountProfile()
+          if (!user) {
+            setAccessToken(null)
+            set({ user: null, currentTeam: null, isAuthenticated: false })
+            return
+          }
           set({ user, isAuthenticated: true })
         } catch {
           setAccessToken(null)
