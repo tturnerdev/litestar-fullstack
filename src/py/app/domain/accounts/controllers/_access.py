@@ -59,7 +59,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 REFRESH_COOKIE_NAME = "refresh_token"
-REFRESH_TOKEN_MAX_AGE = 7 * 24 * 60 * 60
+REFRESH_TOKEN_MAX_AGE = 604800 # 7 days
 
 
 class AccessController(Controller):
