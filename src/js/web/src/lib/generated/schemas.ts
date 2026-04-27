@@ -29,6 +29,9 @@ import type {
   ConfirmMfaSetupData,
   ConfirmMfaSetupErrors,
   ConfirmMfaSetupResponses,
+  CreateDeviceData,
+  CreateDeviceErrors,
+  CreateDeviceResponses,
   CreateRoleData,
   CreateRoleErrors,
   CreateRoleResponses,
@@ -86,6 +89,7 @@ import type {
  */
 export type OperationName =
   | 'confirm_setup'
+  | 'create_device'
   | 'create_role'
   | 'create_tag'
   | 'create_team'
@@ -97,6 +101,7 @@ export type OperationName =
   | 'get_sessions'
   | 'get_stats'
   | 'initiate_setup'
+  | 'list_devices'
   | 'list_roles'
   | 'list_tags'
   | 'list_teams_api_teams'
@@ -124,6 +129,7 @@ export type OperationName =
  */
 export interface OperationDataTypes {
   'confirm_setup': ConfirmMfaSetupData
+  'create_device': CreateDeviceData
   'create_role': CreateRoleData
   'create_tag': CreateTagData
   'create_team': CreateTeamData
@@ -135,6 +141,7 @@ export interface OperationDataTypes {
   'get_sessions': RevokeAllSessionsData
   'get_stats': GetDashboardStatsData
   'initiate_setup': InitiateMfaSetupData
+  'list_devices': CreateDeviceData
   'list_roles': CreateRoleData
   'list_tags': CreateTagData
   'list_teams_api_teams': CreateTeamData
@@ -163,6 +170,7 @@ export interface OperationDataTypes {
  */
 export interface OperationResponseTypes {
   'confirm_setup': ConfirmMfaSetupResponses
+  'create_device': CreateDeviceResponses
   'create_role': CreateRoleResponses
   'create_tag': CreateTagResponses
   'create_team': CreateTeamResponses
@@ -174,6 +182,7 @@ export interface OperationResponseTypes {
   'get_sessions': RevokeAllSessionsResponses
   'get_stats': GetDashboardStatsResponses
   'initiate_setup': InitiateMfaSetupResponses
+  'list_devices': CreateDeviceResponses
   'list_roles': CreateRoleResponses
   'list_tags': CreateTagResponses
   'list_teams_api_teams': CreateTeamResponses
@@ -202,6 +211,7 @@ export interface OperationResponseTypes {
  */
 export interface OperationErrorTypes {
   'confirm_setup': ConfirmMfaSetupErrors
+  'create_device': CreateDeviceErrors
   'create_role': CreateRoleErrors
   'create_tag': CreateTagErrors
   'create_team': CreateTeamErrors
@@ -213,6 +223,7 @@ export interface OperationErrorTypes {
   'get_sessions': never
   'get_stats': never
   'initiate_setup': never
+  'list_devices': CreateDeviceErrors
   'list_roles': CreateRoleErrors
   'list_tags': CreateTagErrors
   'list_teams_api_teams': CreateTeamErrors

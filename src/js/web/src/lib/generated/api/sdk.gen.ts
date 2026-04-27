@@ -98,6 +98,9 @@ import type {
   ConfirmMfaSetupData,
   ConfirmMfaSetupErrors,
   ConfirmMfaSetupResponses,
+  CreateDeviceData,
+  CreateDeviceErrors,
+  CreateDeviceResponses,
   CreateRoleData,
   CreateRoleErrors,
   CreateRoleResponses,
@@ -113,6 +116,9 @@ import type {
   CreateUserData,
   CreateUserErrors,
   CreateUserResponses,
+  DeleteDeviceData,
+  DeleteDeviceErrors,
+  DeleteDeviceResponses,
   DeleteRoleData,
   DeleteRoleErrors,
   DeleteRoleResponses,
@@ -139,6 +145,9 @@ import type {
   GetActiveSessionsResponses,
   GetDashboardStatsData,
   GetDashboardStatsResponses,
+  GetDeviceData,
+  GetDeviceErrors,
+  GetDeviceResponses,
   GetMfaStatusData,
   GetMfaStatusResponses,
   GetRecentActivityData,
@@ -161,6 +170,9 @@ import type {
   InitiateDisableMfaOAuthResponses,
   InitiateMfaSetupData,
   InitiateMfaSetupResponses,
+  ListDevicesData,
+  ListDevicesErrors,
+  ListDevicesResponses,
   ListRolesData,
   ListRolesErrors,
   ListRolesResponses,
@@ -217,6 +229,9 @@ import type {
   SystemHealthResponses,
   TokenRefreshData,
   TokenRefreshResponses,
+  UpdateDeviceData,
+  UpdateDeviceErrors,
+  UpdateDeviceResponses,
   UpdateRoleData,
   UpdateRoleErrors,
   UpdateRoleResponses,
@@ -748,6 +763,94 @@ export const oAuthConfig = <ThrowOnError extends boolean = false>(
     security: [{ scheme: "bearer", type: "http" }],
     url: "/api/config/oauth",
     ...options,
+  });
+
+/**
+ * ListDevices
+ */
+export const listDevices = <ThrowOnError extends boolean = false>(
+  options?: Options<ListDevicesData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    ListDevicesResponses,
+    ListDevicesErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/devices",
+    ...options,
+  });
+
+/**
+ * CreateDevice
+ */
+export const createDevice = <ThrowOnError extends boolean = false>(
+  options: Options<CreateDeviceData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    CreateDeviceResponses,
+    CreateDeviceErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/devices",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * DeleteDevice
+ */
+export const deleteDevice = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteDeviceData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    DeleteDeviceResponses,
+    DeleteDeviceErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/devices/{device_id}",
+    ...options,
+  });
+
+/**
+ * GetDevice
+ */
+export const getDevice = <ThrowOnError extends boolean = false>(
+  options: Options<GetDeviceData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    GetDeviceResponses,
+    GetDeviceErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/devices/{device_id}",
+    ...options,
+  });
+
+/**
+ * UpdateDevice
+ */
+export const updateDevice = <ThrowOnError extends boolean = false>(
+  options: Options<UpdateDeviceData, ThrowOnError>,
+) =>
+  (options.client ?? client).patch<
+    UpdateDeviceResponses,
+    UpdateDeviceErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/devices/{device_id}",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
   });
 
 /**

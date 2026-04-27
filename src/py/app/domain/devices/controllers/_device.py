@@ -1,0 +1,157 @@
+"""Device Controllers."""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Annotated
+from uuid import UUID
+
+from litestar import Controller, delete, get, patch, post
+from litestar.params import Dependency, Parameter
+from sqlalchemy.orm import selectinload
+
+from app.db import models as m
+from app.domain.devices.guards import requires_device_ownership
+from app.domain.devices.schemas import Device, DeviceCreate, DeviceUpdate
+from app.domain.devices.services import DeviceService
+from app.lib.deps import create_service_dependencies
+
+if TYPE_CHECKING:
+    from advanced_alchemy.filters import FilterTypes
+    from advanced_alchemy.service.pagination import OffsetPagination
+
+
+class DeviceController(Controller):
+    """Devices."""
+
+    tags = ["Devices"]
+    dependencies = create_service_dependencies(
+        DeviceService,
+        key="devices_service",
+        load=[selectinload(m.Device.lines)],
+        filters={
+            "id_filter": UUID,
+            "search": "name",
+            "pagination_type": "limit_offset",
+            "pagination_size": 20,
+            "created_at": True,
+            "updated_at": True,
+            "sort_field": "name",
+            "sort_order": "asc",
+        },
+    )
+
+    @get(operation_id="ListDevices", path="/api/devices")
+    async def list_devices(
+        self,
+        devices_service: DeviceService,
+        current_user: m.User,
+        filters: Annotated[list[FilterTypes], Dependency(skip_validation=True)],
+    ) -> OffsetPagination[Device]:
+        """List devices for the current user.
+
+        Args:
+            devices_service: Device Service
+            current_user: Current User
+            filters: Filters
+
+        Returns:
+            OffsetPagination[Device]
+        """
+        if current_user.is_superuser:
+            results, total = await devices_service.list_and_count(*filters)
+        else:
+            results, total = await devices_service.list_and_count(
+                *filters,
+                m.Device.user_id == current_user.id,
+            )
+        return devices_service.to_schema(results, total, filters, schema_type=Device)
+
+    @post(operation_id="CreateDevice", path="/api/devices")
+    async def create_device(
+        self,
+        devices_service: DeviceService,
+        current_user: m.User,
+        data: DeviceCreate,
+    ) -> Device:
+        """Register a new device.
+
+        Args:
+            devices_service: Device Service
+            current_user: Current User
+            data: Device Create
+
+        Returns:
+            Device
+        """
+        obj = data.to_dict()
+        obj["user_id"] = current_user.id
+        db_obj = await devices_service.create(obj)
+        return devices_service.to_schema(db_obj, schema_type=Device)
+
+    @get(
+        operation_id="GetDevice",
+        path="/api/devices/{device_id:uuid}",
+        guards=[requires_device_ownership],
+    )
+    async def get_device(
+        self,
+        devices_service: DeviceService,
+        device_id: Annotated[UUID, Parameter(title="Device ID", description="The device to retrieve.")],
+    ) -> Device:
+        """Get details about a device.
+
+        Args:
+            devices_service: Device Service
+            device_id: Device ID
+
+        Returns:
+            Device
+        """
+        db_obj = await devices_service.get(device_id)
+        return devices_service.to_schema(db_obj, schema_type=Device)
+
+    @patch(
+        operation_id="UpdateDevice",
+        path="/api/devices/{device_id:uuid}",
+        guards=[requires_device_ownership],
+    )
+    async def update_device(
+        self,
+        data: DeviceUpdate,
+        devices_service: DeviceService,
+        device_id: Annotated[UUID, Parameter(title="Device ID", description="The device to update.")],
+    ) -> Device:
+        """Update a device.
+
+        Args:
+            data: Device Update
+            devices_service: Device Service
+            device_id: Device ID
+
+        Returns:
+            Device
+        """
+        await devices_service.update(
+            item_id=device_id,
+            data=data.to_dict(),
+        )
+        fresh_obj = await devices_service.get_one(id=device_id)
+        return devices_service.to_schema(fresh_obj, schema_type=Device)
+
+    @delete(
+        operation_id="DeleteDevice",
+        path="/api/devices/{device_id:uuid}",
+        guards=[requires_device_ownership],
+    )
+    async def delete_device(
+        self,
+        devices_service: DeviceService,
+        device_id: Annotated[UUID, Parameter(title="Device ID", description="The device to delete.")],
+    ) -> None:
+        """Delete a device.
+
+        Args:
+            devices_service: Device Service
+            device_id: Device ID
+        """
+        _ = await devices_service.delete(device_id)

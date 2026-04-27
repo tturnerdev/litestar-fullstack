@@ -39,11 +39,13 @@ import {
   assignRole,
   assignUserRole,
   confirmMfaSetup,
+  createDevice,
   createRole,
   createTag,
   createTeam,
   createTeamInvitation,
   createUser,
+  deleteDevice,
   deleteRole,
   deleteTag,
   deleteTeam,
@@ -53,6 +55,7 @@ import {
   forgotPassword,
   getActiveSessions,
   getDashboardStats,
+  getDevice,
   getMfaStatus,
   getRecentActivity,
   getRole,
@@ -61,6 +64,7 @@ import {
   getUser,
   initiateDisableMfaOAuth,
   initiateMfaSetup,
+  listDevices,
   listRoles,
   listTags,
   listTeamInvitations,
@@ -82,6 +86,7 @@ import {
   revokeUserRole,
   systemHealth,
   tokenRefresh,
+  updateDevice,
   updateRole,
   updateTag,
   updateTeam,
@@ -178,6 +183,9 @@ import type {
   ConfirmMfaSetupData,
   ConfirmMfaSetupError,
   ConfirmMfaSetupResponse,
+  CreateDeviceData,
+  CreateDeviceError,
+  CreateDeviceResponse,
   CreateRoleData,
   CreateRoleError,
   CreateRoleResponse,
@@ -193,6 +201,9 @@ import type {
   CreateUserData,
   CreateUserError,
   CreateUserResponse,
+  DeleteDeviceData,
+  DeleteDeviceError,
+  DeleteDeviceResponse,
   DeleteRoleData,
   DeleteRoleError,
   DeleteRoleResponse,
@@ -219,6 +230,9 @@ import type {
   GetActiveSessionsResponse,
   GetDashboardStatsData,
   GetDashboardStatsResponse,
+  GetDeviceData,
+  GetDeviceError,
+  GetDeviceResponse,
   GetMfaStatusData,
   GetMfaStatusResponse,
   GetRecentActivityData,
@@ -241,6 +255,9 @@ import type {
   InitiateDisableMfaOAuthResponse,
   InitiateMfaSetupData,
   InitiateMfaSetupResponse,
+  ListDevicesData,
+  ListDevicesError,
+  ListDevicesResponse,
   ListRolesData,
   ListRolesError,
   ListRolesResponse,
@@ -297,6 +314,9 @@ import type {
   SystemHealthResponse,
   TokenRefreshData,
   TokenRefreshResponse,
+  UpdateDeviceData,
+  UpdateDeviceError,
+  UpdateDeviceResponse,
   UpdateRoleData,
   UpdateRoleError,
   UpdateRoleResponse,
@@ -1144,6 +1164,137 @@ export const oAuthConfigOptions = (options?: Options<OAuthConfigData>) =>
     },
     queryKey: oAuthConfigQueryKey(options),
   });
+
+export const listDevicesQueryKey = (options?: Options<ListDevicesData>) =>
+  createQueryKey("listDevices", options);
+
+/**
+ * ListDevices
+ */
+export const listDevicesOptions = (options?: Options<ListDevicesData>) =>
+  queryOptions<
+    ListDevicesResponse,
+    ListDevicesError,
+    ListDevicesResponse,
+    ReturnType<typeof listDevicesQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listDevices({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listDevicesQueryKey(options),
+  });
+
+/**
+ * CreateDevice
+ */
+export const createDeviceMutation = (
+  options?: Partial<Options<CreateDeviceData>>,
+): UseMutationOptions<
+  CreateDeviceResponse,
+  CreateDeviceError,
+  Options<CreateDeviceData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    CreateDeviceResponse,
+    CreateDeviceError,
+    Options<CreateDeviceData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await createDevice({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * DeleteDevice
+ */
+export const deleteDeviceMutation = (
+  options?: Partial<Options<DeleteDeviceData>>,
+): UseMutationOptions<
+  DeleteDeviceResponse,
+  DeleteDeviceError,
+  Options<DeleteDeviceData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    DeleteDeviceResponse,
+    DeleteDeviceError,
+    Options<DeleteDeviceData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await deleteDevice({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const getDeviceQueryKey = (options: Options<GetDeviceData>) =>
+  createQueryKey("getDevice", options);
+
+/**
+ * GetDevice
+ */
+export const getDeviceOptions = (options: Options<GetDeviceData>) =>
+  queryOptions<
+    GetDeviceResponse,
+    GetDeviceError,
+    GetDeviceResponse,
+    ReturnType<typeof getDeviceQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getDevice({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getDeviceQueryKey(options),
+  });
+
+/**
+ * UpdateDevice
+ */
+export const updateDeviceMutation = (
+  options?: Partial<Options<UpdateDeviceData>>,
+): UseMutationOptions<
+  UpdateDeviceResponse,
+  UpdateDeviceError,
+  Options<UpdateDeviceData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    UpdateDeviceResponse,
+    UpdateDeviceError,
+    Options<UpdateDeviceData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await updateDevice({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
 
 /**
  * RequestVerification

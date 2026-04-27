@@ -1,4 +1,9 @@
 from app.db.models._audit_log import AuditLog
+from app.db.models._device import Device
+from app.db.models._device_line_assignment import DeviceLineAssignment
+from app.db.models._device_line_type import DeviceLineType
+from app.db.models._device_status import DeviceStatus
+from app.db.models._device_type import DeviceType
 from app.db.models._email_verification_token import EmailVerificationToken
 from app.db.models._oauth_account import UserOAuthAccount
 from app.db.models._password_reset_token import PasswordResetToken
@@ -15,6 +20,11 @@ from app.db.models._user_role import UserRole
 
 __all__ = (
     "AuditLog",
+    "Device",
+    "DeviceLineAssignment",
+    "DeviceLineType",
+    "DeviceStatus",
+    "DeviceType",
     "EmailVerificationToken",
     "PasswordResetToken",
     "RefreshToken",

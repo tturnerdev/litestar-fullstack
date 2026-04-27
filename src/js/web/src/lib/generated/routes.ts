@@ -23,11 +23,13 @@ export type RouteName =
   | 'assign_role'
   | 'assign_role_api_users_roles'
   | 'confirm_setup'
+  | 'create_device'
   | 'create_role'
   | 'create_tag'
   | 'create_team'
   | 'create_team_invitation'
   | 'create_user'
+  | 'delete_device'
   | 'delete_role'
   | 'delete_tag'
   | 'delete_team'
@@ -38,6 +40,7 @@ export type RouteName =
   | 'disable_mfa'
   | 'forgot_password'
   | 'get_activity'
+  | 'get_device'
   | 'get_log'
   | 'get_mfa_status'
   | 'get_profile'
@@ -55,6 +58,7 @@ export type RouteName =
   | 'initiate_disable_mfa_oauth'
   | 'initiate_setup'
   | 'list_accounts'
+  | 'list_devices'
   | 'list_logs'
   | 'list_roles'
   | 'list_tags'
@@ -87,6 +91,7 @@ export type RouteName =
   | 'system:health'
   | 'system:oauth-config'
   | 'unlink'
+  | 'update_device'
   | 'update_password'
   | 'update_profile'
   | 'update_role'
@@ -127,6 +132,7 @@ export interface RoutePathParams {
   };
   'assign_role_api_users_roles': Record<string, never>;
   'confirm_setup': Record<string, never>;
+  'create_device': Record<string, never>;
   'create_role': Record<string, never>;
   'create_tag': Record<string, never>;
   'create_team': Record<string, never>;
@@ -134,6 +140,9 @@ export interface RoutePathParams {
     team_id: UUID;
   };
   'create_user': Record<string, never>;
+  'delete_device': {
+    device_id: UUID;
+  };
   'delete_role': {
     role_id: UUID;
   };
@@ -159,6 +168,9 @@ export interface RoutePathParams {
   'disable_mfa': Record<string, never>;
   'forgot_password': Record<string, never>;
   'get_activity': Record<string, never>;
+  'get_device': {
+    device_id: UUID;
+  };
   'get_log': {
     log_id: UUID;
   };
@@ -199,6 +211,7 @@ export interface RoutePathParams {
   };
   'initiate_setup': Record<string, never>;
   'list_accounts': Record<string, never>;
+  'list_devices': Record<string, never>;
   'list_logs': Record<string, never>;
   'list_roles': Record<string, never>;
   'list_tags': Record<string, never>;
@@ -247,6 +260,9 @@ export interface RoutePathParams {
   'system:oauth-config': Record<string, never>;
   'unlink': {
     provider: string;
+  };
+  'update_device': {
+    device_id: UUID;
   };
   'update_password': Record<string, never>;
   'update_profile': Record<string, never>;
@@ -321,11 +337,13 @@ export interface RouteQueryParams {
     role_slug: string;
   };
   'confirm_setup': Record<string, never>;
+  'create_device': Record<string, never>;
   'create_role': Record<string, never>;
   'create_tag': Record<string, never>;
   'create_team': Record<string, never>;
   'create_team_invitation': Record<string, never>;
   'create_user': Record<string, never>;
+  'delete_device': Record<string, never>;
   'delete_role': Record<string, never>;
   'delete_tag': Record<string, never>;
   'delete_team': Record<string, never>;
@@ -339,6 +357,7 @@ export interface RouteQueryParams {
     hours?: number;
     limit?: number;
   };
+  'get_device': Record<string, never>;
   'get_log': Record<string, never>;
   'get_mfa_status': Record<string, never>;
   'get_profile': Record<string, never>;
@@ -401,6 +420,19 @@ export interface RouteQueryParams {
     orderBy?: string;
     pageSize?: number;
     sortOrder?: "asc" | "desc";
+  };
+  'list_devices': {
+    createdAfter?: DateTime;
+    createdBefore?: DateTime;
+    currentPage?: number;
+    ids?: string[];
+    orderBy?: string;
+    pageSize?: number;
+    searchIgnoreCase?: boolean;
+    searchString?: string;
+    sortOrder?: "asc" | "desc";
+    updatedAfter?: DateTime;
+    updatedBefore?: DateTime;
   };
   'list_logs': {
     action?: string;
@@ -544,6 +576,7 @@ export interface RouteQueryParams {
   'system:health': Record<string, never>;
   'system:oauth-config': Record<string, never>;
   'unlink': Record<string, never>;
+  'update_device': Record<string, never>;
   'update_password': Record<string, never>;
   'update_profile': Record<string, never>;
   'update_role': Record<string, never>;
@@ -619,6 +652,13 @@ export const routeDefinitions = {
     pathParams: [] as const,
     queryParams: [] as const,
   },
+  'create_device': {
+    path: '/api/devices',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
   'create_role': {
     path: '/api/roles',
     methods: ['POST'] as const,
@@ -652,6 +692,13 @@ export const routeDefinitions = {
     methods: ['POST'] as const,
     method: 'post',
     pathParams: [] as const,
+    queryParams: [] as const,
+  },
+  'delete_device': {
+    path: '/api/devices/{device_id}',
+    methods: ['DELETE'] as const,
+    method: 'delete',
+    pathParams: ['device_id'] as const,
     queryParams: [] as const,
   },
   'delete_role': {
@@ -723,6 +770,13 @@ export const routeDefinitions = {
     method: 'get',
     pathParams: [] as const,
     queryParams: ['hours', 'limit'] as const,
+  },
+  'get_device': {
+    path: '/api/devices/{device_id}',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['device_id'] as const,
+    queryParams: [] as const,
   },
   'get_log': {
     path: '/api/admin/audit/{log_id}',
@@ -842,6 +896,13 @@ export const routeDefinitions = {
     method: 'get',
     pathParams: [] as const,
     queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'orderBy', 'pageSize', 'sortOrder'] as const,
+  },
+  'list_devices': {
+    path: '/api/devices',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
   },
   'list_logs': {
     path: '/api/admin/audit',
@@ -1066,6 +1127,13 @@ export const routeDefinitions = {
     methods: ['DELETE'] as const,
     method: 'delete',
     pathParams: ['provider'] as const,
+    queryParams: [] as const,
+  },
+  'update_device': {
+    path: '/api/devices/{device_id}',
+    methods: ['PATCH'] as const,
+    method: 'patch',
+    pathParams: ['device_id'] as const,
     queryParams: [] as const,
   },
   'update_password': {

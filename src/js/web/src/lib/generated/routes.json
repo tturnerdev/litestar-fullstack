@@ -59,6 +59,13 @@
       ],
       "uri": "/api/mfa/confirm"
     },
+    "create_device": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "uri": "/api/devices"
+    },
     "create_role": {
       "method": "post",
       "methods": [
@@ -99,6 +106,19 @@
         "POST"
       ],
       "uri": "/api/users"
+    },
+    "delete_device": {
+      "method": "delete",
+      "methods": [
+        "DELETE"
+      ],
+      "parameterTypes": {
+        "device_id": "UUID"
+      },
+      "parameters": [
+        "device_id"
+      ],
+      "uri": "/api/devices/{device_id}"
     },
     "delete_role": {
       "method": "delete",
@@ -217,6 +237,19 @@
         "limit": "number | undefined"
       },
       "uri": "/api/admin/dashboard/activity"
+    },
+    "get_device": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "device_id": "UUID"
+      },
+      "parameters": [
+        "device_id"
+      ],
+      "uri": "/api/devices/{device_id}"
     },
     "get_log": {
       "method": "get",
@@ -454,6 +487,26 @@
         "sortOrder": "\"asc\" | \"desc\" | undefined"
       },
       "uri": "/api/profile/oauth/accounts"
+    },
+    "list_devices": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "queryParameters": {
+        "createdAfter": "DateTime | undefined",
+        "createdBefore": "DateTime | undefined",
+        "currentPage": "number | undefined",
+        "ids": "string[] | undefined",
+        "orderBy": "string | undefined",
+        "pageSize": "number | undefined",
+        "searchIgnoreCase": "boolean | undefined",
+        "searchString": "string | undefined",
+        "sortOrder": "\"asc\" | \"desc\" | undefined",
+        "updatedAfter": "DateTime | undefined",
+        "updatedBefore": "DateTime | undefined"
+      },
+      "uri": "/api/devices"
     },
     "list_logs": {
       "method": "get",
@@ -853,6 +906,19 @@
         "provider"
       ],
       "uri": "/api/profile/oauth/{provider}"
+    },
+    "update_device": {
+      "method": "patch",
+      "methods": [
+        "PATCH"
+      ],
+      "parameterTypes": {
+        "device_id": "UUID"
+      },
+      "parameters": [
+        "device_id"
+      ],
+      "uri": "/api/devices/{device_id}"
     },
     "update_password": {
       "method": "patch",
