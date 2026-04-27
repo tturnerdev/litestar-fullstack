@@ -52,7 +52,7 @@ client.interceptors.request.use((request, _options) => {
 // Silent token refresh state
 let isRefreshing = false
 let failedQueue: Array<{
-  resolve: (value?: unknown) => void
+  resolve: () => void
   reject: (reason?: unknown) => void
 }> = []
 
@@ -67,54 +67,81 @@ const processQueue = (error: Error | null) => {
   failedQueue = []
 }
 
-// Response interceptor for silent token refresh
-// Using error interceptor with the new client API
-client.interceptors.error.use(async (error, response, request, options) => {
-  // Only attempt refresh for 401 errors, not on refresh endpoint itself
-  const requestUrl = request.url
-  if (response?.status === 401 && !requestUrl?.includes("/api/access/refresh") && !requestUrl?.includes("/api/access/login")) {
-    // Skip refresh attempt if we're already on a public auth page to prevent infinite loops
-    const currentPath = window.location.pathname
-    const isPublicAuthPage = ["/login", "/signup", "/forgot-password", "/reset-password"].some((p) => currentPath.startsWith(p))
+function retryWithNewToken(request: Request, options: Record<string, unknown>): Promise<Response> {
+  const headers = new Headers(request.headers)
+  const token = window.localStorage.getItem("access_token")
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`)
+  }
+  return fetch(request.url, {
+    method: request.method,
+    headers,
+    body: (options.serializedBody as BodyInit) ?? undefined,
+    credentials: request.credentials,
+    redirect: request.redirect,
+  })
+}
 
-    if (isPublicAuthPage) {
-      // Don't try to refresh or redirect on public auth pages - just throw the error
-      throw error
-    }
-
-    if (isRefreshing) {
-      // If already refreshing, queue this request
-      return new Promise((resolve, reject) => {
-        failedQueue.push({ resolve, reject })
-      }).then(() => {
-        const method = options.method ?? "GET"
-        return client.request({ ...options, method, url: requestUrl })
-      })
-    }
-
-    isRefreshing = true
-
-    try {
-      // Attempt to refresh the token
-      await client.post({ url: "/api/access/refresh" })
-      processQueue(null)
-      // Retry the original request
-      const method = options.method ?? "GET"
-      return client.request({ ...options, method, url: requestUrl })
-    } catch (refreshError) {
-      processQueue(refreshError as Error)
-      // Refresh failed - clear auth state and redirect to login
-      // But only if we're not already on the login page
-      queryClient.clear()
-      if (window.location.pathname !== "/login") {
-        window.location.href = "/login"
-      }
-      throw refreshError
-    } finally {
-      isRefreshing = false
-    }
+// Response interceptor for silent token refresh.
+// Must be a response interceptor (not error) so the retried Response replaces
+// the original 401 before the client's ok/error branching logic runs.
+client.interceptors.response.use(async (response, request, options) => {
+  if (response.status !== 401) {
+    return response
   }
 
+  const requestUrl = request.url
+  if (requestUrl.includes("/api/access/refresh") || requestUrl.includes("/api/access/login")) {
+    return response
+  }
+
+  const currentPath = window.location.pathname
+  if (["/login", "/signup", "/forgot-password", "/reset-password"].some((p) => currentPath.startsWith(p))) {
+    return response
+  }
+
+  const opts = options as unknown as Record<string, unknown>
+
+  if (isRefreshing) {
+    try {
+      await new Promise<void>((resolve, reject) => {
+        failedQueue.push({ resolve, reject })
+      })
+    } catch {
+      return response
+    }
+    return retryWithNewToken(request, opts)
+  }
+
+  isRefreshing = true
+
+  try {
+    const refreshResult = await client.post({ url: "/api/access/refresh" })
+    const refreshData = refreshResult.data as { access_token?: string } | undefined
+    if (!refreshData?.access_token) {
+      throw new Error("No access token in refresh response")
+    }
+    window.localStorage.setItem("access_token", refreshData.access_token)
+    processQueue(null)
+    return retryWithNewToken(request, opts)
+  } catch (refreshError) {
+    processQueue(refreshError as Error)
+    window.localStorage.removeItem("access_token")
+    const { useAuthStore } = await import("@/lib/auth")
+    useAuthStore.setState({ user: null, currentTeam: null, isAuthenticated: false })
+    queryClient.clear()
+    if (window.location.pathname !== "/login") {
+      window.location.href = "/login"
+    }
+    return response
+  } finally {
+    isRefreshing = false
+  }
+})
+
+// Ensure non-OK responses throw so callers (React Query, checkAuth, etc.)
+// see them as errors rather than successful responses with undefined data.
+client.interceptors.error.use(async (error) => {
   throw error
 })
 
