@@ -27,14 +27,17 @@ import { Route as AppTeamsRouteImport } from './routes/_app/teams'
 import { Route as AppHomeRouteImport } from './routes/_app/home'
 import { Route as AppDevicesRouteImport } from './routes/_app/devices'
 import { Route as AppAdminRouteImport } from './routes/_app/admin'
+import { Route as AppVoiceIndexRouteImport } from './routes/_app/voice/index'
 import { Route as AppTeamsIndexRouteImport } from './routes/_app/teams/index'
 import { Route as AppProfileIndexRouteImport } from './routes/_app/profile/index'
 import { Route as AppDevicesIndexRouteImport } from './routes/_app/devices/index'
 import { Route as AppAdminIndexRouteImport } from './routes/_app/admin/index'
+import { Route as AppVoicePhoneNumbersRouteImport } from './routes/_app/voice/phone-numbers'
 import { Route as AppTeamsNewRouteImport } from './routes/_app/teams/new'
 import { Route as AppTeamsTeamIdRouteImport } from './routes/_app/teams/$teamId'
 import { Route as AppDevicesNewRouteImport } from './routes/_app/devices/new'
 import { Route as AppAdminAuditRouteImport } from './routes/_app/admin/audit'
+import { Route as AppVoiceExtensionsIndexRouteImport } from './routes/_app/voice/extensions/index'
 import { Route as AppDevicesDeviceIdIndexRouteImport } from './routes/_app/devices/$deviceId/index'
 import { Route as AppAdminUsersIndexRouteImport } from './routes/_app/admin/users/index'
 import { Route as AppAdminTeamsIndexRouteImport } from './routes/_app/admin/teams/index'
@@ -42,6 +45,7 @@ import { Route as PublicAuthGoogleCallbackRouteImport } from './routes/_public/a
 import { Route as PublicAuthGithubCallbackRouteImport } from './routes/_public/auth/github/callback'
 import { Route as AppAdminUsersUserIdRouteImport } from './routes/_app/admin/users/$userId'
 import { Route as AppAdminTeamsTeamIdRouteImport } from './routes/_app/admin/teams/$teamId'
+import { Route as AppVoiceExtensionsExtensionIdIndexRouteImport } from './routes/_app/voice/extensions/$extensionId/index'
 import { Route as AppTeamsTeamIdInvitationsInvitationIdAcceptRouteImport } from './routes/_app/teams/$teamId/invitations/$invitationId/accept'
 
 const PublicRoute = PublicRouteImport.update({
@@ -132,6 +136,11 @@ const AppAdminRoute = AppAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AppRoute,
 } as any)
+const AppVoiceIndexRoute = AppVoiceIndexRouteImport.update({
+  id: '/voice/',
+  path: '/voice/',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppTeamsIndexRoute = AppTeamsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -152,6 +161,11 @@ const AppAdminIndexRoute = AppAdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppAdminRoute,
 } as any)
+const AppVoicePhoneNumbersRoute = AppVoicePhoneNumbersRouteImport.update({
+  id: '/voice/phone-numbers',
+  path: '/voice/phone-numbers',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppTeamsNewRoute = AppTeamsNewRouteImport.update({
   id: '/new',
   path: '/new',
@@ -171,6 +185,11 @@ const AppAdminAuditRoute = AppAdminAuditRouteImport.update({
   id: '/audit',
   path: '/audit',
   getParentRoute: () => AppAdminRoute,
+} as any)
+const AppVoiceExtensionsIndexRoute = AppVoiceExtensionsIndexRouteImport.update({
+  id: '/voice/extensions/',
+  path: '/voice/extensions/',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppDevicesDeviceIdIndexRoute = AppDevicesDeviceIdIndexRouteImport.update({
   id: '/$deviceId/',
@@ -209,6 +228,12 @@ const AppAdminTeamsTeamIdRoute = AppAdminTeamsTeamIdRouteImport.update({
   path: '/teams/$teamId',
   getParentRoute: () => AppAdminRoute,
 } as any)
+const AppVoiceExtensionsExtensionIdIndexRoute =
+  AppVoiceExtensionsExtensionIdIndexRouteImport.update({
+    id: '/voice/extensions/$extensionId/',
+    path: '/voice/extensions/$extensionId/',
+    getParentRoute: () => AppRoute,
+  } as any)
 const AppTeamsTeamIdInvitationsInvitationIdAcceptRoute =
   AppTeamsTeamIdInvitationsInvitationIdAcceptRouteImport.update({
     id: '/invitations/$invitationId/accept',
@@ -237,10 +262,12 @@ export interface FileRoutesByFullPath {
   '/devices/new': typeof AppDevicesNewRoute
   '/teams/$teamId': typeof AppTeamsTeamIdRouteWithChildren
   '/teams/new': typeof AppTeamsNewRoute
+  '/voice/phone-numbers': typeof AppVoicePhoneNumbersRoute
   '/admin/': typeof AppAdminIndexRoute
   '/devices/': typeof AppDevicesIndexRoute
   '/profile/': typeof AppProfileIndexRoute
   '/teams/': typeof AppTeamsIndexRoute
+  '/voice/': typeof AppVoiceIndexRoute
   '/admin/teams/$teamId': typeof AppAdminTeamsTeamIdRoute
   '/admin/users/$userId': typeof AppAdminUsersUserIdRoute
   '/auth/github/callback': typeof PublicAuthGithubCallbackRoute
@@ -248,6 +275,8 @@ export interface FileRoutesByFullPath {
   '/admin/teams/': typeof AppAdminTeamsIndexRoute
   '/admin/users/': typeof AppAdminUsersIndexRoute
   '/devices/$deviceId/': typeof AppDevicesDeviceIdIndexRoute
+  '/voice/extensions/': typeof AppVoiceExtensionsIndexRoute
+  '/voice/extensions/$extensionId/': typeof AppVoiceExtensionsExtensionIdIndexRoute
   '/teams/$teamId/invitations/$invitationId/accept': typeof AppTeamsTeamIdInvitationsInvitationIdAcceptRoute
 }
 export interface FileRoutesByTo {
@@ -268,10 +297,12 @@ export interface FileRoutesByTo {
   '/devices/new': typeof AppDevicesNewRoute
   '/teams/$teamId': typeof AppTeamsTeamIdRouteWithChildren
   '/teams/new': typeof AppTeamsNewRoute
+  '/voice/phone-numbers': typeof AppVoicePhoneNumbersRoute
   '/admin': typeof AppAdminIndexRoute
   '/devices': typeof AppDevicesIndexRoute
   '/profile': typeof AppProfileIndexRoute
   '/teams': typeof AppTeamsIndexRoute
+  '/voice': typeof AppVoiceIndexRoute
   '/admin/teams/$teamId': typeof AppAdminTeamsTeamIdRoute
   '/admin/users/$userId': typeof AppAdminUsersUserIdRoute
   '/auth/github/callback': typeof PublicAuthGithubCallbackRoute
@@ -279,6 +310,8 @@ export interface FileRoutesByTo {
   '/admin/teams': typeof AppAdminTeamsIndexRoute
   '/admin/users': typeof AppAdminUsersIndexRoute
   '/devices/$deviceId': typeof AppDevicesDeviceIdIndexRoute
+  '/voice/extensions': typeof AppVoiceExtensionsIndexRoute
+  '/voice/extensions/$extensionId': typeof AppVoiceExtensionsExtensionIdIndexRoute
   '/teams/$teamId/invitations/$invitationId/accept': typeof AppTeamsTeamIdInvitationsInvitationIdAcceptRoute
 }
 export interface FileRoutesById {
@@ -305,10 +338,12 @@ export interface FileRoutesById {
   '/_app/devices/new': typeof AppDevicesNewRoute
   '/_app/teams/$teamId': typeof AppTeamsTeamIdRouteWithChildren
   '/_app/teams/new': typeof AppTeamsNewRoute
+  '/_app/voice/phone-numbers': typeof AppVoicePhoneNumbersRoute
   '/_app/admin/': typeof AppAdminIndexRoute
   '/_app/devices/': typeof AppDevicesIndexRoute
   '/_app/profile/': typeof AppProfileIndexRoute
   '/_app/teams/': typeof AppTeamsIndexRoute
+  '/_app/voice/': typeof AppVoiceIndexRoute
   '/_app/admin/teams/$teamId': typeof AppAdminTeamsTeamIdRoute
   '/_app/admin/users/$userId': typeof AppAdminUsersUserIdRoute
   '/_public/auth/github/callback': typeof PublicAuthGithubCallbackRoute
@@ -316,6 +351,8 @@ export interface FileRoutesById {
   '/_app/admin/teams/': typeof AppAdminTeamsIndexRoute
   '/_app/admin/users/': typeof AppAdminUsersIndexRoute
   '/_app/devices/$deviceId/': typeof AppDevicesDeviceIdIndexRoute
+  '/_app/voice/extensions/': typeof AppVoiceExtensionsIndexRoute
+  '/_app/voice/extensions/$extensionId/': typeof AppVoiceExtensionsExtensionIdIndexRoute
   '/_app/teams/$teamId/invitations/$invitationId/accept': typeof AppTeamsTeamIdInvitationsInvitationIdAcceptRoute
 }
 export interface FileRouteTypes {
@@ -341,10 +378,12 @@ export interface FileRouteTypes {
     | '/devices/new'
     | '/teams/$teamId'
     | '/teams/new'
+    | '/voice/phone-numbers'
     | '/admin/'
     | '/devices/'
     | '/profile/'
     | '/teams/'
+    | '/voice/'
     | '/admin/teams/$teamId'
     | '/admin/users/$userId'
     | '/auth/github/callback'
@@ -352,6 +391,8 @@ export interface FileRouteTypes {
     | '/admin/teams/'
     | '/admin/users/'
     | '/devices/$deviceId/'
+    | '/voice/extensions/'
+    | '/voice/extensions/$extensionId/'
     | '/teams/$teamId/invitations/$invitationId/accept'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -372,10 +413,12 @@ export interface FileRouteTypes {
     | '/devices/new'
     | '/teams/$teamId'
     | '/teams/new'
+    | '/voice/phone-numbers'
     | '/admin'
     | '/devices'
     | '/profile'
     | '/teams'
+    | '/voice'
     | '/admin/teams/$teamId'
     | '/admin/users/$userId'
     | '/auth/github/callback'
@@ -383,6 +426,8 @@ export interface FileRouteTypes {
     | '/admin/teams'
     | '/admin/users'
     | '/devices/$deviceId'
+    | '/voice/extensions'
+    | '/voice/extensions/$extensionId'
     | '/teams/$teamId/invitations/$invitationId/accept'
   id:
     | '__root__'
@@ -408,10 +453,12 @@ export interface FileRouteTypes {
     | '/_app/devices/new'
     | '/_app/teams/$teamId'
     | '/_app/teams/new'
+    | '/_app/voice/phone-numbers'
     | '/_app/admin/'
     | '/_app/devices/'
     | '/_app/profile/'
     | '/_app/teams/'
+    | '/_app/voice/'
     | '/_app/admin/teams/$teamId'
     | '/_app/admin/users/$userId'
     | '/_public/auth/github/callback'
@@ -419,6 +466,8 @@ export interface FileRouteTypes {
     | '/_app/admin/teams/'
     | '/_app/admin/users/'
     | '/_app/devices/$deviceId/'
+    | '/_app/voice/extensions/'
+    | '/_app/voice/extensions/$extensionId/'
     | '/_app/teams/$teamId/invitations/$invitationId/accept'
   fileRoutesById: FileRoutesById
 }
@@ -557,6 +606,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/voice/': {
+      id: '/_app/voice/'
+      path: '/voice'
+      fullPath: '/voice/'
+      preLoaderRoute: typeof AppVoiceIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/teams/': {
       id: '/_app/teams/'
       path: '/'
@@ -585,6 +641,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminIndexRouteImport
       parentRoute: typeof AppAdminRoute
     }
+    '/_app/voice/phone-numbers': {
+      id: '/_app/voice/phone-numbers'
+      path: '/voice/phone-numbers'
+      fullPath: '/voice/phone-numbers'
+      preLoaderRoute: typeof AppVoicePhoneNumbersRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/teams/new': {
       id: '/_app/teams/new'
       path: '/new'
@@ -612,6 +675,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/audit'
       preLoaderRoute: typeof AppAdminAuditRouteImport
       parentRoute: typeof AppAdminRoute
+    }
+    '/_app/voice/extensions/': {
+      id: '/_app/voice/extensions/'
+      path: '/voice/extensions'
+      fullPath: '/voice/extensions/'
+      preLoaderRoute: typeof AppVoiceExtensionsIndexRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_app/devices/$deviceId/': {
       id: '/_app/devices/$deviceId/'
@@ -661,6 +731,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/teams/$teamId'
       preLoaderRoute: typeof AppAdminTeamsTeamIdRouteImport
       parentRoute: typeof AppAdminRoute
+    }
+    '/_app/voice/extensions/$extensionId/': {
+      id: '/_app/voice/extensions/$extensionId/'
+      path: '/voice/extensions/$extensionId'
+      fullPath: '/voice/extensions/$extensionId/'
+      preLoaderRoute: typeof AppVoiceExtensionsExtensionIdIndexRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_app/teams/$teamId/invitations/$invitationId/accept': {
       id: '/_app/teams/$teamId/invitations/$invitationId/accept'
@@ -744,7 +821,11 @@ interface AppRouteChildren {
   AppDevicesRoute: typeof AppDevicesRouteWithChildren
   AppHomeRoute: typeof AppHomeRoute
   AppTeamsRoute: typeof AppTeamsRouteWithChildren
+  AppVoicePhoneNumbersRoute: typeof AppVoicePhoneNumbersRoute
   AppProfileIndexRoute: typeof AppProfileIndexRoute
+  AppVoiceIndexRoute: typeof AppVoiceIndexRoute
+  AppVoiceExtensionsIndexRoute: typeof AppVoiceExtensionsIndexRoute
+  AppVoiceExtensionsExtensionIdIndexRoute: typeof AppVoiceExtensionsExtensionIdIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -752,7 +833,12 @@ const AppRouteChildren: AppRouteChildren = {
   AppDevicesRoute: AppDevicesRouteWithChildren,
   AppHomeRoute: AppHomeRoute,
   AppTeamsRoute: AppTeamsRouteWithChildren,
+  AppVoicePhoneNumbersRoute: AppVoicePhoneNumbersRoute,
   AppProfileIndexRoute: AppProfileIndexRoute,
+  AppVoiceIndexRoute: AppVoiceIndexRoute,
+  AppVoiceExtensionsIndexRoute: AppVoiceExtensionsIndexRoute,
+  AppVoiceExtensionsExtensionIdIndexRoute:
+    AppVoiceExtensionsExtensionIdIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

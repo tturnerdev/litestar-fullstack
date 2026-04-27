@@ -1,6 +1,6 @@
 """Domain modules for the application."""
 
-from app.domain import accounts, devices, system, tags, teams
+from app.domain import accounts, devices, system, tags, teams, voice
 
 __all__ = (
     "accounts",
@@ -8,4 +8,5 @@ __all__ = (
     "system",
     "tags",
     "teams",
+    "voice",
 )
