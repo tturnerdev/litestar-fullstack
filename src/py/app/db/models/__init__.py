@@ -23,6 +23,10 @@ from app.db.models._team_invitation import TeamInvitation
 from app.db.models._team_member import TeamMember
 from app.db.models._team_roles import TeamRoles
 from app.db.models._team_tag import team_tag
+from app.db.models._ticket import Ticket
+from app.db.models._ticket_attachment import TicketAttachment
+from app.db.models._ticket_message import TicketMessage
+from app.db.models._ticket_status import TicketCategory, TicketPriority, TicketStatus
 from app.db.models._user import User
 from app.db.models._user_role import UserRole
 from app.db.models._voice_enums import (
@@ -65,6 +69,12 @@ __all__ = (
     "TeamInvitation",
     "TeamMember",
     "TeamRoles",
+    "Ticket",
+    "TicketAttachment",
+    "TicketCategory",
+    "TicketMessage",
+    "TicketPriority",
+    "TicketStatus",
     "User",
     "UserOAuthAccount",
     "UserRole",

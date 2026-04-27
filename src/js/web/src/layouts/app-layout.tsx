@@ -63,6 +63,15 @@ export function AppLayout() {
     if (pathname === "/fax/send") {
       return { eyebrow: "Communications", title: "Send Fax" }
     }
+    if (pathname === "/support") {
+      return { eyebrow: "Helpdesk", title: "Tickets" }
+    }
+    if (pathname === "/support/new") {
+      return { eyebrow: "Helpdesk", title: "New Ticket" }
+    }
+    if (pathname.startsWith("/support/")) {
+      return { eyebrow: "Helpdesk", title: "Ticket Detail" }
+    }
     if (pathname.startsWith("/admin")) {
       return { eyebrow: "Operations", title: "Admin" }
     }
