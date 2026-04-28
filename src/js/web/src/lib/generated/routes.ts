@@ -22,14 +22,28 @@ export type RouteName =
   | 'add_member_to_team'
   | 'assign_role'
   | 'assign_role_api_users_roles'
+  | 'close_ticket'
   | 'confirm_setup'
+  | 'create_connection'
   | 'create_device'
+  | 'create_fax_email_route'
+  | 'create_forwarding_rule'
+  | 'create_location'
+  | 'create_message'
   | 'create_role'
   | 'create_tag'
   | 'create_team'
   | 'create_team_invitation'
+  | 'create_ticket'
   | 'create_user'
+  | 'delete_attachment'
+  | 'delete_connection'
   | 'delete_device'
+  | 'delete_fax_email_route'
+  | 'delete_fax_message'
+  | 'delete_forwarding_rule'
+  | 'delete_location'
+  | 'delete_message'
   | 'delete_role'
   | 'delete_tag'
   | 'delete_team'
@@ -37,12 +51,22 @@ export type RouteName =
   | 'delete_team_invitation'
   | 'delete_user'
   | 'delete_user_api_users_user_id:uuid'
+  | 'delete_voicemail_message'
   | 'disable_mfa'
   | 'forgot_password'
   | 'get_activity'
+  | 'get_attachment'
+  | 'get_connection'
   | 'get_device'
+  | 'get_dnd_settings'
+  | 'get_extension'
+  | 'get_fax_message'
+  | 'get_fax_number'
+  | 'get_location'
   | 'get_log'
   | 'get_mfa_status'
+  | 'get_organization'
+  | 'get_phone_number'
   | 'get_profile'
   | 'get_role'
   | 'get_sessions'
@@ -51,22 +75,36 @@ export type RouteName =
   | 'get_target_logs'
   | 'get_team'
   | 'get_team_api_teams_team_id:uuid'
+  | 'get_ticket'
   | 'get_user'
   | 'get_user_api_users_user_id:uuid'
   | 'get_user_logs'
   | 'get_verification_status'
+  | 'get_voicemail_message'
+  | 'get_voicemail_settings'
   | 'initiate_disable_mfa_oauth'
   | 'initiate_setup'
   | 'list_accounts'
+  | 'list_connections'
   | 'list_devices'
+  | 'list_extensions'
+  | 'list_fax_email_routes'
+  | 'list_fax_messages'
+  | 'list_fax_numbers'
+  | 'list_forwarding_rules'
+  | 'list_locations'
   | 'list_logs'
+  | 'list_messages'
+  | 'list_phone_numbers'
   | 'list_roles'
   | 'list_tags'
   | 'list_team_invitations'
   | 'list_teams'
   | 'list_teams_api_teams'
+  | 'list_tickets'
   | 'list_users'
   | 'list_users_api_users'
+  | 'list_voicemail_messages'
   | 'login'
   | 'logout'
   | 'oauth:github:authorize'
@@ -74,11 +112,13 @@ export type RouteName =
   | 'oauth:google:authorize'
   | 'oauth:google:callback'
   | 'openapi.json'
+  | 'paste_image'
   | 'refresh_token'
   | 'regenerate_backup_codes'
   | 'reject_team_invitation'
   | 'remove_account'
   | 'remove_member_from_team'
+  | 'reopen_ticket'
   | 'request_verification'
   | 'reset_password_with_token'
   | 'revoke_all_sessions'
@@ -86,22 +126,39 @@ export type RouteName =
   | 'revoke_role_api_users_roles'
   | 'revoke_session'
   | 'saq'
+  | 'set_forwarding_rules'
   | 'signup'
   | 'start_link'
   | 'system:health'
   | 'system:oauth-config'
+  | 'test_connection'
+  | 'toggle_dnd'
   | 'unlink'
+  | 'update_connection'
   | 'update_device'
+  | 'update_dnd_settings'
+  | 'update_extension'
+  | 'update_fax_email_route'
+  | 'update_fax_number'
+  | 'update_forwarding_rule'
+  | 'update_location'
+  | 'update_message'
+  | 'update_organization'
   | 'update_password'
+  | 'update_phone_number'
   | 'update_profile'
   | 'update_role'
   | 'update_tag'
   | 'update_team'
   | 'update_team_api_teams_team_id:uuid'
   | 'update_team_member'
+  | 'update_ticket'
   | 'update_user'
   | 'update_user_api_users_user_id:uuid'
+  | 'update_voicemail_message'
+  | 'update_voicemail_settings'
   | 'upgrade_scopes'
+  | 'upload_attachment'
   | 'validate_reset_token'
   | 'verify_challenge'
   | 'verify_email'
@@ -131,17 +188,59 @@ export interface RoutePathParams {
     role_slug: string;
   };
   'assign_role_api_users_roles': Record<string, never>;
+  'close_ticket': {
+    ticket_id: UUID;
+  };
   'confirm_setup': Record<string, never>;
+  'create_connection': Record<string, never>;
   'create_device': Record<string, never>;
+  'create_fax_email_route': {
+    fax_number_id: UUID;
+  };
+  'create_forwarding_rule': {
+    ext_id: UUID;
+  };
+  'create_location': {
+    team_id: UUID;
+  };
+  'create_message': {
+    ticket_id: UUID;
+  };
   'create_role': Record<string, never>;
   'create_tag': Record<string, never>;
   'create_team': Record<string, never>;
   'create_team_invitation': {
     team_id: UUID;
   };
+  'create_ticket': Record<string, never>;
   'create_user': Record<string, never>;
+  'delete_attachment': {
+    attachment_id: UUID;
+  };
+  'delete_connection': {
+    connection_id: UUID;
+  };
   'delete_device': {
     device_id: UUID;
+  };
+  'delete_fax_email_route': {
+    fax_number_id: UUID;
+    route_id: UUID;
+  };
+  'delete_fax_message': {
+    message_id: UUID;
+  };
+  'delete_forwarding_rule': {
+    ext_id: UUID;
+    rule_id: UUID;
+  };
+  'delete_location': {
+    location_id: UUID;
+    team_id: UUID;
+  };
+  'delete_message': {
+    msg_id: UUID;
+    ticket_id: UUID;
   };
   'delete_role': {
     role_id: UUID;
@@ -165,16 +264,46 @@ export interface RoutePathParams {
   'delete_user_api_users_user_id:uuid': {
     user_id: UUID;
   };
+  'delete_voicemail_message': {
+    ext_id: UUID;
+    msg_id: UUID;
+  };
   'disable_mfa': Record<string, never>;
   'forgot_password': Record<string, never>;
   'get_activity': Record<string, never>;
+  'get_attachment': {
+    attachment_id: UUID;
+  };
+  'get_connection': {
+    connection_id: UUID;
+  };
   'get_device': {
     device_id: UUID;
+  };
+  'get_dnd_settings': {
+    ext_id: UUID;
+  };
+  'get_extension': {
+    ext_id: UUID;
+  };
+  'get_fax_message': {
+    message_id: UUID;
+  };
+  'get_fax_number': {
+    fax_number_id: UUID;
+  };
+  'get_location': {
+    location_id: UUID;
+    team_id: UUID;
   };
   'get_log': {
     log_id: UUID;
   };
   'get_mfa_status': Record<string, never>;
+  'get_organization': Record<string, never>;
+  'get_phone_number': {
+    phone_number_id: UUID;
+  };
   'get_profile': Record<string, never>;
   'get_role': {
     role_id: UUID;
@@ -194,6 +323,9 @@ export interface RoutePathParams {
   'get_team_api_teams_team_id:uuid': {
     team_id: UUID;
   };
+  'get_ticket': {
+    ticket_id: UUID;
+  };
   'get_user': {
     user_id: UUID;
   };
@@ -206,13 +338,37 @@ export interface RoutePathParams {
   'get_verification_status': {
     user_id: UUID;
   };
+  'get_voicemail_message': {
+    ext_id: UUID;
+    msg_id: UUID;
+  };
+  'get_voicemail_settings': {
+    ext_id: UUID;
+  };
   'initiate_disable_mfa_oauth': {
     provider: string;
   };
   'initiate_setup': Record<string, never>;
   'list_accounts': Record<string, never>;
+  'list_connections': Record<string, never>;
   'list_devices': Record<string, never>;
+  'list_extensions': Record<string, never>;
+  'list_fax_email_routes': {
+    fax_number_id: UUID;
+  };
+  'list_fax_messages': Record<string, never>;
+  'list_fax_numbers': Record<string, never>;
+  'list_forwarding_rules': {
+    ext_id: UUID;
+  };
+  'list_locations': {
+    team_id: UUID;
+  };
   'list_logs': Record<string, never>;
+  'list_messages': {
+    ticket_id: UUID;
+  };
+  'list_phone_numbers': Record<string, never>;
   'list_roles': Record<string, never>;
   'list_tags': Record<string, never>;
   'list_team_invitations': {
@@ -220,8 +376,12 @@ export interface RoutePathParams {
   };
   'list_teams': Record<string, never>;
   'list_teams_api_teams': Record<string, never>;
+  'list_tickets': Record<string, never>;
   'list_users': Record<string, never>;
   'list_users_api_users': Record<string, never>;
+  'list_voicemail_messages': {
+    ext_id: UUID;
+  };
   'login': Record<string, never>;
   'logout': Record<string, never>;
   'oauth:github:authorize': Record<string, never>;
@@ -229,6 +389,9 @@ export interface RoutePathParams {
   'oauth:google:authorize': Record<string, never>;
   'oauth:google:callback': Record<string, never>;
   'openapi.json': Record<string, never>;
+  'paste_image': {
+    ticket_id: UUID;
+  };
   'refresh_token': Record<string, never>;
   'regenerate_backup_codes': Record<string, never>;
   'reject_team_invitation': {
@@ -238,6 +401,9 @@ export interface RoutePathParams {
   'remove_account': Record<string, never>;
   'remove_member_from_team': {
     team_id: UUID;
+  };
+  'reopen_ticket': {
+    ticket_id: UUID;
   };
   'request_verification': Record<string, never>;
   'reset_password_with_token': Record<string, never>;
@@ -252,19 +418,60 @@ export interface RoutePathParams {
   'saq': {
     file_path: any;
   };
+  'set_forwarding_rules': {
+    ext_id: UUID;
+  };
   'signup': Record<string, never>;
   'start_link': {
     provider: string;
   };
   'system:health': Record<string, never>;
   'system:oauth-config': Record<string, never>;
+  'test_connection': {
+    connection_id: UUID;
+  };
+  'toggle_dnd': {
+    ext_id: UUID;
+  };
   'unlink': {
     provider: string;
+  };
+  'update_connection': {
+    connection_id: UUID;
   };
   'update_device': {
     device_id: UUID;
   };
+  'update_dnd_settings': {
+    ext_id: UUID;
+  };
+  'update_extension': {
+    ext_id: UUID;
+  };
+  'update_fax_email_route': {
+    fax_number_id: UUID;
+    route_id: UUID;
+  };
+  'update_fax_number': {
+    fax_number_id: UUID;
+  };
+  'update_forwarding_rule': {
+    ext_id: UUID;
+    rule_id: UUID;
+  };
+  'update_location': {
+    location_id: UUID;
+    team_id: UUID;
+  };
+  'update_message': {
+    msg_id: UUID;
+    ticket_id: UUID;
+  };
+  'update_organization': Record<string, never>;
   'update_password': Record<string, never>;
+  'update_phone_number': {
+    phone_number_id: UUID;
+  };
   'update_profile': Record<string, never>;
   'update_role': {
     role_id: UUID;
@@ -282,14 +489,27 @@ export interface RoutePathParams {
     team_id: UUID;
     user_id: UUID;
   };
+  'update_ticket': {
+    ticket_id: UUID;
+  };
   'update_user': {
     user_id: UUID;
   };
   'update_user_api_users_user_id:uuid': {
     user_id: UUID;
   };
+  'update_voicemail_message': {
+    ext_id: UUID;
+    msg_id: UUID;
+  };
+  'update_voicemail_settings': {
+    ext_id: UUID;
+  };
   'upgrade_scopes': {
     provider: string;
+  };
+  'upload_attachment': {
+    ticket_id: UUID;
   };
   'validate_reset_token': Record<string, never>;
   'verify_challenge': Record<string, never>;
@@ -336,14 +556,28 @@ export interface RouteQueryParams {
   'assign_role_api_users_roles': {
     role_slug: string;
   };
+  'close_ticket': Record<string, never>;
   'confirm_setup': Record<string, never>;
+  'create_connection': Record<string, never>;
   'create_device': Record<string, never>;
+  'create_fax_email_route': Record<string, never>;
+  'create_forwarding_rule': Record<string, never>;
+  'create_location': Record<string, never>;
+  'create_message': Record<string, never>;
   'create_role': Record<string, never>;
   'create_tag': Record<string, never>;
   'create_team': Record<string, never>;
   'create_team_invitation': Record<string, never>;
+  'create_ticket': Record<string, never>;
   'create_user': Record<string, never>;
+  'delete_attachment': Record<string, never>;
+  'delete_connection': Record<string, never>;
   'delete_device': Record<string, never>;
+  'delete_fax_email_route': Record<string, never>;
+  'delete_fax_message': Record<string, never>;
+  'delete_forwarding_rule': Record<string, never>;
+  'delete_location': Record<string, never>;
+  'delete_message': Record<string, never>;
   'delete_role': Record<string, never>;
   'delete_tag': Record<string, never>;
   'delete_team': Record<string, never>;
@@ -351,15 +585,25 @@ export interface RouteQueryParams {
   'delete_team_invitation': Record<string, never>;
   'delete_user': Record<string, never>;
   'delete_user_api_users_user_id:uuid': Record<string, never>;
+  'delete_voicemail_message': Record<string, never>;
   'disable_mfa': Record<string, never>;
   'forgot_password': Record<string, never>;
   'get_activity': {
     hours?: number;
     limit?: number;
   };
+  'get_attachment': Record<string, never>;
+  'get_connection': Record<string, never>;
   'get_device': Record<string, never>;
+  'get_dnd_settings': Record<string, never>;
+  'get_extension': Record<string, never>;
+  'get_fax_message': Record<string, never>;
+  'get_fax_number': Record<string, never>;
+  'get_location': Record<string, never>;
   'get_log': Record<string, never>;
   'get_mfa_status': Record<string, never>;
+  'get_organization': Record<string, never>;
+  'get_phone_number': Record<string, never>;
   'get_profile': Record<string, never>;
   'get_role': Record<string, never>;
   'get_sessions': {
@@ -391,6 +635,7 @@ export interface RouteQueryParams {
   };
   'get_team': Record<string, never>;
   'get_team_api_teams_team_id:uuid': Record<string, never>;
+  'get_ticket': Record<string, never>;
   'get_user': Record<string, never>;
   'get_user_api_users_user_id:uuid': Record<string, never>;
   'get_user_logs': {
@@ -411,6 +656,8 @@ export interface RouteQueryParams {
     targetTypeIn?: string[];
   };
   'get_verification_status': Record<string, never>;
+  'get_voicemail_message': Record<string, never>;
+  'get_voicemail_settings': Record<string, never>;
   'initiate_disable_mfa_oauth': Record<string, never>;
   'initiate_setup': Record<string, never>;
   'list_accounts': {
@@ -421,11 +668,93 @@ export interface RouteQueryParams {
     pageSize?: number;
     sortOrder?: "asc" | "desc";
   };
+  'list_connections': {
+    createdAfter?: DateTime;
+    createdBefore?: DateTime;
+    currentPage?: number;
+    ids?: string[];
+    orderBy?: string;
+    pageSize?: number;
+    searchIgnoreCase?: boolean;
+    searchString?: string;
+    sortOrder?: "asc" | "desc";
+    teamId?: UUID;
+    updatedAfter?: DateTime;
+    updatedBefore?: DateTime;
+  };
   'list_devices': {
     createdAfter?: DateTime;
     createdBefore?: DateTime;
     currentPage?: number;
     ids?: string[];
+    orderBy?: string;
+    pageSize?: number;
+    searchIgnoreCase?: boolean;
+    searchString?: string;
+    sortOrder?: "asc" | "desc";
+    updatedAfter?: DateTime;
+    updatedBefore?: DateTime;
+  };
+  'list_extensions': {
+    createdAfter?: DateTime;
+    createdBefore?: DateTime;
+    currentPage?: number;
+    ids?: string[];
+    orderBy?: string;
+    pageSize?: number;
+    sortOrder?: "asc" | "desc";
+    updatedAfter?: DateTime;
+    updatedBefore?: DateTime;
+  };
+  'list_fax_email_routes': {
+    createdAfter?: DateTime;
+    createdBefore?: DateTime;
+    currentPage?: number;
+    orderBy?: string;
+    pageSize?: number;
+    sortOrder?: "asc" | "desc";
+    updatedAfter?: DateTime;
+    updatedBefore?: DateTime;
+  };
+  'list_fax_messages': {
+    createdAfter?: DateTime;
+    createdBefore?: DateTime;
+    currentPage?: number;
+    ids?: string[];
+    orderBy?: string;
+    pageSize?: number;
+    sortOrder?: "asc" | "desc";
+    updatedAfter?: DateTime;
+    updatedBefore?: DateTime;
+  };
+  'list_fax_numbers': {
+    createdAfter?: DateTime;
+    createdBefore?: DateTime;
+    currentPage?: number;
+    ids?: string[];
+    orderBy?: string;
+    pageSize?: number;
+    sortOrder?: "asc" | "desc";
+    updatedAfter?: DateTime;
+    updatedBefore?: DateTime;
+  };
+  'list_forwarding_rules': {
+    createdAfter?: DateTime;
+    createdBefore?: DateTime;
+    currentPage?: number;
+    ids?: string[];
+    orderBy?: string;
+    pageSize?: number;
+    sortOrder?: "asc" | "desc";
+    updatedAfter?: DateTime;
+    updatedBefore?: DateTime;
+  };
+  'list_locations': {
+    createdAfter?: DateTime;
+    createdBefore?: DateTime;
+    currentPage?: number;
+    ids?: string[];
+    location_type?: string;
     orderBy?: string;
     pageSize?: number;
     searchIgnoreCase?: boolean;
@@ -450,6 +779,26 @@ export interface RouteQueryParams {
     sortOrder?: "asc" | "desc";
     targetIdIn?: string[];
     targetTypeIn?: string[];
+  };
+  'list_messages': {
+    createdAfter?: DateTime;
+    createdBefore?: DateTime;
+    currentPage?: number;
+    ids?: string[];
+    orderBy?: string;
+    pageSize?: number;
+    sortOrder?: "asc" | "desc";
+  };
+  'list_phone_numbers': {
+    createdAfter?: DateTime;
+    createdBefore?: DateTime;
+    currentPage?: number;
+    ids?: string[];
+    orderBy?: string;
+    pageSize?: number;
+    sortOrder?: "asc" | "desc";
+    updatedAfter?: DateTime;
+    updatedBefore?: DateTime;
   };
   'list_roles': {
     currentPage?: number;
@@ -509,6 +858,19 @@ export interface RouteQueryParams {
     updatedAfter?: DateTime;
     updatedBefore?: DateTime;
   };
+  'list_tickets': {
+    createdAfter?: DateTime;
+    createdBefore?: DateTime;
+    currentPage?: number;
+    ids?: string[];
+    orderBy?: string;
+    pageSize?: number;
+    searchIgnoreCase?: boolean;
+    searchString?: string;
+    sortOrder?: "asc" | "desc";
+    updatedAfter?: DateTime;
+    updatedBefore?: DateTime;
+  };
   'list_users': {
     createdAfter?: DateTime;
     createdBefore?: DateTime;
@@ -535,6 +897,17 @@ export interface RouteQueryParams {
     updatedAfter?: DateTime;
     updatedBefore?: DateTime;
   };
+  'list_voicemail_messages': {
+    createdAfter?: DateTime;
+    createdBefore?: DateTime;
+    currentPage?: number;
+    ids?: string[];
+    orderBy?: string;
+    pageSize?: number;
+    sortOrder?: "asc" | "desc";
+    updatedAfter?: DateTime;
+    updatedBefore?: DateTime;
+  };
   'login': Record<string, never>;
   'logout': Record<string, never>;
   'oauth:github:authorize': {
@@ -555,11 +928,13 @@ export interface RouteQueryParams {
     state?: string;
   };
   'openapi.json': Record<string, never>;
+  'paste_image': Record<string, never>;
   'refresh_token': Record<string, never>;
   'regenerate_backup_codes': Record<string, never>;
   'reject_team_invitation': Record<string, never>;
   'remove_account': Record<string, never>;
   'remove_member_from_team': Record<string, never>;
+  'reopen_ticket': Record<string, never>;
   'request_verification': Record<string, never>;
   'reset_password_with_token': Record<string, never>;
   'revoke_all_sessions': Record<string, never>;
@@ -569,26 +944,43 @@ export interface RouteQueryParams {
   };
   'revoke_session': Record<string, never>;
   'saq': Record<string, never>;
+  'set_forwarding_rules': Record<string, never>;
   'signup': Record<string, never>;
   'start_link': {
     redirect_url?: string;
   };
   'system:health': Record<string, never>;
   'system:oauth-config': Record<string, never>;
+  'test_connection': Record<string, never>;
+  'toggle_dnd': Record<string, never>;
   'unlink': Record<string, never>;
+  'update_connection': Record<string, never>;
   'update_device': Record<string, never>;
+  'update_dnd_settings': Record<string, never>;
+  'update_extension': Record<string, never>;
+  'update_fax_email_route': Record<string, never>;
+  'update_fax_number': Record<string, never>;
+  'update_forwarding_rule': Record<string, never>;
+  'update_location': Record<string, never>;
+  'update_message': Record<string, never>;
+  'update_organization': Record<string, never>;
   'update_password': Record<string, never>;
+  'update_phone_number': Record<string, never>;
   'update_profile': Record<string, never>;
   'update_role': Record<string, never>;
   'update_tag': Record<string, never>;
   'update_team': Record<string, never>;
   'update_team_api_teams_team_id:uuid': Record<string, never>;
   'update_team_member': Record<string, never>;
+  'update_ticket': Record<string, never>;
   'update_user': Record<string, never>;
   'update_user_api_users_user_id:uuid': Record<string, never>;
+  'update_voicemail_message': Record<string, never>;
+  'update_voicemail_settings': Record<string, never>;
   'upgrade_scopes': {
     redirect_url?: string;
   };
+  'upload_attachment': Record<string, never>;
   'validate_reset_token': {
     token: string;
   };
@@ -645,8 +1037,22 @@ export const routeDefinitions = {
     pathParams: [] as const,
     queryParams: ['role_slug'] as const,
   },
+  'close_ticket': {
+    path: '/api/support/tickets/{ticket_id}/close',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: ['ticket_id'] as const,
+    queryParams: [] as const,
+  },
   'confirm_setup': {
     path: '/api/mfa/confirm',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
+  'create_connection': {
+    path: '/api/connections',
     methods: ['POST'] as const,
     method: 'post',
     pathParams: [] as const,
@@ -657,6 +1063,34 @@ export const routeDefinitions = {
     methods: ['POST'] as const,
     method: 'post',
     pathParams: [] as const,
+    queryParams: [] as const,
+  },
+  'create_fax_email_route': {
+    path: '/api/fax/numbers/{fax_number_id}/email-routes',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: ['fax_number_id'] as const,
+    queryParams: [] as const,
+  },
+  'create_forwarding_rule': {
+    path: '/api/voice/extensions/{ext_id}/forwarding',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: ['ext_id'] as const,
+    queryParams: [] as const,
+  },
+  'create_location': {
+    path: '/api/teams/{team_id}/locations',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: ['team_id'] as const,
+    queryParams: [] as const,
+  },
+  'create_message': {
+    path: '/api/support/tickets/{ticket_id}/messages',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: ['ticket_id'] as const,
     queryParams: [] as const,
   },
   'create_role': {
@@ -687,6 +1121,13 @@ export const routeDefinitions = {
     pathParams: ['team_id'] as const,
     queryParams: [] as const,
   },
+  'create_ticket': {
+    path: '/api/support/tickets',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
   'create_user': {
     path: '/api/users',
     methods: ['POST'] as const,
@@ -694,11 +1135,60 @@ export const routeDefinitions = {
     pathParams: [] as const,
     queryParams: [] as const,
   },
+  'delete_attachment': {
+    path: '/api/support/attachments/{attachment_id}',
+    methods: ['DELETE'] as const,
+    method: 'delete',
+    pathParams: ['attachment_id'] as const,
+    queryParams: [] as const,
+  },
+  'delete_connection': {
+    path: '/api/connections/{connection_id}',
+    methods: ['DELETE'] as const,
+    method: 'delete',
+    pathParams: ['connection_id'] as const,
+    queryParams: [] as const,
+  },
   'delete_device': {
     path: '/api/devices/{device_id}',
     methods: ['DELETE'] as const,
     method: 'delete',
     pathParams: ['device_id'] as const,
+    queryParams: [] as const,
+  },
+  'delete_fax_email_route': {
+    path: '/api/fax/numbers/{fax_number_id}/email-routes/{route_id}',
+    methods: ['DELETE'] as const,
+    method: 'delete',
+    pathParams: ['fax_number_id', 'route_id'] as const,
+    queryParams: [] as const,
+  },
+  'delete_fax_message': {
+    path: '/api/fax/messages/{message_id}',
+    methods: ['DELETE'] as const,
+    method: 'delete',
+    pathParams: ['message_id'] as const,
+    queryParams: [] as const,
+  },
+  'delete_forwarding_rule': {
+    path: '/api/voice/extensions/{ext_id}/forwarding/{rule_id}',
+    methods: ['DELETE'] as const,
+    method: 'delete',
+    pathParams: ['ext_id', 'rule_id'] as const,
+    queryParams: [] as const,
+  },
+  'delete_location': {
+    path: '/api/teams/{team_id}/locations/{location_id}',
+    methods: ['DELETE'] as const,
+    method: 'delete',
+    pathParams: ['location_id', 'team_id'] as const,
+    queryParams: [] as const,
+  },
+  'delete_message': {
+    path: '/api/support/tickets/{ticket_id}/messages/{msg_id}',
+    methods: ['DELETE'] as const,
+    method: 'delete',
+    pathParams: ['msg_id', 'ticket_id'] as const,
     queryParams: [] as const,
   },
   'delete_role': {
@@ -750,6 +1240,13 @@ export const routeDefinitions = {
     pathParams: ['user_id'] as const,
     queryParams: [] as const,
   },
+  'delete_voicemail_message': {
+    path: '/api/voice/extensions/{ext_id}/voicemail/messages/{msg_id}',
+    methods: ['DELETE'] as const,
+    method: 'delete',
+    pathParams: ['ext_id', 'msg_id'] as const,
+    queryParams: [] as const,
+  },
   'disable_mfa': {
     path: '/api/mfa/disable',
     methods: ['DELETE'] as const,
@@ -771,11 +1268,60 @@ export const routeDefinitions = {
     pathParams: [] as const,
     queryParams: ['hours', 'limit'] as const,
   },
+  'get_attachment': {
+    path: '/api/support/attachments/{attachment_id}',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['attachment_id'] as const,
+    queryParams: [] as const,
+  },
+  'get_connection': {
+    path: '/api/connections/{connection_id}',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['connection_id'] as const,
+    queryParams: [] as const,
+  },
   'get_device': {
     path: '/api/devices/{device_id}',
     methods: ['GET'] as const,
     method: 'get',
     pathParams: ['device_id'] as const,
+    queryParams: [] as const,
+  },
+  'get_dnd_settings': {
+    path: '/api/voice/extensions/{ext_id}/dnd',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['ext_id'] as const,
+    queryParams: [] as const,
+  },
+  'get_extension': {
+    path: '/api/voice/extensions/{ext_id}',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['ext_id'] as const,
+    queryParams: [] as const,
+  },
+  'get_fax_message': {
+    path: '/api/fax/messages/{message_id}',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['message_id'] as const,
+    queryParams: [] as const,
+  },
+  'get_fax_number': {
+    path: '/api/fax/numbers/{fax_number_id}',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['fax_number_id'] as const,
+    queryParams: [] as const,
+  },
+  'get_location': {
+    path: '/api/teams/{team_id}/locations/{location_id}',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['location_id', 'team_id'] as const,
     queryParams: [] as const,
   },
   'get_log': {
@@ -790,6 +1336,20 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: [] as const,
+    queryParams: [] as const,
+  },
+  'get_organization': {
+    path: '/api/organization',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
+  'get_phone_number': {
+    path: '/api/voice/phone-numbers/{phone_number_id}',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['phone_number_id'] as const,
     queryParams: [] as const,
   },
   'get_profile': {
@@ -848,6 +1408,13 @@ export const routeDefinitions = {
     pathParams: ['team_id'] as const,
     queryParams: [] as const,
   },
+  'get_ticket': {
+    path: '/api/support/tickets/{ticket_id}',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['ticket_id'] as const,
+    queryParams: [] as const,
+  },
   'get_user': {
     path: '/api/admin/users/{user_id}',
     methods: ['GET'] as const,
@@ -876,6 +1443,20 @@ export const routeDefinitions = {
     pathParams: ['user_id'] as const,
     queryParams: [] as const,
   },
+  'get_voicemail_message': {
+    path: '/api/voice/extensions/{ext_id}/voicemail/messages/{msg_id}',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['ext_id', 'msg_id'] as const,
+    queryParams: [] as const,
+  },
+  'get_voicemail_settings': {
+    path: '/api/voice/extensions/{ext_id}/voicemail',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['ext_id'] as const,
+    queryParams: [] as const,
+  },
   'initiate_disable_mfa_oauth': {
     path: '/api/mfa/disable/oauth/{provider}',
     methods: ['GET'] as const,
@@ -897,6 +1478,13 @@ export const routeDefinitions = {
     pathParams: [] as const,
     queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'orderBy', 'pageSize', 'sortOrder'] as const,
   },
+  'list_connections': {
+    path: '/api/connections',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'teamId', 'updatedAfter', 'updatedBefore'] as const,
+  },
   'list_devices': {
     path: '/api/devices',
     methods: ['GET'] as const,
@@ -904,12 +1492,70 @@ export const routeDefinitions = {
     pathParams: [] as const,
     queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
   },
+  'list_extensions': {
+    path: '/api/voice/extensions',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
+  },
+  'list_fax_email_routes': {
+    path: '/api/fax/numbers/{fax_number_id}/email-routes',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['fax_number_id'] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'orderBy', 'pageSize', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
+  },
+  'list_fax_messages': {
+    path: '/api/fax/messages',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
+    component: 'fax/message-list',
+  },
+  'list_fax_numbers': {
+    path: '/api/fax/numbers',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
+    component: 'fax/number-list',
+  },
+  'list_forwarding_rules': {
+    path: '/api/voice/extensions/{ext_id}/forwarding',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['ext_id'] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
+  },
+  'list_locations': {
+    path: '/api/teams/{team_id}/locations',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['team_id'] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'location_type', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
+  },
   'list_logs': {
     path: '/api/admin/audit',
     methods: ['GET'] as const,
     method: 'get',
     pathParams: [] as const,
     queryParams: ['action', 'actionIn', 'actorIdIn', 'createdAfter', 'createdBefore', 'currentPage', 'end_date', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'targetIdIn', 'targetTypeIn'] as const,
+  },
+  'list_messages': {
+    path: '/api/support/tickets/{ticket_id}/messages',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['ticket_id'] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'sortOrder'] as const,
+  },
+  'list_phone_numbers': {
+    path: '/api/voice/phone-numbers',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
   },
   'list_roles': {
     path: '/api/roles',
@@ -947,6 +1593,13 @@ export const routeDefinitions = {
     queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
     component: 'team/list',
   },
+  'list_tickets': {
+    path: '/api/support/tickets',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
+  },
   'list_users': {
     path: '/api/admin/users',
     methods: ['GET'] as const,
@@ -960,6 +1613,13 @@ export const routeDefinitions = {
     method: 'get',
     pathParams: [] as const,
     queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
+  },
+  'list_voicemail_messages': {
+    path: '/api/voice/extensions/{ext_id}/voicemail/messages',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['ext_id'] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
   },
   'login': {
     path: '/api/access/login',
@@ -1010,6 +1670,13 @@ export const routeDefinitions = {
     pathParams: [] as const,
     queryParams: [] as const,
   },
+  'paste_image': {
+    path: '/api/support/tickets/{ticket_id}/paste-image',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: ['ticket_id'] as const,
+    queryParams: [] as const,
+  },
   'refresh_token': {
     path: '/api/access/refresh',
     methods: ['POST'] as const,
@@ -1043,6 +1710,13 @@ export const routeDefinitions = {
     methods: ['DELETE'] as const,
     method: 'delete',
     pathParams: ['team_id'] as const,
+    queryParams: [] as const,
+  },
+  'reopen_ticket': {
+    path: '/api/support/tickets/{ticket_id}/reopen',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: ['ticket_id'] as const,
     queryParams: [] as const,
   },
   'request_verification': {
@@ -1094,6 +1768,13 @@ export const routeDefinitions = {
     pathParams: ['file_path'] as const,
     queryParams: [] as const,
   },
+  'set_forwarding_rules': {
+    path: '/api/voice/extensions/{ext_id}/forwarding',
+    methods: ['PUT'] as const,
+    method: 'put',
+    pathParams: ['ext_id'] as const,
+    queryParams: [] as const,
+  },
   'signup': {
     path: '/api/access/signup',
     methods: ['POST'] as const,
@@ -1122,11 +1803,32 @@ export const routeDefinitions = {
     pathParams: [] as const,
     queryParams: [] as const,
   },
+  'test_connection': {
+    path: '/api/connections/{connection_id}/test',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: ['connection_id'] as const,
+    queryParams: [] as const,
+  },
+  'toggle_dnd': {
+    path: '/api/voice/extensions/{ext_id}/dnd/toggle',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: ['ext_id'] as const,
+    queryParams: [] as const,
+  },
   'unlink': {
     path: '/api/profile/oauth/{provider}',
     methods: ['DELETE'] as const,
     method: 'delete',
     pathParams: ['provider'] as const,
+    queryParams: [] as const,
+  },
+  'update_connection': {
+    path: '/api/connections/{connection_id}',
+    methods: ['PATCH'] as const,
+    method: 'patch',
+    pathParams: ['connection_id'] as const,
     queryParams: [] as const,
   },
   'update_device': {
@@ -1136,11 +1838,74 @@ export const routeDefinitions = {
     pathParams: ['device_id'] as const,
     queryParams: [] as const,
   },
+  'update_dnd_settings': {
+    path: '/api/voice/extensions/{ext_id}/dnd',
+    methods: ['PATCH'] as const,
+    method: 'patch',
+    pathParams: ['ext_id'] as const,
+    queryParams: [] as const,
+  },
+  'update_extension': {
+    path: '/api/voice/extensions/{ext_id}',
+    methods: ['PATCH'] as const,
+    method: 'patch',
+    pathParams: ['ext_id'] as const,
+    queryParams: [] as const,
+  },
+  'update_fax_email_route': {
+    path: '/api/fax/numbers/{fax_number_id}/email-routes/{route_id}',
+    methods: ['PATCH'] as const,
+    method: 'patch',
+    pathParams: ['fax_number_id', 'route_id'] as const,
+    queryParams: [] as const,
+  },
+  'update_fax_number': {
+    path: '/api/fax/numbers/{fax_number_id}',
+    methods: ['PATCH'] as const,
+    method: 'patch',
+    pathParams: ['fax_number_id'] as const,
+    queryParams: [] as const,
+  },
+  'update_forwarding_rule': {
+    path: '/api/voice/extensions/{ext_id}/forwarding/{rule_id}',
+    methods: ['PATCH'] as const,
+    method: 'patch',
+    pathParams: ['ext_id', 'rule_id'] as const,
+    queryParams: [] as const,
+  },
+  'update_location': {
+    path: '/api/teams/{team_id}/locations/{location_id}',
+    methods: ['PATCH'] as const,
+    method: 'patch',
+    pathParams: ['location_id', 'team_id'] as const,
+    queryParams: [] as const,
+  },
+  'update_message': {
+    path: '/api/support/tickets/{ticket_id}/messages/{msg_id}',
+    methods: ['PATCH'] as const,
+    method: 'patch',
+    pathParams: ['msg_id', 'ticket_id'] as const,
+    queryParams: [] as const,
+  },
+  'update_organization': {
+    path: '/api/organization',
+    methods: ['PUT'] as const,
+    method: 'put',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
   'update_password': {
     path: '/api/me/password',
     methods: ['PATCH'] as const,
     method: 'patch',
     pathParams: [] as const,
+    queryParams: [] as const,
+  },
+  'update_phone_number': {
+    path: '/api/voice/phone-numbers/{phone_number_id}',
+    methods: ['PATCH'] as const,
+    method: 'patch',
+    pathParams: ['phone_number_id'] as const,
     queryParams: [] as const,
   },
   'update_profile': {
@@ -1185,6 +1950,13 @@ export const routeDefinitions = {
     pathParams: ['team_id', 'user_id'] as const,
     queryParams: [] as const,
   },
+  'update_ticket': {
+    path: '/api/support/tickets/{ticket_id}',
+    methods: ['PATCH'] as const,
+    method: 'patch',
+    pathParams: ['ticket_id'] as const,
+    queryParams: [] as const,
+  },
   'update_user': {
     path: '/api/admin/users/{user_id}',
     methods: ['PATCH'] as const,
@@ -1199,12 +1971,33 @@ export const routeDefinitions = {
     pathParams: ['user_id'] as const,
     queryParams: [] as const,
   },
+  'update_voicemail_message': {
+    path: '/api/voice/extensions/{ext_id}/voicemail/messages/{msg_id}',
+    methods: ['PATCH'] as const,
+    method: 'patch',
+    pathParams: ['ext_id', 'msg_id'] as const,
+    queryParams: [] as const,
+  },
+  'update_voicemail_settings': {
+    path: '/api/voice/extensions/{ext_id}/voicemail',
+    methods: ['PATCH'] as const,
+    method: 'patch',
+    pathParams: ['ext_id'] as const,
+    queryParams: [] as const,
+  },
   'upgrade_scopes': {
     path: '/api/profile/oauth/{provider}/upgrade-scopes',
     methods: ['POST'] as const,
     method: 'post',
     pathParams: ['provider'] as const,
     queryParams: ['redirect_url'] as const,
+  },
+  'upload_attachment': {
+    path: '/api/support/tickets/{ticket_id}/attachments',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: ['ticket_id'] as const,
+    queryParams: [] as const,
   },
   'validate_reset_token': {
     path: '/api/access/reset-password',

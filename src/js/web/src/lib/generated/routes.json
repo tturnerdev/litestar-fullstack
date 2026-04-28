@@ -52,6 +52,19 @@
       },
       "uri": "/api/users/roles"
     },
+    "close_ticket": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "parameterTypes": {
+        "ticket_id": "UUID"
+      },
+      "parameters": [
+        "ticket_id"
+      ],
+      "uri": "/api/support/tickets/{ticket_id}/close"
+    },
     "confirm_setup": {
       "method": "post",
       "methods": [
@@ -59,12 +72,71 @@
       ],
       "uri": "/api/mfa/confirm"
     },
+    "create_connection": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "uri": "/api/connections"
+    },
     "create_device": {
       "method": "post",
       "methods": [
         "POST"
       ],
       "uri": "/api/devices"
+    },
+    "create_fax_email_route": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "parameterTypes": {
+        "fax_number_id": "UUID"
+      },
+      "parameters": [
+        "fax_number_id"
+      ],
+      "uri": "/api/fax/numbers/{fax_number_id}/email-routes"
+    },
+    "create_forwarding_rule": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "parameterTypes": {
+        "ext_id": "UUID"
+      },
+      "parameters": [
+        "ext_id"
+      ],
+      "uri": "/api/voice/extensions/{ext_id}/forwarding"
+    },
+    "create_location": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "parameterTypes": {
+        "team_id": "UUID"
+      },
+      "parameters": [
+        "team_id"
+      ],
+      "uri": "/api/teams/{team_id}/locations"
+    },
+    "create_message": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "parameterTypes": {
+        "ticket_id": "UUID"
+      },
+      "parameters": [
+        "ticket_id"
+      ],
+      "uri": "/api/support/tickets/{ticket_id}/messages"
     },
     "create_role": {
       "method": "post",
@@ -100,12 +172,45 @@
       ],
       "uri": "/api/teams/{team_id}/invitations"
     },
+    "create_ticket": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "uri": "/api/support/tickets"
+    },
     "create_user": {
       "method": "post",
       "methods": [
         "POST"
       ],
       "uri": "/api/users"
+    },
+    "delete_attachment": {
+      "method": "delete",
+      "methods": [
+        "DELETE"
+      ],
+      "parameterTypes": {
+        "attachment_id": "UUID"
+      },
+      "parameters": [
+        "attachment_id"
+      ],
+      "uri": "/api/support/attachments/{attachment_id}"
+    },
+    "delete_connection": {
+      "method": "delete",
+      "methods": [
+        "DELETE"
+      ],
+      "parameterTypes": {
+        "connection_id": "UUID"
+      },
+      "parameters": [
+        "connection_id"
+      ],
+      "uri": "/api/connections/{connection_id}"
     },
     "delete_device": {
       "method": "delete",
@@ -119,6 +224,79 @@
         "device_id"
       ],
       "uri": "/api/devices/{device_id}"
+    },
+    "delete_fax_email_route": {
+      "method": "delete",
+      "methods": [
+        "DELETE"
+      ],
+      "parameterTypes": {
+        "fax_number_id": "UUID",
+        "route_id": "UUID"
+      },
+      "parameters": [
+        "fax_number_id",
+        "route_id"
+      ],
+      "uri": "/api/fax/numbers/{fax_number_id}/email-routes/{route_id}"
+    },
+    "delete_fax_message": {
+      "method": "delete",
+      "methods": [
+        "DELETE"
+      ],
+      "parameterTypes": {
+        "message_id": "UUID"
+      },
+      "parameters": [
+        "message_id"
+      ],
+      "uri": "/api/fax/messages/{message_id}"
+    },
+    "delete_forwarding_rule": {
+      "method": "delete",
+      "methods": [
+        "DELETE"
+      ],
+      "parameterTypes": {
+        "ext_id": "UUID",
+        "rule_id": "UUID"
+      },
+      "parameters": [
+        "ext_id",
+        "rule_id"
+      ],
+      "uri": "/api/voice/extensions/{ext_id}/forwarding/{rule_id}"
+    },
+    "delete_location": {
+      "method": "delete",
+      "methods": [
+        "DELETE"
+      ],
+      "parameterTypes": {
+        "location_id": "UUID",
+        "team_id": "UUID"
+      },
+      "parameters": [
+        "location_id",
+        "team_id"
+      ],
+      "uri": "/api/teams/{team_id}/locations/{location_id}"
+    },
+    "delete_message": {
+      "method": "delete",
+      "methods": [
+        "DELETE"
+      ],
+      "parameterTypes": {
+        "msg_id": "UUID",
+        "ticket_id": "UUID"
+      },
+      "parameters": [
+        "msg_id",
+        "ticket_id"
+      ],
+      "uri": "/api/support/tickets/{ticket_id}/messages/{msg_id}"
     },
     "delete_role": {
       "method": "delete",
@@ -213,6 +391,21 @@
       ],
       "uri": "/api/users/{user_id}"
     },
+    "delete_voicemail_message": {
+      "method": "delete",
+      "methods": [
+        "DELETE"
+      ],
+      "parameterTypes": {
+        "ext_id": "UUID",
+        "msg_id": "UUID"
+      },
+      "parameters": [
+        "ext_id",
+        "msg_id"
+      ],
+      "uri": "/api/voice/extensions/{ext_id}/voicemail/messages/{msg_id}"
+    },
     "disable_mfa": {
       "method": "delete",
       "methods": [
@@ -238,6 +431,32 @@
       },
       "uri": "/api/admin/dashboard/activity"
     },
+    "get_attachment": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "attachment_id": "UUID"
+      },
+      "parameters": [
+        "attachment_id"
+      ],
+      "uri": "/api/support/attachments/{attachment_id}"
+    },
+    "get_connection": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "connection_id": "UUID"
+      },
+      "parameters": [
+        "connection_id"
+      ],
+      "uri": "/api/connections/{connection_id}"
+    },
     "get_device": {
       "method": "get",
       "methods": [
@@ -250,6 +469,73 @@
         "device_id"
       ],
       "uri": "/api/devices/{device_id}"
+    },
+    "get_dnd_settings": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "ext_id": "UUID"
+      },
+      "parameters": [
+        "ext_id"
+      ],
+      "uri": "/api/voice/extensions/{ext_id}/dnd"
+    },
+    "get_extension": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "ext_id": "UUID"
+      },
+      "parameters": [
+        "ext_id"
+      ],
+      "uri": "/api/voice/extensions/{ext_id}"
+    },
+    "get_fax_message": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "message_id": "UUID"
+      },
+      "parameters": [
+        "message_id"
+      ],
+      "uri": "/api/fax/messages/{message_id}"
+    },
+    "get_fax_number": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "fax_number_id": "UUID"
+      },
+      "parameters": [
+        "fax_number_id"
+      ],
+      "uri": "/api/fax/numbers/{fax_number_id}"
+    },
+    "get_location": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "location_id": "UUID",
+        "team_id": "UUID"
+      },
+      "parameters": [
+        "location_id",
+        "team_id"
+      ],
+      "uri": "/api/teams/{team_id}/locations/{location_id}"
     },
     "get_log": {
       "method": "get",
@@ -270,6 +556,26 @@
         "GET"
       ],
       "uri": "/api/mfa/status"
+    },
+    "get_organization": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "uri": "/api/organization"
+    },
+    "get_phone_number": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "phone_number_id": "UUID"
+      },
+      "parameters": [
+        "phone_number_id"
+      ],
+      "uri": "/api/voice/phone-numbers/{phone_number_id}"
     },
     "get_profile": {
       "method": "get",
@@ -384,6 +690,19 @@
       ],
       "uri": "/api/teams/{team_id}"
     },
+    "get_ticket": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "ticket_id": "UUID"
+      },
+      "parameters": [
+        "ticket_id"
+      ],
+      "uri": "/api/support/tickets/{ticket_id}"
+    },
     "get_user": {
       "method": "get",
       "methods": [
@@ -453,6 +772,34 @@
       ],
       "uri": "/api/email-verification/status/{user_id}"
     },
+    "get_voicemail_message": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "ext_id": "UUID",
+        "msg_id": "UUID"
+      },
+      "parameters": [
+        "ext_id",
+        "msg_id"
+      ],
+      "uri": "/api/voice/extensions/{ext_id}/voicemail/messages/{msg_id}"
+    },
+    "get_voicemail_settings": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "ext_id": "UUID"
+      },
+      "parameters": [
+        "ext_id"
+      ],
+      "uri": "/api/voice/extensions/{ext_id}/voicemail"
+    },
     "initiate_disable_mfa_oauth": {
       "method": "get",
       "methods": [
@@ -488,6 +835,27 @@
       },
       "uri": "/api/profile/oauth/accounts"
     },
+    "list_connections": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "queryParameters": {
+        "createdAfter": "DateTime | undefined",
+        "createdBefore": "DateTime | undefined",
+        "currentPage": "number | undefined",
+        "ids": "string[] | undefined",
+        "orderBy": "string | undefined",
+        "pageSize": "number | undefined",
+        "searchIgnoreCase": "boolean | undefined",
+        "searchString": "string | undefined",
+        "sortOrder": "\"asc\" | \"desc\" | undefined",
+        "teamId": "UUID | undefined",
+        "updatedAfter": "DateTime | undefined",
+        "updatedBefore": "DateTime | undefined"
+      },
+      "uri": "/api/connections"
+    },
     "list_devices": {
       "method": "get",
       "methods": [
@@ -507,6 +875,136 @@
         "updatedBefore": "DateTime | undefined"
       },
       "uri": "/api/devices"
+    },
+    "list_extensions": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "queryParameters": {
+        "createdAfter": "DateTime | undefined",
+        "createdBefore": "DateTime | undefined",
+        "currentPage": "number | undefined",
+        "ids": "string[] | undefined",
+        "orderBy": "string | undefined",
+        "pageSize": "number | undefined",
+        "sortOrder": "\"asc\" | \"desc\" | undefined",
+        "updatedAfter": "DateTime | undefined",
+        "updatedBefore": "DateTime | undefined"
+      },
+      "uri": "/api/voice/extensions"
+    },
+    "list_fax_email_routes": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "fax_number_id": "UUID"
+      },
+      "parameters": [
+        "fax_number_id"
+      ],
+      "queryParameters": {
+        "createdAfter": "DateTime | undefined",
+        "createdBefore": "DateTime | undefined",
+        "currentPage": "number | undefined",
+        "orderBy": "string | undefined",
+        "pageSize": "number | undefined",
+        "sortOrder": "\"asc\" | \"desc\" | undefined",
+        "updatedAfter": "DateTime | undefined",
+        "updatedBefore": "DateTime | undefined"
+      },
+      "uri": "/api/fax/numbers/{fax_number_id}/email-routes"
+    },
+    "list_fax_messages": {
+      "component": "fax/message-list",
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "queryParameters": {
+        "createdAfter": "DateTime | undefined",
+        "createdBefore": "DateTime | undefined",
+        "currentPage": "number | undefined",
+        "ids": "string[] | undefined",
+        "orderBy": "string | undefined",
+        "pageSize": "number | undefined",
+        "sortOrder": "\"asc\" | \"desc\" | undefined",
+        "updatedAfter": "DateTime | undefined",
+        "updatedBefore": "DateTime | undefined"
+      },
+      "uri": "/api/fax/messages"
+    },
+    "list_fax_numbers": {
+      "component": "fax/number-list",
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "queryParameters": {
+        "createdAfter": "DateTime | undefined",
+        "createdBefore": "DateTime | undefined",
+        "currentPage": "number | undefined",
+        "ids": "string[] | undefined",
+        "orderBy": "string | undefined",
+        "pageSize": "number | undefined",
+        "sortOrder": "\"asc\" | \"desc\" | undefined",
+        "updatedAfter": "DateTime | undefined",
+        "updatedBefore": "DateTime | undefined"
+      },
+      "uri": "/api/fax/numbers"
+    },
+    "list_forwarding_rules": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "ext_id": "UUID"
+      },
+      "parameters": [
+        "ext_id"
+      ],
+      "queryParameters": {
+        "createdAfter": "DateTime | undefined",
+        "createdBefore": "DateTime | undefined",
+        "currentPage": "number | undefined",
+        "ids": "string[] | undefined",
+        "orderBy": "string | undefined",
+        "pageSize": "number | undefined",
+        "sortOrder": "\"asc\" | \"desc\" | undefined",
+        "updatedAfter": "DateTime | undefined",
+        "updatedBefore": "DateTime | undefined"
+      },
+      "uri": "/api/voice/extensions/{ext_id}/forwarding"
+    },
+    "list_locations": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "team_id": "UUID"
+      },
+      "parameters": [
+        "team_id"
+      ],
+      "queryParameters": {
+        "createdAfter": "DateTime | undefined",
+        "createdBefore": "DateTime | undefined",
+        "currentPage": "number | undefined",
+        "ids": "string[] | undefined",
+        "location_type": "string | undefined",
+        "orderBy": "string | undefined",
+        "pageSize": "number | undefined",
+        "searchIgnoreCase": "boolean | undefined",
+        "searchString": "string | undefined",
+        "sortOrder": "\"asc\" | \"desc\" | undefined",
+        "updatedAfter": "DateTime | undefined",
+        "updatedBefore": "DateTime | undefined"
+      },
+      "uri": "/api/teams/{team_id}/locations"
     },
     "list_logs": {
       "method": "get",
@@ -531,6 +1029,46 @@
         "targetTypeIn": "string[] | undefined"
       },
       "uri": "/api/admin/audit"
+    },
+    "list_messages": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "ticket_id": "UUID"
+      },
+      "parameters": [
+        "ticket_id"
+      ],
+      "queryParameters": {
+        "createdAfter": "DateTime | undefined",
+        "createdBefore": "DateTime | undefined",
+        "currentPage": "number | undefined",
+        "ids": "string[] | undefined",
+        "orderBy": "string | undefined",
+        "pageSize": "number | undefined",
+        "sortOrder": "\"asc\" | \"desc\" | undefined"
+      },
+      "uri": "/api/support/tickets/{ticket_id}/messages"
+    },
+    "list_phone_numbers": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "queryParameters": {
+        "createdAfter": "DateTime | undefined",
+        "createdBefore": "DateTime | undefined",
+        "currentPage": "number | undefined",
+        "ids": "string[] | undefined",
+        "orderBy": "string | undefined",
+        "pageSize": "number | undefined",
+        "sortOrder": "\"asc\" | \"desc\" | undefined",
+        "updatedAfter": "DateTime | undefined",
+        "updatedBefore": "DateTime | undefined"
+      },
+      "uri": "/api/voice/phone-numbers"
     },
     "list_roles": {
       "method": "get",
@@ -632,6 +1170,26 @@
       },
       "uri": "/api/teams"
     },
+    "list_tickets": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "queryParameters": {
+        "createdAfter": "DateTime | undefined",
+        "createdBefore": "DateTime | undefined",
+        "currentPage": "number | undefined",
+        "ids": "string[] | undefined",
+        "orderBy": "string | undefined",
+        "pageSize": "number | undefined",
+        "searchIgnoreCase": "boolean | undefined",
+        "searchString": "string | undefined",
+        "sortOrder": "\"asc\" | \"desc\" | undefined",
+        "updatedAfter": "DateTime | undefined",
+        "updatedBefore": "DateTime | undefined"
+      },
+      "uri": "/api/support/tickets"
+    },
     "list_users": {
       "method": "get",
       "methods": [
@@ -671,6 +1229,30 @@
         "updatedBefore": "DateTime | undefined"
       },
       "uri": "/api/users"
+    },
+    "list_voicemail_messages": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "ext_id": "UUID"
+      },
+      "parameters": [
+        "ext_id"
+      ],
+      "queryParameters": {
+        "createdAfter": "DateTime | undefined",
+        "createdBefore": "DateTime | undefined",
+        "currentPage": "number | undefined",
+        "ids": "string[] | undefined",
+        "orderBy": "string | undefined",
+        "pageSize": "number | undefined",
+        "sortOrder": "\"asc\" | \"desc\" | undefined",
+        "updatedAfter": "DateTime | undefined",
+        "updatedBefore": "DateTime | undefined"
+      },
+      "uri": "/api/voice/extensions/{ext_id}/voicemail/messages"
     },
     "login": {
       "method": "post",
@@ -738,6 +1320,19 @@
       ],
       "uri": "/schema/openapi.json"
     },
+    "paste_image": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "parameterTypes": {
+        "ticket_id": "UUID"
+      },
+      "parameters": [
+        "ticket_id"
+      ],
+      "uri": "/api/support/tickets/{ticket_id}/paste-image"
+    },
     "refresh_token": {
       "method": "post",
       "methods": [
@@ -786,6 +1381,19 @@
         "team_id"
       ],
       "uri": "/api/teams/{team_id}/members"
+    },
+    "reopen_ticket": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "parameterTypes": {
+        "ticket_id": "UUID"
+      },
+      "parameters": [
+        "ticket_id"
+      ],
+      "uri": "/api/support/tickets/{ticket_id}/reopen"
     },
     "request_verification": {
       "method": "post",
@@ -857,6 +1465,19 @@
       ],
       "uri": "/saq/static/{file_path}"
     },
+    "set_forwarding_rules": {
+      "method": "put",
+      "methods": [
+        "PUT"
+      ],
+      "parameterTypes": {
+        "ext_id": "UUID"
+      },
+      "parameters": [
+        "ext_id"
+      ],
+      "uri": "/api/voice/extensions/{ext_id}/forwarding"
+    },
     "signup": {
       "method": "post",
       "methods": [
@@ -894,6 +1515,32 @@
       ],
       "uri": "/api/config/oauth"
     },
+    "test_connection": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "parameterTypes": {
+        "connection_id": "UUID"
+      },
+      "parameters": [
+        "connection_id"
+      ],
+      "uri": "/api/connections/{connection_id}/test"
+    },
+    "toggle_dnd": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "parameterTypes": {
+        "ext_id": "UUID"
+      },
+      "parameters": [
+        "ext_id"
+      ],
+      "uri": "/api/voice/extensions/{ext_id}/dnd/toggle"
+    },
     "unlink": {
       "method": "delete",
       "methods": [
@@ -906,6 +1553,19 @@
         "provider"
       ],
       "uri": "/api/profile/oauth/{provider}"
+    },
+    "update_connection": {
+      "method": "patch",
+      "methods": [
+        "PATCH"
+      ],
+      "parameterTypes": {
+        "connection_id": "UUID"
+      },
+      "parameters": [
+        "connection_id"
+      ],
+      "uri": "/api/connections/{connection_id}"
     },
     "update_device": {
       "method": "patch",
@@ -920,12 +1580,131 @@
       ],
       "uri": "/api/devices/{device_id}"
     },
+    "update_dnd_settings": {
+      "method": "patch",
+      "methods": [
+        "PATCH"
+      ],
+      "parameterTypes": {
+        "ext_id": "UUID"
+      },
+      "parameters": [
+        "ext_id"
+      ],
+      "uri": "/api/voice/extensions/{ext_id}/dnd"
+    },
+    "update_extension": {
+      "method": "patch",
+      "methods": [
+        "PATCH"
+      ],
+      "parameterTypes": {
+        "ext_id": "UUID"
+      },
+      "parameters": [
+        "ext_id"
+      ],
+      "uri": "/api/voice/extensions/{ext_id}"
+    },
+    "update_fax_email_route": {
+      "method": "patch",
+      "methods": [
+        "PATCH"
+      ],
+      "parameterTypes": {
+        "fax_number_id": "UUID",
+        "route_id": "UUID"
+      },
+      "parameters": [
+        "fax_number_id",
+        "route_id"
+      ],
+      "uri": "/api/fax/numbers/{fax_number_id}/email-routes/{route_id}"
+    },
+    "update_fax_number": {
+      "method": "patch",
+      "methods": [
+        "PATCH"
+      ],
+      "parameterTypes": {
+        "fax_number_id": "UUID"
+      },
+      "parameters": [
+        "fax_number_id"
+      ],
+      "uri": "/api/fax/numbers/{fax_number_id}"
+    },
+    "update_forwarding_rule": {
+      "method": "patch",
+      "methods": [
+        "PATCH"
+      ],
+      "parameterTypes": {
+        "ext_id": "UUID",
+        "rule_id": "UUID"
+      },
+      "parameters": [
+        "ext_id",
+        "rule_id"
+      ],
+      "uri": "/api/voice/extensions/{ext_id}/forwarding/{rule_id}"
+    },
+    "update_location": {
+      "method": "patch",
+      "methods": [
+        "PATCH"
+      ],
+      "parameterTypes": {
+        "location_id": "UUID",
+        "team_id": "UUID"
+      },
+      "parameters": [
+        "location_id",
+        "team_id"
+      ],
+      "uri": "/api/teams/{team_id}/locations/{location_id}"
+    },
+    "update_message": {
+      "method": "patch",
+      "methods": [
+        "PATCH"
+      ],
+      "parameterTypes": {
+        "msg_id": "UUID",
+        "ticket_id": "UUID"
+      },
+      "parameters": [
+        "msg_id",
+        "ticket_id"
+      ],
+      "uri": "/api/support/tickets/{ticket_id}/messages/{msg_id}"
+    },
+    "update_organization": {
+      "method": "put",
+      "methods": [
+        "PUT"
+      ],
+      "uri": "/api/organization"
+    },
     "update_password": {
       "method": "patch",
       "methods": [
         "PATCH"
       ],
       "uri": "/api/me/password"
+    },
+    "update_phone_number": {
+      "method": "patch",
+      "methods": [
+        "PATCH"
+      ],
+      "parameterTypes": {
+        "phone_number_id": "UUID"
+      },
+      "parameters": [
+        "phone_number_id"
+      ],
+      "uri": "/api/voice/phone-numbers/{phone_number_id}"
     },
     "update_profile": {
       "method": "patch",
@@ -1001,6 +1780,19 @@
       ],
       "uri": "/api/teams/{team_id}/members/{user_id}"
     },
+    "update_ticket": {
+      "method": "patch",
+      "methods": [
+        "PATCH"
+      ],
+      "parameterTypes": {
+        "ticket_id": "UUID"
+      },
+      "parameters": [
+        "ticket_id"
+      ],
+      "uri": "/api/support/tickets/{ticket_id}"
+    },
     "update_user": {
       "method": "patch",
       "methods": [
@@ -1027,6 +1819,34 @@
       ],
       "uri": "/api/users/{user_id}"
     },
+    "update_voicemail_message": {
+      "method": "patch",
+      "methods": [
+        "PATCH"
+      ],
+      "parameterTypes": {
+        "ext_id": "UUID",
+        "msg_id": "UUID"
+      },
+      "parameters": [
+        "ext_id",
+        "msg_id"
+      ],
+      "uri": "/api/voice/extensions/{ext_id}/voicemail/messages/{msg_id}"
+    },
+    "update_voicemail_settings": {
+      "method": "patch",
+      "methods": [
+        "PATCH"
+      ],
+      "parameterTypes": {
+        "ext_id": "UUID"
+      },
+      "parameters": [
+        "ext_id"
+      ],
+      "uri": "/api/voice/extensions/{ext_id}/voicemail"
+    },
     "upgrade_scopes": {
       "method": "post",
       "methods": [
@@ -1042,6 +1862,19 @@
         "redirect_url": "string | undefined"
       },
       "uri": "/api/profile/oauth/{provider}/upgrade-scopes"
+    },
+    "upload_attachment": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "parameterTypes": {
+        "ticket_id": "UUID"
+      },
+      "parameters": [
+        "ticket_id"
+      ],
+      "uri": "/api/support/tickets/{ticket_id}/attachments"
     },
     "validate_reset_token": {
       "method": "get",

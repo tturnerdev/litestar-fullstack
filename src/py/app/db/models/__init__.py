@@ -1,4 +1,6 @@
 from app.db.models._audit_log import AuditLog
+from app.db.models._connection import Connection
+from app.db.models._connection_enums import ConnectionAuthType, ConnectionStatus, ConnectionType
 from app.db.models._device import Device
 from app.db.models._device_line_assignment import DeviceLineAssignment
 from app.db.models._device_line_type import DeviceLineType
@@ -12,7 +14,10 @@ from app.db.models._fax_enums import FaxDirection, FaxStatus
 from app.db.models._fax_message import FaxMessage
 from app.db.models._fax_number import FaxNumber
 from app.db.models._forwarding_rule import ForwardingRule
+from app.db.models._location import Location
+from app.db.models._location_type import LocationType
 from app.db.models._oauth_account import UserOAuthAccount
+from app.db.models._organization import Organization
 from app.db.models._password_reset_token import PasswordResetToken
 from app.db.models._phone_number import PhoneNumber
 from app.db.models._refresh_token import RefreshToken
@@ -41,6 +46,10 @@ from app.db.models._voicemail_message import VoicemailMessage
 
 __all__ = (
     "AuditLog",
+    "Connection",
+    "ConnectionAuthType",
+    "ConnectionStatus",
+    "ConnectionType",
     "Device",
     "DeviceLineAssignment",
     "DeviceLineType",
@@ -59,6 +68,9 @@ __all__ = (
     "ForwardingRule",
     "ForwardingRuleType",
     "GreetingType",
+    "Location",
+    "LocationType",
+    "Organization",
     "PasswordResetToken",
     "PhoneNumber",
     "PhoneNumberType",

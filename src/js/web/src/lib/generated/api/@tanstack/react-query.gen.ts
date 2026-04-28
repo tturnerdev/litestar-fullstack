@@ -38,40 +38,79 @@ import {
   apiEmailVerificationVerifyVerifyEmail,
   assignRole,
   assignUserRole,
+  closeTicket,
   confirmMfaSetup,
+  createConnection,
   createDevice,
+  createFaxEmailRoute,
+  createForwardingRule,
+  createLocation,
   createRole,
   createTag,
   createTeam,
   createTeamInvitation,
+  createTicket,
+  createTicketMessage,
   createUser,
+  deleteAttachment,
+  deleteConnection,
   deleteDevice,
+  deleteFaxEmailRoute,
+  deleteFaxMessage,
+  deleteForwardingRule,
+  deleteLocation,
   deleteRole,
   deleteTag,
   deleteTeam,
   deleteTeamInvitation,
+  deleteTicketMessage,
   deleteUser,
+  deleteVoicemailMessage,
   disableMfa,
   forgotPassword,
   getActiveSessions,
+  getAttachment,
+  getConnection,
   getDashboardStats,
   getDevice,
+  getDndSettings,
+  getExtension,
+  getFaxMessage,
+  getFaxNumber,
+  getLocation,
   getMfaStatus,
+  getOrganization,
+  getPhoneNumber,
   getRecentActivity,
   getRole,
   getTag,
   getTeam,
+  getTicket,
   getUser,
+  getVoicemailMessage,
+  getVoicemailSettings,
   initiateDisableMfaOAuth,
   initiateMfaSetup,
+  listConnections,
   listDevices,
+  listExtensions,
+  listFaxEmailRoutes,
+  listFaxMessages,
+  listFaxNumbers,
+  listForwardingRules,
+  listLocations,
+  listPhoneNumbers,
   listRoles,
   listTags,
   listTeamInvitations,
   listTeams,
+  listTicketMessages,
+  listTickets,
   listUsers,
+  listVoicemailMessages,
   oAuthConfig,
   type Options,
+  pasteImage,
   profileOAuthAccounts,
   profileOAuthLink,
   profileOAuthUnlink,
@@ -79,19 +118,37 @@ import {
   regenerateMfaBackupCodes,
   rejectTeamInvitation,
   removeMemberFromTeam,
+  reopenTicket,
   resetPassword,
   revokeAllSessions,
   revokeRole,
   revokeSession,
   revokeUserRole,
+  setForwardingRules,
   systemHealth,
+  testConnection,
+  toggleDnd,
   tokenRefresh,
+  updateConnection,
   updateDevice,
+  updateDndSettings,
+  updateExtension,
+  updateFaxEmailRoute,
+  updateFaxNumber,
+  updateForwardingRule,
+  updateLocation,
+  updateOrganization,
+  updatePhoneNumber,
   updateRole,
   updateTag,
   updateTeam,
   updateTeamMember,
+  updateTicket,
+  updateTicketMessage,
   updateUser,
+  updateVoicemailMessage,
+  updateVoicemailSettings,
+  uploadAttachment,
   validateResetToken,
   verifyMfaChallenge,
 } from "../sdk.gen";
@@ -180,12 +237,27 @@ import type {
   AssignUserRoleData,
   AssignUserRoleError,
   AssignUserRoleResponse,
+  CloseTicketData,
+  CloseTicketError,
+  CloseTicketResponse,
   ConfirmMfaSetupData,
   ConfirmMfaSetupError,
   ConfirmMfaSetupResponse,
+  CreateConnectionData,
+  CreateConnectionError,
+  CreateConnectionResponse,
   CreateDeviceData,
   CreateDeviceError,
   CreateDeviceResponse,
+  CreateFaxEmailRouteData,
+  CreateFaxEmailRouteError,
+  CreateFaxEmailRouteResponse,
+  CreateForwardingRuleData,
+  CreateForwardingRuleError,
+  CreateForwardingRuleResponse,
+  CreateLocationData,
+  CreateLocationError,
+  CreateLocationResponse,
   CreateRoleData,
   CreateRoleError,
   CreateRoleResponse,
@@ -198,12 +270,36 @@ import type {
   CreateTeamInvitationError,
   CreateTeamInvitationResponse,
   CreateTeamResponse,
+  CreateTicketData,
+  CreateTicketError,
+  CreateTicketMessageData,
+  CreateTicketMessageError,
+  CreateTicketMessageResponse,
+  CreateTicketResponse,
   CreateUserData,
   CreateUserError,
   CreateUserResponse,
+  DeleteAttachmentData,
+  DeleteAttachmentError,
+  DeleteAttachmentResponse,
+  DeleteConnectionData,
+  DeleteConnectionError,
+  DeleteConnectionResponse,
   DeleteDeviceData,
   DeleteDeviceError,
   DeleteDeviceResponse,
+  DeleteFaxEmailRouteData,
+  DeleteFaxEmailRouteError,
+  DeleteFaxEmailRouteResponse,
+  DeleteFaxMessageData,
+  DeleteFaxMessageError,
+  DeleteFaxMessageResponse,
+  DeleteForwardingRuleData,
+  DeleteForwardingRuleError,
+  DeleteForwardingRuleResponse,
+  DeleteLocationData,
+  DeleteLocationError,
+  DeleteLocationResponse,
   DeleteRoleData,
   DeleteRoleError,
   DeleteRoleResponse,
@@ -216,9 +312,15 @@ import type {
   DeleteTeamInvitationError,
   DeleteTeamInvitationResponse,
   DeleteTeamResponse,
+  DeleteTicketMessageData,
+  DeleteTicketMessageError,
+  DeleteTicketMessageResponse,
   DeleteUserData,
   DeleteUserError,
   DeleteUserResponse,
+  DeleteVoicemailMessageData,
+  DeleteVoicemailMessageError,
+  DeleteVoicemailMessageResponse,
   DisableMfaData,
   DisableMfaError,
   DisableMfaResponse,
@@ -228,13 +330,39 @@ import type {
   GetActiveSessionsData,
   GetActiveSessionsError,
   GetActiveSessionsResponse,
+  GetAttachmentData,
+  GetAttachmentError,
+  GetAttachmentResponse,
+  GetConnectionData,
+  GetConnectionError,
+  GetConnectionResponse,
   GetDashboardStatsData,
   GetDashboardStatsResponse,
   GetDeviceData,
   GetDeviceError,
   GetDeviceResponse,
+  GetDndSettingsData,
+  GetDndSettingsError,
+  GetDndSettingsResponse,
+  GetExtensionData,
+  GetExtensionError,
+  GetExtensionResponse,
+  GetFaxMessageData,
+  GetFaxMessageError,
+  GetFaxMessageResponse,
+  GetFaxNumberData,
+  GetFaxNumberError,
+  GetFaxNumberResponse,
+  GetLocationData,
+  GetLocationError,
+  GetLocationResponse,
   GetMfaStatusData,
   GetMfaStatusResponse,
+  GetOrganizationData,
+  GetOrganizationResponse,
+  GetPhoneNumberData,
+  GetPhoneNumberError,
+  GetPhoneNumberResponse,
   GetRecentActivityData,
   GetRecentActivityError,
   GetRecentActivityResponse,
@@ -247,17 +375,50 @@ import type {
   GetTeamData,
   GetTeamError,
   GetTeamResponse,
+  GetTicketData,
+  GetTicketError,
+  GetTicketResponse,
   GetUserData,
   GetUserError,
   GetUserResponse,
+  GetVoicemailMessageData,
+  GetVoicemailMessageError,
+  GetVoicemailMessageResponse,
+  GetVoicemailSettingsData,
+  GetVoicemailSettingsError,
+  GetVoicemailSettingsResponse,
   InitiateDisableMfaOAuthData,
   InitiateDisableMfaOAuthError,
   InitiateDisableMfaOAuthResponse,
   InitiateMfaSetupData,
   InitiateMfaSetupResponse,
+  ListConnectionsData,
+  ListConnectionsError,
+  ListConnectionsResponse,
   ListDevicesData,
   ListDevicesError,
   ListDevicesResponse,
+  ListExtensionsData,
+  ListExtensionsError,
+  ListExtensionsResponse,
+  ListFaxEmailRoutesData,
+  ListFaxEmailRoutesError,
+  ListFaxEmailRoutesResponse,
+  ListFaxMessagesData,
+  ListFaxMessagesError,
+  ListFaxMessagesResponse,
+  ListFaxNumbersData,
+  ListFaxNumbersError,
+  ListFaxNumbersResponse,
+  ListForwardingRulesData,
+  ListForwardingRulesError,
+  ListForwardingRulesResponse,
+  ListLocationsData,
+  ListLocationsError,
+  ListLocationsResponse,
+  ListPhoneNumbersData,
+  ListPhoneNumbersError,
+  ListPhoneNumbersResponse,
   ListRolesData,
   ListRolesError,
   ListRolesResponse,
@@ -270,11 +431,23 @@ import type {
   ListTeamsData,
   ListTeamsError,
   ListTeamsResponse,
+  ListTicketMessagesData,
+  ListTicketMessagesError,
+  ListTicketMessagesResponse,
+  ListTicketsData,
+  ListTicketsError,
+  ListTicketsResponse,
   ListUsersData,
   ListUsersError,
   ListUsersResponse,
+  ListVoicemailMessagesData,
+  ListVoicemailMessagesError,
+  ListVoicemailMessagesResponse,
   OAuthConfigData,
   OAuthConfigResponse,
+  PasteImageData,
+  PasteImageError,
+  PasteImageResponse,
   ProfileOAuthAccountsData,
   ProfileOAuthAccountsError,
   ProfileOAuthAccountsResponse,
@@ -296,6 +469,9 @@ import type {
   RemoveMemberFromTeamData,
   RemoveMemberFromTeamError,
   RemoveMemberFromTeamResponse,
+  ReopenTicketData,
+  ReopenTicketError,
+  ReopenTicketResponse,
   ResetPasswordData,
   ResetPasswordError,
   ResetPasswordResponse,
@@ -310,13 +486,49 @@ import type {
   RevokeUserRoleData,
   RevokeUserRoleError,
   RevokeUserRoleResponse,
+  SetForwardingRulesData,
+  SetForwardingRulesError,
+  SetForwardingRulesResponse,
   SystemHealthData,
   SystemHealthResponse,
+  TestConnectionData,
+  TestConnectionError,
+  TestConnectionResponse,
+  ToggleDndData,
+  ToggleDndError,
+  ToggleDndResponse,
   TokenRefreshData,
   TokenRefreshResponse,
+  UpdateConnectionData,
+  UpdateConnectionError,
+  UpdateConnectionResponse,
   UpdateDeviceData,
   UpdateDeviceError,
   UpdateDeviceResponse,
+  UpdateDndSettingsData,
+  UpdateDndSettingsError,
+  UpdateDndSettingsResponse,
+  UpdateExtensionData,
+  UpdateExtensionError,
+  UpdateExtensionResponse,
+  UpdateFaxEmailRouteData,
+  UpdateFaxEmailRouteError,
+  UpdateFaxEmailRouteResponse,
+  UpdateFaxNumberData,
+  UpdateFaxNumberError,
+  UpdateFaxNumberResponse,
+  UpdateForwardingRuleData,
+  UpdateForwardingRuleError,
+  UpdateForwardingRuleResponse,
+  UpdateLocationData,
+  UpdateLocationError,
+  UpdateLocationResponse,
+  UpdateOrganizationData,
+  UpdateOrganizationError,
+  UpdateOrganizationResponse,
+  UpdatePhoneNumberData,
+  UpdatePhoneNumberError,
+  UpdatePhoneNumberResponse,
   UpdateRoleData,
   UpdateRoleError,
   UpdateRoleResponse,
@@ -329,9 +541,24 @@ import type {
   UpdateTeamMemberError,
   UpdateTeamMemberResponse,
   UpdateTeamResponse,
+  UpdateTicketData,
+  UpdateTicketError,
+  UpdateTicketMessageData,
+  UpdateTicketMessageError,
+  UpdateTicketMessageResponse,
+  UpdateTicketResponse,
   UpdateUserData,
   UpdateUserError,
   UpdateUserResponse,
+  UpdateVoicemailMessageData,
+  UpdateVoicemailMessageError,
+  UpdateVoicemailMessageResponse,
+  UpdateVoicemailSettingsData,
+  UpdateVoicemailSettingsError,
+  UpdateVoicemailSettingsResponse,
+  UploadAttachmentData,
+  UploadAttachmentError,
+  UploadAttachmentResponse,
   ValidateResetTokenData,
   ValidateResetTokenError,
   ValidateResetTokenResponse,
@@ -1165,6 +1392,167 @@ export const oAuthConfigOptions = (options?: Options<OAuthConfigData>) =>
     queryKey: oAuthConfigQueryKey(options),
   });
 
+export const listConnectionsQueryKey = (
+  options?: Options<ListConnectionsData>,
+) => createQueryKey("listConnections", options);
+
+/**
+ * ListConnections
+ */
+export const listConnectionsOptions = (
+  options?: Options<ListConnectionsData>,
+) =>
+  queryOptions<
+    ListConnectionsResponse,
+    ListConnectionsError,
+    ListConnectionsResponse,
+    ReturnType<typeof listConnectionsQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listConnections({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listConnectionsQueryKey(options),
+  });
+
+/**
+ * CreateConnection
+ */
+export const createConnectionMutation = (
+  options?: Partial<Options<CreateConnectionData>>,
+): UseMutationOptions<
+  CreateConnectionResponse,
+  CreateConnectionError,
+  Options<CreateConnectionData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    CreateConnectionResponse,
+    CreateConnectionError,
+    Options<CreateConnectionData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await createConnection({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * DeleteConnection
+ */
+export const deleteConnectionMutation = (
+  options?: Partial<Options<DeleteConnectionData>>,
+): UseMutationOptions<
+  DeleteConnectionResponse,
+  DeleteConnectionError,
+  Options<DeleteConnectionData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    DeleteConnectionResponse,
+    DeleteConnectionError,
+    Options<DeleteConnectionData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await deleteConnection({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const getConnectionQueryKey = (options: Options<GetConnectionData>) =>
+  createQueryKey("getConnection", options);
+
+/**
+ * GetConnection
+ */
+export const getConnectionOptions = (options: Options<GetConnectionData>) =>
+  queryOptions<
+    GetConnectionResponse,
+    GetConnectionError,
+    GetConnectionResponse,
+    ReturnType<typeof getConnectionQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getConnection({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getConnectionQueryKey(options),
+  });
+
+/**
+ * UpdateConnection
+ */
+export const updateConnectionMutation = (
+  options?: Partial<Options<UpdateConnectionData>>,
+): UseMutationOptions<
+  UpdateConnectionResponse,
+  UpdateConnectionError,
+  Options<UpdateConnectionData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    UpdateConnectionResponse,
+    UpdateConnectionError,
+    Options<UpdateConnectionData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await updateConnection({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * TestConnection
+ */
+export const testConnectionMutation = (
+  options?: Partial<Options<TestConnectionData>>,
+): UseMutationOptions<
+  TestConnectionResponse,
+  TestConnectionError,
+  Options<TestConnectionData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    TestConnectionResponse,
+    TestConnectionError,
+    Options<TestConnectionData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await testConnection({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
 export const listDevicesQueryKey = (options?: Options<ListDevicesData>) =>
   createQueryKey("listDevices", options);
 
@@ -1378,6 +1766,272 @@ export const apiEmailVerificationVerifyVerifyEmailMutation = (
   > = {
     mutationFn: async (fnOptions) => {
       const { data } = await apiEmailVerificationVerifyVerifyEmail({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const listFaxMessagesQueryKey = (
+  options?: Options<ListFaxMessagesData>,
+) => createQueryKey("listFaxMessages", options);
+
+/**
+ * ListFaxMessages
+ */
+export const listFaxMessagesOptions = (
+  options?: Options<ListFaxMessagesData>,
+) =>
+  queryOptions<
+    ListFaxMessagesResponse,
+    ListFaxMessagesError,
+    ListFaxMessagesResponse,
+    ReturnType<typeof listFaxMessagesQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listFaxMessages({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listFaxMessagesQueryKey(options),
+  });
+
+/**
+ * DeleteFaxMessage
+ */
+export const deleteFaxMessageMutation = (
+  options?: Partial<Options<DeleteFaxMessageData>>,
+): UseMutationOptions<
+  DeleteFaxMessageResponse,
+  DeleteFaxMessageError,
+  Options<DeleteFaxMessageData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    DeleteFaxMessageResponse,
+    DeleteFaxMessageError,
+    Options<DeleteFaxMessageData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await deleteFaxMessage({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const getFaxMessageQueryKey = (options: Options<GetFaxMessageData>) =>
+  createQueryKey("getFaxMessage", options);
+
+/**
+ * GetFaxMessage
+ */
+export const getFaxMessageOptions = (options: Options<GetFaxMessageData>) =>
+  queryOptions<
+    GetFaxMessageResponse,
+    GetFaxMessageError,
+    GetFaxMessageResponse,
+    ReturnType<typeof getFaxMessageQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getFaxMessage({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getFaxMessageQueryKey(options),
+  });
+
+export const listFaxNumbersQueryKey = (options?: Options<ListFaxNumbersData>) =>
+  createQueryKey("listFaxNumbers", options);
+
+/**
+ * ListFaxNumbers
+ */
+export const listFaxNumbersOptions = (options?: Options<ListFaxNumbersData>) =>
+  queryOptions<
+    ListFaxNumbersResponse,
+    ListFaxNumbersError,
+    ListFaxNumbersResponse,
+    ReturnType<typeof listFaxNumbersQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listFaxNumbers({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listFaxNumbersQueryKey(options),
+  });
+
+export const getFaxNumberQueryKey = (options: Options<GetFaxNumberData>) =>
+  createQueryKey("getFaxNumber", options);
+
+/**
+ * GetFaxNumber
+ */
+export const getFaxNumberOptions = (options: Options<GetFaxNumberData>) =>
+  queryOptions<
+    GetFaxNumberResponse,
+    GetFaxNumberError,
+    GetFaxNumberResponse,
+    ReturnType<typeof getFaxNumberQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getFaxNumber({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getFaxNumberQueryKey(options),
+  });
+
+/**
+ * UpdateFaxNumber
+ */
+export const updateFaxNumberMutation = (
+  options?: Partial<Options<UpdateFaxNumberData>>,
+): UseMutationOptions<
+  UpdateFaxNumberResponse,
+  UpdateFaxNumberError,
+  Options<UpdateFaxNumberData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    UpdateFaxNumberResponse,
+    UpdateFaxNumberError,
+    Options<UpdateFaxNumberData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await updateFaxNumber({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const listFaxEmailRoutesQueryKey = (
+  options: Options<ListFaxEmailRoutesData>,
+) => createQueryKey("listFaxEmailRoutes", options);
+
+/**
+ * ListFaxEmailRoutes
+ */
+export const listFaxEmailRoutesOptions = (
+  options: Options<ListFaxEmailRoutesData>,
+) =>
+  queryOptions<
+    ListFaxEmailRoutesResponse,
+    ListFaxEmailRoutesError,
+    ListFaxEmailRoutesResponse,
+    ReturnType<typeof listFaxEmailRoutesQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listFaxEmailRoutes({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listFaxEmailRoutesQueryKey(options),
+  });
+
+/**
+ * CreateFaxEmailRoute
+ */
+export const createFaxEmailRouteMutation = (
+  options?: Partial<Options<CreateFaxEmailRouteData>>,
+): UseMutationOptions<
+  CreateFaxEmailRouteResponse,
+  CreateFaxEmailRouteError,
+  Options<CreateFaxEmailRouteData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    CreateFaxEmailRouteResponse,
+    CreateFaxEmailRouteError,
+    Options<CreateFaxEmailRouteData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await createFaxEmailRoute({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * DeleteFaxEmailRoute
+ */
+export const deleteFaxEmailRouteMutation = (
+  options?: Partial<Options<DeleteFaxEmailRouteData>>,
+): UseMutationOptions<
+  DeleteFaxEmailRouteResponse,
+  DeleteFaxEmailRouteError,
+  Options<DeleteFaxEmailRouteData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    DeleteFaxEmailRouteResponse,
+    DeleteFaxEmailRouteError,
+    Options<DeleteFaxEmailRouteData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await deleteFaxEmailRoute({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * UpdateFaxEmailRoute
+ */
+export const updateFaxEmailRouteMutation = (
+  options?: Partial<Options<UpdateFaxEmailRouteData>>,
+): UseMutationOptions<
+  UpdateFaxEmailRouteResponse,
+  UpdateFaxEmailRouteError,
+  Options<UpdateFaxEmailRouteData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    UpdateFaxEmailRouteResponse,
+    UpdateFaxEmailRouteError,
+    Options<UpdateFaxEmailRouteData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await updateFaxEmailRoute({
         ...options,
         ...fnOptions,
         throwOnError: true,
@@ -1684,6 +2338,61 @@ export const getMfaStatusOptions = (options?: Options<GetMfaStatusData>) =>
     queryKey: getMfaStatusQueryKey(options),
   });
 
+export const getOrganizationQueryKey = (
+  options?: Options<GetOrganizationData>,
+) => createQueryKey("getOrganization", options);
+
+/**
+ * GetOrganization
+ */
+export const getOrganizationOptions = (
+  options?: Options<GetOrganizationData>,
+) =>
+  queryOptions<
+    GetOrganizationResponse,
+    DefaultError,
+    GetOrganizationResponse,
+    ReturnType<typeof getOrganizationQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getOrganization({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getOrganizationQueryKey(options),
+  });
+
+/**
+ * UpdateOrganization
+ */
+export const updateOrganizationMutation = (
+  options?: Partial<Options<UpdateOrganizationData>>,
+): UseMutationOptions<
+  UpdateOrganizationResponse,
+  UpdateOrganizationError,
+  Options<UpdateOrganizationData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    UpdateOrganizationResponse,
+    UpdateOrganizationError,
+    Options<UpdateOrganizationData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await updateOrganization({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
 export const profileOAuthAccountsQueryKey = (
   options?: Options<ProfileOAuthAccountsData>,
 ) => createQueryKey("profileOAuthAccounts", options);
@@ -1968,6 +2677,379 @@ export const revokeRoleMutation = (
   > = {
     mutationFn: async (fnOptions) => {
       const { data } = await revokeRole({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * DeleteAttachment
+ */
+export const deleteAttachmentMutation = (
+  options?: Partial<Options<DeleteAttachmentData>>,
+): UseMutationOptions<
+  DeleteAttachmentResponse,
+  DeleteAttachmentError,
+  Options<DeleteAttachmentData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    DeleteAttachmentResponse,
+    DeleteAttachmentError,
+    Options<DeleteAttachmentData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await deleteAttachment({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const getAttachmentQueryKey = (options: Options<GetAttachmentData>) =>
+  createQueryKey("getAttachment", options);
+
+/**
+ * GetAttachment
+ */
+export const getAttachmentOptions = (options: Options<GetAttachmentData>) =>
+  queryOptions<
+    GetAttachmentResponse,
+    GetAttachmentError,
+    GetAttachmentResponse,
+    ReturnType<typeof getAttachmentQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getAttachment({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getAttachmentQueryKey(options),
+  });
+
+export const listTicketsQueryKey = (options?: Options<ListTicketsData>) =>
+  createQueryKey("listTickets", options);
+
+/**
+ * ListTickets
+ */
+export const listTicketsOptions = (options?: Options<ListTicketsData>) =>
+  queryOptions<
+    ListTicketsResponse,
+    ListTicketsError,
+    ListTicketsResponse,
+    ReturnType<typeof listTicketsQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listTickets({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listTicketsQueryKey(options),
+  });
+
+/**
+ * CreateTicket
+ */
+export const createTicketMutation = (
+  options?: Partial<Options<CreateTicketData>>,
+): UseMutationOptions<
+  CreateTicketResponse,
+  CreateTicketError,
+  Options<CreateTicketData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    CreateTicketResponse,
+    CreateTicketError,
+    Options<CreateTicketData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await createTicket({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const getTicketQueryKey = (options: Options<GetTicketData>) =>
+  createQueryKey("getTicket", options);
+
+/**
+ * GetTicket
+ */
+export const getTicketOptions = (options: Options<GetTicketData>) =>
+  queryOptions<
+    GetTicketResponse,
+    GetTicketError,
+    GetTicketResponse,
+    ReturnType<typeof getTicketQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getTicket({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getTicketQueryKey(options),
+  });
+
+/**
+ * UpdateTicket
+ */
+export const updateTicketMutation = (
+  options?: Partial<Options<UpdateTicketData>>,
+): UseMutationOptions<
+  UpdateTicketResponse,
+  UpdateTicketError,
+  Options<UpdateTicketData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    UpdateTicketResponse,
+    UpdateTicketError,
+    Options<UpdateTicketData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await updateTicket({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * UploadAttachment
+ */
+export const uploadAttachmentMutation = (
+  options?: Partial<Options<UploadAttachmentData>>,
+): UseMutationOptions<
+  UploadAttachmentResponse,
+  UploadAttachmentError,
+  Options<UploadAttachmentData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    UploadAttachmentResponse,
+    UploadAttachmentError,
+    Options<UploadAttachmentData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await uploadAttachment({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * CloseTicket
+ */
+export const closeTicketMutation = (
+  options?: Partial<Options<CloseTicketData>>,
+): UseMutationOptions<
+  CloseTicketResponse,
+  CloseTicketError,
+  Options<CloseTicketData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    CloseTicketResponse,
+    CloseTicketError,
+    Options<CloseTicketData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await closeTicket({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const listTicketMessagesQueryKey = (
+  options: Options<ListTicketMessagesData>,
+) => createQueryKey("listTicketMessages", options);
+
+/**
+ * ListMessages
+ */
+export const listTicketMessagesOptions = (
+  options: Options<ListTicketMessagesData>,
+) =>
+  queryOptions<
+    ListTicketMessagesResponse,
+    ListTicketMessagesError,
+    ListTicketMessagesResponse,
+    ReturnType<typeof listTicketMessagesQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listTicketMessages({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listTicketMessagesQueryKey(options),
+  });
+
+/**
+ * CreateMessage
+ */
+export const createTicketMessageMutation = (
+  options?: Partial<Options<CreateTicketMessageData>>,
+): UseMutationOptions<
+  CreateTicketMessageResponse,
+  CreateTicketMessageError,
+  Options<CreateTicketMessageData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    CreateTicketMessageResponse,
+    CreateTicketMessageError,
+    Options<CreateTicketMessageData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await createTicketMessage({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * DeleteMessage
+ */
+export const deleteTicketMessageMutation = (
+  options?: Partial<Options<DeleteTicketMessageData>>,
+): UseMutationOptions<
+  DeleteTicketMessageResponse,
+  DeleteTicketMessageError,
+  Options<DeleteTicketMessageData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    DeleteTicketMessageResponse,
+    DeleteTicketMessageError,
+    Options<DeleteTicketMessageData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await deleteTicketMessage({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * UpdateMessage
+ */
+export const updateTicketMessageMutation = (
+  options?: Partial<Options<UpdateTicketMessageData>>,
+): UseMutationOptions<
+  UpdateTicketMessageResponse,
+  UpdateTicketMessageError,
+  Options<UpdateTicketMessageData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    UpdateTicketMessageResponse,
+    UpdateTicketMessageError,
+    Options<UpdateTicketMessageData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await updateTicketMessage({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * PasteImage
+ */
+export const pasteImageMutation = (
+  options?: Partial<Options<PasteImageData>>,
+): UseMutationOptions<
+  PasteImageResponse,
+  PasteImageError,
+  Options<PasteImageData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    PasteImageResponse,
+    PasteImageError,
+    Options<PasteImageData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await pasteImage({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * ReopenTicket
+ */
+export const reopenTicketMutation = (
+  options?: Partial<Options<ReopenTicketData>>,
+): UseMutationOptions<
+  ReopenTicketResponse,
+  ReopenTicketError,
+  Options<ReopenTicketData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    ReopenTicketResponse,
+    ReopenTicketError,
+    Options<ReopenTicketData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await reopenTicket({
         ...options,
         ...fnOptions,
         throwOnError: true,
@@ -2376,6 +3458,137 @@ export const rejectTeamInvitationMutation = (
   return mutationOptions;
 };
 
+export const listLocationsQueryKey = (options: Options<ListLocationsData>) =>
+  createQueryKey("listLocations", options);
+
+/**
+ * ListLocations
+ */
+export const listLocationsOptions = (options: Options<ListLocationsData>) =>
+  queryOptions<
+    ListLocationsResponse,
+    ListLocationsError,
+    ListLocationsResponse,
+    ReturnType<typeof listLocationsQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listLocations({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listLocationsQueryKey(options),
+  });
+
+/**
+ * CreateLocation
+ */
+export const createLocationMutation = (
+  options?: Partial<Options<CreateLocationData>>,
+): UseMutationOptions<
+  CreateLocationResponse,
+  CreateLocationError,
+  Options<CreateLocationData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    CreateLocationResponse,
+    CreateLocationError,
+    Options<CreateLocationData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await createLocation({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * DeleteLocation
+ */
+export const deleteLocationMutation = (
+  options?: Partial<Options<DeleteLocationData>>,
+): UseMutationOptions<
+  DeleteLocationResponse,
+  DeleteLocationError,
+  Options<DeleteLocationData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    DeleteLocationResponse,
+    DeleteLocationError,
+    Options<DeleteLocationData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await deleteLocation({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const getLocationQueryKey = (options: Options<GetLocationData>) =>
+  createQueryKey("getLocation", options);
+
+/**
+ * GetLocation
+ */
+export const getLocationOptions = (options: Options<GetLocationData>) =>
+  queryOptions<
+    GetLocationResponse,
+    GetLocationError,
+    GetLocationResponse,
+    ReturnType<typeof getLocationQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getLocation({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getLocationQueryKey(options),
+  });
+
+/**
+ * UpdateLocation
+ */
+export const updateLocationMutation = (
+  options?: Partial<Options<UpdateLocationData>>,
+): UseMutationOptions<
+  UpdateLocationResponse,
+  UpdateLocationError,
+  Options<UpdateLocationData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    UpdateLocationResponse,
+    UpdateLocationError,
+    Options<UpdateLocationData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await updateLocation({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
 /**
  * RemoveMemberFromTeam
  */
@@ -2632,6 +3845,543 @@ export const updateUserMutation = (
   > = {
     mutationFn: async (fnOptions) => {
       const { data } = await updateUser({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const listExtensionsQueryKey = (options?: Options<ListExtensionsData>) =>
+  createQueryKey("listExtensions", options);
+
+/**
+ * ListExtensions
+ */
+export const listExtensionsOptions = (options?: Options<ListExtensionsData>) =>
+  queryOptions<
+    ListExtensionsResponse,
+    ListExtensionsError,
+    ListExtensionsResponse,
+    ReturnType<typeof listExtensionsQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listExtensions({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listExtensionsQueryKey(options),
+  });
+
+export const getExtensionQueryKey = (options: Options<GetExtensionData>) =>
+  createQueryKey("getExtension", options);
+
+/**
+ * GetExtension
+ */
+export const getExtensionOptions = (options: Options<GetExtensionData>) =>
+  queryOptions<
+    GetExtensionResponse,
+    GetExtensionError,
+    GetExtensionResponse,
+    ReturnType<typeof getExtensionQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getExtension({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getExtensionQueryKey(options),
+  });
+
+/**
+ * UpdateExtension
+ */
+export const updateExtensionMutation = (
+  options?: Partial<Options<UpdateExtensionData>>,
+): UseMutationOptions<
+  UpdateExtensionResponse,
+  UpdateExtensionError,
+  Options<UpdateExtensionData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    UpdateExtensionResponse,
+    UpdateExtensionError,
+    Options<UpdateExtensionData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await updateExtension({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const getDndSettingsQueryKey = (options: Options<GetDndSettingsData>) =>
+  createQueryKey("getDndSettings", options);
+
+/**
+ * GetDndSettings
+ */
+export const getDndSettingsOptions = (options: Options<GetDndSettingsData>) =>
+  queryOptions<
+    GetDndSettingsResponse,
+    GetDndSettingsError,
+    GetDndSettingsResponse,
+    ReturnType<typeof getDndSettingsQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getDndSettings({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getDndSettingsQueryKey(options),
+  });
+
+/**
+ * UpdateDndSettings
+ */
+export const updateDndSettingsMutation = (
+  options?: Partial<Options<UpdateDndSettingsData>>,
+): UseMutationOptions<
+  UpdateDndSettingsResponse,
+  UpdateDndSettingsError,
+  Options<UpdateDndSettingsData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    UpdateDndSettingsResponse,
+    UpdateDndSettingsError,
+    Options<UpdateDndSettingsData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await updateDndSettings({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * ToggleDnd
+ */
+export const toggleDndMutation = (
+  options?: Partial<Options<ToggleDndData>>,
+): UseMutationOptions<
+  ToggleDndResponse,
+  ToggleDndError,
+  Options<ToggleDndData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    ToggleDndResponse,
+    ToggleDndError,
+    Options<ToggleDndData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await toggleDnd({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const listForwardingRulesQueryKey = (
+  options: Options<ListForwardingRulesData>,
+) => createQueryKey("listForwardingRules", options);
+
+/**
+ * ListForwardingRules
+ */
+export const listForwardingRulesOptions = (
+  options: Options<ListForwardingRulesData>,
+) =>
+  queryOptions<
+    ListForwardingRulesResponse,
+    ListForwardingRulesError,
+    ListForwardingRulesResponse,
+    ReturnType<typeof listForwardingRulesQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listForwardingRules({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listForwardingRulesQueryKey(options),
+  });
+
+/**
+ * CreateForwardingRule
+ */
+export const createForwardingRuleMutation = (
+  options?: Partial<Options<CreateForwardingRuleData>>,
+): UseMutationOptions<
+  CreateForwardingRuleResponse,
+  CreateForwardingRuleError,
+  Options<CreateForwardingRuleData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    CreateForwardingRuleResponse,
+    CreateForwardingRuleError,
+    Options<CreateForwardingRuleData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await createForwardingRule({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * SetForwardingRules
+ */
+export const setForwardingRulesMutation = (
+  options?: Partial<Options<SetForwardingRulesData>>,
+): UseMutationOptions<
+  SetForwardingRulesResponse,
+  SetForwardingRulesError,
+  Options<SetForwardingRulesData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    SetForwardingRulesResponse,
+    SetForwardingRulesError,
+    Options<SetForwardingRulesData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await setForwardingRules({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * DeleteForwardingRule
+ */
+export const deleteForwardingRuleMutation = (
+  options?: Partial<Options<DeleteForwardingRuleData>>,
+): UseMutationOptions<
+  DeleteForwardingRuleResponse,
+  DeleteForwardingRuleError,
+  Options<DeleteForwardingRuleData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    DeleteForwardingRuleResponse,
+    DeleteForwardingRuleError,
+    Options<DeleteForwardingRuleData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await deleteForwardingRule({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * UpdateForwardingRule
+ */
+export const updateForwardingRuleMutation = (
+  options?: Partial<Options<UpdateForwardingRuleData>>,
+): UseMutationOptions<
+  UpdateForwardingRuleResponse,
+  UpdateForwardingRuleError,
+  Options<UpdateForwardingRuleData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    UpdateForwardingRuleResponse,
+    UpdateForwardingRuleError,
+    Options<UpdateForwardingRuleData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await updateForwardingRule({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const getVoicemailSettingsQueryKey = (
+  options: Options<GetVoicemailSettingsData>,
+) => createQueryKey("getVoicemailSettings", options);
+
+/**
+ * GetVoicemailSettings
+ */
+export const getVoicemailSettingsOptions = (
+  options: Options<GetVoicemailSettingsData>,
+) =>
+  queryOptions<
+    GetVoicemailSettingsResponse,
+    GetVoicemailSettingsError,
+    GetVoicemailSettingsResponse,
+    ReturnType<typeof getVoicemailSettingsQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getVoicemailSettings({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getVoicemailSettingsQueryKey(options),
+  });
+
+/**
+ * UpdateVoicemailSettings
+ */
+export const updateVoicemailSettingsMutation = (
+  options?: Partial<Options<UpdateVoicemailSettingsData>>,
+): UseMutationOptions<
+  UpdateVoicemailSettingsResponse,
+  UpdateVoicemailSettingsError,
+  Options<UpdateVoicemailSettingsData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    UpdateVoicemailSettingsResponse,
+    UpdateVoicemailSettingsError,
+    Options<UpdateVoicemailSettingsData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await updateVoicemailSettings({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const listVoicemailMessagesQueryKey = (
+  options: Options<ListVoicemailMessagesData>,
+) => createQueryKey("listVoicemailMessages", options);
+
+/**
+ * ListVoicemailMessages
+ */
+export const listVoicemailMessagesOptions = (
+  options: Options<ListVoicemailMessagesData>,
+) =>
+  queryOptions<
+    ListVoicemailMessagesResponse,
+    ListVoicemailMessagesError,
+    ListVoicemailMessagesResponse,
+    ReturnType<typeof listVoicemailMessagesQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listVoicemailMessages({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listVoicemailMessagesQueryKey(options),
+  });
+
+/**
+ * DeleteVoicemailMessage
+ */
+export const deleteVoicemailMessageMutation = (
+  options?: Partial<Options<DeleteVoicemailMessageData>>,
+): UseMutationOptions<
+  DeleteVoicemailMessageResponse,
+  DeleteVoicemailMessageError,
+  Options<DeleteVoicemailMessageData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    DeleteVoicemailMessageResponse,
+    DeleteVoicemailMessageError,
+    Options<DeleteVoicemailMessageData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await deleteVoicemailMessage({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const getVoicemailMessageQueryKey = (
+  options: Options<GetVoicemailMessageData>,
+) => createQueryKey("getVoicemailMessage", options);
+
+/**
+ * GetVoicemailMessage
+ */
+export const getVoicemailMessageOptions = (
+  options: Options<GetVoicemailMessageData>,
+) =>
+  queryOptions<
+    GetVoicemailMessageResponse,
+    GetVoicemailMessageError,
+    GetVoicemailMessageResponse,
+    ReturnType<typeof getVoicemailMessageQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getVoicemailMessage({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getVoicemailMessageQueryKey(options),
+  });
+
+/**
+ * UpdateVoicemailMessage
+ */
+export const updateVoicemailMessageMutation = (
+  options?: Partial<Options<UpdateVoicemailMessageData>>,
+): UseMutationOptions<
+  UpdateVoicemailMessageResponse,
+  UpdateVoicemailMessageError,
+  Options<UpdateVoicemailMessageData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    UpdateVoicemailMessageResponse,
+    UpdateVoicemailMessageError,
+    Options<UpdateVoicemailMessageData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await updateVoicemailMessage({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const listPhoneNumbersQueryKey = (
+  options?: Options<ListPhoneNumbersData>,
+) => createQueryKey("listPhoneNumbers", options);
+
+/**
+ * ListPhoneNumbers
+ */
+export const listPhoneNumbersOptions = (
+  options?: Options<ListPhoneNumbersData>,
+) =>
+  queryOptions<
+    ListPhoneNumbersResponse,
+    ListPhoneNumbersError,
+    ListPhoneNumbersResponse,
+    ReturnType<typeof listPhoneNumbersQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listPhoneNumbers({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listPhoneNumbersQueryKey(options),
+  });
+
+export const getPhoneNumberQueryKey = (options: Options<GetPhoneNumberData>) =>
+  createQueryKey("getPhoneNumber", options);
+
+/**
+ * GetPhoneNumber
+ */
+export const getPhoneNumberOptions = (options: Options<GetPhoneNumberData>) =>
+  queryOptions<
+    GetPhoneNumberResponse,
+    GetPhoneNumberError,
+    GetPhoneNumberResponse,
+    ReturnType<typeof getPhoneNumberQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getPhoneNumber({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getPhoneNumberQueryKey(options),
+  });
+
+/**
+ * UpdatePhoneNumber
+ */
+export const updatePhoneNumberMutation = (
+  options?: Partial<Options<UpdatePhoneNumberData>>,
+): UseMutationOptions<
+  UpdatePhoneNumberResponse,
+  UpdatePhoneNumberError,
+  Options<UpdatePhoneNumberData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    UpdatePhoneNumberResponse,
+    UpdatePhoneNumberError,
+    Options<UpdatePhoneNumberData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await updatePhoneNumber({
         ...options,
         ...fnOptions,
         throwOnError: true,

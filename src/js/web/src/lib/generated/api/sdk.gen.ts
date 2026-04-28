@@ -95,12 +95,27 @@ import type {
   AssignUserRoleData,
   AssignUserRoleErrors,
   AssignUserRoleResponses,
+  CloseTicketData,
+  CloseTicketErrors,
+  CloseTicketResponses,
   ConfirmMfaSetupData,
   ConfirmMfaSetupErrors,
   ConfirmMfaSetupResponses,
+  CreateConnectionData,
+  CreateConnectionErrors,
+  CreateConnectionResponses,
   CreateDeviceData,
   CreateDeviceErrors,
   CreateDeviceResponses,
+  CreateFaxEmailRouteData,
+  CreateFaxEmailRouteErrors,
+  CreateFaxEmailRouteResponses,
+  CreateForwardingRuleData,
+  CreateForwardingRuleErrors,
+  CreateForwardingRuleResponses,
+  CreateLocationData,
+  CreateLocationErrors,
+  CreateLocationResponses,
   CreateRoleData,
   CreateRoleErrors,
   CreateRoleResponses,
@@ -113,12 +128,36 @@ import type {
   CreateTeamInvitationErrors,
   CreateTeamInvitationResponses,
   CreateTeamResponses,
+  CreateTicketData,
+  CreateTicketErrors,
+  CreateTicketMessageData,
+  CreateTicketMessageErrors,
+  CreateTicketMessageResponses,
+  CreateTicketResponses,
   CreateUserData,
   CreateUserErrors,
   CreateUserResponses,
+  DeleteAttachmentData,
+  DeleteAttachmentErrors,
+  DeleteAttachmentResponses,
+  DeleteConnectionData,
+  DeleteConnectionErrors,
+  DeleteConnectionResponses,
   DeleteDeviceData,
   DeleteDeviceErrors,
   DeleteDeviceResponses,
+  DeleteFaxEmailRouteData,
+  DeleteFaxEmailRouteErrors,
+  DeleteFaxEmailRouteResponses,
+  DeleteFaxMessageData,
+  DeleteFaxMessageErrors,
+  DeleteFaxMessageResponses,
+  DeleteForwardingRuleData,
+  DeleteForwardingRuleErrors,
+  DeleteForwardingRuleResponses,
+  DeleteLocationData,
+  DeleteLocationErrors,
+  DeleteLocationResponses,
   DeleteRoleData,
   DeleteRoleErrors,
   DeleteRoleResponses,
@@ -131,9 +170,15 @@ import type {
   DeleteTeamInvitationErrors,
   DeleteTeamInvitationResponses,
   DeleteTeamResponses,
+  DeleteTicketMessageData,
+  DeleteTicketMessageErrors,
+  DeleteTicketMessageResponses,
   DeleteUserData,
   DeleteUserErrors,
   DeleteUserResponses,
+  DeleteVoicemailMessageData,
+  DeleteVoicemailMessageErrors,
+  DeleteVoicemailMessageResponses,
   DisableMfaData,
   DisableMfaErrors,
   DisableMfaResponses,
@@ -143,13 +188,39 @@ import type {
   GetActiveSessionsData,
   GetActiveSessionsErrors,
   GetActiveSessionsResponses,
+  GetAttachmentData,
+  GetAttachmentErrors,
+  GetAttachmentResponses,
+  GetConnectionData,
+  GetConnectionErrors,
+  GetConnectionResponses,
   GetDashboardStatsData,
   GetDashboardStatsResponses,
   GetDeviceData,
   GetDeviceErrors,
   GetDeviceResponses,
+  GetDndSettingsData,
+  GetDndSettingsErrors,
+  GetDndSettingsResponses,
+  GetExtensionData,
+  GetExtensionErrors,
+  GetExtensionResponses,
+  GetFaxMessageData,
+  GetFaxMessageErrors,
+  GetFaxMessageResponses,
+  GetFaxNumberData,
+  GetFaxNumberErrors,
+  GetFaxNumberResponses,
+  GetLocationData,
+  GetLocationErrors,
+  GetLocationResponses,
   GetMfaStatusData,
   GetMfaStatusResponses,
+  GetOrganizationData,
+  GetOrganizationResponses,
+  GetPhoneNumberData,
+  GetPhoneNumberErrors,
+  GetPhoneNumberResponses,
   GetRecentActivityData,
   GetRecentActivityErrors,
   GetRecentActivityResponses,
@@ -162,17 +233,50 @@ import type {
   GetTeamData,
   GetTeamErrors,
   GetTeamResponses,
+  GetTicketData,
+  GetTicketErrors,
+  GetTicketResponses,
   GetUserData,
   GetUserErrors,
   GetUserResponses,
+  GetVoicemailMessageData,
+  GetVoicemailMessageErrors,
+  GetVoicemailMessageResponses,
+  GetVoicemailSettingsData,
+  GetVoicemailSettingsErrors,
+  GetVoicemailSettingsResponses,
   InitiateDisableMfaOAuthData,
   InitiateDisableMfaOAuthErrors,
   InitiateDisableMfaOAuthResponses,
   InitiateMfaSetupData,
   InitiateMfaSetupResponses,
+  ListConnectionsData,
+  ListConnectionsErrors,
+  ListConnectionsResponses,
   ListDevicesData,
   ListDevicesErrors,
   ListDevicesResponses,
+  ListExtensionsData,
+  ListExtensionsErrors,
+  ListExtensionsResponses,
+  ListFaxEmailRoutesData,
+  ListFaxEmailRoutesErrors,
+  ListFaxEmailRoutesResponses,
+  ListFaxMessagesData,
+  ListFaxMessagesErrors,
+  ListFaxMessagesResponses,
+  ListFaxNumbersData,
+  ListFaxNumbersErrors,
+  ListFaxNumbersResponses,
+  ListForwardingRulesData,
+  ListForwardingRulesErrors,
+  ListForwardingRulesResponses,
+  ListLocationsData,
+  ListLocationsErrors,
+  ListLocationsResponses,
+  ListPhoneNumbersData,
+  ListPhoneNumbersErrors,
+  ListPhoneNumbersResponses,
   ListRolesData,
   ListRolesErrors,
   ListRolesResponses,
@@ -185,11 +289,23 @@ import type {
   ListTeamsData,
   ListTeamsErrors,
   ListTeamsResponses,
+  ListTicketMessagesData,
+  ListTicketMessagesErrors,
+  ListTicketMessagesResponses,
+  ListTicketsData,
+  ListTicketsErrors,
+  ListTicketsResponses,
   ListUsersData,
   ListUsersErrors,
   ListUsersResponses,
+  ListVoicemailMessagesData,
+  ListVoicemailMessagesErrors,
+  ListVoicemailMessagesResponses,
   OAuthConfigData,
   OAuthConfigResponses,
+  PasteImageData,
+  PasteImageErrors,
+  PasteImageResponses,
   ProfileOAuthAccountsData,
   ProfileOAuthAccountsErrors,
   ProfileOAuthAccountsResponses,
@@ -211,6 +327,9 @@ import type {
   RemoveMemberFromTeamData,
   RemoveMemberFromTeamErrors,
   RemoveMemberFromTeamResponses,
+  ReopenTicketData,
+  ReopenTicketErrors,
+  ReopenTicketResponses,
   ResetPasswordData,
   ResetPasswordErrors,
   ResetPasswordResponses,
@@ -225,13 +344,49 @@ import type {
   RevokeUserRoleData,
   RevokeUserRoleErrors,
   RevokeUserRoleResponses,
+  SetForwardingRulesData,
+  SetForwardingRulesErrors,
+  SetForwardingRulesResponses,
   SystemHealthData,
   SystemHealthResponses,
+  TestConnectionData,
+  TestConnectionErrors,
+  TestConnectionResponses,
+  ToggleDndData,
+  ToggleDndErrors,
+  ToggleDndResponses,
   TokenRefreshData,
   TokenRefreshResponses,
+  UpdateConnectionData,
+  UpdateConnectionErrors,
+  UpdateConnectionResponses,
   UpdateDeviceData,
   UpdateDeviceErrors,
   UpdateDeviceResponses,
+  UpdateDndSettingsData,
+  UpdateDndSettingsErrors,
+  UpdateDndSettingsResponses,
+  UpdateExtensionData,
+  UpdateExtensionErrors,
+  UpdateExtensionResponses,
+  UpdateFaxEmailRouteData,
+  UpdateFaxEmailRouteErrors,
+  UpdateFaxEmailRouteResponses,
+  UpdateFaxNumberData,
+  UpdateFaxNumberErrors,
+  UpdateFaxNumberResponses,
+  UpdateForwardingRuleData,
+  UpdateForwardingRuleErrors,
+  UpdateForwardingRuleResponses,
+  UpdateLocationData,
+  UpdateLocationErrors,
+  UpdateLocationResponses,
+  UpdateOrganizationData,
+  UpdateOrganizationErrors,
+  UpdateOrganizationResponses,
+  UpdatePhoneNumberData,
+  UpdatePhoneNumberErrors,
+  UpdatePhoneNumberResponses,
   UpdateRoleData,
   UpdateRoleErrors,
   UpdateRoleResponses,
@@ -244,9 +399,24 @@ import type {
   UpdateTeamMemberErrors,
   UpdateTeamMemberResponses,
   UpdateTeamResponses,
+  UpdateTicketData,
+  UpdateTicketErrors,
+  UpdateTicketMessageData,
+  UpdateTicketMessageErrors,
+  UpdateTicketMessageResponses,
+  UpdateTicketResponses,
   UpdateUserData,
   UpdateUserErrors,
   UpdateUserResponses,
+  UpdateVoicemailMessageData,
+  UpdateVoicemailMessageErrors,
+  UpdateVoicemailMessageResponses,
+  UpdateVoicemailSettingsData,
+  UpdateVoicemailSettingsErrors,
+  UpdateVoicemailSettingsResponses,
+  UploadAttachmentData,
+  UploadAttachmentErrors,
+  UploadAttachmentResponses,
   ValidateResetTokenData,
   ValidateResetTokenErrors,
   ValidateResetTokenResponses,
@@ -766,6 +936,110 @@ export const oAuthConfig = <ThrowOnError extends boolean = false>(
   });
 
 /**
+ * ListConnections
+ */
+export const listConnections = <ThrowOnError extends boolean = false>(
+  options?: Options<ListConnectionsData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    ListConnectionsResponses,
+    ListConnectionsErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/connections",
+    ...options,
+  });
+
+/**
+ * CreateConnection
+ */
+export const createConnection = <ThrowOnError extends boolean = false>(
+  options: Options<CreateConnectionData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    CreateConnectionResponses,
+    CreateConnectionErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/connections",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * DeleteConnection
+ */
+export const deleteConnection = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteConnectionData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    DeleteConnectionResponses,
+    DeleteConnectionErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/connections/{connection_id}",
+    ...options,
+  });
+
+/**
+ * GetConnection
+ */
+export const getConnection = <ThrowOnError extends boolean = false>(
+  options: Options<GetConnectionData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    GetConnectionResponses,
+    GetConnectionErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/connections/{connection_id}",
+    ...options,
+  });
+
+/**
+ * UpdateConnection
+ */
+export const updateConnection = <ThrowOnError extends boolean = false>(
+  options: Options<UpdateConnectionData, ThrowOnError>,
+) =>
+  (options.client ?? client).patch<
+    UpdateConnectionResponses,
+    UpdateConnectionErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/connections/{connection_id}",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * TestConnection
+ */
+export const testConnection = <ThrowOnError extends boolean = false>(
+  options: Options<TestConnectionData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    TestConnectionResponses,
+    TestConnectionErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/connections/{connection_id}/test",
+    ...options,
+  });
+
+/**
  * ListDevices
  */
 export const listDevices = <ThrowOnError extends boolean = false>(
@@ -914,6 +1188,178 @@ export const apiEmailVerificationVerifyVerifyEmail = <
   >({
     security: [{ scheme: "bearer", type: "http" }],
     url: "/api/email-verification/verify",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * ListFaxMessages
+ */
+export const listFaxMessages = <ThrowOnError extends boolean = false>(
+  options?: Options<ListFaxMessagesData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    ListFaxMessagesResponses,
+    ListFaxMessagesErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/fax/messages",
+    ...options,
+  });
+
+/**
+ * DeleteFaxMessage
+ */
+export const deleteFaxMessage = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteFaxMessageData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    DeleteFaxMessageResponses,
+    DeleteFaxMessageErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/fax/messages/{message_id}",
+    ...options,
+  });
+
+/**
+ * GetFaxMessage
+ */
+export const getFaxMessage = <ThrowOnError extends boolean = false>(
+  options: Options<GetFaxMessageData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    GetFaxMessageResponses,
+    GetFaxMessageErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/fax/messages/{message_id}",
+    ...options,
+  });
+
+/**
+ * ListFaxNumbers
+ */
+export const listFaxNumbers = <ThrowOnError extends boolean = false>(
+  options?: Options<ListFaxNumbersData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    ListFaxNumbersResponses,
+    ListFaxNumbersErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/fax/numbers",
+    ...options,
+  });
+
+/**
+ * GetFaxNumber
+ */
+export const getFaxNumber = <ThrowOnError extends boolean = false>(
+  options: Options<GetFaxNumberData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    GetFaxNumberResponses,
+    GetFaxNumberErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/fax/numbers/{fax_number_id}",
+    ...options,
+  });
+
+/**
+ * UpdateFaxNumber
+ */
+export const updateFaxNumber = <ThrowOnError extends boolean = false>(
+  options: Options<UpdateFaxNumberData, ThrowOnError>,
+) =>
+  (options.client ?? client).patch<
+    UpdateFaxNumberResponses,
+    UpdateFaxNumberErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/fax/numbers/{fax_number_id}",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * ListFaxEmailRoutes
+ */
+export const listFaxEmailRoutes = <ThrowOnError extends boolean = false>(
+  options: Options<ListFaxEmailRoutesData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    ListFaxEmailRoutesResponses,
+    ListFaxEmailRoutesErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/fax/numbers/{fax_number_id}/email-routes",
+    ...options,
+  });
+
+/**
+ * CreateFaxEmailRoute
+ */
+export const createFaxEmailRoute = <ThrowOnError extends boolean = false>(
+  options: Options<CreateFaxEmailRouteData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    CreateFaxEmailRouteResponses,
+    CreateFaxEmailRouteErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/fax/numbers/{fax_number_id}/email-routes",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * DeleteFaxEmailRoute
+ */
+export const deleteFaxEmailRoute = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteFaxEmailRouteData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    DeleteFaxEmailRouteResponses,
+    DeleteFaxEmailRouteErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/fax/numbers/{fax_number_id}/email-routes/{route_id}",
+    ...options,
+  });
+
+/**
+ * UpdateFaxEmailRoute
+ */
+export const updateFaxEmailRoute = <ThrowOnError extends boolean = false>(
+  options: Options<UpdateFaxEmailRouteData, ThrowOnError>,
+) =>
+  (options.client ?? client).patch<
+    UpdateFaxEmailRouteResponses,
+    UpdateFaxEmailRouteErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/fax/numbers/{fax_number_id}/email-routes/{route_id}",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -1122,6 +1568,42 @@ export const getMfaStatus = <ThrowOnError extends boolean = false>(
   );
 
 /**
+ * GetOrganization
+ */
+export const getOrganization = <ThrowOnError extends boolean = false>(
+  options?: Options<GetOrganizationData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    GetOrganizationResponses,
+    unknown,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/organization",
+    ...options,
+  });
+
+/**
+ * UpdateOrganization
+ */
+export const updateOrganization = <ThrowOnError extends boolean = false>(
+  options: Options<UpdateOrganizationData, ThrowOnError>,
+) =>
+  (options.client ?? client).put<
+    UpdateOrganizationResponses,
+    UpdateOrganizationErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/organization",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
  * ListAccounts
  */
 export const profileOAuthAccounts = <ThrowOnError extends boolean = false>(
@@ -1309,6 +1791,246 @@ export const revokeRole = <ThrowOnError extends boolean = false>(
       "Content-Type": "application/json",
       ...options.headers,
     },
+  });
+
+/**
+ * DeleteAttachment
+ */
+export const deleteAttachment = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteAttachmentData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    DeleteAttachmentResponses,
+    DeleteAttachmentErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/support/attachments/{attachment_id}",
+    ...options,
+  });
+
+/**
+ * GetAttachment
+ */
+export const getAttachment = <ThrowOnError extends boolean = false>(
+  options: Options<GetAttachmentData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    GetAttachmentResponses,
+    GetAttachmentErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/support/attachments/{attachment_id}",
+    ...options,
+  });
+
+/**
+ * ListTickets
+ */
+export const listTickets = <ThrowOnError extends boolean = false>(
+  options?: Options<ListTicketsData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    ListTicketsResponses,
+    ListTicketsErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/support/tickets",
+    ...options,
+  });
+
+/**
+ * CreateTicket
+ */
+export const createTicket = <ThrowOnError extends boolean = false>(
+  options: Options<CreateTicketData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    CreateTicketResponses,
+    CreateTicketErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/support/tickets",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * GetTicket
+ */
+export const getTicket = <ThrowOnError extends boolean = false>(
+  options: Options<GetTicketData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    GetTicketResponses,
+    GetTicketErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/support/tickets/{ticket_id}",
+    ...options,
+  });
+
+/**
+ * UpdateTicket
+ */
+export const updateTicket = <ThrowOnError extends boolean = false>(
+  options: Options<UpdateTicketData, ThrowOnError>,
+) =>
+  (options.client ?? client).patch<
+    UpdateTicketResponses,
+    UpdateTicketErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/support/tickets/{ticket_id}",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * UploadAttachment
+ */
+export const uploadAttachment = <ThrowOnError extends boolean = false>(
+  options: Options<UploadAttachmentData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    UploadAttachmentResponses,
+    UploadAttachmentErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/support/tickets/{ticket_id}/attachments",
+    ...options,
+  });
+
+/**
+ * CloseTicket
+ */
+export const closeTicket = <ThrowOnError extends boolean = false>(
+  options: Options<CloseTicketData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    CloseTicketResponses,
+    CloseTicketErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/support/tickets/{ticket_id}/close",
+    ...options,
+  });
+
+/**
+ * ListMessages
+ */
+export const listTicketMessages = <ThrowOnError extends boolean = false>(
+  options: Options<ListTicketMessagesData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    ListTicketMessagesResponses,
+    ListTicketMessagesErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/support/tickets/{ticket_id}/messages",
+    ...options,
+  });
+
+/**
+ * CreateMessage
+ */
+export const createTicketMessage = <ThrowOnError extends boolean = false>(
+  options: Options<CreateTicketMessageData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    CreateTicketMessageResponses,
+    CreateTicketMessageErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/support/tickets/{ticket_id}/messages",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * DeleteMessage
+ */
+export const deleteTicketMessage = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteTicketMessageData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    DeleteTicketMessageResponses,
+    DeleteTicketMessageErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/support/tickets/{ticket_id}/messages/{msg_id}",
+    ...options,
+  });
+
+/**
+ * UpdateMessage
+ */
+export const updateTicketMessage = <ThrowOnError extends boolean = false>(
+  options: Options<UpdateTicketMessageData, ThrowOnError>,
+) =>
+  (options.client ?? client).patch<
+    UpdateTicketMessageResponses,
+    UpdateTicketMessageErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/support/tickets/{ticket_id}/messages/{msg_id}",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * PasteImage
+ */
+export const pasteImage = <ThrowOnError extends boolean = false>(
+  options: Options<PasteImageData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    PasteImageResponses,
+    PasteImageErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/support/tickets/{ticket_id}/paste-image",
+    ...options,
+  });
+
+/**
+ * ReopenTicket
+ */
+export const reopenTicket = <ThrowOnError extends boolean = false>(
+  options: Options<ReopenTicketData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    ReopenTicketResponses,
+    ReopenTicketErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/support/tickets/{ticket_id}/reopen",
+    ...options,
   });
 
 /**
@@ -1566,6 +2288,94 @@ export const rejectTeamInvitation = <ThrowOnError extends boolean = false>(
   });
 
 /**
+ * ListLocations
+ */
+export const listLocations = <ThrowOnError extends boolean = false>(
+  options: Options<ListLocationsData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    ListLocationsResponses,
+    ListLocationsErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/teams/{team_id}/locations",
+    ...options,
+  });
+
+/**
+ * CreateLocation
+ */
+export const createLocation = <ThrowOnError extends boolean = false>(
+  options: Options<CreateLocationData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    CreateLocationResponses,
+    CreateLocationErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/teams/{team_id}/locations",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * DeleteLocation
+ */
+export const deleteLocation = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteLocationData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    DeleteLocationResponses,
+    DeleteLocationErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/teams/{team_id}/locations/{location_id}",
+    ...options,
+  });
+
+/**
+ * GetLocation
+ */
+export const getLocation = <ThrowOnError extends boolean = false>(
+  options: Options<GetLocationData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    GetLocationResponses,
+    GetLocationErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/teams/{team_id}/locations/{location_id}",
+    ...options,
+  });
+
+/**
+ * UpdateLocation
+ */
+export const updateLocation = <ThrowOnError extends boolean = false>(
+  options: Options<UpdateLocationData, ThrowOnError>,
+) =>
+  (options.client ?? client).patch<
+    UpdateLocationResponses,
+    UpdateLocationErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/teams/{team_id}/locations/{location_id}",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
  * RemoveMemberFromTeam
  */
 export const removeMemberFromTeam = <ThrowOnError extends boolean = false>(
@@ -1744,6 +2554,358 @@ export const updateUser = <ThrowOnError extends boolean = false>(
   >({
     security: [{ scheme: "bearer", type: "http" }],
     url: "/api/users/{user_id}",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * ListExtensions
+ */
+export const listExtensions = <ThrowOnError extends boolean = false>(
+  options?: Options<ListExtensionsData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    ListExtensionsResponses,
+    ListExtensionsErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/voice/extensions",
+    ...options,
+  });
+
+/**
+ * GetExtension
+ */
+export const getExtension = <ThrowOnError extends boolean = false>(
+  options: Options<GetExtensionData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    GetExtensionResponses,
+    GetExtensionErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/voice/extensions/{ext_id}",
+    ...options,
+  });
+
+/**
+ * UpdateExtension
+ */
+export const updateExtension = <ThrowOnError extends boolean = false>(
+  options: Options<UpdateExtensionData, ThrowOnError>,
+) =>
+  (options.client ?? client).patch<
+    UpdateExtensionResponses,
+    UpdateExtensionErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/voice/extensions/{ext_id}",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * GetDndSettings
+ */
+export const getDndSettings = <ThrowOnError extends boolean = false>(
+  options: Options<GetDndSettingsData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    GetDndSettingsResponses,
+    GetDndSettingsErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/voice/extensions/{ext_id}/dnd",
+    ...options,
+  });
+
+/**
+ * UpdateDndSettings
+ */
+export const updateDndSettings = <ThrowOnError extends boolean = false>(
+  options: Options<UpdateDndSettingsData, ThrowOnError>,
+) =>
+  (options.client ?? client).patch<
+    UpdateDndSettingsResponses,
+    UpdateDndSettingsErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/voice/extensions/{ext_id}/dnd",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * ToggleDnd
+ */
+export const toggleDnd = <ThrowOnError extends boolean = false>(
+  options: Options<ToggleDndData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    ToggleDndResponses,
+    ToggleDndErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/voice/extensions/{ext_id}/dnd/toggle",
+    ...options,
+  });
+
+/**
+ * ListForwardingRules
+ */
+export const listForwardingRules = <ThrowOnError extends boolean = false>(
+  options: Options<ListForwardingRulesData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    ListForwardingRulesResponses,
+    ListForwardingRulesErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/voice/extensions/{ext_id}/forwarding",
+    ...options,
+  });
+
+/**
+ * CreateForwardingRule
+ */
+export const createForwardingRule = <ThrowOnError extends boolean = false>(
+  options: Options<CreateForwardingRuleData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    CreateForwardingRuleResponses,
+    CreateForwardingRuleErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/voice/extensions/{ext_id}/forwarding",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * SetForwardingRules
+ */
+export const setForwardingRules = <ThrowOnError extends boolean = false>(
+  options: Options<SetForwardingRulesData, ThrowOnError>,
+) =>
+  (options.client ?? client).put<
+    SetForwardingRulesResponses,
+    SetForwardingRulesErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/voice/extensions/{ext_id}/forwarding",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * DeleteForwardingRule
+ */
+export const deleteForwardingRule = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteForwardingRuleData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    DeleteForwardingRuleResponses,
+    DeleteForwardingRuleErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/voice/extensions/{ext_id}/forwarding/{rule_id}",
+    ...options,
+  });
+
+/**
+ * UpdateForwardingRule
+ */
+export const updateForwardingRule = <ThrowOnError extends boolean = false>(
+  options: Options<UpdateForwardingRuleData, ThrowOnError>,
+) =>
+  (options.client ?? client).patch<
+    UpdateForwardingRuleResponses,
+    UpdateForwardingRuleErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/voice/extensions/{ext_id}/forwarding/{rule_id}",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * GetVoicemailSettings
+ */
+export const getVoicemailSettings = <ThrowOnError extends boolean = false>(
+  options: Options<GetVoicemailSettingsData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    GetVoicemailSettingsResponses,
+    GetVoicemailSettingsErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/voice/extensions/{ext_id}/voicemail",
+    ...options,
+  });
+
+/**
+ * UpdateVoicemailSettings
+ */
+export const updateVoicemailSettings = <ThrowOnError extends boolean = false>(
+  options: Options<UpdateVoicemailSettingsData, ThrowOnError>,
+) =>
+  (options.client ?? client).patch<
+    UpdateVoicemailSettingsResponses,
+    UpdateVoicemailSettingsErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/voice/extensions/{ext_id}/voicemail",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * ListVoicemailMessages
+ */
+export const listVoicemailMessages = <ThrowOnError extends boolean = false>(
+  options: Options<ListVoicemailMessagesData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    ListVoicemailMessagesResponses,
+    ListVoicemailMessagesErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/voice/extensions/{ext_id}/voicemail/messages",
+    ...options,
+  });
+
+/**
+ * DeleteVoicemailMessage
+ */
+export const deleteVoicemailMessage = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteVoicemailMessageData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    DeleteVoicemailMessageResponses,
+    DeleteVoicemailMessageErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/voice/extensions/{ext_id}/voicemail/messages/{msg_id}",
+    ...options,
+  });
+
+/**
+ * GetVoicemailMessage
+ */
+export const getVoicemailMessage = <ThrowOnError extends boolean = false>(
+  options: Options<GetVoicemailMessageData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    GetVoicemailMessageResponses,
+    GetVoicemailMessageErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/voice/extensions/{ext_id}/voicemail/messages/{msg_id}",
+    ...options,
+  });
+
+/**
+ * UpdateVoicemailMessage
+ */
+export const updateVoicemailMessage = <ThrowOnError extends boolean = false>(
+  options: Options<UpdateVoicemailMessageData, ThrowOnError>,
+) =>
+  (options.client ?? client).patch<
+    UpdateVoicemailMessageResponses,
+    UpdateVoicemailMessageErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/voice/extensions/{ext_id}/voicemail/messages/{msg_id}",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * ListPhoneNumbers
+ */
+export const listPhoneNumbers = <ThrowOnError extends boolean = false>(
+  options?: Options<ListPhoneNumbersData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    ListPhoneNumbersResponses,
+    ListPhoneNumbersErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/voice/phone-numbers",
+    ...options,
+  });
+
+/**
+ * GetPhoneNumber
+ */
+export const getPhoneNumber = <ThrowOnError extends boolean = false>(
+  options: Options<GetPhoneNumberData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    GetPhoneNumberResponses,
+    GetPhoneNumberErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/voice/phone-numbers/{phone_number_id}",
+    ...options,
+  });
+
+/**
+ * UpdatePhoneNumber
+ */
+export const updatePhoneNumber = <ThrowOnError extends boolean = false>(
+  options: Options<UpdatePhoneNumberData, ThrowOnError>,
+) =>
+  (options.client ?? client).patch<
+    UpdatePhoneNumberResponses,
+    UpdatePhoneNumberErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/voice/phone-numbers/{phone_number_id}",
     ...options,
     headers: {
       "Content-Type": "application/json",

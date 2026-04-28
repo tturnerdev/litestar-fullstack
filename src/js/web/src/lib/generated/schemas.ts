@@ -29,6 +29,9 @@ import type {
   ConfirmMfaSetupData,
   ConfirmMfaSetupErrors,
   ConfirmMfaSetupResponses,
+  CreateConnectionData,
+  CreateConnectionErrors,
+  CreateConnectionResponses,
   CreateDeviceData,
   CreateDeviceErrors,
   CreateDeviceResponses,
@@ -41,6 +44,9 @@ import type {
   CreateTeamData,
   CreateTeamErrors,
   CreateTeamResponses,
+  CreateTicketData,
+  CreateTicketErrors,
+  CreateTicketResponses,
   CreateUserData,
   CreateUserErrors,
   CreateUserResponses,
@@ -70,6 +76,9 @@ import type {
   SystemHealthResponses,
   TokenRefreshData,
   TokenRefreshResponses,
+  UpdateOrganizationData,
+  UpdateOrganizationErrors,
+  UpdateOrganizationResponses,
   VerifyMfaChallengeData,
   VerifyMfaChallengeErrors,
   VerifyMfaChallengeResponses
@@ -89,22 +98,27 @@ import type {
  */
 export type OperationName =
   | 'confirm_setup'
+  | 'create_connection'
   | 'create_device'
   | 'create_role'
   | 'create_tag'
   | 'create_team'
+  | 'create_ticket'
   | 'create_user'
   | 'disable_mfa'
   | 'forgot_password'
   | 'get_mfa_status'
+  | 'get_organization'
   | 'get_profile'
   | 'get_sessions'
   | 'get_stats'
   | 'initiate_setup'
+  | 'list_connections'
   | 'list_devices'
   | 'list_roles'
   | 'list_tags'
   | 'list_teams_api_teams'
+  | 'list_tickets'
   | 'list_users_api_users'
   | 'login'
   | 'logout'
@@ -117,6 +131,7 @@ export type OperationName =
   | 'signup'
   | 'system:health'
   | 'system:oauth-config'
+  | 'update_organization'
   | 'update_password'
   | 'update_profile'
   | 'validate_reset_token'
@@ -129,22 +144,27 @@ export type OperationName =
  */
 export interface OperationDataTypes {
   'confirm_setup': ConfirmMfaSetupData
+  'create_connection': CreateConnectionData
   'create_device': CreateDeviceData
   'create_role': CreateRoleData
   'create_tag': CreateTagData
   'create_team': CreateTeamData
+  'create_ticket': CreateTicketData
   'create_user': CreateUserData
   'disable_mfa': DisableMfaData
   'forgot_password': ForgotPasswordData
   'get_mfa_status': GetMfaStatusData
+  'get_organization': UpdateOrganizationData
   'get_profile': AccountProfileUpdateData
   'get_sessions': RevokeAllSessionsData
   'get_stats': GetDashboardStatsData
   'initiate_setup': InitiateMfaSetupData
+  'list_connections': CreateConnectionData
   'list_devices': CreateDeviceData
   'list_roles': CreateRoleData
   'list_tags': CreateTagData
   'list_teams_api_teams': CreateTeamData
+  'list_tickets': CreateTicketData
   'list_users_api_users': CreateUserData
   'login': AccountLoginData
   'logout': AccountLogoutData
@@ -157,6 +177,7 @@ export interface OperationDataTypes {
   'signup': AccountRegisterData
   'system:health': SystemHealthData
   'system:oauth-config': OAuthConfigData
+  'update_organization': UpdateOrganizationData
   'update_password': AccountPasswordUpdateData
   'update_profile': AccountProfileUpdateData
   'validate_reset_token': ResetPasswordData
@@ -170,22 +191,27 @@ export interface OperationDataTypes {
  */
 export interface OperationResponseTypes {
   'confirm_setup': ConfirmMfaSetupResponses
+  'create_connection': CreateConnectionResponses
   'create_device': CreateDeviceResponses
   'create_role': CreateRoleResponses
   'create_tag': CreateTagResponses
   'create_team': CreateTeamResponses
+  'create_ticket': CreateTicketResponses
   'create_user': CreateUserResponses
   'disable_mfa': DisableMfaResponses
   'forgot_password': ForgotPasswordResponses
   'get_mfa_status': GetMfaStatusResponses
+  'get_organization': UpdateOrganizationResponses
   'get_profile': AccountProfileUpdateResponses
   'get_sessions': RevokeAllSessionsResponses
   'get_stats': GetDashboardStatsResponses
   'initiate_setup': InitiateMfaSetupResponses
+  'list_connections': CreateConnectionResponses
   'list_devices': CreateDeviceResponses
   'list_roles': CreateRoleResponses
   'list_tags': CreateTagResponses
   'list_teams_api_teams': CreateTeamResponses
+  'list_tickets': CreateTicketResponses
   'list_users_api_users': CreateUserResponses
   'login': AccountLoginResponses
   'logout': AccountLogoutResponses
@@ -198,6 +224,7 @@ export interface OperationResponseTypes {
   'signup': AccountRegisterResponses
   'system:health': SystemHealthResponses
   'system:oauth-config': OAuthConfigResponses
+  'update_organization': UpdateOrganizationResponses
   'update_password': AccountPasswordUpdateResponses
   'update_profile': AccountProfileUpdateResponses
   'validate_reset_token': ResetPasswordResponses
@@ -211,22 +238,27 @@ export interface OperationResponseTypes {
  */
 export interface OperationErrorTypes {
   'confirm_setup': ConfirmMfaSetupErrors
+  'create_connection': CreateConnectionErrors
   'create_device': CreateDeviceErrors
   'create_role': CreateRoleErrors
   'create_tag': CreateTagErrors
   'create_team': CreateTeamErrors
+  'create_ticket': CreateTicketErrors
   'create_user': CreateUserErrors
   'disable_mfa': DisableMfaErrors
   'forgot_password': ForgotPasswordErrors
   'get_mfa_status': never
+  'get_organization': UpdateOrganizationErrors
   'get_profile': AccountProfileUpdateErrors
   'get_sessions': never
   'get_stats': never
   'initiate_setup': never
+  'list_connections': CreateConnectionErrors
   'list_devices': CreateDeviceErrors
   'list_roles': CreateRoleErrors
   'list_tags': CreateTagErrors
   'list_teams_api_teams': CreateTeamErrors
+  'list_tickets': CreateTicketErrors
   'list_users_api_users': CreateUserErrors
   'login': AccountLoginErrors
   'logout': never
@@ -239,6 +271,7 @@ export interface OperationErrorTypes {
   'signup': AccountRegisterErrors
   'system:health': never
   'system:oauth-config': never
+  'update_organization': UpdateOrganizationErrors
   'update_password': AccountPasswordUpdateErrors
   'update_profile': AccountProfileUpdateErrors
   'validate_reset_token': ResetPasswordErrors

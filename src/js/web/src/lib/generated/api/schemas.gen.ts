@@ -615,6 +615,432 @@ export const AuditLogEntrySchema = {
   type: "object",
 } as const;
 
+export const ConnectionCreateSchema = {
+  properties: {
+    authType: {
+      default: "none",
+      type: "string",
+    },
+    connectionType: {
+      type: "string",
+    },
+    credentials: {
+      oneOf: [
+        {
+          type: "object",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    description: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    host: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    isEnabled: {
+      default: true,
+      type: "boolean",
+    },
+    name: {
+      type: "string",
+    },
+    port: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    provider: {
+      type: "string",
+    },
+    settings: {
+      oneOf: [
+        {
+          type: "object",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    teamId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: ["connectionType", "name", "provider"],
+  title: "ConnectionCreate",
+  type: "object",
+} as const;
+
+export const ConnectionDetailSchema = {
+  properties: {
+    authType: {
+      type: "string",
+    },
+    connectionType: {
+      type: "string",
+    },
+    createdAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    credentialFields: {
+      items: {
+        type: "string",
+      },
+      type: "array",
+    },
+    description: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    host: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    isEnabled: {
+      default: true,
+      type: "boolean",
+    },
+    lastError: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    lastHealthCheck: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    name: {
+      type: "string",
+    },
+    port: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    provider: {
+      type: "string",
+    },
+    settings: {
+      oneOf: [
+        {
+          type: "object",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    status: {
+      type: "string",
+    },
+    teamId: {
+      format: "uuid",
+      type: "string",
+    },
+    updatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: [
+    "authType",
+    "connectionType",
+    "id",
+    "name",
+    "provider",
+    "status",
+    "teamId",
+  ],
+  title: "ConnectionDetail",
+  type: "object",
+} as const;
+
+export const ConnectionListSchema = {
+  properties: {
+    authType: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    connectionType: {
+      type: "string",
+    },
+    createdAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    description: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    host: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    isEnabled: {
+      default: true,
+      type: "boolean",
+    },
+    lastError: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    lastHealthCheck: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    name: {
+      type: "string",
+    },
+    port: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    provider: {
+      type: "string",
+    },
+    status: {
+      type: "string",
+    },
+    teamId: {
+      format: "uuid",
+      type: "string",
+    },
+    updatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: ["connectionType", "id", "name", "provider", "status", "teamId"],
+  title: "ConnectionList",
+  type: "object",
+} as const;
+
+export const ConnectionUpdateSchema = {
+  properties: {
+    authType: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+    connectionType: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+    credentials: {
+      oneOf: [
+        {
+          type: "object",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    description: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    host: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    isEnabled: {
+      oneOf: [
+        {
+          type: "boolean",
+        },
+      ],
+    },
+    name: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+    port: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    provider: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+    settings: {
+      oneOf: [
+        {
+          type: "object",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: [],
+  title: "ConnectionUpdate",
+  type: "object",
+} as const;
+
 export const DashboardStatsSchema = {
   properties: {
     activeUsers: {
@@ -967,6 +1393,166 @@ export const DeviceUpdateSchema = {
   type: "object",
 } as const;
 
+export const DndModeSchema = {
+  default: "off",
+  description: "Valid DND modes.",
+  enum: ["always", "scheduled", "off"],
+  title: "DndMode",
+  type: "string",
+} as const;
+
+export const DndSettingsSchema = {
+  properties: {
+    allowList: {
+      oneOf: [
+        {
+          items: {
+            type: "string",
+          },
+          type: "array",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    extensionId: {
+      format: "uuid",
+      type: "string",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    isEnabled: {
+      default: false,
+      type: "boolean",
+    },
+    mode: {
+      $ref: "#/components/schemas/DndMode",
+    },
+    scheduleDays: {
+      oneOf: [
+        {
+          items: {
+            type: "integer",
+          },
+          type: "array",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    scheduleEnd: {
+      oneOf: [
+        {
+          format: "duration",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    scheduleStart: {
+      oneOf: [
+        {
+          format: "duration",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: ["extensionId", "id"],
+  title: "DndSettings",
+  type: "object",
+} as const;
+
+export const DndSettingsUpdateSchema = {
+  properties: {
+    allowList: {
+      oneOf: [
+        {
+          items: {
+            type: "string",
+          },
+          type: "array",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    isEnabled: {
+      oneOf: [
+        {
+          type: "boolean",
+        },
+      ],
+    },
+    mode: {
+      oneOf: [
+        {
+          $ref: "#/components/schemas/DndMode",
+        },
+      ],
+    },
+    scheduleDays: {
+      oneOf: [
+        {
+          items: {
+            type: "integer",
+          },
+          type: "array",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    scheduleEnd: {
+      oneOf: [
+        {
+          format: "duration",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    scheduleStart: {
+      oneOf: [
+        {
+          format: "duration",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: [],
+  title: "DndSettingsUpdate",
+  type: "object",
+} as const;
+
+export const DndToggleResponseSchema = {
+  properties: {
+    isEnabled: {
+      type: "boolean",
+    },
+  },
+  required: ["isEnabled"],
+  title: "DndToggleResponse",
+  type: "object",
+} as const;
+
 export const EmailVerificationConfirmSchema = {
   properties: {
     token: {
@@ -1021,6 +1607,383 @@ export const EmailVerificationStatusSchema = {
   type: "object",
 } as const;
 
+export const ExtensionSchema = {
+  properties: {
+    displayName: {
+      default: "",
+      type: "string",
+    },
+    extensionNumber: {
+      type: "string",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    isActive: {
+      default: true,
+      type: "boolean",
+    },
+    phoneNumberId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    userId: {
+      format: "uuid",
+      type: "string",
+    },
+  },
+  required: ["extensionNumber", "id", "userId"],
+  title: "Extension",
+  type: "object",
+} as const;
+
+export const ExtensionUpdateSchema = {
+  properties: {
+    displayName: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+    isActive: {
+      oneOf: [
+        {
+          type: "boolean",
+        },
+      ],
+    },
+    phoneNumberId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: [],
+  title: "ExtensionUpdate",
+  type: "object",
+} as const;
+
+export const FaxDirectionSchema = {
+  description: "Valid values for fax message direction.",
+  enum: ["inbound", "outbound"],
+  title: "FaxDirection",
+  type: "string",
+} as const;
+
+export const FaxEmailRouteSchema = {
+  properties: {
+    createdAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    emailAddress: {
+      type: "string",
+    },
+    faxNumberId: {
+      format: "uuid",
+      type: "string",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    isActive: {
+      default: true,
+      type: "boolean",
+    },
+    notifyOnFailure: {
+      default: true,
+      type: "boolean",
+    },
+    updatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: ["emailAddress", "faxNumberId", "id"],
+  title: "FaxEmailRoute",
+  type: "object",
+} as const;
+
+export const FaxEmailRouteCreateSchema = {
+  properties: {
+    emailAddress: {
+      type: "string",
+    },
+    isActive: {
+      default: true,
+      type: "boolean",
+    },
+    notifyOnFailure: {
+      default: true,
+      type: "boolean",
+    },
+  },
+  required: ["emailAddress"],
+  title: "FaxEmailRouteCreate",
+  type: "object",
+} as const;
+
+export const FaxEmailRouteUpdateSchema = {
+  properties: {
+    emailAddress: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+    isActive: {
+      oneOf: [
+        {
+          type: "boolean",
+        },
+      ],
+    },
+    notifyOnFailure: {
+      oneOf: [
+        {
+          type: "boolean",
+        },
+      ],
+    },
+  },
+  required: [],
+  title: "FaxEmailRouteUpdate",
+  type: "object",
+} as const;
+
+export const FaxMessageSchema = {
+  properties: {
+    createdAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    deliveredToEmails: {
+      oneOf: [
+        {
+          items: {
+            type: "string",
+          },
+          type: "array",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    direction: {
+      $ref: "#/components/schemas/FaxDirection",
+    },
+    errorMessage: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    faxNumberId: {
+      format: "uuid",
+      type: "string",
+    },
+    filePath: {
+      default: "",
+      type: "string",
+    },
+    fileSizeBytes: {
+      default: 0,
+      type: "integer",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    pageCount: {
+      default: 0,
+      type: "integer",
+    },
+    receivedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    remoteName: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    remoteNumber: {
+      type: "string",
+    },
+    status: {
+      $ref: "#/components/schemas/FaxStatus",
+    },
+    updatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: ["direction", "faxNumberId", "id", "remoteNumber"],
+  title: "FaxMessage",
+  type: "object",
+} as const;
+
+export const FaxNumberSchema = {
+  properties: {
+    createdAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    isActive: {
+      default: true,
+      type: "boolean",
+    },
+    label: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    number: {
+      type: "string",
+    },
+    teamId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    updatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    userId: {
+      format: "uuid",
+      type: "string",
+    },
+  },
+  required: ["id", "number", "userId"],
+  title: "FaxNumber",
+  type: "object",
+} as const;
+
+export const FaxNumberUpdateSchema = {
+  properties: {
+    isActive: {
+      oneOf: [
+        {
+          type: "boolean",
+        },
+      ],
+    },
+    label: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: [],
+  title: "FaxNumberUpdate",
+  type: "object",
+} as const;
+
+export const FaxStatusSchema = {
+  default: "received",
+  description: "Valid values for fax message status.",
+  enum: ["received", "delivered", "failed", "sending", "sent"],
+  title: "FaxStatus",
+  type: "string",
+} as const;
+
 export const ForgotPasswordRequestSchema = {
   properties: {
     email: {
@@ -1029,6 +1992,483 @@ export const ForgotPasswordRequestSchema = {
   },
   required: ["email"],
   title: "ForgotPasswordRequest",
+  type: "object",
+} as const;
+
+export const ForwardingDestinationTypeSchema = {
+  description: "Valid forwarding destination types.",
+  enum: ["extension", "external", "voicemail"],
+  title: "ForwardingDestinationType",
+  type: "string",
+} as const;
+
+export const ForwardingRuleSchema = {
+  properties: {
+    destinationType: {
+      $ref: "#/components/schemas/ForwardingDestinationType",
+    },
+    destinationValue: {
+      type: "string",
+    },
+    extensionId: {
+      format: "uuid",
+      type: "string",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    isActive: {
+      default: true,
+      type: "boolean",
+    },
+    priority: {
+      default: 0,
+      type: "integer",
+    },
+    ringTimeoutSeconds: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    ruleType: {
+      $ref: "#/components/schemas/ForwardingRuleType",
+    },
+  },
+  required: [
+    "destinationType",
+    "destinationValue",
+    "extensionId",
+    "id",
+    "ruleType",
+  ],
+  title: "ForwardingRule",
+  type: "object",
+} as const;
+
+export const ForwardingRuleCreateSchema = {
+  properties: {
+    destinationType: {
+      $ref: "#/components/schemas/ForwardingDestinationType",
+    },
+    destinationValue: {
+      type: "string",
+    },
+    isActive: {
+      default: true,
+      type: "boolean",
+    },
+    priority: {
+      default: 0,
+      type: "integer",
+    },
+    ringTimeoutSeconds: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    ruleType: {
+      $ref: "#/components/schemas/ForwardingRuleType",
+    },
+  },
+  required: ["destinationType", "destinationValue", "ruleType"],
+  title: "ForwardingRuleCreate",
+  type: "object",
+} as const;
+
+export const ForwardingRuleTypeSchema = {
+  description: "Valid forwarding rule types.",
+  enum: ["always", "busy", "no_answer", "unreachable"],
+  title: "ForwardingRuleType",
+  type: "string",
+} as const;
+
+export const ForwardingRuleUpdateSchema = {
+  properties: {
+    destinationType: {
+      oneOf: [
+        {
+          $ref: "#/components/schemas/ForwardingDestinationType",
+        },
+      ],
+    },
+    destinationValue: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+    isActive: {
+      oneOf: [
+        {
+          type: "boolean",
+        },
+      ],
+    },
+    priority: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+      ],
+    },
+    ringTimeoutSeconds: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    ruleType: {
+      oneOf: [
+        {
+          $ref: "#/components/schemas/ForwardingRuleType",
+        },
+      ],
+    },
+  },
+  required: [],
+  title: "ForwardingRuleUpdate",
+  type: "object",
+} as const;
+
+export const GreetingTypeSchema = {
+  default: "default",
+  description: "Valid voicemail greeting types.",
+  enum: ["default", "custom", "name_only"],
+  title: "GreetingType",
+  type: "string",
+} as const;
+
+export const LocationSchema = {
+  properties: {
+    addressLine1: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    addressLine2: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    children: {
+      items: {
+        $ref: "#/components/schemas/LocationChild",
+      },
+      type: "array",
+    },
+    city: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    country: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    description: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    locationType: {
+      type: "string",
+    },
+    name: {
+      type: "string",
+    },
+    parentId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    postalCode: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    state: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    teamId: {
+      format: "uuid",
+      type: "string",
+    },
+  },
+  required: ["id", "locationType", "name", "teamId"],
+  title: "Location",
+  type: "object",
+} as const;
+
+export const LocationChildSchema = {
+  properties: {
+    description: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    name: {
+      type: "string",
+    },
+  },
+  required: ["id", "name"],
+  title: "LocationChild",
+  type: "object",
+} as const;
+
+export const LocationCreateSchema = {
+  properties: {
+    addressLine1: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    addressLine2: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    city: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    country: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    description: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    locationType: {
+      type: "string",
+    },
+    name: {
+      type: "string",
+    },
+    parentId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    postalCode: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    state: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    teamId: {
+      format: "uuid",
+      type: "string",
+    },
+  },
+  required: ["locationType", "name", "teamId"],
+  title: "LocationCreate",
+  type: "object",
+} as const;
+
+export const LocationUpdateSchema = {
+  properties: {
+    addressLine1: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    addressLine2: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    city: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    country: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    description: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    name: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+    postalCode: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    state: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: [],
+  title: "LocationUpdate",
   type: "object",
 } as const;
 
@@ -1305,6 +2745,322 @@ export const OauthAccountSchema = {
   type: "object",
 } as const;
 
+export const OrganizationSchema = {
+  properties: {
+    addressLine1: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    addressLine2: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    city: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    country: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    defaultLanguage: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    description: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    email: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    logoUrl: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    name: {
+      type: "string",
+    },
+    phone: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    postalCode: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    settings: {
+      oneOf: [
+        {
+          type: "object",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    slug: {
+      type: "string",
+    },
+    state: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    timezone: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    website: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: ["id", "name", "slug"],
+  title: "Organization",
+  type: "object",
+} as const;
+
+export const OrganizationUpdateSchema = {
+  properties: {
+    addressLine1: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    addressLine2: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    city: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    country: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    defaultLanguage: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    description: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    email: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    logoUrl: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    name: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    phone: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    postalCode: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    settings: {
+      oneOf: [
+        {
+          type: "object",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    state: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    timezone: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    website: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: [],
+  title: "OrganizationUpdate",
+  type: "object",
+} as const;
+
 export const PasswordResetCompleteSchema = {
   properties: {
     message: {
@@ -1346,6 +3102,106 @@ export const PasswordUpdateSchema = {
   },
   required: ["currentPassword", "newPassword"],
   title: "PasswordUpdate",
+  type: "object",
+} as const;
+
+export const PhoneNumberSchema = {
+  properties: {
+    callerIdName: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    isActive: {
+      default: true,
+      type: "boolean",
+    },
+    label: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    number: {
+      type: "string",
+    },
+    numberType: {
+      $ref: "#/components/schemas/PhoneNumberType",
+    },
+    teamId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    userId: {
+      format: "uuid",
+      type: "string",
+    },
+  },
+  required: ["id", "number", "userId"],
+  title: "PhoneNumber",
+  type: "object",
+} as const;
+
+export const PhoneNumberTypeSchema = {
+  default: "local",
+  description: "Valid phone number types.",
+  enum: ["local", "toll_free", "international"],
+  title: "PhoneNumberType",
+  type: "string",
+} as const;
+
+export const PhoneNumberUpdateSchema = {
+  properties: {
+    callerIdName: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    isActive: {
+      oneOf: [
+        {
+          type: "boolean",
+        },
+      ],
+    },
+    label: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: [],
+  title: "PhoneNumberUpdate",
   type: "object",
 } as const;
 
@@ -1829,15 +3685,344 @@ export const TeamUpdateSchema = {
   type: "object",
 } as const;
 
-export const TokenRefreshSchema = {
+export const TicketSchema = {
   properties: {
-    message: {
-      default: "Token refreshed successfully",
+    assignedTo: {
+      oneOf: [
+        {
+          $ref: "#/components/schemas/TicketUser",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    category: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    closedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    createdAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    isReadByAgent: {
+      default: false,
+      type: "boolean",
+    },
+    isReadByUser: {
+      default: true,
+      type: "boolean",
+    },
+    latestMessagePreview: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    messageCount: {
+      default: 0,
+      type: "integer",
+    },
+    priority: {
+      type: "string",
+    },
+    resolvedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    status: {
+      type: "string",
+    },
+    subject: {
+      type: "string",
+    },
+    ticketNumber: {
+      type: "string",
+    },
+    updatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    user: {
+      oneOf: [
+        {
+          $ref: "#/components/schemas/TicketUser",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: ["id", "priority", "status", "subject", "ticketNumber"],
+  title: "Ticket",
+  type: "object",
+} as const;
+
+export const TicketAttachmentSchema = {
+  properties: {
+    contentType: {
+      type: "string",
+    },
+    fileName: {
+      type: "string",
+    },
+    fileSizeBytes: {
+      type: "integer",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    isInline: {
+      default: false,
+      type: "boolean",
+    },
+    url: {
+      default: "",
       type: "string",
     },
   },
+  required: ["contentType", "fileName", "fileSizeBytes", "id"],
+  title: "TicketAttachment",
+  type: "object",
+} as const;
+
+export const TicketCreateSchema = {
+  properties: {
+    bodyMarkdown: {
+      type: "string",
+    },
+    category: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    priority: {
+      default: "medium",
+      type: "string",
+    },
+    subject: {
+      type: "string",
+    },
+    teamId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: ["bodyMarkdown", "subject"],
+  title: "TicketCreate",
+  type: "object",
+} as const;
+
+export const TicketMessageSchema = {
+  properties: {
+    attachments: {
+      items: {
+        $ref: "#/components/schemas/TicketAttachment",
+      },
+      type: "array",
+    },
+    author: {
+      oneOf: [
+        {
+          $ref: "#/components/schemas/TicketUser",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    bodyHtml: {
+      type: "string",
+    },
+    bodyMarkdown: {
+      type: "string",
+    },
+    createdAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    isInternalNote: {
+      default: false,
+      type: "boolean",
+    },
+    isSystemMessage: {
+      default: false,
+      type: "boolean",
+    },
+  },
+  required: ["bodyHtml", "bodyMarkdown", "id"],
+  title: "TicketMessage",
+  type: "object",
+} as const;
+
+export const TicketMessageCreateSchema = {
+  properties: {
+    bodyMarkdown: {
+      type: "string",
+    },
+    isInternalNote: {
+      default: false,
+      type: "boolean",
+    },
+  },
+  required: ["bodyMarkdown"],
+  title: "TicketMessageCreate",
+  type: "object",
+} as const;
+
+export const TicketUpdateSchema = {
+  properties: {
+    assignedToId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    category: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    priority: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+    status: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+    subject: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+  },
   required: [],
-  title: "TokenRefresh",
+  title: "TicketUpdate",
+  type: "object",
+} as const;
+
+export const TicketUserSchema = {
+  properties: {
+    avatarUrl: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    email: {
+      type: "string",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    name: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: ["email", "id"],
+  title: "TicketUser",
   type: "object",
 } as const;
 
@@ -2148,5 +4333,215 @@ export const UserUpdateSchema = {
   },
   required: [],
   title: "UserUpdate",
+  type: "object",
+} as const;
+
+export const VoicemailMessageSchema = {
+  properties: {
+    audioFilePath: {
+      default: "",
+      type: "string",
+    },
+    callerName: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    callerNumber: {
+      type: "string",
+    },
+    durationSeconds: {
+      default: 0,
+      type: "integer",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    isRead: {
+      default: false,
+      type: "boolean",
+    },
+    isUrgent: {
+      default: false,
+      type: "boolean",
+    },
+    receivedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    transcription: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    voicemailBoxId: {
+      format: "uuid",
+      type: "string",
+    },
+  },
+  required: ["callerNumber", "id", "voicemailBoxId"],
+  title: "VoicemailMessage",
+  type: "object",
+} as const;
+
+export const VoicemailMessageUpdateSchema = {
+  properties: {
+    isRead: {
+      oneOf: [
+        {
+          type: "boolean",
+        },
+      ],
+    },
+  },
+  required: [],
+  title: "VoicemailMessageUpdate",
+  type: "object",
+} as const;
+
+export const VoicemailSettingsSchema = {
+  properties: {
+    autoDeleteDays: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    emailAttachAudio: {
+      default: false,
+      type: "boolean",
+    },
+    emailNotification: {
+      default: true,
+      type: "boolean",
+    },
+    extensionId: {
+      format: "uuid",
+      type: "string",
+    },
+    greetingFilePath: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    greetingType: {
+      $ref: "#/components/schemas/GreetingType",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    isEnabled: {
+      default: true,
+      type: "boolean",
+    },
+    maxMessageLengthSeconds: {
+      default: 120,
+      type: "integer",
+    },
+    transcriptionEnabled: {
+      default: false,
+      type: "boolean",
+    },
+  },
+  required: ["extensionId", "id"],
+  title: "VoicemailSettings",
+  type: "object",
+} as const;
+
+export const VoicemailSettingsUpdateSchema = {
+  properties: {
+    autoDeleteDays: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    emailAttachAudio: {
+      oneOf: [
+        {
+          type: "boolean",
+        },
+      ],
+    },
+    emailNotification: {
+      oneOf: [
+        {
+          type: "boolean",
+        },
+      ],
+    },
+    greetingType: {
+      oneOf: [
+        {
+          $ref: "#/components/schemas/GreetingType",
+        },
+      ],
+    },
+    isEnabled: {
+      oneOf: [
+        {
+          type: "boolean",
+        },
+      ],
+    },
+    maxMessageLengthSeconds: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+      ],
+    },
+    pin: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    transcriptionEnabled: {
+      oneOf: [
+        {
+          type: "boolean",
+        },
+      ],
+    },
+  },
+  required: [],
+  title: "VoicemailSettingsUpdate",
   type: "object",
 } as const;
