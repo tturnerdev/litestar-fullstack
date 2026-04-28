@@ -1,9 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Check, Pencil, X } from "lucide-react"
+import { useState } from "react"
 import { EmailRouteEditor } from "@/components/fax/email-route-editor"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { useFaxNumber, useUpdateFaxNumber } from "@/lib/api/hooks/fax"
@@ -16,6 +18,26 @@ function FaxNumberDetailPage() {
   const { faxNumberId } = Route.useParams()
   const { data, isLoading, isError } = useFaxNumber(faxNumberId)
   const updateFaxNumber = useUpdateFaxNumber(faxNumberId)
+  const [editingLabel, setEditingLabel] = useState(false)
+  const [labelValue, setLabelValue] = useState("")
+
+  function startEditingLabel() {
+    setLabelValue(data?.label ?? "")
+    setEditingLabel(true)
+  }
+
+  function cancelEditingLabel() {
+    setEditingLabel(false)
+    setLabelValue("")
+  }
+
+  function saveLabel() {
+    const trimmed = labelValue.trim()
+    updateFaxNumber.mutate(
+      { label: trimmed || null },
+      { onSuccess: () => setEditingLabel(false) },
+    )
+  }
 
   if (isLoading) {
     return (
@@ -70,34 +92,81 @@ function FaxNumberDetailPage() {
 
       <PageSection>
         <Card>
+          <CardHeader>
+            <CardTitle>Details</CardTitle>
+          </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid gap-3 text-sm md:grid-cols-2">
+            <div className="grid gap-4 text-sm md:grid-cols-2">
               <div>
-                <p className="text-muted-foreground">Number</p>
-                <p className="font-mono">{data.number}</p>
+                <p className="text-muted-foreground mb-1">Number</p>
+                <p className="font-mono text-base">{data.number}</p>
               </div>
               <div>
-                <p className="text-muted-foreground">Label</p>
-                <p>{data.label ?? "—"}</p>
+                <p className="text-muted-foreground mb-1">Label</p>
+                {editingLabel ? (
+                  <div className="flex items-center gap-2">
+                    <Input
+                      value={labelValue}
+                      onChange={(e) => setLabelValue(e.target.value)}
+                      placeholder="e.g. Main Fax, Billing Dept"
+                      className="h-9 max-w-xs"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") saveLabel()
+                        if (e.key === "Escape") cancelEditingLabel()
+                      }}
+                      autoFocus
+                    />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={saveLabel}
+                      disabled={updateFaxNumber.isPending}
+                    >
+                      <Check className="h-4 w-4 text-emerald-600" />
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={cancelEditingLabel}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <p>{data.label || "--"}</p>
+                    <Button variant="ghost" size="sm" onClick={startEditingLabel} className="h-7 w-7 p-0">
+                      <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+                    </Button>
+                  </div>
+                )}
               </div>
               <div>
-                <p className="text-muted-foreground">Status</p>
+                <p className="text-muted-foreground mb-1">Status</p>
                 <Badge variant={data.isActive ? "default" : "secondary"}>
                   {data.isActive ? "Active" : "Inactive"}
                 </Badge>
               </div>
               <div>
-                <p className="text-muted-foreground">Team</p>
-                <p>{data.teamId ?? "Personal"}</p>
+                <p className="text-muted-foreground mb-1">Assignment</p>
+                <p>{data.teamId ? "Team" : "Personal"}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground mb-1">Created</p>
+                <p>{data.createdAt ? new Date(data.createdAt).toLocaleDateString() : "--"}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground mb-1">Updated</p>
+                <p>{data.updatedAt ? new Date(data.updatedAt).toLocaleDateString() : "--"}</p>
               </div>
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 pt-2 border-t border-border/40">
               <Button
-                variant="outline"
+                variant={data.isActive ? "outline" : "default"}
                 onClick={() => updateFaxNumber.mutate({ isActive: !data.isActive })}
                 disabled={updateFaxNumber.isPending}
               >
-                {data.isActive ? "Deactivate" : "Activate"}
+                {updateFaxNumber.isPending
+                  ? "Updating..."
+                  : data.isActive
+                    ? "Deactivate Number"
+                    : "Activate Number"}
               </Button>
             </div>
           </CardContent>

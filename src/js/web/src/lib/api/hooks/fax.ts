@@ -245,6 +245,28 @@ export function useDeleteFaxMessage() {
   })
 }
 
+export function useDownloadFaxDocument(messageId: string) {
+  return useQuery({
+    queryKey: ["fax", "download", messageId],
+    queryFn: async () => {
+      const token = window.localStorage.getItem("access_token") ?? ""
+      const response = await fetch(`/api/fax/messages/${messageId}/download`, {
+        credentials: "include",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      if (!response.ok) {
+        throw new Error("Failed to download fax document")
+      }
+      const blob = await response.blob()
+      return URL.createObjectURL(blob)
+    },
+    enabled: !!messageId,
+    staleTime: 5 * 60 * 1000,
+  })
+}
+
 // ---------------------------------------------------------------------------
 // Send Fax
 // ---------------------------------------------------------------------------

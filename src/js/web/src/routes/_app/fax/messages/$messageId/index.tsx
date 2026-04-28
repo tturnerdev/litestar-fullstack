@@ -1,6 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router"
-import { ArrowLeft, Download } from "lucide-react"
-import { DirectionBadge, FaxStatusBadge } from "@/components/fax/fax-status-badge"
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
+import { ArrowLeft } from "lucide-react"
+import { FaxMessageDetail } from "@/components/fax/fax-message-detail"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
@@ -13,20 +13,16 @@ export const Route = createFileRoute("/_app/fax/messages/$messageId/")({
 
 function FaxMessageDetailPage() {
   const { messageId } = Route.useParams()
+  const router = useRouter()
   const { data, isLoading, isError } = useFaxMessage(messageId)
   const deleteMutation = useDeleteFaxMessage()
 
-  function formatDate(dateStr: string | null): string {
-    if (!dateStr) return "—"
-    return new Date(dateStr).toLocaleString()
-  }
-
-  function formatBytes(bytes: number): string {
-    if (bytes === 0) return "0 B"
-    const k = 1024
-    const sizes = ["B", "KB", "MB", "GB"]
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return `${Number.parseFloat((bytes / k ** i).toFixed(1))} ${sizes[i]}`
+  function handleDelete() {
+    deleteMutation.mutate(messageId, {
+      onSuccess: () => {
+        router.navigate({ to: "/fax/messages" })
+      },
+    })
   }
 
   if (isLoading) {
@@ -35,6 +31,9 @@ function FaxMessageDetailPage() {
         <PageHeader eyebrow="Communications" title="Message Details" />
         <PageSection>
           <SkeletonCard />
+        </PageSection>
+        <PageSection delay={0.1}>
+          <SkeletonCard className="h-[400px]" />
         </PageSection>
       </PageContainer>
     )
@@ -72,81 +71,20 @@ function FaxMessageDetailPage() {
         title="Fax Message"
         description={`${data.direction === "inbound" ? "From" : "To"} ${data.remoteNumber}`}
         actions={
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" asChild>
-              <Link to="/fax/messages">
-                <ArrowLeft className="mr-2 h-4 w-4" /> Back to messages
-              </Link>
-            </Button>
-          </div>
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/fax/messages">
+              <ArrowLeft className="mr-2 h-4 w-4" /> Back to messages
+            </Link>
+          </Button>
         }
       />
 
       <PageSection>
-        <Card>
-          <CardContent className="space-y-4">
-            <div className="grid gap-3 text-sm md:grid-cols-2">
-              <div>
-                <p className="text-muted-foreground">Direction</p>
-                <div className="mt-1">
-                  <DirectionBadge direction={data.direction} />
-                </div>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Status</p>
-                <div className="mt-1">
-                  <FaxStatusBadge status={data.status} />
-                </div>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Remote Number</p>
-                <p className="font-mono">{data.remoteNumber}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Remote Name</p>
-                <p>{data.remoteName ?? "—"}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Pages</p>
-                <p>{data.pageCount}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">File Size</p>
-                <p>{formatBytes(data.fileSizeBytes)}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Date</p>
-                <p>{formatDate(data.receivedAt)}</p>
-              </div>
-              {data.errorMessage && (
-                <div className="md:col-span-2">
-                  <p className="text-muted-foreground">Error</p>
-                  <p className="text-red-600 dark:text-red-400">{data.errorMessage}</p>
-                </div>
-              )}
-              {data.deliveredToEmails && data.deliveredToEmails.length > 0 && (
-                <div className="md:col-span-2">
-                  <p className="text-muted-foreground">Delivered To</p>
-                  <p>{data.deliveredToEmails.join(", ")}</p>
-                </div>
-              )}
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Button variant="outline" asChild>
-                <a href={`/api/fax/messages/${data.id}/download`} download>
-                  <Download className="mr-2 h-4 w-4" /> Download Document
-                </a>
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={() => deleteMutation.mutate(data.id)}
-                disabled={deleteMutation.isPending}
-              >
-                {deleteMutation.isPending ? "Deleting..." : "Delete Message"}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <FaxMessageDetail
+          message={data}
+          onDelete={handleDelete}
+          isDeleting={deleteMutation.isPending}
+        />
       </PageSection>
     </PageContainer>
   )
