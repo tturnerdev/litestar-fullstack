@@ -261,6 +261,58 @@ export function useDeleteVoicemailMessage(extensionId: string) {
   })
 }
 
+export function useUploadVoicemailGreeting(extensionId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (file: File) => {
+      const config = client.getConfig()
+      const baseUrl = config.baseUrl ?? ""
+      const token = typeof window !== "undefined" ? window.localStorage.getItem("access_token") : null
+      const formData = new FormData()
+      formData.append("file", file)
+      const response = await fetch(`${baseUrl}/api/voice/extensions/${extensionId}/voicemail/greeting`, {
+        method: "POST",
+        credentials: "include",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      })
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}))
+        throw new Error(body.detail ?? `Upload failed (${response.status})`)
+      }
+      return response.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["voice", "voicemail-settings", extensionId] })
+      toast.success("Greeting uploaded")
+    },
+    onError: (error) => {
+      toast.error("Unable to upload greeting", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
+    },
+  })
+}
+
+export function useMarkVoicemailRead(extensionId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ messageId, isRead }: { messageId: string; isRead: boolean }) =>
+      apiFetch<VoicemailMessage>(`/api/voice/extensions/${extensionId}/voicemail/messages/${messageId}`, {
+        method: "PATCH",
+        body: JSON.stringify({ isRead }),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["voice", "voicemail-messages", extensionId] })
+    },
+    onError: (error) => {
+      toast.error("Unable to update message", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
+    },
+  })
+}
+
 // ---------------------------------------------------------------------------
 // Forwarding Rules
 // ---------------------------------------------------------------------------
@@ -307,6 +359,26 @@ export function useCreateForwardingRule(extensionId: string) {
     },
     onError: (error) => {
       toast.error("Unable to create forwarding rule", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
+    },
+  })
+}
+
+export function useUpdateForwardingRule(extensionId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ ruleId, payload }: { ruleId: string; payload: Record<string, unknown> }) =>
+      apiFetch<ForwardingRule>(`/api/voice/extensions/${extensionId}/forwarding/${ruleId}`, {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["voice", "forwarding-rules", extensionId] })
+      toast.success("Forwarding rule updated")
+    },
+    onError: (error) => {
+      toast.error("Unable to update forwarding rule", {
         description: error instanceof Error ? error.message : "Try again later",
       })
     },
@@ -374,6 +446,60 @@ export function useToggleDnd(extensionId: string) {
     },
     onError: (error) => {
       toast.error("Unable to toggle DND", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
+    },
+  })
+}
+
+// ---------------------------------------------------------------------------
+// Bulk Operations
+// ---------------------------------------------------------------------------
+
+export function useBulkMarkVoicemailRead(extensionId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (messageIds: string[]) => {
+      await Promise.all(
+        messageIds.map((messageId) =>
+          apiFetch<VoicemailMessage>(
+            `/api/voice/extensions/${extensionId}/voicemail/messages/${messageId}`,
+            { method: "PATCH", body: JSON.stringify({ isRead: true }) },
+          ),
+        ),
+      )
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["voice", "voicemail-messages", extensionId] })
+      toast.success("Messages marked as read")
+    },
+    onError: (error) => {
+      toast.error("Unable to mark messages as read", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
+    },
+  })
+}
+
+export function useBulkDeleteVoicemailMessages(extensionId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (messageIds: string[]) => {
+      await Promise.all(
+        messageIds.map((messageId) =>
+          apiFetch<void>(
+            `/api/voice/extensions/${extensionId}/voicemail/messages/${messageId}`,
+            { method: "DELETE" },
+          ),
+        ),
+      )
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["voice", "voicemail-messages", extensionId] })
+      toast.success("Messages deleted")
+    },
+    onError: (error) => {
+      toast.error("Unable to delete messages", {
         description: error instanceof Error ? error.message : "Try again later",
       })
     },
