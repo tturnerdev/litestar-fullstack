@@ -1,0 +1,11 @@
+import { createFileRoute, Outlet } from "@tanstack/react-router"
+
+export const Route = createFileRoute("/_app/connections")({
+  component: ConnectionsLayout,
+})
+
+function ConnectionsLayout() {
+  return <Outlet />
+}
+
+export default ConnectionsLayout

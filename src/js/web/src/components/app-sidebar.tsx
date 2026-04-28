@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { Home, LifeBuoy, Monitor, Phone, Printer, ShieldCheck, Users } from "lucide-react"
+import { Building2, Cable, Home, LifeBuoy, MapPin, Monitor, Phone, Printer, ShieldCheck, Users } from "lucide-react"
 import type * as React from "react"
 import { useEffect, useMemo } from "react"
 import { NavMain } from "@/components/nav-main"
@@ -54,6 +54,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         ],
       },
       {
+        title: "Locations",
+        to: "/locations",
+        icon: MapPin,
+        items: [
+          { title: "All locations", to: "/locations" },
+          { title: "New location", to: "/locations/new" },
+        ],
+      },
+      {
         title: "Devices",
         to: "/devices",
         icon: Monitor,
@@ -93,6 +102,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     ]
 
     if (user?.isSuperuser) {
+      items.push({
+        title: "Connections",
+        to: "/connections",
+        icon: Cable,
+        items: [
+          { title: "All connections", to: "/connections" },
+          { title: "New connection", to: "/connections/new" },
+        ],
+      })
+      items.push({
+        title: "Organization",
+        to: "/organization",
+        icon: Building2,
+      })
       items.push({
         title: "Admin",
         to: "/admin",
