@@ -1,7 +1,7 @@
 """merge feature branches
 
 Revision ID: 2d2ae36586a5
-Revises: a1b2c3d4e5f6, a424720f5029, ba884be8f077, b1cf87cc0066
+Revises: ee846255bf42, a424720f5029, ba884be8f077, b1cf87cc0066
 Create Date: 2026-04-27 15:42:02.532260
 
 """
@@ -28,7 +28,7 @@ sa.PasswordHash = PasswordHash  # pyright: ignore
 
 # revision identifiers, used by Alembic.
 revision = '2d2ae36586a5'
-down_revision = ('a1b2c3d4e5f6', 'a424720f5029', 'ba884be8f077', 'b1cf87cc0066')
+down_revision = ('ee846255bf42', 'a424720f5029', 'ba884be8f077', 'b1cf87cc0066')
 branch_labels = None
 depends_on = None
 

@@ -1,6 +1,6 @@
 """add fax tables
 
-Revision ID: a1b2c3d4e5f6
+Revision ID: ee846255bf42
 Revises: dc54b25d8b6c
 Create Date: 2026-02-06 00:00:00.000000
 
@@ -22,7 +22,7 @@ sa.GUID = GUID  # pyright: ignore
 sa.DateTimeUTC = DateTimeUTC  # pyright: ignore
 
 # revision identifiers, used by Alembic.
-revision = 'a1b2c3d4e5f6'
+revision = 'ee846255bf42'
 down_revision = 'dc54b25d8b6c'
 branch_labels = None
 depends_on = None
