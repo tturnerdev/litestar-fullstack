@@ -25,6 +25,7 @@ const createDeviceSchema = z.object({
   macAddress: z.string().optional(),
   deviceModel: z.string().optional(),
   manufacturer: z.string().optional(),
+  teamId: z.string().optional(),
 })
 
 type CreateDeviceFormData = z.infer<typeof createDeviceSchema>
@@ -41,20 +42,22 @@ export function CreateDeviceForm() {
       macAddress: "",
       deviceModel: "",
       manufacturer: "",
+      teamId: "",
     },
   })
 
   const onSubmit = async (data: CreateDeviceFormData) => {
     try {
-      await createDevice.mutateAsync({
+      const device = await createDevice.mutateAsync({
         name: data.name,
         deviceType: data.deviceType,
         macAddress: data.macAddress || undefined,
         deviceModel: data.deviceModel || undefined,
         manufacturer: data.manufacturer || undefined,
+        teamId: data.teamId || undefined,
       })
       router.invalidate()
-      router.navigate({ to: "/devices" })
+      router.navigate({ to: "/devices/$deviceId", params: { deviceId: device.id } })
     } catch (_error) {
       form.setError("root", {
         message: "Failed to create device",
@@ -136,6 +139,19 @@ export function CreateDeviceForm() {
               <FormLabel>Manufacturer</FormLabel>
               <FormControl>
                 <Input placeholder="Polycom" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="teamId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Team (optional)</FormLabel>
+              <FormControl>
+                <Input placeholder="Team ID (optional)" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
