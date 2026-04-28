@@ -5,37 +5,40 @@
 </p>
 <!-- markdownlint-restore -->
 
-<div align="center">
-<!-- prettier-ignore-start -->
+# Admin Portal
 
-| Project   |     | Status                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| --------- | :-- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| CI/CD     |     | [![Tests and Linting](https://github.com/litestar-org/litestar-fullstack/actions/workflows/ci.yaml/badge.svg)](https://github.com/litestar-org/litestar-fullstack/actions/workflows/ci.yaml)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| Quality   |     | [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=litestar-org_litestar-fullstack&metric=coverage)](https://sonarcloud.io/summary/new_code?id=litestar-org_litestar) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=litestar-org_litestar-fullstack&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=litestar-org_litestar) [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=litestar-org_litestar-fullstack&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=litestar-org_litestar) [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=litestar-org_litestar-fullstack&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=litestar-org_litestar) [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=litestar-org_litestar-fullstack&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=litestar-org_litestar)                                                                                                                                                                                                                     |
-| Community |     | [![Reddit](https://img.shields.io/reddit/subreddit-subscribers/litestarapi?label=r%2FLitestar&logo=reddit&labelColor=202235&color=edb641&logoColor=edb641)](https://reddit.com/r/litestarapi) [![Discord](https://img.shields.io/discord/919193495116337154?labelColor=202235&color=edb641&label=chat%20on%20discord&logo=discord&logoColor=edb641)](https://discord.gg/litestar) [![Matrix](https://img.shields.io/badge/chat%20on%20Matrix-bridged-202235?labelColor=202235&color=edb641&logo=matrix&logoColor=edb641)](https://matrix.to/#/#litestar:matrix.org) [![Medium](https://img.shields.io/badge/Medium-202235?labelColor=202235&color=edb641&logo=medium&logoColor=edb641)](https://blog.litestar.dev) [![Twitter](https://img.shields.io/twitter/follow/LitestarAPI?labelColor=202235&color=edb641&logo=twitter&logoColor=edb641&style=flat)](https://twitter.com/LitestarAPI) [![Blog](https://img.shields.io/badge/Blog-litestar.dev-202235?logo=blogger&labelColor=202235&color=edb641&logoColor=edb641)](https://blog.litestar.dev)                                                                                                                                                                                                |
-| Meta      |     | [![Litestar Project](https://img.shields.io/badge/Litestar%20Org-%E2%AD%90%20Litestar-202235.svg?logo=python&labelColor=202235&color=edb641&logoColor=edb641)](https://github.com/litestar-org/litestar) [![types - Mypy](https://img.shields.io/badge/types-Mypy-202235.svg?logo=python&labelColor=202235&color=edb641&logoColor=edb641)](https://github.com/python/mypy) [![License - MIT](https://img.shields.io/badge/license-MIT-202235.svg?logo=python&labelColor=202235&color=edb641&logoColor=edb641)](https://spdx.org/licenses/) [![Litestar Sponsors](https://img.shields.io/badge/Sponsor-%E2%9D%A4-%23edb641.svg?&logo=github&logoColor=edb641&labelColor=202235)](https://github.com/sponsors/litestar-org) [![linting - Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/charliermarsh/ruff/main/assets/badge/v2.json&labelColor=202235)](https://github.com/astral-sh/ruff) [![code style - Black](https://img.shields.io/badge/code%20style-black-000000.svg?logo=python&labelColor=202235&logoColor=edb641)](https://github.com/psf/black) [![All Contributors](https://img.shields.io/github/all-contributors/litestar-org/litestar?labelColor=202235&color=edb641&logoColor=edb641)](#contributors-) |
+A multi-tenant administration portal built on the [Litestar Fullstack](https://github.com/litestar-org/litestar-fullstack) reference architecture.
 
-<!-- prettier-ignore-end -->
-</div>
+## Stack
 
-# Litestar Fullstack Reference Application
+| Layer | Technology |
+|---|---|
+| Backend API | Litestar (Python ASGI) |
+| ORM / DB | SQLAlchemy 2.0 + PostgreSQL via Advanced Alchemy |
+| Schemas / DTOs | msgspec Structs (`CamelizedBaseStruct`) |
+| Migrations | Alembic |
+| Task Queue | SAQ + Redis |
+| Frontend | React 19 + Vite + TanStack Router + React Query |
+| UI Components | shadcn/ui (Radix-based) + Tailwind CSS |
+| API Client | Auto-generated via `@hey-api/openapi-ts` |
+| State | Zustand |
 
-This is a reference application that you can use to get your next Litestar application running quickly.
+## Feature Domains
 
-It contains most of the boilerplate required for a production web API with features like:
+| Domain | Module | Description |
+|--------|--------|-------------|
+| **Teams** | `app.domain.teams` | Team management, member roles, invitations with email notifications |
+| **Devices** | `app.domain.devices` | Device provisioning, configuration, line assignments, and status monitoring |
+| **Voice** | `app.domain.voice` | Phone numbers, extensions, voicemail, forwarding rules, and DND settings |
+| **Fax** | `app.domain.fax` | Fax number management and email delivery routing |
+| **Support** | `app.domain.support` | Helpdesk ticket system with markdown, attachments, and message threads |
+| **Locations** | `app.domain.locations` | Addressed locations (with mailing address) and physical sub-locations for associating devices and extensions |
+| **Organization** | `app.domain.organizations` | Org-level settings and profile (admin-viewable, superuser-editable) |
+| **Connections** | `app.domain.connections` | External integration configs (PBX, helpdesk, carrier) with credential security and health checks |
 
-- Latest Litestar configured with best practices
-- Integration with [SQLAlchemy 2.0](https://www.sqlalchemy.org/), [SAQ (Simple Asynchronous Queue)](https://saq-py.readthedocs.io/en/latest/), [Structlog](https://www.structlog.org/en/stable/), and [Granian](https://github.com/emmett-framework/granian)
-- Frontend integrated with Vite in SPA mode and React Email templates compiled to static HTML
-- JWT auth with refresh tokens, MFA, OAuth, and admin surfaces
-- Multi-stage Docker build using a minimal Python 3.13 runtime image (including a distroless variant)
-- Team and role management with service/repository patterns and Advanced Alchemy filters
-
-Take what you need and adapt it to your own projects
+See [PROJECT.md](./PROJECT.md) for architecture conventions and detailed feature plans.
 
 ## Quick Start
-
-To quickly get a development environment running, run the following:
 
 ```shell
 make install
@@ -54,8 +57,14 @@ app run
 
 ### Docker
 
-If you want to run the entire development environment containerized, you can run the following:
-
 ```bash
 docker compose up
+```
+
+### After Backend Changes
+
+Regenerate the TypeScript API client:
+
+```bash
+make types
 ```

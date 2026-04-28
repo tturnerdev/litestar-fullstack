@@ -22,12 +22,17 @@ The platform is built on the [Litestar Fullstack](https://github.com/litestar-or
 
 ## Feature Areas
 
-| # | Area | Domain Module | Description | Detailed Plan |
-|---|------|---------------|-------------|---------------|
-| 1 | **Device** | `app.domain.devices` | Device provisioning, configuration, and status monitoring | [FEATURE-DEVICE.md](./FEATURE-DEVICE.md) |
-| 2 | **Voice** | `app.domain.voice` | Phone, extension, voicemail, forwarding, and DND settings | [FEATURE-VOICE.md](./FEATURE-VOICE.md) |
-| 3 | **Fax** | `app.domain.fax` | Fax number management and email delivery configuration | [FEATURE-FAX.md](./FEATURE-FAX.md) |
-| 4 | **Support** | `app.domain.support` | Helpdesk ticket system with markdown and image support | [FEATURE-SUPPORT.md](./FEATURE-SUPPORT.md) |
+| # | Area | Domain Module | Description | Status |
+|---|------|---------------|-------------|--------|
+| 1 | **Device** | `app.domain.devices` | Device provisioning, configuration, and status monitoring | Implemented |
+| 2 | **Voice** | `app.domain.voice` | Phone, extension, voicemail, forwarding, and DND settings | Implemented |
+| 3 | **Fax** | `app.domain.fax` | Fax number management and email delivery configuration | Implemented |
+| 4 | **Support** | `app.domain.support` | Helpdesk ticket system with markdown and image support | Implemented |
+| 5 | **Location** | `app.domain.locations` | Addressed and physical sub-locations for associating devices and extensions | Implemented |
+| 6 | **Organization** | `app.domain.organizations` | Org-level settings and profile (admin-viewable, superuser-editable) | Implemented |
+| 7 | **Connections** | `app.domain.connections` | External integration configs (PBX, helpdesk, carrier) with credential security | Implemented |
+
+Detailed plans for the original four domains: [FEATURE-DEVICE.md](./FEATURE-DEVICE.md), [FEATURE-VOICE.md](./FEATURE-VOICE.md), [FEATURE-FAX.md](./FEATURE-FAX.md), [FEATURE-SUPPORT.md](./FEATURE-SUPPORT.md)
 
 ---
 
@@ -81,7 +86,8 @@ After backend changes, run `make types` to regenerate the TypeScript API client.
 
 ### Navigation
 
-- New top-level sidebar entries: **Devices**, **Voice**, **Fax**, **Support**.
+- Top-level sidebar entries: **Teams**, **Locations**, **Devices**, **Voice**, **Fax**, **Support**.
+- Superuser-only entries: **Connections**, **Organization**, **Admin**.
 - The admin panel (`/admin`) will gain management views for each domain.
 
 ### Database Migrations
@@ -111,37 +117,22 @@ After backend changes, run `make types` to regenerate the TypeScript API client.
 
 ---
 
-## Implementation Order
+## Implementation Status
 
-The recommended order balances dependency relationships and incremental value:
+All seven domain modules are implemented with full backend (models, services, controllers, schemas, guards, migrations) and frontend (routes, components, API hooks).
 
-```
-Phase 1: Device
-  └── Foundation — models, CRUD, device status
-  └── Establishes the pattern for hardware-linked entities
+### Access Control
 
-Phase 2: Voice
-  └── Depends on Device (extensions tied to devices)
-  └── Core telephony settings
+| Role | Visible Domains |
+|------|----------------|
+| Member | Teams, Locations, Devices, Voice, Fax, Support |
+| Admin | All member domains + view Organization |
+| Superuser | All domains + edit Organization, Connections, Admin |
 
-Phase 3: Fax
-  └── Lighter scope, self-contained
-  └── Fax number + email delivery mapping
+### Upcoming Work
 
-Phase 4: Support
-  └── Most complex frontend (rich text editor, image handling)
-  └── Can be developed in parallel with Phases 2–3
-```
-
-Each phase is detailed in its own `FEATURE-*.md` file linked above.
-
----
-
-## Shared Infrastructure Needs
-
-Before or during Phase 1, the following shared infrastructure should be established:
-
-1. **File/Image Upload Service** — Needed by Support (ticket attachments) and potentially Device (firmware uploads). Should be a shared service in `app.lib` or its own domain.
-2. **Notification Service** — Email and in-app notifications for ticket updates, device alerts, voicemail delivery. Extends the existing email infrastructure.
-3. **Audit Logging** — All four domains should emit audit events. The existing admin audit log viewer should be extended to cover new entity types.
-4. **Webhook/External Integration Layer** — Support helpdesk integration, device provisioning callbacks, voicemail transcription. A shared pattern for external API communication.
+- **API Sync System** — Pull data from external sources (carrier phone numbers, PBX extensions, helpdesk tickets) into portal tables via the Connections domain. Provider-specific adapters behind a common interface, executed as SAQ background jobs.
+- **File/Image Upload Service** — Needed by Support (ticket attachments) and potentially Device (firmware uploads).
+- **Notification Service** — Email and in-app notifications for ticket updates, device alerts, voicemail delivery.
+- **Audit Logging** — Extend the admin audit log viewer to cover all domain entity types.
+- **Cross-Domain Linking** — Associate devices and extensions with physical locations; link connections to their respective data domains.
