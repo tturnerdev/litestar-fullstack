@@ -46,6 +46,9 @@ import { Route as PublicAuthGithubCallbackRouteImport } from './routes/_public/a
 import { Route as AppAdminUsersUserIdRouteImport } from './routes/_app/admin/users/$userId'
 import { Route as AppAdminTeamsTeamIdRouteImport } from './routes/_app/admin/teams/$teamId'
 import { Route as AppVoiceExtensionsExtensionIdIndexRouteImport } from './routes/_app/voice/extensions/$extensionId/index'
+import { Route as AppVoiceExtensionsExtensionIdVoicemailRouteImport } from './routes/_app/voice/extensions/$extensionId/voicemail'
+import { Route as AppVoiceExtensionsExtensionIdForwardingRouteImport } from './routes/_app/voice/extensions/$extensionId/forwarding'
+import { Route as AppVoiceExtensionsExtensionIdDndRouteImport } from './routes/_app/voice/extensions/$extensionId/dnd'
 import { Route as AppTeamsTeamIdInvitationsInvitationIdAcceptRouteImport } from './routes/_app/teams/$teamId/invitations/$invitationId/accept'
 
 const PublicRoute = PublicRouteImport.update({
@@ -234,6 +237,24 @@ const AppVoiceExtensionsExtensionIdIndexRoute =
     path: '/voice/extensions/$extensionId/',
     getParentRoute: () => AppRoute,
   } as any)
+const AppVoiceExtensionsExtensionIdVoicemailRoute =
+  AppVoiceExtensionsExtensionIdVoicemailRouteImport.update({
+    id: '/voice/extensions/$extensionId/voicemail',
+    path: '/voice/extensions/$extensionId/voicemail',
+    getParentRoute: () => AppRoute,
+  } as any)
+const AppVoiceExtensionsExtensionIdForwardingRoute =
+  AppVoiceExtensionsExtensionIdForwardingRouteImport.update({
+    id: '/voice/extensions/$extensionId/forwarding',
+    path: '/voice/extensions/$extensionId/forwarding',
+    getParentRoute: () => AppRoute,
+  } as any)
+const AppVoiceExtensionsExtensionIdDndRoute =
+  AppVoiceExtensionsExtensionIdDndRouteImport.update({
+    id: '/voice/extensions/$extensionId/dnd',
+    path: '/voice/extensions/$extensionId/dnd',
+    getParentRoute: () => AppRoute,
+  } as any)
 const AppTeamsTeamIdInvitationsInvitationIdAcceptRoute =
   AppTeamsTeamIdInvitationsInvitationIdAcceptRouteImport.update({
     id: '/invitations/$invitationId/accept',
@@ -277,6 +298,9 @@ export interface FileRoutesByFullPath {
   '/devices/$deviceId/': typeof AppDevicesDeviceIdIndexRoute
   '/voice/extensions/': typeof AppVoiceExtensionsIndexRoute
   '/voice/extensions/$extensionId/': typeof AppVoiceExtensionsExtensionIdIndexRoute
+  '/voice/extensions/$extensionId/voicemail': typeof AppVoiceExtensionsExtensionIdVoicemailRoute
+  '/voice/extensions/$extensionId/forwarding': typeof AppVoiceExtensionsExtensionIdForwardingRoute
+  '/voice/extensions/$extensionId/dnd': typeof AppVoiceExtensionsExtensionIdDndRoute
   '/teams/$teamId/invitations/$invitationId/accept': typeof AppTeamsTeamIdInvitationsInvitationIdAcceptRoute
 }
 export interface FileRoutesByTo {
@@ -312,6 +336,9 @@ export interface FileRoutesByTo {
   '/devices/$deviceId': typeof AppDevicesDeviceIdIndexRoute
   '/voice/extensions': typeof AppVoiceExtensionsIndexRoute
   '/voice/extensions/$extensionId': typeof AppVoiceExtensionsExtensionIdIndexRoute
+  '/voice/extensions/$extensionId/voicemail': typeof AppVoiceExtensionsExtensionIdVoicemailRoute
+  '/voice/extensions/$extensionId/forwarding': typeof AppVoiceExtensionsExtensionIdForwardingRoute
+  '/voice/extensions/$extensionId/dnd': typeof AppVoiceExtensionsExtensionIdDndRoute
   '/teams/$teamId/invitations/$invitationId/accept': typeof AppTeamsTeamIdInvitationsInvitationIdAcceptRoute
 }
 export interface FileRoutesById {
@@ -353,6 +380,9 @@ export interface FileRoutesById {
   '/_app/devices/$deviceId/': typeof AppDevicesDeviceIdIndexRoute
   '/_app/voice/extensions/': typeof AppVoiceExtensionsIndexRoute
   '/_app/voice/extensions/$extensionId/': typeof AppVoiceExtensionsExtensionIdIndexRoute
+  '/_app/voice/extensions/$extensionId/voicemail': typeof AppVoiceExtensionsExtensionIdVoicemailRoute
+  '/_app/voice/extensions/$extensionId/forwarding': typeof AppVoiceExtensionsExtensionIdForwardingRoute
+  '/_app/voice/extensions/$extensionId/dnd': typeof AppVoiceExtensionsExtensionIdDndRoute
   '/_app/teams/$teamId/invitations/$invitationId/accept': typeof AppTeamsTeamIdInvitationsInvitationIdAcceptRoute
 }
 export interface FileRouteTypes {
@@ -393,6 +423,9 @@ export interface FileRouteTypes {
     | '/devices/$deviceId/'
     | '/voice/extensions/'
     | '/voice/extensions/$extensionId/'
+    | '/voice/extensions/$extensionId/voicemail'
+    | '/voice/extensions/$extensionId/forwarding'
+    | '/voice/extensions/$extensionId/dnd'
     | '/teams/$teamId/invitations/$invitationId/accept'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -428,6 +461,9 @@ export interface FileRouteTypes {
     | '/devices/$deviceId'
     | '/voice/extensions'
     | '/voice/extensions/$extensionId'
+    | '/voice/extensions/$extensionId/voicemail'
+    | '/voice/extensions/$extensionId/forwarding'
+    | '/voice/extensions/$extensionId/dnd'
     | '/teams/$teamId/invitations/$invitationId/accept'
   id:
     | '__root__'
@@ -468,6 +504,9 @@ export interface FileRouteTypes {
     | '/_app/devices/$deviceId/'
     | '/_app/voice/extensions/'
     | '/_app/voice/extensions/$extensionId/'
+    | '/_app/voice/extensions/$extensionId/voicemail'
+    | '/_app/voice/extensions/$extensionId/forwarding'
+    | '/_app/voice/extensions/$extensionId/dnd'
     | '/_app/teams/$teamId/invitations/$invitationId/accept'
   fileRoutesById: FileRoutesById
 }

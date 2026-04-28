@@ -1,16 +1,26 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, Link } from "@tanstack/react-router"
+import { ArrowLeft, ArrowRight, BellOff, Mail, PhoneForwarded, Voicemail } from "lucide-react"
 import { useState } from "react"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { DndQuickToggle } from "@/components/voice/dnd-quick-toggle"
 import { DndSettingsForm } from "@/components/voice/dnd-settings-form"
 import { ForwardingRuleEditor } from "@/components/voice/forwarding-rule-editor"
 import { VoicemailSettingsForm } from "@/components/voice/voicemail-settings-form"
-import { useExtension, useUpdateExtension } from "@/lib/api/hooks/voice"
+import {
+  useDndSettings,
+  useExtension,
+  useForwardingRules,
+  useUpdateExtension,
+  useVoicemailMessages,
+  useVoicemailSettings,
+} from "@/lib/api/hooks/voice"
 
 export const Route = createFileRoute("/_app/voice/extensions/$extensionId/")({
   component: ExtensionSettingsPage,
@@ -18,11 +28,32 @@ export const Route = createFileRoute("/_app/voice/extensions/$extensionId/")({
 
 function ExtensionSettingsPage() {
   const { extensionId } = Route.useParams()
+  const { data } = useExtension(extensionId)
+
+  const title = data ? `${data.displayName} (Ext. ${data.extensionNumber})` : "Extension Settings"
 
   return (
     <PageContainer className="flex-1 space-y-8">
-      <PageHeader eyebrow="Voice" title="Extension Settings" />
+      <PageHeader
+        eyebrow="Voice"
+        title={title}
+        actions={
+          <div className="flex items-center gap-2">
+            <DndQuickToggle extensionId={extensionId} showLabel />
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/voice/extensions">
+                <ArrowLeft className="mr-2 h-4 w-4" /> All Extensions
+              </Link>
+            </Button>
+          </div>
+        }
+      />
+
       <PageSection>
+        <SubPageLinks extensionId={extensionId} />
+      </PageSection>
+
+      <PageSection delay={0.1}>
         <Tabs defaultValue="general">
           <TabsList>
             <TabsTrigger value="general">General</TabsTrigger>
@@ -49,6 +80,88 @@ function ExtensionSettingsPage() {
         </Tabs>
       </PageSection>
     </PageContainer>
+  )
+}
+
+function SubPageLinks({ extensionId }: { extensionId: string }) {
+  const { data: vmSettings } = useVoicemailSettings(extensionId)
+  const { data: vmMessages } = useVoicemailMessages(extensionId, 1, 5)
+  const { data: fwdRules } = useForwardingRules(extensionId)
+  const { data: dndSettings } = useDndSettings(extensionId)
+
+  const unreadCount = vmMessages?.items.filter((m) => !m.isRead).length ?? 0
+  const totalMessages = vmMessages?.total ?? 0
+  const ruleCount = fwdRules?.items?.length ?? 0
+  const activeRules = fwdRules?.items?.filter((r) => r.isActive).length ?? 0
+  const dndEnabled = dndSettings?.isEnabled ?? false
+  const vmEnabled = vmSettings?.isEnabled ?? false
+
+  const subPages = [
+    {
+      label: "Voicemail",
+      description: vmEnabled
+        ? unreadCount > 0
+          ? `${unreadCount} unread of ${totalMessages} messages`
+          : `${totalMessages} messages`
+        : "Voicemail disabled",
+      to: "/voice/extensions/$extensionId/voicemail" as const,
+      icon: Voicemail,
+      badge: unreadCount > 0 ? (
+        <Badge variant="secondary" className="gap-1">
+          <Mail className="h-3 w-3" />
+          {unreadCount}
+        </Badge>
+      ) : null,
+    },
+    {
+      label: "Call Forwarding",
+      description: ruleCount > 0
+        ? `${activeRules} of ${ruleCount} rules active`
+        : "No forwarding rules configured",
+      to: "/voice/extensions/$extensionId/forwarding" as const,
+      icon: PhoneForwarded,
+      badge: ruleCount > 0 ? (
+        <Badge variant="secondary">{ruleCount} rules</Badge>
+      ) : null,
+    },
+    {
+      label: "Do Not Disturb",
+      description: dndEnabled
+        ? `DND is active (${dndSettings?.mode ?? "always"})`
+        : "DND is off",
+      to: "/voice/extensions/$extensionId/dnd" as const,
+      icon: BellOff,
+      badge: dndEnabled ? (
+        <Badge variant="destructive" className="gap-1">
+          <BellOff className="h-3 w-3" />
+          Active
+        </Badge>
+      ) : null,
+    },
+  ]
+
+  return (
+    <div className="grid gap-3 md:grid-cols-3">
+      {subPages.map((page) => (
+        <Card key={page.to} hover>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <div className="flex items-center gap-3">
+              <page.icon className="h-5 w-5 text-muted-foreground" />
+              <CardTitle className="text-sm">{page.label}</CardTitle>
+            </div>
+            {page.badge}
+          </CardHeader>
+          <CardContent className="flex items-center justify-between">
+            <CardDescription className="text-xs">{page.description}</CardDescription>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to={page.to} params={{ extensionId }}>
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
   )
 }
 
@@ -85,6 +198,7 @@ function GeneralTab({ extensionId }: { extensionId: string }) {
     <Card>
       <CardHeader>
         <CardTitle>General Settings</CardTitle>
+        <CardDescription>Basic configuration for this extension.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-2">
@@ -94,6 +208,7 @@ function GeneralTab({ extensionId }: { extensionId: string }) {
 
         <div className="space-y-2">
           <Label htmlFor="ext-display-name">Display name</Label>
+          <p className="text-xs text-muted-foreground">This name appears in the directory and call logs.</p>
           <Input
             id="ext-display-name"
             value={currentDisplayName}
@@ -105,9 +220,24 @@ function GeneralTab({ extensionId }: { extensionId: string }) {
         </div>
 
         <div className="flex items-center justify-between">
-          <Label>Status</Label>
-          <span className={data.isActive ? "text-sm font-medium text-green-600" : "text-sm font-medium text-muted-foreground"}>{data.isActive ? "Active" : "Inactive"}</span>
+          <div>
+            <Label>Status</Label>
+            <p className="text-xs text-muted-foreground">Whether this extension can receive calls.</p>
+          </div>
+          <Badge variant={data.isActive ? "default" : "outline"}>
+            {data.isActive ? "Active" : "Inactive"}
+          </Badge>
         </div>
+
+        {data.phoneNumberId && (
+          <div className="flex items-center justify-between">
+            <div>
+              <Label>Linked phone number</Label>
+              <p className="text-xs text-muted-foreground">A DID number routes directly to this extension.</p>
+            </div>
+            <Badge variant="secondary">Assigned</Badge>
+          </div>
+        )}
 
         <Button onClick={handleSave} disabled={!dirty || updateMutation.isPending}>
           {updateMutation.isPending ? "Saving..." : "Save changes"}
