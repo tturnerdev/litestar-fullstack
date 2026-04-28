@@ -47,6 +47,16 @@ import { Route as AppAdminUsersUserIdRouteImport } from './routes/_app/admin/use
 import { Route as AppAdminTeamsTeamIdRouteImport } from './routes/_app/admin/teams/$teamId'
 import { Route as AppVoiceExtensionsExtensionIdIndexRouteImport } from './routes/_app/voice/extensions/$extensionId/index'
 import { Route as AppTeamsTeamIdInvitationsInvitationIdAcceptRouteImport } from './routes/_app/teams/$teamId/invitations/$invitationId/accept'
+import { Route as AppFaxIndexRouteImport } from './routes/_app/fax/index'
+import { Route as AppFaxSendRouteImport } from './routes/_app/fax/send'
+import { Route as AppFaxNumbersIndexRouteImport } from './routes/_app/fax/numbers/index'
+import { Route as AppFaxNumbersFaxNumberIdIndexRouteImport } from './routes/_app/fax/numbers/$faxNumberId/index'
+import { Route as AppFaxMessagesIndexRouteImport } from './routes/_app/fax/messages/index'
+import { Route as AppFaxMessagesMessageIdIndexRouteImport } from './routes/_app/fax/messages/$messageId/index'
+import { Route as AppSupportRouteImport } from './routes/_app/support'
+import { Route as AppSupportIndexRouteImport } from './routes/_app/support/index'
+import { Route as AppSupportNewRouteImport } from './routes/_app/support/new'
+import { Route as AppSupportTicketIdIndexRouteImport } from './routes/_app/support/$ticketId/index'
 
 const PublicRoute = PublicRouteImport.update({
   id: '/_public',
@@ -240,6 +250,56 @@ const AppTeamsTeamIdInvitationsInvitationIdAcceptRoute =
     path: '/invitations/$invitationId/accept',
     getParentRoute: () => AppTeamsTeamIdRoute,
   } as any)
+const AppFaxIndexRoute = AppFaxIndexRouteImport.update({
+  id: '/fax/',
+  path: '/fax/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFaxSendRoute = AppFaxSendRouteImport.update({
+  id: '/fax/send',
+  path: '/fax/send',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFaxNumbersIndexRoute = AppFaxNumbersIndexRouteImport.update({
+  id: '/fax/numbers/',
+  path: '/fax/numbers/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFaxNumbersFaxNumberIdIndexRoute = AppFaxNumbersFaxNumberIdIndexRouteImport.update({
+  id: '/fax/numbers/$faxNumberId/',
+  path: '/fax/numbers/$faxNumberId/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFaxMessagesIndexRoute = AppFaxMessagesIndexRouteImport.update({
+  id: '/fax/messages/',
+  path: '/fax/messages/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFaxMessagesMessageIdIndexRoute = AppFaxMessagesMessageIdIndexRouteImport.update({
+  id: '/fax/messages/$messageId/',
+  path: '/fax/messages/$messageId/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSupportRoute = AppSupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSupportIndexRoute = AppSupportIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppSupportRoute,
+} as any)
+const AppSupportNewRoute = AppSupportNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AppSupportRoute,
+} as any)
+const AppSupportTicketIdIndexRoute = AppSupportTicketIdIndexRouteImport.update({
+  id: '/$ticketId/',
+  path: '/$ticketId/',
+  getParentRoute: () => AppSupportRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -278,6 +338,16 @@ export interface FileRoutesByFullPath {
   '/voice/extensions/': typeof AppVoiceExtensionsIndexRoute
   '/voice/extensions/$extensionId/': typeof AppVoiceExtensionsExtensionIdIndexRoute
   '/teams/$teamId/invitations/$invitationId/accept': typeof AppTeamsTeamIdInvitationsInvitationIdAcceptRoute
+  '/fax/': typeof AppFaxIndexRoute
+  '/fax/send': typeof AppFaxSendRoute
+  '/fax/numbers/': typeof AppFaxNumbersIndexRoute
+  '/fax/numbers/$faxNumberId/': typeof AppFaxNumbersFaxNumberIdIndexRoute
+  '/fax/messages/': typeof AppFaxMessagesIndexRoute
+  '/fax/messages/$messageId/': typeof AppFaxMessagesMessageIdIndexRoute
+  '/support': typeof AppSupportRouteWithChildren
+  '/support/new': typeof AppSupportNewRoute
+  '/support/': typeof AppSupportIndexRoute
+  '/support/$ticketId/': typeof AppSupportTicketIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -313,6 +383,15 @@ export interface FileRoutesByTo {
   '/voice/extensions': typeof AppVoiceExtensionsIndexRoute
   '/voice/extensions/$extensionId': typeof AppVoiceExtensionsExtensionIdIndexRoute
   '/teams/$teamId/invitations/$invitationId/accept': typeof AppTeamsTeamIdInvitationsInvitationIdAcceptRoute
+  '/fax': typeof AppFaxIndexRoute
+  '/fax/send': typeof AppFaxSendRoute
+  '/fax/numbers': typeof AppFaxNumbersIndexRoute
+  '/fax/numbers/$faxNumberId': typeof AppFaxNumbersFaxNumberIdIndexRoute
+  '/fax/messages': typeof AppFaxMessagesIndexRoute
+  '/fax/messages/$messageId': typeof AppFaxMessagesMessageIdIndexRoute
+  '/support': typeof AppSupportIndexRoute
+  '/support/new': typeof AppSupportNewRoute
+  '/support/$ticketId': typeof AppSupportTicketIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -354,6 +433,16 @@ export interface FileRoutesById {
   '/_app/voice/extensions/': typeof AppVoiceExtensionsIndexRoute
   '/_app/voice/extensions/$extensionId/': typeof AppVoiceExtensionsExtensionIdIndexRoute
   '/_app/teams/$teamId/invitations/$invitationId/accept': typeof AppTeamsTeamIdInvitationsInvitationIdAcceptRoute
+  '/_app/fax/': typeof AppFaxIndexRoute
+  '/_app/fax/send': typeof AppFaxSendRoute
+  '/_app/fax/numbers/': typeof AppFaxNumbersIndexRoute
+  '/_app/fax/numbers/$faxNumberId/': typeof AppFaxNumbersFaxNumberIdIndexRoute
+  '/_app/fax/messages/': typeof AppFaxMessagesIndexRoute
+  '/_app/fax/messages/$messageId/': typeof AppFaxMessagesMessageIdIndexRoute
+  '/_app/support': typeof AppSupportRouteWithChildren
+  '/_app/support/': typeof AppSupportIndexRoute
+  '/_app/support/new': typeof AppSupportNewRoute
+  '/_app/support/$ticketId/': typeof AppSupportTicketIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -394,6 +483,16 @@ export interface FileRouteTypes {
     | '/voice/extensions/'
     | '/voice/extensions/$extensionId/'
     | '/teams/$teamId/invitations/$invitationId/accept'
+    | '/fax/'
+    | '/fax/send'
+    | '/fax/numbers/'
+    | '/fax/numbers/$faxNumberId/'
+    | '/fax/messages/'
+    | '/fax/messages/$messageId/'
+    | '/support'
+    | '/support/new'
+    | '/support/'
+    | '/support/$ticketId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -429,6 +528,15 @@ export interface FileRouteTypes {
     | '/voice/extensions'
     | '/voice/extensions/$extensionId'
     | '/teams/$teamId/invitations/$invitationId/accept'
+    | '/fax'
+    | '/fax/send'
+    | '/fax/numbers'
+    | '/fax/numbers/$faxNumberId'
+    | '/fax/messages'
+    | '/fax/messages/$messageId'
+    | '/support'
+    | '/support/new'
+    | '/support/$ticketId'
   id:
     | '__root__'
     | '/'
@@ -469,6 +577,16 @@ export interface FileRouteTypes {
     | '/_app/voice/extensions/'
     | '/_app/voice/extensions/$extensionId/'
     | '/_app/teams/$teamId/invitations/$invitationId/accept'
+    | '/_app/fax/'
+    | '/_app/fax/send'
+    | '/_app/fax/numbers/'
+    | '/_app/fax/numbers/$faxNumberId/'
+    | '/_app/fax/messages/'
+    | '/_app/fax/messages/$messageId/'
+    | '/_app/support'
+    | '/_app/support/'
+    | '/_app/support/new'
+    | '/_app/support/$ticketId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -746,6 +864,76 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppTeamsTeamIdInvitationsInvitationIdAcceptRouteImport
       parentRoute: typeof AppTeamsTeamIdRoute
     }
+    '/_app/fax/': {
+      id: '/_app/fax/'
+      path: '/fax'
+      fullPath: '/fax/'
+      preLoaderRoute: typeof AppFaxIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/fax/send': {
+      id: '/_app/fax/send'
+      path: '/fax/send'
+      fullPath: '/fax/send'
+      preLoaderRoute: typeof AppFaxSendRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/fax/numbers/': {
+      id: '/_app/fax/numbers/'
+      path: '/fax/numbers'
+      fullPath: '/fax/numbers/'
+      preLoaderRoute: typeof AppFaxNumbersIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/fax/numbers/$faxNumberId/': {
+      id: '/_app/fax/numbers/$faxNumberId/'
+      path: '/fax/numbers/$faxNumberId'
+      fullPath: '/fax/numbers/$faxNumberId/'
+      preLoaderRoute: typeof AppFaxNumbersFaxNumberIdIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/fax/messages/': {
+      id: '/_app/fax/messages/'
+      path: '/fax/messages'
+      fullPath: '/fax/messages/'
+      preLoaderRoute: typeof AppFaxMessagesIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/fax/messages/$messageId/': {
+      id: '/_app/fax/messages/$messageId/'
+      path: '/fax/messages/$messageId'
+      fullPath: '/fax/messages/$messageId/'
+      preLoaderRoute: typeof AppFaxMessagesMessageIdIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/support': {
+      id: '/_app/support'
+      path: '/support'
+      fullPath: '/support'
+      preLoaderRoute: typeof AppSupportRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/support/': {
+      id: '/_app/support/'
+      path: '/'
+      fullPath: '/support/'
+      preLoaderRoute: typeof AppSupportIndexRouteImport
+      parentRoute: typeof AppSupportRoute
+    }
+    '/_app/support/new': {
+      id: '/_app/support/new'
+      path: '/new'
+      fullPath: '/support/new'
+      preLoaderRoute: typeof AppSupportNewRouteImport
+      parentRoute: typeof AppSupportRoute
+    }
+    '/_app/support/$ticketId/': {
+      id: '/_app/support/$ticketId/'
+      path: '/$ticketId'
+      fullPath: '/support/$ticketId/'
+      preLoaderRoute: typeof AppSupportTicketIdIndexRouteImport
+      parentRoute: typeof AppSupportRoute
+    }
   }
 }
 
@@ -816,16 +1004,39 @@ const AppTeamsRouteWithChildren = AppTeamsRoute._addFileChildren(
   AppTeamsRouteChildren,
 )
 
+interface AppSupportRouteChildren {
+  AppSupportIndexRoute: typeof AppSupportIndexRoute
+  AppSupportNewRoute: typeof AppSupportNewRoute
+  AppSupportTicketIdIndexRoute: typeof AppSupportTicketIdIndexRoute
+}
+
+const AppSupportRouteChildren: AppSupportRouteChildren = {
+  AppSupportIndexRoute: AppSupportIndexRoute,
+  AppSupportNewRoute: AppSupportNewRoute,
+  AppSupportTicketIdIndexRoute: AppSupportTicketIdIndexRoute,
+}
+
+const AppSupportRouteWithChildren = AppSupportRoute._addFileChildren(
+  AppSupportRouteChildren,
+)
+
 interface AppRouteChildren {
   AppAdminRoute: typeof AppAdminRouteWithChildren
   AppDevicesRoute: typeof AppDevicesRouteWithChildren
   AppHomeRoute: typeof AppHomeRoute
   AppTeamsRoute: typeof AppTeamsRouteWithChildren
+  AppSupportRoute: typeof AppSupportRouteWithChildren
   AppVoicePhoneNumbersRoute: typeof AppVoicePhoneNumbersRoute
   AppProfileIndexRoute: typeof AppProfileIndexRoute
   AppVoiceIndexRoute: typeof AppVoiceIndexRoute
   AppVoiceExtensionsIndexRoute: typeof AppVoiceExtensionsIndexRoute
   AppVoiceExtensionsExtensionIdIndexRoute: typeof AppVoiceExtensionsExtensionIdIndexRoute
+  AppFaxIndexRoute: typeof AppFaxIndexRoute
+  AppFaxSendRoute: typeof AppFaxSendRoute
+  AppFaxNumbersIndexRoute: typeof AppFaxNumbersIndexRoute
+  AppFaxNumbersFaxNumberIdIndexRoute: typeof AppFaxNumbersFaxNumberIdIndexRoute
+  AppFaxMessagesIndexRoute: typeof AppFaxMessagesIndexRoute
+  AppFaxMessagesMessageIdIndexRoute: typeof AppFaxMessagesMessageIdIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -833,12 +1044,19 @@ const AppRouteChildren: AppRouteChildren = {
   AppDevicesRoute: AppDevicesRouteWithChildren,
   AppHomeRoute: AppHomeRoute,
   AppTeamsRoute: AppTeamsRouteWithChildren,
+  AppSupportRoute: AppSupportRouteWithChildren,
   AppVoicePhoneNumbersRoute: AppVoicePhoneNumbersRoute,
   AppProfileIndexRoute: AppProfileIndexRoute,
   AppVoiceIndexRoute: AppVoiceIndexRoute,
   AppVoiceExtensionsIndexRoute: AppVoiceExtensionsIndexRoute,
   AppVoiceExtensionsExtensionIdIndexRoute:
     AppVoiceExtensionsExtensionIdIndexRoute,
+  AppFaxIndexRoute: AppFaxIndexRoute,
+  AppFaxSendRoute: AppFaxSendRoute,
+  AppFaxNumbersIndexRoute: AppFaxNumbersIndexRoute,
+  AppFaxNumbersFaxNumberIdIndexRoute: AppFaxNumbersFaxNumberIdIndexRoute,
+  AppFaxMessagesIndexRoute: AppFaxMessagesIndexRoute,
+  AppFaxMessagesMessageIdIndexRoute: AppFaxMessagesMessageIdIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

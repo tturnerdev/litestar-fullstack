@@ -1,6 +1,6 @@
-import { Mail, Plus, Trash2 } from "lucide-react"
+import { Mail, Plus } from "lucide-react"
 import { useState } from "react"
-import { Badge } from "@/components/ui/badge"
+import { EmailRouteRow } from "@/components/fax/email-route-row"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -10,21 +10,46 @@ import {
   useCreateFaxEmailRoute,
   useDeleteFaxEmailRoute,
   useFaxEmailRoutes,
-  useUpdateFaxEmailRoute,
 } from "@/lib/api/hooks/fax"
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export function EmailRouteEditor({ faxNumberId }: { faxNumberId: string }) {
   const { data, isLoading, isError } = useFaxEmailRoutes(faxNumberId)
   const createRoute = useCreateFaxEmailRoute(faxNumberId)
   const deleteRoute = useDeleteFaxEmailRoute(faxNumberId)
   const [newEmail, setNewEmail] = useState("")
+  const [emailError, setEmailError] = useState<string | null>(null)
+
+  function validateEmail(email: string): boolean {
+    if (!email.trim()) {
+      setEmailError("Email address is required")
+      return false
+    }
+    if (!EMAIL_REGEX.test(email.trim())) {
+      setEmailError("Please enter a valid email address")
+      return false
+    }
+    if (data?.items.some((r) => r.emailAddress.toLowerCase() === email.trim().toLowerCase())) {
+      setEmailError("This email address is already configured")
+      return false
+    }
+    setEmailError(null)
+    return true
+  }
 
   function handleAddRoute() {
     const trimmed = newEmail.trim()
-    if (!trimmed) return
-    createRoute.mutate({ emailAddress: trimmed }, {
-      onSuccess: () => setNewEmail(""),
-    })
+    if (!validateEmail(trimmed)) return
+    createRoute.mutate(
+      { emailAddress: trimmed, isActive: true, notifyOnFailure: true },
+      {
+        onSuccess: () => {
+          setNewEmail("")
+          setEmailError(null)
+        },
+      },
+    )
   }
 
   if (isLoading) {
@@ -45,19 +70,35 @@ export function EmailRouteEditor({ faxNumberId }: { faxNumberId: string }) {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle>Email Routes</CardTitle>
-          <div className="flex gap-2">
-            <Input
-              placeholder="email@example.com"
-              value={newEmail}
-              onChange={(e) => setNewEmail(e.target.value)}
-              className="w-64"
-              onKeyDown={(e) => e.key === "Enter" && handleAddRoute()}
-            />
-            <Button size="sm" onClick={handleAddRoute} disabled={createRoute.isPending || !newEmail.trim()}>
-              <Plus className="mr-2 h-4 w-4" /> Add
-            </Button>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <CardTitle>Email Routes</CardTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              Configure where incoming faxes are delivered via email.
+            </p>
+          </div>
+          <div className="flex flex-col gap-1">
+            <div className="flex gap-2">
+              <Input
+                placeholder="email@example.com"
+                value={newEmail}
+                onChange={(e) => {
+                  setNewEmail(e.target.value)
+                  if (emailError) setEmailError(null)
+                }}
+                className="w-64"
+                onKeyDown={(e) => e.key === "Enter" && handleAddRoute()}
+                aria-invalid={!!emailError}
+              />
+              <Button
+                size="sm"
+                onClick={handleAddRoute}
+                disabled={createRoute.isPending || !newEmail.trim()}
+              >
+                <Plus className="mr-2 h-4 w-4" /> Add Email
+              </Button>
+            </div>
+            {emailError && <p className="text-xs text-destructive">{emailError}</p>}
           </div>
         </div>
       </CardHeader>
@@ -77,7 +118,10 @@ export function EmailRouteEditor({ faxNumberId }: { faxNumberId: string }) {
                 <TableCell colSpan={4} className="text-center text-muted-foreground">
                   <div className="flex flex-col items-center gap-2 py-4">
                     <Mail className="h-8 w-8 text-muted-foreground/50" />
-                    <p>No email routes configured. Add one above.</p>
+                    <p>No email routes configured.</p>
+                    <p className="text-xs">
+                      Add an email address above to start receiving faxes via email.
+                    </p>
                   </div>
                 </TableCell>
               </TableRow>
@@ -93,56 +137,12 @@ export function EmailRouteEditor({ faxNumberId }: { faxNumberId: string }) {
             ))}
           </TableBody>
         </Table>
+        {data.items.length > 0 && (
+          <p className="text-xs text-muted-foreground">
+            {data.items.filter((r) => r.isActive).length} of {data.items.length} routes active
+          </p>
+        )}
       </CardContent>
     </Card>
-  )
-}
-
-function EmailRouteRow({
-  route,
-  faxNumberId,
-  onDelete,
-  isDeleting,
-}: {
-  route: { id: string; emailAddress: string; isActive: boolean; notifyOnFailure: boolean }
-  faxNumberId: string
-  onDelete: () => void
-  isDeleting: boolean
-}) {
-  const updateRoute = useUpdateFaxEmailRoute(faxNumberId, route.id)
-
-  return (
-    <TableRow>
-      <TableCell className="font-mono text-sm">{route.emailAddress}</TableCell>
-      <TableCell>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => updateRoute.mutate({ isActive: !route.isActive })}
-          disabled={updateRoute.isPending}
-        >
-          <Badge variant={route.isActive ? "default" : "secondary"}>
-            {route.isActive ? "Active" : "Inactive"}
-          </Badge>
-        </Button>
-      </TableCell>
-      <TableCell>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => updateRoute.mutate({ notifyOnFailure: !route.notifyOnFailure })}
-          disabled={updateRoute.isPending}
-        >
-          <Badge variant={route.notifyOnFailure ? "default" : "outline"}>
-            {route.notifyOnFailure ? "Yes" : "No"}
-          </Badge>
-        </Button>
-      </TableCell>
-      <TableCell className="text-right">
-        <Button variant="outline" size="sm" onClick={onDelete} disabled={isDeleting}>
-          <Trash2 className="h-4 w-4" />
-        </Button>
-      </TableCell>
-    </TableRow>
   )
 }
