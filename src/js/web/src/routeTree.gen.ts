@@ -43,6 +43,7 @@ import { Route as AppFaxSendRouteImport } from './routes/_app/fax/send'
 import { Route as AppDevicesNewRouteImport } from './routes/_app/devices/new'
 import { Route as AppAdminAuditRouteImport } from './routes/_app/admin/audit'
 import { Route as AppVoiceExtensionsIndexRouteImport } from './routes/_app/voice/extensions/index'
+import { Route as AppTeamsTeamIdIndexRouteImport } from './routes/_app/teams/$teamId/index'
 import { Route as AppSupportTicketIdIndexRouteImport } from './routes/_app/support/$ticketId/index'
 import { Route as AppFaxNumbersIndexRouteImport } from './routes/_app/fax/numbers/index'
 import { Route as AppFaxMessagesIndexRouteImport } from './routes/_app/fax/messages/index'
@@ -229,6 +230,11 @@ const AppVoiceExtensionsIndexRoute = AppVoiceExtensionsIndexRouteImport.update({
   path: '/voice/extensions/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppTeamsTeamIdIndexRoute = AppTeamsTeamIdIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppTeamsTeamIdRoute,
+} as any)
 const AppSupportTicketIdIndexRoute = AppSupportTicketIdIndexRouteImport.update({
   id: '/$ticketId/',
   path: '/$ticketId/',
@@ -366,6 +372,7 @@ export interface FileRoutesByFullPath {
   '/fax/messages/': typeof AppFaxMessagesIndexRoute
   '/fax/numbers/': typeof AppFaxNumbersIndexRoute
   '/support/$ticketId/': typeof AppSupportTicketIdIndexRoute
+  '/teams/$teamId/': typeof AppTeamsTeamIdIndexRoute
   '/voice/extensions/': typeof AppVoiceExtensionsIndexRoute
   '/voice/extensions/$extensionId/dnd': typeof AppVoiceExtensionsExtensionIdDndRoute
   '/voice/extensions/$extensionId/forwarding': typeof AppVoiceExtensionsExtensionIdForwardingRoute
@@ -393,7 +400,6 @@ export interface FileRoutesByTo {
   '/devices/new': typeof AppDevicesNewRoute
   '/fax/send': typeof AppFaxSendRoute
   '/support/new': typeof AppSupportNewRoute
-  '/teams/$teamId': typeof AppTeamsTeamIdRouteWithChildren
   '/teams/new': typeof AppTeamsNewRoute
   '/voice/phone-numbers': typeof AppVoicePhoneNumbersRoute
   '/admin': typeof AppAdminIndexRoute
@@ -413,6 +419,7 @@ export interface FileRoutesByTo {
   '/fax/messages': typeof AppFaxMessagesIndexRoute
   '/fax/numbers': typeof AppFaxNumbersIndexRoute
   '/support/$ticketId': typeof AppSupportTicketIdIndexRoute
+  '/teams/$teamId': typeof AppTeamsTeamIdIndexRoute
   '/voice/extensions': typeof AppVoiceExtensionsIndexRoute
   '/voice/extensions/$extensionId/dnd': typeof AppVoiceExtensionsExtensionIdDndRoute
   '/voice/extensions/$extensionId/forwarding': typeof AppVoiceExtensionsExtensionIdForwardingRoute
@@ -467,6 +474,7 @@ export interface FileRoutesById {
   '/_app/fax/messages/': typeof AppFaxMessagesIndexRoute
   '/_app/fax/numbers/': typeof AppFaxNumbersIndexRoute
   '/_app/support/$ticketId/': typeof AppSupportTicketIdIndexRoute
+  '/_app/teams/$teamId/': typeof AppTeamsTeamIdIndexRoute
   '/_app/voice/extensions/': typeof AppVoiceExtensionsIndexRoute
   '/_app/voice/extensions/$extensionId/dnd': typeof AppVoiceExtensionsExtensionIdDndRoute
   '/_app/voice/extensions/$extensionId/forwarding': typeof AppVoiceExtensionsExtensionIdForwardingRoute
@@ -520,6 +528,7 @@ export interface FileRouteTypes {
     | '/fax/messages/'
     | '/fax/numbers/'
     | '/support/$ticketId/'
+    | '/teams/$teamId/'
     | '/voice/extensions/'
     | '/voice/extensions/$extensionId/dnd'
     | '/voice/extensions/$extensionId/forwarding'
@@ -547,7 +556,6 @@ export interface FileRouteTypes {
     | '/devices/new'
     | '/fax/send'
     | '/support/new'
-    | '/teams/$teamId'
     | '/teams/new'
     | '/voice/phone-numbers'
     | '/admin'
@@ -567,6 +575,7 @@ export interface FileRouteTypes {
     | '/fax/messages'
     | '/fax/numbers'
     | '/support/$ticketId'
+    | '/teams/$teamId'
     | '/voice/extensions'
     | '/voice/extensions/$extensionId/dnd'
     | '/voice/extensions/$extensionId/forwarding'
@@ -620,6 +629,7 @@ export interface FileRouteTypes {
     | '/_app/fax/messages/'
     | '/_app/fax/numbers/'
     | '/_app/support/$ticketId/'
+    | '/_app/teams/$teamId/'
     | '/_app/voice/extensions/'
     | '/_app/voice/extensions/$extensionId/dnd'
     | '/_app/voice/extensions/$extensionId/forwarding'
@@ -877,6 +887,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppVoiceExtensionsIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/teams/$teamId/': {
+      id: '/_app/teams/$teamId/'
+      path: '/'
+      fullPath: '/teams/$teamId/'
+      preLoaderRoute: typeof AppTeamsTeamIdIndexRouteImport
+      parentRoute: typeof AppTeamsTeamIdRoute
+    }
     '/_app/support/$ticketId/': {
       id: '/_app/support/$ticketId/'
       path: '/$ticketId'
@@ -1054,10 +1071,12 @@ const AppSupportRouteWithChildren = AppSupportRoute._addFileChildren(
 )
 
 interface AppTeamsTeamIdRouteChildren {
+  AppTeamsTeamIdIndexRoute: typeof AppTeamsTeamIdIndexRoute
   AppTeamsTeamIdInvitationsInvitationIdAcceptRoute: typeof AppTeamsTeamIdInvitationsInvitationIdAcceptRoute
 }
 
 const AppTeamsTeamIdRouteChildren: AppTeamsTeamIdRouteChildren = {
+  AppTeamsTeamIdIndexRoute: AppTeamsTeamIdIndexRoute,
   AppTeamsTeamIdInvitationsInvitationIdAcceptRoute:
     AppTeamsTeamIdInvitationsInvitationIdAcceptRoute,
 }
