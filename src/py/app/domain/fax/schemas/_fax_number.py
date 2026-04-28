@@ -11,8 +11,8 @@ from app.lib.schema import CamelizedBaseStruct
 class FaxNumber(CamelizedBaseStruct):
     id: UUID
     user_id: UUID
-    team_id: UUID | None = None
     number: str
+    team_id: UUID | None = None
     label: str | None = None
     is_active: bool = True
     created_at: datetime | None = None

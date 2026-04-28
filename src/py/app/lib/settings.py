@@ -279,8 +279,8 @@ class EmailSettings:
             backend = SMTPConfig(
                 host=self.SMTP_HOST,
                 port=self.SMTP_PORT,
-                username=self.SMTP_USER,
-                password=self.SMTP_PASSWORD,
+                username=self.SMTP_USER or None,
+                password=self.SMTP_PASSWORD or None,
                 use_tls=self.USE_TLS,
                 use_ssl=self.USE_SSL,
                 timeout=self.TIMEOUT,
