@@ -48,18 +48,37 @@ export interface TicketAttachment {
   fileSizeBytes: number
   contentType: string
   isInline: boolean
+  url?: string | null
   createdAt?: string | null
+}
+
+export interface PastedImage {
+  id: string
+  url: string
+  fileName: string
+}
+
+export interface TicketFilters {
+  status?: string
+  priority?: string
+  category?: string
+  search?: string
 }
 
 // ── Ticket Hooks ───────────────────────────────────────────────────────
 
-export function useTickets(page = 1, pageSize = 25) {
+export function useTickets(page = 1, pageSize = 25, filters?: TicketFilters) {
   return useQuery({
-    queryKey: ["support", "tickets", page, pageSize],
+    queryKey: ["support", "tickets", page, pageSize, filters],
     queryFn: async () => {
+      const query: Record<string, unknown> = { currentPage: page, pageSize }
+      if (filters?.status && filters.status !== "all") query.status = filters.status
+      if (filters?.priority && filters.priority !== "all") query.priority = filters.priority
+      if (filters?.category && filters.category !== "all") query.category = filters.category
+      if (filters?.search) query.search = filters.search
       const response = await client.get({
         url: "/api/support/tickets",
-        query: { currentPage: page, pageSize },
+        query,
         security: [{ scheme: "bearer", type: "http" }],
       } as never)
       return (response as { data: unknown }).data as { items: Ticket[]; total: number }
@@ -208,6 +227,82 @@ export function useCreateTicketMessage(ticketId: string) {
     },
     onError: (error) => {
       toast.error("Unable to send message", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
+    },
+  })
+}
+
+// ── Attachment Hooks ───────────────────────────────────────────────────
+
+export function useUploadAttachment(ticketId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (files: File[]) => {
+      const formData = new FormData()
+      for (const file of files) {
+        formData.append("files", file)
+      }
+      const response = await client.post({
+        url: `/api/support/tickets/${ticketId}/attachments`,
+        body: formData,
+        bodySerializer: (body: unknown) => body as FormData,
+        headers: {},
+        security: [{ scheme: "bearer", type: "http" }],
+      } as never)
+      return (response as { data: unknown }).data as TicketAttachment[]
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["support", "ticket", ticketId, "messages"] })
+    },
+    onError: (error) => {
+      toast.error("Unable to upload file", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
+    },
+  })
+}
+
+export function usePasteImage(ticketId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (blob: Blob) => {
+      const formData = new FormData()
+      formData.append("image", blob, `paste-${Date.now()}.png`)
+      const response = await client.post({
+        url: `/api/support/tickets/${ticketId}/paste-image`,
+        body: formData,
+        bodySerializer: (body: unknown) => body as FormData,
+        headers: {},
+        security: [{ scheme: "bearer", type: "http" }],
+      } as never)
+      return (response as { data: unknown }).data as PastedImage
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["support", "ticket", ticketId, "messages"] })
+    },
+    onError: (error) => {
+      toast.error("Unable to upload image", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
+    },
+  })
+}
+
+export function useDeleteAttachment(ticketId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (attachmentId: string) => {
+      await client.delete({
+        url: `/api/support/attachments/${attachmentId}`,
+        security: [{ scheme: "bearer", type: "http" }],
+      } as never)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["support", "ticket", ticketId, "messages"] })
+    },
+    onError: (error) => {
+      toast.error("Unable to delete attachment", {
         description: error instanceof Error ? error.message : "Try again later",
       })
     },

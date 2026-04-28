@@ -11,8 +11,12 @@ const statusConfig: Record<string, { label: string; className: string }> = {
     className: "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400",
   },
   waiting_on_customer: {
-    label: "Waiting",
+    label: "Waiting on Customer",
     className: "border-purple-500/30 bg-purple-500/10 text-purple-700 dark:text-purple-400",
+  },
+  waiting_on_support: {
+    label: "Waiting on Support",
+    className: "border-indigo-500/30 bg-indigo-500/10 text-indigo-700 dark:text-indigo-400",
   },
   resolved: {
     label: "Resolved",
