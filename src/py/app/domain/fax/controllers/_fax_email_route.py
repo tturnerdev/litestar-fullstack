@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Annotated
+from typing import TYPE_CHECKING, Annotated, Any
 
 from litestar import Controller, delete, get, patch, post
 from litestar.di import Provide
@@ -11,11 +11,13 @@ from litestar.params import Dependency, Parameter
 from sqlalchemy.orm import selectinload
 
 from app.db import models as m
+from app.domain.admin.deps import provide_audit_log_service
 from app.domain.fax.controllers._fax_number import _can_access_fax_number
 from app.domain.fax.deps import provide_fax_numbers_service
 from app.domain.fax.guards import requires_fax_number_access
 from app.domain.fax.schemas import FaxEmailRoute, FaxEmailRouteCreate, FaxEmailRouteUpdate
 from app.domain.fax.services import FaxEmailRouteService
+from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
 
 if TYPE_CHECKING:
@@ -23,7 +25,10 @@ if TYPE_CHECKING:
 
     from advanced_alchemy.filters import FilterTypes
     from advanced_alchemy.service.pagination import OffsetPagination
+    from litestar import Request
+    from litestar.security.jwt import Token
 
+    from app.domain.admin.services import AuditLogService
     from app.domain.fax.services import FaxNumberService
 
 
@@ -51,6 +56,7 @@ class FaxEmailRouteController(Controller):
         },
     ) | {
         "fax_numbers_service": Provide(provide_fax_numbers_service),
+        "audit_service": Provide(provide_audit_log_service),
     }
 
     async def _verify_fax_number_access(
@@ -103,8 +109,10 @@ class FaxEmailRouteController(Controller):
     @post(operation_id="CreateFaxEmailRoute", path="")
     async def create_fax_email_route(
         self,
+        request: Request[m.User, Token, Any],
         fax_email_routes_service: FaxEmailRouteService,
         fax_numbers_service: FaxNumberService,
+        audit_service: AuditLogService,
         current_user: m.User,
         fax_number_id: UUID,
         data: FaxEmailRouteCreate,
@@ -112,8 +120,10 @@ class FaxEmailRouteController(Controller):
         """Add an email route to a fax number.
 
         Args:
+            request: The current request
             fax_email_routes_service: Fax Email Route Service
             fax_numbers_service: Fax Number Service
+            audit_service: Audit Log Service
             current_user: Current User
             fax_number_id: Fax Number ID
             data: Email Route Create
@@ -125,13 +135,28 @@ class FaxEmailRouteController(Controller):
         payload = data.to_dict()
         payload["fax_number_id"] = fax_number_id
         db_obj = await fax_email_routes_service.create(payload)
+        after = capture_snapshot(db_obj)
+        await log_audit(
+            audit_service,
+            action="fax.email_route_create",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            target_type="fax_email_route",
+            target_id=db_obj.id,
+            target_label=db_obj.email_address,
+            before=None,
+            after=after,
+            request=request,
+        )
         return fax_email_routes_service.to_schema(db_obj, schema_type=FaxEmailRoute)
 
     @patch(operation_id="UpdateFaxEmailRoute", path="/{route_id:uuid}")
     async def update_fax_email_route(
         self,
+        request: Request[m.User, Token, Any],
         fax_email_routes_service: FaxEmailRouteService,
         fax_numbers_service: FaxNumberService,
+        audit_service: AuditLogService,
         current_user: m.User,
         fax_number_id: UUID,
         route_id: Annotated[UUID, Parameter(title="Route ID", description="The email route to update.")],
@@ -140,8 +165,10 @@ class FaxEmailRouteController(Controller):
         """Update an email route.
 
         Args:
+            request: The current request
             fax_email_routes_service: Fax Email Route Service
             fax_numbers_service: Fax Number Service
+            audit_service: Audit Log Service
             current_user: Current User
             fax_number_id: Fax Number ID
             route_id: Route ID
@@ -157,14 +184,30 @@ class FaxEmailRouteController(Controller):
         existing = await fax_email_routes_service.get(route_id)
         if existing.fax_number_id != fax_number_id:
             raise HTTPException(status_code=400, detail="Route does not belong to this fax number.")
+        before = capture_snapshot(existing)
         db_obj = await fax_email_routes_service.update(item_id=route_id, data=data.to_dict())
+        after = capture_snapshot(db_obj)
+        await log_audit(
+            audit_service,
+            action="fax.email_route_update",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            target_type="fax_email_route",
+            target_id=route_id,
+            target_label=db_obj.email_address,
+            before=before,
+            after=after,
+            request=request,
+        )
         return fax_email_routes_service.to_schema(db_obj, schema_type=FaxEmailRoute)
 
     @delete(operation_id="DeleteFaxEmailRoute", path="/{route_id:uuid}")
     async def delete_fax_email_route(
         self,
+        request: Request[m.User, Token, Any],
         fax_email_routes_service: FaxEmailRouteService,
         fax_numbers_service: FaxNumberService,
+        audit_service: AuditLogService,
         current_user: m.User,
         fax_number_id: UUID,
         route_id: Annotated[UUID, Parameter(title="Route ID", description="The email route to delete.")],
@@ -172,8 +215,10 @@ class FaxEmailRouteController(Controller):
         """Remove an email route.
 
         Args:
+            request: The current request
             fax_email_routes_service: Fax Email Route Service
             fax_numbers_service: Fax Number Service
+            audit_service: Audit Log Service
             current_user: Current User
             fax_number_id: Fax Number ID
             route_id: Route ID
@@ -185,4 +230,18 @@ class FaxEmailRouteController(Controller):
         existing = await fax_email_routes_service.get(route_id)
         if existing.fax_number_id != fax_number_id:
             raise HTTPException(status_code=400, detail="Route does not belong to this fax number.")
+        before = capture_snapshot(existing)
+        target_label = existing.email_address
         await fax_email_routes_service.delete(item_id=route_id)
+        await log_audit(
+            audit_service,
+            action="fax.email_route_delete",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            target_type="fax_email_route",
+            target_id=route_id,
+            target_label=target_label,
+            before=before,
+            after=None,
+            request=request,
+        )

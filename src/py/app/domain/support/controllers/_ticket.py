@@ -2,23 +2,30 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Annotated
+from typing import TYPE_CHECKING, Annotated, Any
 from uuid import UUID
 
 from litestar import Controller, delete, get, patch, post
+from litestar.di import Provide
 from litestar.params import Dependency, Parameter
 from sqlalchemy.orm import selectinload
 
 from app.db import models as m
+from app.domain.admin.deps import provide_audit_log_service
 from app.domain.support.guards import requires_support_agent, requires_ticket_access
 from app.domain.support.schemas import Ticket, TicketCreate, TicketUpdate
 from app.domain.support.services import TicketMessageService, TicketService
 from app.domain.support.utils import render_markdown
+from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
 
 if TYPE_CHECKING:
     from advanced_alchemy.filters import FilterTypes
     from advanced_alchemy.service.pagination import OffsetPagination
+    from litestar import Request
+    from litestar.security.jwt import Token
+
+    from app.domain.admin.services import AuditLogService
 
 
 class TicketController(Controller):
@@ -39,7 +46,9 @@ class TicketController(Controller):
             "sort_field": "created_at",
             "sort_order": "desc",
         },
-    )
+    ) | {
+        "audit_service": Provide(provide_audit_log_service),
+    }
 
     @get(operation_id="ListTickets", path="/api/support/tickets")
     async def list_tickets(
@@ -61,7 +70,9 @@ class TicketController(Controller):
     @post(operation_id="CreateTicket", path="/api/support/tickets")
     async def create_ticket(
         self,
+        request: Request[m.User, Token, Any],
         tickets_service: TicketService,
+        audit_service: AuditLogService,
         current_user: m.User,
         data: TicketCreate,
     ) -> Ticket:
@@ -79,6 +90,19 @@ class TicketController(Controller):
                 "body_markdown": body_markdown,
                 "body_html": render_markdown(body_markdown),
             }
+        )
+        after = capture_snapshot(db_obj)
+        await log_audit(
+            audit_service,
+            action="support.ticket_create",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            target_type="ticket",
+            target_id=db_obj.id,
+            target_label=db_obj.subject,
+            before=None,
+            after=after,
+            request=request,
         )
         return tickets_service.to_schema(db_obj, schema_type=Ticket)
 
@@ -103,14 +127,31 @@ class TicketController(Controller):
     )
     async def update_ticket(
         self,
+        request: Request[m.User, Token, Any],
         data: TicketUpdate,
         tickets_service: TicketService,
+        audit_service: AuditLogService,
+        current_user: m.User,
         ticket_id: Annotated[UUID, Parameter(title="Ticket ID", description="The ticket to update.")],
     ) -> Ticket:
         """Update ticket (status, priority, assign)."""
+        before = capture_snapshot(await tickets_service.get(ticket_id))
         db_obj = await tickets_service.update(
             item_id=ticket_id,
             data=data.to_dict(),
+        )
+        after = capture_snapshot(db_obj)
+        await log_audit(
+            audit_service,
+            action="support.ticket_update",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            target_type="ticket",
+            target_id=ticket_id,
+            target_label=db_obj.subject,
+            before=before,
+            after=after,
+            request=request,
         )
         return tickets_service.to_schema(db_obj, schema_type=Ticket)
 
@@ -121,11 +162,29 @@ class TicketController(Controller):
     )
     async def delete_ticket(
         self,
+        request: Request[m.User, Token, Any],
         tickets_service: TicketService,
+        audit_service: AuditLogService,
+        current_user: m.User,
         ticket_id: Annotated[UUID, Parameter(title="Ticket ID", description="The ticket to delete.")],
     ) -> None:
         """Delete a ticket and all associated messages/attachments."""
-        _ = await tickets_service.delete(ticket_id)
+        db_obj = await tickets_service.get(ticket_id)
+        before = capture_snapshot(db_obj)
+        target_label = db_obj.subject
+        await tickets_service.delete(ticket_id)
+        await log_audit(
+            audit_service,
+            action="support.ticket_delete",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            target_type="ticket",
+            target_id=ticket_id,
+            target_label=target_label,
+            before=before,
+            after=None,
+            request=request,
+        )
 
     @post(
         operation_id="CloseTicket",
@@ -134,11 +193,28 @@ class TicketController(Controller):
     )
     async def close_ticket(
         self,
+        request: Request[m.User, Token, Any],
         tickets_service: TicketService,
+        audit_service: AuditLogService,
+        current_user: m.User,
         ticket_id: Annotated[UUID, Parameter(title="Ticket ID", description="The ticket to close.")],
     ) -> Ticket:
         """Close a ticket."""
+        before = capture_snapshot(await tickets_service.get(ticket_id))
         db_obj = await tickets_service.close_ticket(ticket_id)
+        after = capture_snapshot(db_obj)
+        await log_audit(
+            audit_service,
+            action="support.ticket_close",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            target_type="ticket",
+            target_id=ticket_id,
+            target_label=db_obj.subject,
+            before=before,
+            after=after,
+            request=request,
+        )
         return tickets_service.to_schema(db_obj, schema_type=Ticket)
 
     @post(
@@ -148,9 +224,26 @@ class TicketController(Controller):
     )
     async def reopen_ticket(
         self,
+        request: Request[m.User, Token, Any],
         tickets_service: TicketService,
+        audit_service: AuditLogService,
+        current_user: m.User,
         ticket_id: Annotated[UUID, Parameter(title="Ticket ID", description="The ticket to reopen.")],
     ) -> Ticket:
         """Reopen a closed ticket."""
+        before = capture_snapshot(await tickets_service.get(ticket_id))
         db_obj = await tickets_service.reopen_ticket(ticket_id)
+        after = capture_snapshot(db_obj)
+        await log_audit(
+            audit_service,
+            action="support.ticket_reopen",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            target_type="ticket",
+            target_id=ticket_id,
+            target_label=db_obj.subject,
+            before=before,
+            after=after,
+            request=request,
+        )
         return tickets_service.to_schema(db_obj, schema_type=Ticket)

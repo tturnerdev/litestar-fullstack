@@ -2,22 +2,29 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Annotated
+from typing import TYPE_CHECKING, Annotated, Any
 from uuid import UUID
 
 from litestar import Controller, delete, get, patch, post
+from litestar.di import Provide
 from litestar.params import Dependency, Parameter
 from sqlalchemy.orm import selectinload
 
 from app.db import models as m
+from app.domain.admin.deps import provide_audit_log_service
 from app.domain.locations.guards import requires_location_team_membership
 from app.domain.locations.schemas import Location, LocationCreate, LocationUpdate
 from app.domain.locations.services import LocationService
+from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
 
 if TYPE_CHECKING:
     from advanced_alchemy.filters import FilterTypes
     from advanced_alchemy.service.pagination import OffsetPagination
+    from litestar import Request
+    from litestar.security.jwt import Token
+
+    from app.domain.admin.services import AuditLogService
 
 
 class LocationController(Controller):
@@ -38,7 +45,9 @@ class LocationController(Controller):
             "sort_field": "name",
             "sort_order": "asc",
         },
-    )
+    ) | {
+        "audit_service": Provide(provide_audit_log_service),
+    }
 
     @get(operation_id="ListLocations", path="/api/teams/{team_id:uuid}/locations")
     async def list_locations(
@@ -70,7 +79,9 @@ class LocationController(Controller):
     @post(operation_id="CreateLocation", path="/api/teams/{team_id:uuid}/locations")
     async def create_location(
         self,
+        request: Request[m.User, Token, Any],
         locations_service: LocationService,
+        audit_service: AuditLogService,
         current_user: m.User,
         data: LocationCreate,
         team_id: Annotated[UUID, Parameter(title="Team ID", description="The team to create the location for.")],
@@ -78,7 +89,9 @@ class LocationController(Controller):
         """Create a new location.
 
         Args:
+            request: The current request
             locations_service: Location Service
+            audit_service: Audit Log Service
             current_user: Current User
             data: Location Create
             team_id: Team ID
@@ -89,6 +102,19 @@ class LocationController(Controller):
         obj = data.to_dict()
         obj["team_id"] = team_id
         db_obj = await locations_service.create(obj)
+        after = capture_snapshot(db_obj)
+        await log_audit(
+            audit_service,
+            action="location.create",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            target_type="location",
+            target_id=db_obj.id,
+            target_label=db_obj.name,
+            before=None,
+            after=after,
+            request=request,
+        )
         return locations_service.to_schema(db_obj, schema_type=Location)
 
     @get(
@@ -122,27 +148,47 @@ class LocationController(Controller):
     )
     async def update_location(
         self,
+        request: Request[m.User, Token, Any],
         data: LocationUpdate,
         locations_service: LocationService,
+        audit_service: AuditLogService,
+        current_user: m.User,
         team_id: Annotated[UUID, Parameter(title="Team ID", description="The team the location belongs to.")],
         location_id: Annotated[UUID, Parameter(title="Location ID", description="The location to update.")],
     ) -> Location:
         """Update a location.
 
         Args:
+            request: The current request
             data: Location Update
             locations_service: Location Service
+            audit_service: Audit Log Service
+            current_user: Current User
             team_id: Team ID
             location_id: Location ID
 
         Returns:
             Location
         """
+        before = capture_snapshot(await locations_service.get(location_id))
         await locations_service.update(
             item_id=location_id,
             data=data.to_dict(),
         )
         fresh_obj = await locations_service.get_one(id=location_id)
+        after = capture_snapshot(fresh_obj)
+        await log_audit(
+            audit_service,
+            action="location.update",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            target_type="location",
+            target_id=location_id,
+            target_label=fresh_obj.name,
+            before=before,
+            after=after,
+            request=request,
+        )
         return locations_service.to_schema(fresh_obj, schema_type=Location)
 
     @delete(
@@ -152,15 +198,36 @@ class LocationController(Controller):
     )
     async def delete_location(
         self,
+        request: Request[m.User, Token, Any],
         locations_service: LocationService,
+        audit_service: AuditLogService,
+        current_user: m.User,
         team_id: Annotated[UUID, Parameter(title="Team ID", description="The team the location belongs to.")],
         location_id: Annotated[UUID, Parameter(title="Location ID", description="The location to delete.")],
     ) -> None:
         """Delete a location.
 
         Args:
+            request: The current request
             locations_service: Location Service
+            audit_service: Audit Log Service
+            current_user: Current User
             team_id: Team ID
             location_id: Location ID
         """
-        _ = await locations_service.delete(location_id)
+        db_obj = await locations_service.get(location_id)
+        before = capture_snapshot(db_obj)
+        target_label = db_obj.name
+        await locations_service.delete(location_id)
+        await log_audit(
+            audit_service,
+            action="location.delete",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            target_type="location",
+            target_id=location_id,
+            target_label=target_label,
+            before=before,
+            after=None,
+            request=request,
+        )

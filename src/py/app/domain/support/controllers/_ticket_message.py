@@ -2,22 +2,29 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Annotated
+from typing import TYPE_CHECKING, Annotated, Any
 from uuid import UUID
 
 from litestar import Controller, delete, get, patch, post
+from litestar.di import Provide
 from litestar.params import Dependency, Parameter
 from sqlalchemy.orm import selectinload
 
 from app.db import models as m
+from app.domain.admin.deps import provide_audit_log_service
 from app.domain.support.guards import requires_ticket_access, requires_ticket_message_edit
 from app.domain.support.schemas import TicketMessage, TicketMessageCreate
 from app.domain.support.services import TicketMessageService
+from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
 
 if TYPE_CHECKING:
     from advanced_alchemy.filters import FilterTypes
     from advanced_alchemy.service.pagination import OffsetPagination
+    from litestar import Request
+    from litestar.security.jwt import Token
+
+    from app.domain.admin.services import AuditLogService
 
 
 class TicketMessageController(Controller):
@@ -37,7 +44,9 @@ class TicketMessageController(Controller):
             "sort_field": "created_at",
             "sort_order": "asc",
         },
-    )
+    ) | {
+        "audit_service": Provide(provide_audit_log_service),
+    }
 
     @get(operation_id="ListTicketMessages", path="/api/support/tickets/{ticket_id:uuid}/messages")
     async def list_messages(
@@ -65,7 +74,9 @@ class TicketMessageController(Controller):
     @post(operation_id="CreateTicketMessage", path="/api/support/tickets/{ticket_id:uuid}/messages")
     async def create_message(
         self,
+        request: Request[m.User, Token, Any],
         messages_service: TicketMessageService,
+        audit_service: AuditLogService,
         current_user: m.User,
         ticket_id: Annotated[UUID, Parameter(title="Ticket ID")],
         data: TicketMessageCreate,
@@ -75,6 +86,19 @@ class TicketMessageController(Controller):
         obj["ticket_id"] = ticket_id
         obj["author_id"] = current_user.id
         db_obj = await messages_service.create(obj)
+        after = capture_snapshot(db_obj)
+        await log_audit(
+            audit_service,
+            action="support.message_create",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            target_type="ticket_message",
+            target_id=db_obj.id,
+            target_label=f"ticket:{ticket_id}",
+            before=None,
+            after=after,
+            request=request,
+        )
         return messages_service.to_schema(db_obj, schema_type=TicketMessage)
 
     @patch(
@@ -84,15 +108,32 @@ class TicketMessageController(Controller):
     )
     async def update_message(
         self,
+        request: Request[m.User, Token, Any],
         messages_service: TicketMessageService,
+        audit_service: AuditLogService,
+        current_user: m.User,
         ticket_id: Annotated[UUID, Parameter(title="Ticket ID")],
         msg_id: Annotated[UUID, Parameter(title="Message ID", description="The message to update.")],
         data: TicketMessageCreate,
     ) -> TicketMessage:
         """Edit a message (own, within time window)."""
+        before = capture_snapshot(await messages_service.get(msg_id))
         db_obj = await messages_service.update(
             item_id=msg_id,
             data=data.to_dict(),
+        )
+        after = capture_snapshot(db_obj)
+        await log_audit(
+            audit_service,
+            action="support.message_update",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            target_type="ticket_message",
+            target_id=msg_id,
+            target_label=f"ticket:{ticket_id}",
+            before=before,
+            after=after,
+            request=request,
         )
         return messages_service.to_schema(db_obj, schema_type=TicketMessage)
 
@@ -103,9 +144,26 @@ class TicketMessageController(Controller):
     )
     async def delete_message(
         self,
+        request: Request[m.User, Token, Any],
         messages_service: TicketMessageService,
+        audit_service: AuditLogService,
+        current_user: m.User,
         ticket_id: Annotated[UUID, Parameter(title="Ticket ID")],
         msg_id: Annotated[UUID, Parameter(title="Message ID", description="The message to delete.")],
     ) -> None:
         """Delete a message (own, within time window)."""
-        _ = await messages_service.delete(msg_id)
+        db_obj = await messages_service.get(msg_id)
+        before = capture_snapshot(db_obj)
+        await messages_service.delete(msg_id)
+        await log_audit(
+            audit_service,
+            action="support.message_delete",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            target_type="ticket_message",
+            target_id=msg_id,
+            target_label=f"ticket:{ticket_id}",
+            before=before,
+            after=None,
+            request=request,
+        )

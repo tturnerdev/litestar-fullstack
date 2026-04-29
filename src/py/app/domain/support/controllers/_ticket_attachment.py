@@ -2,17 +2,26 @@
 
 from __future__ import annotations
 
-from typing import Annotated
+from typing import TYPE_CHECKING, Annotated, Any
 from uuid import UUID
 
 from litestar import Controller, delete, get, post
+from litestar.di import Provide
 from litestar.params import Parameter
 
 from app.db import models as m
+from app.domain.admin.deps import provide_audit_log_service
 from app.domain.support.guards import requires_ticket_access
 from app.domain.support.schemas import TicketAttachment
 from app.domain.support.services import TicketAttachmentService
+from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
+
+if TYPE_CHECKING:
+    from litestar import Request
+    from litestar.security.jwt import Token
+
+    from app.domain.admin.services import AuditLogService
 
 
 class TicketAttachmentController(Controller):
@@ -22,7 +31,9 @@ class TicketAttachmentController(Controller):
     dependencies = create_service_dependencies(
         TicketAttachmentService,
         key="attachments_service",
-    )
+    ) | {
+        "audit_service": Provide(provide_audit_log_service),
+    }
 
     @post(
         operation_id="UploadAttachment",
@@ -59,11 +70,29 @@ class TicketAttachmentController(Controller):
     @delete(operation_id="DeleteAttachment", path="/api/support/attachments/{attachment_id:uuid}")
     async def delete_attachment(
         self,
+        request: Request[m.User, Token, Any],
         attachments_service: TicketAttachmentService,
+        audit_service: AuditLogService,
+        current_user: m.User,
         attachment_id: Annotated[UUID, Parameter(title="Attachment ID", description="The attachment to delete.")],
     ) -> None:
         """Delete an attachment."""
-        _ = await attachments_service.delete(attachment_id)
+        db_obj = await attachments_service.get(attachment_id)
+        before = capture_snapshot(db_obj)
+        target_label = db_obj.file_name
+        await attachments_service.delete(attachment_id)
+        await log_audit(
+            audit_service,
+            action="support.attachment_delete",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            target_type="ticket_attachment",
+            target_id=attachment_id,
+            target_label=target_label,
+            before=before,
+            after=None,
+            request=request,
+        )
 
     @post(
         operation_id="PasteImage",

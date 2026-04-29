@@ -2,25 +2,32 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Annotated
+from typing import TYPE_CHECKING, Annotated, Any
 from uuid import UUID
 
 from litestar import Controller, delete, get
+from litestar.di import Provide
 from litestar.exceptions import PermissionDeniedException
 from litestar.params import Dependency, Parameter
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from app.db import models as m
+from app.domain.admin.deps import provide_audit_log_service
 from app.domain.fax.controllers._fax_number import _can_access_fax_number
 from app.domain.fax.guards import requires_fax_message_access
 from app.domain.fax.schemas import FaxMessage
 from app.domain.fax.services import FaxMessageService
+from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
 
 if TYPE_CHECKING:
     from advanced_alchemy.filters import FilterTypes
     from advanced_alchemy.service.pagination import OffsetPagination
+    from litestar import Request
+    from litestar.security.jwt import Token
+
+    from app.domain.admin.services import AuditLogService
 
 
 class FaxMessageController(Controller):
@@ -40,7 +47,9 @@ class FaxMessageController(Controller):
             "sort_field": "received_at",
             "sort_order": "desc",
         },
-    )
+    ) | {
+        "audit_service": Provide(provide_audit_log_service),
+    }
 
     @get(component="fax/message-list", operation_id="ListFaxMessages", path="/api/fax/messages")
     async def list_fax_messages(
@@ -115,14 +124,18 @@ class FaxMessageController(Controller):
     )
     async def delete_fax_message(
         self,
+        request: Request[m.User, Token, Any],
         fax_messages_service: FaxMessageService,
+        audit_service: AuditLogService,
         current_user: m.User,
         message_id: Annotated[UUID, Parameter(title="Message ID", description="The fax message to delete.")],
     ) -> None:
         """Delete a fax message.
 
         Args:
+            request: The current request
             fax_messages_service: Fax Message Service
+            audit_service: Audit Log Service
             current_user: Current User
             message_id: Message ID
 
@@ -132,4 +145,17 @@ class FaxMessageController(Controller):
         db_obj = await fax_messages_service.get(message_id)
         if not _can_access_fax_number(current_user, db_obj.fax_number):
             raise PermissionDeniedException(detail="Insufficient permissions to access this fax message.")
+        before = capture_snapshot(db_obj)
         await fax_messages_service.delete(message_id)
+        await log_audit(
+            audit_service,
+            action="fax.message_delete",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            target_type="fax_message",
+            target_id=message_id,
+            target_label=str(message_id),
+            before=before,
+            after=None,
+            request=request,
+        )

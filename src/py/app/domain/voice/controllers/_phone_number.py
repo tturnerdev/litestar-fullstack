@@ -2,21 +2,28 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Annotated
+from typing import TYPE_CHECKING, Annotated, Any
 from uuid import UUID
 
 from litestar import Controller, delete, get, patch, post
+from litestar.di import Provide
 from litestar.params import Dependency, Parameter
 
 from app.db import models as m
+from app.domain.admin.deps import provide_audit_log_service
 from app.domain.voice.guards import requires_phone_number_access
 from app.domain.voice.schemas import PhoneNumber, PhoneNumberCreate, PhoneNumberUpdate
 from app.domain.voice.services import PhoneNumberService
+from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
 
 if TYPE_CHECKING:
     from advanced_alchemy.filters import FilterTypes
     from advanced_alchemy.service.pagination import OffsetPagination
+    from litestar import Request
+    from litestar.security.jwt import Token
+
+    from app.domain.admin.services import AuditLogService
 
 
 class PhoneNumberController(Controller):
@@ -36,7 +43,9 @@ class PhoneNumberController(Controller):
             "sort_field": "created_at",
             "sort_order": "desc",
         },
-    )
+    ) | {
+        "audit_service": Provide(provide_audit_log_service),
+    }
 
     @get(operation_id="ListPhoneNumbers")
     async def list_phone_numbers(
@@ -55,7 +64,9 @@ class PhoneNumberController(Controller):
     @post(operation_id="CreatePhoneNumber")
     async def create_phone_number(
         self,
+        request: Request[m.User, Token, Any],
         phone_numbers_service: PhoneNumberService,
+        audit_service: AuditLogService,
         current_user: m.User,
         data: PhoneNumberCreate,
     ) -> PhoneNumber:
@@ -63,6 +74,19 @@ class PhoneNumberController(Controller):
         obj = data.to_dict()
         obj["user_id"] = current_user.id
         db_obj = await phone_numbers_service.create(obj)
+        after = capture_snapshot(db_obj)
+        await log_audit(
+            audit_service,
+            action="voice.phone_number_create",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            target_type="phone_number",
+            target_id=db_obj.id,
+            target_label=db_obj.number,
+            before=None,
+            after=after,
+            request=request,
+        )
         return phone_numbers_service.to_schema(db_obj, schema_type=PhoneNumber)
 
     @get(operation_id="GetPhoneNumber", path="/{phone_number_id:uuid}", guards=[requires_phone_number_access])
@@ -79,14 +103,30 @@ class PhoneNumberController(Controller):
     @patch(operation_id="UpdatePhoneNumber", path="/{phone_number_id:uuid}", guards=[requires_phone_number_access])
     async def update_phone_number(
         self,
+        request: Request[m.User, Token, Any],
         phone_numbers_service: PhoneNumberService,
+        audit_service: AuditLogService,
         current_user: m.User,
         data: PhoneNumberUpdate,
         phone_number_id: Annotated[UUID, Parameter(title="Phone Number ID", description="The phone number to update.")],
     ) -> PhoneNumber:
         """Update label, caller ID."""
         db_obj = await phone_numbers_service.get_one(id=phone_number_id, user_id=current_user.id)
+        before = capture_snapshot(db_obj)
         db_obj = await phone_numbers_service.update(item_id=db_obj.id, data=data.to_dict())
+        after = capture_snapshot(db_obj)
+        await log_audit(
+            audit_service,
+            action="voice.phone_number_update",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            target_type="phone_number",
+            target_id=db_obj.id,
+            target_label=db_obj.number,
+            before=before,
+            after=after,
+            request=request,
+        )
         return phone_numbers_service.to_schema(db_obj, schema_type=PhoneNumber)
 
     @delete(
@@ -97,10 +137,26 @@ class PhoneNumberController(Controller):
     )
     async def delete_phone_number(
         self,
+        request: Request[m.User, Token, Any],
         phone_numbers_service: PhoneNumberService,
+        audit_service: AuditLogService,
         current_user: m.User,
         phone_number_id: Annotated[UUID, Parameter(title="Phone Number ID", description="The phone number to delete.")],
     ) -> None:
         """Delete a phone number."""
-        await phone_numbers_service.get_one(id=phone_number_id, user_id=current_user.id)
+        db_obj = await phone_numbers_service.get_one(id=phone_number_id, user_id=current_user.id)
+        before = capture_snapshot(db_obj)
+        target_label = db_obj.number
         await phone_numbers_service.delete(phone_number_id)
+        await log_audit(
+            audit_service,
+            action="voice.phone_number_delete",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            target_type="phone_number",
+            target_id=phone_number_id,
+            target_label=target_label,
+            before=before,
+            after=None,
+            request=request,
+        )

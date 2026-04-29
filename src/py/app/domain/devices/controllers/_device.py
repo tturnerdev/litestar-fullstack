@@ -2,22 +2,29 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Annotated
+from typing import TYPE_CHECKING, Annotated, Any
 from uuid import UUID
 
 from litestar import Controller, delete, get, patch, post
+from litestar.di import Provide
 from litestar.params import Dependency, Parameter
 from sqlalchemy.orm import selectinload
 
 from app.db import models as m
+from app.domain.admin.deps import provide_audit_log_service
 from app.domain.devices.guards import requires_device_ownership
 from app.domain.devices.schemas import Device, DeviceCreate, DeviceUpdate
 from app.domain.devices.services import DeviceService
+from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
 
 if TYPE_CHECKING:
     from advanced_alchemy.filters import FilterTypes
     from advanced_alchemy.service.pagination import OffsetPagination
+    from litestar import Request
+    from litestar.security.jwt import Token
+
+    from app.domain.admin.services import AuditLogService
 
 
 class DeviceController(Controller):
@@ -38,7 +45,9 @@ class DeviceController(Controller):
             "sort_field": "name",
             "sort_order": "asc",
         },
-    )
+    ) | {
+        "audit_service": Provide(provide_audit_log_service),
+    }
 
     @get(operation_id="ListDevices", path="/api/devices")
     async def list_devices(
@@ -69,14 +78,18 @@ class DeviceController(Controller):
     @post(operation_id="CreateDevice", path="/api/devices")
     async def create_device(
         self,
+        request: Request[m.User, Token, Any],
         devices_service: DeviceService,
+        audit_service: AuditLogService,
         current_user: m.User,
         data: DeviceCreate,
     ) -> Device:
         """Register a new device.
 
         Args:
+            request: The current request
             devices_service: Device Service
+            audit_service: Audit Log Service
             current_user: Current User
             data: Device Create
 
@@ -86,6 +99,19 @@ class DeviceController(Controller):
         obj = data.to_dict()
         obj["user_id"] = current_user.id
         db_obj = await devices_service.create(obj)
+        after = capture_snapshot(db_obj)
+        await log_audit(
+            audit_service,
+            action="device.create",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            target_type="device",
+            target_id=db_obj.id,
+            target_label=db_obj.name,
+            before=None,
+            after=after,
+            request=request,
+        )
         return devices_service.to_schema(db_obj, schema_type=Device)
 
     @get(
@@ -117,25 +143,45 @@ class DeviceController(Controller):
     )
     async def update_device(
         self,
+        request: Request[m.User, Token, Any],
         data: DeviceUpdate,
         devices_service: DeviceService,
+        audit_service: AuditLogService,
+        current_user: m.User,
         device_id: Annotated[UUID, Parameter(title="Device ID", description="The device to update.")],
     ) -> Device:
         """Update a device.
 
         Args:
+            request: The current request
             data: Device Update
             devices_service: Device Service
+            audit_service: Audit Log Service
+            current_user: Current User
             device_id: Device ID
 
         Returns:
             Device
         """
+        before = capture_snapshot(await devices_service.get(device_id))
         await devices_service.update(
             item_id=device_id,
             data=data.to_dict(),
         )
         fresh_obj = await devices_service.get_one(id=device_id)
+        after = capture_snapshot(fresh_obj)
+        await log_audit(
+            audit_service,
+            action="device.update",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            target_type="device",
+            target_id=device_id,
+            target_label=fresh_obj.name,
+            before=before,
+            after=after,
+            request=request,
+        )
         return devices_service.to_schema(fresh_obj, schema_type=Device)
 
     @delete(
@@ -145,13 +191,34 @@ class DeviceController(Controller):
     )
     async def delete_device(
         self,
+        request: Request[m.User, Token, Any],
         devices_service: DeviceService,
+        audit_service: AuditLogService,
+        current_user: m.User,
         device_id: Annotated[UUID, Parameter(title="Device ID", description="The device to delete.")],
     ) -> None:
         """Delete a device.
 
         Args:
+            request: The current request
             devices_service: Device Service
+            audit_service: Audit Log Service
+            current_user: Current User
             device_id: Device ID
         """
-        _ = await devices_service.delete(device_id)
+        db_obj = await devices_service.get(device_id)
+        before = capture_snapshot(db_obj)
+        target_label = db_obj.name
+        await devices_service.delete(device_id)
+        await log_audit(
+            audit_service,
+            action="device.delete",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            target_type="device",
+            target_id=device_id,
+            target_label=target_label,
+            before=before,
+            after=None,
+            request=request,
+        )

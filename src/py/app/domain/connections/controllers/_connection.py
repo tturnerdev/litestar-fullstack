@@ -2,22 +2,29 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Annotated
+from typing import TYPE_CHECKING, Annotated, Any
 from uuid import UUID
 
 from litestar import Controller, delete, get, patch, post
+from litestar.di import Provide
 from litestar.params import Dependency, Parameter
 
 from app.db import models as m
+from app.domain.admin.deps import provide_audit_log_service
 from app.domain.connections.guards import requires_connections_admin
 from app.domain.connections.schemas import ConnectionCreate, ConnectionDetail, ConnectionList, ConnectionUpdate
 from app.domain.connections.services import ConnectionService
+from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
 from app.lib.schema import Message
 
 if TYPE_CHECKING:
     from advanced_alchemy.filters import FilterTypes
     from advanced_alchemy.service.pagination import OffsetPagination
+    from litestar import Request
+    from litestar.security.jwt import Token
+
+    from app.domain.admin.services import AuditLogService
 
 
 def _mask_credentials(db_obj: m.Connection) -> list[str]:
@@ -52,7 +59,9 @@ class ConnectionController(Controller):
             "sort_field": "name",
             "sort_order": "asc",
         },
-    )
+    ) | {
+        "audit_service": Provide(provide_audit_log_service),
+    }
 
     @get(operation_id="ListConnections", path="/api/connections")
     async def list_connections(
@@ -82,14 +91,18 @@ class ConnectionController(Controller):
     @post(operation_id="CreateConnection", path="/api/connections")
     async def create_connection(
         self,
+        request: Request[m.User, Token, Any],
         connections_service: ConnectionService,
+        audit_service: AuditLogService,
         current_user: m.User,
         data: ConnectionCreate,
     ) -> ConnectionList:
         """Create a new connection.
 
         Args:
+            request: The current request
             connections_service: Connection Service
+            audit_service: Audit Log Service
             current_user: Current User
             data: Connection Create
 
@@ -98,6 +111,19 @@ class ConnectionController(Controller):
         """
         obj = data.to_dict()
         db_obj = await connections_service.create(obj)
+        after = capture_snapshot(db_obj)
+        await log_audit(
+            audit_service,
+            action="connection.create",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            target_type="connection",
+            target_id=db_obj.id,
+            target_label=db_obj.name,
+            before=None,
+            after=after,
+            request=request,
+        )
         return connections_service.to_schema(db_obj, schema_type=ConnectionList)
 
     @get(
@@ -131,25 +157,45 @@ class ConnectionController(Controller):
     )
     async def update_connection(
         self,
+        request: Request[m.User, Token, Any],
         data: ConnectionUpdate,
         connections_service: ConnectionService,
+        audit_service: AuditLogService,
+        current_user: m.User,
         connection_id: Annotated[UUID, Parameter(title="Connection ID", description="The connection to update.")],
     ) -> ConnectionDetail:
         """Update a connection.
 
         Args:
+            request: The current request
             data: Connection Update
             connections_service: Connection Service
+            audit_service: Audit Log Service
+            current_user: Current User
             connection_id: Connection ID
 
         Returns:
             ConnectionDetail
         """
+        before = capture_snapshot(await connections_service.get(connection_id))
         await connections_service.update(
             item_id=connection_id,
             data=data.to_dict(),
         )
         db_obj = await connections_service.get_one(id=connection_id)
+        after = capture_snapshot(db_obj)
+        await log_audit(
+            audit_service,
+            action="connection.update",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            target_type="connection",
+            target_id=connection_id,
+            target_label=db_obj.name,
+            before=before,
+            after=after,
+            request=request,
+        )
         detail = connections_service.to_schema(db_obj, schema_type=ConnectionDetail)
         detail.credential_fields = _mask_credentials(db_obj)
         return detail
@@ -160,16 +206,37 @@ class ConnectionController(Controller):
     )
     async def delete_connection(
         self,
+        request: Request[m.User, Token, Any],
         connections_service: ConnectionService,
+        audit_service: AuditLogService,
+        current_user: m.User,
         connection_id: Annotated[UUID, Parameter(title="Connection ID", description="The connection to delete.")],
     ) -> None:
         """Delete a connection.
 
         Args:
+            request: The current request
             connections_service: Connection Service
+            audit_service: Audit Log Service
+            current_user: Current User
             connection_id: Connection ID
         """
-        _ = await connections_service.delete(connection_id)
+        db_obj = await connections_service.get(connection_id)
+        before = capture_snapshot(db_obj)
+        target_label = db_obj.name
+        await connections_service.delete(connection_id)
+        await log_audit(
+            audit_service,
+            action="connection.delete",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            target_type="connection",
+            target_id=connection_id,
+            target_label=target_label,
+            before=before,
+            after=None,
+            request=request,
+        )
 
     @post(
         operation_id="TestConnection",
