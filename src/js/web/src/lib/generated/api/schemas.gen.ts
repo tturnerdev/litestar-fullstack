@@ -107,6 +107,16 @@ export const ActivityLogEntrySchema = {
         },
       ],
     },
+    actorName: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     createdAt: {
       format: "date-time",
       type: "string",
@@ -533,6 +543,16 @@ export const AuditLogEntrySchema = {
       oneOf: [
         {
           format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    actorName: {
+      oneOf: [
+        {
           type: "string",
         },
         {

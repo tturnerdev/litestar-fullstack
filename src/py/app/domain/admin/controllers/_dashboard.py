@@ -112,6 +112,7 @@ class DashboardController(Controller):
                 id=log.id,
                 action=log.action,
                 actor_email=log.actor_email,
+                actor_name=log.actor_name,
                 target_label=log.target_label,
                 created_at=log.created_at,
             )

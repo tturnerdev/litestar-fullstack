@@ -15,6 +15,7 @@ class AuditLogEntry(CamelizedBaseStruct, kw_only=True):
     created_at: datetime
     actor_id: UUID | None = None
     actor_email: str | None = None
+    actor_name: str | None = None
     target_type: str | None = None
     target_id: str | None = None
     target_label: str | None = None

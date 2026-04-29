@@ -33,6 +33,9 @@ class AuditLog(UUIDv7AuditBase):
     actor_email: Mapped[str | None] = mapped_column(String(255), nullable=True)
     """Email of the actor at the time of the action (preserved even if user deleted)."""
 
+    actor_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    """Display name of the actor at the time of the action (preserved even if user deleted)."""
+
     action: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     """The action performed (e.g., 'user.created', 'team.deleted', 'login.failed')."""
 

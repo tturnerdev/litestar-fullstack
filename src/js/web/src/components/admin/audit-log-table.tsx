@@ -102,11 +102,12 @@ function escapeCsvField(value: string): string {
 }
 
 function generateBasicCsv(items: AuditLogEntry[]): string {
-  const headers = ["timestamp", "action", "actor_email", "target_type", "target_id", "target_label", "ip_address", "user_agent"]
+  const headers = ["timestamp", "action", "actor_name", "actor_email", "target_type", "target_id", "target_label", "ip_address", "user_agent"]
   const rows = items.map((entry) =>
     [
       new Date(entry.createdAt).toISOString(),
       entry.action,
+      entry.actorName ?? "",
       entry.actorEmail ?? "",
       entry.targetType ?? "",
       entry.targetId ?? "",
@@ -145,7 +146,7 @@ function generateExtendedCsv(items: AuditLogEntry[]): string {
   const sortedDetailKeys = [...detailKeys].sort()
 
   const headers = [
-    "id", "timestamp", "action", "actor_id", "actor_email",
+    "id", "timestamp", "action", "actor_id", "actor_name", "actor_email",
     "target_type", "target_id", "target_label",
     "ip_address", "user_agent", "details_json",
     ...sortedDetailKeys.map((k) => `detail_${k}`),
@@ -158,6 +159,7 @@ function generateExtendedCsv(items: AuditLogEntry[]): string {
       new Date(entry.createdAt).toISOString(),
       entry.action,
       entry.actorId ?? "",
+      entry.actorName ?? "",
       entry.actorEmail ?? "",
       entry.targetType ?? "",
       entry.targetId ?? "",
@@ -535,7 +537,20 @@ export function AuditLogTable() {
                           {entry.action}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-muted-foreground">{entry.actorEmail ?? "System"}</TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {entry.actorName ? (
+                          <div>
+                            <span>{entry.actorName}</span>
+                            {entry.actorEmail && (
+                              <span className="block text-xs text-muted-foreground/70">{entry.actorEmail}</span>
+                            )}
+                          </div>
+                        ) : entry.actorEmail ? (
+                          entry.actorEmail
+                        ) : (
+                          "System"
+                        )}
+                      </TableCell>
                       <TableCell className="text-muted-foreground">
                         {entry.targetLabel ?? entry.targetId ?? "-"}
                         {entry.targetType && <span className="ml-1.5 text-xs text-muted-foreground/60">({entry.targetType})</span>}

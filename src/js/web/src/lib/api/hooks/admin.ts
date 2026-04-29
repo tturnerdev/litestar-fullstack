@@ -29,6 +29,8 @@ import {
   type RecentActivity,
   revokeRole,
   type Role,
+  type TeamRoles,
+  updateTeamMember,
 } from "@/lib/generated/api"
 
 export function useAdminDashboardStats() {
@@ -299,6 +301,29 @@ export function useAssignRole() {
     },
     onError: (error) => {
       toast.error("Unable to assign role", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
+    },
+  })
+}
+
+export function useUpdateTeamMember(userId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ teamId, role }: { teamId: string; role: TeamRoles }) => {
+      const response = await updateTeamMember({
+        path: { team_id: teamId, user_id: userId },
+        body: { role },
+      })
+      return response.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "users"] })
+      queryClient.invalidateQueries({ queryKey: ["admin", "user", userId] })
+      toast.success("Team role updated")
+    },
+    onError: (error) => {
+      toast.error("Unable to update team role", {
         description: error instanceof Error ? error.message : "Try again later",
       })
     },

@@ -25,6 +25,7 @@ class ActivityLogEntry(CamelizedBaseStruct, kw_only=True):
     action: str
     created_at: datetime
     actor_email: str | None = None
+    actor_name: str | None = None
     target_label: str | None = None
     ip_address: str | None = None
 

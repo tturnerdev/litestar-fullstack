@@ -40,6 +40,7 @@ export type ActiveSession = {
 export type ActivityLogEntry = {
   action: string;
   actorEmail?: string | null;
+  actorName?: string | null;
   createdAt: string;
   id: string;
   ipAddress?: string | null;
@@ -150,6 +151,7 @@ export type AuditLogEntry = {
   action: string;
   actorEmail?: string | null;
   actorId?: string | null;
+  actorName?: string | null;
   createdAt: string;
   details?: {
     [key: string]: unknown;
@@ -1728,9 +1730,9 @@ export type AdminListAuditLogsData = {
      */
     sortOrder?: "asc" | "desc" | null;
     targetTypeIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -1810,9 +1812,9 @@ export type AdminGetTargetAuditLogsData = {
      */
     sortOrder?: "asc" | "desc" | null;
     targetTypeIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -1890,9 +1892,9 @@ export type AdminGetUserAuditLogsData = {
      */
     sortOrder?: "asc" | "desc" | null;
     targetTypeIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };

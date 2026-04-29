@@ -561,8 +561,10 @@ async def _handle_mfa_disable(
         action="mfa.disabled.oauth",
         actor_id=user.id,
         actor_email=user.email,
+        actor_name=user.name,
         target_type="user",
         target_id=str(user.id),
+        target_label=user.email,
         request=request,
         details={"provider": provider},
     )

@@ -35,6 +35,17 @@ A multi-tenant administration portal built on the [Litestar Fullstack](https://g
 | **Locations** | `app.domain.locations` | Addressed locations (with mailing address) and physical sub-locations for associating devices and extensions |
 | **Organization** | `app.domain.organizations` | Org-level settings and profile (admin-viewable, superuser-editable) |
 | **Connections** | `app.domain.connections` | External integration configs (PBX, helpdesk, carrier) with credential security and health checks |
+| **Notifications** | `app.domain.notifications` | In-app notification system with bell icon, unread counts, and domain event triggers |
+| **Admin** | `app.domain.admin` | User management, audit logging with field-level diffs, and platform dashboard |
+
+## Platform Features
+
+- **Global Search** — `Cmd+K` command palette searching across all entity types
+- **Keyboard Shortcuts** — `g+h/t/d/s/p/a` navigation sequences, `?` help dialog, `n` context-sensitive create
+- **Audit Logging** — Comprehensive audit trail with before/after change tracking, field-level diffs, actor enrichment, CSV export (Basic/Extended)
+- **Notifications** — In-app notifications wired to domain events (tickets, teams, devices, voice, fax) with mark read/unread and bulk actions
+- **Settings** — Theme (light/dark/system), notification preferences, display density
+- **Role-Based Access** — Feature-area-scoped permissions per team, admin and superuser guards
 
 See [PROJECT.md](./PROJECT.md) for architecture conventions and detailed feature plans.
 
@@ -55,6 +66,13 @@ app database upgrade
 app run
 ```
 
+For development with error logging:
+
+```bash
+make dev          # stdout+stderr logged to error.log
+make dev-debug    # same, with Litestar debug mode
+```
+
 ### Docker
 
 ```bash
@@ -63,7 +81,7 @@ docker compose up
 
 ### After Backend Changes
 
-Regenerate the TypeScript API client:
+Regenerate the TypeScript API client and route manifest:
 
 ```bash
 make types

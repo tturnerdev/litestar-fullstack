@@ -30,6 +30,7 @@ class AuditLogService(service.SQLAlchemyAsyncRepositoryService[m.AuditLog]):
         action: str,
         actor_id: UUID | None = None,
         actor_email: str | None = None,
+        actor_name: str | None = None,
         target_type: str | None = None,
         target_id: str | None = None,
         target_label: str | None = None,
@@ -44,6 +45,7 @@ class AuditLogService(service.SQLAlchemyAsyncRepositoryService[m.AuditLog]):
             action: The action performed (e.g., 'user.created', 'login.failed')
             actor_id: ID of the user performing the action
             actor_email: Email of the actor
+            actor_name: Display name of the actor
             target_type: Type of target entity (e.g., 'user', 'team')
             target_id: ID of target entity
             target_label: Human-readable label for target
@@ -67,6 +69,7 @@ class AuditLogService(service.SQLAlchemyAsyncRepositoryService[m.AuditLog]):
                 "action": action,
                 "actor_id": actor_id,
                 "actor_email": actor_email,
+                "actor_name": actor_name,
                 "target_type": target_type,
                 "target_id": target_id,
                 "target_label": target_label,
@@ -105,6 +108,7 @@ class AuditLogService(service.SQLAlchemyAsyncRepositoryService[m.AuditLog]):
         *,
         actor_id: UUID,
         actor_email: str | None,
+        actor_name: str | None = None,
         user_id: UUID,
         user_email: str,
         changes: list[str],
@@ -119,6 +123,7 @@ class AuditLogService(service.SQLAlchemyAsyncRepositoryService[m.AuditLog]):
             action="admin.user.update",
             actor_id=actor_id,
             actor_email=actor_email,
+            actor_name=actor_name,
             target_type="user",
             target_id=str(user_id),
             target_label=user_email,
@@ -131,6 +136,7 @@ class AuditLogService(service.SQLAlchemyAsyncRepositoryService[m.AuditLog]):
         *,
         actor_id: UUID,
         actor_email: str | None,
+        actor_name: str | None = None,
         user_id: UUID,
         user_email: str,
         request: Request[Any, Any, Any] | None = None,
@@ -144,6 +150,7 @@ class AuditLogService(service.SQLAlchemyAsyncRepositoryService[m.AuditLog]):
             action="admin.user.delete",
             actor_id=actor_id,
             actor_email=actor_email,
+            actor_name=actor_name,
             target_type="user",
             target_id=str(user_id),
             target_label=user_email,
@@ -155,6 +162,7 @@ class AuditLogService(service.SQLAlchemyAsyncRepositoryService[m.AuditLog]):
         *,
         actor_id: UUID,
         actor_email: str | None,
+        actor_name: str | None = None,
         team_id: UUID,
         team_name: str,
         changes: list[str],
@@ -169,6 +177,7 @@ class AuditLogService(service.SQLAlchemyAsyncRepositoryService[m.AuditLog]):
             action="admin.team.update",
             actor_id=actor_id,
             actor_email=actor_email,
+            actor_name=actor_name,
             target_type="team",
             target_id=str(team_id),
             target_label=team_name,
@@ -181,6 +190,7 @@ class AuditLogService(service.SQLAlchemyAsyncRepositoryService[m.AuditLog]):
         *,
         actor_id: UUID,
         actor_email: str | None,
+        actor_name: str | None = None,
         team_id: UUID,
         team_name: str,
         request: Request[Any, Any, Any] | None = None,
@@ -194,6 +204,7 @@ class AuditLogService(service.SQLAlchemyAsyncRepositoryService[m.AuditLog]):
             action="admin.team.delete",
             actor_id=actor_id,
             actor_email=actor_email,
+            actor_name=actor_name,
             target_type="team",
             target_id=str(team_id),
             target_label=team_name,
