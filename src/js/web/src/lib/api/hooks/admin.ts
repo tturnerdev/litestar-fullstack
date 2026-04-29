@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import {
+  type AdminGetUserAuditLogsData,
   type AdminListAuditLogsData,
   type AdminListTeamsData,
   type AdminListUsersData,
@@ -13,15 +14,21 @@ import {
   adminDeleteUser,
   adminGetTeam,
   adminGetUser,
+  adminGetUserAuditLogs,
   adminListAuditLogs,
   adminListTeams,
   adminListUsers,
   adminUpdateTeam,
   adminUpdateUser,
+  assignRole,
   type DashboardStats,
   getDashboardStats,
   getRecentActivity,
+  listRoles,
+  type ListRolesData,
   type RecentActivity,
+  revokeRole,
+  type Role,
 } from "@/lib/generated/api"
 
 export function useAdminDashboardStats() {
@@ -44,13 +51,15 @@ export function useAdminRecentActivity() {
   })
 }
 
-export function useAdminUsers(page = 1, pageSize = 25) {
+export function useAdminUsers(page = 1, pageSize = 25, search?: string) {
   return useQuery({
-    queryKey: ["admin", "users", page, pageSize],
+    queryKey: ["admin", "users", page, pageSize, search],
     queryFn: async () => {
       const query = {
         currentPage: page,
         pageSize,
+        searchString: search,
+        searchIgnoreCase: search ? true : undefined,
       } as unknown as AdminListUsersData["query"]
       const response = await adminListUsers({ query })
       return response.data as { items: AdminUserSummary[]; total: number }
@@ -77,23 +86,21 @@ export function useAdminAuditLogs(params: {
   pageSize?: number
   search?: string
   action?: string
-  domain?: string
   actorId?: string
   targetType?: string
   startDate?: string
   endDate?: string
 }) {
-  const { page = 1, pageSize = 50, search, action, domain, actorId, targetType, startDate, endDate } = params
+  const { page = 1, pageSize = 50, search, action, actorId, targetType, startDate, endDate } = params
   return useQuery({
-    queryKey: ["admin", "audit", page, pageSize, search, action, domain, actorId, targetType, startDate, endDate],
+    queryKey: ["admin", "audit", page, pageSize, search, action, actorId, targetType, startDate, endDate],
     queryFn: async () => {
       const query = {
         currentPage: page,
         pageSize,
         searchString: search,
         searchIgnoreCase: search ? true : undefined,
-        action: action || undefined,
-        domain: domain || undefined,
+        actionIn: action ? [action] : undefined,
         actorIdIn: actorId ? [actorId] : undefined,
         targetTypeIn: targetType ? [targetType] : undefined,
         createdAfter: startDate,
@@ -207,6 +214,83 @@ export function useAdminDeleteTeam() {
     },
     onError: (error) => {
       toast.error("Unable to delete team", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
+    },
+  })
+}
+
+export function useAdminUserAuditLogs(userId: string, page = 1, pageSize = 10) {
+  return useQuery({
+    queryKey: ["admin", "user", userId, "audit", page, pageSize],
+    queryFn: async () => {
+      const query = {
+        currentPage: page,
+        pageSize,
+      } as unknown as AdminGetUserAuditLogsData["query"]
+      const response = await adminGetUserAuditLogs({
+        path: { user_id: userId },
+        query,
+      })
+      return response.data as { items: AuditLogEntry[]; total: number }
+    },
+    enabled: !!userId,
+  })
+}
+
+export function useRoles() {
+  return useQuery({
+    queryKey: ["roles"],
+    queryFn: async () => {
+      const query = {
+        pageSize: 100,
+      } as unknown as ListRolesData["query"]
+      const response = await listRoles({ query })
+      return response.data as { items: Role[]; total: number }
+    },
+  })
+}
+
+export function useAssignRole() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ roleSlug, userEmail }: { roleSlug: string; userEmail: string }) => {
+      const response = await assignRole({
+        path: { role_slug: roleSlug },
+        body: { userName: userEmail },
+      })
+      return response.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "users"] })
+      queryClient.invalidateQueries({ queryKey: ["admin", "user"] })
+      toast.success("Role assigned")
+    },
+    onError: (error) => {
+      toast.error("Unable to assign role", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
+    },
+  })
+}
+
+export function useRevokeRole() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ roleSlug, userEmail }: { roleSlug: string; userEmail: string }) => {
+      const response = await revokeRole({
+        path: { role_slug: roleSlug },
+        body: { userName: userEmail },
+      })
+      return response.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "users"] })
+      queryClient.invalidateQueries({ queryKey: ["admin", "user"] })
+      toast.success("Role revoked")
+    },
+    onError: (error) => {
+      toast.error("Unable to revoke role", {
         description: error instanceof Error ? error.message : "Try again later",
       })
     },
