@@ -3,9 +3,11 @@
 from app.domain.teams.services._team import TeamService
 from app.domain.teams.services._team_invitation import TeamInvitationService
 from app.domain.teams.services._team_member import TeamMemberService
+from app.domain.teams.services._team_role_permission import TeamRolePermissionService
 
 __all__ = (
     "TeamInvitationService",
     "TeamMemberService",
+    "TeamRolePermissionService",
     "TeamService",
 )

@@ -3,6 +3,7 @@ import { createFileRoute, Link, useParams } from "@tanstack/react-router"
 import { ArrowLeft, Clock, Mail, X } from "lucide-react"
 import { useEffect } from "react"
 import { InviteMemberDialog } from "@/components/teams/invite-member-dialog"
+import { TeamPermissions } from "@/components/teams/team-permissions"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -204,6 +205,10 @@ function TeamDetail() {
             </CardContent>
           </Card>
         </div>
+      </PageSection>
+
+      <PageSection>
+        <TeamPermissions teamId={teamId} canEdit={canManageMembers} />
       </PageSection>
     </PageContainer>
   )

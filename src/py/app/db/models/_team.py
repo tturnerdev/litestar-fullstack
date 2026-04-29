@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from app.db.models._tag import Tag
     from app.db.models._team_invitation import TeamInvitation
     from app.db.models._team_member import TeamMember
+    from app.db.models._team_role_permission import TeamRolePermission
 
 
 class Team(UUIDv7AuditBase, SlugKey):
@@ -44,4 +45,10 @@ class Team(UUIDv7AuditBase, SlugKey):
         back_populates="teams",
         cascade="all, delete",
         passive_deletes=True,
+    )
+    permissions: Mapped[list[TeamRolePermission]] = relationship(
+        back_populates="team",
+        cascade="all, delete",
+        passive_deletes=True,
+        lazy="noload",
     )

@@ -23,9 +23,11 @@ from app.db.models._phone_number import PhoneNumber
 from app.db.models._refresh_token import RefreshToken
 from app.db.models._role import Role
 from app.db.models._tag import Tag
+from app.db.models._feature_area import FeatureArea
 from app.db.models._team import Team
 from app.db.models._team_invitation import TeamInvitation
 from app.db.models._team_member import TeamMember
+from app.db.models._team_role_permission import TeamRolePermission
 from app.db.models._team_roles import TeamRoles
 from app.db.models._team_tag import team_tag
 from app.db.models._ticket import Ticket
@@ -63,6 +65,7 @@ __all__ = (
     "FaxEmailRoute",
     "FaxMessage",
     "FaxNumber",
+    "FeatureArea",
     "FaxStatus",
     "ForwardingDestinationType",
     "ForwardingRule",
@@ -80,6 +83,7 @@ __all__ = (
     "Team",
     "TeamInvitation",
     "TeamMember",
+    "TeamRolePermission",
     "TeamRoles",
     "Ticket",
     "TicketAttachment",
