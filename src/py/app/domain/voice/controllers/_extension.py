@@ -5,12 +5,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Annotated
 from uuid import UUID
 
-from litestar import Controller, get, patch
+from litestar import Controller, get, patch, post
 from litestar.params import Dependency, Parameter
 
 from app.db import models as m
 from app.domain.voice.guards import requires_extension_ownership
-from app.domain.voice.schemas import Extension, ExtensionUpdate
+from app.domain.voice.schemas import Extension, ExtensionCreate, ExtensionUpdate
 from app.domain.voice.services import ExtensionService
 from app.lib.deps import create_service_dependencies
 
@@ -51,6 +51,19 @@ class ExtensionController(Controller):
             m.Extension.user_id == current_user.id,
         )
         return extensions_service.to_schema(results, total, filters, schema_type=Extension)
+
+    @post(operation_id="CreateExtension")
+    async def create_extension(
+        self,
+        extensions_service: ExtensionService,
+        current_user: m.User,
+        data: ExtensionCreate,
+    ) -> Extension:
+        """Create a new extension."""
+        obj = data.to_dict()
+        obj["user_id"] = current_user.id
+        db_obj = await extensions_service.create(obj)
+        return extensions_service.to_schema(db_obj, schema_type=Extension)
 
     @get(operation_id="GetExtension", path="/{ext_id:uuid}", guards=[requires_extension_ownership])
     async def get_extension(

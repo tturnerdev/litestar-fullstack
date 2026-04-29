@@ -18,6 +18,15 @@ class Extension(CamelizedBaseStruct):
     is_active: bool = True
 
 
+class ExtensionCreate(CamelizedBaseStruct):
+    """Extension create properties."""
+
+    extension_number: str
+    display_name: str = ""
+    phone_number_id: UUID | None = None
+    is_active: bool = True
+
+
 class ExtensionUpdate(CamelizedBaseStruct, omit_defaults=True):
     """Extension update properties."""
 

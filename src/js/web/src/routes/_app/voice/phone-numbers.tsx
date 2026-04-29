@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { LayoutGrid, List } from "lucide-react"
+import { LayoutGrid, List, Plus } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { CreatePhoneNumberDialog } from "@/components/voice/create-phone-number-dialog"
 import { PhoneNumberCard } from "@/components/voice/phone-number-card"
 import { PhoneNumberTable } from "@/components/voice/phone-number-table"
 import { usePhoneNumbers } from "@/lib/api/hooks/voice"
@@ -21,25 +22,35 @@ function PhoneNumbersPage() {
         title="Phone Numbers"
         description="View and manage your assigned phone numbers."
         actions={
-          <div className="flex items-center gap-1 rounded-lg border p-1">
-            <Button
-              variant={viewMode === "table" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setViewMode("table")}
-              className="h-8 px-3"
-            >
-              <List className="mr-2 h-4 w-4" />
-              Table
-            </Button>
-            <Button
-              variant={viewMode === "cards" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setViewMode("cards")}
-              className="h-8 px-3"
-            >
-              <LayoutGrid className="mr-2 h-4 w-4" />
-              Cards
-            </Button>
+          <div className="flex items-center gap-2">
+            <CreatePhoneNumberDialog
+              trigger={
+                <Button size="sm">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Phone Number
+                </Button>
+              }
+            />
+            <div className="flex items-center gap-1 rounded-lg border p-1">
+              <Button
+                variant={viewMode === "table" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("table")}
+                className="h-8 px-3"
+              >
+                <List className="mr-2 h-4 w-4" />
+                Table
+              </Button>
+              <Button
+                variant={viewMode === "cards" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("cards")}
+                className="h-8 px-3"
+              >
+                <LayoutGrid className="mr-2 h-4 w-4" />
+                Cards
+              </Button>
+            </div>
           </div>
         }
       />

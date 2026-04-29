@@ -144,6 +144,26 @@ export function useUpdatePhoneNumber(id: string) {
   })
 }
 
+export function useCreatePhoneNumber() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (payload: Record<string, unknown>) =>
+      apiFetch<PhoneNumber>("/api/voice/phone-numbers", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["voice", "phone-numbers"] })
+      toast.success("Phone number created")
+    },
+    onError: (error) => {
+      toast.error("Unable to create phone number", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
+    },
+  })
+}
+
 // ---------------------------------------------------------------------------
 // Extensions
 // ---------------------------------------------------------------------------
@@ -160,6 +180,26 @@ export function useExtension(id: string) {
     queryKey: ["voice", "extension", id],
     queryFn: () => apiFetch<Extension>(`/api/voice/extensions/${id}`),
     enabled: !!id,
+  })
+}
+
+export function useCreateExtension() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (payload: Record<string, unknown>) =>
+      apiFetch<Extension>("/api/voice/extensions", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["voice", "extensions"] })
+      toast.success("Extension created")
+    },
+    onError: (error) => {
+      toast.error("Unable to create extension", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
+    },
   })
 }
 

@@ -5,12 +5,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Annotated
 from uuid import UUID
 
-from litestar import Controller, get, patch
+from litestar import Controller, get, patch, post
 from litestar.params import Dependency, Parameter
 
 from app.db import models as m
 from app.domain.voice.guards import requires_phone_number_access
-from app.domain.voice.schemas import PhoneNumber, PhoneNumberUpdate
+from app.domain.voice.schemas import PhoneNumber, PhoneNumberCreate, PhoneNumberUpdate
 from app.domain.voice.services import PhoneNumberService
 from app.lib.deps import create_service_dependencies
 
@@ -51,6 +51,19 @@ class PhoneNumberController(Controller):
             m.PhoneNumber.user_id == current_user.id,
         )
         return phone_numbers_service.to_schema(results, total, filters, schema_type=PhoneNumber)
+
+    @post(operation_id="CreatePhoneNumber")
+    async def create_phone_number(
+        self,
+        phone_numbers_service: PhoneNumberService,
+        current_user: m.User,
+        data: PhoneNumberCreate,
+    ) -> PhoneNumber:
+        """Create a new phone number."""
+        obj = data.to_dict()
+        obj["user_id"] = current_user.id
+        db_obj = await phone_numbers_service.create(obj)
+        return phone_numbers_service.to_schema(db_obj, schema_type=PhoneNumber)
 
     @get(operation_id="GetPhoneNumber", path="/{phone_number_id:uuid}", guards=[requires_phone_number_access])
     async def get_phone_number(
