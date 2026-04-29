@@ -16,6 +16,8 @@ from app.domain.accounts.schemas import (
     EmailVerificationStatus,
     User,
 )
+from app.domain.admin.deps import provide_audit_log_service
+from app.lib.audit import log_audit
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -24,6 +26,7 @@ if TYPE_CHECKING:
 
     from app.db import models as m
     from app.domain.accounts.services import EmailVerificationTokenService, UserService
+    from app.domain.admin.services import AuditLogService
     from app.lib.email import AppEmailService
 
 
@@ -35,6 +38,7 @@ class EmailVerificationController(Controller):
     dependencies = {
         "users_service": Provide(provide_users_service),
         "verification_service": Provide(provide_email_verification_service),
+        "audit_service": Provide(provide_audit_log_service),
     }
 
     @post("/request", status_code=HTTP_201_CREATED)
@@ -61,9 +65,11 @@ class EmailVerificationController(Controller):
     @post("/verify", status_code=HTTP_200_OK)
     async def verify_email(
         self,
+        request: Request[m.User, Token, Any],
         data: EmailVerificationConfirm,
         users_service: UserService,
         verification_service: EmailVerificationTokenService,
+        audit_service: AuditLogService,
     ) -> User:
         """Verify email using verification token.
 
@@ -72,6 +78,18 @@ class EmailVerificationController(Controller):
         """
         verification_token = await verification_service.verify_token(data.token)
         user = await users_service.verify_email(user_id=verification_token.user_id, email=verification_token.email)
+
+        await log_audit(
+            audit_service,
+            action="account.email_verify",
+            actor_id=user.id,
+            actor_email=user.email,
+            target_type="user",
+            target_id=user.id,
+            target_label=user.email,
+            request=request,
+        )
+
         return users_service.to_schema(user, schema_type=User)
 
     @get("/status/{user_id:uuid}")

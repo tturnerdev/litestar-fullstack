@@ -11,9 +11,11 @@ from litestar.params import Dependency
 from sqlalchemy.orm import selectinload
 
 from app.db import models as m
+from app.domain.admin.deps import provide_audit_log_service
 from app.domain.teams.deps import provide_team_members_service, provide_teams_service
 from app.domain.teams.schemas import TeamInvitation, TeamInvitationCreate
 from app.domain.teams.services import TeamInvitationService
+from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
 from app.lib.schema import Message
 
@@ -24,6 +26,7 @@ if TYPE_CHECKING:
     from advanced_alchemy.service import OffsetPagination
     from litestar.security.jwt import Token
 
+    from app.domain.admin.services import AuditLogService
     from app.domain.teams.services import TeamMemberService, TeamService
     from app.lib.email import AppEmailService
 
@@ -52,6 +55,7 @@ class TeamInvitationController(Controller):
     ) | {
         "teams_service": Provide(provide_teams_service),
         "team_members_service": Provide(provide_team_members_service),
+        "audit_service": Provide(provide_audit_log_service),
     }
 
     @post(operation_id="CreateTeamInvitation", path="")
@@ -60,6 +64,7 @@ class TeamInvitationController(Controller):
         current_user: m.User,
         team_invitations_service: TeamInvitationService,
         teams_service: TeamService,
+        audit_service: AuditLogService,
         app_mailer: AppEmailService,
         request: Request[m.User, Token, Any],
         team_id: UUID,
@@ -71,6 +76,7 @@ class TeamInvitationController(Controller):
             current_user: The current user sending the invitation.
             team_invitations_service: The team invitation service.
             teams_service: The teams service.
+            audit_service: Audit log service.
             app_mailer: Email service for sending notifications.
             request: The request object.
             team_id: The team id.
@@ -88,8 +94,23 @@ class TeamInvitationController(Controller):
         payload = data.to_dict()
         payload["team_id"] = team_id
         payload["invited_by"] = current_user
-        db_obj = await team_invitations_service.create(payload, auto_commit=True)
+        db_obj = await team_invitations_service.create(payload)
+        after = capture_snapshot(db_obj)
         request.app.emit(event_id="team_invitation_created", invitation_id=db_obj.id, mailer=app_mailer)
+
+        await log_audit(
+            audit_service,
+            action="team.invitation_create",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            target_type="team_invitation",
+            target_id=db_obj.id,
+            target_label=f"{data.email} -> {team.name}",
+            before=None,
+            after=after,
+            request=request,
+        )
+
         return team_invitations_service.to_schema(db_obj, schema_type=TeamInvitation)
 
     @get(operation_id="ListTeamInvitations", path="")
@@ -114,14 +135,23 @@ class TeamInvitationController(Controller):
 
     @delete(operation_id="DeleteTeamInvitation", path="/{invitation_id:uuid}")
     async def delete_team_invitation(
-        self, team_invitations_service: TeamInvitationService, team_id: UUID, invitation_id: UUID
+        self,
+        request: Request[m.User, Token, Any],
+        current_user: m.User,
+        team_invitations_service: TeamInvitationService,
+        audit_service: AuditLogService,
+        team_id: UUID,
+        invitation_id: UUID,
     ) -> None:
         """Delete an invitation.
 
         Args:
+            request: The HTTP request.
+            current_user: The current user.
+            team_invitations_service: The team invitation service.
+            audit_service: Audit log service.
             team_id: The ID of the team to delete the invitation for.
             invitation_id: The ID of the invitation to delete.
-            team_invitations_service: The team invitation service.
 
         Raises:
             HTTPException: If the invitation does not belong to the team
@@ -129,24 +159,42 @@ class TeamInvitationController(Controller):
         invitation = await team_invitations_service.get(invitation_id)
         if invitation.team_id != team_id:
             raise HTTPException(status_code=400, detail="Invitation does not belong to this team")
+        before = capture_snapshot(invitation)
         await team_invitations_service.delete(item_id=invitation_id)
+
+        await log_audit(
+            audit_service,
+            action="team.invitation_delete",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            target_type="team_invitation",
+            target_id=invitation_id,
+            target_label=invitation.email,
+            before=before,
+            after=None,
+            request=request,
+        )
 
     @post(operation_id="AcceptTeamInvitation", path="/{invitation_id:uuid}/accept")
     async def accept_team_invitation(
         self,
+        request: Request[m.User, Token, Any],
         current_user: m.User,
         team_invitations_service: TeamInvitationService,
         team_members_service: TeamMemberService,
+        audit_service: AuditLogService,
         team_id: UUID,
         invitation_id: UUID,
     ) -> Message:
         """Accept an invitation.
 
         Args:
+            request: The HTTP request.
             team_id: The ID of the team to accept the invitation for.
             invitation_id: The ID of the invitation to accept.
             team_invitations_service: The team invitation service.
             team_members_service: The team member service.
+            audit_service: Audit log service.
             current_user: The current user.
 
         Raises:
@@ -177,13 +225,28 @@ class TeamInvitationController(Controller):
             }
         )
         await team_invitations_service.update(item_id=invitation_id, data={"is_accepted": True})
+
+        await log_audit(
+            audit_service,
+            action="team.invitation_accept",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            target_type="team_invitation",
+            target_id=invitation_id,
+            target_label=db_obj.email,
+            request=request,
+            metadata={"team_id": str(team_id), "role": db_obj.role},
+        )
+
         return Message(message="Team invitation accepted")
 
     @post(operation_id="RejectTeamInvitation", path="/{invitation_id:uuid}/reject")
     async def reject_team_invitation(
         self,
+        request: Request[m.User, Token, Any],
         current_user: m.User,
         team_invitations_service: TeamInvitationService,
+        audit_service: AuditLogService,
         team_id: UUID,
         invitation_id: UUID,
     ) -> Message:
@@ -201,4 +264,17 @@ class TeamInvitationController(Controller):
         if db_obj.email != current_user.email:
             raise HTTPException(status_code=400, detail="You are not authorized to reject this invitation")
         await team_invitations_service.delete(item_id=invitation_id)
+
+        await log_audit(
+            audit_service,
+            action="team.invitation_reject",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            target_type="team_invitation",
+            target_id=invitation_id,
+            target_label=db_obj.email,
+            request=request,
+            metadata={"team_id": str(team_id)},
+        )
+
         return Message(message="Team invitation rejected")

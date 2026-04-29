@@ -17,6 +17,7 @@ from app.domain.accounts.guards import requires_superuser
 from app.domain.accounts.services import UserService
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.admin.schemas import AdminUserDetail, AdminUserSummary, AdminUserUpdate
+from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
 from app.lib.schema import Message
 
@@ -129,14 +130,21 @@ class AdminUsersController(Controller):
             if value is not msgspec.UNSET:
                 update_data[field] = value
 
+        before_obj = await users_service.get(user_id)
+        before = capture_snapshot(before_obj)
         user = await users_service.update(item_id=user_id, data=update_data, auto_commit=True)
+        after = capture_snapshot(user)
 
-        await audit_service.log_admin_user_update(
+        await log_audit(
+            audit_service,
+            action="admin.user.update",
             actor_id=request.user.id,
             actor_email=request.user.email,
-            user_id=user_id,
-            user_email=user.email,
-            changes=list(update_data.keys()),
+            target_type="user",
+            target_id=user_id,
+            target_label=user.email,
+            before=before,
+            after=after,
             request=request,
         )
 
@@ -167,13 +175,19 @@ class AdminUsersController(Controller):
         user = await users_service.get(user_id)
         if user.id == request.user.id:
             raise NotAuthorizedException(detail="Cannot delete your own account")
+        before = capture_snapshot(user)
         user_email = user.email
         await users_service.delete(user_id)
-        await audit_service.log_admin_user_delete(
+        await log_audit(
+            audit_service,
+            action="admin.user.delete",
             actor_id=request.user.id,
             actor_email=request.user.email,
-            user_id=user_id,
-            user_email=user_email,
+            target_type="user",
+            target_id=user_id,
+            target_label=user_email,
+            before=before,
+            after=None,
             request=request,
         )
         return Message(message=f"User {user_email} deleted successfully")

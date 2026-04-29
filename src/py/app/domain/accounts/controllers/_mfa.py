@@ -24,6 +24,7 @@ from app.domain.accounts.schemas import (
     OAuthAuthorization,
 )
 from app.domain.admin.deps import provide_audit_log_service
+from app.lib.audit import log_audit
 from app.lib.crypt import (
     generate_backup_codes,
     generate_totp_qr_code,
@@ -211,7 +212,7 @@ class MfaController(Controller):
         """
         user = await users_service.get(request.user.id, load=[undefer_group("security_sensitive")])
         failed_attempts = await audit_service.count_recent_actions(
-            action="mfa.setup.failed", actor_id=user.id, window_minutes=MFA_RATE_LIMIT_WINDOW_MINUTES
+            action="account.mfa_setup_failed", actor_id=user.id, window_minutes=MFA_RATE_LIMIT_WINDOW_MINUTES
         )
         if failed_attempts >= MFA_RATE_LIMIT_MAX_ATTEMPTS:
             raise ClientException(detail="Too many verification attempts. Please try again later.", status_code=429)
@@ -220,12 +221,14 @@ class MfaController(Controller):
         if not user.totp_secret:
             raise ClientException(detail="No MFA setup in progress. Call /enable first.", status_code=400)
         if not verify_totp_code(user.totp_secret, data.code):
-            await audit_service.log_action(
-                action="mfa.setup.failed",
+            await log_audit(
+                audit_service,
+                action="account.mfa_setup_failed",
                 actor_id=user.id,
                 actor_email=user.email,
                 target_type="user",
-                target_id=str(user.id),
+                target_id=user.id,
+                target_label=user.email,
                 request=request,
             )
             raise ClientException(detail="Invalid verification code", status_code=400)
@@ -238,12 +241,14 @@ class MfaController(Controller):
             },
             item_id=user.id,
         )
-        await audit_service.log_action(
-            action="mfa.setup.confirmed",
+        await log_audit(
+            audit_service,
+            action="account.mfa_enable",
             actor_id=user.id,
             actor_email=user.email,
             target_type="user",
-            target_id=str(user.id),
+            target_id=user.id,
+            target_label=user.email,
             request=request,
         )
         return MfaBackupCodes(codes=plaintext_codes)
@@ -253,6 +258,7 @@ class MfaController(Controller):
         self,
         request: Request[m.User, Token, Any],
         users_service: UserService,
+        audit_service: AuditLogService,
         data: MfaDisable,
     ) -> Message:
         """Disable MFA for the authenticated user.
@@ -262,6 +268,7 @@ class MfaController(Controller):
         Args:
             request: Request with authenticated user
             users_service: User service
+            audit_service: Audit log service
             data: Password for verification
 
         Returns:
@@ -285,6 +292,18 @@ class MfaController(Controller):
             item_id=user.id,
         )
         logger.info("MFA disabled for user %s", user.email)
+
+        await log_audit(
+            audit_service,
+            action="account.mfa_disable",
+            actor_id=user.id,
+            actor_email=user.email,
+            target_type="user",
+            target_id=user.id,
+            target_label=user.email,
+            request=request,
+        )
+
         return Message(message="MFA has been disabled")
 
     @post(operation_id="RegenerateMfaBackupCodes", path="/regenerate-codes")

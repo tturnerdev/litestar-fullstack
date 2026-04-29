@@ -57,6 +57,7 @@ class AuditController(Controller):
         audit_service: AuditLogService,
         filters: Annotated[list[FilterTypes], Dependency(skip_validation=True)],
         action: str | None = Parameter(query="action", required=False),
+        domain: str | None = Parameter(query="domain", required=False),
         end_date: datetime | None = Parameter(query="end_date", required=False),  # noqa: B008
     ) -> OffsetPagination[AuditLogEntry]:
         """List audit logs with filtering and pagination.
@@ -64,7 +65,8 @@ class AuditController(Controller):
         Args:
             audit_service: Audit log service
             filters: Filter and pagination parameters
-            action: Optional action filter
+            action: Optional exact action filter
+            domain: Optional domain prefix filter (e.g. 'account', 'team')
             end_date: Optional upper bound for created_at
 
         Returns:
@@ -73,6 +75,8 @@ class AuditController(Controller):
         conditions: list[Any] = []
         if action:
             conditions.append(m.AuditLog.action == action)
+        if domain:
+            conditions.append(m.AuditLog.action.startswith(domain + "."))
         if end_date:
             conditions.append(m.AuditLog.created_at <= end_date)
         results, total = await audit_service.list_and_count(*filters, *conditions)

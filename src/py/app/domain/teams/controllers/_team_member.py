@@ -2,23 +2,28 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Annotated
+from typing import TYPE_CHECKING, Annotated, Any
 
 from advanced_alchemy.exceptions import IntegrityError
-from litestar import Controller, delete, patch, post
+from litestar import Controller, Request, delete, patch, post
 from litestar.di import Provide
 from litestar.params import Parameter
 from litestar.status_codes import HTTP_202_ACCEPTED
 
 from app.db import models as m
 from app.domain.accounts.deps import provide_users_service
+from app.domain.admin.deps import provide_audit_log_service
 from app.domain.teams.deps import provide_team_members_service, provide_teams_service
 from app.domain.teams.schemas import Team, TeamMember, TeamMemberModify, TeamMemberUpdate
+from app.lib.audit import capture_snapshot, log_audit
 
 if TYPE_CHECKING:
     from uuid import UUID
 
+    from litestar.security.jwt import Token
+
     from app.domain.accounts.services import UserService
+    from app.domain.admin.services import AuditLogService
     from app.domain.teams.services import TeamMemberService, TeamService
 
 
@@ -30,23 +35,30 @@ class TeamMemberController(Controller):
         "teams_service": Provide(provide_teams_service),
         "team_members_service": Provide(provide_team_members_service),
         "users_service": Provide(provide_users_service),
+        "audit_service": Provide(provide_audit_log_service),
     }
 
     @post(operation_id="AddMemberToTeam", path="/api/teams/{team_id:uuid}/members")
     async def add_member_to_team(
         self,
+        request: Request[m.User, Token, Any],
         teams_service: TeamService,
         team_members_service: TeamMemberService,
         users_service: UserService,
+        audit_service: AuditLogService,
+        current_user: m.User,
         data: TeamMemberModify,
         team_id: Annotated[UUID, Parameter(title="Team ID", description="The team to update.")],
     ) -> Team:
         """Add a member to a team.
 
         Args:
+            request: The HTTP request.
             teams_service: Team Service
             team_members_service: Team Member Service
             users_service: User Service
+            audit_service: Audit log service
+            current_user: Current User
             data: Team Member Modify
             team_id: Team ID
 
@@ -61,7 +73,7 @@ class TeamMemberController(Controller):
         if existing_membership is not None:
             msg = "User is already a member of the team."
             raise IntegrityError(msg)
-        await team_members_service.create(
+        member = await team_members_service.create(
             {
                 "team_id": team_id,
                 "user_id": user_obj.id,
@@ -69,7 +81,22 @@ class TeamMemberController(Controller):
                 "is_owner": False,
             }
         )
+        after = capture_snapshot(member)
         team_obj = await teams_service.get(team_id)
+
+        await log_audit(
+            audit_service,
+            action="team.member_add",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            target_type="team_member",
+            target_id=member.id,
+            target_label=f"{user_obj.email} -> {team_obj.name}",
+            before=None,
+            after=after,
+            request=request,
+        )
+
         return teams_service.to_schema(team_obj, schema_type=Team)
 
     @delete(
@@ -77,18 +104,24 @@ class TeamMemberController(Controller):
     )
     async def remove_member_from_team(
         self,
+        request: Request[m.User, Token, Any],
         teams_service: TeamService,
         team_members_service: TeamMemberService,
         users_service: UserService,
+        audit_service: AuditLogService,
+        current_user: m.User,
         data: TeamMemberModify,
         team_id: Annotated[UUID, Parameter(title="Team ID", description="The team to delete.")],
     ) -> Team:
         """Revoke a member's access to a team.
 
         Args:
+            request: The HTTP request.
             teams_service: Team Service
             team_members_service: Team Member Service
             users_service: User Service
+            audit_service: Audit log service
+            current_user: Current User
             data: Team Member Modify
             team_id: Team ID
 
@@ -103,14 +136,32 @@ class TeamMemberController(Controller):
         if membership is None:
             msg = "User is not a member of this team."
             raise IntegrityError(msg)
+        before = capture_snapshot(membership)
         await team_members_service.delete(membership.id)
         team_obj = await teams_service.get(team_id)
+
+        await log_audit(
+            audit_service,
+            action="team.member_remove",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            target_type="team_member",
+            target_id=membership.id,
+            target_label=f"{user_obj.email} -> {team_obj.name}",
+            before=before,
+            after=None,
+            request=request,
+        )
+
         return teams_service.to_schema(team_obj, schema_type=Team)
 
     @patch(operation_id="UpdateTeamMember", path="/api/teams/{team_id:uuid}/members/{user_id:uuid}")
     async def update_team_member(
         self,
+        request: Request[m.User, Token, Any],
         team_members_service: TeamMemberService,
+        audit_service: AuditLogService,
+        current_user: m.User,
         team_id: Annotated[UUID, Parameter(title="Team ID", description="The team to update.")],
         user_id: Annotated[UUID, Parameter(title="User ID", description="The user to update.")],
         data: TeamMemberUpdate,
@@ -127,5 +178,20 @@ class TeamMemberController(Controller):
         if membership is None:
             msg = "User is not a member of this team."
             raise IntegrityError(msg)
+        before = capture_snapshot(membership)
         updated = await team_members_service.update(item_id=membership.id, data={"role": data.role})
+        after = capture_snapshot(updated)
+
+        await log_audit(
+            audit_service,
+            action="team.member_update",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            target_type="team_member",
+            target_id=membership.id,
+            before=before,
+            after=after,
+            request=request,
+        )
+
         return team_members_service.to_schema(updated, schema_type=TeamMember)

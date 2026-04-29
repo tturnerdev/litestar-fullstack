@@ -17,6 +17,8 @@ from app.db import models as m
 from app.domain.accounts.deps import provide_users_service
 from app.domain.accounts.schemas import OAuthAccountInfo, OAuthAuthorization
 from app.domain.accounts.services import UserOAuthAccountService
+from app.domain.admin.deps import provide_audit_log_service
+from app.lib.audit import log_audit
 from app.lib.deps import create_service_dependencies
 from app.lib.schema import Message
 from app.utils.oauth import create_oauth_state
@@ -27,6 +29,7 @@ if TYPE_CHECKING:
     from litestar import Request
 
     from app.domain.accounts.services import UserService
+    from app.domain.admin.services import AuditLogService
     from app.lib.settings import AppSettings
 
 OAUTH_DEFAULT_SCOPES: dict[str, list[str]] = {
@@ -52,6 +55,7 @@ class OAuthAccountController(Controller):
         },
     ) | {
         "users_service": Provide(provide_users_service),
+        "audit_service": Provide(provide_audit_log_service),
     }
 
     @get(operation_id="ProfileOAuthAccounts", path="/accounts")
@@ -133,17 +137,21 @@ class OAuthAccountController(Controller):
     @delete(operation_id="ProfileOAuthUnlink", path="/{provider:str}", status_code=200)
     async def unlink(
         self,
+        request: Request[Any, Any, Any],
         current_user: m.User,
         users_service: UserService,
         oauth_account_service: UserOAuthAccountService,
+        audit_service: AuditLogService,
         provider: str,
     ) -> Message:
         """Unlink an OAuth provider from the user's account.
 
         Args:
+            request: The HTTP request.
             current_user: The authenticated user.
             users_service: User service.
             oauth_account_service: OAuth account service.
+            audit_service: Audit log service.
             provider: OAuth provider name.
 
         Raises:
@@ -162,6 +170,19 @@ class OAuthAccountController(Controller):
                 status_code=HTTP_404_NOT_FOUND,
                 detail=f"No {provider} account linked to your profile",
             )
+
+        await log_audit(
+            audit_service,
+            action="account.oauth_unlink",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            target_type="user",
+            target_id=current_user.id,
+            target_label=current_user.email,
+            request=request,
+            metadata={"provider": provider},
+        )
+
         return Message(message=f"Successfully unlinked {provider} account")
 
     @post(operation_id="ProfileOAuthUpgradeScopes", path="/{provider:str}/upgrade-scopes")

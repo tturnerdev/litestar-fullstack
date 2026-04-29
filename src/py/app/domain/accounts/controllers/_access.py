@@ -37,6 +37,8 @@ from app.domain.accounts.schemas import (
     User,
 )
 from app.domain.accounts.services import RefreshTokenService
+from app.domain.admin.deps import provide_audit_log_service
+from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
 from app.lib.schema import Message
 from app.lib.validation import PasswordValidationError, validate_password_strength
@@ -53,6 +55,7 @@ if TYPE_CHECKING:
         RoleService,
         UserService,
     )
+    from app.domain.admin.services import AuditLogService
     from app.lib.email import AppEmailService
     from app.lib.settings import AppSettings
 
@@ -86,6 +89,7 @@ class AccessController(Controller):
         "roles_service": Provide(provide_roles_service),
         "verification_service": Provide(provide_email_verification_service),
         "password_reset_service": Provide(provide_password_reset_service),
+        "audit_service": Provide(provide_audit_log_service),
     }
 
     @post(operation_id="AccountLogin", path="/api/access/login", exclude_from_auth=True, security=[])
@@ -94,6 +98,7 @@ class AccessController(Controller):
         request: Request[m.User, Token, Any],
         users_service: UserService,
         refresh_token_service: RefreshTokenService,
+        audit_service: AuditLogService,
         settings: AppSettings,
         data: Annotated[AccountLogin, Body(title="OAuth2 Login", media_type=RequestEncodingType.URL_ENCODED)],
     ) -> Response[OAuth2Login] | Response[LoginMfaChallenge]:
@@ -177,6 +182,18 @@ class AccessController(Controller):
             path="/api/access",
         )
 
+        await log_audit(
+            audit_service,
+            action="account.login",
+            actor_id=user.id,
+            actor_email=user.email,
+            target_type="user",
+            target_id=user.id,
+            target_label=user.email,
+            request=request,
+            metadata={"auth_method": "password"},
+        )
+
         return response
 
     @post(operation_id="AccountLogout", path="/api/access/logout", exclude_from_auth=True, security=[])
@@ -184,6 +201,7 @@ class AccessController(Controller):
         self,
         request: Request[m.User, Token, Any],
         refresh_token_service: RefreshTokenService,
+        audit_service: AuditLogService,
     ) -> Response[Message]:
         """Account Logout.
 
@@ -201,11 +219,33 @@ class AccessController(Controller):
             if refresh_token := await refresh_token_service.get_one_or_none(token_hash=token_hash):
                 await refresh_token_service.revoke_token_family(refresh_token.family_id)
 
+        # Try to extract actor info before clearing session
+        actor_id = None
+        actor_email = None
+        try:
+            if hasattr(request, "user") and request.user:
+                actor_id = request.user.id
+                actor_email = request.user.email
+        except Exception:  # noqa: BLE001
+            pass
+
         request.cookies.pop(auth.key, None)
         request.clear_session()
         response = Response(Message(message="OK"), status_code=200)
         response.delete_cookie(auth.key)
         response.delete_cookie(REFRESH_COOKIE_NAME, path="/api/access")
+
+        await log_audit(
+            audit_service,
+            action="account.logout",
+            actor_id=actor_id,
+            actor_email=actor_email,
+            target_type="user",
+            target_id=actor_id,
+            target_label=actor_email,
+            request=request,
+        )
+
         return response
 
     @post(operation_id="TokenRefresh", path="/api/access/refresh", exclude_from_auth=True, security=[])
@@ -313,6 +353,7 @@ class AccessController(Controller):
         self,
         request: Request[m.User, Token, Any],
         refresh_token_service: RefreshTokenService,
+        audit_service: AuditLogService,
         session_id: UUID,
     ) -> Message:
         """Revoke a specific session.
@@ -320,6 +361,7 @@ class AccessController(Controller):
         Args:
             request: Request with authenticated user
             refresh_token_service: Refresh Token Service
+            audit_service: Audit log service
             session_id: ID of the session to revoke
 
         Returns:
@@ -332,6 +374,17 @@ class AccessController(Controller):
         if not token or token.user_id != request.user.id:
             raise ClientException(detail="Session not found", status_code=404)
         await refresh_token_service.revoke_token_family(token.family_id)
+
+        await log_audit(
+            audit_service,
+            action="account.session_revoke",
+            actor_id=request.user.id,
+            actor_email=request.user.email,
+            target_type="session",
+            target_id=session_id,
+            request=request,
+        )
+
         return Message(message="Session revoked successfully")
 
     @delete(operation_id="RevokeAllSessions", path="/api/access/sessions", status_code=200)
@@ -339,6 +392,7 @@ class AccessController(Controller):
         self,
         request: Request[m.User, Token, Any],
         refresh_token_service: RefreshTokenService,
+        audit_service: AuditLogService,
     ) -> Message:
         """Revoke all sessions except the current one.
 
@@ -358,6 +412,19 @@ class AccessController(Controller):
         for token in active_tokens:
             if token.token_hash != current_token_hash:
                 revoked_count += await refresh_token_service.revoke_token_family(token.family_id)
+
+        await log_audit(
+            audit_service,
+            action="account.sessions_revoke_all",
+            actor_id=request.user.id,
+            actor_email=request.user.email,
+            target_type="user",
+            target_id=request.user.id,
+            target_label=request.user.email,
+            request=request,
+            metadata={"revoked_count": revoked_count},
+        )
+
         return Message(message=f"Revoked {revoked_count} session(s)")
 
     @post(operation_id="AccountRegister", path="/api/access/signup")
@@ -366,6 +433,7 @@ class AccessController(Controller):
         request: Request[m.User, Token, Any],
         users_service: UserService,
         roles_service: RoleService,
+        audit_service: AuditLogService,
         data: AccountRegister,
         app_mailer: AppEmailService,
     ) -> User:
@@ -375,6 +443,7 @@ class AccessController(Controller):
             request: Request
             users_service: User Service
             roles_service: Role Service
+            audit_service: Audit log service
             data: Account Register Data
             app_mailer: Email service for sending notifications
 
@@ -389,7 +458,22 @@ class AccessController(Controller):
             user_data.update({"role_id": role_obj.id})
 
         user = await users_service.create(user_data)
+        after = capture_snapshot(user)
         request.app.emit(event_id="user_created", user_id=user.id, mailer=app_mailer)
+
+        await log_audit(
+            audit_service,
+            action="account.register",
+            actor_id=user.id,
+            actor_email=user.email,
+            target_type="user",
+            target_id=user.id,
+            target_label=user.email,
+            before=None,
+            after=after,
+            request=request,
+        )
+
         return users_service.to_schema(user, schema_type=User)
 
     @post(operation_id="ForgotPassword", path="/api/access/forgot-password", exclude_from_auth=True, security=[])
@@ -459,6 +543,7 @@ class AccessController(Controller):
         data: ResetPasswordRequest,
         users_service: UserService,
         password_reset_service: PasswordResetService,
+        audit_service: AuditLogService,
         request: Request[m.User, Token, Any],
         app_mailer: AppEmailService,
     ) -> PasswordResetComplete:
@@ -488,4 +573,17 @@ class AccessController(Controller):
         reset_token = await password_reset_service.use_reset_token(data.token)
         user = await users_service.reset_password_with_token(user_id=reset_token.user_id, new_password=data.password)
         request.app.emit(event_id="password_reset_completed", user_id=user.id, mailer=app_mailer)
+
+        await log_audit(
+            audit_service,
+            action="account.password_reset",
+            actor_id=user.id,
+            actor_email=user.email,
+            target_type="user",
+            target_id=user.id,
+            target_label=user.email,
+            request=request,
+            metadata={"method": "token"},
+        )
+
         return PasswordResetComplete(message="Password has been successfully reset", user_id=user.id)

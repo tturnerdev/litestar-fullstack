@@ -77,21 +77,23 @@ export function useAdminAuditLogs(params: {
   pageSize?: number
   search?: string
   action?: string
+  domain?: string
   actorId?: string
   targetType?: string
   startDate?: string
   endDate?: string
 }) {
-  const { page = 1, pageSize = 50, search, action, actorId, targetType, startDate, endDate } = params
+  const { page = 1, pageSize = 50, search, action, domain, actorId, targetType, startDate, endDate } = params
   return useQuery({
-    queryKey: ["admin", "audit", page, pageSize, search, action, actorId, targetType, startDate, endDate],
+    queryKey: ["admin", "audit", page, pageSize, search, action, domain, actorId, targetType, startDate, endDate],
     queryFn: async () => {
       const query = {
         currentPage: page,
         pageSize,
         searchString: search,
         searchIgnoreCase: search ? true : undefined,
-        actionIn: action ? [action] : undefined,
+        action: action || undefined,
+        domain: domain || undefined,
         actorIdIn: actorId ? [actorId] : undefined,
         targetTypeIn: targetType ? [targetType] : undefined,
         createdAfter: startDate,

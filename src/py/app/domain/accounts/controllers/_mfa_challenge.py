@@ -15,6 +15,7 @@ from sqlalchemy.orm import undefer_group
 from app.domain.accounts.deps import provide_refresh_token_service, provide_users_service
 from app.domain.accounts.guards import auth
 from app.domain.admin.deps import provide_audit_log_service
+from app.lib.audit import log_audit
 from app.lib.crypt import verify_backup_code, verify_totp_code
 
 if TYPE_CHECKING:
@@ -97,14 +98,16 @@ class MfaChallengeController(Controller):
             request=request,
         )
 
-        await audit_service.log_action(
-            action="mfa.challenge.success",
+        await log_audit(
+            audit_service,
+            action="account.mfa_challenge_success",
             actor_id=user.id,
             actor_email=user.email,
             target_type="user",
-            target_id=str(user.id),
-            details={"used_backup_code": used_backup_code},
+            target_id=user.id,
+            target_label=user.email,
             request=request,
+            metadata={"used_backup_code": used_backup_code},
         )
 
         device_info = request.headers.get("user-agent", "")[:255] if request.headers.get("user-agent") else None
@@ -207,7 +210,7 @@ class MfaChallengeController(Controller):
             ClientException: If rate limited
         """
         failed_attempts = await audit_service.count_recent_actions(
-            action="mfa.challenge.failed",
+            action="account.mfa_challenge_failed",
             actor_id=user_id,
             window_minutes=MFA_RATE_LIMIT_WINDOW_MINUTES,
         )
@@ -244,12 +247,14 @@ class MfaChallengeController(Controller):
                 raise NotAuthorizedException(detail="MFA is not enabled for this user")
             if verify_totp_code(totp_secret, data.code):
                 return False, None
-            await audit_service.log_action(
-                action="mfa.challenge.failed",
+            await log_audit(
+                audit_service,
+                action="account.mfa_challenge_failed",
                 actor_id=user.id,
                 actor_email=user.email,
                 target_type="user",
-                target_id=str(user.id),
+                target_id=user.id,
+                target_label=user.email,
                 request=request,
             )
             raise NotAuthorizedException(detail="Invalid verification code")
@@ -259,12 +264,14 @@ class MfaChallengeController(Controller):
             raise NotAuthorizedException(detail="No backup codes available")
         code_index = await verify_backup_code(data.recovery_code.upper(), user.backup_codes)
         if code_index is None:
-            await audit_service.log_action(
-                action="mfa.challenge.failed",
+            await log_audit(
+                audit_service,
+                action="account.mfa_challenge_failed",
                 actor_id=user.id,
                 actor_email=user.email,
                 target_type="user",
-                target_id=str(user.id),
+                target_id=user.id,
+                target_label=user.email,
                 request=request,
             )
             raise NotAuthorizedException(detail="Invalid backup code")

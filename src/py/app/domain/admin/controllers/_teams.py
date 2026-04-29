@@ -16,6 +16,7 @@ from app.domain.accounts.guards import requires_superuser
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.admin.schemas import AdminTeamDetail, AdminTeamSummary, AdminTeamUpdate
 from app.domain.teams.services import TeamService
+from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
 from app.lib.schema import Message
 
@@ -116,13 +117,20 @@ class AdminTeamsController(Controller):
             value = getattr(data, field)
             if value is not UNSET:
                 update_data[field] = value
+        before_obj = await teams_service.get(team_id)
+        before = capture_snapshot(before_obj)
         team = await teams_service.update(item_id=team_id, data=update_data, auto_commit=True)
-        await audit_service.log_admin_team_update(
+        after = capture_snapshot(team)
+        await log_audit(
+            audit_service,
+            action="admin.team.update",
             actor_id=request.user.id,
             actor_email=request.user.email,
-            team_id=team_id,
-            team_name=team.name,
-            changes=list(update_data.keys()),
+            target_type="team",
+            target_id=team_id,
+            target_label=team.name,
+            before=before,
+            after=after,
             request=request,
         )
         return teams_service.to_schema(team, schema_type=AdminTeamDetail)
@@ -147,13 +155,19 @@ class AdminTeamsController(Controller):
             Success message
         """
         team = await teams_service.get(team_id)
+        before = capture_snapshot(team)
         team_name = team.name
         await teams_service.delete(team.id)
-        await audit_service.log_admin_team_delete(
+        await log_audit(
+            audit_service,
+            action="admin.team.delete",
             actor_id=request.user.id,
             actor_email=request.user.email,
-            team_id=team_id,
-            team_name=team_name,
+            target_type="team",
+            target_id=team_id,
+            target_label=team_name,
+            before=before,
+            after=None,
             request=request,
         )
         return Message(message=f"Team {team_name} deleted successfully")
