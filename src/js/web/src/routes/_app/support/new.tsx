@@ -1,6 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, Link } from "@tanstack/react-router"
 import { ChevronRight, Clock, FileText, MessageSquare, Shield } from "lucide-react"
 import { CreateTicketForm } from "@/components/support/create-ticket-form"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PageContainer, PageHeader } from "@/components/ui/page-layout"
 
@@ -34,7 +35,7 @@ const tips = [
 function NewTicketPage() {
   return (
     <PageContainer className="flex-1 space-y-8">
-      <PageHeader eyebrow="Helpdesk" title="New Ticket" description="Create a support ticket to get help from our team." />
+      <PageHeader eyebrow="Helpdesk" title="New Ticket" description="Create a support ticket to get help from our team." breadcrumbs={<Breadcrumb><BreadcrumbList><BreadcrumbItem><BreadcrumbLink asChild><Link to="/home">Home</Link></BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbLink asChild><Link to="/support">Support</Link></BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbPage>New Ticket</BreadcrumbPage></BreadcrumbItem></BreadcrumbList></Breadcrumb>} />
 
       <div className="flex gap-6">
         {/* Main form */}

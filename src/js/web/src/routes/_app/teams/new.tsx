@@ -1,6 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, Link } from "@tanstack/react-router"
 import { ChevronRight, Shield, Tag, UserPlus, Users } from "lucide-react"
 import { CreateTeamForm } from "@/components/teams/create-team-form"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PageContainer, PageHeader } from "@/components/ui/page-layout"
 
@@ -34,7 +35,7 @@ const tips = [
 function NewTeamPage() {
   return (
     <PageContainer className="flex-1 space-y-8">
-      <PageHeader eyebrow="Teams" title="Create New Team" description="Set up a new team to organize members and manage access." />
+      <PageHeader eyebrow="Teams" title="Create New Team" description="Set up a new team to organize members and manage access." breadcrumbs={<Breadcrumb><BreadcrumbList><BreadcrumbItem><BreadcrumbLink asChild><Link to="/home">Home</Link></BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbLink asChild><Link to="/teams">Teams</Link></BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbPage>New Team</BreadcrumbPage></BreadcrumbItem></BreadcrumbList></Breadcrumb>} />
 
       <div className="flex gap-6">
         {/* Main form */}

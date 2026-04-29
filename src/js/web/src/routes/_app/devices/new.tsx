@@ -1,6 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, Link } from "@tanstack/react-router"
 import { ChevronRight, Monitor, Phone, Radio, Settings } from "lucide-react"
 import { CreateDeviceForm } from "@/components/devices/device-form"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PageContainer, PageHeader } from "@/components/ui/page-layout"
 
@@ -34,7 +35,7 @@ const tips = [
 function NewDevicePage() {
   return (
     <PageContainer className="flex-1 space-y-8">
-      <PageHeader eyebrow="Devices" title="Add New Device" description="Register a new phone or SIP device to your account." />
+      <PageHeader eyebrow="Devices" title="Add New Device" description="Register a new phone or SIP device to your account." breadcrumbs={<Breadcrumb><BreadcrumbList><BreadcrumbItem><BreadcrumbLink asChild><Link to="/home">Home</Link></BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbLink asChild><Link to="/devices">Devices</Link></BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbPage>New Device</BreadcrumbPage></BreadcrumbItem></BreadcrumbList></Breadcrumb>} />
 
       <div className="flex gap-6">
         {/* Main form */}
