@@ -1,3 +1,4 @@
+import { Users } from "lucide-react"
 import { useMemo, useState } from "react"
 import { UserBulkActions } from "@/components/admin/user-bulk-actions"
 import { UserRowActions } from "@/components/admin/user-row-actions"
@@ -5,6 +6,8 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
+import { EmptyState } from "@/components/ui/empty-state"
+import { ErrorState } from "@/components/ui/error-state"
 import { ExportButton } from "@/components/ui/export-button"
 import { Input } from "@/components/ui/input"
 import { SkeletonTable } from "@/components/ui/skeleton"
@@ -42,7 +45,7 @@ export function UserTable() {
   const [search, setSearch] = useState("")
   const [sortKey, setSortKey] = useState<string | null>(null)
   const [sortDirection, setSortDirection] = useState<SortDirection>(null)
-  const { data, isLoading, isError } = useAdminUsers(page, PAGE_SIZE, search || undefined)
+  const { data, isLoading, isError, refetch } = useAdminUsers(page, PAGE_SIZE, search || undefined)
   const selection = useRowSelection(page)
 
   const sortedItems = useMemo(() => {
@@ -67,10 +70,9 @@ export function UserTable() {
   if (isError || !data) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle>Users</CardTitle>
-        </CardHeader>
-        <CardContent className="text-muted-foreground">We could not load users.</CardContent>
+        <CardContent>
+          <ErrorState title="Unable to load users" description="Something went wrong while fetching user data." onRetry={() => refetch()} />
+        </CardContent>
       </Card>
     )
   }
@@ -120,8 +122,8 @@ export function UserTable() {
           <TableBody>
             {sortedItems.length === 0 && (
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-muted-foreground">
-                  No users found.
+                <TableCell colSpan={6}>
+                  <EmptyState icon={Users} title="No users found" description="Try adjusting your search or filters to find what you're looking for." variant="no-results" />
                 </TableCell>
               </TableRow>
             )}

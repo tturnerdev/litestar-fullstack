@@ -5,6 +5,8 @@ import { AdminNav } from "@/components/admin/admin-nav"
 import { AdminQuickActions } from "@/components/admin/admin-quick-actions"
 import { RecentActivity } from "@/components/admin/recent-activity"
 import { StatsCards } from "@/components/admin/stats-cards"
+import { SystemHealthCard } from "@/components/admin/system-health-card"
+import { TopUsersCard } from "@/components/admin/top-users-card"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 
 export const Route = createFileRoute("/_app/admin/")({
@@ -27,8 +29,10 @@ function AdminDashboardPage() {
           <div className="lg:col-span-2">
             <RecentActivity />
           </div>
-          <div>
+          <div className="space-y-6">
             <AdminQuickActions />
+            <TopUsersCard />
+            <SystemHealthCard />
           </div>
         </div>
       </PageSection>

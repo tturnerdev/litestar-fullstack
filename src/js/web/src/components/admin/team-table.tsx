@@ -1,10 +1,12 @@
 import { Link } from "@tanstack/react-router"
-import { Search } from "lucide-react"
+import { Search, Users2 } from "lucide-react"
 import { useMemo, useState } from "react"
 import { TeamRowActions } from "@/components/admin/team-row-actions"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/empty-state"
+import { ErrorState } from "@/components/ui/error-state"
 import { ExportButton } from "@/components/ui/export-button"
 import { Input } from "@/components/ui/input"
 import { SkeletonTable } from "@/components/ui/skeleton"
@@ -40,7 +42,7 @@ export function TeamTable() {
   const [search, setSearch] = useState("")
   const [sortKey, setSortKey] = useState<string | null>(null)
   const [sortDirection, setSortDirection] = useState<SortDirection>(null)
-  const { data, isLoading, isError } = useAdminTeams(page, PAGE_SIZE)
+  const { data, isLoading, isError, refetch } = useAdminTeams(page, PAGE_SIZE)
 
   if (isLoading) {
     return <SkeletonTable rows={6} />
@@ -49,10 +51,9 @@ export function TeamTable() {
   if (isError || !data) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle>Teams</CardTitle>
-        </CardHeader>
-        <CardContent className="text-muted-foreground">We could not load teams.</CardContent>
+        <CardContent>
+          <ErrorState title="Unable to load teams" description="Something went wrong while fetching team data." onRetry={() => refetch()} />
+        </CardContent>
       </Card>
     )
   }
@@ -105,8 +106,8 @@ export function TeamTable() {
           <TableBody>
             {filtered.length === 0 && (
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-muted-foreground">
-                  {search ? "No teams match your filter." : "No teams found."}
+                <TableCell colSpan={6}>
+                  <EmptyState icon={Users2} title={search ? "No teams match your filter" : "No teams found"} description="Try adjusting your search to find what you're looking for." variant="no-results" />
                 </TableCell>
               </TableRow>
             )}
