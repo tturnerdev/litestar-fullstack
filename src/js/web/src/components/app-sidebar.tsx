@@ -52,20 +52,23 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     queryKey: ["teams"],
     queryFn: async () => {
       const response = await listTeams()
-      return response.data?.items ?? []
+      const data = response.data
+      if (Array.isArray(data)) return data
+      return data?.items ?? []
     },
     enabled: isAuthenticated,
   })
 
-  const teamIds = useMemo(() => teamsData.map((team) => team.id).join("|"), [teamsData])
+  const safeTeamsData = Array.isArray(teamsData) ? teamsData : []
+  const teamIds = useMemo(() => safeTeamsData.map((team) => team.id).join("|"), [safeTeamsData])
   const storeIds = useMemo(() => teams.map((team) => team.id).join("|"), [teams])
 
   useEffect(() => {
     if (isLoading || isError || teamIds === storeIds) {
       return
     }
-    setTeams(teamsData)
-  }, [isError, isLoading, setTeams, storeIds, teamIds, teamsData])
+    setTeams(safeTeamsData)
+  }, [isError, isLoading, setTeams, storeIds, teamIds, safeTeamsData])
 
   const navMain = useMemo(() => {
     const items: NavMainItem[] = [
@@ -173,7 +176,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       })),
     [teams],
   )
-  const teamOptions = teamsData.length > 0 ? teamsData : teams
+  const teamOptions = safeTeamsData.length > 0 ? safeTeamsData : teams
 
   return (
     <Sidebar collapsible="icon" {...props}>
