@@ -1,18 +1,95 @@
-import { Link, Outlet, useRouterState } from "@tanstack/react-router"
-import { useMemo } from "react"
+import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router"
+import { useCallback, useMemo, useState } from "react"
+import { toast } from "sonner"
 import { AppSidebar } from "@/components/app-sidebar"
 import { HelpMenu } from "@/components/help/help-menu"
+import { KeyboardShortcutsDialog } from "@/components/keyboard-shortcuts-dialog"
 import { NotificationBell } from "@/components/notifications/notification-bell"
 import { GlobalSearch } from "@/components/search/global-search"
 import { Separator } from "@/components/ui/separator"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+import type { KeyboardShortcut, SequenceShortcut } from "@/hooks/use-keyboard-shortcuts"
+import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts"
 import { useAuthStore } from "@/lib/auth"
+
+const NEW_ITEM_ROUTES: Record<string, string> = {
+  "/teams": "/teams/new",
+  "/devices": "/devices/new",
+  "/support": "/support/new",
+}
+
+function getNewItemRoute(pathname: string): string | null {
+  for (const [prefix, target] of Object.entries(NEW_ITEM_ROUTES)) {
+    if (pathname === prefix || pathname.startsWith(`${prefix}/`)) {
+      return target
+    }
+  }
+  return null
+}
 
 export function AppLayout() {
   const currentTeam = useAuthStore((state) => state.currentTeam)
+  const user = useAuthStore((state) => state.user)
+  const navigate = useNavigate()
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   })
+  const [shortcutsOpen, setShortcutsOpen] = useState(false)
+
+  const goTo = useCallback((path: string) => navigate({ to: path }), [navigate])
+
+  const shortcuts = useMemo<KeyboardShortcut[]>(() => {
+    const newRoute = getNewItemRoute(pathname)
+    const items: KeyboardShortcut[] = [
+      { key: "N", modifiers: ["ctrl", "shift"], action: () => goTo("/support/new"), description: "New ticket", category: "actions" },
+      { key: "?", action: () => setShortcutsOpen(true), description: "Show keyboard shortcuts", category: "help" },
+    ]
+    if (newRoute) {
+      items.push({ key: "n", action: () => goTo(newRoute), description: "Create new item", category: "actions" })
+    }
+    return items
+  }, [goTo, pathname])
+
+  const sequences = useMemo<SequenceShortcut[]>(() => {
+    const items: SequenceShortcut[] = [
+      { prefix: "g", key: "h", action: () => goTo("/home"), description: "Go to Home", category: "navigation" },
+      { prefix: "g", key: "t", action: () => goTo("/teams"), description: "Go to Teams", category: "navigation" },
+      { prefix: "g", key: "d", action: () => goTo("/devices"), description: "Go to Devices", category: "navigation" },
+      { prefix: "g", key: "s", action: () => goTo("/support"), description: "Go to Support", category: "navigation" },
+      { prefix: "g", key: "p", action: () => goTo("/profile"), description: "Go to Profile", category: "navigation" },
+    ]
+    if (user?.isSuperuser) {
+      items.push({ prefix: "g", key: "a", action: () => goTo("/admin"), description: "Go to Admin", category: "navigation" })
+    }
+    return items
+  }, [goTo, user?.isSuperuser])
+
+  useKeyboardShortcuts({
+    shortcuts,
+    sequences,
+    onSequenceStart: (prefix) => {
+      if (prefix === "g") toast("Go to…", { id: "keyboard-go-to", description: "Press h/t/d/s/p to navigate", duration: 1000 })
+    },
+    onSequenceEnd: () => toast.dismiss("keyboard-go-to"),
+  })
+
+  const isMac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.userAgent)
+  const modKey = isMac ? "⌘" : "Ctrl"
+  const shortcutGroups = useMemo(() => {
+    const navigation = [
+      { keys: ["g", "h"], description: "Go to Home" },
+      { keys: ["g", "t"], description: "Go to Teams" },
+      { keys: ["g", "d"], description: "Go to Devices" },
+      { keys: ["g", "s"], description: "Go to Support" },
+      { keys: ["g", "p"], description: "Go to Profile" },
+    ]
+    if (user?.isSuperuser) navigation.push({ keys: ["g", "a"], description: "Go to Admin" })
+    return [
+      { category: "Navigation", shortcuts: navigation },
+      { category: "Actions", shortcuts: [{ keys: [`${modKey}+K`], description: "Open search" }, { keys: [`${modKey}+Shift+N`], description: "New ticket" }, { keys: ["n"], description: "Create new item (context-dependent)" }] },
+      { category: "Help", shortcuts: [{ keys: ["?"], description: "Show keyboard shortcuts" }] },
+    ]
+  }, [modKey, user?.isSuperuser])
 
   const header = useMemo(() => {
     if (pathname === "/home") {
@@ -124,6 +201,7 @@ export function AppLayout() {
           </SidebarInset>
         </SidebarProvider>
       </main>
+      <KeyboardShortcutsDialog open={shortcutsOpen} onOpenChange={setShortcutsOpen} groups={shortcutGroups} />
     </div>
   )
 }
