@@ -1,16 +1,20 @@
 import { Link } from "@tanstack/react-router"
+import { Loader2, RefreshCw } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { SkeletonTable } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAdminTeams } from "@/lib/api/hooks/admin"
+import { useSyncEntity } from "@/lib/api/hooks/sync"
 
 const PAGE_SIZE = 25
 
 export function TeamTable() {
   const [page, setPage] = useState(1)
   const { data, isLoading, isError } = useAdminTeams(page, PAGE_SIZE)
+  const syncEntity = useSyncEntity()
 
   if (isLoading) {
     return <SkeletonTable rows={6} />
@@ -60,11 +64,32 @@ export function TeamTable() {
                 <TableCell>{team.memberCount ?? 0}</TableCell>
                 <TableCell>{team.isActive ? "Active" : "Inactive"}</TableCell>
                 <TableCell className="text-right">
-                  <Button asChild variant="outline" size="sm">
-                    <Link to="/admin/teams/$teamId" params={{ teamId: team.id }}>
-                      View
-                    </Link>
-                  </Button>
+                  <div className="flex items-center justify-end gap-1">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0"
+                          disabled={syncEntity.isPending}
+                          onClick={() => syncEntity.mutate({ domain: "teams", field: "id", value: team.id })}
+                        >
+                          {syncEntity.isPending && syncEntity.variables?.value === team.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <RefreshCw className="h-4 w-4" />
+                          )}
+                          <span className="sr-only">Sync</span>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Sync</TooltipContent>
+                    </Tooltip>
+                    <Button asChild variant="outline" size="sm">
+                      <Link to="/admin/teams/$teamId" params={{ teamId: team.id }}>
+                        View
+                      </Link>
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}

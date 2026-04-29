@@ -1,4 +1,4 @@
-"""System domain controllers."""
+"""System health and configuration controllers."""
 
 from __future__ import annotations
 
