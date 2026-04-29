@@ -30,8 +30,8 @@ sa.PasswordHash = PasswordHash  # pyright: ignore
 # revision identifiers, used by Alembic.
 revision = "b3f7a9c2d1e4"
 down_revision = "cab4c48aa481"
-branch_labels: Sequence[str] | None = None
-depends_on: Sequence[str] | None = None
+branch_labels = None
+depends_on = None
 
 
 def upgrade() -> None:
