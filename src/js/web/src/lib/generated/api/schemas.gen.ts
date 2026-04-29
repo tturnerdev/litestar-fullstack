@@ -594,6 +594,51 @@ export const AdminSupportStatsSchema = {
   type: "object",
 } as const;
 
+export const AdminSystemStatusSchema = {
+  properties: {
+    appName: {
+      type: "string",
+    },
+    appVersion: {
+      type: "string",
+    },
+    databaseStatus: {
+      enum: ["online", "offline"],
+      type: "string",
+    },
+    debugMode: {
+      type: "boolean",
+    },
+    pythonVersion: {
+      type: "string",
+    },
+    startedAt: {
+      format: "date-time",
+      type: "string",
+    },
+    uptimeSeconds: {
+      type: "number",
+    },
+    workerQueues: {
+      items: {
+        $ref: "#/components/schemas/WorkerQueueInfo",
+      },
+      type: "array",
+    },
+  },
+  required: [
+    "appName",
+    "appVersion",
+    "databaseStatus",
+    "debugMode",
+    "pythonVersion",
+    "startedAt",
+    "uptimeSeconds",
+  ],
+  title: "AdminSystemStatus",
+  type: "object",
+} as const;
+
 export const AdminTeamDetailSchema = {
   properties: {
     createdAt: {
@@ -818,6 +863,20 @@ export const AdminTicketSummarySchema = {
     "updatedAt",
   ],
   title: "AdminTicketSummary",
+  type: "object",
+} as const;
+
+export const AdminTrendsSchema = {
+  properties: {
+    points: {
+      items: {
+        $ref: "#/components/schemas/TrendPoint",
+      },
+      type: "array",
+    },
+  },
+  required: ["points"],
+  title: "AdminTrends",
   type: "object",
 } as const;
 
@@ -5086,6 +5145,23 @@ export const TicketUserSchema = {
   type: "object",
 } as const;
 
+export const TrendPointSchema = {
+  properties: {
+    date: {
+      type: "string",
+    },
+    events: {
+      type: "integer",
+    },
+    newUsers: {
+      type: "integer",
+    },
+  },
+  required: ["date", "events", "newUsers"],
+  title: "TrendPoint",
+  type: "object",
+} as const;
+
 export const UnreadCountSchema = {
   properties: {
     count: {
@@ -5614,5 +5690,28 @@ export const VoicemailSettingsUpdateSchema = {
   },
   required: [],
   title: "VoicemailSettingsUpdate",
+  type: "object",
+} as const;
+
+export const WorkerQueueInfoSchema = {
+  properties: {
+    active: {
+      default: 0,
+      type: "integer",
+    },
+    name: {
+      type: "string",
+    },
+    queued: {
+      default: 0,
+      type: "integer",
+    },
+    scheduled: {
+      default: 0,
+      type: "integer",
+    },
+  },
+  required: ["name"],
+  title: "WorkerQueueInfo",
   type: "object",
 } as const;

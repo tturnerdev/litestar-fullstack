@@ -170,6 +170,20 @@ export type AdminSupportStats = {
 };
 
 /**
+ * AdminSystemStatus
+ */
+export type AdminSystemStatus = {
+  appName: string;
+  appVersion: string;
+  databaseStatus: "online" | "offline";
+  debugMode: boolean;
+  pythonVersion: string;
+  startedAt: string;
+  uptimeSeconds: number;
+  workerQueues?: Array<WorkerQueueInfo>;
+};
+
+/**
  * AdminTeamDetail
  */
 export type AdminTeamDetail = {
@@ -231,6 +245,13 @@ export type AdminTicketSummary = {
   subject: string;
   ticketNumber: string;
   updatedAt: string;
+};
+
+/**
+ * AdminTrends
+ */
+export type AdminTrends = {
+  points: Array<TrendPoint>;
 };
 
 /**
@@ -1460,6 +1481,15 @@ export type TicketUser = {
 };
 
 /**
+ * TrendPoint
+ */
+export type TrendPoint = {
+  date: string;
+  events: number;
+  newUsers: number;
+};
+
+/**
  * UnreadCount
  */
 export type UnreadCount = {
@@ -1599,6 +1629,16 @@ export type VoicemailSettingsUpdate = {
   maxMessageLengthSeconds?: number;
   pin?: string | null;
   transcriptionEnabled?: boolean;
+};
+
+/**
+ * WorkerQueueInfo
+ */
+export type WorkerQueueInfo = {
+  active?: number;
+  name: string;
+  queued?: number;
+  scheduled?: number;
 };
 
 export type ForgotPasswordData = {
@@ -1954,10 +1994,10 @@ export type AdminListAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetTypeIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
-    actionIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -2036,10 +2076,10 @@ export type AdminGetTargetAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetTypeIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
-    actionIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -2116,10 +2156,10 @@ export type AdminGetUserAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetTypeIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
-    actionIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -2262,6 +2302,23 @@ export type GetDashboardStatsResponses = {
 
 export type GetDashboardStatsResponse =
   GetDashboardStatsResponses[keyof GetDashboardStatsResponses];
+
+export type GetDashboardTrendsData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/api/admin/dashboard/trends";
+};
+
+export type GetDashboardTrendsResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: AdminTrends;
+};
+
+export type GetDashboardTrendsResponse =
+  GetDashboardTrendsResponses[keyof GetDashboardTrendsResponses];
 
 export type AdminListDevicesData = {
   body?: never;
@@ -2550,6 +2607,23 @@ export type AdminListTicketsResponses = {
 
 export type AdminListTicketsResponse =
   AdminListTicketsResponses[keyof AdminListTicketsResponses];
+
+export type GetAdminSystemStatusData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/api/admin/system/status";
+};
+
+export type GetAdminSystemStatusResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: AdminSystemStatus;
+};
+
+export type GetAdminSystemStatusResponse =
+  GetAdminSystemStatusResponses[keyof GetAdminSystemStatusResponses];
 
 export type AdminListTeamsData = {
   body?: never;

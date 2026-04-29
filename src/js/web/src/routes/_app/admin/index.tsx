@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
+import { AdminCharts } from "@/components/admin/admin-charts"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { AdminQuickActions } from "@/components/admin/admin-quick-actions"
 import { RecentActivity } from "@/components/admin/recent-activity"
@@ -18,6 +19,9 @@ function AdminDashboardPage() {
         <StatsCards />
       </PageSection>
       <PageSection delay={0.1}>
+        <AdminCharts />
+      </PageSection>
+      <PageSection delay={0.2}>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <RecentActivity />

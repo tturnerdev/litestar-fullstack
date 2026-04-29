@@ -84,11 +84,13 @@ export type RouteName =
   | 'get_stats_api_admin_fax_stats'
   | 'get_stats_api_admin_support_stats'
   | 'get_stats_api_admin_voice_stats'
+  | 'get_system_status'
   | 'get_tag'
   | 'get_target_logs'
   | 'get_team'
   | 'get_team_api_teams_team_id:uuid'
   | 'get_ticket'
+  | 'get_trends'
   | 'get_unread_count'
   | 'get_user'
   | 'get_user_api_users_user_id:uuid'
@@ -367,6 +369,7 @@ export interface RoutePathParams {
   'get_stats_api_admin_fax_stats': Record<string, never>;
   'get_stats_api_admin_support_stats': Record<string, never>;
   'get_stats_api_admin_voice_stats': Record<string, never>;
+  'get_system_status': Record<string, never>;
   'get_tag': {
     tag_id: UUID;
   };
@@ -383,6 +386,7 @@ export interface RoutePathParams {
   'get_ticket': {
     ticket_id: UUID;
   };
+  'get_trends': Record<string, never>;
   'get_unread_count': Record<string, never>;
   'get_user': {
     user_id: UUID;
@@ -724,6 +728,7 @@ export interface RouteQueryParams {
   'get_stats_api_admin_fax_stats': Record<string, never>;
   'get_stats_api_admin_support_stats': Record<string, never>;
   'get_stats_api_admin_voice_stats': Record<string, never>;
+  'get_system_status': Record<string, never>;
   'get_tag': Record<string, never>;
   'get_target_logs': {
     action?: string;
@@ -745,6 +750,7 @@ export interface RouteQueryParams {
   'get_team': Record<string, never>;
   'get_team_api_teams_team_id:uuid': Record<string, never>;
   'get_ticket': Record<string, never>;
+  'get_trends': Record<string, never>;
   'get_unread_count': Record<string, never>;
   'get_user': Record<string, never>;
   'get_user_api_users_user_id:uuid': Record<string, never>;
@@ -1659,6 +1665,13 @@ export const routeDefinitions = {
     pathParams: [] as const,
     queryParams: [] as const,
   },
+  'get_system_status': {
+    path: '/api/admin/system/status',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
   'get_tag': {
     path: '/api/tags/{tag_id}',
     methods: ['GET'] as const,
@@ -1692,6 +1705,13 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: ['ticket_id'] as const,
+    queryParams: [] as const,
+  },
+  'get_trends': {
+    path: '/api/admin/dashboard/trends',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
     queryParams: [] as const,
   },
   'get_unread_count': {

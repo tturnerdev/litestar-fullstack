@@ -35,3 +35,17 @@ class RecentActivity(CamelizedBaseStruct):
 
     activities: list[ActivityLogEntry]
     total: int
+
+
+class TrendPoint(CamelizedBaseStruct):
+    """Single data point for dashboard trend charts."""
+
+    date: str
+    events: int
+    new_users: int
+
+
+class AdminTrends(CamelizedBaseStruct):
+    """Dashboard trend data over the last 7 days."""
+
+    points: list[TrendPoint]

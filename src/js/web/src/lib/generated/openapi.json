@@ -621,6 +621,53 @@
         "title": "AdminSupportStats",
         "type": "object"
       },
+      "AdminSystemStatus": {
+        "properties": {
+          "appName": {
+            "type": "string"
+          },
+          "appVersion": {
+            "type": "string"
+          },
+          "databaseStatus": {
+            "enum": [
+              "online",
+              "offline"
+            ],
+            "type": "string"
+          },
+          "debugMode": {
+            "type": "boolean"
+          },
+          "pythonVersion": {
+            "type": "string"
+          },
+          "startedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "uptimeSeconds": {
+            "type": "number"
+          },
+          "workerQueues": {
+            "items": {
+              "$ref": "#/components/schemas/WorkerQueueInfo"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "appName",
+          "appVersion",
+          "databaseStatus",
+          "debugMode",
+          "pythonVersion",
+          "startedAt",
+          "uptimeSeconds"
+        ],
+        "title": "AdminSystemStatus",
+        "type": "object"
+      },
       "AdminTeamDetail": {
         "properties": {
           "createdAt": {
@@ -856,6 +903,21 @@
           "updatedAt"
         ],
         "title": "AdminTicketSummary",
+        "type": "object"
+      },
+      "AdminTrends": {
+        "properties": {
+          "points": {
+            "items": {
+              "$ref": "#/components/schemas/TrendPoint"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "points"
+        ],
+        "title": "AdminTrends",
         "type": "object"
       },
       "AdminUserDetail": {
@@ -5313,6 +5375,26 @@
         "title": "TicketUser",
         "type": "object"
       },
+      "TrendPoint": {
+        "properties": {
+          "date": {
+            "type": "string"
+          },
+          "events": {
+            "type": "integer"
+          },
+          "newUsers": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "date",
+          "events",
+          "newUsers"
+        ],
+        "title": "TrendPoint",
+        "type": "object"
+      },
       "UnreadCount": {
         "properties": {
           "count": {
@@ -5857,6 +5939,30 @@
         },
         "required": [],
         "title": "VoicemailSettingsUpdate",
+        "type": "object"
+      },
+      "WorkerQueueInfo": {
+        "properties": {
+          "active": {
+            "default": 0,
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "queued": {
+            "default": 0,
+            "type": "integer"
+          },
+          "scheduled": {
+            "default": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "WorkerQueueInfo",
         "type": "object"
       }
     },
@@ -6744,28 +6850,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
-            "name": "actorIdIn",
+            "name": "targetIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -6807,7 +6892,28 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetIdIn",
+            "name": "actorIdIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -7151,28 +7257,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
-            "name": "actorIdIn",
+            "name": "targetIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -7214,7 +7299,28 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetIdIn",
+            "name": "actorIdIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -7532,28 +7638,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
-            "name": "actorIdIn",
+            "name": "targetIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -7595,7 +7680,28 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetIdIn",
+            "name": "actorIdIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -7904,6 +8010,29 @@
           }
         },
         "summary": "GetStats",
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/api/admin/dashboard/trends": {
+      "get": {
+        "deprecated": false,
+        "operationId": "GetDashboardTrends",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminTrends"
+                }
+              }
+            },
+            "description": "Request fulfilled, document follows",
+            "headers": {}
+          }
+        },
+        "summary": "Get 7-day trend data for dashboard charts",
         "tags": [
           "Admin"
         ]
@@ -8825,6 +8954,29 @@
           }
         },
         "summary": "ListTickets",
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/api/admin/system/status": {
+      "get": {
+        "deprecated": false,
+        "operationId": "GetAdminSystemStatus",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminSystemStatus"
+                }
+              }
+            },
+            "description": "Request fulfilled, document follows",
+            "headers": {}
+          }
+        },
+        "summary": "GetSystemStatus",
         "tags": [
           "Admin"
         ]

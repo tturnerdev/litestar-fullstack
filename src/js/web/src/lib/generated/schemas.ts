@@ -77,8 +77,12 @@ import type {
   ForgotPasswordData,
   ForgotPasswordErrors,
   ForgotPasswordResponses,
+  GetAdminSystemStatusData,
+  GetAdminSystemStatusResponses,
   GetDashboardStatsData,
   GetDashboardStatsResponses,
+  GetDashboardTrendsData,
+  GetDashboardTrendsResponses,
   GetMfaStatusData,
   GetMfaStatusResponses,
   GetUnreadNotificationCountData,
@@ -151,6 +155,8 @@ export type OperationName =
   | 'get_stats_api_admin_fax_stats'
   | 'get_stats_api_admin_support_stats'
   | 'get_stats_api_admin_voice_stats'
+  | 'get_system_status'
+  | 'get_trends'
   | 'get_unread_count'
   | 'initiate_setup'
   | 'list_connections'
@@ -214,6 +220,8 @@ export interface OperationDataTypes {
   'get_stats_api_admin_fax_stats': AdminGetFaxStatsData
   'get_stats_api_admin_support_stats': AdminGetSupportStatsData
   'get_stats_api_admin_voice_stats': AdminGetVoiceStatsData
+  'get_system_status': GetAdminSystemStatusData
+  'get_trends': GetDashboardTrendsData
   'get_unread_count': GetUnreadNotificationCountData
   'initiate_setup': InitiateMfaSetupData
   'list_connections': CreateConnectionData
@@ -278,6 +286,8 @@ export interface OperationResponseTypes {
   'get_stats_api_admin_fax_stats': AdminGetFaxStatsResponses
   'get_stats_api_admin_support_stats': AdminGetSupportStatsResponses
   'get_stats_api_admin_voice_stats': AdminGetVoiceStatsResponses
+  'get_system_status': GetAdminSystemStatusResponses
+  'get_trends': GetDashboardTrendsResponses
   'get_unread_count': GetUnreadNotificationCountResponses
   'initiate_setup': InitiateMfaSetupResponses
   'list_connections': CreateConnectionResponses
@@ -342,6 +352,8 @@ export interface OperationErrorTypes {
   'get_stats_api_admin_fax_stats': never
   'get_stats_api_admin_support_stats': never
   'get_stats_api_admin_voice_stats': never
+  'get_system_status': never
+  'get_trends': never
   'get_unread_count': never
   'initiate_setup': never
   'list_connections': CreateConnectionErrors

@@ -16,7 +16,9 @@ import {
   type AdminListTicketsData,
   type AdminListUsersData,
   type AdminPhoneNumberSummary,
+  type AdminTrends,
   type AdminSupportStats,
+  type AdminSystemStatus,
   type AdminTeamDetail,
   type AdminTeamSummary,
   type AdminTicketSummary,
@@ -46,7 +48,9 @@ import {
   adminUpdateUser,
   assignRole,
   type DashboardStats,
+  getAdminSystemStatus,
   getDashboardStats,
+  getDashboardTrends,
   getRecentActivity,
   listRoles,
   type ListRolesData,
@@ -73,6 +77,26 @@ export function useAdminRecentActivity() {
     queryFn: async () => {
       const response = await getRecentActivity()
       return response.data as RecentActivity
+    },
+  })
+}
+
+export function useAdminTrends() {
+  return useQuery({
+    queryKey: ["admin", "trends"],
+    queryFn: async () => {
+      const response = await getDashboardTrends()
+      return response.data as AdminTrends
+    },
+  })
+}
+
+export function useAdminSystemStatus() {
+  return useQuery({
+    queryKey: ["admin", "system", "status"],
+    queryFn: async () => {
+      const response = await getAdminSystemStatus()
+      return response.data as AdminSystemStatus
     },
   })
 }

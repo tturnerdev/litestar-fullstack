@@ -740,6 +740,13 @@
       ],
       "uri": "/api/admin/voice/stats"
     },
+    "get_system_status": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "uri": "/api/admin/system/status"
+    },
     "get_tag": {
       "method": "get",
       "methods": [
@@ -823,6 +830,13 @@
         "ticket_id"
       ],
       "uri": "/api/support/tickets/{ticket_id}"
+    },
+    "get_trends": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "uri": "/api/admin/dashboard/trends"
     },
     "get_unread_count": {
       "method": "get",

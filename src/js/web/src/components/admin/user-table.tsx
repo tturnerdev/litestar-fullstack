@@ -2,11 +2,22 @@ import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ExportButton } from "@/components/ui/export-button"
 import { Input } from "@/components/ui/input"
 import { SkeletonTable } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { UserRowActions } from "@/components/admin/user-row-actions"
 import { useAdminUsers } from "@/lib/api/hooks/admin"
+
+const USER_EXPORT_COLUMNS = [
+  { key: "name", header: "Name" },
+  { key: "email", header: "Email" },
+  { key: "isActive", header: "Active" },
+  { key: "isSuperuser", header: "Superuser" },
+  { key: "isVerified", header: "Verified" },
+  { key: "loginCount", header: "Login Count" },
+  { key: "createdAt", header: "Created At" },
+]
 
 const PAGE_SIZE = 25
 
@@ -36,6 +47,7 @@ export function UserTable() {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Users</CardTitle>
+        <div className="flex items-center gap-3">
         <div className="w-64">
           <Input
             placeholder="Search users..."
@@ -45,6 +57,8 @@ export function UserTable() {
               setPage(1)
             }}
           />
+        </div>
+        <ExportButton data={(data?.items ?? []) as Record<string, unknown>[]} filename="users" columns={USER_EXPORT_COLUMNS} />
         </div>
       </CardHeader>
       <CardContent className="space-y-4">

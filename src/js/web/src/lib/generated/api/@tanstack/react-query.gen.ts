@@ -87,9 +87,11 @@ import {
   disableMfa,
   forgotPassword,
   getActiveSessions,
+  getAdminSystemStatus,
   getAttachment,
   getConnection,
   getDashboardStats,
+  getDashboardTrends,
   getDevice,
   getDndSettings,
   getExtension,
@@ -412,6 +414,8 @@ import type {
   GetActiveSessionsData,
   GetActiveSessionsError,
   GetActiveSessionsResponse,
+  GetAdminSystemStatusData,
+  GetAdminSystemStatusResponse,
   GetAttachmentData,
   GetAttachmentError,
   GetAttachmentResponse,
@@ -420,6 +424,8 @@ import type {
   GetConnectionResponse,
   GetDashboardStatsData,
   GetDashboardStatsResponse,
+  GetDashboardTrendsData,
+  GetDashboardTrendsResponse,
   GetDeviceData,
   GetDeviceError,
   GetDeviceResponse,
@@ -1174,6 +1180,34 @@ export const getDashboardStatsOptions = (
     queryKey: getDashboardStatsQueryKey(options),
   });
 
+export const getDashboardTrendsQueryKey = (
+  options?: Options<GetDashboardTrendsData>,
+) => createQueryKey("getDashboardTrends", options);
+
+/**
+ * Get 7-day trend data for dashboard charts
+ */
+export const getDashboardTrendsOptions = (
+  options?: Options<GetDashboardTrendsData>,
+) =>
+  queryOptions<
+    GetDashboardTrendsResponse,
+    DefaultError,
+    GetDashboardTrendsResponse,
+    ReturnType<typeof getDashboardTrendsQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getDashboardTrends({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getDashboardTrendsQueryKey(options),
+  });
+
 export const adminListDevicesQueryKey = (
   options?: Options<AdminListDevicesData>,
 ) => createQueryKey("adminListDevices", options);
@@ -1368,6 +1402,34 @@ export const adminListTicketsOptions = (
       return data;
     },
     queryKey: adminListTicketsQueryKey(options),
+  });
+
+export const getAdminSystemStatusQueryKey = (
+  options?: Options<GetAdminSystemStatusData>,
+) => createQueryKey("getAdminSystemStatus", options);
+
+/**
+ * GetSystemStatus
+ */
+export const getAdminSystemStatusOptions = (
+  options?: Options<GetAdminSystemStatusData>,
+) =>
+  queryOptions<
+    GetAdminSystemStatusResponse,
+    DefaultError,
+    GetAdminSystemStatusResponse,
+    ReturnType<typeof getAdminSystemStatusQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getAdminSystemStatus({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getAdminSystemStatusQueryKey(options),
   });
 
 export const adminListTeamsQueryKey = (options?: Options<AdminListTeamsData>) =>

@@ -10,6 +10,7 @@ const navItems = [
   { label: "Fax", to: "/admin/fax" },
   { label: "Support", to: "/admin/support" },
   { label: "Audit log", to: "/admin/audit" },
+  { label: "System", to: "/admin/system" },
 ] as const
 
 export function AdminNav() {

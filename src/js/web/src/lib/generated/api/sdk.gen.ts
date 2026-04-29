@@ -237,6 +237,8 @@ import type {
   GetActiveSessionsData,
   GetActiveSessionsErrors,
   GetActiveSessionsResponses,
+  GetAdminSystemStatusData,
+  GetAdminSystemStatusResponses,
   GetAttachmentData,
   GetAttachmentErrors,
   GetAttachmentResponses,
@@ -245,6 +247,8 @@ import type {
   GetConnectionResponses,
   GetDashboardStatsData,
   GetDashboardStatsResponses,
+  GetDashboardTrendsData,
+  GetDashboardTrendsResponses,
   GetDeviceData,
   GetDeviceErrors,
   GetDeviceResponses,
@@ -810,6 +814,22 @@ export const getDashboardStats = <ThrowOnError extends boolean = false>(
   });
 
 /**
+ * Get 7-day trend data for dashboard charts
+ */
+export const getDashboardTrends = <ThrowOnError extends boolean = false>(
+  options?: Options<GetDashboardTrendsData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    GetDashboardTrendsResponses,
+    unknown,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/admin/dashboard/trends",
+    ...options,
+  });
+
+/**
  * ListDevices
  */
 export const adminListDevices = <ThrowOnError extends boolean = false>(
@@ -918,6 +938,22 @@ export const adminListTickets = <ThrowOnError extends boolean = false>(
   >({
     security: [{ scheme: "bearer", type: "http" }],
     url: "/api/admin/support/tickets",
+    ...options,
+  });
+
+/**
+ * GetSystemStatus
+ */
+export const getAdminSystemStatus = <ThrowOnError extends boolean = false>(
+  options?: Options<GetAdminSystemStatusData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    GetAdminSystemStatusResponses,
+    unknown,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/admin/system/status",
     ...options,
   });
 

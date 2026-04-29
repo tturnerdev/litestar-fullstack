@@ -13,7 +13,7 @@ from app.db import models as m
 from app.domain.accounts.deps import provide_users_service
 from app.domain.accounts.guards import requires_superuser
 from app.domain.admin.deps import provide_audit_log_service
-from app.domain.admin.schemas import ActivityLogEntry, DashboardStats, RecentActivity
+from app.domain.admin.schemas import ActivityLogEntry, AdminTrends, DashboardStats, RecentActivity, TrendPoint
 from app.domain.teams.deps import provide_teams_service
 
 if TYPE_CHECKING:
@@ -120,3 +120,47 @@ class DashboardController(Controller):
         ]
 
         return RecentActivity(activities=items, total=total)
+
+    @get(operation_id="GetDashboardTrends", path="/trends", summary="Get 7-day trend data for dashboard charts")
+    async def get_trends(
+        self,
+        request: Request[m.User, Token, Any],
+        users_service: UserService,
+        audit_service: AuditLogService,
+    ) -> AdminTrends:
+        """Get daily trend data for the last 7 days.
+
+        Args:
+            request: Request with authenticated superuser
+            users_service: User service
+            audit_service: Audit log service
+
+        Returns:
+            7-day trend data with daily event and user counts
+        """
+        now = datetime.now(UTC)
+        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        points: list[TrendPoint] = []
+
+        for days_ago in range(6, -1, -1):
+            day_start = today_start - timedelta(days=days_ago)
+            day_end = day_start + timedelta(days=1)
+
+            event_count = await audit_service.count(
+                m.AuditLog.created_at >= day_start,
+                m.AuditLog.created_at < day_end,
+            )
+            new_user_count = await users_service.count(
+                m.User.created_at >= day_start,
+                m.User.created_at < day_end,
+            )
+
+            points.append(
+                TrendPoint(
+                    date=day_start.strftime("%b %d"),
+                    events=event_count,
+                    new_users=new_user_count,
+                )
+            )
+
+        return AdminTrends(points=points)
