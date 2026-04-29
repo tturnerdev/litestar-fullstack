@@ -41,16 +41,20 @@ export type RouteName =
   | 'delete_attachment'
   | 'delete_connection'
   | 'delete_device'
+  | 'delete_extension'
   | 'delete_fax_email_route'
   | 'delete_fax_message'
+  | 'delete_fax_number'
   | 'delete_forwarding_rule'
   | 'delete_location'
   | 'delete_message'
+  | 'delete_phone_number'
   | 'delete_role'
   | 'delete_tag'
   | 'delete_team'
   | 'delete_team_api_teams_team_id:uuid'
   | 'delete_team_invitation'
+  | 'delete_ticket'
   | 'delete_user'
   | 'delete_user_api_users_user_id:uuid'
   | 'delete_voicemail_message'
@@ -229,12 +233,18 @@ export interface RoutePathParams {
   'delete_device': {
     device_id: UUID;
   };
+  'delete_extension': {
+    ext_id: UUID;
+  };
   'delete_fax_email_route': {
     fax_number_id: UUID;
     route_id: UUID;
   };
   'delete_fax_message': {
     message_id: UUID;
+  };
+  'delete_fax_number': {
+    fax_number_id: UUID;
   };
   'delete_forwarding_rule': {
     ext_id: UUID;
@@ -247,6 +257,9 @@ export interface RoutePathParams {
   'delete_message': {
     msg_id: UUID;
     ticket_id: UUID;
+  };
+  'delete_phone_number': {
+    phone_number_id: UUID;
   };
   'delete_role': {
     role_id: UUID;
@@ -263,6 +276,9 @@ export interface RoutePathParams {
   'delete_team_invitation': {
     invitation_id: UUID;
     team_id: UUID;
+  };
+  'delete_ticket': {
+    ticket_id: UUID;
   };
   'delete_user': {
     user_id: UUID;
@@ -587,16 +603,20 @@ export interface RouteQueryParams {
   'delete_attachment': Record<string, never>;
   'delete_connection': Record<string, never>;
   'delete_device': Record<string, never>;
+  'delete_extension': Record<string, never>;
   'delete_fax_email_route': Record<string, never>;
   'delete_fax_message': Record<string, never>;
+  'delete_fax_number': Record<string, never>;
   'delete_forwarding_rule': Record<string, never>;
   'delete_location': Record<string, never>;
   'delete_message': Record<string, never>;
+  'delete_phone_number': Record<string, never>;
   'delete_role': Record<string, never>;
   'delete_tag': Record<string, never>;
   'delete_team': Record<string, never>;
   'delete_team_api_teams_team_id:uuid': Record<string, never>;
   'delete_team_invitation': Record<string, never>;
+  'delete_ticket': Record<string, never>;
   'delete_user': Record<string, never>;
   'delete_user_api_users_user_id:uuid': Record<string, never>;
   'delete_voicemail_message': Record<string, never>;
@@ -784,6 +804,7 @@ export interface RouteQueryParams {
     createdAfter?: DateTime;
     createdBefore?: DateTime;
     currentPage?: number;
+    domain?: string;
     end_date?: DateTime;
     ids?: string[];
     orderBy?: string;
@@ -1186,6 +1207,13 @@ export const routeDefinitions = {
     pathParams: ['device_id'] as const,
     queryParams: [] as const,
   },
+  'delete_extension': {
+    path: '/api/voice/extensions/{ext_id}',
+    methods: ['DELETE'] as const,
+    method: 'delete',
+    pathParams: ['ext_id'] as const,
+    queryParams: [] as const,
+  },
   'delete_fax_email_route': {
     path: '/api/fax/numbers/{fax_number_id}/email-routes/{route_id}',
     methods: ['DELETE'] as const,
@@ -1198,6 +1226,13 @@ export const routeDefinitions = {
     methods: ['DELETE'] as const,
     method: 'delete',
     pathParams: ['message_id'] as const,
+    queryParams: [] as const,
+  },
+  'delete_fax_number': {
+    path: '/api/fax/numbers/{fax_number_id}',
+    methods: ['DELETE'] as const,
+    method: 'delete',
+    pathParams: ['fax_number_id'] as const,
     queryParams: [] as const,
   },
   'delete_forwarding_rule': {
@@ -1219,6 +1254,13 @@ export const routeDefinitions = {
     methods: ['DELETE'] as const,
     method: 'delete',
     pathParams: ['msg_id', 'ticket_id'] as const,
+    queryParams: [] as const,
+  },
+  'delete_phone_number': {
+    path: '/api/voice/phone-numbers/{phone_number_id}',
+    methods: ['DELETE'] as const,
+    method: 'delete',
+    pathParams: ['phone_number_id'] as const,
     queryParams: [] as const,
   },
   'delete_role': {
@@ -1254,6 +1296,13 @@ export const routeDefinitions = {
     methods: ['DELETE'] as const,
     method: 'delete',
     pathParams: ['invitation_id', 'team_id'] as const,
+    queryParams: [] as const,
+  },
+  'delete_ticket': {
+    path: '/api/support/tickets/{ticket_id}',
+    methods: ['DELETE'] as const,
+    method: 'delete',
+    pathParams: ['ticket_id'] as const,
     queryParams: [] as const,
   },
   'delete_user': {
@@ -1571,7 +1620,7 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: [] as const,
-    queryParams: ['action', 'actionIn', 'actorIdIn', 'createdAfter', 'createdBefore', 'currentPage', 'end_date', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'targetIdIn', 'targetTypeIn'] as const,
+    queryParams: ['action', 'actionIn', 'actorIdIn', 'createdAfter', 'createdBefore', 'currentPage', 'domain', 'end_date', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'targetIdIn', 'targetTypeIn'] as const,
   },
   'list_messages': {
     path: '/api/support/tickets/{ticket_id}/messages',

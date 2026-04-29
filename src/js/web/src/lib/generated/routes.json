@@ -239,6 +239,19 @@
       ],
       "uri": "/api/devices/{device_id}"
     },
+    "delete_extension": {
+      "method": "delete",
+      "methods": [
+        "DELETE"
+      ],
+      "parameterTypes": {
+        "ext_id": "UUID"
+      },
+      "parameters": [
+        "ext_id"
+      ],
+      "uri": "/api/voice/extensions/{ext_id}"
+    },
     "delete_fax_email_route": {
       "method": "delete",
       "methods": [
@@ -266,6 +279,19 @@
         "message_id"
       ],
       "uri": "/api/fax/messages/{message_id}"
+    },
+    "delete_fax_number": {
+      "method": "delete",
+      "methods": [
+        "DELETE"
+      ],
+      "parameterTypes": {
+        "fax_number_id": "UUID"
+      },
+      "parameters": [
+        "fax_number_id"
+      ],
+      "uri": "/api/fax/numbers/{fax_number_id}"
     },
     "delete_forwarding_rule": {
       "method": "delete",
@@ -311,6 +337,19 @@
         "ticket_id"
       ],
       "uri": "/api/support/tickets/{ticket_id}/messages/{msg_id}"
+    },
+    "delete_phone_number": {
+      "method": "delete",
+      "methods": [
+        "DELETE"
+      ],
+      "parameterTypes": {
+        "phone_number_id": "UUID"
+      },
+      "parameters": [
+        "phone_number_id"
+      ],
+      "uri": "/api/voice/phone-numbers/{phone_number_id}"
     },
     "delete_role": {
       "method": "delete",
@@ -378,6 +417,19 @@
         "team_id"
       ],
       "uri": "/api/teams/{team_id}/invitations/{invitation_id}"
+    },
+    "delete_ticket": {
+      "method": "delete",
+      "methods": [
+        "DELETE"
+      ],
+      "parameterTypes": {
+        "ticket_id": "UUID"
+      },
+      "parameters": [
+        "ticket_id"
+      ],
+      "uri": "/api/support/tickets/{ticket_id}"
     },
     "delete_user": {
       "method": "delete",
@@ -1032,6 +1084,7 @@
         "createdAfter": "DateTime | undefined",
         "createdBefore": "DateTime | undefined",
         "currentPage": "number | undefined",
+        "domain": "string | undefined",
         "end_date": "DateTime | undefined",
         "ids": "string[] | undefined",
         "orderBy": "string | undefined",

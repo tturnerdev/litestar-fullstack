@@ -152,18 +152,27 @@ import type {
   DeleteDeviceData,
   DeleteDeviceErrors,
   DeleteDeviceResponses,
+  DeleteExtensionData,
+  DeleteExtensionErrors,
+  DeleteExtensionResponses,
   DeleteFaxEmailRouteData,
   DeleteFaxEmailRouteErrors,
   DeleteFaxEmailRouteResponses,
   DeleteFaxMessageData,
   DeleteFaxMessageErrors,
   DeleteFaxMessageResponses,
+  DeleteFaxNumberData,
+  DeleteFaxNumberErrors,
+  DeleteFaxNumberResponses,
   DeleteForwardingRuleData,
   DeleteForwardingRuleErrors,
   DeleteForwardingRuleResponses,
   DeleteLocationData,
   DeleteLocationErrors,
   DeleteLocationResponses,
+  DeletePhoneNumberData,
+  DeletePhoneNumberErrors,
+  DeletePhoneNumberResponses,
   DeleteRoleData,
   DeleteRoleErrors,
   DeleteRoleResponses,
@@ -176,9 +185,12 @@ import type {
   DeleteTeamInvitationErrors,
   DeleteTeamInvitationResponses,
   DeleteTeamResponses,
+  DeleteTicketData,
+  DeleteTicketErrors,
   DeleteTicketMessageData,
   DeleteTicketMessageErrors,
   DeleteTicketMessageResponses,
+  DeleteTicketResponses,
   DeleteUserData,
   DeleteUserErrors,
   DeleteUserResponses,
@@ -1272,6 +1284,22 @@ export const listFaxNumbers = <ThrowOnError extends boolean = false>(
   });
 
 /**
+ * DeleteFaxNumber
+ */
+export const deleteFaxNumber = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteFaxNumberData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    DeleteFaxNumberResponses,
+    DeleteFaxNumberErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/fax/numbers/{fax_number_id}",
+    ...options,
+  });
+
+/**
  * GetFaxNumber
  */
 export const getFaxNumber = <ThrowOnError extends boolean = false>(
@@ -1871,6 +1899,22 @@ export const createTicket = <ThrowOnError extends boolean = false>(
       "Content-Type": "application/json",
       ...options.headers,
     },
+  });
+
+/**
+ * DeleteTicket
+ */
+export const deleteTicket = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteTicketData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    DeleteTicketResponses,
+    DeleteTicketErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/support/tickets/{ticket_id}",
+    ...options,
   });
 
 /**
@@ -2646,6 +2690,22 @@ export const createExtension = <ThrowOnError extends boolean = false>(
   });
 
 /**
+ * DeleteExtension
+ */
+export const deleteExtension = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteExtensionData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    DeleteExtensionResponses,
+    DeleteExtensionErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/voice/extensions/{ext_id}",
+    ...options,
+  });
+
+/**
  * GetExtension
  */
 export const getExtension = <ThrowOnError extends boolean = false>(
@@ -2963,6 +3023,22 @@ export const createPhoneNumber = <ThrowOnError extends boolean = false>(
       "Content-Type": "application/json",
       ...options.headers,
     },
+  });
+
+/**
+ * DeletePhoneNumber
+ */
+export const deletePhoneNumber = <ThrowOnError extends boolean = false>(
+  options: Options<DeletePhoneNumberData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    DeletePhoneNumberResponses,
+    DeletePhoneNumberErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/voice/phone-numbers/{phone_number_id}",
+    ...options,
   });
 
 /**

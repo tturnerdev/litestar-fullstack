@@ -1668,11 +1668,12 @@ export type AdminListAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
-    actionIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     action?: string | null;
+    domain?: string | null;
     end_date?: string | null;
   };
   url: "/api/admin/audit";
@@ -1749,10 +1750,10 @@ export type AdminGetTargetAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
-    actionIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -1829,10 +1830,10 @@ export type AdminGetUserAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
-    actionIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -3360,6 +3361,49 @@ export type ListFaxNumbersResponses = {
 export type ListFaxNumbersResponse =
   ListFaxNumbersResponses[keyof ListFaxNumbersResponses];
 
+export type DeleteFaxNumberData = {
+  body?: never;
+  path: {
+    /**
+     * Fax Number ID
+     *
+     * The fax number to delete.
+     */
+    fax_number_id: string;
+  };
+  query?: never;
+  url: "/api/fax/numbers/{fax_number_id}";
+};
+
+export type DeleteFaxNumberErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type DeleteFaxNumberError =
+  DeleteFaxNumberErrors[keyof DeleteFaxNumberErrors];
+
+export type DeleteFaxNumberResponses = {
+  /**
+   * Request fulfilled, nothing follows
+   */
+  204: void;
+};
+
+export type DeleteFaxNumberResponse =
+  DeleteFaxNumberResponses[keyof DeleteFaxNumberResponses];
+
 export type GetFaxNumberData = {
   body?: never;
   path: {
@@ -4691,6 +4735,48 @@ export type CreateTicketResponses = {
 
 export type CreateTicketResponse =
   CreateTicketResponses[keyof CreateTicketResponses];
+
+export type DeleteTicketData = {
+  body?: never;
+  path: {
+    /**
+     * Ticket ID
+     *
+     * The ticket to delete.
+     */
+    ticket_id: string;
+  };
+  query?: never;
+  url: "/api/support/tickets/{ticket_id}";
+};
+
+export type DeleteTicketErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type DeleteTicketError = DeleteTicketErrors[keyof DeleteTicketErrors];
+
+export type DeleteTicketResponses = {
+  /**
+   * Request fulfilled, nothing follows
+   */
+  204: void;
+};
+
+export type DeleteTicketResponse =
+  DeleteTicketResponses[keyof DeleteTicketResponses];
 
 export type GetTicketData = {
   body?: never;
@@ -6736,6 +6822,49 @@ export type CreateExtensionResponses = {
 export type CreateExtensionResponse =
   CreateExtensionResponses[keyof CreateExtensionResponses];
 
+export type DeleteExtensionData = {
+  body?: never;
+  path: {
+    /**
+     * Extension ID
+     *
+     * The extension to delete.
+     */
+    ext_id: string;
+  };
+  query?: never;
+  url: "/api/voice/extensions/{ext_id}";
+};
+
+export type DeleteExtensionErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type DeleteExtensionError =
+  DeleteExtensionErrors[keyof DeleteExtensionErrors];
+
+export type DeleteExtensionResponses = {
+  /**
+   * Request fulfilled, nothing follows
+   */
+  204: void;
+};
+
+export type DeleteExtensionResponse =
+  DeleteExtensionResponses[keyof DeleteExtensionResponses];
+
 export type GetExtensionData = {
   body?: never;
   path: {
@@ -7612,6 +7741,49 @@ export type CreatePhoneNumberResponses = {
 
 export type CreatePhoneNumberResponse =
   CreatePhoneNumberResponses[keyof CreatePhoneNumberResponses];
+
+export type DeletePhoneNumberData = {
+  body?: never;
+  path: {
+    /**
+     * Phone Number ID
+     *
+     * The phone number to delete.
+     */
+    phone_number_id: string;
+  };
+  query?: never;
+  url: "/api/voice/phone-numbers/{phone_number_id}";
+};
+
+export type DeletePhoneNumberErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type DeletePhoneNumberError =
+  DeletePhoneNumberErrors[keyof DeletePhoneNumberErrors];
+
+export type DeletePhoneNumberResponses = {
+  /**
+   * Request fulfilled, nothing follows
+   */
+  204: void;
+};
+
+export type DeletePhoneNumberResponse =
+  DeletePhoneNumberResponses[keyof DeletePhoneNumberResponses];
 
 export type GetPhoneNumberData = {
   body?: never;

@@ -57,14 +57,18 @@ import {
   deleteAttachment,
   deleteConnection,
   deleteDevice,
+  deleteExtension,
   deleteFaxEmailRoute,
   deleteFaxMessage,
+  deleteFaxNumber,
   deleteForwardingRule,
   deleteLocation,
+  deletePhoneNumber,
   deleteRole,
   deleteTag,
   deleteTeam,
   deleteTeamInvitation,
+  deleteTicket,
   deleteTicketMessage,
   deleteUser,
   deleteVoicemailMessage,
@@ -298,18 +302,27 @@ import type {
   DeleteDeviceData,
   DeleteDeviceError,
   DeleteDeviceResponse,
+  DeleteExtensionData,
+  DeleteExtensionError,
+  DeleteExtensionResponse,
   DeleteFaxEmailRouteData,
   DeleteFaxEmailRouteError,
   DeleteFaxEmailRouteResponse,
   DeleteFaxMessageData,
   DeleteFaxMessageError,
   DeleteFaxMessageResponse,
+  DeleteFaxNumberData,
+  DeleteFaxNumberError,
+  DeleteFaxNumberResponse,
   DeleteForwardingRuleData,
   DeleteForwardingRuleError,
   DeleteForwardingRuleResponse,
   DeleteLocationData,
   DeleteLocationError,
   DeleteLocationResponse,
+  DeletePhoneNumberData,
+  DeletePhoneNumberError,
+  DeletePhoneNumberResponse,
   DeleteRoleData,
   DeleteRoleError,
   DeleteRoleResponse,
@@ -322,9 +335,12 @@ import type {
   DeleteTeamInvitationError,
   DeleteTeamInvitationResponse,
   DeleteTeamResponse,
+  DeleteTicketData,
+  DeleteTicketError,
   DeleteTicketMessageData,
   DeleteTicketMessageError,
   DeleteTicketMessageResponse,
+  DeleteTicketResponse,
   DeleteUserData,
   DeleteUserError,
   DeleteUserResponse,
@@ -1897,6 +1913,33 @@ export const listFaxNumbersOptions = (options?: Options<ListFaxNumbersData>) =>
     queryKey: listFaxNumbersQueryKey(options),
   });
 
+/**
+ * DeleteFaxNumber
+ */
+export const deleteFaxNumberMutation = (
+  options?: Partial<Options<DeleteFaxNumberData>>,
+): UseMutationOptions<
+  DeleteFaxNumberResponse,
+  DeleteFaxNumberError,
+  Options<DeleteFaxNumberData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    DeleteFaxNumberResponse,
+    DeleteFaxNumberError,
+    Options<DeleteFaxNumberData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await deleteFaxNumber({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
 export const getFaxNumberQueryKey = (options: Options<GetFaxNumberData>) =>
   createQueryKey("getFaxNumber", options);
 
@@ -2797,6 +2840,33 @@ export const createTicketMutation = (
   > = {
     mutationFn: async (fnOptions) => {
       const { data } = await createTicket({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * DeleteTicket
+ */
+export const deleteTicketMutation = (
+  options?: Partial<Options<DeleteTicketData>>,
+): UseMutationOptions<
+  DeleteTicketResponse,
+  DeleteTicketError,
+  Options<DeleteTicketData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    DeleteTicketResponse,
+    DeleteTicketError,
+    Options<DeleteTicketData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await deleteTicket({
         ...options,
         ...fnOptions,
         throwOnError: true,
@@ -3978,6 +4048,33 @@ export const createExtensionMutation = (
   return mutationOptions;
 };
 
+/**
+ * DeleteExtension
+ */
+export const deleteExtensionMutation = (
+  options?: Partial<Options<DeleteExtensionData>>,
+): UseMutationOptions<
+  DeleteExtensionResponse,
+  DeleteExtensionError,
+  Options<DeleteExtensionData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    DeleteExtensionResponse,
+    DeleteExtensionError,
+    Options<DeleteExtensionData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await deleteExtension({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
 export const getExtensionQueryKey = (options: Options<GetExtensionData>) =>
   createQueryKey("getExtension", options);
 
@@ -4455,6 +4552,33 @@ export const createPhoneNumberMutation = (
   > = {
     mutationFn: async (fnOptions) => {
       const { data } = await createPhoneNumber({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * DeletePhoneNumber
+ */
+export const deletePhoneNumberMutation = (
+  options?: Partial<Options<DeletePhoneNumberData>>,
+): UseMutationOptions<
+  DeletePhoneNumberResponse,
+  DeletePhoneNumberError,
+  Options<DeletePhoneNumberData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    DeletePhoneNumberResponse,
+    DeletePhoneNumberError,
+    Options<DeletePhoneNumberData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await deletePhoneNumber({
         ...options,
         ...fnOptions,
         throwOnError: true,
