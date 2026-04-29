@@ -39,7 +39,7 @@ export function TicketConversation({ ticketId }: { ticketId: string }) {
   return (
     <div className="space-y-4">
       {messages.map((message) => (
-        <TicketMessage key={message.id} message={message} />
+        <TicketMessage key={message.id} message={message} ticketId={ticketId} />
       ))}
     </div>
   )

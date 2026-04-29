@@ -255,6 +255,29 @@ export function useCreateTicketMessage(ticketId: string) {
   })
 }
 
+export function useDeleteTicketMessage(ticketId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (messageId: string) => {
+      await client.delete({
+        url: `/api/support/tickets/${ticketId}/messages/${messageId}`,
+        security: [{ scheme: "bearer", type: "http" }],
+      } as never)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["support", "ticket", ticketId, "messages"] })
+      queryClient.invalidateQueries({ queryKey: ["support", "ticket", ticketId] })
+      queryClient.invalidateQueries({ queryKey: ["support", "tickets"] })
+      toast.success("Message deleted")
+    },
+    onError: (error) => {
+      toast.error("Unable to delete message", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
+    },
+  })
+}
+
 // ── Attachment Hooks ───────────────────────────────────────────────────
 
 export function useUploadAttachment(ticketId: string) {
