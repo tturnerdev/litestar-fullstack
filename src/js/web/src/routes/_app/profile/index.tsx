@@ -5,6 +5,8 @@ import { toast } from "sonner"
 import { z } from "zod"
 import { ConnectedAccounts } from "@/components/profile/connected-accounts"
 import { MfaSection } from "@/components/profile/mfa-section"
+import { PasswordChangeCard } from "@/components/profile/password-change-card"
+import { ProfileInfoCard } from "@/components/profile/profile-info-card"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { profileOAuthAccountsQueryKey } from "@/lib/generated/api/@tanstack/react-query.gen"
 
@@ -46,12 +48,21 @@ function ProfilePage() {
 
   return (
     <PageContainer className="flex-1 space-y-8">
-      <PageHeader eyebrow="Account" title="Profile settings" description="Manage security, connected accounts, and authentication options." />
+      <PageHeader eyebrow="Account" title="Profile settings" description="Manage your profile, security, connected accounts, and authentication options." />
+
       <PageSection>
+        <ProfileInfoCard />
+      </PageSection>
+
+      <PageSection delay={0.1}>
         <div className="grid gap-6 lg:grid-cols-2">
           <MfaSection />
           <ConnectedAccounts />
         </div>
+      </PageSection>
+
+      <PageSection delay={0.2}>
+        <PasswordChangeCard />
       </PageSection>
     </PageContainer>
   )
