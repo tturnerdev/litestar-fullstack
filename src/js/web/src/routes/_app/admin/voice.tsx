@@ -1,62 +1,40 @@
 import { useState } from "react"
 import { createFileRoute } from "@tanstack/react-router"
+import { Search } from "lucide-react"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SkeletonCard } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { useAdminExtensions, useAdminPhoneNumbers, useAdminVoiceStats } from "@/lib/api/hooks/admin"
 
 export const Route = createFileRoute("/_app/admin/voice")({
   component: AdminVoicePage,
 })
 
-// Placeholder data until backend aggregation endpoints are available
-const stats = [
-  { label: "Total phone numbers", value: 0 },
-  { label: "Total extensions", value: 0 },
-  { label: "Active DND", value: 0 },
-  { label: "Unassigned numbers", value: 0 },
-]
-
-interface PhoneNumberRow {
-  id: string
-  number: string
-  label: string
-  teamName: string
-  assignedTo: string | null
-  status: "active" | "inactive"
-}
-
-interface ExtensionRow {
-  id: string
-  extension: string
-  displayName: string
-  teamName: string
-  dnd: boolean
-  status: "active" | "inactive"
-}
-
-// Placeholder -- will be replaced by API data
-const placeholderPhoneNumbers: PhoneNumberRow[] = []
-const placeholderExtensions: ExtensionRow[] = []
-
 const PAGE_SIZE = 25
 
 function AdminVoicePage() {
   const [phoneNumberPage, setPhoneNumberPage] = useState(1)
-  const [extensionPage, setExtensionPage] = useState(1)
+  const [phoneSearch, setPhoneSearch] = useState("")
 
-  // TODO: replace with admin API hooks once backend endpoints exist
-  const phoneNumbers = placeholderPhoneNumbers
-  const phoneTotal = phoneNumbers.length
+  const { data: stats, isLoading: statsLoading } = useAdminVoiceStats()
+  const { data: phoneData, isLoading: phonesLoading } = useAdminPhoneNumbers(phoneNumberPage, PAGE_SIZE, phoneSearch || undefined)
+  const { data: extensions, isLoading: extensionsLoading } = useAdminExtensions()
+
+  const phoneNumbers = phoneData?.items ?? []
+  const phoneTotal = phoneData?.total ?? 0
   const phoneTotalPages = Math.max(1, Math.ceil(phoneTotal / PAGE_SIZE))
-  const pagedPhoneNumbers = phoneNumbers.slice((phoneNumberPage - 1) * PAGE_SIZE, phoneNumberPage * PAGE_SIZE)
 
-  const extensions = placeholderExtensions
-  const extTotal = extensions.length
-  const extTotalPages = Math.max(1, Math.ceil(extTotal / PAGE_SIZE))
-  const pagedExtensions = extensions.slice((extensionPage - 1) * PAGE_SIZE, extensionPage * PAGE_SIZE)
+  const statCards = [
+    { label: "Phone numbers", value: stats?.totalPhoneNumbers ?? 0 },
+    { label: "Active numbers", value: stats?.activePhoneNumbers ?? 0 },
+    { label: "Extensions", value: stats?.totalExtensions ?? 0 },
+    { label: "Active DND", value: stats?.activeDnd ?? 0 },
+  ]
 
   return (
     <PageContainer className="flex-1 space-y-8">
@@ -64,24 +42,46 @@ function AdminVoicePage() {
       <AdminNav />
 
       <PageSection>
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {stats.map((item) => (
-            <Card key={item.label}>
-              <CardHeader>
-                <CardTitle className="text-sm text-muted-foreground">{item.label}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-semibold">{item.value}</div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        {statsLoading ? (
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
+          </div>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {statCards.map((item) => (
+              <Card key={item.label}>
+                <CardHeader>
+                  <CardTitle className="text-sm text-muted-foreground">{item.label}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-semibold">{item.value}</div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </PageSection>
 
       <PageSection delay={0.1}>
         <Card>
           <CardHeader>
-            <CardTitle>Phone numbers</CardTitle>
+            <div className="flex items-center justify-between gap-4">
+              <CardTitle>Phone numbers</CardTitle>
+              <div className="relative max-w-sm">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="Search numbers..."
+                  value={phoneSearch}
+                  onChange={(e) => {
+                    setPhoneSearch(e.target.value)
+                    setPhoneNumberPage(1)
+                  }}
+                  className="pl-9"
+                />
+              </div>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <Table>
@@ -89,36 +89,47 @@ function AdminVoicePage() {
                 <TableRow>
                   <TableHead>Number</TableHead>
                   <TableHead>Label</TableHead>
+                  <TableHead>Type</TableHead>
                   <TableHead>Team</TableHead>
-                  <TableHead>Assigned to</TableHead>
+                  <TableHead>Owner</TableHead>
                   <TableHead>Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {pagedPhoneNumbers.length === 0 && (
+                {phonesLoading ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center text-muted-foreground">
-                      No phone numbers found. Numbers will appear here once the voice backend is connected.
+                    <TableCell colSpan={6} className="text-center py-8">
+                      <div className="flex items-center justify-center">
+                        <div className="h-5 w-5 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
+                      </div>
                     </TableCell>
                   </TableRow>
+                ) : phoneNumbers.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center text-muted-foreground">
+                      {phoneSearch ? "No numbers match your search." : "No phone numbers found."}
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  phoneNumbers.map((pn) => (
+                    <TableRow key={pn.id}>
+                      <TableCell className="font-mono font-medium">{pn.number}</TableCell>
+                      <TableCell className="text-muted-foreground">{pn.label ?? "—"}</TableCell>
+                      <TableCell className="text-muted-foreground capitalize">{pn.numberType}</TableCell>
+                      <TableCell className="text-muted-foreground">{pn.teamName ?? "—"}</TableCell>
+                      <TableCell className="text-muted-foreground">{pn.ownerEmail ?? "Unassigned"}</TableCell>
+                      <TableCell>
+                        <Badge variant={pn.isActive ? "default" : "secondary"}>{pn.isActive ? "Active" : "Inactive"}</Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))
                 )}
-                {pagedPhoneNumbers.map((pn) => (
-                  <TableRow key={pn.id}>
-                    <TableCell className="font-mono font-medium">{pn.number}</TableCell>
-                    <TableCell className="text-muted-foreground">{pn.label}</TableCell>
-                    <TableCell className="text-muted-foreground">{pn.teamName}</TableCell>
-                    <TableCell className="text-muted-foreground">{pn.assignedTo ?? "Unassigned"}</TableCell>
-                    <TableCell>
-                      <Badge variant={pn.status === "active" ? "default" : "secondary"}>{pn.status}</Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
               </TableBody>
             </Table>
-            {phoneTotal > PAGE_SIZE && (
+            {phoneTotalPages > 1 && (
               <div className="flex items-center justify-between">
                 <p className="text-xs text-muted-foreground">
-                  Page {phoneNumberPage} of {phoneTotalPages}
+                  Page {phoneNumberPage} of {phoneTotalPages} ({phoneTotal} total)
                 </p>
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm" onClick={() => setPhoneNumberPage((p) => Math.max(1, p - 1))} disabled={phoneNumberPage <= 1}>
@@ -145,49 +156,41 @@ function AdminVoicePage() {
                 <TableRow>
                   <TableHead>Extension</TableHead>
                   <TableHead>Display name</TableHead>
-                  <TableHead>Team</TableHead>
-                  <TableHead>DND</TableHead>
+                  <TableHead>Owner</TableHead>
+                  <TableHead>Phone number</TableHead>
                   <TableHead>Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {pagedExtensions.length === 0 && (
+                {extensionsLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center py-8">
+                      <div className="flex items-center justify-center">
+                        <div className="h-5 w-5 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : !extensions || (extensions as unknown[]).length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center text-muted-foreground">
-                      No extensions found. Extensions will appear here once the voice backend is connected.
+                      No extensions found.
                     </TableCell>
                   </TableRow>
+                ) : (
+                  (extensions as { id: string; extensionNumber: string; displayName: string; ownerEmail: string | null; phoneNumber: string | null; isActive: boolean }[]).map((ext) => (
+                    <TableRow key={ext.id}>
+                      <TableCell className="font-mono font-medium">{ext.extensionNumber}</TableCell>
+                      <TableCell className="text-muted-foreground">{ext.displayName}</TableCell>
+                      <TableCell className="text-muted-foreground">{ext.ownerEmail ?? "—"}</TableCell>
+                      <TableCell className="font-mono text-muted-foreground">{ext.phoneNumber ?? "—"}</TableCell>
+                      <TableCell>
+                        <Badge variant={ext.isActive ? "default" : "secondary"}>{ext.isActive ? "Active" : "Inactive"}</Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))
                 )}
-                {pagedExtensions.map((ext) => (
-                  <TableRow key={ext.id}>
-                    <TableCell className="font-mono font-medium">{ext.extension}</TableCell>
-                    <TableCell className="text-muted-foreground">{ext.displayName}</TableCell>
-                    <TableCell className="text-muted-foreground">{ext.teamName}</TableCell>
-                    <TableCell>
-                      <Badge variant={ext.dnd ? "destructive" : "outline"}>{ext.dnd ? "On" : "Off"}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={ext.status === "active" ? "default" : "secondary"}>{ext.status}</Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
               </TableBody>
             </Table>
-            {extTotal > PAGE_SIZE && (
-              <div className="flex items-center justify-between">
-                <p className="text-xs text-muted-foreground">
-                  Page {extensionPage} of {extTotalPages}
-                </p>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => setExtensionPage((p) => Math.max(1, p - 1))} disabled={extensionPage <= 1}>
-                    Previous
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => setExtensionPage((p) => Math.min(extTotalPages, p + 1))} disabled={extensionPage >= extTotalPages}>
-                    Next
-                  </Button>
-                </div>
-              </div>
-            )}
           </CardContent>
         </Card>
       </PageSection>

@@ -712,6 +712,34 @@
       ],
       "uri": "/api/admin/dashboard/stats"
     },
+    "get_stats_api_admin_devices_stats": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "uri": "/api/admin/devices/stats"
+    },
+    "get_stats_api_admin_fax_stats": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "uri": "/api/admin/fax/stats"
+    },
+    "get_stats_api_admin_support_stats": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "uri": "/api/admin/support/stats"
+    },
+    "get_stats_api_admin_voice_stats": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "uri": "/api/admin/voice/stats"
+    },
     "get_tag": {
       "method": "get",
       "methods": [
@@ -987,9 +1015,36 @@
         "updatedAfter": "DateTime | undefined",
         "updatedBefore": "DateTime | undefined"
       },
+      "uri": "/api/admin/devices"
+    },
+    "list_devices_api_devices": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "queryParameters": {
+        "createdAfter": "DateTime | undefined",
+        "createdBefore": "DateTime | undefined",
+        "currentPage": "number | undefined",
+        "ids": "string[] | undefined",
+        "orderBy": "string | undefined",
+        "pageSize": "number | undefined",
+        "searchIgnoreCase": "boolean | undefined",
+        "searchString": "string | undefined",
+        "sortOrder": "\"asc\" | \"desc\" | undefined",
+        "updatedAfter": "DateTime | undefined",
+        "updatedBefore": "DateTime | undefined"
+      },
       "uri": "/api/devices"
     },
     "list_extensions": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "uri": "/api/admin/voice/extensions"
+    },
+    "list_extensions_api_voice_extensions": {
       "method": "get",
       "methods": [
         "GET"
@@ -1031,6 +1086,13 @@
       "uri": "/api/fax/numbers/{fax_number_id}/email-routes"
     },
     "list_fax_messages": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "uri": "/api/admin/fax/messages"
+    },
+    "list_fax_messages_api_fax_messages": {
       "component": "fax/message-list",
       "method": "get",
       "methods": [
@@ -1050,6 +1112,24 @@
       "uri": "/api/fax/messages"
     },
     "list_fax_numbers": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "queryParameters": {
+        "createdAfter": "DateTime | undefined",
+        "createdBefore": "DateTime | undefined",
+        "currentPage": "number | undefined",
+        "ids": "string[] | undefined",
+        "orderBy": "string | undefined",
+        "pageSize": "number | undefined",
+        "searchIgnoreCase": "boolean | undefined",
+        "searchString": "string | undefined",
+        "sortOrder": "\"asc\" | \"desc\" | undefined"
+      },
+      "uri": "/api/admin/fax/numbers"
+    },
+    "list_fax_numbers_api_fax_numbers": {
       "component": "fax/number-list",
       "method": "get",
       "methods": [
@@ -1196,6 +1276,24 @@
         "ids": "string[] | undefined",
         "orderBy": "string | undefined",
         "pageSize": "number | undefined",
+        "searchIgnoreCase": "boolean | undefined",
+        "searchString": "string | undefined",
+        "sortOrder": "\"asc\" | \"desc\" | undefined"
+      },
+      "uri": "/api/admin/voice/phone-numbers"
+    },
+    "list_phone_numbers_api_voice_phone_numbers": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "queryParameters": {
+        "createdAfter": "DateTime | undefined",
+        "createdBefore": "DateTime | undefined",
+        "currentPage": "number | undefined",
+        "ids": "string[] | undefined",
+        "orderBy": "string | undefined",
+        "pageSize": "number | undefined",
         "sortOrder": "\"asc\" | \"desc\" | undefined",
         "updatedAfter": "DateTime | undefined",
         "updatedBefore": "DateTime | undefined"
@@ -1316,6 +1414,26 @@
       "uri": "/api/teams"
     },
     "list_tickets": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "queryParameters": {
+        "createdAfter": "DateTime | undefined",
+        "createdBefore": "DateTime | undefined",
+        "currentPage": "number | undefined",
+        "ids": "string[] | undefined",
+        "orderBy": "string | undefined",
+        "pageSize": "number | undefined",
+        "searchIgnoreCase": "boolean | undefined",
+        "searchString": "string | undefined",
+        "sortOrder": "\"asc\" | \"desc\" | undefined",
+        "updatedAfter": "DateTime | undefined",
+        "updatedBefore": "DateTime | undefined"
+      },
+      "uri": "/api/admin/support/tickets"
+    },
+    "list_tickets_api_support_tickets": {
       "method": "get",
       "methods": [
         "GET"

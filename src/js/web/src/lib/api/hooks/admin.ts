@@ -1,22 +1,46 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import {
+  type AdminDeviceStats,
+  type AdminDeviceSummary,
+  type AdminExtensionSummary,
+  type AdminFaxMessageSummary,
+  type AdminFaxNumberSummary,
+  type AdminFaxStats,
   type AdminGetUserAuditLogsData,
   type AdminListAuditLogsData,
+  type AdminListDevicesData,
+  type AdminListFaxNumbersData,
+  type AdminListPhoneNumbersData,
   type AdminListTeamsData,
+  type AdminListTicketsData,
   type AdminListUsersData,
+  type AdminPhoneNumberSummary,
+  type AdminSupportStats,
   type AdminTeamDetail,
   type AdminTeamSummary,
+  type AdminTicketSummary,
   type AdminUserDetail,
   type AdminUserSummary,
+  type AdminVoiceStats,
   type AuditLogEntry,
   adminDeleteTeam,
   adminDeleteUser,
+  adminGetDeviceStats,
+  adminGetFaxStats,
+  adminGetSupportStats,
   adminGetTeam,
   adminGetUser,
   adminGetUserAuditLogs,
+  adminGetVoiceStats,
   adminListAuditLogs,
+  adminListDevices,
+  adminListExtensions,
+  adminListFaxMessages,
+  adminListFaxNumbers,
+  adminListPhoneNumbers,
   adminListTeams,
+  adminListTickets,
   adminListUsers,
   adminUpdateTeam,
   adminUpdateUser,
@@ -349,6 +373,130 @@ export function useRevokeRole() {
       toast.error("Unable to revoke role", {
         description: error instanceof Error ? error.message : "Try again later",
       })
+    },
+  })
+}
+
+export function useAdminDevices(page = 1, pageSize = 25, search?: string) {
+  return useQuery({
+    queryKey: ["admin", "devices", page, pageSize, search],
+    queryFn: async () => {
+      const query = {
+        currentPage: page,
+        pageSize,
+        searchString: search,
+        searchIgnoreCase: search ? true : undefined,
+      } as unknown as AdminListDevicesData["query"]
+      const response = await adminListDevices({ query })
+      return response.data as { items: AdminDeviceSummary[]; total: number }
+    },
+  })
+}
+
+export function useAdminDeviceStats() {
+  return useQuery({
+    queryKey: ["admin", "devices", "stats"],
+    queryFn: async () => {
+      const response = await adminGetDeviceStats()
+      return response.data as AdminDeviceStats
+    },
+  })
+}
+
+export function useAdminPhoneNumbers(page = 1, pageSize = 25, search?: string) {
+  return useQuery({
+    queryKey: ["admin", "voice", "phone-numbers", page, pageSize, search],
+    queryFn: async () => {
+      const query = {
+        currentPage: page,
+        pageSize,
+        searchString: search,
+        searchIgnoreCase: search ? true : undefined,
+      } as unknown as AdminListPhoneNumbersData["query"]
+      const response = await adminListPhoneNumbers({ query })
+      return response.data as { items: AdminPhoneNumberSummary[]; total: number }
+    },
+  })
+}
+
+export function useAdminExtensions() {
+  return useQuery({
+    queryKey: ["admin", "voice", "extensions"],
+    queryFn: async () => {
+      const response = await adminListExtensions()
+      return response.data as AdminExtensionSummary[]
+    },
+  })
+}
+
+export function useAdminVoiceStats() {
+  return useQuery({
+    queryKey: ["admin", "voice", "stats"],
+    queryFn: async () => {
+      const response = await adminGetVoiceStats()
+      return response.data as AdminVoiceStats
+    },
+  })
+}
+
+export function useAdminFaxNumbers(page = 1, pageSize = 25, search?: string) {
+  return useQuery({
+    queryKey: ["admin", "fax", "numbers", page, pageSize, search],
+    queryFn: async () => {
+      const query = {
+        currentPage: page,
+        pageSize,
+        searchString: search,
+        searchIgnoreCase: search ? true : undefined,
+      } as unknown as AdminListFaxNumbersData["query"]
+      const response = await adminListFaxNumbers({ query })
+      return response.data as { items: AdminFaxNumberSummary[]; total: number }
+    },
+  })
+}
+
+export function useAdminFaxMessages() {
+  return useQuery({
+    queryKey: ["admin", "fax", "messages"],
+    queryFn: async () => {
+      const response = await adminListFaxMessages()
+      return response.data as AdminFaxMessageSummary[]
+    },
+  })
+}
+
+export function useAdminFaxStats() {
+  return useQuery({
+    queryKey: ["admin", "fax", "stats"],
+    queryFn: async () => {
+      const response = await adminGetFaxStats()
+      return response.data as AdminFaxStats
+    },
+  })
+}
+
+export function useAdminTickets(page = 1, pageSize = 25, search?: string) {
+  return useQuery({
+    queryKey: ["admin", "support", "tickets", page, pageSize, search],
+    queryFn: async () => {
+      const query = {
+        currentPage: page,
+        pageSize,
+        searchString: search,
+        searchIgnoreCase: search ? true : undefined,
+      } as unknown as AdminListTicketsData["query"]
+      const response = await adminListTickets({ query })
+      return response.data as { items: AdminTicketSummary[]; total: number }
+    },
+  })
+}
+
+export function useAdminSupportStats() {
+  return useQuery({
+    queryKey: ["admin", "support", "stats"],
+    queryFn: async () => {
+      const response = await adminGetSupportStats()
+      return response.data as AdminSupportStats
     },
   })
 }

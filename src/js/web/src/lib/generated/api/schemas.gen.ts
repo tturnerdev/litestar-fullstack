@@ -151,6 +151,449 @@ export const ActivityLogEntrySchema = {
   type: "object",
 } as const;
 
+export const AdminDeviceStatsSchema = {
+  properties: {
+    active: {
+      type: "integer",
+    },
+    byType: {
+      additionalProperties: {
+        type: "integer",
+      },
+      type: "object",
+    },
+    error: {
+      type: "integer",
+    },
+    offline: {
+      type: "integer",
+    },
+    online: {
+      type: "integer",
+    },
+    total: {
+      type: "integer",
+    },
+  },
+  required: ["active", "byType", "error", "offline", "online", "total"],
+  title: "AdminDeviceStats",
+  type: "object",
+} as const;
+
+export const AdminDeviceSummarySchema = {
+  properties: {
+    createdAt: {
+      format: "date-time",
+      type: "string",
+    },
+    deviceType: {
+      type: "string",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    ipAddress: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    isActive: {
+      type: "boolean",
+    },
+    lastSeenAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    macAddress: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    model: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    name: {
+      type: "string",
+    },
+    ownerEmail: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    sipUsername: {
+      type: "string",
+    },
+    status: {
+      type: "string",
+    },
+    teamName: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: [
+    "createdAt",
+    "deviceType",
+    "id",
+    "isActive",
+    "name",
+    "sipUsername",
+    "status",
+  ],
+  title: "AdminDeviceSummary",
+  type: "object",
+} as const;
+
+export const AdminExtensionSummarySchema = {
+  properties: {
+    createdAt: {
+      format: "date-time",
+      type: "string",
+    },
+    displayName: {
+      type: "string",
+    },
+    extensionNumber: {
+      type: "string",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    isActive: {
+      type: "boolean",
+    },
+    ownerEmail: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    phoneNumber: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: ["createdAt", "displayName", "extensionNumber", "id", "isActive"],
+  title: "AdminExtensionSummary",
+  type: "object",
+} as const;
+
+export const AdminFaxMessageSummarySchema = {
+  properties: {
+    createdAt: {
+      format: "date-time",
+      type: "string",
+    },
+    direction: {
+      type: "string",
+    },
+    errorMessage: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    faxNumber: {
+      type: "string",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    pageCount: {
+      type: "integer",
+    },
+    receivedAt: {
+      format: "date-time",
+      type: "string",
+    },
+    remoteName: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    remoteNumber: {
+      type: "string",
+    },
+    status: {
+      type: "string",
+    },
+  },
+  required: [
+    "createdAt",
+    "direction",
+    "faxNumber",
+    "id",
+    "pageCount",
+    "receivedAt",
+    "remoteNumber",
+    "status",
+  ],
+  title: "AdminFaxMessageSummary",
+  type: "object",
+} as const;
+
+export const AdminFaxNumberSummarySchema = {
+  properties: {
+    createdAt: {
+      format: "date-time",
+      type: "string",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    isActive: {
+      type: "boolean",
+    },
+    label: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    number: {
+      type: "string",
+    },
+    ownerEmail: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    teamName: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: ["createdAt", "id", "isActive", "number"],
+  title: "AdminFaxNumberSummary",
+  type: "object",
+} as const;
+
+export const AdminFaxStatsSchema = {
+  properties: {
+    activeNumbers: {
+      type: "integer",
+    },
+    failedToday: {
+      type: "integer",
+    },
+    inboundToday: {
+      type: "integer",
+    },
+    messagesToday: {
+      type: "integer",
+    },
+    outboundToday: {
+      type: "integer",
+    },
+    totalMessages: {
+      type: "integer",
+    },
+    totalNumbers: {
+      type: "integer",
+    },
+  },
+  required: [
+    "activeNumbers",
+    "failedToday",
+    "inboundToday",
+    "messagesToday",
+    "outboundToday",
+    "totalMessages",
+    "totalNumbers",
+  ],
+  title: "AdminFaxStats",
+  type: "object",
+} as const;
+
+export const AdminPhoneNumberSummarySchema = {
+  properties: {
+    callerIdName: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    createdAt: {
+      format: "date-time",
+      type: "string",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    isActive: {
+      type: "boolean",
+    },
+    label: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    number: {
+      type: "string",
+    },
+    numberType: {
+      type: "string",
+    },
+    ownerEmail: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    teamName: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: ["createdAt", "id", "isActive", "number", "numberType"],
+  title: "AdminPhoneNumberSummary",
+  type: "object",
+} as const;
+
+export const AdminSupportStatsSchema = {
+  properties: {
+    byCategory: {
+      additionalProperties: {
+        type: "integer",
+      },
+      type: "object",
+    },
+    byPriority: {
+      additionalProperties: {
+        type: "integer",
+      },
+      type: "object",
+    },
+    closed: {
+      type: "integer",
+    },
+    inProgress: {
+      type: "integer",
+    },
+    open: {
+      type: "integer",
+    },
+    resolved: {
+      type: "integer",
+    },
+    total: {
+      type: "integer",
+    },
+    waitingOnCustomer: {
+      type: "integer",
+    },
+    waitingOnSupport: {
+      type: "integer",
+    },
+  },
+  required: [
+    "byCategory",
+    "byPriority",
+    "closed",
+    "inProgress",
+    "open",
+    "resolved",
+    "total",
+    "waitingOnCustomer",
+    "waitingOnSupport",
+  ],
+  title: "AdminSupportStats",
+  type: "object",
+} as const;
+
 export const AdminTeamDetailSchema = {
   properties: {
     createdAt: {
@@ -290,6 +733,91 @@ export const AdminTeamUpdateSchema = {
   },
   required: [],
   title: "AdminTeamUpdate",
+  type: "object",
+} as const;
+
+export const AdminTicketSummarySchema = {
+  properties: {
+    assignedToEmail: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    category: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    closedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    createdAt: {
+      format: "date-time",
+      type: "string",
+    },
+    creatorEmail: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    isReadByAgent: {
+      type: "boolean",
+    },
+    priority: {
+      type: "string",
+    },
+    status: {
+      type: "string",
+    },
+    subject: {
+      type: "string",
+    },
+    ticketNumber: {
+      type: "string",
+    },
+    updatedAt: {
+      format: "date-time",
+      type: "string",
+    },
+  },
+  required: [
+    "createdAt",
+    "id",
+    "isReadByAgent",
+    "priority",
+    "status",
+    "subject",
+    "ticketNumber",
+    "updatedAt",
+  ],
+  title: "AdminTicketSummary",
   type: "object",
 } as const;
 
@@ -521,6 +1049,42 @@ export const AdminUserUpdateSchema = {
   },
   required: [],
   title: "AdminUserUpdate",
+  type: "object",
+} as const;
+
+export const AdminVoiceStatsSchema = {
+  properties: {
+    activeDnd: {
+      type: "integer",
+    },
+    activeExtensions: {
+      type: "integer",
+    },
+    activePhoneNumbers: {
+      type: "integer",
+    },
+    byNumberType: {
+      additionalProperties: {
+        type: "integer",
+      },
+      type: "object",
+    },
+    totalExtensions: {
+      type: "integer",
+    },
+    totalPhoneNumbers: {
+      type: "integer",
+    },
+  },
+  required: [
+    "activeDnd",
+    "activeExtensions",
+    "activePhoneNumbers",
+    "byNumberType",
+    "totalExtensions",
+    "totalPhoneNumbers",
+  ],
+  title: "AdminVoiceStats",
   type: "object",
 } as const;
 

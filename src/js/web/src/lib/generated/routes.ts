@@ -80,6 +80,10 @@ export type RouteName =
   | 'get_role'
   | 'get_sessions'
   | 'get_stats'
+  | 'get_stats_api_admin_devices_stats'
+  | 'get_stats_api_admin_fax_stats'
+  | 'get_stats_api_admin_support_stats'
+  | 'get_stats_api_admin_voice_stats'
   | 'get_tag'
   | 'get_target_logs'
   | 'get_team'
@@ -98,16 +102,21 @@ export type RouteName =
   | 'list_connections'
   | 'list_device_lines'
   | 'list_devices'
+  | 'list_devices_api_devices'
   | 'list_extensions'
+  | 'list_extensions_api_voice_extensions'
   | 'list_fax_email_routes'
   | 'list_fax_messages'
+  | 'list_fax_messages_api_fax_messages'
   | 'list_fax_numbers'
+  | 'list_fax_numbers_api_fax_numbers'
   | 'list_forwarding_rules'
   | 'list_locations'
   | 'list_logs'
   | 'list_messages'
   | 'list_notifications'
   | 'list_phone_numbers'
+  | 'list_phone_numbers_api_voice_phone_numbers'
   | 'list_roles'
   | 'list_tags'
   | 'list_team_invitations'
@@ -115,6 +124,7 @@ export type RouteName =
   | 'list_teams'
   | 'list_teams_api_teams'
   | 'list_tickets'
+  | 'list_tickets_api_support_tickets'
   | 'list_users'
   | 'list_users_api_users'
   | 'list_voicemail_messages'
@@ -353,6 +363,10 @@ export interface RoutePathParams {
   };
   'get_sessions': Record<string, never>;
   'get_stats': Record<string, never>;
+  'get_stats_api_admin_devices_stats': Record<string, never>;
+  'get_stats_api_admin_fax_stats': Record<string, never>;
+  'get_stats_api_admin_support_stats': Record<string, never>;
+  'get_stats_api_admin_voice_stats': Record<string, never>;
   'get_tag': {
     tag_id: UUID;
   };
@@ -399,12 +413,16 @@ export interface RoutePathParams {
     device_id: UUID;
   };
   'list_devices': Record<string, never>;
+  'list_devices_api_devices': Record<string, never>;
   'list_extensions': Record<string, never>;
+  'list_extensions_api_voice_extensions': Record<string, never>;
   'list_fax_email_routes': {
     fax_number_id: UUID;
   };
   'list_fax_messages': Record<string, never>;
+  'list_fax_messages_api_fax_messages': Record<string, never>;
   'list_fax_numbers': Record<string, never>;
+  'list_fax_numbers_api_fax_numbers': Record<string, never>;
   'list_forwarding_rules': {
     ext_id: UUID;
   };
@@ -417,6 +435,7 @@ export interface RoutePathParams {
   };
   'list_notifications': Record<string, never>;
   'list_phone_numbers': Record<string, never>;
+  'list_phone_numbers_api_voice_phone_numbers': Record<string, never>;
   'list_roles': Record<string, never>;
   'list_tags': Record<string, never>;
   'list_team_invitations': {
@@ -428,6 +447,7 @@ export interface RoutePathParams {
   'list_teams': Record<string, never>;
   'list_teams_api_teams': Record<string, never>;
   'list_tickets': Record<string, never>;
+  'list_tickets_api_support_tickets': Record<string, never>;
   'list_users': Record<string, never>;
   'list_users_api_users': Record<string, never>;
   'list_voicemail_messages': {
@@ -700,6 +720,10 @@ export interface RouteQueryParams {
     sortOrder?: "asc" | "desc";
   };
   'get_stats': Record<string, never>;
+  'get_stats_api_admin_devices_stats': Record<string, never>;
+  'get_stats_api_admin_fax_stats': Record<string, never>;
+  'get_stats_api_admin_support_stats': Record<string, never>;
+  'get_stats_api_admin_voice_stats': Record<string, never>;
   'get_tag': Record<string, never>;
   'get_target_logs': {
     action?: string;
@@ -782,7 +806,21 @@ export interface RouteQueryParams {
     updatedAfter?: DateTime;
     updatedBefore?: DateTime;
   };
-  'list_extensions': {
+  'list_devices_api_devices': {
+    createdAfter?: DateTime;
+    createdBefore?: DateTime;
+    currentPage?: number;
+    ids?: string[];
+    orderBy?: string;
+    pageSize?: number;
+    searchIgnoreCase?: boolean;
+    searchString?: string;
+    sortOrder?: "asc" | "desc";
+    updatedAfter?: DateTime;
+    updatedBefore?: DateTime;
+  };
+  'list_extensions': Record<string, never>;
+  'list_extensions_api_voice_extensions': {
     createdAfter?: DateTime;
     createdBefore?: DateTime;
     currentPage?: number;
@@ -803,7 +841,8 @@ export interface RouteQueryParams {
     updatedAfter?: DateTime;
     updatedBefore?: DateTime;
   };
-  'list_fax_messages': {
+  'list_fax_messages': Record<string, never>;
+  'list_fax_messages_api_fax_messages': {
     createdAfter?: DateTime;
     createdBefore?: DateTime;
     currentPage?: number;
@@ -815,6 +854,17 @@ export interface RouteQueryParams {
     updatedBefore?: DateTime;
   };
   'list_fax_numbers': {
+    createdAfter?: DateTime;
+    createdBefore?: DateTime;
+    currentPage?: number;
+    ids?: string[];
+    orderBy?: string;
+    pageSize?: number;
+    searchIgnoreCase?: boolean;
+    searchString?: string;
+    sortOrder?: "asc" | "desc";
+  };
+  'list_fax_numbers_api_fax_numbers': {
     createdAfter?: DateTime;
     createdBefore?: DateTime;
     currentPage?: number;
@@ -895,6 +945,17 @@ export interface RouteQueryParams {
     ids?: string[];
     orderBy?: string;
     pageSize?: number;
+    searchIgnoreCase?: boolean;
+    searchString?: string;
+    sortOrder?: "asc" | "desc";
+  };
+  'list_phone_numbers_api_voice_phone_numbers': {
+    createdAfter?: DateTime;
+    createdBefore?: DateTime;
+    currentPage?: number;
+    ids?: string[];
+    orderBy?: string;
+    pageSize?: number;
     sortOrder?: "asc" | "desc";
     updatedAfter?: DateTime;
     updatedBefore?: DateTime;
@@ -959,6 +1020,19 @@ export interface RouteQueryParams {
     updatedBefore?: DateTime;
   };
   'list_tickets': {
+    createdAfter?: DateTime;
+    createdBefore?: DateTime;
+    currentPage?: number;
+    ids?: string[];
+    orderBy?: string;
+    pageSize?: number;
+    searchIgnoreCase?: boolean;
+    searchString?: string;
+    sortOrder?: "asc" | "desc";
+    updatedAfter?: DateTime;
+    updatedBefore?: DateTime;
+  };
+  'list_tickets_api_support_tickets': {
     createdAfter?: DateTime;
     createdBefore?: DateTime;
     currentPage?: number;
@@ -1557,6 +1631,34 @@ export const routeDefinitions = {
     pathParams: [] as const,
     queryParams: [] as const,
   },
+  'get_stats_api_admin_devices_stats': {
+    path: '/api/admin/devices/stats',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
+  'get_stats_api_admin_fax_stats': {
+    path: '/api/admin/fax/stats',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
+  'get_stats_api_admin_support_stats': {
+    path: '/api/admin/support/stats',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
+  'get_stats_api_admin_voice_stats': {
+    path: '/api/admin/voice/stats',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
   'get_tag': {
     path: '/api/tags/{tag_id}',
     methods: ['GET'] as const,
@@ -1677,6 +1779,13 @@ export const routeDefinitions = {
     queryParams: [] as const,
   },
   'list_devices': {
+    path: '/api/admin/devices',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
+  },
+  'list_devices_api_devices': {
     path: '/api/devices',
     methods: ['GET'] as const,
     method: 'get',
@@ -1684,6 +1793,13 @@ export const routeDefinitions = {
     queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
   },
   'list_extensions': {
+    path: '/api/admin/voice/extensions',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
+  'list_extensions_api_voice_extensions': {
     path: '/api/voice/extensions',
     methods: ['GET'] as const,
     method: 'get',
@@ -1698,6 +1814,13 @@ export const routeDefinitions = {
     queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'orderBy', 'pageSize', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
   },
   'list_fax_messages': {
+    path: '/api/admin/fax/messages',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
+  'list_fax_messages_api_fax_messages': {
     path: '/api/fax/messages',
     methods: ['GET'] as const,
     method: 'get',
@@ -1706,6 +1829,13 @@ export const routeDefinitions = {
     component: 'fax/message-list',
   },
   'list_fax_numbers': {
+    path: '/api/admin/fax/numbers',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder'] as const,
+  },
+  'list_fax_numbers_api_fax_numbers': {
     path: '/api/fax/numbers',
     methods: ['GET'] as const,
     method: 'get',
@@ -1749,6 +1879,13 @@ export const routeDefinitions = {
     queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
   },
   'list_phone_numbers': {
+    path: '/api/admin/voice/phone-numbers',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder'] as const,
+  },
+  'list_phone_numbers_api_voice_phone_numbers': {
     path: '/api/voice/phone-numbers',
     methods: ['GET'] as const,
     method: 'get',
@@ -1799,6 +1936,13 @@ export const routeDefinitions = {
     component: 'team/list',
   },
   'list_tickets': {
+    path: '/api/admin/support/tickets',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
+  },
+  'list_tickets_api_support_tickets': {
     path: '/api/support/tickets',
     methods: ['GET'] as const,
     method: 'get',

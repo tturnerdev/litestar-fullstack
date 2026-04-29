@@ -20,12 +20,22 @@ import {
   adminDeleteTeam,
   adminDeleteUser,
   adminGetAuditLog,
+  adminGetDeviceStats,
+  adminGetFaxStats,
+  adminGetSupportStats,
   adminGetTargetAuditLogs,
   adminGetTeam,
   adminGetUser,
   adminGetUserAuditLogs,
+  adminGetVoiceStats,
   adminListAuditLogs,
+  adminListDevices,
+  adminListExtensions,
+  adminListFaxMessages,
+  adminListFaxNumbers,
+  adminListPhoneNumbers,
   adminListTeams,
+  adminListTickets,
   adminListUsers,
   adminUpdateTeam,
   adminUpdateUser,
@@ -209,6 +219,12 @@ import type {
   AdminGetAuditLogData,
   AdminGetAuditLogError,
   AdminGetAuditLogResponse,
+  AdminGetDeviceStatsData,
+  AdminGetDeviceStatsResponse,
+  AdminGetFaxStatsData,
+  AdminGetFaxStatsResponse,
+  AdminGetSupportStatsData,
+  AdminGetSupportStatsResponse,
   AdminGetTargetAuditLogsData,
   AdminGetTargetAuditLogsError,
   AdminGetTargetAuditLogsResponse,
@@ -221,12 +237,30 @@ import type {
   AdminGetUserData,
   AdminGetUserError,
   AdminGetUserResponse,
+  AdminGetVoiceStatsData,
+  AdminGetVoiceStatsResponse,
   AdminListAuditLogsData,
   AdminListAuditLogsError,
   AdminListAuditLogsResponse,
+  AdminListDevicesData,
+  AdminListDevicesError,
+  AdminListDevicesResponse,
+  AdminListExtensionsData,
+  AdminListExtensionsResponse,
+  AdminListFaxMessagesData,
+  AdminListFaxMessagesResponse,
+  AdminListFaxNumbersData,
+  AdminListFaxNumbersError,
+  AdminListFaxNumbersResponse,
+  AdminListPhoneNumbersData,
+  AdminListPhoneNumbersError,
+  AdminListPhoneNumbersResponse,
   AdminListTeamsData,
   AdminListTeamsError,
   AdminListTeamsResponse,
+  AdminListTicketsData,
+  AdminListTicketsError,
+  AdminListTicketsResponse,
   AdminListUsersData,
   AdminListUsersError,
   AdminListUsersResponse,
@@ -1140,6 +1174,202 @@ export const getDashboardStatsOptions = (
     queryKey: getDashboardStatsQueryKey(options),
   });
 
+export const adminListDevicesQueryKey = (
+  options?: Options<AdminListDevicesData>,
+) => createQueryKey("adminListDevices", options);
+
+/**
+ * ListDevices
+ */
+export const adminListDevicesOptions = (
+  options?: Options<AdminListDevicesData>,
+) =>
+  queryOptions<
+    AdminListDevicesResponse,
+    AdminListDevicesError,
+    AdminListDevicesResponse,
+    ReturnType<typeof adminListDevicesQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await adminListDevices({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: adminListDevicesQueryKey(options),
+  });
+
+export const adminGetDeviceStatsQueryKey = (
+  options?: Options<AdminGetDeviceStatsData>,
+) => createQueryKey("adminGetDeviceStats", options);
+
+/**
+ * GetStats
+ */
+export const adminGetDeviceStatsOptions = (
+  options?: Options<AdminGetDeviceStatsData>,
+) =>
+  queryOptions<
+    AdminGetDeviceStatsResponse,
+    DefaultError,
+    AdminGetDeviceStatsResponse,
+    ReturnType<typeof adminGetDeviceStatsQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await adminGetDeviceStats({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: adminGetDeviceStatsQueryKey(options),
+  });
+
+export const adminListFaxMessagesQueryKey = (
+  options?: Options<AdminListFaxMessagesData>,
+) => createQueryKey("adminListFaxMessages", options);
+
+/**
+ * ListFaxMessages
+ */
+export const adminListFaxMessagesOptions = (
+  options?: Options<AdminListFaxMessagesData>,
+) =>
+  queryOptions<
+    AdminListFaxMessagesResponse,
+    DefaultError,
+    AdminListFaxMessagesResponse,
+    ReturnType<typeof adminListFaxMessagesQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await adminListFaxMessages({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: adminListFaxMessagesQueryKey(options),
+  });
+
+export const adminListFaxNumbersQueryKey = (
+  options?: Options<AdminListFaxNumbersData>,
+) => createQueryKey("adminListFaxNumbers", options);
+
+/**
+ * ListFaxNumbers
+ */
+export const adminListFaxNumbersOptions = (
+  options?: Options<AdminListFaxNumbersData>,
+) =>
+  queryOptions<
+    AdminListFaxNumbersResponse,
+    AdminListFaxNumbersError,
+    AdminListFaxNumbersResponse,
+    ReturnType<typeof adminListFaxNumbersQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await adminListFaxNumbers({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: adminListFaxNumbersQueryKey(options),
+  });
+
+export const adminGetFaxStatsQueryKey = (
+  options?: Options<AdminGetFaxStatsData>,
+) => createQueryKey("adminGetFaxStats", options);
+
+/**
+ * GetStats
+ */
+export const adminGetFaxStatsOptions = (
+  options?: Options<AdminGetFaxStatsData>,
+) =>
+  queryOptions<
+    AdminGetFaxStatsResponse,
+    DefaultError,
+    AdminGetFaxStatsResponse,
+    ReturnType<typeof adminGetFaxStatsQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await adminGetFaxStats({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: adminGetFaxStatsQueryKey(options),
+  });
+
+export const adminGetSupportStatsQueryKey = (
+  options?: Options<AdminGetSupportStatsData>,
+) => createQueryKey("adminGetSupportStats", options);
+
+/**
+ * GetStats
+ */
+export const adminGetSupportStatsOptions = (
+  options?: Options<AdminGetSupportStatsData>,
+) =>
+  queryOptions<
+    AdminGetSupportStatsResponse,
+    DefaultError,
+    AdminGetSupportStatsResponse,
+    ReturnType<typeof adminGetSupportStatsQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await adminGetSupportStats({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: adminGetSupportStatsQueryKey(options),
+  });
+
+export const adminListTicketsQueryKey = (
+  options?: Options<AdminListTicketsData>,
+) => createQueryKey("adminListTickets", options);
+
+/**
+ * ListTickets
+ */
+export const adminListTicketsOptions = (
+  options?: Options<AdminListTicketsData>,
+) =>
+  queryOptions<
+    AdminListTicketsResponse,
+    AdminListTicketsError,
+    AdminListTicketsResponse,
+    ReturnType<typeof adminListTicketsQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await adminListTickets({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: adminListTicketsQueryKey(options),
+  });
+
 export const adminListTeamsQueryKey = (options?: Options<AdminListTeamsData>) =>
   createQueryKey("adminListTeams", options);
 
@@ -1347,6 +1577,90 @@ export const adminUpdateUserMutation = (
   };
   return mutationOptions;
 };
+
+export const adminListExtensionsQueryKey = (
+  options?: Options<AdminListExtensionsData>,
+) => createQueryKey("adminListExtensions", options);
+
+/**
+ * ListExtensions
+ */
+export const adminListExtensionsOptions = (
+  options?: Options<AdminListExtensionsData>,
+) =>
+  queryOptions<
+    AdminListExtensionsResponse,
+    DefaultError,
+    AdminListExtensionsResponse,
+    ReturnType<typeof adminListExtensionsQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await adminListExtensions({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: adminListExtensionsQueryKey(options),
+  });
+
+export const adminListPhoneNumbersQueryKey = (
+  options?: Options<AdminListPhoneNumbersData>,
+) => createQueryKey("adminListPhoneNumbers", options);
+
+/**
+ * ListPhoneNumbers
+ */
+export const adminListPhoneNumbersOptions = (
+  options?: Options<AdminListPhoneNumbersData>,
+) =>
+  queryOptions<
+    AdminListPhoneNumbersResponse,
+    AdminListPhoneNumbersError,
+    AdminListPhoneNumbersResponse,
+    ReturnType<typeof adminListPhoneNumbersQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await adminListPhoneNumbers({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: adminListPhoneNumbersQueryKey(options),
+  });
+
+export const adminGetVoiceStatsQueryKey = (
+  options?: Options<AdminGetVoiceStatsData>,
+) => createQueryKey("adminGetVoiceStats", options);
+
+/**
+ * GetStats
+ */
+export const adminGetVoiceStatsOptions = (
+  options?: Options<AdminGetVoiceStatsData>,
+) =>
+  queryOptions<
+    AdminGetVoiceStatsResponse,
+    DefaultError,
+    AdminGetVoiceStatsResponse,
+    ReturnType<typeof adminGetVoiceStatsQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await adminGetVoiceStats({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: adminGetVoiceStatsQueryKey(options),
+  });
 
 export const apiAuthOauthGithubGithubAuthorizeQueryKey = (
   options?: Options<ApiAuthOauthGithubGithubAuthorizeData>,

@@ -20,6 +20,18 @@ import type {
   AccountRegisterData,
   AccountRegisterErrors,
   AccountRegisterResponses,
+  AdminGetDeviceStatsData,
+  AdminGetDeviceStatsResponses,
+  AdminGetFaxStatsData,
+  AdminGetFaxStatsResponses,
+  AdminGetSupportStatsData,
+  AdminGetSupportStatsResponses,
+  AdminGetVoiceStatsData,
+  AdminGetVoiceStatsResponses,
+  AdminListExtensionsData,
+  AdminListExtensionsResponses,
+  AdminListFaxMessagesData,
+  AdminListFaxMessagesResponses,
   ApiEmailVerificationRequestRequestVerificationData,
   ApiEmailVerificationRequestRequestVerificationErrors,
   ApiEmailVerificationRequestRequestVerificationResponses,
@@ -135,17 +147,23 @@ export type OperationName =
   | 'get_profile'
   | 'get_sessions'
   | 'get_stats'
+  | 'get_stats_api_admin_devices_stats'
+  | 'get_stats_api_admin_fax_stats'
+  | 'get_stats_api_admin_support_stats'
+  | 'get_stats_api_admin_voice_stats'
   | 'get_unread_count'
   | 'initiate_setup'
   | 'list_connections'
-  | 'list_devices'
+  | 'list_devices_api_devices'
   | 'list_extensions'
-  | 'list_fax_numbers'
-  | 'list_phone_numbers'
+  | 'list_extensions_api_voice_extensions'
+  | 'list_fax_messages'
+  | 'list_fax_numbers_api_fax_numbers'
+  | 'list_phone_numbers_api_voice_phone_numbers'
   | 'list_roles'
   | 'list_tags'
   | 'list_teams_api_teams'
-  | 'list_tickets'
+  | 'list_tickets_api_support_tickets'
   | 'list_users_api_users'
   | 'login'
   | 'logout'
@@ -192,17 +210,23 @@ export interface OperationDataTypes {
   'get_profile': AccountProfileUpdateData
   'get_sessions': RevokeAllSessionsData
   'get_stats': GetDashboardStatsData
+  'get_stats_api_admin_devices_stats': AdminGetDeviceStatsData
+  'get_stats_api_admin_fax_stats': AdminGetFaxStatsData
+  'get_stats_api_admin_support_stats': AdminGetSupportStatsData
+  'get_stats_api_admin_voice_stats': AdminGetVoiceStatsData
   'get_unread_count': GetUnreadNotificationCountData
   'initiate_setup': InitiateMfaSetupData
   'list_connections': CreateConnectionData
-  'list_devices': CreateDeviceData
-  'list_extensions': CreateExtensionData
-  'list_fax_numbers': CreateFaxNumberData
-  'list_phone_numbers': CreatePhoneNumberData
+  'list_devices_api_devices': CreateDeviceData
+  'list_extensions': AdminListExtensionsData
+  'list_extensions_api_voice_extensions': CreateExtensionData
+  'list_fax_messages': AdminListFaxMessagesData
+  'list_fax_numbers_api_fax_numbers': CreateFaxNumberData
+  'list_phone_numbers_api_voice_phone_numbers': CreatePhoneNumberData
   'list_roles': CreateRoleData
   'list_tags': CreateTagData
   'list_teams_api_teams': CreateTeamData
-  'list_tickets': CreateTicketData
+  'list_tickets_api_support_tickets': CreateTicketData
   'list_users_api_users': CreateUserData
   'login': AccountLoginData
   'logout': AccountLogoutData
@@ -250,17 +274,23 @@ export interface OperationResponseTypes {
   'get_profile': AccountProfileUpdateResponses
   'get_sessions': RevokeAllSessionsResponses
   'get_stats': GetDashboardStatsResponses
+  'get_stats_api_admin_devices_stats': AdminGetDeviceStatsResponses
+  'get_stats_api_admin_fax_stats': AdminGetFaxStatsResponses
+  'get_stats_api_admin_support_stats': AdminGetSupportStatsResponses
+  'get_stats_api_admin_voice_stats': AdminGetVoiceStatsResponses
   'get_unread_count': GetUnreadNotificationCountResponses
   'initiate_setup': InitiateMfaSetupResponses
   'list_connections': CreateConnectionResponses
-  'list_devices': CreateDeviceResponses
-  'list_extensions': CreateExtensionResponses
-  'list_fax_numbers': CreateFaxNumberResponses
-  'list_phone_numbers': CreatePhoneNumberResponses
+  'list_devices_api_devices': CreateDeviceResponses
+  'list_extensions': AdminListExtensionsResponses
+  'list_extensions_api_voice_extensions': CreateExtensionResponses
+  'list_fax_messages': AdminListFaxMessagesResponses
+  'list_fax_numbers_api_fax_numbers': CreateFaxNumberResponses
+  'list_phone_numbers_api_voice_phone_numbers': CreatePhoneNumberResponses
   'list_roles': CreateRoleResponses
   'list_tags': CreateTagResponses
   'list_teams_api_teams': CreateTeamResponses
-  'list_tickets': CreateTicketResponses
+  'list_tickets_api_support_tickets': CreateTicketResponses
   'list_users_api_users': CreateUserResponses
   'login': AccountLoginResponses
   'logout': AccountLogoutResponses
@@ -308,17 +338,23 @@ export interface OperationErrorTypes {
   'get_profile': AccountProfileUpdateErrors
   'get_sessions': never
   'get_stats': never
+  'get_stats_api_admin_devices_stats': never
+  'get_stats_api_admin_fax_stats': never
+  'get_stats_api_admin_support_stats': never
+  'get_stats_api_admin_voice_stats': never
   'get_unread_count': never
   'initiate_setup': never
   'list_connections': CreateConnectionErrors
-  'list_devices': CreateDeviceErrors
-  'list_extensions': CreateExtensionErrors
-  'list_fax_numbers': CreateFaxNumberErrors
-  'list_phone_numbers': CreatePhoneNumberErrors
+  'list_devices_api_devices': CreateDeviceErrors
+  'list_extensions': never
+  'list_extensions_api_voice_extensions': CreateExtensionErrors
+  'list_fax_messages': never
+  'list_fax_numbers_api_fax_numbers': CreateFaxNumberErrors
+  'list_phone_numbers_api_voice_phone_numbers': CreatePhoneNumberErrors
   'list_roles': CreateRoleErrors
   'list_tags': CreateTagErrors
   'list_teams_api_teams': CreateTeamErrors
-  'list_tickets': CreateTicketErrors
+  'list_tickets_api_support_tickets': CreateTicketErrors
   'list_users_api_users': CreateUserErrors
   'login': AccountLoginErrors
   'logout': never

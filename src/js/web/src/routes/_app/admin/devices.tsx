@@ -4,50 +4,43 @@ import { AdminNav } from "@/components/admin/admin-nav"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SkeletonCard } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { useAdminDevices, useAdminDeviceStats } from "@/lib/api/hooks/admin"
+import { Search } from "lucide-react"
 
 export const Route = createFileRoute("/_app/admin/devices")({
   component: AdminDevicesPage,
 })
 
-// Placeholder data until backend aggregation endpoints are available
-const stats = [
-  { label: "Total devices", value: 0 },
-  { label: "Active devices", value: 0 },
-  { label: "Offline devices", value: 0 },
-  { label: "Needs provisioning", value: 0 },
-]
-
-interface DeviceRow {
-  id: string
-  name: string
-  macAddress: string
-  model: string
-  teamName: string
-  status: "active" | "offline" | "provisioning"
-  lastSeen: string
-}
-
-// Placeholder — will be replaced by API data
-const placeholderDevices: DeviceRow[] = []
-
 const PAGE_SIZE = 25
 
-const statusVariant: Record<DeviceRow["status"], "default" | "secondary" | "outline" | "destructive"> = {
-  active: "default",
+const statusVariant: Record<string, "default" | "secondary" | "outline" | "destructive"> = {
+  online: "default",
   offline: "destructive",
   provisioning: "secondary",
+  error: "destructive",
 }
 
 function AdminDevicesPage() {
   const [page, setPage] = useState(1)
+  const [search, setSearch] = useState("")
 
-  // TODO: replace with useAdminDevices() hook once backend endpoint exists
-  const devices = placeholderDevices
-  const total = devices.length
+  const { data: stats, isLoading: statsLoading } = useAdminDeviceStats()
+  const { data, isLoading } = useAdminDevices(page, PAGE_SIZE, search || undefined)
+
+  const devices = data?.items ?? []
+  const total = data?.total ?? 0
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
-  const paged = devices.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+
+  const statCards = [
+    { label: "Total devices", value: stats?.total ?? 0 },
+    { label: "Active devices", value: stats?.active ?? 0 },
+    { label: "Online", value: stats?.online ?? 0 },
+    { label: "Offline", value: stats?.offline ?? 0 },
+  ]
 
   return (
     <PageContainer className="flex-1 space-y-8">
@@ -55,24 +48,46 @@ function AdminDevicesPage() {
       <AdminNav />
 
       <PageSection>
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {stats.map((item) => (
-            <Card key={item.label}>
-              <CardHeader>
-                <CardTitle className="text-sm text-muted-foreground">{item.label}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-semibold">{item.value}</div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        {statsLoading ? (
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
+          </div>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {statCards.map((item) => (
+              <Card key={item.label}>
+                <CardHeader>
+                  <CardTitle className="text-sm text-muted-foreground">{item.label}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-semibold">{item.value}</div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </PageSection>
 
       <PageSection delay={0.1}>
         <Card>
           <CardHeader>
-            <CardTitle>All devices</CardTitle>
+            <div className="flex items-center justify-between gap-4">
+              <CardTitle>All devices</CardTitle>
+              <div className="relative max-w-sm">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="Search devices..."
+                  value={search}
+                  onChange={(e) => {
+                    setSearch(e.target.value)
+                    setPage(1)
+                  }}
+                  className="pl-9"
+                />
+              </div>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <Table>
@@ -87,31 +102,42 @@ function AdminDevicesPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {paged.length === 0 && (
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8">
+                      <div className="flex items-center justify-center">
+                        <div className="h-5 w-5 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : devices.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center text-muted-foreground">
-                      No devices found. Devices will appear here once the device management backend is connected.
+                      {search ? "No devices match your search." : "No devices found."}
                     </TableCell>
                   </TableRow>
+                ) : (
+                  devices.map((device) => (
+                    <TableRow key={device.id}>
+                      <TableCell className="font-medium">{device.name}</TableCell>
+                      <TableCell className="font-mono text-muted-foreground text-sm">{device.macAddress ?? "—"}</TableCell>
+                      <TableCell className="text-muted-foreground">{device.model ?? "—"}</TableCell>
+                      <TableCell className="text-muted-foreground">{device.teamName ?? "—"}</TableCell>
+                      <TableCell>
+                        <Badge variant={statusVariant[device.status] ?? "outline"}>{device.status}</Badge>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {device.lastSeenAt ? new Date(device.lastSeenAt).toLocaleString() : "Never"}
+                      </TableCell>
+                    </TableRow>
+                  ))
                 )}
-                {paged.map((device) => (
-                  <TableRow key={device.id}>
-                    <TableCell className="font-medium">{device.name}</TableCell>
-                    <TableCell className="font-mono text-muted-foreground text-sm">{device.macAddress}</TableCell>
-                    <TableCell className="text-muted-foreground">{device.model}</TableCell>
-                    <TableCell className="text-muted-foreground">{device.teamName}</TableCell>
-                    <TableCell>
-                      <Badge variant={statusVariant[device.status]}>{device.status}</Badge>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">{new Date(device.lastSeen).toLocaleString()}</TableCell>
-                  </TableRow>
-                ))}
               </TableBody>
             </Table>
-            {total > PAGE_SIZE && (
+            {totalPages > 1 && (
               <div className="flex items-center justify-between">
                 <p className="text-xs text-muted-foreground">
-                  Page {page} of {totalPages}
+                  Page {page} of {totalPages} ({total} total)
                 </p>
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>

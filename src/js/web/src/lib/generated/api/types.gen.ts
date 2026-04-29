@@ -48,6 +48,128 @@ export type ActivityLogEntry = {
 };
 
 /**
+ * AdminDeviceStats
+ */
+export type AdminDeviceStats = {
+  active: number;
+  byType: {
+    [key: string]: number;
+  };
+  error: number;
+  offline: number;
+  online: number;
+  total: number;
+};
+
+/**
+ * AdminDeviceSummary
+ */
+export type AdminDeviceSummary = {
+  createdAt: string;
+  deviceType: string;
+  id: string;
+  ipAddress?: string | null;
+  isActive: boolean;
+  lastSeenAt?: string | null;
+  macAddress?: string | null;
+  model?: string | null;
+  name: string;
+  ownerEmail?: string | null;
+  sipUsername: string;
+  status: string;
+  teamName?: string | null;
+};
+
+/**
+ * AdminExtensionSummary
+ */
+export type AdminExtensionSummary = {
+  createdAt: string;
+  displayName: string;
+  extensionNumber: string;
+  id: string;
+  isActive: boolean;
+  ownerEmail?: string | null;
+  phoneNumber?: string | null;
+};
+
+/**
+ * AdminFaxMessageSummary
+ */
+export type AdminFaxMessageSummary = {
+  createdAt: string;
+  direction: string;
+  errorMessage?: string | null;
+  faxNumber: string;
+  id: string;
+  pageCount: number;
+  receivedAt: string;
+  remoteName?: string | null;
+  remoteNumber: string;
+  status: string;
+};
+
+/**
+ * AdminFaxNumberSummary
+ */
+export type AdminFaxNumberSummary = {
+  createdAt: string;
+  id: string;
+  isActive: boolean;
+  label?: string | null;
+  number: string;
+  ownerEmail?: string | null;
+  teamName?: string | null;
+};
+
+/**
+ * AdminFaxStats
+ */
+export type AdminFaxStats = {
+  activeNumbers: number;
+  failedToday: number;
+  inboundToday: number;
+  messagesToday: number;
+  outboundToday: number;
+  totalMessages: number;
+  totalNumbers: number;
+};
+
+/**
+ * AdminPhoneNumberSummary
+ */
+export type AdminPhoneNumberSummary = {
+  callerIdName?: string | null;
+  createdAt: string;
+  id: string;
+  isActive: boolean;
+  label?: string | null;
+  number: string;
+  numberType: string;
+  ownerEmail?: string | null;
+  teamName?: string | null;
+};
+
+/**
+ * AdminSupportStats
+ */
+export type AdminSupportStats = {
+  byCategory: {
+    [key: string]: number;
+  };
+  byPriority: {
+    [key: string]: number;
+  };
+  closed: number;
+  inProgress: number;
+  open: number;
+  resolved: number;
+  total: number;
+  waitingOnCustomer: number;
+  waitingOnSupport: number;
+};
+
+/**
  * AdminTeamDetail
  */
 export type AdminTeamDetail = {
@@ -91,6 +213,24 @@ export type AdminTeamUpdate = {
   description?: string | null;
   is_active?: boolean;
   name?: string | null;
+};
+
+/**
+ * AdminTicketSummary
+ */
+export type AdminTicketSummary = {
+  assignedToEmail?: string | null;
+  category?: string | null;
+  closedAt?: string | null;
+  createdAt: string;
+  creatorEmail?: string | null;
+  id: string;
+  isReadByAgent: boolean;
+  priority: string;
+  status: string;
+  subject: string;
+  ticketNumber: string;
+  updatedAt: string;
 };
 
 /**
@@ -142,6 +282,20 @@ export type AdminUserUpdate = {
   name?: string | null;
   phone?: string | null;
   username?: string | null;
+};
+
+/**
+ * AdminVoiceStats
+ */
+export type AdminVoiceStats = {
+  activeDnd: number;
+  activeExtensions: number;
+  activePhoneNumbers: number;
+  byNumberType: {
+    [key: string]: number;
+  };
+  totalExtensions: number;
+  totalPhoneNumbers: number;
 };
 
 /**
@@ -1801,8 +1955,8 @@ export type AdminListAuditLogsData = {
      */
     sortOrder?: "asc" | "desc" | null;
     targetTypeIn?: Array<string> | null;
-    actionIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
@@ -1883,8 +2037,8 @@ export type AdminGetTargetAuditLogsData = {
      */
     sortOrder?: "asc" | "desc" | null;
     targetTypeIn?: Array<string> | null;
-    actionIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
@@ -1963,8 +2117,8 @@ export type AdminGetUserAuditLogsData = {
      */
     sortOrder?: "asc" | "desc" | null;
     targetTypeIn?: Array<string> | null;
-    actionIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
@@ -2108,6 +2262,294 @@ export type GetDashboardStatsResponses = {
 
 export type GetDashboardStatsResponse =
   GetDashboardStatsResponses[keyof GetDashboardStatsResponses];
+
+export type AdminListDevicesData = {
+  body?: never;
+  path?: never;
+  query?: {
+    ids?: Array<string> | null;
+    createdBefore?: string | null;
+    createdAfter?: string | null;
+    updatedBefore?: string | null;
+    updatedAfter?: string | null;
+    /**
+     * Field to search
+     */
+    searchString?: string | null;
+    /**
+     * Search should be case sensitive
+     */
+    searchIgnoreCase?: boolean | null;
+    currentPage?: number;
+    pageSize?: number;
+    /**
+     * Order by field
+     */
+    orderBy?: string | null;
+    /**
+     * Field to search
+     */
+    sortOrder?: "asc" | "desc" | null;
+  };
+  url: "/api/admin/devices";
+};
+
+export type AdminListDevicesErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type AdminListDevicesError =
+  AdminListDevicesErrors[keyof AdminListDevicesErrors];
+
+export type AdminListDevicesResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: {
+    items?: Array<AdminDeviceSummary>;
+    /**
+     * Maximal number of items to send.
+     */
+    limit?: number;
+    /**
+     * Offset from the beginning of the query.
+     */
+    offset?: number;
+    /**
+     * Total number of items.
+     */
+    total?: number;
+  };
+};
+
+export type AdminListDevicesResponse =
+  AdminListDevicesResponses[keyof AdminListDevicesResponses];
+
+export type AdminGetDeviceStatsData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/api/admin/devices/stats";
+};
+
+export type AdminGetDeviceStatsResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: AdminDeviceStats;
+};
+
+export type AdminGetDeviceStatsResponse =
+  AdminGetDeviceStatsResponses[keyof AdminGetDeviceStatsResponses];
+
+export type AdminListFaxMessagesData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/api/admin/fax/messages";
+};
+
+export type AdminListFaxMessagesResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: Array<AdminFaxMessageSummary>;
+};
+
+export type AdminListFaxMessagesResponse =
+  AdminListFaxMessagesResponses[keyof AdminListFaxMessagesResponses];
+
+export type AdminListFaxNumbersData = {
+  body?: never;
+  path?: never;
+  query?: {
+    ids?: Array<string> | null;
+    createdBefore?: string | null;
+    createdAfter?: string | null;
+    /**
+     * Field to search
+     */
+    searchString?: string | null;
+    /**
+     * Search should be case sensitive
+     */
+    searchIgnoreCase?: boolean | null;
+    currentPage?: number;
+    pageSize?: number;
+    /**
+     * Order by field
+     */
+    orderBy?: string | null;
+    /**
+     * Field to search
+     */
+    sortOrder?: "asc" | "desc" | null;
+  };
+  url: "/api/admin/fax/numbers";
+};
+
+export type AdminListFaxNumbersErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type AdminListFaxNumbersError =
+  AdminListFaxNumbersErrors[keyof AdminListFaxNumbersErrors];
+
+export type AdminListFaxNumbersResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: {
+    items?: Array<AdminFaxNumberSummary>;
+    /**
+     * Maximal number of items to send.
+     */
+    limit?: number;
+    /**
+     * Offset from the beginning of the query.
+     */
+    offset?: number;
+    /**
+     * Total number of items.
+     */
+    total?: number;
+  };
+};
+
+export type AdminListFaxNumbersResponse =
+  AdminListFaxNumbersResponses[keyof AdminListFaxNumbersResponses];
+
+export type AdminGetFaxStatsData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/api/admin/fax/stats";
+};
+
+export type AdminGetFaxStatsResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: AdminFaxStats;
+};
+
+export type AdminGetFaxStatsResponse =
+  AdminGetFaxStatsResponses[keyof AdminGetFaxStatsResponses];
+
+export type AdminGetSupportStatsData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/api/admin/support/stats";
+};
+
+export type AdminGetSupportStatsResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: AdminSupportStats;
+};
+
+export type AdminGetSupportStatsResponse =
+  AdminGetSupportStatsResponses[keyof AdminGetSupportStatsResponses];
+
+export type AdminListTicketsData = {
+  body?: never;
+  path?: never;
+  query?: {
+    ids?: Array<string> | null;
+    createdBefore?: string | null;
+    createdAfter?: string | null;
+    updatedBefore?: string | null;
+    updatedAfter?: string | null;
+    /**
+     * Field to search
+     */
+    searchString?: string | null;
+    /**
+     * Search should be case sensitive
+     */
+    searchIgnoreCase?: boolean | null;
+    currentPage?: number;
+    pageSize?: number;
+    /**
+     * Order by field
+     */
+    orderBy?: string | null;
+    /**
+     * Field to search
+     */
+    sortOrder?: "asc" | "desc" | null;
+  };
+  url: "/api/admin/support/tickets";
+};
+
+export type AdminListTicketsErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type AdminListTicketsError =
+  AdminListTicketsErrors[keyof AdminListTicketsErrors];
+
+export type AdminListTicketsResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: {
+    items?: Array<AdminTicketSummary>;
+    /**
+     * Maximal number of items to send.
+     */
+    limit?: number;
+    /**
+     * Offset from the beginning of the query.
+     */
+    offset?: number;
+    /**
+     * Total number of items.
+     */
+    total?: number;
+  };
+};
+
+export type AdminListTicketsResponse =
+  AdminListTicketsResponses[keyof AdminListTicketsResponses];
 
 export type AdminListTeamsData = {
   body?: never;
@@ -2482,6 +2924,112 @@ export type AdminUpdateUserResponses = {
 
 export type AdminUpdateUserResponse =
   AdminUpdateUserResponses[keyof AdminUpdateUserResponses];
+
+export type AdminListExtensionsData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/api/admin/voice/extensions";
+};
+
+export type AdminListExtensionsResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: Array<AdminExtensionSummary>;
+};
+
+export type AdminListExtensionsResponse =
+  AdminListExtensionsResponses[keyof AdminListExtensionsResponses];
+
+export type AdminListPhoneNumbersData = {
+  body?: never;
+  path?: never;
+  query?: {
+    ids?: Array<string> | null;
+    createdBefore?: string | null;
+    createdAfter?: string | null;
+    /**
+     * Field to search
+     */
+    searchString?: string | null;
+    /**
+     * Search should be case sensitive
+     */
+    searchIgnoreCase?: boolean | null;
+    currentPage?: number;
+    pageSize?: number;
+    /**
+     * Order by field
+     */
+    orderBy?: string | null;
+    /**
+     * Field to search
+     */
+    sortOrder?: "asc" | "desc" | null;
+  };
+  url: "/api/admin/voice/phone-numbers";
+};
+
+export type AdminListPhoneNumbersErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type AdminListPhoneNumbersError =
+  AdminListPhoneNumbersErrors[keyof AdminListPhoneNumbersErrors];
+
+export type AdminListPhoneNumbersResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: {
+    items?: Array<AdminPhoneNumberSummary>;
+    /**
+     * Maximal number of items to send.
+     */
+    limit?: number;
+    /**
+     * Offset from the beginning of the query.
+     */
+    offset?: number;
+    /**
+     * Total number of items.
+     */
+    total?: number;
+  };
+};
+
+export type AdminListPhoneNumbersResponse =
+  AdminListPhoneNumbersResponses[keyof AdminListPhoneNumbersResponses];
+
+export type AdminGetVoiceStatsData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/api/admin/voice/stats";
+};
+
+export type AdminGetVoiceStatsResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: AdminVoiceStats;
+};
+
+export type AdminGetVoiceStatsResponse =
+  AdminGetVoiceStatsResponses[keyof AdminGetVoiceStatsResponses];
 
 export type ApiAuthOauthGithubGithubAuthorizeData = {
   body?: never;

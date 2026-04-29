@@ -42,6 +42,12 @@ import type {
   AdminGetAuditLogData,
   AdminGetAuditLogErrors,
   AdminGetAuditLogResponses,
+  AdminGetDeviceStatsData,
+  AdminGetDeviceStatsResponses,
+  AdminGetFaxStatsData,
+  AdminGetFaxStatsResponses,
+  AdminGetSupportStatsData,
+  AdminGetSupportStatsResponses,
   AdminGetTargetAuditLogsData,
   AdminGetTargetAuditLogsErrors,
   AdminGetTargetAuditLogsResponses,
@@ -54,12 +60,30 @@ import type {
   AdminGetUserData,
   AdminGetUserErrors,
   AdminGetUserResponses,
+  AdminGetVoiceStatsData,
+  AdminGetVoiceStatsResponses,
   AdminListAuditLogsData,
   AdminListAuditLogsErrors,
   AdminListAuditLogsResponses,
+  AdminListDevicesData,
+  AdminListDevicesErrors,
+  AdminListDevicesResponses,
+  AdminListExtensionsData,
+  AdminListExtensionsResponses,
+  AdminListFaxMessagesData,
+  AdminListFaxMessagesResponses,
+  AdminListFaxNumbersData,
+  AdminListFaxNumbersErrors,
+  AdminListFaxNumbersResponses,
+  AdminListPhoneNumbersData,
+  AdminListPhoneNumbersErrors,
+  AdminListPhoneNumbersResponses,
   AdminListTeamsData,
   AdminListTeamsErrors,
   AdminListTeamsResponses,
+  AdminListTicketsData,
+  AdminListTicketsErrors,
+  AdminListTicketsResponses,
   AdminListUsersData,
   AdminListUsersErrors,
   AdminListUsersResponses,
@@ -786,6 +810,118 @@ export const getDashboardStats = <ThrowOnError extends boolean = false>(
   });
 
 /**
+ * ListDevices
+ */
+export const adminListDevices = <ThrowOnError extends boolean = false>(
+  options?: Options<AdminListDevicesData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    AdminListDevicesResponses,
+    AdminListDevicesErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/admin/devices",
+    ...options,
+  });
+
+/**
+ * GetStats
+ */
+export const adminGetDeviceStats = <ThrowOnError extends boolean = false>(
+  options?: Options<AdminGetDeviceStatsData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    AdminGetDeviceStatsResponses,
+    unknown,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/admin/devices/stats",
+    ...options,
+  });
+
+/**
+ * ListFaxMessages
+ */
+export const adminListFaxMessages = <ThrowOnError extends boolean = false>(
+  options?: Options<AdminListFaxMessagesData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    AdminListFaxMessagesResponses,
+    unknown,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/admin/fax/messages",
+    ...options,
+  });
+
+/**
+ * ListFaxNumbers
+ */
+export const adminListFaxNumbers = <ThrowOnError extends boolean = false>(
+  options?: Options<AdminListFaxNumbersData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    AdminListFaxNumbersResponses,
+    AdminListFaxNumbersErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/admin/fax/numbers",
+    ...options,
+  });
+
+/**
+ * GetStats
+ */
+export const adminGetFaxStats = <ThrowOnError extends boolean = false>(
+  options?: Options<AdminGetFaxStatsData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    AdminGetFaxStatsResponses,
+    unknown,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/admin/fax/stats",
+    ...options,
+  });
+
+/**
+ * GetStats
+ */
+export const adminGetSupportStats = <ThrowOnError extends boolean = false>(
+  options?: Options<AdminGetSupportStatsData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    AdminGetSupportStatsResponses,
+    unknown,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/admin/support/stats",
+    ...options,
+  });
+
+/**
+ * ListTickets
+ */
+export const adminListTickets = <ThrowOnError extends boolean = false>(
+  options?: Options<AdminListTicketsData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    AdminListTicketsResponses,
+    AdminListTicketsErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/admin/support/tickets",
+    ...options,
+  });
+
+/**
  * ListTeams
  */
 export const adminListTeams = <ThrowOnError extends boolean = false>(
@@ -919,6 +1055,54 @@ export const adminUpdateUser = <ThrowOnError extends boolean = false>(
       "Content-Type": "application/json",
       ...options.headers,
     },
+  });
+
+/**
+ * ListExtensions
+ */
+export const adminListExtensions = <ThrowOnError extends boolean = false>(
+  options?: Options<AdminListExtensionsData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    AdminListExtensionsResponses,
+    unknown,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/admin/voice/extensions",
+    ...options,
+  });
+
+/**
+ * ListPhoneNumbers
+ */
+export const adminListPhoneNumbers = <ThrowOnError extends boolean = false>(
+  options?: Options<AdminListPhoneNumbersData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    AdminListPhoneNumbersResponses,
+    AdminListPhoneNumbersErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/admin/voice/phone-numbers",
+    ...options,
+  });
+
+/**
+ * GetStats
+ */
+export const adminGetVoiceStats = <ThrowOnError extends boolean = false>(
+  options?: Options<AdminGetVoiceStatsData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    AdminGetVoiceStatsResponses,
+    unknown,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/admin/voice/stats",
+    ...options,
   });
 
 /**
