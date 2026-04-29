@@ -10,4 +10,6 @@ class DeviceStatus(StrEnum):
     OFFLINE = "offline"
     RINGING = "ringing"
     IN_USE = "in_use"
+    REBOOTING = "rebooting"
+    PROVISIONING = "provisioning"
     ERROR = "error"

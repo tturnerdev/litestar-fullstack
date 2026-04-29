@@ -29,7 +29,7 @@ ERROR := $(shell printf "$(RED)✖$(NC)")
 
 .PHONY: help
 help:                                               ## Display this help text for Makefile
-	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z0-9_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
+	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z0-9_-]+:.*?##/ { printf "  \033[36m%-25s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
 
 # =============================================================================
@@ -176,11 +176,30 @@ test:                                              ## Run the tests
 	@uv run pytest src/py/tests --quiet
 	@echo "${OK} Tests passed ✨"
 
+.PHONY: test-unit
+test-unit:                                         ## Run backend unit tests only
+	@echo "${INFO} Running unit tests... 🧪"
+	@uv run pytest src/py/tests/unit --quiet
+	@echo "${OK} Unit tests passed ✨"
+
+.PHONY: test-frontend
+test-frontend:                                     ## Run frontend tests (vitest)
+	@echo "${INFO} Running frontend tests... 🧪"
+	@cd src/js/web && bun run test
+	@echo "${OK} Frontend tests passed ✨"
+
 .PHONY: test-all
-test-all:                                          ## Run all tests
+test-all:                                          ## Run all backend and frontend tests
 	@echo "${INFO} Running all test cases... 🧪"
 	@uv run pytest src/py/tests -m '' --quiet
+	@cd src/js/web && bun run test
 	@echo "${OK} All tests passed ✨"
+
+.PHONY: tsc
+tsc:                                               ## Run TypeScript type checking
+	@echo "${INFO} Running TypeScript type check... 🔍"
+	@cd src/js/web && npx --package=typescript tsc --noEmit
+	@echo "${OK} TypeScript type check passed ✨"
 
 .PHONY: check-all
 check-all: lint test-all coverage                  ## Run all linting, tests, and coverage checks
@@ -257,6 +276,36 @@ dev:                                               ## Run app with stdout+stderr
 dev-debug:                                         ## Run app in debug mode with stdout+stderr logged to error.log
 	@echo "${INFO} Starting dev server (debug) — logging to error.log"
 	@uv run app run --debug 2>&1 | tee error.log
+
+
+# =============================================================================
+# Database Management
+# =============================================================================
+.PHONY: db-migrate
+db-migrate:                                        ## Create a new migration (usage: make db-migrate m="description")
+	@echo "${INFO} Creating database migration... 📝"
+	@uv run app database make-migrations -m "$(m)"
+	@echo "${OK} Migration created"
+
+.PHONY: db-upgrade
+db-upgrade:                                        ## Apply pending database migrations
+	@echo "${INFO} Applying database migrations... ⬆️"
+	@uv run app database upgrade
+	@echo "${OK} Database upgraded"
+
+.PHONY: db-downgrade
+db-downgrade:                                      ## Downgrade database by one revision
+	@echo "${INFO} Downgrading database... ⬇️"
+	@uv run app database downgrade
+	@echo "${OK} Database downgraded"
+
+.PHONY: db-current
+db-current:                                        ## Show current database revision
+	@uv run app database show-current-revision
+
+.PHONY: db-history
+db-history:                                        ## Show database migration history
+	@uv run app database history
 
 
 # =============================================================================

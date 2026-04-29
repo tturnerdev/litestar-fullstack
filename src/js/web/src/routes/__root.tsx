@@ -2,6 +2,7 @@ import { createRootRoute, createRouter, Outlet } from "@tanstack/react-router"
 import { Toaster } from "sonner"
 import { ErrorBoundary } from "@/components/error-boundary"
 import { NotFoundPage } from "@/components/ui/not-found-page"
+import { RouteProgressBar } from "@/components/ui/progress-bar"
 import { useTheme } from "@/lib/theme-context"
 
 export const Route = createRootRoute({
@@ -18,6 +19,7 @@ function RootRoute() {
   const { theme } = useTheme()
   return (
     <>
+      <RouteProgressBar />
       <div aria-live="polite" aria-relevant="additions">
         <Toaster richColors theme={theme} position="top-right" />
       </div>
