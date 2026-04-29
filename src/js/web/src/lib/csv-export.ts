@@ -17,6 +17,8 @@ export interface CsvHeader<T> {
   accessor: (item: T) => unknown
 }
 
+export { escapeCell as escapeCSVCell }
+
 function escapeCell(value: unknown): string {
   if (value === null || value === undefined) {
     return ""
@@ -47,6 +49,18 @@ function todaySuffix(): string {
  *                 keys are exported using the given header labels. When omitted
  *                 every key found across the data rows is exported.
  */
+export function buildCsvString(data: Record<string, unknown>[], keys: string[]): string {
+  const headerRow = keys.join(",")
+  const bodyRows = data.map((row) => keys.map((k) => escapeCell(row[k])).join(","))
+  return [headerRow, ...bodyRows].join("\n")
+}
+
+export function buildCsvStringWithAccessors<T>(data: T[], columns: { header: string; accessor: (item: T) => unknown }[]): string {
+  const headerRow = columns.map((c) => escapeCell(c.header)).join(",")
+  const bodyRows = data.map((item) => columns.map((c) => escapeCell(c.accessor(item))).join(","))
+  return [headerRow, ...bodyRows].join("\n")
+}
+
 export function exportToCSV(data: Record<string, unknown>[], filename: string, columns?: CsvColumn[]): void {
   if (data.length === 0) {
     return

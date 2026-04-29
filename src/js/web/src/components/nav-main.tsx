@@ -30,7 +30,7 @@ export function NavMain({ items, label = "Platform" }: { items: NavMainItem[]; l
   return (
     <SidebarGroup>
       <SidebarGroupLabel>{label}</SidebarGroupLabel>
-      <SidebarMenu>
+      <SidebarMenu role="navigation" aria-label="Main navigation">
         {items.map((item) => {
           const badgeText = formatBadge(item.badge)
 

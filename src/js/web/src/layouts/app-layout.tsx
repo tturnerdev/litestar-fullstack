@@ -175,14 +175,20 @@ export function AppLayout() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <main className="flex flex-1">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-primary-foreground focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+      >
+        Skip to main content
+      </a>
+      <div className="flex flex-1">
         <SidebarProvider>
           <AppSidebar />
           <SidebarInset>
             <header className="flex h-16 shrink-0 items-center gap-2 border-b border-border/60 bg-background/80 backdrop-blur">
               <div className="flex w-full items-center justify-between gap-4 px-4">
                 <div className="flex items-center gap-2">
-                  <SidebarTrigger className="-ml-1" />
+                  <SidebarTrigger className="-ml-1" aria-label="Toggle sidebar" />
                   <Separator orientation="vertical" className="mr-2 h-4" />
                   <div>
                     <p className="text-[0.65rem] font-semibold uppercase tracking-[0.24em] text-muted-foreground">{header.eyebrow}</p>
@@ -206,10 +212,12 @@ export function AppLayout() {
                 </div>
               </div>
             </header>
-            <Outlet />
+            <main id="main-content" tabIndex={-1} className="outline-none">
+              <Outlet />
+            </main>
           </SidebarInset>
         </SidebarProvider>
-      </main>
+      </div>
       <KeyboardShortcutsDialog open={shortcutsOpen} onOpenChange={setShortcutsOpen} groups={shortcutGroups} />
     </div>
   )

@@ -18,7 +18,9 @@ function RootRoute() {
   const { theme } = useTheme()
   return (
     <>
-      <Toaster richColors theme={theme} position="top-right" />
+      <div aria-live="polite" aria-relevant="additions">
+        <Toaster richColors theme={theme} position="top-right" />
+      </div>
       <Outlet />
     </>
   )

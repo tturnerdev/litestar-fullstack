@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router"
 import { Search } from "lucide-react"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { TeamRowActions } from "@/components/admin/team-row-actions"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -8,7 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ExportButton } from "@/components/ui/export-button"
 import { Input } from "@/components/ui/input"
 import { SkeletonTable } from "@/components/ui/skeleton"
+import { type SortDirection, SortableHeader, nextSortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import type { AdminTeamSummary } from "@/lib/generated/api"
 import { useAdminTeams } from "@/lib/api/hooks/admin"
 
 const TEAM_EXPORT_COLUMNS = [
@@ -21,9 +23,23 @@ const TEAM_EXPORT_COLUMNS = [
 
 const PAGE_SIZE = 25
 
+function compareValues(a: unknown, b: unknown, direction: SortDirection): number {
+  const dir = direction === "desc" ? -1 : 1
+  if (a == null && b == null) return 0
+  if (a == null) return 1
+  if (b == null) return -1
+  if (typeof a === "string" && typeof b === "string") return dir * a.localeCompare(b)
+  if (typeof a === "number" && typeof b === "number") return dir * (a - b)
+  if (a < b) return -1 * dir
+  if (a > b) return 1 * dir
+  return 0
+}
+
 export function TeamTable() {
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState("")
+  const [sortKey, setSortKey] = useState<string | null>(null)
+  const [sortDirection, setSortDirection] = useState<SortDirection>(null)
   const { data, isLoading, isError } = useAdminTeams(page, PAGE_SIZE)
 
   if (isLoading) {
@@ -47,6 +63,21 @@ export function TeamTable() {
     ? data.items.filter((t) => t.name.toLowerCase().includes(lowerSearch) || t.slug.toLowerCase().includes(lowerSearch))
     : data.items
 
+  const sortedItems = useMemo(() => {
+    if (!sortKey || !sortDirection) return filtered
+    return [...filtered].sort((a, b) => {
+      const aVal = a[sortKey as keyof AdminTeamSummary]
+      const bVal = b[sortKey as keyof AdminTeamSummary]
+      return compareValues(aVal, bVal, sortDirection)
+    })
+  }, [filtered, sortKey, sortDirection])
+
+  const handleSort = (key: string) => {
+    const next = nextSortDirection(sortKey, sortDirection, key)
+    setSortKey(next.sort)
+    setSortDirection(next.direction)
+  }
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
@@ -63,9 +94,9 @@ export function TeamTable() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Slug</TableHead>
-              <TableHead>Members</TableHead>
+              <SortableHeader label="Name" sortKey="name" currentSort={sortKey} currentDirection={sortDirection} onSort={handleSort} />
+              <SortableHeader label="Slug" sortKey="slug" currentSort={sortKey} currentDirection={sortDirection} onSort={handleSort} />
+              <SortableHeader label="Members" sortKey="memberCount" currentSort={sortKey} currentDirection={sortDirection} onSort={handleSort} />
               <TableHead>Status</TableHead>
               <TableHead>Created</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -79,7 +110,7 @@ export function TeamTable() {
                 </TableCell>
               </TableRow>
             )}
-            {filtered.map((team) => (
+            {sortedItems.map((team) => (
               <TableRow key={team.id}>
                 <TableCell className="font-medium">
                   <Link to="/admin/teams/$teamId" params={{ teamId: team.id }} className="hover:underline">

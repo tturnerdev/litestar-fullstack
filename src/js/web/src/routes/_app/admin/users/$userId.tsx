@@ -6,6 +6,7 @@ import { DeleteUserDialog } from "@/components/admin/delete-user-dialog"
 import { EditUserDialog } from "@/components/admin/edit-user-dialog"
 import { ManageRolesDialog } from "@/components/admin/manage-roles-dialog"
 import { ToggleUserStatusDialog } from "@/components/admin/toggle-user-status-dialog"
+import { UserActivityTimeline } from "@/components/admin/user-activity-timeline"
 import { Badge } from "@/components/ui/badge"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
@@ -13,7 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { useAdminUpdateUser, useAdminUser, useAdminUserAuditLogs } from "@/lib/api/hooks/admin"
+import { useAdminUpdateUser, useAdminUser } from "@/lib/api/hooks/admin"
 
 export const Route = createFileRoute("/_app/admin/users/$userId")({
   component: AdminUserDetailPage,
@@ -27,8 +28,6 @@ function AdminUserDetailPage() {
   const [rolesOpen, setRolesOpen] = useState(false)
   const [statusOpen, setStatusOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
-  const [auditPage, setAuditPage] = useState(1)
-  const { data: auditData, isLoading: auditLoading } = useAdminUserAuditLogs(userId, auditPage, 10)
 
   if (isLoading) {
     return (
@@ -68,8 +67,6 @@ function AdminUserDetailPage() {
       </PageContainer>
     )
   }
-
-  const auditTotalPages = auditData ? Math.max(1, Math.ceil(auditData.total / 10)) : 1
 
   return (
     <PageContainer className="flex-1 space-y-8">
@@ -318,62 +315,9 @@ function AdminUserDetailPage() {
         </PageSection>
       )}
 
-      {/* Recent Audit Log */}
+      {/* Recent Activity Timeline */}
       <PageSection>
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {auditLoading ? (
-              <p className="text-sm text-muted-foreground">Loading audit log...</p>
-            ) : !auditData || auditData.items.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No audit entries found for this user.</p>
-            ) : (
-              <>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Action</TableHead>
-                      <TableHead>Actor</TableHead>
-                      <TableHead>Target</TableHead>
-                      <TableHead>IP Address</TableHead>
-                      <TableHead>Date</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {auditData.items.map((entry) => (
-                      <TableRow key={entry.id}>
-                        <TableCell>
-                          <Badge variant="outline">{entry.action}</Badge>
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">{entry.actorEmail ?? entry.actorId ?? "System"}</TableCell>
-                        <TableCell className="text-muted-foreground">{entry.targetLabel ?? entry.targetId ?? "---"}</TableCell>
-                        <TableCell className="text-muted-foreground">{entry.ipAddress ?? "---"}</TableCell>
-                        <TableCell className="text-muted-foreground">{new Date(entry.createdAt).toLocaleString()}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-                {auditData.total > 10 && (
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs text-muted-foreground">
-                      Page {auditPage} of {auditTotalPages}
-                    </p>
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm" onClick={() => setAuditPage((p) => Math.max(1, p - 1))} disabled={auditPage <= 1}>
-                        Previous
-                      </Button>
-                      <Button variant="outline" size="sm" onClick={() => setAuditPage((p) => Math.min(auditTotalPages, p + 1))} disabled={auditPage >= auditTotalPages}>
-                        Next
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
-          </CardContent>
-        </Card>
+        <UserActivityTimeline userId={userId} />
       </PageSection>
 
       {/* Dialogs */}

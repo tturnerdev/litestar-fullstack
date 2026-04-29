@@ -1,13 +1,15 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ExportButton } from "@/components/ui/export-button"
 import { Input } from "@/components/ui/input"
 import { SkeletonTable } from "@/components/ui/skeleton"
+import { type SortDirection, SortableHeader, nextSortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { UserRowActions } from "@/components/admin/user-row-actions"
 import { useAdminUsers } from "@/lib/api/hooks/admin"
+import type { AdminUserSummary } from "@/lib/generated/api"
 
 const USER_EXPORT_COLUMNS = [
   { key: "name", header: "Name" },
@@ -21,10 +23,38 @@ const USER_EXPORT_COLUMNS = [
 
 const PAGE_SIZE = 25
 
+function compareValues(a: unknown, b: unknown, direction: SortDirection): number {
+  const dir = direction === "desc" ? -1 : 1
+  if (a == null && b == null) return 0
+  if (a == null) return 1
+  if (b == null) return -1
+  if (typeof a === "string" && typeof b === "string") return dir * a.localeCompare(b)
+  if (a < b) return -1 * dir
+  if (a > b) return 1 * dir
+  return 0
+}
+
 export function UserTable() {
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState("")
+  const [sortKey, setSortKey] = useState<string | null>(null)
+  const [sortDirection, setSortDirection] = useState<SortDirection>(null)
   const { data, isLoading, isError } = useAdminUsers(page, PAGE_SIZE, search || undefined)
+
+  const sortedItems = useMemo(() => {
+    if (!data?.items || !sortKey || !sortDirection) return data?.items ?? []
+    return [...data.items].sort((a, b) => {
+      const aVal = a[sortKey as keyof AdminUserSummary]
+      const bVal = b[sortKey as keyof AdminUserSummary]
+      return compareValues(aVal, bVal, sortDirection)
+    })
+  }, [data?.items, sortKey, sortDirection])
+
+  const handleSort = (key: string) => {
+    const next = nextSortDirection(sortKey, sortDirection, key)
+    setSortKey(next.sort)
+    setSortDirection(next.direction)
+  }
 
   if (isLoading) {
     return <SkeletonTable rows={6} />
@@ -65,22 +95,22 @@ export function UserTable() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
+              <SortableHeader label="Name" sortKey="name" currentSort={sortKey} currentDirection={sortDirection} onSort={handleSort} />
+              <SortableHeader label="Email" sortKey="email" currentSort={sortKey} currentDirection={sortDirection} onSort={handleSort} />
               <TableHead>Status</TableHead>
               <TableHead>Role</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.items.length === 0 && (
+            {sortedItems.length === 0 && (
               <TableRow>
                 <TableCell colSpan={5} className="text-center text-muted-foreground">
                   No users found.
                 </TableCell>
               </TableRow>
             )}
-            {data.items.map((user) => (
+            {sortedItems.map((user) => (
               <TableRow key={user.id}>
                 <TableCell className="font-medium">{user.name ?? user.email}</TableCell>
                 <TableCell className="text-muted-foreground">{user.email}</TableCell>
