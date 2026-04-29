@@ -1,16 +1,22 @@
 import { Link } from "@tanstack/react-router"
-import { useState } from "react"
-import { MoreVertical, Power, RefreshCw, Search, X } from "lucide-react"
+import { useCallback, useMemo, useState } from "react"
+import { Download, MoreVertical, Power, RefreshCw, Search, X } from "lucide-react"
+import { useQueryClient } from "@tanstack/react-query"
 import { DeviceStatusBadge } from "@/components/devices/device-status-badge"
 import { Badge } from "@/components/ui/badge"
+import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { SkeletonTable } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { useTableSelection } from "@/hooks/use-table-selection"
 import { useDevices, useRebootDevice, useUpdateDevice } from "@/lib/api/hooks/devices"
+import { deleteDevice } from "@/lib/generated/api"
+import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 
 const PAGE_SIZE = 20
 
@@ -40,6 +46,27 @@ const statusOptions = [
   { value: "error", label: "Error" },
 ]
 
+type DeviceItem = {
+  id: string
+  name: string
+  deviceType: string
+  status: string
+  macAddress?: string | null
+  lastSeenAt?: string | null
+  isActive?: boolean
+}
+
+const csvHeaders: CsvHeader<DeviceItem>[] = [
+  { label: "Name", accessor: (d) => d.name },
+  { label: "Type", accessor: (d) => deviceTypeLabels[d.deviceType] ?? d.deviceType },
+  { label: "Status", accessor: (d) => d.status },
+  { label: "MAC Address", accessor: (d) => d.macAddress ?? "" },
+  { label: "Last Seen", accessor: (d) => d.lastSeenAt ?? "Never" },
+  { label: "Active", accessor: (d) => (d.isActive === false ? "No" : "Yes") },
+]
+
+const getId = (d: DeviceItem) => d.id
+
 function formatLastSeen(value: string | null | undefined): string {
   if (!value) return "Never"
   const date = new Date(value)
@@ -52,12 +79,25 @@ export function DeviceTable() {
   const [searchInput, setSearchInput] = useState("")
   const [typeFilter, setTypeFilter] = useState("all")
   const [statusFilter, setStatusFilter] = useState("all")
+  const queryClient = useQueryClient()
 
   const { data, isLoading, isError } = useDevices({
     page,
     pageSize: PAGE_SIZE,
     search: search || undefined,
   })
+
+  // Client-side filtering for type and status (server search handles name)
+  const filteredItems: DeviceItem[] = useMemo(() => {
+    if (!data) return []
+    return data.items.filter((device) => {
+      if (typeFilter !== "all" && device.deviceType !== typeFilter) return false
+      if (statusFilter !== "all" && device.status !== statusFilter) return false
+      return true
+    })
+  }, [data, typeFilter, statusFilter])
+
+  const selection = useTableSelection(filteredItems, getId)
 
   const handleSearch = () => {
     setSearch(searchInput)
@@ -78,6 +118,33 @@ export function DeviceTable() {
     setPage(1)
   }
 
+  const handleExportAll = useCallback(() => {
+    if (!filteredItems.length) return
+    exportToCsv("devices", csvHeaders, filteredItems)
+  }, [filteredItems])
+
+  const handleSelectAllToggle = useCallback(() => {
+    if (selection.allSelected) {
+      selection.deselectAll()
+    } else {
+      selection.selectAll()
+    }
+  }, [selection])
+
+  const bulkActions = useMemo(() => [
+    createBulkDeleteAction(
+      async (id) => {
+        await deleteDevice({ path: { device_id: id } })
+      },
+      () => queryClient.invalidateQueries({ queryKey: ["devices"] }),
+    ),
+    createExportAction<DeviceItem>(
+      "devices-selected",
+      csvHeaders,
+      (ids) => filteredItems.filter((d) => ids.includes(d.id)),
+    ),
+  ], [filteredItems, queryClient])
+
   if (isLoading) {
     return <SkeletonTable rows={6} />
   }
@@ -93,118 +160,139 @@ export function DeviceTable() {
     )
   }
 
-  // Client-side filtering for type and status (server search handles name)
-  const filteredItems = data.items.filter((device) => {
-    if (typeFilter !== "all" && device.deviceType !== typeFilter) return false
-    if (statusFilter !== "all" && device.status !== statusFilter) return false
-    return true
-  })
-
   const totalPages = Math.max(1, Math.ceil(data.total / PAGE_SIZE))
   const hasActiveFilters = typeFilter !== "all" || statusFilter !== "all" || search !== ""
 
   return (
-    <Card>
-      <CardHeader className="space-y-4">
-        <div className="flex items-center justify-between">
-          <CardTitle>Devices</CardTitle>
-          {hasActiveFilters && (
-            <Button variant="ghost" size="sm" onClick={clearFilters} className="text-muted-foreground">
-              <X className="mr-1 h-3 w-3" />
-              Clear filters
-            </Button>
-          )}
-        </div>
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <div className="relative flex-1">
-            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Search by name..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleSearch()
-              }}
-              className="pl-9 pr-8"
-            />
-            {searchInput && (
-              <button
-                type="button"
-                onClick={clearSearch}
-                className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            )}
+    <>
+      <Card>
+        <CardHeader className="space-y-4">
+          <div className="flex items-center justify-between">
+            <CardTitle>Devices</CardTitle>
+            <div className="flex items-center gap-2">
+              {hasActiveFilters && (
+                <Button variant="ghost" size="sm" onClick={clearFilters} className="text-muted-foreground">
+                  <X className="mr-1 h-3 w-3" />
+                  Clear filters
+                </Button>
+              )}
+              <Button variant="outline" size="sm" onClick={handleExportAll} disabled={filteredItems.length === 0}>
+                <Download className="mr-1 h-3.5 w-3.5" />
+                Export All
+              </Button>
+            </div>
           </div>
-          <Select value={typeFilter} onValueChange={(v) => { setTypeFilter(v); setPage(1) }}>
-            <SelectTrigger className="w-full sm:w-40">
-              <SelectValue placeholder="Type" />
-            </SelectTrigger>
-            <SelectContent>
-              {deviceTypes.map((t) => (
-                <SelectItem key={t.value} value={t.value}>
-                  {t.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1) }}>
-            <SelectTrigger className="w-full sm:w-40">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              {statusOptions.map((s) => (
-                <SelectItem key={s.value} value={s.value}>
-                  {s.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>MAC Address</TableHead>
-              <TableHead>Last Seen</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredItems.length === 0 && (
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="relative flex-1">
+              <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search by name..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleSearch()
+                }}
+                className="pl-9 pr-8"
+              />
+              {searchInput && (
+                <button
+                  type="button"
+                  onClick={clearSearch}
+                  className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              )}
+            </div>
+            <Select value={typeFilter} onValueChange={(v) => { setTypeFilter(v); setPage(1) }}>
+              <SelectTrigger className="w-full sm:w-40">
+                <SelectValue placeholder="Type" />
+              </SelectTrigger>
+              <SelectContent>
+                {deviceTypes.map((t) => (
+                  <SelectItem key={t.value} value={t.value}>
+                    {t.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1) }}>
+              <SelectTrigger className="w-full sm:w-40">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                {statusOptions.map((s) => (
+                  <SelectItem key={s.value} value={s.value}>
+                    {s.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-muted-foreground">
-                  {hasActiveFilters ? "No devices match your filters." : "No devices found."}
-                </TableCell>
+                <TableHead className="w-10">
+                  <Checkbox
+                    checked={selection.allSelected}
+                    indeterminate={selection.someSelected}
+                    onChange={handleSelectAllToggle}
+                    aria-label="Select all devices"
+                  />
+                </TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>MAC Address</TableHead>
+                <TableHead>Last Seen</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
-            )}
-            {filteredItems.map((device) => (
-              <DeviceRow key={device.id} device={device} />
-            ))}
-          </TableBody>
-        </Table>
-        <div className="flex items-center justify-between">
-          <p className="text-xs text-muted-foreground">
-            {hasActiveFilters
-              ? `Showing ${filteredItems.length} of ${data.total} devices`
-              : `Page ${page} of ${totalPages}`}
-          </p>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>
-              Previous
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>
-              Next
-            </Button>
+            </TableHeader>
+            <TableBody>
+              {filteredItems.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center text-muted-foreground">
+                    {hasActiveFilters ? "No devices match your filters." : "No devices found."}
+                  </TableCell>
+                </TableRow>
+              )}
+              {filteredItems.map((device) => (
+                <DeviceRow
+                  key={device.id}
+                  device={device}
+                  isSelected={selection.isSelected(device.id)}
+                  onToggleSelect={() => selection.toggle(device.id)}
+                />
+              ))}
+            </TableBody>
+          </Table>
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-muted-foreground">
+              {hasActiveFilters
+                ? `Showing ${filteredItems.length} of ${data.total} devices`
+                : `Page ${page} of ${totalPages}`}
+            </p>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>
+                Previous
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>
+                Next
+              </Button>
+            </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+
+      <BulkActionBar
+        selectedCount={selection.selectedCount}
+        selectedIds={[...selection.selectedIds]}
+        onClearSelection={selection.deselectAll}
+        actions={bulkActions}
+      />
+    </>
   )
 }
 
@@ -212,12 +300,27 @@ export function DeviceTable() {
 // Device Row (with quick actions)
 // ---------------------------------------------------------------------------
 
-function DeviceRow({ device }: { device: { id: string; name: string; deviceType: string; status: string; macAddress?: string | null; lastSeenAt?: string | null; isActive?: boolean } }) {
+function DeviceRow({
+  device,
+  isSelected,
+  onToggleSelect,
+}: {
+  device: DeviceItem
+  isSelected: boolean
+  onToggleSelect: () => void
+}) {
   const rebootMutation = useRebootDevice(device.id)
   const updateMutation = useUpdateDevice(device.id)
 
   return (
-    <TableRow>
+    <TableRow data-state={isSelected ? "selected" : undefined}>
+      <TableCell>
+        <Checkbox
+          checked={isSelected}
+          onChange={onToggleSelect}
+          aria-label={`Select ${device.name}`}
+        />
+      </TableCell>
       <TableCell>
         <Link to="/devices/$deviceId" params={{ deviceId: device.id }} className="font-medium hover:underline">
           {device.name}
