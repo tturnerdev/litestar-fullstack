@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import secrets
 from typing import TYPE_CHECKING, Any
+from uuid import UUID
 
 from advanced_alchemy.extensions.litestar import repository, service
 
@@ -34,9 +35,38 @@ class DeviceService(service.SQLAlchemyAsyncRepositoryService[m.Device]):
         return data
 
     async def update(self, data: ModelDictT[m.Device], item_id: Any | None = None, **kwargs: Any) -> m.Device:
-        """Update a device.
-
-        Returns:
-            The updated device object.
-        """
         return await super().update(data, item_id=item_id, **kwargs)
+
+    async def reboot_device(self, device_id: UUID) -> m.Device:
+        return await self.update(
+            item_id=device_id,
+            data={"status": m.DeviceStatus.REBOOTING},
+        )
+
+    async def reprovision_device(self, device_id: UUID) -> m.Device:
+        return await self.update(
+            item_id=device_id,
+            data={"status": m.DeviceStatus.PROVISIONING},
+        )
+
+    async def set_device_lines(
+        self,
+        device_id: UUID,
+        lines_data: list[dict[str, Any]],
+    ) -> m.Device:
+        line_svc = DeviceLineAssignmentService(session=self.repository.session)
+        existing = await line_svc.list(m.DeviceLineAssignment.device_id == device_id)
+        for line in existing:
+            await line_svc.delete(line.id)
+        for line_data in lines_data:
+            line_data["device_id"] = device_id
+            await line_svc.create(line_data)
+        return await self.get(device_id)
+
+
+class DeviceLineAssignmentService(service.SQLAlchemyAsyncRepositoryService[m.DeviceLineAssignment]):
+
+    class Repo(repository.SQLAlchemyAsyncRepository[m.DeviceLineAssignment]):
+        model_type = m.DeviceLineAssignment
+
+    repository_type = Repo

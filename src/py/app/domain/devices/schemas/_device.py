@@ -64,3 +64,22 @@ class DeviceUpdate(CamelizedBaseStruct, omit_defaults=True):
     firmware_version: str | msgspec.UnsetType | None = msgspec.UNSET
     ip_address: str | msgspec.UnsetType | None = msgspec.UNSET
     config_json: dict | msgspec.UnsetType | None = msgspec.UNSET
+
+
+class DeviceActionResponse(CamelizedBaseStruct):
+    device_id: UUID
+    action: str
+    status: str
+    message: str
+
+
+class DeviceLineAssignmentInput(CamelizedBaseStruct):
+    line_number: int
+    extension_id: UUID | None = None
+    label: str
+    line_type: str = "private"
+    is_active: bool = True
+
+
+class SetDeviceLinesRequest(CamelizedBaseStruct):
+    lines: list[DeviceLineAssignmentInput]

@@ -1,5 +1,5 @@
 """Devices domain services."""
 
-from app.domain.devices.services._device import DeviceService
+from app.domain.devices.services._device import DeviceLineAssignmentService, DeviceService
 
-__all__ = ("DeviceService",)
+__all__ = ("DeviceLineAssignmentService", "DeviceService")
