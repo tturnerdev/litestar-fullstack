@@ -85,23 +85,22 @@ export function useAdminAuditLogs(params: {
   page?: number
   pageSize?: number
   search?: string
-  action?: string
-  actorId?: string
+  actions?: string[]
+  actorEmail?: string
   targetType?: string
   startDate?: string
   endDate?: string
 }) {
-  const { page = 1, pageSize = 50, search, action, actorId, targetType, startDate, endDate } = params
+  const { page = 1, pageSize = 50, search, actions, actorEmail, targetType, startDate, endDate } = params
   return useQuery({
-    queryKey: ["admin", "audit", page, pageSize, search, action, actorId, targetType, startDate, endDate],
+    queryKey: ["admin", "audit", page, pageSize, search, actions, actorEmail, targetType, startDate, endDate],
     queryFn: async () => {
       const query = {
         currentPage: page,
         pageSize,
-        searchString: search,
-        searchIgnoreCase: search ? true : undefined,
-        actionIn: action ? [action] : undefined,
-        actorIdIn: actorId ? [actorId] : undefined,
+        searchString: actorEmail || search || undefined,
+        searchIgnoreCase: actorEmail || search ? true : undefined,
+        actionIn: actions && actions.length > 0 ? actions : undefined,
         targetTypeIn: targetType ? [targetType] : undefined,
         createdAfter: startDate,
         createdBefore: endDate,
@@ -111,6 +110,38 @@ export function useAdminAuditLogs(params: {
       })
       return response.data as { items: AuditLogEntry[]; total: number }
     },
+  })
+}
+
+export function useAdminAuditLogsExport(params: {
+  search?: string
+  actions?: string[]
+  actorEmail?: string
+  targetType?: string
+  startDate?: string
+  endDate?: string
+  enabled?: boolean
+}) {
+  const { search, actions, actorEmail, targetType, startDate, endDate, enabled = false } = params
+  return useQuery({
+    queryKey: ["admin", "audit", "export", search, actions, actorEmail, targetType, startDate, endDate],
+    queryFn: async () => {
+      const query = {
+        currentPage: 1,
+        pageSize: 1000,
+        searchString: actorEmail || search || undefined,
+        searchIgnoreCase: actorEmail || search ? true : undefined,
+        actionIn: actions && actions.length > 0 ? actions : undefined,
+        targetTypeIn: targetType ? [targetType] : undefined,
+        createdAfter: startDate,
+        createdBefore: endDate,
+      } as unknown as AdminListAuditLogsData["query"]
+      const response = await adminListAuditLogs({
+        query,
+      })
+      return response.data as { items: AuditLogEntry[]; total: number }
+    },
+    enabled,
   })
 }
 

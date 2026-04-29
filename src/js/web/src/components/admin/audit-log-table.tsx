@@ -1,218 +1,297 @@
-import { useState } from "react"
+import { Calendar, ChevronDown, ChevronRight, Download, Loader2, Search, X } from "lucide-react"
+import { useCallback, useMemo, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { SkeletonTable } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { useAdminAuditLogs } from "@/lib/api/hooks/admin"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { useAdminAuditLogs, useAdminAuditLogsExport } from "@/lib/api/hooks/admin"
 import type { AuditLogEntry } from "@/lib/generated/api"
 
 const PAGE_SIZE = 50
 
-const DOMAIN_OPTIONS = [
-  { value: "", label: "All domains" },
-  { value: "account", label: "Account" },
-  { value: "admin", label: "Admin" },
-  { value: "team", label: "Team" },
-  { value: "device", label: "Device" },
-  { value: "voice", label: "Voice" },
-  { value: "fax", label: "Fax" },
-  { value: "support", label: "Support" },
-  { value: "location", label: "Location" },
-  { value: "connection", label: "Connection" },
-  { value: "organization", label: "Organization" },
+/** Known audit action types grouped by domain. */
+const ACTION_GROUPS: Record<string, string[]> = {
+  Account: ["account.created", "account.updated", "account.deleted", "login.success", "login.failed", "password.changed", "mfa.enabled", "mfa.disabled"],
+  Team: ["team.created", "team.updated", "team.deleted", "team.member_added", "team.member_removed", "team.invite_sent"],
+  User: ["user.created", "user.updated", "user.deleted", "user.role_changed"],
+  Device: ["device.created", "device.updated", "device.deleted"],
+  Voice: ["extension.created", "extension.updated", "extension.deleted", "phone_number.created", "phone_number.updated", "phone_number.deleted"],
+  System: ["system.config_changed", "system.maintenance"],
+}
+
+/** Date preset definitions. */
+const DATE_PRESETS = [
+  { label: "Today", days: 0 },
+  { label: "Last 7 days", days: 7 },
+  { label: "Last 30 days", days: 30 },
+  { label: "All time", days: -1 },
 ] as const
 
-function getActionBadgeVariant(action: string): "default" | "secondary" | "outline" | "destructive" {
-  if (action.includes("delete") || action.includes("remove") || action.includes("revoke")) return "destructive"
-  if (action.includes("create") || action.includes("register") || action.includes("add")) return "default"
-  if (action.includes("update") || action.includes("change")) return "secondary"
-  return "outline"
+function formatDateForInput(date: Date): string {
+  return date.toISOString().split("T")[0]
 }
 
-interface AuditDiffViewProps {
-  details: Record<string, unknown> | null | undefined
+function getPresetDates(days: number): { start: string; end: string } {
+  const now = new Date()
+  const end = formatDateForInput(now)
+  if (days < 0) return { start: "", end: "" }
+  if (days === 0) return { start: end, end }
+  const start = new Date(now)
+  start.setDate(start.getDate() - days)
+  return { start: formatDateForInput(start), end }
 }
 
-function AuditDiffView({ details }: AuditDiffViewProps) {
-  if (!details) {
-    return <p className="text-sm text-muted-foreground">No details recorded.</p>
+/** Return a human-readable relative time string. */
+function relativeTime(dateStr: string): string {
+  const date = new Date(dateStr)
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffSec = Math.floor(diffMs / 1000)
+  if (diffSec < 60) return "just now"
+  const diffMin = Math.floor(diffSec / 60)
+  if (diffMin < 60) return `${diffMin}m ago`
+  const diffHr = Math.floor(diffMin / 60)
+  if (diffHr < 24) return `${diffHr}h ago`
+  const diffDays = Math.floor(diffHr / 24)
+  if (diffDays < 30) return `${diffDays}d ago`
+  const diffMonths = Math.floor(diffDays / 30)
+  return `${diffMonths}mo ago`
+}
+
+/** Derive the verb from an action string (e.g., "user.created" -> "created"). */
+function getActionVerb(action: string): string {
+  const parts = action.split(".")
+  return parts[parts.length - 1] ?? action
+}
+
+/** Map action verbs to badge styling. */
+function getActionBadgeClasses(action: string): string {
+  const verb = getActionVerb(action)
+  switch (verb) {
+    case "created":
+    case "success":
+    case "enabled":
+    case "member_added":
+    case "invite_sent":
+      return "border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-950 dark:text-green-300"
+    case "updated":
+    case "changed":
+    case "role_changed":
+    case "config_changed":
+      return "border-yellow-200 bg-yellow-50 text-yellow-700 dark:border-yellow-800 dark:bg-yellow-950 dark:text-yellow-300"
+    case "deleted":
+    case "failed":
+    case "disabled":
+    case "member_removed":
+      return "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300"
+    default:
+      return "border-zinc-200 bg-zinc-50 text-zinc-700 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300"
   }
+}
 
-  const before = details.before as Record<string, unknown> | null | undefined
-  const after = details.after as Record<string, unknown> | null | undefined
-  const metadata = details.metadata as Record<string, unknown> | null | undefined
+function escapeCsvField(value: string): string {
+  if (value.includes(",") || value.includes('"') || value.includes("\n")) {
+    return `"${value.replace(/"/g, '""')}"`
+  }
+  return value
+}
 
-  const hasChanges = before !== undefined || after !== undefined
-
-  return (
-    <div className="space-y-4">
-      {hasChanges && (
-        <div className="space-y-2">
-          <h4 className="text-sm font-medium">Changes</h4>
-          {before === null && after ? (
-            <div className="rounded-md border bg-green-50 p-3 dark:bg-green-950/30">
-              <p className="mb-2 text-xs font-medium text-green-700 dark:text-green-400">Created</p>
-              <div className="space-y-1">
-                {Object.entries(after).map(([key, value]) => (
-                  <div key={key} className="flex items-start gap-2 text-sm">
-                    <span className="font-mono text-xs text-muted-foreground">{key}:</span>
-                    <span className="text-green-700 dark:text-green-400">{formatValue(value)}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : after === null && before ? (
-            <div className="rounded-md border bg-red-50 p-3 dark:bg-red-950/30">
-              <p className="mb-2 text-xs font-medium text-red-700 dark:text-red-400">Deleted</p>
-              <div className="space-y-1">
-                {Object.entries(before).map(([key, value]) => (
-                  <div key={key} className="flex items-start gap-2 text-sm">
-                    <span className="font-mono text-xs text-muted-foreground">{key}:</span>
-                    <span className="text-red-700 dark:text-red-400 line-through">{formatValue(value)}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : before && after ? (
-            <div className="space-y-1">
-              {Object.keys({ ...before, ...after }).map((key) => {
-                const oldVal = (before as Record<string, unknown>)[key]
-                const newVal = (after as Record<string, unknown>)[key]
-                return (
-                  <div key={key} className="flex items-start gap-2 rounded-md border p-2 text-sm">
-                    <span className="min-w-[120px] font-mono text-xs text-muted-foreground">{key}</span>
-                    <span className="text-red-600 line-through dark:text-red-400">{formatValue(oldVal)}</span>
-                    <span className="text-muted-foreground">-&gt;</span>
-                    <span className="text-green-600 dark:text-green-400">{formatValue(newVal)}</span>
-                  </div>
-                )
-              })}
-            </div>
-          ) : null}
-        </div>
-      )}
-
-      {metadata && Object.keys(metadata).length > 0 && (
-        <div className="space-y-2">
-          <h4 className="text-sm font-medium">Metadata</h4>
-          <div className="rounded-md border bg-muted/50 p-3">
-            <div className="space-y-1">
-              {Object.entries(metadata).map(([key, value]) => (
-                <div key={key} className="flex items-start gap-2 text-sm">
-                  <span className="font-mono text-xs text-muted-foreground">{key}:</span>
-                  <span>{formatValue(value)}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {!hasChanges && !metadata && (
-        <div className="rounded-md border bg-muted/50 p-3">
-          <pre className="text-xs whitespace-pre-wrap">{JSON.stringify(details, null, 2)}</pre>
-        </div>
-      )}
-    </div>
+function generateCsv(items: AuditLogEntry[]): string {
+  const headers = ["timestamp", "action", "actor_email", "target_type", "target_id", "target_label", "ip_address", "user_agent"]
+  const rows = items.map((entry) =>
+    [
+      new Date(entry.createdAt).toISOString(),
+      entry.action,
+      entry.actorEmail ?? "",
+      entry.targetType ?? "",
+      entry.targetId ?? "",
+      entry.targetLabel ?? "",
+      entry.ipAddress ?? "",
+      entry.userAgent ?? "",
+    ]
+      .map(escapeCsvField)
+      .join(","),
   )
+  return [headers.join(","), ...rows].join("\n")
 }
 
-function formatValue(value: unknown): string {
-  if (value === null || value === undefined) return "null"
-  if (typeof value === "boolean") return value ? "true" : "false"
-  if (typeof value === "object") return JSON.stringify(value)
-  return String(value)
+function downloadCsv(csv: string) {
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement("a")
+  const date = new Date().toISOString().split("T")[0]
+  link.href = url
+  link.download = `audit-log-${date}.csv`
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
 }
 
-interface AuditDetailDialogProps {
-  entry: AuditLogEntry | null
-  open: boolean
-  onOpenChange: (open: boolean) => void
-}
-
-function AuditDetailDialog({ entry, open, onOpenChange }: AuditDetailDialogProps) {
-  if (!entry) return null
-
+/** Expandable detail row for a single audit log entry. */
+function AuditDetailRow({ entry }: { entry: AuditLogEntry }) {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[80vh] max-w-2xl overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            Audit Entry
-            <Badge variant={getActionBadgeVariant(entry.action)}>{entry.action}</Badge>
-          </DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <p className="text-xs text-muted-foreground">Actor</p>
-              <p>{entry.actorEmail ?? entry.actorId ?? "System"}</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Time</p>
-              <p>{new Date(entry.createdAt).toLocaleString()}</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Target</p>
-              <p>
-                {entry.targetType && <Badge variant="outline" className="mr-1">{entry.targetType}</Badge>}
-                {entry.targetLabel ?? entry.targetId ?? "-"}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">IP Address</p>
-              <p className="font-mono text-xs">{entry.ipAddress ?? "-"}</p>
-            </div>
+    <TableRow className="bg-muted/30 hover:bg-muted/30">
+      <TableCell colSpan={5} className="p-4">
+        <div className="grid gap-4 text-sm md:grid-cols-2">
+          <div className="space-y-2">
+            <p>
+              <span className="font-medium text-muted-foreground">Actor ID:</span> <span className="font-mono text-xs">{entry.actorId ?? "N/A"}</span>
+            </p>
+            <p>
+              <span className="font-medium text-muted-foreground">Target ID:</span> <span className="font-mono text-xs">{entry.targetId ?? "N/A"}</span>
+            </p>
+            <p>
+              <span className="font-medium text-muted-foreground">IP Address:</span> <span className="font-mono text-xs">{entry.ipAddress ?? "N/A"}</span>
+            </p>
+            <p>
+              <span className="font-medium text-muted-foreground">User Agent:</span> <span className="max-w-md truncate text-xs">{entry.userAgent ?? "N/A"}</span>
+            </p>
           </div>
-
-          <div className="border-t pt-4">
-            <AuditDiffView details={entry.details as Record<string, unknown> | null | undefined} />
-          </div>
-
-          {entry.userAgent && (
-            <div className="border-t pt-4">
-              <p className="text-xs text-muted-foreground">User Agent</p>
-              <p className="text-xs break-all">{entry.userAgent}</p>
+          {entry.details && Object.keys(entry.details).length > 0 && (
+            <div>
+              <p className="mb-1 font-medium text-muted-foreground">Details:</p>
+              <pre className="max-h-48 overflow-auto rounded-md border bg-muted/50 p-2 font-mono text-xs">{JSON.stringify(entry.details, null, 2)}</pre>
             </div>
           )}
         </div>
-      </DialogContent>
-    </Dialog>
+      </TableCell>
+    </TableRow>
   )
 }
 
 export function AuditLogTable() {
   const [page, setPage] = useState(1)
-  const [search, setSearch] = useState("")
-  const [action, setAction] = useState("")
-  const [domainFilter, setDomainFilter] = useState("")
-  const [actorId, setActorId] = useState("")
+  const [actorEmail, setActorEmail] = useState("")
   const [targetType, setTargetType] = useState("")
   const [startDate, setStartDate] = useState("")
   const [endDate, setEndDate] = useState("")
-  const [selectedEntry, setSelectedEntry] = useState<AuditLogEntry | null>(null)
-  const [detailOpen, setDetailOpen] = useState(false)
+  const [selectedActions, setSelectedActions] = useState<string[]>([])
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
+  const [isExporting, setIsExporting] = useState(false)
+
+  // Reset to page 1 when filters change
+  const resetPage = useCallback(() => setPage(1), [])
 
   const { data, isLoading, isError } = useAdminAuditLogs({
     page,
     pageSize: PAGE_SIZE,
-    search: search || undefined,
-    action: action || undefined,
-    domain: domainFilter || undefined,
-    actorId: actorId || undefined,
+    actions: selectedActions.length > 0 ? selectedActions : undefined,
+    actorEmail: actorEmail || undefined,
     targetType: targetType || undefined,
-    startDate: startDate || undefined,
-    endDate: endDate || undefined,
+    startDate: startDate ? new Date(startDate).toISOString() : undefined,
+    endDate: endDate ? new Date(`${endDate}T23:59:59`).toISOString() : undefined,
   })
 
-  const handleRowClick = (entry: AuditLogEntry) => {
-    setSelectedEntry(entry)
-    setDetailOpen(true)
-  }
+  const { refetch: fetchExport } = useAdminAuditLogsExport({
+    actions: selectedActions.length > 0 ? selectedActions : undefined,
+    actorEmail: actorEmail || undefined,
+    targetType: targetType || undefined,
+    startDate: startDate ? new Date(startDate).toISOString() : undefined,
+    endDate: endDate ? new Date(`${endDate}T23:59:59`).toISOString() : undefined,
+    enabled: false,
+  })
+
+  const totalPages = useMemo(() => Math.max(1, Math.ceil((data?.total ?? 0) / PAGE_SIZE)), [data?.total])
+
+  const toggleRow = useCallback((id: string) => {
+    setExpandedRows((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      return next
+    })
+  }, [])
+
+  const handleExport = useCallback(async () => {
+    setIsExporting(true)
+    try {
+      const result = await fetchExport()
+      if (result.data?.items) {
+        const csv = generateCsv(result.data.items)
+        downloadCsv(csv)
+      }
+    } finally {
+      setIsExporting(false)
+    }
+  }, [fetchExport])
+
+  const handleDatePreset = useCallback(
+    (days: number) => {
+      const { start, end } = getPresetDates(days)
+      setStartDate(start)
+      setEndDate(end)
+      resetPage()
+    },
+    [resetPage],
+  )
+
+  const handleAddAction = useCallback(
+    (action: string) => {
+      if (action && !selectedActions.includes(action)) {
+        setSelectedActions((prev) => [...prev, action])
+        resetPage()
+      }
+    },
+    [selectedActions, resetPage],
+  )
+
+  const handleRemoveAction = useCallback(
+    (action: string) => {
+      setSelectedActions((prev) => prev.filter((a) => a !== action))
+      resetPage()
+    },
+    [resetPage],
+  )
+
+  const handleClearActions = useCallback(() => {
+    setSelectedActions([])
+    resetPage()
+  }, [resetPage])
+
+  const handleTargetTypeChange = useCallback(
+    (value: string) => {
+      setTargetType(value === "all" ? "" : value)
+      resetPage()
+    },
+    [resetPage],
+  )
+
+  const handleActorEmailChange = useCallback(
+    (value: string) => {
+      setActorEmail(value)
+      resetPage()
+    },
+    [resetPage],
+  )
+
+  const activeFilterCount = useMemo(() => {
+    let count = 0
+    if (selectedActions.length > 0) count++
+    if (actorEmail) count++
+    if (targetType) count++
+    if (startDate || endDate) count++
+    return count
+  }, [selectedActions, actorEmail, targetType, startDate, endDate])
+
+  const handleClearAll = useCallback(() => {
+    setSelectedActions([])
+    setActorEmail("")
+    setTargetType("")
+    setStartDate("")
+    setEndDate("")
+    resetPage()
+  }, [resetPage])
+
+  // Known target types for the filter
+  const targetTypes = ["user", "team", "device", "extension", "phone_number", "role", "organization", "location"]
 
   if (isLoading) {
     return <SkeletonTable rows={6} />
@@ -229,116 +308,198 @@ export function AuditLogTable() {
     )
   }
 
-  const totalPages = Math.max(1, Math.ceil(data.total / PAGE_SIZE))
-
   return (
-    <>
-      <Card>
-        <CardHeader>
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+        <div>
           <CardTitle>Audit log</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-6">
-            <Input placeholder="Search" value={search} onChange={(event) => { setSearch(event.target.value); setPage(1) }} />
-            <Select value={domainFilter || "_all"} onValueChange={(value) => { setDomainFilter(value === "_all" ? "" : value); setPage(1) }}>
-              <SelectTrigger>
-                <SelectValue placeholder="All domains" />
+          <p className="mt-1 text-sm text-muted-foreground">
+            {data.total.toLocaleString()} {data.total === 1 ? "entry" : "entries"} found
+          </p>
+        </div>
+        <Button variant="outline" size="sm" onClick={handleExport} disabled={isExporting || data.total === 0}>
+          {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+          Export CSV
+        </Button>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Filter bar */}
+        <div className="space-y-3">
+          {/* Row 1: Date range + presets */}
+          <div className="flex flex-wrap items-center gap-2">
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <Input
+              type="date"
+              className="w-[160px]"
+              value={startDate}
+              onChange={(e) => {
+                setStartDate(e.target.value)
+                resetPage()
+              }}
+              aria-label="From date"
+            />
+            <span className="text-sm text-muted-foreground">to</span>
+            <Input
+              type="date"
+              className="w-[160px]"
+              value={endDate}
+              onChange={(e) => {
+                setEndDate(e.target.value)
+                resetPage()
+              }}
+              aria-label="To date"
+            />
+            <div className="flex gap-1">
+              {DATE_PRESETS.map((preset) => (
+                <Button key={preset.label} variant="ghost" size="sm" className="h-8 text-xs" onClick={() => handleDatePreset(preset.days)}>
+                  {preset.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          {/* Row 2: Actor email, Target type, Action type selector */}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative w-[220px]">
+              <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input placeholder="Filter by actor email" className="pl-9" value={actorEmail} onChange={(e) => handleActorEmailChange(e.target.value)} />
+            </div>
+
+            <Select value={targetType || "all"} onValueChange={handleTargetTypeChange}>
+              <SelectTrigger className="w-[170px]">
+                <SelectValue placeholder="Target type" />
               </SelectTrigger>
               <SelectContent>
-                {DOMAIN_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value || "_all"} value={opt.value || "_all"}>
-                    {opt.label}
+                <SelectItem value="all">All targets</SelectItem>
+                {targetTypes.map((t) => (
+                  <SelectItem key={t} value={t}>
+                    {t.replace(/_/g, " ")}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <Input placeholder="Action" value={action} onChange={(event) => { setAction(event.target.value); setPage(1) }} />
-            <Input placeholder="Target type" value={targetType} onChange={(event) => { setTargetType(event.target.value); setPage(1) }} />
-            <Input type="date" placeholder="Start date" value={startDate} onChange={(event) => { setStartDate(event.target.value); setPage(1) }} />
-            <Input type="date" placeholder="End date" value={endDate} onChange={(event) => { setEndDate(event.target.value); setPage(1) }} />
+
+            <Select value="" onValueChange={handleAddAction}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Add action filter" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(ACTION_GROUPS).map(([group, actions]) => {
+                  const available = actions.filter((a) => !selectedActions.includes(a))
+                  if (available.length === 0) return null
+                  return (
+                    <SelectGroup key={group}>
+                      <SelectLabel>{group}</SelectLabel>
+                      {available.map((a) => (
+                        <SelectItem key={a} value={a}>
+                          {a}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  )
+                })}
+              </SelectContent>
+            </Select>
+
+            {activeFilterCount > 0 && (
+              <Button variant="ghost" size="sm" className="h-8 text-xs text-muted-foreground" onClick={handleClearAll}>
+                <X className="mr-1 h-3 w-3" />
+                Clear filters
+              </Button>
+            )}
           </div>
+
+          {/* Action filter chips */}
+          {selectedActions.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-xs text-muted-foreground">Actions:</span>
+              {selectedActions.map((action) => (
+                <Badge key={action} variant="secondary" className="gap-1 pr-1">
+                  <span className="text-xs">{action}</span>
+                  <button type="button" className="ml-0.5 rounded-full p-0.5 hover:bg-muted" onClick={() => handleRemoveAction(action)} aria-label={`Remove ${action} filter`}>
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              ))}
+              {selectedActions.length > 1 && (
+                <button type="button" className="text-xs text-muted-foreground underline-offset-4 hover:underline" onClick={handleClearActions}>
+                  Clear all
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Table */}
+        <div className="rounded-md border">
           <Table>
-            <TableHeader>
+            <TableHeader className="sticky top-0 z-10 bg-background">
               <TableRow>
+                <TableHead className="w-8" />
                 <TableHead>Action</TableHead>
                 <TableHead>Actor</TableHead>
                 <TableHead>Target</TableHead>
-                <TableHead>Details</TableHead>
-                <TableHead>Created</TableHead>
+                <TableHead className="text-right">Time</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {data.items.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground">
-                    No audit entries found.
+                  <TableCell colSpan={5} className="py-12 text-center text-muted-foreground">
+                    No audit entries match the current filters.
                   </TableCell>
                 </TableRow>
               )}
               {data.items.map((entry) => {
-                const details = entry.details as Record<string, unknown> | null | undefined
-                const hasChanges = details && (details.before !== undefined || details.after !== undefined)
-                const hasMeta = details?.metadata !== undefined
-
+                const isExpanded = expandedRows.has(entry.id)
                 return (
-                  <TableRow
-                    key={entry.id}
-                    className="cursor-pointer hover:bg-muted/50"
-                    onClick={() => handleRowClick(entry)}
-                  >
-                    <TableCell>
-                      <Badge variant={getActionBadgeVariant(entry.action)} className="text-xs">
-                        {entry.action}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">{entry.actorEmail ?? entry.actorId ?? "System"}</TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {entry.targetType && (
-                        <Badge variant="outline" className="mr-1 text-xs">
-                          {entry.targetType}
+                  <>
+                    <TableRow key={entry.id} className="cursor-pointer transition-colors hover:bg-muted/50" onClick={() => toggleRow(entry.id)}>
+                      <TableCell className="w-8 pr-0">
+                        {isExpanded ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={getActionBadgeClasses(entry.action)}>
+                          {entry.action}
                         </Badge>
-                      )}
-                      {entry.targetLabel ?? entry.targetId ?? "-"}
-                    </TableCell>
-                    <TableCell>
-                      {hasChanges && (
-                        <Badge variant="secondary" className="text-xs">
-                          diff
-                        </Badge>
-                      )}
-                      {hasMeta && (
-                        <Badge variant="outline" className="ml-1 text-xs">
-                          meta
-                        </Badge>
-                      )}
-                      {!hasChanges && !hasMeta && details && (
-                        <Badge variant="outline" className="text-xs">
-                          data
-                        </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">{new Date(entry.createdAt).toLocaleString()}</TableCell>
-                  </TableRow>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">{entry.actorEmail ?? "System"}</TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {entry.targetLabel ?? entry.targetId ?? "-"}
+                        {entry.targetType && <span className="ml-1.5 text-xs text-muted-foreground/60">({entry.targetType})</span>}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="cursor-default text-sm text-muted-foreground">{relativeTime(entry.createdAt)}</span>
+                          </TooltipTrigger>
+                          <TooltipContent>{new Date(entry.createdAt).toLocaleString()}</TooltipContent>
+                        </Tooltip>
+                      </TableCell>
+                    </TableRow>
+                    {isExpanded && <AuditDetailRow key={`${entry.id}-detail`} entry={entry} />}
+                  </>
                 )
               })}
             </TableBody>
           </Table>
-          <div className="flex items-center justify-between">
-            <p className="text-xs text-muted-foreground">
-              {data.total} entries {" "} | {" "} Page {page} of {totalPages}
-            </p>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>
-                Previous
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>
-                Next
-              </Button>
-            </div>
+        </div>
+
+        {/* Pagination */}
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-muted-foreground">
+            Page {page} of {totalPages} ({data.total.toLocaleString()} total)
+          </p>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>
+              Previous
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>
+              Next
+            </Button>
           </div>
-        </CardContent>
-      </Card>
-      <AuditDetailDialog entry={selectedEntry} open={detailOpen} onOpenChange={setDetailOpen} />
-    </>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
