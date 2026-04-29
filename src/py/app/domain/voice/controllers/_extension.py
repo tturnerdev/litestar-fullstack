@@ -11,6 +11,7 @@ from litestar.params import Dependency, Parameter
 
 from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
+from app.domain.notifications.deps import provide_notifications_service
 from app.domain.voice.guards import requires_extension_ownership
 from app.domain.voice.schemas import Extension, ExtensionCreate, ExtensionUpdate
 from app.domain.voice.services import ExtensionService
@@ -24,6 +25,7 @@ if TYPE_CHECKING:
     from litestar.security.jwt import Token
 
     from app.domain.admin.services import AuditLogService
+    from app.domain.notifications.services import NotificationService
 
 
 class ExtensionController(Controller):
@@ -45,6 +47,7 @@ class ExtensionController(Controller):
         },
     ) | {
         "audit_service": Provide(provide_audit_log_service),
+        "notifications_service": Provide(provide_notifications_service),
     }
 
     @get(operation_id="ListExtensions")
@@ -67,6 +70,7 @@ class ExtensionController(Controller):
         request: Request[m.User, Token, Any],
         extensions_service: ExtensionService,
         audit_service: AuditLogService,
+        notifications_service: NotificationService,
         current_user: m.User,
         data: ExtensionCreate,
     ) -> Extension:
@@ -87,6 +91,16 @@ class ExtensionController(Controller):
             after=after,
             request=request,
         )
+        try:
+            await notifications_service.notify(
+                user_id=current_user.id,
+                title="Extension Created",
+                message=f"Your extension '{db_obj.extension_number}' has been created.",
+                category="voice",
+                action_url=f"/voice/extensions/{db_obj.id}",
+            )
+        except Exception:
+            pass
         return extensions_service.to_schema(db_obj, schema_type=Extension)
 
     @get(operation_id="GetExtension", path="/{ext_id:uuid}", guards=[requires_extension_ownership])

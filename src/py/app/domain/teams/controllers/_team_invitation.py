@@ -11,7 +11,9 @@ from litestar.params import Dependency
 from sqlalchemy.orm import selectinload
 
 from app.db import models as m
+from app.domain.accounts.deps import provide_users_service
 from app.domain.admin.deps import provide_audit_log_service
+from app.domain.notifications.deps import provide_notifications_service
 from app.domain.teams.deps import provide_team_members_service, provide_teams_service
 from app.domain.teams.schemas import TeamInvitation, TeamInvitationCreate
 from app.domain.teams.services import TeamInvitationService
@@ -26,7 +28,9 @@ if TYPE_CHECKING:
     from advanced_alchemy.service import OffsetPagination
     from litestar.security.jwt import Token
 
+    from app.domain.accounts.services import UserService
     from app.domain.admin.services import AuditLogService
+    from app.domain.notifications.services import NotificationService
     from app.domain.teams.services import TeamMemberService, TeamService
     from app.lib.email import AppEmailService
 
@@ -56,6 +60,8 @@ class TeamInvitationController(Controller):
         "teams_service": Provide(provide_teams_service),
         "team_members_service": Provide(provide_team_members_service),
         "audit_service": Provide(provide_audit_log_service),
+        "notifications_service": Provide(provide_notifications_service),
+        "users_service": Provide(provide_users_service),
     }
 
     @post(operation_id="CreateTeamInvitation", path="")
@@ -65,6 +71,8 @@ class TeamInvitationController(Controller):
         team_invitations_service: TeamInvitationService,
         teams_service: TeamService,
         audit_service: AuditLogService,
+        notifications_service: NotificationService,
+        users_service: UserService,
         app_mailer: AppEmailService,
         request: Request[m.User, Token, Any],
         team_id: UUID,
@@ -110,6 +118,19 @@ class TeamInvitationController(Controller):
             after=after,
             request=request,
         )
+
+        try:
+            invited_user = await users_service.get_one_or_none(email=data.email)
+            if invited_user is not None:
+                await notifications_service.notify(
+                    user_id=invited_user.id,
+                    title="Team Invitation",
+                    message=f"You've been invited to join team '{team.name}'.",
+                    category="team",
+                    action_url=f"/teams/{team_id}",
+                )
+        except Exception:
+            pass
 
         return team_invitations_service.to_schema(db_obj, schema_type=TeamInvitation)
 
@@ -183,6 +204,8 @@ class TeamInvitationController(Controller):
         team_invitations_service: TeamInvitationService,
         team_members_service: TeamMemberService,
         audit_service: AuditLogService,
+        notifications_service: NotificationService,
+        teams_service: TeamService,
         team_id: UUID,
         invitation_id: UUID,
     ) -> Message:
@@ -237,6 +260,20 @@ class TeamInvitationController(Controller):
             request=request,
             metadata={"team_id": str(team_id), "role": db_obj.role},
         )
+
+        try:
+            team = await teams_service.get(team_id)
+            owner = next((member for member in team.members if member.is_owner), None)
+            if owner is not None:
+                await notifications_service.notify(
+                    user_id=owner.user_id,
+                    title="Invitation Accepted",
+                    message=f"{current_user.email} has joined team '{team.name}'.",
+                    category="team",
+                    action_url=f"/teams/{team_id}",
+                )
+        except Exception:
+            pass
 
         return Message(message="Team invitation accepted")
 

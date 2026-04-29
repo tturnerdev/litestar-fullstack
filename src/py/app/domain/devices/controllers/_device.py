@@ -15,6 +15,7 @@ from app.domain.admin.deps import provide_audit_log_service
 from app.domain.devices.guards import requires_device_ownership
 from app.domain.devices.schemas import Device, DeviceCreate, DeviceUpdate
 from app.domain.devices.services import DeviceService
+from app.domain.notifications.deps import provide_notifications_service
 from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
 
@@ -25,6 +26,7 @@ if TYPE_CHECKING:
     from litestar.security.jwt import Token
 
     from app.domain.admin.services import AuditLogService
+    from app.domain.notifications.services import NotificationService
 
 
 class DeviceController(Controller):
@@ -47,6 +49,7 @@ class DeviceController(Controller):
         },
     ) | {
         "audit_service": Provide(provide_audit_log_service),
+        "notifications_service": Provide(provide_notifications_service),
     }
 
     @get(operation_id="ListDevices", path="/api/devices")
@@ -81,6 +84,7 @@ class DeviceController(Controller):
         request: Request[m.User, Token, Any],
         devices_service: DeviceService,
         audit_service: AuditLogService,
+        notifications_service: NotificationService,
         current_user: m.User,
         data: DeviceCreate,
     ) -> Device:
@@ -112,6 +116,16 @@ class DeviceController(Controller):
             after=after,
             request=request,
         )
+        try:
+            await notifications_service.notify(
+                user_id=current_user.id,
+                title="Device Registered",
+                message=f"Your device '{db_obj.name}' has been registered.",
+                category="device",
+                action_url=f"/devices/{db_obj.id}",
+            )
+        except Exception:
+            pass
         return devices_service.to_schema(db_obj, schema_type=Device)
 
     @get(
@@ -194,6 +208,7 @@ class DeviceController(Controller):
         request: Request[m.User, Token, Any],
         devices_service: DeviceService,
         audit_service: AuditLogService,
+        notifications_service: NotificationService,
         current_user: m.User,
         device_id: Annotated[UUID, Parameter(title="Device ID", description="The device to delete.")],
     ) -> None:
@@ -209,6 +224,7 @@ class DeviceController(Controller):
         db_obj = await devices_service.get(device_id)
         before = capture_snapshot(db_obj)
         target_label = db_obj.name
+        owner_id = db_obj.user_id
         await devices_service.delete(device_id)
         await log_audit(
             audit_service,
@@ -222,3 +238,13 @@ class DeviceController(Controller):
             after=None,
             request=request,
         )
+        try:
+            await notifications_service.notify(
+                user_id=owner_id,
+                title="Device Removed",
+                message=f"Your device '{target_label}' has been removed.",
+                category="device",
+                action_url="/devices",
+            )
+        except Exception:
+            pass

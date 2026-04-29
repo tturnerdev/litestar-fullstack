@@ -17,6 +17,7 @@ from app.domain.admin.deps import provide_audit_log_service
 from app.domain.fax.guards import requires_fax_number_access
 from app.domain.fax.schemas import FaxNumber, FaxNumberUpdate
 from app.domain.fax.services import FaxNumberService
+from app.domain.notifications.deps import provide_notifications_service
 from app.lib import constants
 from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
@@ -28,6 +29,7 @@ if TYPE_CHECKING:
     from litestar.security.jwt import Token
 
     from app.domain.admin.services import AuditLogService
+    from app.domain.notifications.services import NotificationService
 
 
 def _can_access_fax_number(user: m.User, fax_number: m.FaxNumber) -> bool:
@@ -62,6 +64,7 @@ class FaxNumberController(Controller):
         },
     ) | {
         "audit_service": Provide(provide_audit_log_service),
+        "notifications_service": Provide(provide_notifications_service),
     }
 
     @get(component="fax/number-list", operation_id="ListFaxNumbers", path="/api/fax/numbers")
@@ -177,6 +180,7 @@ class FaxNumberController(Controller):
         request: Request[m.User, Token, Any],
         fax_numbers_service: FaxNumberService,
         audit_service: AuditLogService,
+        notifications_service: NotificationService,
         current_user: m.User,
         fax_number_id: Annotated[UUID, Parameter(title="Fax Number ID", description="The fax number to delete.")],
     ) -> None:
@@ -186,6 +190,7 @@ class FaxNumberController(Controller):
             raise PermissionDeniedException(detail="Insufficient permissions to delete this fax number.")
         before = capture_snapshot(existing)
         target_label = existing.number
+        owner_id = existing.user_id
         await fax_numbers_service.delete(fax_number_id)
         await log_audit(
             audit_service,
@@ -199,3 +204,13 @@ class FaxNumberController(Controller):
             after=None,
             request=request,
         )
+        try:
+            await notifications_service.notify(
+                user_id=owner_id,
+                title="Fax Number Removed",
+                message=f"Your fax number '{target_label}' has been removed.",
+                category="fax",
+                action_url="/fax/numbers",
+            )
+        except Exception:
+            pass

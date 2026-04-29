@@ -13,6 +13,7 @@ from litestar.status_codes import HTTP_202_ACCEPTED
 from app.db import models as m
 from app.domain.accounts.deps import provide_users_service
 from app.domain.admin.deps import provide_audit_log_service
+from app.domain.notifications.deps import provide_notifications_service
 from app.domain.teams.deps import provide_team_members_service, provide_teams_service
 from app.domain.teams.schemas import Team, TeamMember, TeamMemberModify, TeamMemberUpdate
 from app.lib.audit import capture_snapshot, log_audit
@@ -24,6 +25,7 @@ if TYPE_CHECKING:
 
     from app.domain.accounts.services import UserService
     from app.domain.admin.services import AuditLogService
+    from app.domain.notifications.services import NotificationService
     from app.domain.teams.services import TeamMemberService, TeamService
 
 
@@ -36,6 +38,7 @@ class TeamMemberController(Controller):
         "team_members_service": Provide(provide_team_members_service),
         "users_service": Provide(provide_users_service),
         "audit_service": Provide(provide_audit_log_service),
+        "notifications_service": Provide(provide_notifications_service),
     }
 
     @post(operation_id="AddMemberToTeam", path="/api/teams/{team_id:uuid}/members")
@@ -109,6 +112,7 @@ class TeamMemberController(Controller):
         team_members_service: TeamMemberService,
         users_service: UserService,
         audit_service: AuditLogService,
+        notifications_service: NotificationService,
         current_user: m.User,
         data: TeamMemberModify,
         team_id: Annotated[UUID, Parameter(title="Team ID", description="The team to delete.")],
@@ -152,6 +156,17 @@ class TeamMemberController(Controller):
             after=None,
             request=request,
         )
+
+        try:
+            await notifications_service.notify(
+                user_id=user_obj.id,
+                title="Removed from Team",
+                message=f"You have been removed from team '{team_obj.name}'.",
+                category="team",
+                action_url=f"/teams/{team_id}",
+            )
+        except Exception:
+            pass
 
         return teams_service.to_schema(team_obj, schema_type=Team)
 

@@ -12,6 +12,7 @@ from sqlalchemy.orm import selectinload
 
 from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
+from app.domain.notifications.deps import provide_notifications_service
 from app.domain.support.guards import requires_support_agent, requires_ticket_access
 from app.domain.support.schemas import Ticket, TicketCreate, TicketUpdate
 from app.domain.support.services import TicketMessageService, TicketService
@@ -26,6 +27,7 @@ if TYPE_CHECKING:
     from litestar.security.jwt import Token
 
     from app.domain.admin.services import AuditLogService
+    from app.domain.notifications.services import NotificationService
 
 
 class TicketController(Controller):
@@ -48,6 +50,7 @@ class TicketController(Controller):
         },
     ) | {
         "audit_service": Provide(provide_audit_log_service),
+        "notifications_service": Provide(provide_notifications_service),
     }
 
     @get(operation_id="ListTickets", path="/api/support/tickets")
@@ -73,6 +76,7 @@ class TicketController(Controller):
         request: Request[m.User, Token, Any],
         tickets_service: TicketService,
         audit_service: AuditLogService,
+        notifications_service: NotificationService,
         current_user: m.User,
         data: TicketCreate,
     ) -> Ticket:
@@ -104,6 +108,16 @@ class TicketController(Controller):
             after=after,
             request=request,
         )
+        try:
+            await notifications_service.notify(
+                user_id=current_user.id,
+                title="Ticket Created",
+                message=f"Your support ticket '{db_obj.subject}' has been created.",
+                category="ticket",
+                action_url=f"/support/{db_obj.id}",
+            )
+        except Exception:
+            pass
         return tickets_service.to_schema(db_obj, schema_type=Ticket)
 
     @get(
@@ -196,6 +210,7 @@ class TicketController(Controller):
         request: Request[m.User, Token, Any],
         tickets_service: TicketService,
         audit_service: AuditLogService,
+        notifications_service: NotificationService,
         current_user: m.User,
         ticket_id: Annotated[UUID, Parameter(title="Ticket ID", description="The ticket to close.")],
     ) -> Ticket:
@@ -215,6 +230,16 @@ class TicketController(Controller):
             after=after,
             request=request,
         )
+        try:
+            await notifications_service.notify(
+                user_id=db_obj.user_id,
+                title="Ticket Closed",
+                message=f"Your support ticket '{db_obj.subject}' has been closed.",
+                category="ticket",
+                action_url=f"/support/{db_obj.id}",
+            )
+        except Exception:
+            pass
         return tickets_service.to_schema(db_obj, schema_type=Ticket)
 
     @post(
@@ -227,6 +252,7 @@ class TicketController(Controller):
         request: Request[m.User, Token, Any],
         tickets_service: TicketService,
         audit_service: AuditLogService,
+        notifications_service: NotificationService,
         current_user: m.User,
         ticket_id: Annotated[UUID, Parameter(title="Ticket ID", description="The ticket to reopen.")],
     ) -> Ticket:
@@ -246,4 +272,14 @@ class TicketController(Controller):
             after=after,
             request=request,
         )
+        try:
+            await notifications_service.notify(
+                user_id=db_obj.user_id,
+                title="Ticket Reopened",
+                message=f"Your support ticket '{db_obj.subject}' has been reopened.",
+                category="ticket",
+                action_url=f"/support/{db_obj.id}",
+            )
+        except Exception:
+            pass
         return tickets_service.to_schema(db_obj, schema_type=Ticket)
