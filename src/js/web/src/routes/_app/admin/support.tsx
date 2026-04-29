@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { createFileRoute } from "@tanstack/react-router"
 import { Search } from "lucide-react"
+import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -62,7 +63,7 @@ function AdminSupportPage() {
 
   return (
     <PageContainer className="flex-1 space-y-8">
-      <PageHeader eyebrow="Administration" title="Support" description="Monitor support tickets and response metrics across the organization." />
+      <PageHeader eyebrow="Administration" title="Support" description="Monitor support tickets and response metrics across the organization." breadcrumbs={<AdminBreadcrumbs />} />
       <AdminNav />
 
       <PageSection>

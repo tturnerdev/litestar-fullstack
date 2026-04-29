@@ -29,7 +29,7 @@ export function AuthForm() {
       <AuthHeroPanel title="Litestar Fullstack" description="Build high-performance web applications with Python and React. Seamless SPA experience powered by Vite." />
 
       {/* Right panel with form - centers on mobile when hero is hidden */}
-      <div className="flex flex-1 flex-col items-center justify-center px-4 py-8 sm:px-6 lg:px-8">
+      <div className="flex flex-1 flex-col items-center justify-center bg-brand-gray-light px-4 py-8 dark:bg-background sm:px-6 lg:px-8">
         {/* Toggle link in top right */}
         <Link to={togglePath} search={toggleSearch} className={cn(buttonVariants({ variant: "ghost" }), "absolute top-4 right-4 md:top-8 md:right-8")}>
           {isLogin ? "Need an account?" : "Sign in"}

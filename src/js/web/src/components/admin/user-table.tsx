@@ -1,13 +1,16 @@
 import { useMemo, useState } from "react"
+import { UserBulkActions } from "@/components/admin/user-bulk-actions"
+import { UserRowActions } from "@/components/admin/user-row-actions"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
 import { ExportButton } from "@/components/ui/export-button"
 import { Input } from "@/components/ui/input"
 import { SkeletonTable } from "@/components/ui/skeleton"
 import { type SortDirection, SortableHeader, nextSortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { UserRowActions } from "@/components/admin/user-row-actions"
+import { useRowSelection } from "@/hooks/use-row-selection"
 import { useAdminUsers } from "@/lib/api/hooks/admin"
 import type { AdminUserSummary } from "@/lib/generated/api"
 
@@ -40,6 +43,7 @@ export function UserTable() {
   const [sortKey, setSortKey] = useState<string | null>(null)
   const [sortDirection, setSortDirection] = useState<SortDirection>(null)
   const { data, isLoading, isError } = useAdminUsers(page, PAGE_SIZE, search || undefined)
+  const selection = useRowSelection(page)
 
   const sortedItems = useMemo(() => {
     if (!data?.items || !sortKey || !sortDirection) return data?.items ?? []
@@ -72,8 +76,12 @@ export function UserTable() {
   }
 
   const totalPages = Math.max(1, Math.ceil(data.total / PAGE_SIZE))
+  const currentIds = sortedItems.map((u) => u.id)
+  const allSelected = selection.isAllSelected(currentIds)
+  const partiallySelected = selection.isPartiallySelected(currentIds)
 
   return (
+    <>
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Users</CardTitle>
@@ -95,6 +103,13 @@ export function UserTable() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-10">
+                <Checkbox
+                  checked={allSelected}
+                  indeterminate={partiallySelected}
+                  onChange={() => allSelected ? selection.deselectAll() : selection.selectAll(currentIds)}
+                />
+              </TableHead>
               <SortableHeader label="Name" sortKey="name" currentSort={sortKey} currentDirection={sortDirection} onSort={handleSort} />
               <SortableHeader label="Email" sortKey="email" currentSort={sortKey} currentDirection={sortDirection} onSort={handleSort} />
               <TableHead>Status</TableHead>
@@ -105,13 +120,16 @@ export function UserTable() {
           <TableBody>
             {sortedItems.length === 0 && (
               <TableRow>
-                <TableCell colSpan={5} className="text-center text-muted-foreground">
+                <TableCell colSpan={6} className="text-center text-muted-foreground">
                   No users found.
                 </TableCell>
               </TableRow>
             )}
             {sortedItems.map((user) => (
-              <TableRow key={user.id}>
+              <TableRow key={user.id} data-state={selection.isSelected(user.id) ? "selected" : undefined}>
+                <TableCell>
+                  <Checkbox checked={selection.isSelected(user.id)} onChange={() => selection.toggle(user.id)} />
+                </TableCell>
                 <TableCell className="font-medium">{user.name ?? user.email}</TableCell>
                 <TableCell className="text-muted-foreground">{user.email}</TableCell>
                 <TableCell>
@@ -148,5 +166,7 @@ export function UserTable() {
         </div>
       </CardContent>
     </Card>
+    <UserBulkActions selectedIds={selection.selectedIds} onClearSelection={selection.deselectAll} />
+    </>
   )
 }

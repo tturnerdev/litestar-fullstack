@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
+import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminCharts } from "@/components/admin/admin-charts"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { AdminQuickActions } from "@/components/admin/admin-quick-actions"
@@ -13,7 +14,7 @@ export const Route = createFileRoute("/_app/admin/")({
 function AdminDashboardPage() {
   return (
     <PageContainer className="flex-1 space-y-8">
-      <PageHeader eyebrow="Administration" title="Admin Console" description="Review activity, manage users, and oversee teams." />
+      <PageHeader eyebrow="Administration" title="Admin Console" description="Review activity, manage users, and oversee teams." breadcrumbs={<AdminBreadcrumbs />} />
       <AdminNav />
       <PageSection>
         <StatsCards />

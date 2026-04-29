@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { RefreshCw } from "lucide-react"
+import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -35,6 +36,7 @@ function AdminSystemPage() {
         eyebrow="Administration"
         title="System Status"
         description="Monitor system health, application info, and worker queues."
+        breadcrumbs={<AdminBreadcrumbs />}
         actions={
           <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
             <RefreshCw className={isFetching ? "animate-spin" : ""} />
