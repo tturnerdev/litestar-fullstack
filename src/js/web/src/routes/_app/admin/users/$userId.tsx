@@ -7,6 +7,7 @@ import { EditUserDialog } from "@/components/admin/edit-user-dialog"
 import { ManageRolesDialog } from "@/components/admin/manage-roles-dialog"
 import { ToggleUserStatusDialog } from "@/components/admin/toggle-user-status-dialog"
 import { Badge } from "@/components/ui/badge"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
@@ -76,6 +77,17 @@ function AdminUserDetailPage() {
         eyebrow="Administration"
         title={data.name ?? data.email}
         description="Manage user account settings and permissions."
+        breadcrumbs={
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem><BreadcrumbLink asChild><Link to="/admin">Admin</Link></BreadcrumbLink></BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem><BreadcrumbLink asChild><Link to="/admin/users">Users</Link></BreadcrumbLink></BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem><BreadcrumbPage>{data.name ?? data.email}</BreadcrumbPage></BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        }
         actions={
           <Button variant="outline" size="sm" asChild>
             <Link to="/admin/users">

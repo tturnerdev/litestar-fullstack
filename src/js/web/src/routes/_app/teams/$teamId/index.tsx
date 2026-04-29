@@ -1,8 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, Link, useParams } from "@tanstack/react-router"
-import { ArrowLeft, Clock, Mail, X } from "lucide-react"
+import { ArrowLeft, ChevronRight, Clock, Mail, X } from "lucide-react"
 import { useEffect } from "react"
 import { InviteMemberDialog } from "@/components/teams/invite-member-dialog"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { TeamPermissions } from "@/components/teams/team-permissions"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -107,6 +108,17 @@ function TeamDetail() {
         eyebrow="Teams"
         title={team.name}
         description={team.description || "No description provided."}
+        breadcrumbs={
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem><BreadcrumbLink asChild><Link to="/home">Home</Link></BreadcrumbLink></BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem><BreadcrumbLink asChild><Link to="/teams">Teams</Link></BreadcrumbLink></BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem><BreadcrumbPage>{team.name}</BreadcrumbPage></BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        }
         actions={
           <div className="flex items-center gap-3">
             <Button variant="outline" size="sm" asChild>
