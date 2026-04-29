@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { Bell, Calendar, Hash, Layout, Monitor, Moon, PanelLeftClose, Sun } from "lucide-react"
+import { Calendar, Hash, Layout, Monitor, Moon, PanelLeftClose, Sun } from "lucide-react"
+import { NotificationPreferences } from "@/components/settings/notification-preferences"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
@@ -21,7 +22,7 @@ function SettingsPage() {
       <PageSection delay={0.1}>
         <div className="space-y-6">
           <AppearanceSection />
-          <NotificationSection />
+          <NotificationPreferences />
           <DisplaySection />
         </div>
       </PageSection>
@@ -81,69 +82,6 @@ function AppearanceSection() {
             <p className="text-sm text-muted-foreground">Reduce padding and spacing throughout the interface.</p>
           </div>
           <Switch id="compact-mode" checked={compactMode} onCheckedChange={setCompactMode} />
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
-function NotificationSection() {
-  const { emailNotifications, setEmailNotifications, pushNotifications, setPushNotifications, notificationCategories, setNotificationCategory } = useSettingsStore()
-
-  const categories: { key: keyof typeof notificationCategories; label: string; description: string }[] = [
-    { key: "tickets", label: "Tickets", description: "Support ticket updates and assignments" },
-    { key: "teamUpdates", label: "Team Updates", description: "Team membership and role changes" },
-    { key: "deviceAlerts", label: "Device Alerts", description: "Device status and connectivity changes" },
-    { key: "faxNotifications", label: "Fax Notifications", description: "Incoming and outgoing fax activity" },
-  ]
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Bell className="h-5 w-5 text-muted-foreground" />
-          Notification Preferences
-        </CardTitle>
-        <CardDescription>Choose how and when you want to be notified.</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label htmlFor="email-notifications" className="text-sm font-medium">
-                Email notifications
-              </Label>
-              <p className="text-sm text-muted-foreground">Receive notifications via email.</p>
-            </div>
-            <Switch id="email-notifications" checked={emailNotifications} onCheckedChange={setEmailNotifications} />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label htmlFor="push-notifications" className="text-sm font-medium">
-                Push notifications
-              </Label>
-              <p className="text-sm text-muted-foreground">Receive browser push notifications.</p>
-            </div>
-            <Switch id="push-notifications" checked={pushNotifications} onCheckedChange={setPushNotifications} />
-          </div>
-        </div>
-
-        <div className="border-t pt-4">
-          <h4 className="mb-3 text-sm font-medium">Categories</h4>
-          <div className="space-y-4">
-            {categories.map(({ key, label, description }) => (
-              <div key={key} className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label htmlFor={`category-${key}`} className="text-sm font-medium">
-                    {label}
-                  </Label>
-                  <p className="text-sm text-muted-foreground">{description}</p>
-                </div>
-                <Switch id={`category-${key}`} checked={notificationCategories[key]} onCheckedChange={(v) => setNotificationCategory(key, v)} />
-              </div>
-            ))}
-          </div>
         </div>
       </CardContent>
     </Card>

@@ -61,7 +61,7 @@ export function TeamList() {
     }
   }, [isError, isLoading, setTeams, teamsData])
 
-  const filteredTeams = teamsData.filter((team) => team.name.toLowerCase().includes(search.toLowerCase()) || team.description?.toLowerCase().includes(search.toLowerCase()))
+  const filteredTeams = teamsData.filter((team: Team) => team.name.toLowerCase().includes(search.toLowerCase()) || team.description?.toLowerCase().includes(search.toLowerCase()))
 
   if (isLoading) {
     return (

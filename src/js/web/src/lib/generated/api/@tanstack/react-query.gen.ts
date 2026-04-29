@@ -44,6 +44,7 @@ import {
   createDevice,
   createExtension,
   createFaxEmailRoute,
+  createFaxNumber,
   createForwardingRule,
   createLocation,
   createPhoneNumber,
@@ -86,6 +87,7 @@ import {
   getFaxNumber,
   getLocation,
   getMfaStatus,
+  getNotificationPreferences,
   getOrganization,
   getPhoneNumber,
   getRecentActivity,
@@ -101,6 +103,7 @@ import {
   initiateDisableMfaOAuth,
   initiateMfaSetup,
   listConnections,
+  listDeviceLines,
   listDevices,
   listExtensions,
   listFaxEmailRoutes,
@@ -128,15 +131,19 @@ import {
   profileOAuthLink,
   profileOAuthUnlink,
   profileOAuthUpgradeScopes,
+  rebootDevice,
   regenerateMfaBackupCodes,
   rejectTeamInvitation,
   removeMemberFromTeam,
   reopenTicket,
+  reprovisionDevice,
   resetPassword,
   revokeAllSessions,
   revokeRole,
   revokeSession,
   revokeUserRole,
+  sendFax,
+  setDeviceLines,
   setForwardingRules,
   submitFeedback,
   syncEntity,
@@ -152,6 +159,7 @@ import {
   updateFaxNumber,
   updateForwardingRule,
   updateLocation,
+  updateNotificationPreferences,
   updateOrganization,
   updatePhoneNumber,
   updateRole,
@@ -271,6 +279,9 @@ import type {
   CreateFaxEmailRouteData,
   CreateFaxEmailRouteError,
   CreateFaxEmailRouteResponse,
+  CreateFaxNumberData,
+  CreateFaxNumberError,
+  CreateFaxNumberResponse,
   CreateForwardingRuleData,
   CreateForwardingRuleError,
   CreateForwardingRuleResponse,
@@ -395,6 +406,8 @@ import type {
   GetLocationResponse,
   GetMfaStatusData,
   GetMfaStatusResponse,
+  GetNotificationPreferencesData,
+  GetNotificationPreferencesResponse,
   GetOrganizationData,
   GetOrganizationResponse,
   GetPhoneNumberData,
@@ -437,6 +450,9 @@ import type {
   ListConnectionsData,
   ListConnectionsError,
   ListConnectionsResponse,
+  ListDeviceLinesData,
+  ListDeviceLinesError,
+  ListDeviceLinesResponse,
   ListDevicesData,
   ListDevicesError,
   ListDevicesResponse,
@@ -513,6 +529,9 @@ import type {
   ProfileOAuthUpgradeScopesData,
   ProfileOAuthUpgradeScopesError,
   ProfileOAuthUpgradeScopesResponse,
+  RebootDeviceData,
+  RebootDeviceError,
+  RebootDeviceResponse,
   RegenerateMfaBackupCodesData,
   RegenerateMfaBackupCodesError,
   RegenerateMfaBackupCodesResponse,
@@ -525,6 +544,9 @@ import type {
   ReopenTicketData,
   ReopenTicketError,
   ReopenTicketResponse,
+  ReprovisionDeviceData,
+  ReprovisionDeviceError,
+  ReprovisionDeviceResponse,
   ResetPasswordData,
   ResetPasswordError,
   ResetPasswordResponse,
@@ -539,6 +561,12 @@ import type {
   RevokeUserRoleData,
   RevokeUserRoleError,
   RevokeUserRoleResponse,
+  SendFaxData,
+  SendFaxError,
+  SendFaxResponse,
+  SetDeviceLinesData,
+  SetDeviceLinesError,
+  SetDeviceLinesResponse,
   SetForwardingRulesData,
   SetForwardingRulesError,
   SetForwardingRulesResponse,
@@ -582,6 +610,9 @@ import type {
   UpdateLocationData,
   UpdateLocationError,
   UpdateLocationResponse,
+  UpdateNotificationPreferencesData,
+  UpdateNotificationPreferencesError,
+  UpdateNotificationPreferencesResponse,
   UpdateOrganizationData,
   UpdateOrganizationError,
   UpdateOrganizationResponse,
@@ -1746,6 +1777,113 @@ export const updateDeviceMutation = (
   return mutationOptions;
 };
 
+export const listDeviceLinesQueryKey = (
+  options: Options<ListDeviceLinesData>,
+) => createQueryKey("listDeviceLines", options);
+
+/**
+ * ListDeviceLines
+ */
+export const listDeviceLinesOptions = (options: Options<ListDeviceLinesData>) =>
+  queryOptions<
+    ListDeviceLinesResponse,
+    ListDeviceLinesError,
+    ListDeviceLinesResponse,
+    ReturnType<typeof listDeviceLinesQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listDeviceLines({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listDeviceLinesQueryKey(options),
+  });
+
+/**
+ * SetDeviceLines
+ */
+export const setDeviceLinesMutation = (
+  options?: Partial<Options<SetDeviceLinesData>>,
+): UseMutationOptions<
+  SetDeviceLinesResponse,
+  SetDeviceLinesError,
+  Options<SetDeviceLinesData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    SetDeviceLinesResponse,
+    SetDeviceLinesError,
+    Options<SetDeviceLinesData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await setDeviceLines({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * RebootDevice
+ */
+export const rebootDeviceMutation = (
+  options?: Partial<Options<RebootDeviceData>>,
+): UseMutationOptions<
+  RebootDeviceResponse,
+  RebootDeviceError,
+  Options<RebootDeviceData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    RebootDeviceResponse,
+    RebootDeviceError,
+    Options<RebootDeviceData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await rebootDevice({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * ReprovisionDevice
+ */
+export const reprovisionDeviceMutation = (
+  options?: Partial<Options<ReprovisionDeviceData>>,
+): UseMutationOptions<
+  ReprovisionDeviceResponse,
+  ReprovisionDeviceError,
+  Options<ReprovisionDeviceData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    ReprovisionDeviceResponse,
+    ReprovisionDeviceError,
+    Options<ReprovisionDeviceData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await reprovisionDevice({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
 /**
  * RequestVerification
  */
@@ -1944,6 +2082,33 @@ export const listFaxNumbersOptions = (options?: Options<ListFaxNumbersData>) =>
   });
 
 /**
+ * CreateFaxNumber
+ */
+export const createFaxNumberMutation = (
+  options?: Partial<Options<CreateFaxNumberData>>,
+): UseMutationOptions<
+  CreateFaxNumberResponse,
+  CreateFaxNumberError,
+  Options<CreateFaxNumberData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    CreateFaxNumberResponse,
+    CreateFaxNumberError,
+    Options<CreateFaxNumberData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await createFaxNumber({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
  * DeleteFaxNumber
  */
 export const deleteFaxNumberMutation = (
@@ -2121,6 +2286,29 @@ export const updateFaxEmailRouteMutation = (
   > = {
     mutationFn: async (fnOptions) => {
       const { data } = await updateFaxEmailRoute({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * SendFax
+ */
+export const sendFaxMutation = (
+  options?: Partial<Options<SendFaxData>>,
+): UseMutationOptions<SendFaxResponse, SendFaxError, Options<SendFaxData>> => {
+  const mutationOptions: UseMutationOptions<
+    SendFaxResponse,
+    SendFaxError,
+    Options<SendFaxData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await sendFax({
         ...options,
         ...fnOptions,
         throwOnError: true,
@@ -2472,6 +2660,65 @@ export const markAllNotificationsReadMutation = (
   > = {
     mutationFn: async (fnOptions) => {
       const { data } = await markAllNotificationsRead({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const getNotificationPreferencesQueryKey = (
+  options?: Options<GetNotificationPreferencesData>,
+) => createQueryKey("getNotificationPreferences", options);
+
+/**
+ * Get notification preferences
+ *
+ * Get the current user's notification preferences.
+ */
+export const getNotificationPreferencesOptions = (
+  options?: Options<GetNotificationPreferencesData>,
+) =>
+  queryOptions<
+    GetNotificationPreferencesResponse,
+    DefaultError,
+    GetNotificationPreferencesResponse,
+    ReturnType<typeof getNotificationPreferencesQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getNotificationPreferences({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getNotificationPreferencesQueryKey(options),
+  });
+
+/**
+ * Update notification preferences
+ *
+ * Update the current user's notification preferences.
+ */
+export const updateNotificationPreferencesMutation = (
+  options?: Partial<Options<UpdateNotificationPreferencesData>>,
+): UseMutationOptions<
+  UpdateNotificationPreferencesResponse,
+  UpdateNotificationPreferencesError,
+  Options<UpdateNotificationPreferencesData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    UpdateNotificationPreferencesResponse,
+    UpdateNotificationPreferencesError,
+    Options<UpdateNotificationPreferencesData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await updateNotificationPreferences({
         ...options,
         ...fnOptions,
         throwOnError: true,

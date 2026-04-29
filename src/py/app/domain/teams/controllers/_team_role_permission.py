@@ -85,6 +85,7 @@ class TeamRolePermissionController(Controller):
             action="team.permissions_update",
             actor_id=current_user.id,
             actor_email=current_user.email,
+            actor_name=current_user.name,
             target_type="team_role_permission",
             target_id=team_id,
             target_label=f"team:{team_id}",

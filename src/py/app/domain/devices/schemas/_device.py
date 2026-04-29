@@ -75,8 +75,8 @@ class DeviceActionResponse(CamelizedBaseStruct):
 
 class DeviceLineAssignmentInput(CamelizedBaseStruct):
     line_number: int
-    extension_id: UUID | None = None
     label: str
+    extension_id: UUID | None = None
     line_type: str = "private"
     is_active: bool = True
 

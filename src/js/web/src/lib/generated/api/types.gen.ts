@@ -288,6 +288,16 @@ export type Device = {
 };
 
 /**
+ * DeviceActionResponse
+ */
+export type DeviceActionResponse = {
+  action: string;
+  deviceId: string;
+  message: string;
+  status: string;
+};
+
+/**
  * DeviceCreate
  */
 export type DeviceCreate = {
@@ -310,6 +320,17 @@ export type DeviceLineAssignment = {
   label: string;
   lineNumber: number;
   lineType: string;
+};
+
+/**
+ * DeviceLineAssignmentInput
+ */
+export type DeviceLineAssignmentInput = {
+  extensionId?: string | null;
+  isActive?: boolean;
+  label: string;
+  lineNumber: number;
+  lineType?: string;
 };
 
 /**
@@ -501,6 +522,16 @@ export type FaxNumber = {
 };
 
 /**
+ * FaxNumberCreate
+ */
+export type FaxNumberCreate = {
+  isActive?: boolean;
+  label?: string | null;
+  number: string;
+  teamId?: string | null;
+};
+
+/**
  * FaxNumberUpdate
  */
 export type FaxNumberUpdate = {
@@ -514,6 +545,7 @@ export type FaxNumberUpdate = {
  * Valid values for fax message status.
  */
 export type FaxStatus =
+  | "queued"
   | "received"
   | "delivered"
   | "failed"
@@ -733,6 +765,28 @@ export type Notification = {
   title: string;
   updatedAt: string;
   userId: string;
+};
+
+/**
+ * NotificationPreference
+ */
+export type NotificationPreference = {
+  categories: {
+    [key: string]: boolean;
+  };
+  emailEnabled: boolean;
+  id: string;
+  userId: string;
+};
+
+/**
+ * NotificationPreferenceUpdate
+ */
+export type NotificationPreferenceUpdate = {
+  categories?: {
+    [key: string]: boolean;
+  };
+  emailEnabled?: boolean;
 };
 
 /**
@@ -976,6 +1030,23 @@ export type SearchResultItem = {
   label: string;
   type: string;
   url: string;
+};
+
+/**
+ * SendFax
+ */
+export type SendFax = {
+  body?: string | null;
+  destinationNumber: string;
+  faxNumberId: string;
+  subject?: string | null;
+};
+
+/**
+ * SetDeviceLinesRequest
+ */
+export type SetDeviceLinesRequest = {
+  lines: Array<DeviceLineAssignmentInput>;
 };
 
 /**
@@ -1731,8 +1802,8 @@ export type AdminListAuditLogsData = {
     sortOrder?: "asc" | "desc" | null;
     targetTypeIn?: Array<string> | null;
     actionIn?: Array<string> | null;
-    targetIdIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -1813,8 +1884,8 @@ export type AdminGetTargetAuditLogsData = {
     sortOrder?: "asc" | "desc" | null;
     targetTypeIn?: Array<string> | null;
     actionIn?: Array<string> | null;
-    targetIdIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -1893,8 +1964,8 @@ export type AdminGetUserAuditLogsData = {
     sortOrder?: "asc" | "desc" | null;
     targetTypeIn?: Array<string> | null;
     actionIn?: Array<string> | null;
-    targetIdIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -3095,6 +3166,177 @@ export type UpdateDeviceResponses = {
 export type UpdateDeviceResponse =
   UpdateDeviceResponses[keyof UpdateDeviceResponses];
 
+export type ListDeviceLinesData = {
+  body?: never;
+  path: {
+    /**
+     * Device ID
+     *
+     * The device to list lines for.
+     */
+    device_id: string;
+  };
+  query?: never;
+  url: "/api/devices/{device_id}/lines";
+};
+
+export type ListDeviceLinesErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type ListDeviceLinesError =
+  ListDeviceLinesErrors[keyof ListDeviceLinesErrors];
+
+export type ListDeviceLinesResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: Array<DeviceLineAssignment>;
+};
+
+export type ListDeviceLinesResponse =
+  ListDeviceLinesResponses[keyof ListDeviceLinesResponses];
+
+export type SetDeviceLinesData = {
+  body: SetDeviceLinesRequest;
+  path: {
+    /**
+     * Device ID
+     *
+     * The device to set lines for.
+     */
+    device_id: string;
+  };
+  query?: never;
+  url: "/api/devices/{device_id}/lines";
+};
+
+export type SetDeviceLinesErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type SetDeviceLinesError =
+  SetDeviceLinesErrors[keyof SetDeviceLinesErrors];
+
+export type SetDeviceLinesResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: Device;
+};
+
+export type SetDeviceLinesResponse =
+  SetDeviceLinesResponses[keyof SetDeviceLinesResponses];
+
+export type RebootDeviceData = {
+  body?: never;
+  path: {
+    /**
+     * Device ID
+     *
+     * The device to reboot.
+     */
+    device_id: string;
+  };
+  query?: never;
+  url: "/api/devices/{device_id}/reboot";
+};
+
+export type RebootDeviceErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type RebootDeviceError = RebootDeviceErrors[keyof RebootDeviceErrors];
+
+export type RebootDeviceResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: DeviceActionResponse;
+};
+
+export type RebootDeviceResponse =
+  RebootDeviceResponses[keyof RebootDeviceResponses];
+
+export type ReprovisionDeviceData = {
+  body?: never;
+  path: {
+    /**
+     * Device ID
+     *
+     * The device to reprovision.
+     */
+    device_id: string;
+  };
+  query?: never;
+  url: "/api/devices/{device_id}/reprovision";
+};
+
+export type ReprovisionDeviceErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type ReprovisionDeviceError =
+  ReprovisionDeviceErrors[keyof ReprovisionDeviceErrors];
+
+export type ReprovisionDeviceResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: DeviceActionResponse;
+};
+
+export type ReprovisionDeviceResponse =
+  ReprovisionDeviceResponses[keyof ReprovisionDeviceResponses];
+
 export type ApiEmailVerificationRequestRequestVerificationData = {
   body: EmailVerificationRequest;
   path?: never;
@@ -3422,6 +3664,42 @@ export type ListFaxNumbersResponses = {
 export type ListFaxNumbersResponse =
   ListFaxNumbersResponses[keyof ListFaxNumbersResponses];
 
+export type CreateFaxNumberData = {
+  body: FaxNumberCreate;
+  path?: never;
+  query?: never;
+  url: "/api/fax/numbers";
+};
+
+export type CreateFaxNumberErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type CreateFaxNumberError =
+  CreateFaxNumberErrors[keyof CreateFaxNumberErrors];
+
+export type CreateFaxNumberResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: FaxNumber;
+};
+
+export type CreateFaxNumberResponse =
+  CreateFaxNumberResponses[keyof CreateFaxNumberResponses];
+
 export type DeleteFaxNumberData = {
   body?: never;
   path: {
@@ -3742,6 +4020,40 @@ export type UpdateFaxEmailRouteResponses = {
 
 export type UpdateFaxEmailRouteResponse =
   UpdateFaxEmailRouteResponses[keyof UpdateFaxEmailRouteResponses];
+
+export type SendFaxData = {
+  body: SendFax;
+  path?: never;
+  query?: never;
+  url: "/api/fax/send";
+};
+
+export type SendFaxErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type SendFaxError = SendFaxErrors[keyof SendFaxErrors];
+
+export type SendFaxResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: FaxMessage;
+};
+
+export type SendFaxResponse = SendFaxResponses[keyof SendFaxResponses];
 
 export type AccountDeleteData = {
   body?: never;
@@ -4145,6 +4457,59 @@ export type MarkAllNotificationsReadResponses = {
 
 export type MarkAllNotificationsReadResponse =
   MarkAllNotificationsReadResponses[keyof MarkAllNotificationsReadResponses];
+
+export type GetNotificationPreferencesData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/api/notifications/preferences";
+};
+
+export type GetNotificationPreferencesResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: NotificationPreference;
+};
+
+export type GetNotificationPreferencesResponse =
+  GetNotificationPreferencesResponses[keyof GetNotificationPreferencesResponses];
+
+export type UpdateNotificationPreferencesData = {
+  body: NotificationPreferenceUpdate;
+  path?: never;
+  query?: never;
+  url: "/api/notifications/preferences";
+};
+
+export type UpdateNotificationPreferencesErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type UpdateNotificationPreferencesError =
+  UpdateNotificationPreferencesErrors[keyof UpdateNotificationPreferencesErrors];
+
+export type UpdateNotificationPreferencesResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: NotificationPreference;
+};
+
+export type UpdateNotificationPreferencesResponse =
+  UpdateNotificationPreferencesResponses[keyof UpdateNotificationPreferencesResponses];
 
 export type GetUnreadNotificationCountData = {
   body?: never;

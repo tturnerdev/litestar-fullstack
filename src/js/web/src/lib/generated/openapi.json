@@ -1266,6 +1266,31 @@
         "title": "Device",
         "type": "object"
       },
+      "DeviceActionResponse": {
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "deviceId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "action",
+          "deviceId",
+          "message",
+          "status"
+        ],
+        "title": "DeviceActionResponse",
+        "type": "object"
+      },
       "DeviceCreate": {
         "properties": {
           "deviceModel": {
@@ -1371,6 +1396,41 @@
           "lineType"
         ],
         "title": "DeviceLineAssignment",
+        "type": "object"
+      },
+      "DeviceLineAssignmentInput": {
+        "properties": {
+          "extensionId": {
+            "oneOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "isActive": {
+            "default": true,
+            "type": "boolean"
+          },
+          "label": {
+            "type": "string"
+          },
+          "lineNumber": {
+            "type": "integer"
+          },
+          "lineType": {
+            "default": "private",
+            "type": "string"
+          }
+        },
+        "required": [
+          "label",
+          "lineNumber"
+        ],
+        "title": "DeviceLineAssignmentInput",
         "type": "object"
       },
       "DeviceUpdate": {
@@ -2066,6 +2126,43 @@
         "title": "FaxNumber",
         "type": "object"
       },
+      "FaxNumberCreate": {
+        "properties": {
+          "isActive": {
+            "default": true,
+            "type": "boolean"
+          },
+          "label": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "number": {
+            "type": "string"
+          },
+          "teamId": {
+            "oneOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "number"
+        ],
+        "title": "FaxNumberCreate",
+        "type": "object"
+      },
       "FaxNumberUpdate": {
         "properties": {
           "isActive": {
@@ -2094,6 +2191,7 @@
         "default": "received",
         "description": "Valid values for fax message status.",
         "enum": [
+          "queued",
           "received",
           "delivered",
           "failed",
@@ -2822,6 +2920,59 @@
           "userId"
         ],
         "title": "Notification",
+        "type": "object"
+      },
+      "NotificationPreference": {
+        "properties": {
+          "categories": {
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "type": "object"
+          },
+          "emailEnabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "userId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "categories",
+          "emailEnabled",
+          "id",
+          "userId"
+        ],
+        "title": "NotificationPreference",
+        "type": "object"
+      },
+      "NotificationPreferenceUpdate": {
+        "properties": {
+          "categories": {
+            "oneOf": [
+              {
+                "additionalProperties": {
+                  "type": "boolean"
+                },
+                "type": "object"
+              }
+            ]
+          },
+          "emailEnabled": {
+            "oneOf": [
+              {
+                "type": "boolean"
+              }
+            ]
+          }
+        },
+        "required": [],
+        "title": "NotificationPreferenceUpdate",
         "type": "object"
       },
       "OAuth2Login": {
@@ -3718,6 +3869,58 @@
           "url"
         ],
         "title": "SearchResultItem",
+        "type": "object"
+      },
+      "SendFax": {
+        "properties": {
+          "body": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "destinationNumber": {
+            "type": "string"
+          },
+          "faxNumberId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "subject": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "destinationNumber",
+          "faxNumberId"
+        ],
+        "title": "SendFax",
+        "type": "object"
+      },
+      "SetDeviceLinesRequest": {
+        "properties": {
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/DeviceLineAssignmentInput"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "lines"
+        ],
+        "title": "SetDeviceLinesRequest",
         "type": "object"
       },
       "SyncResponse": {
@@ -6005,7 +6208,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetIdIn",
+            "name": "actorIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -6026,7 +6229,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actorIdIn",
+            "name": "targetIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -6412,7 +6615,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetIdIn",
+            "name": "actorIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -6433,7 +6636,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actorIdIn",
+            "name": "targetIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -6793,7 +6996,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetIdIn",
+            "name": "actorIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -6814,7 +7017,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actorIdIn",
+            "name": "targetIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -9858,6 +10061,321 @@
         ]
       }
     },
+    "/api/devices/{device_id}/lines": {
+      "get": {
+        "deprecated": false,
+        "operationId": "ListDeviceLines",
+        "parameters": [
+          {
+            "deprecated": false,
+            "description": "The device to list lines for.",
+            "in": "path",
+            "name": "device_id",
+            "required": true,
+            "schema": {
+              "description": "The device to list lines for.",
+              "format": "uuid",
+              "title": "Device ID",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DeviceLineAssignment"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Request fulfilled, document follows",
+            "headers": {}
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "detail": "Bad Request",
+                      "extra": {},
+                      "status_code": 400
+                    }
+                  ],
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    },
+                    "status_code": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Bad request syntax or unsupported method"
+          }
+        },
+        "summary": "ListDeviceLines",
+        "tags": [
+          "Devices"
+        ]
+      },
+      "put": {
+        "deprecated": false,
+        "operationId": "SetDeviceLines",
+        "parameters": [
+          {
+            "deprecated": false,
+            "description": "The device to set lines for.",
+            "in": "path",
+            "name": "device_id",
+            "required": true,
+            "schema": {
+              "description": "The device to set lines for.",
+              "format": "uuid",
+              "title": "Device ID",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetDeviceLinesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Device"
+                }
+              }
+            },
+            "description": "Request fulfilled, document follows",
+            "headers": {}
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "detail": "Bad Request",
+                      "extra": {},
+                      "status_code": 400
+                    }
+                  ],
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    },
+                    "status_code": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Bad request syntax or unsupported method"
+          }
+        },
+        "summary": "SetDeviceLines",
+        "tags": [
+          "Devices"
+        ]
+      }
+    },
+    "/api/devices/{device_id}/reboot": {
+      "post": {
+        "deprecated": false,
+        "operationId": "RebootDevice",
+        "parameters": [
+          {
+            "deprecated": false,
+            "description": "The device to reboot.",
+            "in": "path",
+            "name": "device_id",
+            "required": true,
+            "schema": {
+              "description": "The device to reboot.",
+              "format": "uuid",
+              "title": "Device ID",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceActionResponse"
+                }
+              }
+            },
+            "description": "Document created, URL follows",
+            "headers": {}
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "detail": "Bad Request",
+                      "extra": {},
+                      "status_code": 400
+                    }
+                  ],
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    },
+                    "status_code": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Bad request syntax or unsupported method"
+          }
+        },
+        "summary": "RebootDevice",
+        "tags": [
+          "Devices"
+        ]
+      }
+    },
+    "/api/devices/{device_id}/reprovision": {
+      "post": {
+        "deprecated": false,
+        "operationId": "ReprovisionDevice",
+        "parameters": [
+          {
+            "deprecated": false,
+            "description": "The device to reprovision.",
+            "in": "path",
+            "name": "device_id",
+            "required": true,
+            "schema": {
+              "description": "The device to reprovision.",
+              "format": "uuid",
+              "title": "Device ID",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceActionResponse"
+                }
+              }
+            },
+            "description": "Document created, URL follows",
+            "headers": {}
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "detail": "Bad Request",
+                      "extra": {},
+                      "status_code": 400
+                    }
+                  ],
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    },
+                    "status_code": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Bad request syntax or unsupported method"
+          }
+        },
+        "summary": "ReprovisionDevice",
+        "tags": [
+          "Devices"
+        ]
+      }
+    },
     "/api/email-verification/request": {
       "post": {
         "deprecated": false,
@@ -10710,6 +11228,75 @@
         "tags": [
           "Fax Numbers"
         ]
+      },
+      "post": {
+        "deprecated": false,
+        "operationId": "CreateFaxNumber",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FaxNumberCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FaxNumber"
+                }
+              }
+            },
+            "description": "Document created, URL follows",
+            "headers": {}
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "detail": "Bad Request",
+                      "extra": {},
+                      "status_code": 400
+                    }
+                  ],
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    },
+                    "status_code": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Bad request syntax or unsupported method"
+          }
+        },
+        "summary": "CreateFaxNumber",
+        "tags": [
+          "Fax Numbers"
+        ]
       }
     },
     "/api/fax/numbers/{fax_number_id}": {
@@ -11427,6 +12014,77 @@
         "summary": "UpdateFaxEmailRoute",
         "tags": [
           "Fax Email Routes"
+        ]
+      }
+    },
+    "/api/fax/send": {
+      "post": {
+        "deprecated": false,
+        "operationId": "SendFax",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendFax"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FaxMessage"
+                }
+              }
+            },
+            "description": "Document created, URL follows",
+            "headers": {}
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "detail": "Bad Request",
+                      "extra": {},
+                      "status_code": 400
+                    }
+                  ],
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    },
+                    "status_code": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Bad request syntax or unsupported method"
+          }
+        },
+        "summary": "SendFax",
+        "tags": [
+          "Fax Messages"
         ]
       }
     },
@@ -12276,6 +12934,100 @@
           }
         },
         "summary": "MarkAllRead",
+        "tags": [
+          "Notifications"
+        ]
+      }
+    },
+    "/api/notifications/preferences": {
+      "get": {
+        "deprecated": false,
+        "description": "Get the current user's notification preferences.",
+        "operationId": "GetNotificationPreferences",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationPreference"
+                }
+              }
+            },
+            "description": "Request fulfilled, document follows",
+            "headers": {}
+          }
+        },
+        "summary": "Get notification preferences",
+        "tags": [
+          "Notifications"
+        ]
+      },
+      "patch": {
+        "deprecated": false,
+        "description": "Update the current user's notification preferences.",
+        "operationId": "UpdateNotificationPreferences",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationPreferenceUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationPreference"
+                }
+              }
+            },
+            "description": "Request fulfilled, document follows",
+            "headers": {}
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "detail": "Bad Request",
+                      "extra": {},
+                      "status_code": 400
+                    }
+                  ],
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    },
+                    "status_code": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Bad request syntax or unsupported method"
+          }
+        },
+        "summary": "Update notification preferences",
         "tags": [
           "Notifications"
         ]

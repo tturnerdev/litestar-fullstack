@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { Building2, Cable, Home, LifeBuoy, MapPin, Monitor, Phone, Printer, Settings, ShieldCheck, Users } from "lucide-react"
+import { Bell, Building2, Cable, Home, LifeBuoy, MapPin, Monitor, Phone, Printer, Settings, ShieldCheck, Users } from "lucide-react"
 import type * as React from "react"
 import { useEffect, useMemo } from "react"
 import { NavMain, type NavMainItem } from "@/components/nav-main"
@@ -7,7 +7,7 @@ import { NavProjects } from "@/components/nav-projects"
 import { NavUser } from "@/components/nav-user"
 import { TeamSwitcher } from "@/components/team-switcher"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail } from "@/components/ui/sidebar"
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail, SidebarSeparator } from "@/components/ui/sidebar"
 import { useAuthStore } from "@/lib/auth"
 import { adminListUsers, listTeams, type Team } from "@/lib/generated/api"
 
@@ -133,11 +133,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           { title: "New Ticket", to: "/support/new" },
         ],
       },
-      {
-        title: "Settings",
-        to: "/settings",
-        icon: Settings,
-      },
     ]
 
     if (user?.isSuperuser) {
@@ -150,21 +145,43 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           { title: "New connection", to: "/connections/new" },
         ],
       })
-      items.push({
+    }
+
+    return items
+  }, [user?.isSuperuser, badges.teams])
+
+  const navSecondary = useMemo<NavMainItem[]>(
+    () => [
+      {
+        title: "Notifications",
+        to: "/notifications",
+        icon: Bell,
+      },
+      {
+        title: "Settings",
+        to: "/settings",
+        icon: Settings,
+      },
+    ],
+    [],
+  )
+
+  const navAdmin = useMemo<NavMainItem[]>(() => {
+    if (!user?.isSuperuser) return []
+    return [
+      {
         title: "Organization",
         to: "/organization",
         icon: Building2,
-      })
-      items.push({
+      },
+      {
         title: "Admin",
         to: "/admin",
         icon: ShieldCheck,
         badge: badges.adminUsers,
-      })
-    }
-
-    return items
-  }, [user?.isSuperuser, badges.teams, badges.adminUsers])
+      },
+    ]
+  }, [user?.isSuperuser, badges.adminUsers])
 
   const teamLinks = useMemo(
     () =>
@@ -186,6 +203,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <NavMain items={navMain} />
         {teamLinks.length > 0 && <NavProjects label="Teams" projects={teamLinks} />}
+        <SidebarSeparator className="mx-3" />
+        <NavMain items={navSecondary} label="General" />
+        {navAdmin.length > 0 && <NavMain items={navAdmin} label="System" />}
       </SidebarContent>
       <SidebarFooter>
         <div className="flex items-center gap-2">

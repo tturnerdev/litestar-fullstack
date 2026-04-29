@@ -146,7 +146,7 @@ function ConnectionsPage() {
           <PageCardGrid>
             {data.items.map((conn) => (
               <PageCardGridItem key={conn.id}>
-                <Link to={`/connections/${conn.id}`} className="block">
+                <Link to={`/connections/${conn.id}` as string} className="block">
                   <Card className="transition-colors hover:border-primary/30 hover:bg-muted/30">
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between gap-2">

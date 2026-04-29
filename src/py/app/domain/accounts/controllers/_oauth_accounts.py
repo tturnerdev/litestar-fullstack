@@ -176,6 +176,7 @@ class OAuthAccountController(Controller):
             action="account.oauth_unlink",
             actor_id=current_user.id,
             actor_email=current_user.email,
+            actor_name=current_user.name,
             target_type="user",
             target_id=current_user.id,
             target_label=current_user.email,

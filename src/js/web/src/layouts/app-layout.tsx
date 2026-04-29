@@ -152,11 +152,20 @@ export function AppLayout() {
     if (pathname.startsWith("/support/")) {
       return { eyebrow: "Helpdesk", title: "Ticket Detail" }
     }
+    if (pathname.startsWith("/locations")) {
+      return { eyebrow: "Infrastructure", title: "Locations" }
+    }
+    if (pathname.startsWith("/connections")) {
+      return { eyebrow: "Infrastructure", title: "Connections" }
+    }
     if (pathname.startsWith("/admin")) {
       return { eyebrow: "Operations", title: "Admin" }
     }
     if (pathname.startsWith("/notifications")) {
-      return { eyebrow: "Account", title: "Notifications" }
+      return { eyebrow: "General", title: "Notifications" }
+    }
+    if (pathname.startsWith("/settings")) {
+      return { eyebrow: "General", title: "Settings" }
     }
     if (pathname.startsWith("/profile")) {
       return { eyebrow: "Account", title: "Profile" }

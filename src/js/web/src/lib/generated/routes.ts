@@ -28,6 +28,7 @@ export type RouteName =
   | 'create_device'
   | 'create_extension'
   | 'create_fax_email_route'
+  | 'create_fax_number'
   | 'create_forwarding_rule'
   | 'create_location'
   | 'create_message'
@@ -74,6 +75,7 @@ export type RouteName =
   | 'get_mfa_status'
   | 'get_organization'
   | 'get_phone_number'
+  | 'get_preferences'
   | 'get_profile'
   | 'get_role'
   | 'get_sessions'
@@ -94,6 +96,7 @@ export type RouteName =
   | 'initiate_setup'
   | 'list_accounts'
   | 'list_connections'
+  | 'list_device_lines'
   | 'list_devices'
   | 'list_extensions'
   | 'list_fax_email_routes'
@@ -125,12 +128,14 @@ export type RouteName =
   | 'oauth:google:callback'
   | 'openapi.json'
   | 'paste_image'
+  | 'reboot_device'
   | 'refresh_token'
   | 'regenerate_backup_codes'
   | 'reject_team_invitation'
   | 'remove_account'
   | 'remove_member_from_team'
   | 'reopen_ticket'
+  | 'reprovision_device'
   | 'request_verification'
   | 'reset_password_with_token'
   | 'revoke_all_sessions'
@@ -138,6 +143,8 @@ export type RouteName =
   | 'revoke_role_api_users_roles'
   | 'revoke_session'
   | 'saq'
+  | 'send_fax'
+  | 'set_device_lines'
   | 'set_forwarding_rules'
   | 'signup'
   | 'start_link'
@@ -161,6 +168,7 @@ export type RouteName =
   | 'update_organization'
   | 'update_password'
   | 'update_phone_number'
+  | 'update_preferences'
   | 'update_profile'
   | 'update_role'
   | 'update_tag'
@@ -214,6 +222,7 @@ export interface RoutePathParams {
   'create_fax_email_route': {
     fax_number_id: UUID;
   };
+  'create_fax_number': Record<string, never>;
   'create_forwarding_rule': {
     ext_id: UUID;
   };
@@ -337,6 +346,7 @@ export interface RoutePathParams {
   'get_phone_number': {
     phone_number_id: UUID;
   };
+  'get_preferences': Record<string, never>;
   'get_profile': Record<string, never>;
   'get_role': {
     role_id: UUID;
@@ -385,6 +395,9 @@ export interface RoutePathParams {
   'initiate_setup': Record<string, never>;
   'list_accounts': Record<string, never>;
   'list_connections': Record<string, never>;
+  'list_device_lines': {
+    device_id: UUID;
+  };
   'list_devices': Record<string, never>;
   'list_extensions': Record<string, never>;
   'list_fax_email_routes': {
@@ -434,6 +447,9 @@ export interface RoutePathParams {
   'paste_image': {
     ticket_id: UUID;
   };
+  'reboot_device': {
+    device_id: UUID;
+  };
   'refresh_token': Record<string, never>;
   'regenerate_backup_codes': Record<string, never>;
   'reject_team_invitation': {
@@ -447,6 +463,9 @@ export interface RoutePathParams {
   'reopen_ticket': {
     ticket_id: UUID;
   };
+  'reprovision_device': {
+    device_id: UUID;
+  };
   'request_verification': Record<string, never>;
   'reset_password_with_token': Record<string, never>;
   'revoke_all_sessions': Record<string, never>;
@@ -459,6 +478,10 @@ export interface RoutePathParams {
   };
   'saq': {
     file_path: any;
+  };
+  'send_fax': Record<string, never>;
+  'set_device_lines': {
+    device_id: UUID;
   };
   'set_forwarding_rules': {
     ext_id: UUID;
@@ -521,6 +544,7 @@ export interface RoutePathParams {
   'update_phone_number': {
     phone_number_id: UUID;
   };
+  'update_preferences': Record<string, never>;
   'update_profile': Record<string, never>;
   'update_role': {
     role_id: UUID;
@@ -614,6 +638,7 @@ export interface RouteQueryParams {
   'create_device': Record<string, never>;
   'create_extension': Record<string, never>;
   'create_fax_email_route': Record<string, never>;
+  'create_fax_number': Record<string, never>;
   'create_forwarding_rule': Record<string, never>;
   'create_location': Record<string, never>;
   'create_message': Record<string, never>;
@@ -663,6 +688,7 @@ export interface RouteQueryParams {
   'get_mfa_status': Record<string, never>;
   'get_organization': Record<string, never>;
   'get_phone_number': Record<string, never>;
+  'get_preferences': Record<string, never>;
   'get_profile': Record<string, never>;
   'get_role': Record<string, never>;
   'get_sessions': {
@@ -742,6 +768,7 @@ export interface RouteQueryParams {
     updatedAfter?: DateTime;
     updatedBefore?: DateTime;
   };
+  'list_device_lines': Record<string, never>;
   'list_devices': {
     createdAfter?: DateTime;
     createdBefore?: DateTime;
@@ -1004,12 +1031,14 @@ export interface RouteQueryParams {
   };
   'openapi.json': Record<string, never>;
   'paste_image': Record<string, never>;
+  'reboot_device': Record<string, never>;
   'refresh_token': Record<string, never>;
   'regenerate_backup_codes': Record<string, never>;
   'reject_team_invitation': Record<string, never>;
   'remove_account': Record<string, never>;
   'remove_member_from_team': Record<string, never>;
   'reopen_ticket': Record<string, never>;
+  'reprovision_device': Record<string, never>;
   'request_verification': Record<string, never>;
   'reset_password_with_token': Record<string, never>;
   'revoke_all_sessions': Record<string, never>;
@@ -1019,6 +1048,8 @@ export interface RouteQueryParams {
   };
   'revoke_session': Record<string, never>;
   'saq': Record<string, never>;
+  'send_fax': Record<string, never>;
+  'set_device_lines': Record<string, never>;
   'set_forwarding_rules': Record<string, never>;
   'signup': Record<string, never>;
   'start_link': {
@@ -1047,6 +1078,7 @@ export interface RouteQueryParams {
   'update_organization': Record<string, never>;
   'update_password': Record<string, never>;
   'update_phone_number': Record<string, never>;
+  'update_preferences': Record<string, never>;
   'update_profile': Record<string, never>;
   'update_role': Record<string, never>;
   'update_tag': Record<string, never>;
@@ -1159,6 +1191,13 @@ export const routeDefinitions = {
     methods: ['POST'] as const,
     method: 'post',
     pathParams: ['fax_number_id'] as const,
+    queryParams: [] as const,
+  },
+  'create_fax_number': {
+    path: '/api/fax/numbers',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: [] as const,
     queryParams: [] as const,
   },
   'create_forwarding_rule': {
@@ -1483,6 +1522,13 @@ export const routeDefinitions = {
     pathParams: ['phone_number_id'] as const,
     queryParams: [] as const,
   },
+  'get_preferences': {
+    path: '/api/notifications/preferences',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
   'get_profile': {
     path: '/api/me',
     methods: ['GET'] as const,
@@ -1622,6 +1668,13 @@ export const routeDefinitions = {
     method: 'get',
     pathParams: [] as const,
     queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'teamId', 'updatedAfter', 'updatedBefore'] as const,
+  },
+  'list_device_lines': {
+    path: '/api/devices/{device_id}/lines',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['device_id'] as const,
+    queryParams: [] as const,
   },
   'list_devices': {
     path: '/api/devices',
@@ -1843,6 +1896,13 @@ export const routeDefinitions = {
     pathParams: ['ticket_id'] as const,
     queryParams: [] as const,
   },
+  'reboot_device': {
+    path: '/api/devices/{device_id}/reboot',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: ['device_id'] as const,
+    queryParams: [] as const,
+  },
   'refresh_token': {
     path: '/api/access/refresh',
     methods: ['POST'] as const,
@@ -1883,6 +1943,13 @@ export const routeDefinitions = {
     methods: ['POST'] as const,
     method: 'post',
     pathParams: ['ticket_id'] as const,
+    queryParams: [] as const,
+  },
+  'reprovision_device': {
+    path: '/api/devices/{device_id}/reprovision',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: ['device_id'] as const,
     queryParams: [] as const,
   },
   'request_verification': {
@@ -1932,6 +1999,20 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: ['file_path'] as const,
+    queryParams: [] as const,
+  },
+  'send_fax': {
+    path: '/api/fax/send',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
+  'set_device_lines': {
+    path: '/api/devices/{device_id}/lines',
+    methods: ['PUT'] as const,
+    method: 'put',
+    pathParams: ['device_id'] as const,
     queryParams: [] as const,
   },
   'set_forwarding_rules': {
@@ -2093,6 +2174,13 @@ export const routeDefinitions = {
     methods: ['PATCH'] as const,
     method: 'patch',
     pathParams: ['phone_number_id'] as const,
+    queryParams: [] as const,
+  },
+  'update_preferences': {
+    path: '/api/notifications/preferences',
+    methods: ['PATCH'] as const,
+    method: 'patch',
+    pathParams: [] as const,
     queryParams: [] as const,
   },
   'update_profile': {

@@ -118,3 +118,70 @@ export function useDeleteNotification() {
     },
   })
 }
+
+// --- Notification Preferences ---
+
+export interface NotificationPreference {
+  id: string
+  userId: string
+  emailEnabled: boolean
+  categories: Record<string, boolean>
+}
+
+interface NotificationPreferenceUpdate {
+  emailEnabled?: boolean
+  categories?: Record<string, boolean>
+}
+
+const PREFERENCES_QUERY_KEY = ["notificationPreferences"] as const
+
+export function useNotificationPreferences() {
+  return useQuery({
+    queryKey: PREFERENCES_QUERY_KEY,
+    queryFn: async () => {
+      const response = await client.get({
+        security: [{ scheme: "bearer", type: "http" }],
+        url: "/api/notifications/preferences",
+      })
+      return response.data as NotificationPreference
+    },
+  })
+}
+
+export function useUpdateNotificationPreferences() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (body: NotificationPreferenceUpdate) => {
+      const response = await client.patch({
+        security: [{ scheme: "bearer", type: "http" }],
+        url: "/api/notifications/preferences",
+        body,
+      })
+      return response.data as NotificationPreference
+    },
+    onMutate: async (newData) => {
+      await queryClient.cancelQueries({ queryKey: PREFERENCES_QUERY_KEY })
+      const previous = queryClient.getQueryData<NotificationPreference>(PREFERENCES_QUERY_KEY)
+      if (previous) {
+        queryClient.setQueryData<NotificationPreference>(PREFERENCES_QUERY_KEY, {
+          ...previous,
+          ...(newData.emailEnabled !== undefined && { emailEnabled: newData.emailEnabled }),
+          ...(newData.categories && {
+            categories: { ...previous.categories, ...newData.categories },
+          }),
+        })
+      }
+      return { previous }
+    },
+    onError: (_err, _newData, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(PREFERENCES_QUERY_KEY, context.previous)
+      }
+      toast.error("Failed to update notification preferences")
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: PREFERENCES_QUERY_KEY })
+    },
+  })
+}

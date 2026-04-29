@@ -6,10 +6,16 @@ from app.domain.notifications.schemas._notification import (
     NotificationUpdate,
     UnreadCount,
 )
+from app.domain.notifications.schemas._notification_preference import (
+    NotificationPreference,
+    NotificationPreferenceUpdate,
+)
 
 __all__ = (
     "Notification",
     "NotificationCreate",
+    "NotificationPreference",
+    "NotificationPreferenceUpdate",
     "NotificationUpdate",
     "UnreadCount",
 )

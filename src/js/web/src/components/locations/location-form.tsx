@@ -16,7 +16,7 @@ import { useCreateLocation, useLocations } from "@/lib/api/hooks/locations"
 const createLocationSchema = z
   .object({
     name: z.string().min(1, "Location name is required"),
-    locationType: z.enum(["ADDRESSED", "PHYSICAL"], { required_error: "Location type is required" }),
+    locationType: z.enum(["ADDRESSED", "PHYSICAL"], { message: "Location type is required" }),
     description: z.string().optional(),
     parentId: z.string().optional(),
     addressLine1: z.string().optional(),

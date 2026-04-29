@@ -26,10 +26,10 @@ function formatBadge(value: number | string | null | undefined): string | null {
   return String(value)
 }
 
-export function NavMain({ items }: { items: NavMainItem[] }) {
+export function NavMain({ items, label = "Platform" }: { items: NavMainItem[]; label?: string }) {
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
+      <SidebarGroupLabel>{label}</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => {
           const badgeText = formatBadge(item.badge)

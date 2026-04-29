@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { Building2, Globe, Mail, MapPin, Pencil, Phone, Save, X } from "lucide-react"
+import { Building2, Globe, Mail, MapPin, Pencil, Save, X } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"

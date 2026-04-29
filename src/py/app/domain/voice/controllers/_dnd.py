@@ -85,6 +85,7 @@ class DndController(Controller):
             action="voice.dnd_toggle",
             actor_id=current_user.id,
             actor_email=current_user.email,
+            actor_name=current_user.name,
             target_type="dnd",
             target_id=db_obj.id,
             target_label=f"extension:{ext_id}",

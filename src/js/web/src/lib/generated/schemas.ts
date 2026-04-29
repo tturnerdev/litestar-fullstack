@@ -38,6 +38,9 @@ import type {
   CreateExtensionData,
   CreateExtensionErrors,
   CreateExtensionResponses,
+  CreateFaxNumberData,
+  CreateFaxNumberErrors,
+  CreateFaxNumberResponses,
   CreatePhoneNumberData,
   CreatePhoneNumberErrors,
   CreatePhoneNumberResponses,
@@ -82,10 +85,16 @@ import type {
   ResetPasswordResponses,
   RevokeAllSessionsData,
   RevokeAllSessionsResponses,
+  SendFaxData,
+  SendFaxErrors,
+  SendFaxResponses,
   SystemHealthData,
   SystemHealthResponses,
   TokenRefreshData,
   TokenRefreshResponses,
+  UpdateNotificationPreferencesData,
+  UpdateNotificationPreferencesErrors,
+  UpdateNotificationPreferencesResponses,
   UpdateOrganizationData,
   UpdateOrganizationErrors,
   UpdateOrganizationResponses,
@@ -111,6 +120,7 @@ export type OperationName =
   | 'create_connection'
   | 'create_device'
   | 'create_extension'
+  | 'create_fax_number'
   | 'create_phone_number'
   | 'create_role'
   | 'create_tag'
@@ -121,6 +131,7 @@ export type OperationName =
   | 'forgot_password'
   | 'get_mfa_status'
   | 'get_organization'
+  | 'get_preferences'
   | 'get_profile'
   | 'get_sessions'
   | 'get_stats'
@@ -129,6 +140,7 @@ export type OperationName =
   | 'list_connections'
   | 'list_devices'
   | 'list_extensions'
+  | 'list_fax_numbers'
   | 'list_phone_numbers'
   | 'list_roles'
   | 'list_tags'
@@ -144,11 +156,13 @@ export type OperationName =
   | 'request_verification'
   | 'reset_password_with_token'
   | 'revoke_all_sessions'
+  | 'send_fax'
   | 'signup'
   | 'system:health'
   | 'system:oauth-config'
   | 'update_organization'
   | 'update_password'
+  | 'update_preferences'
   | 'update_profile'
   | 'validate_reset_token'
   | 'verify_challenge'
@@ -163,6 +177,7 @@ export interface OperationDataTypes {
   'create_connection': CreateConnectionData
   'create_device': CreateDeviceData
   'create_extension': CreateExtensionData
+  'create_fax_number': CreateFaxNumberData
   'create_phone_number': CreatePhoneNumberData
   'create_role': CreateRoleData
   'create_tag': CreateTagData
@@ -173,6 +188,7 @@ export interface OperationDataTypes {
   'forgot_password': ForgotPasswordData
   'get_mfa_status': GetMfaStatusData
   'get_organization': UpdateOrganizationData
+  'get_preferences': UpdateNotificationPreferencesData
   'get_profile': AccountProfileUpdateData
   'get_sessions': RevokeAllSessionsData
   'get_stats': GetDashboardStatsData
@@ -181,6 +197,7 @@ export interface OperationDataTypes {
   'list_connections': CreateConnectionData
   'list_devices': CreateDeviceData
   'list_extensions': CreateExtensionData
+  'list_fax_numbers': CreateFaxNumberData
   'list_phone_numbers': CreatePhoneNumberData
   'list_roles': CreateRoleData
   'list_tags': CreateTagData
@@ -196,11 +213,13 @@ export interface OperationDataTypes {
   'request_verification': ApiEmailVerificationRequestRequestVerificationData
   'reset_password_with_token': ResetPasswordData
   'revoke_all_sessions': RevokeAllSessionsData
+  'send_fax': SendFaxData
   'signup': AccountRegisterData
   'system:health': SystemHealthData
   'system:oauth-config': OAuthConfigData
   'update_organization': UpdateOrganizationData
   'update_password': AccountPasswordUpdateData
+  'update_preferences': UpdateNotificationPreferencesData
   'update_profile': AccountProfileUpdateData
   'validate_reset_token': ResetPasswordData
   'verify_challenge': VerifyMfaChallengeData
@@ -216,6 +235,7 @@ export interface OperationResponseTypes {
   'create_connection': CreateConnectionResponses
   'create_device': CreateDeviceResponses
   'create_extension': CreateExtensionResponses
+  'create_fax_number': CreateFaxNumberResponses
   'create_phone_number': CreatePhoneNumberResponses
   'create_role': CreateRoleResponses
   'create_tag': CreateTagResponses
@@ -226,6 +246,7 @@ export interface OperationResponseTypes {
   'forgot_password': ForgotPasswordResponses
   'get_mfa_status': GetMfaStatusResponses
   'get_organization': UpdateOrganizationResponses
+  'get_preferences': UpdateNotificationPreferencesResponses
   'get_profile': AccountProfileUpdateResponses
   'get_sessions': RevokeAllSessionsResponses
   'get_stats': GetDashboardStatsResponses
@@ -234,6 +255,7 @@ export interface OperationResponseTypes {
   'list_connections': CreateConnectionResponses
   'list_devices': CreateDeviceResponses
   'list_extensions': CreateExtensionResponses
+  'list_fax_numbers': CreateFaxNumberResponses
   'list_phone_numbers': CreatePhoneNumberResponses
   'list_roles': CreateRoleResponses
   'list_tags': CreateTagResponses
@@ -249,11 +271,13 @@ export interface OperationResponseTypes {
   'request_verification': ApiEmailVerificationRequestRequestVerificationResponses
   'reset_password_with_token': ResetPasswordResponses
   'revoke_all_sessions': RevokeAllSessionsResponses
+  'send_fax': SendFaxResponses
   'signup': AccountRegisterResponses
   'system:health': SystemHealthResponses
   'system:oauth-config': OAuthConfigResponses
   'update_organization': UpdateOrganizationResponses
   'update_password': AccountPasswordUpdateResponses
+  'update_preferences': UpdateNotificationPreferencesResponses
   'update_profile': AccountProfileUpdateResponses
   'validate_reset_token': ResetPasswordResponses
   'verify_challenge': VerifyMfaChallengeResponses
@@ -269,6 +293,7 @@ export interface OperationErrorTypes {
   'create_connection': CreateConnectionErrors
   'create_device': CreateDeviceErrors
   'create_extension': CreateExtensionErrors
+  'create_fax_number': CreateFaxNumberErrors
   'create_phone_number': CreatePhoneNumberErrors
   'create_role': CreateRoleErrors
   'create_tag': CreateTagErrors
@@ -279,6 +304,7 @@ export interface OperationErrorTypes {
   'forgot_password': ForgotPasswordErrors
   'get_mfa_status': never
   'get_organization': UpdateOrganizationErrors
+  'get_preferences': UpdateNotificationPreferencesErrors
   'get_profile': AccountProfileUpdateErrors
   'get_sessions': never
   'get_stats': never
@@ -287,6 +313,7 @@ export interface OperationErrorTypes {
   'list_connections': CreateConnectionErrors
   'list_devices': CreateDeviceErrors
   'list_extensions': CreateExtensionErrors
+  'list_fax_numbers': CreateFaxNumberErrors
   'list_phone_numbers': CreatePhoneNumberErrors
   'list_roles': CreateRoleErrors
   'list_tags': CreateTagErrors
@@ -302,11 +329,13 @@ export interface OperationErrorTypes {
   'request_verification': ApiEmailVerificationRequestRequestVerificationErrors
   'reset_password_with_token': ResetPasswordErrors
   'revoke_all_sessions': never
+  'send_fax': SendFaxErrors
   'signup': AccountRegisterErrors
   'system:health': never
   'system:oauth-config': never
   'update_organization': UpdateOrganizationErrors
   'update_password': AccountPasswordUpdateErrors
+  'update_preferences': UpdateNotificationPreferencesErrors
   'update_profile': AccountProfileUpdateErrors
   'validate_reset_token': ResetPasswordErrors
   'verify_challenge': VerifyMfaChallengeErrors

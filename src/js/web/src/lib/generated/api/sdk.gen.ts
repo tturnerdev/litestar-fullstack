@@ -114,6 +114,9 @@ import type {
   CreateFaxEmailRouteData,
   CreateFaxEmailRouteErrors,
   CreateFaxEmailRouteResponses,
+  CreateFaxNumberData,
+  CreateFaxNumberErrors,
+  CreateFaxNumberResponses,
   CreateForwardingRuleData,
   CreateForwardingRuleErrors,
   CreateForwardingRuleResponses,
@@ -238,6 +241,8 @@ import type {
   GetLocationResponses,
   GetMfaStatusData,
   GetMfaStatusResponses,
+  GetNotificationPreferencesData,
+  GetNotificationPreferencesResponses,
   GetOrganizationData,
   GetOrganizationResponses,
   GetPhoneNumberData,
@@ -280,6 +285,9 @@ import type {
   ListConnectionsData,
   ListConnectionsErrors,
   ListConnectionsResponses,
+  ListDeviceLinesData,
+  ListDeviceLinesErrors,
+  ListDeviceLinesResponses,
   ListDevicesData,
   ListDevicesErrors,
   ListDevicesResponses,
@@ -356,6 +364,9 @@ import type {
   ProfileOAuthUpgradeScopesData,
   ProfileOAuthUpgradeScopesErrors,
   ProfileOAuthUpgradeScopesResponses,
+  RebootDeviceData,
+  RebootDeviceErrors,
+  RebootDeviceResponses,
   RegenerateMfaBackupCodesData,
   RegenerateMfaBackupCodesErrors,
   RegenerateMfaBackupCodesResponses,
@@ -368,6 +379,9 @@ import type {
   ReopenTicketData,
   ReopenTicketErrors,
   ReopenTicketResponses,
+  ReprovisionDeviceData,
+  ReprovisionDeviceErrors,
+  ReprovisionDeviceResponses,
   ResetPasswordData,
   ResetPasswordErrors,
   ResetPasswordResponses,
@@ -382,6 +396,12 @@ import type {
   RevokeUserRoleData,
   RevokeUserRoleErrors,
   RevokeUserRoleResponses,
+  SendFaxData,
+  SendFaxErrors,
+  SendFaxResponses,
+  SetDeviceLinesData,
+  SetDeviceLinesErrors,
+  SetDeviceLinesResponses,
   SetForwardingRulesData,
   SetForwardingRulesErrors,
   SetForwardingRulesResponses,
@@ -425,6 +445,9 @@ import type {
   UpdateLocationData,
   UpdateLocationErrors,
   UpdateLocationResponses,
+  UpdateNotificationPreferencesData,
+  UpdateNotificationPreferencesErrors,
+  UpdateNotificationPreferencesResponses,
   UpdateOrganizationData,
   UpdateOrganizationErrors,
   UpdateOrganizationResponses,
@@ -1175,6 +1198,74 @@ export const updateDevice = <ThrowOnError extends boolean = false>(
   });
 
 /**
+ * ListDeviceLines
+ */
+export const listDeviceLines = <ThrowOnError extends boolean = false>(
+  options: Options<ListDeviceLinesData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    ListDeviceLinesResponses,
+    ListDeviceLinesErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/devices/{device_id}/lines",
+    ...options,
+  });
+
+/**
+ * SetDeviceLines
+ */
+export const setDeviceLines = <ThrowOnError extends boolean = false>(
+  options: Options<SetDeviceLinesData, ThrowOnError>,
+) =>
+  (options.client ?? client).put<
+    SetDeviceLinesResponses,
+    SetDeviceLinesErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/devices/{device_id}/lines",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * RebootDevice
+ */
+export const rebootDevice = <ThrowOnError extends boolean = false>(
+  options: Options<RebootDeviceData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    RebootDeviceResponses,
+    RebootDeviceErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/devices/{device_id}/reboot",
+    ...options,
+  });
+
+/**
+ * ReprovisionDevice
+ */
+export const reprovisionDevice = <ThrowOnError extends boolean = false>(
+  options: Options<ReprovisionDeviceData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    ReprovisionDeviceResponses,
+    ReprovisionDeviceErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/devices/{device_id}/reprovision",
+    ...options,
+  });
+
+/**
  * RequestVerification
  */
 export const apiEmailVerificationRequestRequestVerification = <
@@ -1307,6 +1398,26 @@ export const listFaxNumbers = <ThrowOnError extends boolean = false>(
   });
 
 /**
+ * CreateFaxNumber
+ */
+export const createFaxNumber = <ThrowOnError extends boolean = false>(
+  options: Options<CreateFaxNumberData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    CreateFaxNumberResponses,
+    CreateFaxNumberErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/fax/numbers",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
  * DeleteFaxNumber
  */
 export const deleteFaxNumber = <ThrowOnError extends boolean = false>(
@@ -1423,6 +1534,26 @@ export const updateFaxEmailRoute = <ThrowOnError extends boolean = false>(
   >({
     security: [{ scheme: "bearer", type: "http" }],
     url: "/api/fax/numbers/{fax_number_id}/email-routes/{route_id}",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * SendFax
+ */
+export const sendFax = <ThrowOnError extends boolean = false>(
+  options: Options<SendFaxData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    SendFaxResponses,
+    SendFaxErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/fax/send",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -1660,6 +1791,50 @@ export const markAllNotificationsRead = <ThrowOnError extends boolean = false>(
     security: [{ scheme: "bearer", type: "http" }],
     url: "/api/notifications/mark-all-read",
     ...options,
+  });
+
+/**
+ * Get notification preferences
+ *
+ * Get the current user's notification preferences.
+ */
+export const getNotificationPreferences = <
+  ThrowOnError extends boolean = false,
+>(
+  options?: Options<GetNotificationPreferencesData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    GetNotificationPreferencesResponses,
+    unknown,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/notifications/preferences",
+    ...options,
+  });
+
+/**
+ * Update notification preferences
+ *
+ * Update the current user's notification preferences.
+ */
+export const updateNotificationPreferences = <
+  ThrowOnError extends boolean = false,
+>(
+  options: Options<UpdateNotificationPreferencesData, ThrowOnError>,
+) =>
+  (options.client ?? client).patch<
+    UpdateNotificationPreferencesResponses,
+    UpdateNotificationPreferencesErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/notifications/preferences",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
   });
 
 /**

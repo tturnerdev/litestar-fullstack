@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router"
 import { ChevronRight, ScrollText, ShieldCheck, Users, UsersRound } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardTitle } from "@/components/ui/card"
 import { useAuthStore } from "@/lib/auth"
 
 interface QuickLinkItem {

@@ -14,6 +14,7 @@ from app.lib.settings import get_settings
 
 if TYPE_CHECKING:
     from app.db.models._email_verification_token import EmailVerificationToken
+    from app.db.models._notification_preference import NotificationPreference
     from app.db.models._oauth_account import UserOAuthAccount
     from app.db.models._password_reset_token import PasswordResetToken
     from app.db.models._refresh_token import RefreshToken
@@ -111,6 +112,12 @@ class User(UUIDv7AuditBase):
         lazy="noload",
         cascade="all, delete-orphan",
         uselist=True,
+    )
+    notification_preference: Mapped[NotificationPreference | None] = relationship(
+        back_populates="user",
+        lazy="noload",
+        cascade="all, delete-orphan",
+        uselist=False,
     )
 
     @hybrid_property

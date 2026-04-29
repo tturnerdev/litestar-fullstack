@@ -1230,6 +1230,27 @@ export const DeviceSchema = {
   type: "object",
 } as const;
 
+export const DeviceActionResponseSchema = {
+  properties: {
+    action: {
+      type: "string",
+    },
+    deviceId: {
+      format: "uuid",
+      type: "string",
+    },
+    message: {
+      type: "string",
+    },
+    status: {
+      type: "string",
+    },
+  },
+  required: ["action", "deviceId", "message", "status"],
+  title: "DeviceActionResponse",
+  type: "object",
+} as const;
+
 export const DeviceCreateSchema = {
   properties: {
     deviceModel: {
@@ -1328,6 +1349,39 @@ export const DeviceLineAssignmentSchema = {
   },
   required: ["id", "label", "lineNumber", "lineType"],
   title: "DeviceLineAssignment",
+  type: "object",
+} as const;
+
+export const DeviceLineAssignmentInputSchema = {
+  properties: {
+    extensionId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    isActive: {
+      default: true,
+      type: "boolean",
+    },
+    label: {
+      type: "string",
+    },
+    lineNumber: {
+      type: "integer",
+    },
+    lineType: {
+      default: "private",
+      type: "string",
+    },
+  },
+  required: ["label", "lineNumber"],
+  title: "DeviceLineAssignmentInput",
   type: "object",
 } as const;
 
@@ -2001,6 +2055,42 @@ export const FaxNumberSchema = {
   type: "object",
 } as const;
 
+export const FaxNumberCreateSchema = {
+  properties: {
+    isActive: {
+      default: true,
+      type: "boolean",
+    },
+    label: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    number: {
+      type: "string",
+    },
+    teamId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: ["number"],
+  title: "FaxNumberCreate",
+  type: "object",
+} as const;
+
 export const FaxNumberUpdateSchema = {
   properties: {
     isActive: {
@@ -2029,7 +2119,7 @@ export const FaxNumberUpdateSchema = {
 export const FaxStatusSchema = {
   default: "received",
   description: "Valid values for fax message status.",
-  enum: ["received", "delivered", "failed", "sending", "sent"],
+  enum: ["queued", "received", "delivered", "failed", "sending", "sent"],
   title: "FaxStatus",
   type: "string",
 } as const;
@@ -2721,6 +2811,56 @@ export const NotificationSchema = {
     "userId",
   ],
   title: "Notification",
+  type: "object",
+} as const;
+
+export const NotificationPreferenceSchema = {
+  properties: {
+    categories: {
+      additionalProperties: {
+        type: "boolean",
+      },
+      type: "object",
+    },
+    emailEnabled: {
+      type: "boolean",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    userId: {
+      format: "uuid",
+      type: "string",
+    },
+  },
+  required: ["categories", "emailEnabled", "id", "userId"],
+  title: "NotificationPreference",
+  type: "object",
+} as const;
+
+export const NotificationPreferenceUpdateSchema = {
+  properties: {
+    categories: {
+      oneOf: [
+        {
+          additionalProperties: {
+            type: "boolean",
+          },
+          type: "object",
+        },
+      ],
+    },
+    emailEnabled: {
+      oneOf: [
+        {
+          type: "boolean",
+        },
+      ],
+    },
+  },
+  required: [],
+  title: "NotificationPreferenceUpdate",
   type: "object",
 } as const;
 
@@ -3576,6 +3716,55 @@ export const SearchResultItemSchema = {
   },
   required: ["description", "id", "label", "type", "url"],
   title: "SearchResultItem",
+  type: "object",
+} as const;
+
+export const SendFaxSchema = {
+  properties: {
+    body: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    destinationNumber: {
+      type: "string",
+    },
+    faxNumberId: {
+      format: "uuid",
+      type: "string",
+    },
+    subject: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: ["destinationNumber", "faxNumberId"],
+  title: "SendFax",
+  type: "object",
+} as const;
+
+export const SetDeviceLinesRequestSchema = {
+  properties: {
+    lines: {
+      items: {
+        $ref: "#/components/schemas/DeviceLineAssignmentInput",
+      },
+      type: "array",
+    },
+  },
+  required: ["lines"],
+  title: "SetDeviceLinesRequest",
   type: "object",
 } as const;
 

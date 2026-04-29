@@ -1,26 +1,52 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, Link, useParams } from "@tanstack/react-router"
-import { ArrowLeft, ChevronRight, Clock, Mail, X } from "lucide-react"
-import { useEffect } from "react"
-import { InviteMemberDialog } from "@/components/teams/invite-member-dialog"
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
-import { TeamPermissions } from "@/components/teams/team-permissions"
+import { Activity, ArrowLeft, Crown, Settings, Shield, Users } from "lucide-react"
+import { useEffect, useState } from "react"
+import { TeamActivity } from "@/components/teams/team-activity"
+import { TeamMembers } from "@/components/teams/team-members"
+import { TeamSettings } from "@/components/teams/team-settings"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Separator } from "@/components/ui/separator"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useAuthStore } from "@/lib/auth"
-import { deleteTeamInvitation, getTeam, listTeamInvitations, removeMemberFromTeam, type TeamInvitation, type TeamMember } from "@/lib/generated/api"
+import { getTeam, type TeamMember } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/teams/$teamId/")({
   component: TeamDetail,
 })
 
+function getTeamInitials(name: string): string {
+  return name
+    .split(/\s+/)
+    .map((word) => word[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2)
+}
+
+function getTeamColor(name: string): string {
+  const colors = [
+    "bg-blue-500/15 text-blue-600 dark:text-blue-400",
+    "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
+    "bg-violet-500/15 text-violet-600 dark:text-violet-400",
+    "bg-amber-500/15 text-amber-600 dark:text-amber-400",
+    "bg-rose-500/15 text-rose-600 dark:text-rose-400",
+    "bg-cyan-500/15 text-cyan-600 dark:text-cyan-400",
+    "bg-fuchsia-500/15 text-fuchsia-600 dark:text-fuchsia-400",
+    "bg-orange-500/15 text-orange-600 dark:text-orange-400",
+  ]
+  const index = name.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length
+  return colors[index]
+}
+
 function TeamDetail() {
-  const { teamId } = useParams({ from: "/_app/teams/$teamId/" })
-  const queryClient = useQueryClient()
+  const { teamId } = useParams({ from: "/_app/teams/$teamId/" as const })
   const { user, currentTeam, setCurrentTeam } = useAuthStore()
+  const [activeTab, setActiveTab] = useState("members")
 
   const {
     data: team,
@@ -34,50 +60,19 @@ function TeamDetail() {
     },
   })
 
-  const { data: invitationsData } = useQuery({
-    queryKey: ["teamInvitations", teamId],
-    queryFn: async () => {
-      const response = await listTeamInvitations({
-        path: { team_id: teamId },
-      })
-      return response.data?.items ?? []
-    },
-    enabled: !!team,
-  })
-
-  const pendingInvitations = invitationsData?.filter((inv) => !inv.isAccepted) ?? []
-
   useEffect(() => {
     if (team && team.id !== currentTeam?.id) {
       setCurrentTeam(team)
     }
   }, [currentTeam?.id, setCurrentTeam, team])
 
-  const removeMemberMutation = useMutation({
-    mutationFn: (memberEmail: string) =>
-      removeMemberFromTeam({
-        path: { team_id: teamId },
-        body: { userName: memberEmail },
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["team", teamId] })
-    },
-  })
-
-  const cancelInvitationMutation = useMutation({
-    mutationFn: (invitationId: string) =>
-      deleteTeamInvitation({
-        path: { team_id: teamId, invitation_id: invitationId },
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["teamInvitations", teamId] })
-    },
-  })
-
   if (isTeamLoading) {
     return (
       <PageContainer className="flex-1">
-        <div className="text-muted-foreground">Loading team...</div>
+        <div className="flex flex-col items-center justify-center py-20">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <p className="mt-3 text-sm text-muted-foreground">Loading team...</p>
+        </div>
       </PageContainer>
     )
   }
@@ -85,7 +80,16 @@ function TeamDetail() {
   if (isTeamError || !team) {
     return (
       <PageContainer className="flex-1">
-        <div className="text-muted-foreground">{isTeamError ? "We couldn't load this team yet. Try refreshing." : "Team not found"}</div>
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <Users className="mb-3 h-10 w-10 text-muted-foreground/50" />
+          <h2 className="text-lg font-semibold">{isTeamError ? "Unable to load team" : "Team not found"}</h2>
+          <p className="mt-1 text-sm text-muted-foreground">{isTeamError ? "Something went wrong. Please try refreshing the page." : "This team may have been deleted or you don't have access."}</p>
+          <Button variant="outline" size="sm" asChild className="mt-4">
+            <Link to="/teams">
+              <ArrowLeft className="mr-2 h-4 w-4" /> Back to teams
+            </Link>
+          </Button>
+        </div>
       </PageContainer>
     )
   }
@@ -94,13 +98,12 @@ function TeamDetail() {
   const owner = members.find((member) => member.isOwner)
   const ownerId = owner?.userId
   const isOwner = ownerId === user?.id
-  const canManageMembers = isOwner || user?.isSuperuser || members.some((member) => member.userId === user?.id && member.role === "ADMIN")
+  const isAdmin = members.some((member) => member.userId === user?.id && member.role === "ADMIN")
+  const canManageMembers = isOwner || user?.isSuperuser || isAdmin
+  const tags = team.tags ?? []
 
-  const canRemoveMember = (member: TeamMember) => {
-    if (member.isOwner) return false
-    if (member.userId === user?.id && !user?.isSuperuser) return false
-    return canManageMembers
-  }
+  const userMembership = members.find((m: TeamMember) => m.userId === user?.id)
+  const userRole = userMembership?.isOwner ? "Owner" : userMembership?.role === "ADMIN" ? "Admin" : userMembership ? "Member" : null
 
   return (
     <PageContainer className="flex-1 space-y-8">
@@ -108,119 +111,113 @@ function TeamDetail() {
         eyebrow="Teams"
         title={team.name}
         description={team.description || "No description provided."}
-        breadcrumbs={
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem><BreadcrumbLink asChild><Link to="/home">Home</Link></BreadcrumbLink></BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem><BreadcrumbLink asChild><Link to="/teams">Teams</Link></BreadcrumbLink></BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem><BreadcrumbPage>{team.name}</BreadcrumbPage></BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        }
         actions={
-          <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" asChild>
-              <Link to="/teams">
-                <ArrowLeft className="mr-2 h-4 w-4" /> Back
-              </Link>
-            </Button>
-            {canManageMembers && <InviteMemberDialog teamId={teamId} />}
-          </div>
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/teams">
+              <ArrowLeft className="mr-2 h-4 w-4" /> Back
+            </Link>
+          </Button>
         }
       />
 
       <PageSection>
-        <div className="grid gap-4 md:grid-cols-[1.1fr_0.9fr]">
-          <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
-            <CardHeader>
-              <CardTitle>Members</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {members.map((member: TeamMember) => {
-                const isSelf = member.userId === user?.id
-                return (
-                  <div
-                    key={member.id}
-                    className={`flex items-center justify-between rounded-xl border bg-background/60 p-3 ${isSelf ? "border-primary/30 bg-primary/5" : "border-border/60"}`}
-                  >
-                    <div className="flex flex-col">
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium text-foreground">{member.name ?? member.email}</p>
-                        {isSelf && (
-                          <Badge variant="secondary" className="text-[10px]">
-                            You
-                          </Badge>
-                        )}
-                        {member.isOwner && <Badge className="text-[10px]">Owner</Badge>}
-                      </div>
-                      <p className="text-muted-foreground text-sm">{member.email}</p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Badge variant="outline" className="uppercase">
-                        {member.role ?? "MEMBER"}
-                      </Badge>
-                      {canRemoveMember(member) && (
-                        <Button variant="outline" size="sm" onClick={() => removeMemberMutation.mutate(member.email)}>
-                          Remove
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                )
-              })}
-              {members.length === 0 && <div className="text-muted-foreground text-sm">No members yet.</div>}
+        <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
+          <CardContent className="p-6">
+            <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
+              <Avatar className={`h-16 w-16 ${getTeamColor(team.name)}`}>
+                <AvatarFallback className={`text-xl font-bold ${getTeamColor(team.name)}`}>
+                  {getTeamInitials(team.name)}
+                </AvatarFallback>
+              </Avatar>
 
-              {pendingInvitations.length > 0 && (
-                <>
-                  <Separator className="my-4" />
-                  <div className="space-y-2">
-                    <p className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                      <Clock className="h-4 w-4" />
-                      Pending invitations
-                    </p>
-                    {pendingInvitations.map((invitation: TeamInvitation) => (
-                      <div key={invitation.id} className="flex items-center justify-between rounded-lg border border-dashed border-border/60 bg-muted/30 p-3">
-                        <div className="flex items-center gap-3">
-                          <Mail className="h-4 w-4 text-muted-foreground" />
-                          <div>
-                            <p className="text-sm font-medium">{invitation.email}</p>
-                            <p className="text-xs text-muted-foreground">Invited as {invitation.role.toLowerCase()}</p>
-                          </div>
-                        </div>
-                        {canManageMembers && (
-                          <Button variant="ghost" size="sm" onClick={() => cancelInvitationMutation.mutate(invitation.id)}>
-                            <X className="h-4 w-4" />
-                            <span className="sr-only">Cancel invitation</span>
-                          </Button>
-                        )}
-                      </div>
+              <div className="flex-1 space-y-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="text-xl font-semibold">{team.name}</h2>
+                  {team.isActive === false && (
+                    <Badge variant="destructive" className="text-[10px]">
+                      Inactive
+                    </Badge>
+                  )}
+                  {userRole && (
+                    <Badge variant="outline" className="gap-1 text-[10px]">
+                      {userRole === "Owner" && <Crown className="h-2.5 w-2.5" />}
+                      {userRole === "Admin" && <Shield className="h-2.5 w-2.5" />}
+                      {userRole}
+                    </Badge>
+                  )}
+                </div>
+                {team.description && <p className="text-sm text-muted-foreground">{team.description}</p>}
+                {tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {tags.map((tag) => (
+                      <Badge key={tag.id} variant="secondary" className="text-[10px] px-2 py-0.5">
+                        {tag.name}
+                      </Badge>
                     ))}
                   </div>
-                </>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
-            <CardHeader>
-              <CardTitle>Team overview</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm text-muted-foreground">
-              <div className="flex justify-between text-foreground">
-                <span>Member count</span>
-                <Badge variant="secondary">{members.length}</Badge>
+                )}
               </div>
-              <Separator className="my-3" />
-              <p>Use this space to track key links, environments, or runbooks for the team.</p>
-            </CardContent>
-          </Card>
-        </div>
+
+              <div className="flex gap-6 sm:gap-8">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-foreground">{members.length}</p>
+                  <p className="text-xs text-muted-foreground">Members</p>
+                </div>
+                <Separator orientation="vertical" className="hidden h-12 sm:block" />
+                {owner && (
+                  <div className="text-center">
+                    <p className="text-sm font-medium text-foreground">{owner.name ?? owner.email}</p>
+                    <p className="text-xs text-muted-foreground">Owner</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </PageSection>
 
-      <PageSection>
-        <TeamPermissions teamId={teamId} canEdit={canManageMembers} />
+      <PageSection delay={0.1}>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList>
+            <TabsTrigger value="members" className="gap-1.5">
+              <Users className="h-4 w-4" />
+              Members
+            </TabsTrigger>
+            {canManageMembers && (
+              <TabsTrigger value="settings" className="gap-1.5">
+                <Settings className="h-4 w-4" />
+                Settings
+              </TabsTrigger>
+            )}
+            <TabsTrigger value="activity" className="gap-1.5">
+              <Activity className="h-4 w-4" />
+              Activity
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="members" className="mt-6">
+            <TeamMembers
+              team={team}
+              teamId={teamId}
+              canManageMembers={!!canManageMembers}
+              isOwner={isOwner}
+            />
+          </TabsContent>
+
+          {canManageMembers && (
+            <TabsContent value="settings" className="mt-6">
+              <TeamSettings
+                team={team}
+                teamId={teamId}
+                isOwner={isOwner}
+              />
+            </TabsContent>
+          )}
+
+          <TabsContent value="activity" className="mt-6">
+            <TeamActivity team={team} />
+          </TabsContent>
+        </Tabs>
       </PageSection>
     </PageContainer>
   )
