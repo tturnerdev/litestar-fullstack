@@ -7,5 +7,3 @@ export const Route = createFileRoute("/_app/devices")({
 function DevicesLayout() {
   return <Outlet />
 }
-
-export default DevicesLayout

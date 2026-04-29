@@ -26,11 +26,13 @@ function HomePage() {
   const user = useAuthStore((state) => state.user)
   const isSuperuser = user?.isSuperuser ?? false
 
-  const { data: teamsData, isLoading: teamsLoading } = useQuery({
-    queryKey: ["teams"],
+  const { data: teamsRaw, isLoading: teamsLoading } = useQuery({
+    queryKey: ["home", "teams"],
     queryFn: async () => {
       const response = await listTeams()
-      return response.data as { items: Array<{ id: string; name: string; description?: string | null; slug: string; members?: Array<unknown> }>; total: number } | undefined
+      const data = response.data
+      if (Array.isArray(data)) return { items: data, total: data.length }
+      return { items: data?.items ?? [], total: data?.total ?? 0 }
     },
   })
 
@@ -68,7 +70,7 @@ function HomePage() {
     enabled: isSuperuser,
   })
 
-  const teams = teamsData?.items ?? []
+  const teams = teamsRaw?.items ?? []
   const displayName = user?.name || user?.email?.split("@")[0] || "there"
 
   return (
@@ -91,7 +93,7 @@ function HomePage() {
         <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
           <StatCard
             label="Teams"
-            value={teamsData?.total ?? teams.length}
+            value={teamsRaw?.total ?? teams.length}
             icon={Users}
             iconClassName="bg-blue-500/10 text-blue-600 dark:text-blue-400"
             isLoading={teamsLoading}

@@ -7,5 +7,3 @@ export const Route = createFileRoute("/_app/locations")({
 function LocationsLayout() {
   return <Outlet />
 }
-
-export default LocationsLayout

@@ -245,6 +245,21 @@ build-emails:                                      ## Build React email template
 
 
 # =============================================================================
+# Development Server
+# =============================================================================
+
+.PHONY: dev
+dev:                                               ## Run app with stdout+stderr logged to error.log (reset each run)
+	@echo "${INFO} Starting dev server — logging to error.log"
+	@uv run app run 2>&1 | tee error.log
+
+.PHONY: dev-debug
+dev-debug:                                         ## Run app in debug mode with stdout+stderr logged to error.log
+	@echo "${INFO} Starting dev server (debug) — logging to error.log"
+	@uv run app run --debug 2>&1 | tee error.log
+
+
+# =============================================================================
 # Local Infrastructure (Database only - for normal development)
 # =============================================================================
 

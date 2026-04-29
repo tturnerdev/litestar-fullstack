@@ -17,5 +17,3 @@ function AdminLayout() {
   // Just pass through to child routes - they handle their own layout
   return <Outlet />
 }
-
-export default AdminLayout

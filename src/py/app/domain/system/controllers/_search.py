@@ -10,12 +10,11 @@ import structlog
 from litestar import Controller, get
 from sqlalchemy import or_, select
 
+from app.db import models as m
 from app.domain.system.schemas._search import SearchResponse, SearchResultItem
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
-
-    from app.db.models._user import User
 
 logger = structlog.get_logger()
 
@@ -147,7 +146,7 @@ def _import_class(dotted_path: str) -> type:
     return getattr(module, class_name)
 
 
-def _get_user_team_ids(user: User) -> set[UUID]:
+def _get_user_team_ids(user: m.User) -> set[UUID]:
     """Extract all team IDs the user is a member of.
 
     Args:
@@ -163,7 +162,7 @@ async def _search_entity(
     db_session: AsyncSession,
     entry: _SearchableEntity,
     query: str,
-    user: User,
+    user: m.User,
     limit: int,
 ) -> list[SearchResultItem]:
     """Search a single entity type and return matching results.
@@ -271,7 +270,7 @@ class SearchController(Controller):
     async def global_search(
         self,
         db_session: AsyncSession,
-        current_user: User,
+        current_user: m.User,
         q: str = "",
         limit: int = 5,
     ) -> SearchResponse:

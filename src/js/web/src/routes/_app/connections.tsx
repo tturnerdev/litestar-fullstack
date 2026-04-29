@@ -7,5 +7,3 @@ export const Route = createFileRoute("/_app/connections")({
 function ConnectionsLayout() {
   return <Outlet />
 }
-
-export default ConnectionsLayout

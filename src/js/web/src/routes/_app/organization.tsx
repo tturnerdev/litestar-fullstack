@@ -18,5 +18,3 @@ function OrganizationLayout() {
 
   return <Outlet />
 }
-
-export default OrganizationLayout

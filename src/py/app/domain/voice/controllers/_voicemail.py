@@ -70,7 +70,7 @@ class VoicemailController(Controller):
     ) -> VoicemailSettings:
         """Get voicemail box config."""
         await extensions_service.get_one(id=ext_id, user_id=current_user.id)
-        db_obj = await voicemail_boxes_service.get_one(extension_id=ext_id)
+        db_obj = await voicemail_boxes_service.get_or_create_for_extension(ext_id)
         return voicemail_boxes_service.to_schema(db_obj, schema_type=VoicemailSettings)
 
     @patch(operation_id="UpdateVoicemailSettings", path="/api/voice/extensions/{ext_id:uuid}/voicemail")
@@ -86,7 +86,7 @@ class VoicemailController(Controller):
     ) -> VoicemailSettings:
         """Update voicemail settings."""
         await extensions_service.get_one(id=ext_id, user_id=current_user.id)
-        db_obj = await voicemail_boxes_service.get_one(extension_id=ext_id)
+        db_obj = await voicemail_boxes_service.get_or_create_for_extension(ext_id)
         before = capture_snapshot(db_obj)
         db_obj = await voicemail_boxes_service.update(item_id=db_obj.id, data=data.to_dict())
         after = capture_snapshot(db_obj)
@@ -116,7 +116,7 @@ class VoicemailController(Controller):
     ) -> OffsetPagination[VoicemailMessage]:
         """List messages (paginated)."""
         await extensions_service.get_one(id=ext_id, user_id=current_user.id)
-        voicemail_box = await voicemail_boxes_service.get_one(extension_id=ext_id)
+        voicemail_box = await voicemail_boxes_service.get_or_create_for_extension(ext_id)
         results, total = await voicemail_messages_service.list_and_count(
             *filters,
             m.VoicemailMessage.voicemail_box_id == voicemail_box.id,

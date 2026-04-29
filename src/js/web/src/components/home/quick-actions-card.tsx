@@ -29,7 +29,7 @@ const defaultActions: QuickAction[] = [
     to: "/teams",
     icon: Users,
     iconBgClassName: "bg-blue-500/10 group-hover:bg-blue-500",
-    iconTextClassName: "text-blue-600 group-hover:text-white dark:text-blue-400",
+    iconTextClassName: "text-blue-600 dark:text-blue-400 group-hover:text-white dark:group-hover:text-white",
   },
   {
     key: "manage-tags",
@@ -38,7 +38,7 @@ const defaultActions: QuickAction[] = [
     to: "/admin",
     icon: Tag,
     iconBgClassName: "bg-emerald-500/10 group-hover:bg-emerald-500",
-    iconTextClassName: "text-emerald-600 group-hover:text-white dark:text-emerald-400",
+    iconTextClassName: "text-emerald-600 dark:text-emerald-400 group-hover:text-white dark:group-hover:text-white",
   },
   {
     key: "edit-profile",
@@ -47,7 +47,7 @@ const defaultActions: QuickAction[] = [
     to: "/profile",
     icon: Settings,
     iconBgClassName: "bg-orange-500/10 group-hover:bg-orange-500",
-    iconTextClassName: "text-orange-600 group-hover:text-white dark:text-orange-400",
+    iconTextClassName: "text-orange-600 dark:text-orange-400 group-hover:text-white dark:group-hover:text-white",
   },
 ]
 
@@ -59,7 +59,7 @@ const adminActions: QuickAction[] = [
     to: "/admin",
     icon: ShieldCheck,
     iconBgClassName: "bg-violet-500/10 group-hover:bg-violet-500",
-    iconTextClassName: "text-violet-600 group-hover:text-white dark:text-violet-400",
+    iconTextClassName: "text-violet-600 dark:text-violet-400 group-hover:text-white dark:group-hover:text-white",
   },
 ]
 

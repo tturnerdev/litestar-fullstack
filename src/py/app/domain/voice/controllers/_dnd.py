@@ -46,7 +46,7 @@ class DndController(Controller):
     ) -> DndSettings:
         """Get DND configuration."""
         await extensions_service.get_one(id=ext_id, user_id=current_user.id)
-        db_obj = await dnd_service.get_one(extension_id=ext_id)
+        db_obj = await dnd_service.get_or_create_for_extension(ext_id)
         return dnd_service.to_schema(db_obj, schema_type=DndSettings)
 
     @patch(operation_id="UpdateDndSettings", path="/api/voice/extensions/{ext_id:uuid}/dnd")
@@ -60,7 +60,7 @@ class DndController(Controller):
     ) -> DndSettings:
         """Update DND settings."""
         await extensions_service.get_one(id=ext_id, user_id=current_user.id)
-        db_obj = await dnd_service.get_one(extension_id=ext_id)
+        db_obj = await dnd_service.get_or_create_for_extension(ext_id)
         db_obj = await dnd_service.update(item_id=db_obj.id, data=data.to_dict())
         return dnd_service.to_schema(db_obj, schema_type=DndSettings)
 
@@ -76,7 +76,7 @@ class DndController(Controller):
     ) -> DndToggleResponse:
         """Quick toggle DND on/off."""
         await extensions_service.get_one(id=ext_id, user_id=current_user.id)
-        db_obj = await dnd_service.get_one(extension_id=ext_id)
+        db_obj = await dnd_service.get_or_create_for_extension(ext_id)
         before = capture_snapshot(db_obj)
         db_obj = await dnd_service.update(item_id=db_obj.id, data={"is_enabled": not db_obj.is_enabled})
         after = capture_snapshot(db_obj)

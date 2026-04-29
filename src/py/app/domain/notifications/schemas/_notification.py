@@ -23,7 +23,7 @@ class Notification(CamelizedBaseStruct):
     created_at: datetime
     updated_at: datetime
     action_url: str | None = None
-    metadata: dict[str, Any] | None = None
+    metadata_: dict[str, Any] | None = None
 
 
 class NotificationCreate(CamelizedBaseStruct):
@@ -34,7 +34,7 @@ class NotificationCreate(CamelizedBaseStruct):
     message: str
     category: str
     action_url: str | None = None
-    metadata: dict[str, Any] | None = None
+    metadata_: dict[str, Any] | None = None
 
 
 class NotificationUpdate(CamelizedBaseStruct):

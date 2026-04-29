@@ -40,16 +40,20 @@ export function TeamList() {
   const [search, setSearch] = useState("")
 
   const {
-    data: teamsData = [],
+    data: rawTeamsData = [],
     isLoading,
     isError,
   } = useQuery({
     queryKey: ["teams"],
     queryFn: async () => {
       const response = await listTeams()
-      return response.data?.items ?? []
+      const data = response.data
+      if (Array.isArray(data)) return data
+      return data?.items ?? []
     },
   })
+
+  const teamsData = Array.isArray(rawTeamsData) ? rawTeamsData : (rawTeamsData as any)?.items ?? []
 
   useEffect(() => {
     if (!isLoading && !isError) {

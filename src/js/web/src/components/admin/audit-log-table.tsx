@@ -1,8 +1,9 @@
-import { Calendar, ChevronDown, ChevronRight, Download, Loader2, Search, X } from "lucide-react"
-import { useCallback, useMemo, useState } from "react"
+import { Calendar, ChevronDown, ChevronRight, Download, FileSpreadsheet, Loader2, Search, X } from "lucide-react"
+import { Fragment, useCallback, useMemo, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { SkeletonTable } from "@/components/ui/skeleton"
@@ -100,7 +101,7 @@ function escapeCsvField(value: string): string {
   return value
 }
 
-function generateCsv(items: AuditLogEntry[]): string {
+function generateBasicCsv(items: AuditLogEntry[]): string {
   const headers = ["timestamp", "action", "actor_email", "target_type", "target_id", "target_label", "ip_address", "user_agent"]
   const rows = items.map((entry) =>
     [
@@ -119,13 +120,67 @@ function generateCsv(items: AuditLogEntry[]): string {
   return [headers.join(","), ...rows].join("\n")
 }
 
-function downloadCsv(csv: string) {
+function flattenDetails(details: Record<string, unknown> | null | undefined): Record<string, string> {
+  if (!details) return {}
+  const flat: Record<string, string> = {}
+  for (const [key, value] of Object.entries(details)) {
+    if (value === null || value === undefined) {
+      flat[key] = ""
+    } else if (typeof value === "object") {
+      flat[key] = JSON.stringify(value)
+    } else {
+      flat[key] = String(value)
+    }
+  }
+  return flat
+}
+
+function generateExtendedCsv(items: AuditLogEntry[]): string {
+  const detailKeys = new Set<string>()
+  const flatDetailsList = items.map((entry) => {
+    const flat = flattenDetails(entry.details)
+    for (const key of Object.keys(flat)) detailKeys.add(key)
+    return flat
+  })
+  const sortedDetailKeys = [...detailKeys].sort()
+
+  const headers = [
+    "id", "timestamp", "action", "actor_id", "actor_email",
+    "target_type", "target_id", "target_label",
+    "ip_address", "user_agent", "details_json",
+    ...sortedDetailKeys.map((k) => `detail_${k}`),
+  ]
+
+  const rows = items.map((entry, i) => {
+    const flat = flatDetailsList[i]
+    return [
+      entry.id,
+      new Date(entry.createdAt).toISOString(),
+      entry.action,
+      entry.actorId ?? "",
+      entry.actorEmail ?? "",
+      entry.targetType ?? "",
+      entry.targetId ?? "",
+      entry.targetLabel ?? "",
+      entry.ipAddress ?? "",
+      entry.userAgent ?? "",
+      entry.details ? JSON.stringify(entry.details) : "",
+      ...sortedDetailKeys.map((k) => flat[k] ?? ""),
+    ]
+      .map(escapeCsvField)
+      .join(",")
+  })
+
+  return [headers.join(","), ...rows].join("\n")
+}
+
+function downloadCsv(csv: string, mode: "basic" | "extended" = "basic") {
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" })
   const url = URL.createObjectURL(blob)
   const link = document.createElement("a")
   const date = new Date().toISOString().split("T")[0]
   link.href = url
-  link.download = `audit-log-${date}.csv`
+  link.download = `audit-log-${mode === "extended" ? "extended-" : ""}${date}.csv`
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
@@ -210,13 +265,13 @@ export function AuditLogTable() {
     })
   }, [])
 
-  const handleExport = useCallback(async () => {
+  const handleExport = useCallback(async (mode: "basic" | "extended") => {
     setIsExporting(true)
     try {
       const result = await fetchExport()
       if (result.data?.items) {
-        const csv = generateCsv(result.data.items)
-        downloadCsv(csv)
+        const csv = mode === "extended" ? generateExtendedCsv(result.data.items) : generateBasicCsv(result.data.items)
+        downloadCsv(csv, mode)
       }
     } finally {
       setIsExporting(false)
@@ -317,10 +372,27 @@ export function AuditLogTable() {
             {data.total.toLocaleString()} {data.total === 1 ? "entry" : "entries"} found
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={handleExport} disabled={isExporting || data.total === 0}>
-          {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-          Export CSV
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" disabled={isExporting || data.total === 0}>
+              {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+              Export CSV
+              <ChevronDown className="ml-1 h-3 w-3" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => handleExport("basic")}>
+              <Download className="mr-2 h-4 w-4" />
+              Basic
+              <span className="ml-2 text-xs text-muted-foreground">Core fields only</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleExport("extended")}>
+              <FileSpreadsheet className="mr-2 h-4 w-4" />
+              Extended
+              <span className="ml-2 text-xs text-muted-foreground">All fields + details</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Filter bar */}
@@ -453,8 +525,8 @@ export function AuditLogTable() {
               {data.items.map((entry) => {
                 const isExpanded = expandedRows.has(entry.id)
                 return (
-                  <>
-                    <TableRow key={entry.id} className="cursor-pointer transition-colors hover:bg-muted/50" onClick={() => toggleRow(entry.id)}>
+                  <Fragment key={entry.id}>
+                    <TableRow className="cursor-pointer transition-colors hover:bg-muted/50" onClick={() => toggleRow(entry.id)}>
                       <TableCell className="w-8 pr-0">
                         {isExpanded ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
                       </TableCell>
@@ -478,7 +550,7 @@ export function AuditLogTable() {
                       </TableCell>
                     </TableRow>
                     {isExpanded && <AuditDetailRow key={`${entry.id}-detail`} entry={entry} />}
-                  </>
+                  </Fragment>
                 )
               })}
             </TableBody>

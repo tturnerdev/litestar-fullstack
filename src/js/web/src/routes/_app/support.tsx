@@ -7,5 +7,3 @@ export const Route = createFileRoute("/_app/support")({
 function SupportLayout() {
   return <Outlet />
 }
-
-export default SupportLayout
