@@ -11,9 +11,11 @@ import {
   type SortingState,
   useReactTable,
 } from "@tanstack/react-table"
-import { ChevronLeft, ChevronRight, Search } from "lucide-react"
+import { ChevronLeft, ChevronRight, Inbox, type LucideIcon, Search } from "lucide-react"
+import type { ReactNode } from "react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
@@ -23,9 +25,11 @@ interface DataTableProps<TData, TValue> {
   searchKey?: string
   searchPlaceholder?: string
   emptyMessage?: string
+  emptyIcon?: LucideIcon
+  emptyAction?: ReactNode
 }
 
-export function DataTable<TData, TValue>({ columns, data, searchKey, searchPlaceholder = "Search...", emptyMessage = "No results found." }: DataTableProps<TData, TValue>) {
+export function DataTable<TData, TValue>({ columns, data, searchKey, searchPlaceholder = "Search...", emptyMessage = "No results found.", emptyIcon, emptyAction }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
@@ -79,8 +83,15 @@ export function DataTable<TData, TValue>({ columns, data, searchKey, searchPlace
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground">
-                  {emptyMessage}
+                <TableCell colSpan={columns.length} className="p-0">
+                  <EmptyState
+                    icon={emptyIcon ?? Inbox}
+                    variant="no-results"
+                    title={emptyMessage}
+                    description="Try adjusting your search or filters."
+                    action={emptyAction}
+                    className="border-0 rounded-none py-12"
+                  />
                 </TableCell>
               </TableRow>
             )}

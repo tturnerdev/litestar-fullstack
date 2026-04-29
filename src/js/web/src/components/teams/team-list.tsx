@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { useAuthStore } from "@/lib/auth"
 import { listTeams, type Team } from "@/lib/generated/api"
@@ -81,25 +82,19 @@ export function TeamList() {
 
   if (teamsData.length === 0) {
     return (
-      <Card className="border-dashed border-2">
-        <CardContent className="py-16 text-center space-y-6">
-          <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-            <Users className="h-8 w-8 text-primary" />
-          </div>
-          <div className="space-y-2">
-            <h3 className="text-lg font-semibold">Create your first team</h3>
-            <p className="text-muted-foreground text-sm max-w-md mx-auto">
-              Teams help you organize members and control access across the app. Get started by creating your first team.
-            </p>
-          </div>
+      <EmptyState
+        icon={Users}
+        title="Create your first team"
+        description="Teams help you organize members and control access across the app. Get started by creating your first team."
+        action={
           <Button asChild size="lg">
             <Link to="/teams/new">
               <Plus className="mr-2 h-4 w-4" />
               Create team
             </Link>
           </Button>
-        </CardContent>
-      </Card>
+        }
+      />
     )
   }
 
@@ -210,11 +205,12 @@ export function TeamList() {
       </div>
 
       {filteredTeams.length === 0 && search && (
-        <Card className="border-dashed">
-          <CardContent className="py-12 text-center">
-            <p className="text-muted-foreground">No teams match "{search}"</p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={Search}
+          variant="no-results"
+          title="No matching teams"
+          description={`No teams match "${search}". Try a different search term.`}
+        />
       )}
 
       {filteredTeams.length > 0 && (

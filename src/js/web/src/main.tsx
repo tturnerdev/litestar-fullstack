@@ -4,6 +4,8 @@ import { createRouter, RouterProvider } from "@tanstack/react-router"
 import React from "react"
 import ReactDOM from "react-dom/client"
 import { ErrorBoundary } from "@/components/error-boundary"
+import { RootErrorBoundary } from "@/components/ui/error-boundary"
+import { NotFoundPage } from "@/components/ui/not-found-page"
 import { client } from "@/lib/generated/api/client.gen"
 import { ThemeProvider } from "@/lib/theme-context"
 
@@ -156,6 +158,7 @@ const router = createRouter({
   defaultStructuralSharing: true,
   defaultPreloadStaleTime: 0,
   defaultErrorComponent: ErrorBoundary,
+  defaultNotFoundComponent: NotFoundPage,
 })
 
 declare module "@tanstack/react-router" {
@@ -170,12 +173,14 @@ if (rootElement && !rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement)
   root.render(
     <React.StrictMode>
-      <ThemeProvider>
-        <QueryClientProvider client={queryClient}>
-          <RouterProvider router={router} />
-          <ReactQueryDevtools />
-        </QueryClientProvider>
-      </ThemeProvider>
+      <RootErrorBoundary>
+        <ThemeProvider>
+          <QueryClientProvider client={queryClient}>
+            <RouterProvider router={router} />
+            <ReactQueryDevtools />
+          </QueryClientProvider>
+        </ThemeProvider>
+      </RootErrorBoundary>
     </React.StrictMode>,
   )
 }
