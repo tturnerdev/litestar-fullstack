@@ -36,6 +36,7 @@
     "axios": "^1.13.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "cmdk": "^1.0.4",
     "framer-motion": "^12.33.0",
     "html2canvas-pro": "^2.0.2",
     "litestar-vite-plugin": "^0.17.0",

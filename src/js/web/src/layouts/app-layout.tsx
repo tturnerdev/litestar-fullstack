@@ -2,6 +2,7 @@ import { Link, Outlet, useRouterState } from "@tanstack/react-router"
 import { useMemo } from "react"
 import { AppSidebar } from "@/components/app-sidebar"
 import { HelpMenu } from "@/components/help/help-menu"
+import { GlobalSearch } from "@/components/search/global-search"
 import { Separator } from "@/components/ui/separator"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { useAuthStore } from "@/lib/auth"
@@ -109,6 +110,7 @@ export function AppLayout() {
                       <span className="text-foreground">{currentTeam.name}</span>
                     </Link>
                   )}
+                  <GlobalSearch />
                   <HelpMenu />
                 </div>
               </div>
