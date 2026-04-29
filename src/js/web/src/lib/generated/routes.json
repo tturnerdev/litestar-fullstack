@@ -86,6 +86,13 @@
       ],
       "uri": "/api/devices"
     },
+    "create_extension": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "uri": "/api/voice/extensions"
+    },
     "create_fax_email_route": {
       "method": "post",
       "methods": [
@@ -137,6 +144,13 @@
         "ticket_id"
       ],
       "uri": "/api/support/tickets/{ticket_id}/messages"
+    },
+    "create_phone_number": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "uri": "/api/voice/phone-numbers"
     },
     "create_role": {
       "method": "post",
@@ -1129,6 +1143,19 @@
       },
       "uri": "/api/teams/{team_id}/invitations"
     },
+    "list_team_permissions": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "team_id": "UUID"
+      },
+      "parameters": [
+        "team_id"
+      ],
+      "uri": "/api/teams/{team_id}/permissions"
+    },
     "list_teams": {
       "method": "get",
       "methods": [
@@ -1779,6 +1806,19 @@
         "user_id"
       ],
       "uri": "/api/teams/{team_id}/members/{user_id}"
+    },
+    "update_team_permissions": {
+      "method": "put",
+      "methods": [
+        "PUT"
+      ],
+      "parameterTypes": {
+        "team_id": "UUID"
+      },
+      "parameters": [
+        "team_id"
+      ],
+      "uri": "/api/teams/{team_id}/permissions"
     },
     "update_ticket": {
       "method": "patch",

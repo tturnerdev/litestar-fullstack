@@ -26,10 +26,12 @@ export type RouteName =
   | 'confirm_setup'
   | 'create_connection'
   | 'create_device'
+  | 'create_extension'
   | 'create_fax_email_route'
   | 'create_forwarding_rule'
   | 'create_location'
   | 'create_message'
+  | 'create_phone_number'
   | 'create_role'
   | 'create_tag'
   | 'create_team'
@@ -99,6 +101,7 @@ export type RouteName =
   | 'list_roles'
   | 'list_tags'
   | 'list_team_invitations'
+  | 'list_team_permissions'
   | 'list_teams'
   | 'list_teams_api_teams'
   | 'list_tickets'
@@ -152,6 +155,7 @@ export type RouteName =
   | 'update_team'
   | 'update_team_api_teams_team_id:uuid'
   | 'update_team_member'
+  | 'update_team_permissions'
   | 'update_ticket'
   | 'update_user'
   | 'update_user_api_users_user_id:uuid'
@@ -194,6 +198,7 @@ export interface RoutePathParams {
   'confirm_setup': Record<string, never>;
   'create_connection': Record<string, never>;
   'create_device': Record<string, never>;
+  'create_extension': Record<string, never>;
   'create_fax_email_route': {
     fax_number_id: UUID;
   };
@@ -206,6 +211,7 @@ export interface RoutePathParams {
   'create_message': {
     ticket_id: UUID;
   };
+  'create_phone_number': Record<string, never>;
   'create_role': Record<string, never>;
   'create_tag': Record<string, never>;
   'create_team': Record<string, never>;
@@ -374,6 +380,9 @@ export interface RoutePathParams {
   'list_team_invitations': {
     team_id: UUID;
   };
+  'list_team_permissions': {
+    team_id: UUID;
+  };
   'list_teams': Record<string, never>;
   'list_teams_api_teams': Record<string, never>;
   'list_tickets': Record<string, never>;
@@ -489,6 +498,9 @@ export interface RoutePathParams {
     team_id: UUID;
     user_id: UUID;
   };
+  'update_team_permissions': {
+    team_id: UUID;
+  };
   'update_ticket': {
     ticket_id: UUID;
   };
@@ -560,10 +572,12 @@ export interface RouteQueryParams {
   'confirm_setup': Record<string, never>;
   'create_connection': Record<string, never>;
   'create_device': Record<string, never>;
+  'create_extension': Record<string, never>;
   'create_fax_email_route': Record<string, never>;
   'create_forwarding_rule': Record<string, never>;
   'create_location': Record<string, never>;
   'create_message': Record<string, never>;
+  'create_phone_number': Record<string, never>;
   'create_role': Record<string, never>;
   'create_tag': Record<string, never>;
   'create_team': Record<string, never>;
@@ -832,6 +846,7 @@ export interface RouteQueryParams {
     updatedAfter?: DateTime;
     updatedBefore?: DateTime;
   };
+  'list_team_permissions': Record<string, never>;
   'list_teams': {
     createdAfter?: DateTime;
     createdBefore?: DateTime;
@@ -972,6 +987,7 @@ export interface RouteQueryParams {
   'update_team': Record<string, never>;
   'update_team_api_teams_team_id:uuid': Record<string, never>;
   'update_team_member': Record<string, never>;
+  'update_team_permissions': Record<string, never>;
   'update_ticket': Record<string, never>;
   'update_user': Record<string, never>;
   'update_user_api_users_user_id:uuid': Record<string, never>;
@@ -1065,6 +1081,13 @@ export const routeDefinitions = {
     pathParams: [] as const,
     queryParams: [] as const,
   },
+  'create_extension': {
+    path: '/api/voice/extensions',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
   'create_fax_email_route': {
     path: '/api/fax/numbers/{fax_number_id}/email-routes',
     methods: ['POST'] as const,
@@ -1091,6 +1114,13 @@ export const routeDefinitions = {
     methods: ['POST'] as const,
     method: 'post',
     pathParams: ['ticket_id'] as const,
+    queryParams: [] as const,
+  },
+  'create_phone_number': {
+    path: '/api/voice/phone-numbers',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: [] as const,
     queryParams: [] as const,
   },
   'create_role': {
@@ -1578,6 +1608,13 @@ export const routeDefinitions = {
     pathParams: ['team_id'] as const,
     queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'orderBy', 'pageSize', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
   },
+  'list_team_permissions': {
+    path: '/api/teams/{team_id}/permissions',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['team_id'] as const,
+    queryParams: [] as const,
+  },
   'list_teams': {
     path: '/api/admin/teams',
     methods: ['GET'] as const,
@@ -1948,6 +1985,13 @@ export const routeDefinitions = {
     methods: ['PATCH'] as const,
     method: 'patch',
     pathParams: ['team_id', 'user_id'] as const,
+    queryParams: [] as const,
+  },
+  'update_team_permissions': {
+    path: '/api/teams/{team_id}/permissions',
+    methods: ['PUT'] as const,
+    method: 'put',
+    pathParams: ['team_id'] as const,
     queryParams: [] as const,
   },
   'update_ticket': {

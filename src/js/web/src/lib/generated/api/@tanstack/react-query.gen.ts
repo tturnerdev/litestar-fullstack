@@ -42,9 +42,11 @@ import {
   confirmMfaSetup,
   createConnection,
   createDevice,
+  createExtension,
   createFaxEmailRoute,
   createForwardingRule,
   createLocation,
+  createPhoneNumber,
   createRole,
   createTag,
   createTeam,
@@ -103,6 +105,7 @@ import {
   listRoles,
   listTags,
   listTeamInvitations,
+  listTeamPermissions,
   listTeams,
   listTicketMessages,
   listTickets,
@@ -143,6 +146,7 @@ import {
   updateTag,
   updateTeam,
   updateTeamMember,
+  updateTeamPermissions,
   updateTicket,
   updateTicketMessage,
   updateUser,
@@ -249,6 +253,9 @@ import type {
   CreateDeviceData,
   CreateDeviceError,
   CreateDeviceResponse,
+  CreateExtensionData,
+  CreateExtensionError,
+  CreateExtensionResponse,
   CreateFaxEmailRouteData,
   CreateFaxEmailRouteError,
   CreateFaxEmailRouteResponse,
@@ -258,6 +265,9 @@ import type {
   CreateLocationData,
   CreateLocationError,
   CreateLocationResponse,
+  CreatePhoneNumberData,
+  CreatePhoneNumberError,
+  CreatePhoneNumberResponse,
   CreateRoleData,
   CreateRoleError,
   CreateRoleResponse,
@@ -428,6 +438,9 @@ import type {
   ListTeamInvitationsData,
   ListTeamInvitationsError,
   ListTeamInvitationsResponse,
+  ListTeamPermissionsData,
+  ListTeamPermissionsError,
+  ListTeamPermissionsResponse,
   ListTeamsData,
   ListTeamsError,
   ListTeamsResponse,
@@ -540,6 +553,9 @@ import type {
   UpdateTeamMemberData,
   UpdateTeamMemberError,
   UpdateTeamMemberResponse,
+  UpdateTeamPermissionsData,
+  UpdateTeamPermissionsError,
+  UpdateTeamPermissionsResponse,
   UpdateTeamResponse,
   UpdateTicketData,
   UpdateTicketError,
@@ -3670,6 +3686,61 @@ export const updateTeamMemberMutation = (
   return mutationOptions;
 };
 
+export const listTeamPermissionsQueryKey = (
+  options: Options<ListTeamPermissionsData>,
+) => createQueryKey("listTeamPermissions", options);
+
+/**
+ * ListTeamPermissions
+ */
+export const listTeamPermissionsOptions = (
+  options: Options<ListTeamPermissionsData>,
+) =>
+  queryOptions<
+    ListTeamPermissionsResponse,
+    ListTeamPermissionsError,
+    ListTeamPermissionsResponse,
+    ReturnType<typeof listTeamPermissionsQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listTeamPermissions({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listTeamPermissionsQueryKey(options),
+  });
+
+/**
+ * UpdateTeamPermissions
+ */
+export const updateTeamPermissionsMutation = (
+  options?: Partial<Options<UpdateTeamPermissionsData>>,
+): UseMutationOptions<
+  UpdateTeamPermissionsResponse,
+  UpdateTeamPermissionsError,
+  Options<UpdateTeamPermissionsData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    UpdateTeamPermissionsResponse,
+    UpdateTeamPermissionsError,
+    Options<UpdateTeamPermissionsData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await updateTeamPermissions({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
 export const listUsersQueryKey = (options?: Options<ListUsersData>) =>
   createQueryKey("listUsers", options);
 
@@ -3879,6 +3950,33 @@ export const listExtensionsOptions = (options?: Options<ListExtensionsData>) =>
     },
     queryKey: listExtensionsQueryKey(options),
   });
+
+/**
+ * CreateExtension
+ */
+export const createExtensionMutation = (
+  options?: Partial<Options<CreateExtensionData>>,
+): UseMutationOptions<
+  CreateExtensionResponse,
+  CreateExtensionError,
+  Options<CreateExtensionData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    CreateExtensionResponse,
+    CreateExtensionError,
+    Options<CreateExtensionData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await createExtension({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
 
 export const getExtensionQueryKey = (options: Options<GetExtensionData>) =>
   createQueryKey("getExtension", options);
@@ -4339,6 +4437,33 @@ export const listPhoneNumbersOptions = (
     },
     queryKey: listPhoneNumbersQueryKey(options),
   });
+
+/**
+ * CreatePhoneNumber
+ */
+export const createPhoneNumberMutation = (
+  options?: Partial<Options<CreatePhoneNumberData>>,
+): UseMutationOptions<
+  CreatePhoneNumberResponse,
+  CreatePhoneNumberError,
+  Options<CreatePhoneNumberData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    CreatePhoneNumberResponse,
+    CreatePhoneNumberError,
+    Options<CreatePhoneNumberData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await createPhoneNumber({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
 
 export const getPhoneNumberQueryKey = (options: Options<GetPhoneNumberData>) =>
   createQueryKey("getPhoneNumber", options);

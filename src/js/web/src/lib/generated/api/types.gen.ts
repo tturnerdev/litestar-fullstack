@@ -408,6 +408,16 @@ export type Extension = {
 };
 
 /**
+ * ExtensionCreate
+ */
+export type ExtensionCreate = {
+  displayName?: string;
+  extensionNumber: string;
+  isActive?: boolean;
+  phoneNumberId?: string | null;
+};
+
+/**
  * ExtensionUpdate
  */
 export type ExtensionUpdate = {
@@ -507,6 +517,19 @@ export type FaxStatus =
   | "failed"
   | "sending"
   | "sent";
+
+/**
+ * FeatureArea
+ *
+ * Feature areas available for team role permissions.
+ */
+export type FeatureArea =
+  | "DEVICES"
+  | "VOICE"
+  | "FAX"
+  | "SUPPORT"
+  | "ORGANIZATION"
+  | "TEAMS";
 
 /**
  * ForgotPasswordRequest
@@ -828,6 +851,18 @@ export type PhoneNumber = {
 };
 
 /**
+ * PhoneNumberCreate
+ */
+export type PhoneNumberCreate = {
+  callerIdName?: string | null;
+  isActive?: boolean;
+  label?: string | null;
+  number: string;
+  numberType?: PhoneNumberType;
+  teamId?: string | null;
+};
+
+/**
  * PhoneNumberType
  *
  * Valid phone number types.
@@ -1001,6 +1036,35 @@ export type TeamMemberModify = {
  */
 export type TeamMemberUpdate = {
   role: TeamRoles;
+};
+
+/**
+ * TeamRolePermission
+ */
+export type TeamRolePermission = {
+  canEdit: boolean;
+  canView: boolean;
+  featureArea: FeatureArea;
+  id: string;
+  role: TeamRoles;
+  teamId: string;
+};
+
+/**
+ * TeamRolePermissionEntry
+ */
+export type TeamRolePermissionEntry = {
+  canEdit?: boolean;
+  canView?: boolean;
+  featureArea: FeatureArea;
+  role: TeamRoles;
+};
+
+/**
+ * TeamRolePermissionUpdate
+ */
+export type TeamRolePermissionUpdate = {
+  permissions: Array<TeamRolePermissionEntry>;
 };
 
 /**
@@ -1604,10 +1668,10 @@ export type AdminListAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
+    targetTypeIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -1685,10 +1749,10 @@ export type AdminGetTargetAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
+    targetTypeIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -1765,10 +1829,10 @@ export type AdminGetUserAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
+    targetTypeIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -6169,6 +6233,92 @@ export type UpdateTeamMemberResponses = {
 export type UpdateTeamMemberResponse =
   UpdateTeamMemberResponses[keyof UpdateTeamMemberResponses];
 
+export type ListTeamPermissionsData = {
+  body?: never;
+  path: {
+    /**
+     * Team ID
+     *
+     * The team to retrieve permissions for.
+     */
+    team_id: string;
+  };
+  query?: never;
+  url: "/api/teams/{team_id}/permissions";
+};
+
+export type ListTeamPermissionsErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type ListTeamPermissionsError =
+  ListTeamPermissionsErrors[keyof ListTeamPermissionsErrors];
+
+export type ListTeamPermissionsResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: Array<TeamRolePermission>;
+};
+
+export type ListTeamPermissionsResponse =
+  ListTeamPermissionsResponses[keyof ListTeamPermissionsResponses];
+
+export type UpdateTeamPermissionsData = {
+  body: TeamRolePermissionUpdate;
+  path: {
+    /**
+     * Team ID
+     *
+     * The team to update permissions for.
+     */
+    team_id: string;
+  };
+  query?: never;
+  url: "/api/teams/{team_id}/permissions";
+};
+
+export type UpdateTeamPermissionsErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type UpdateTeamPermissionsError =
+  UpdateTeamPermissionsErrors[keyof UpdateTeamPermissionsErrors];
+
+export type UpdateTeamPermissionsResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: Array<TeamRolePermission>;
+};
+
+export type UpdateTeamPermissionsResponse =
+  UpdateTeamPermissionsResponses[keyof UpdateTeamPermissionsResponses];
+
 export type ListUsersData = {
   body?: never;
   path?: never;
@@ -6549,6 +6699,42 @@ export type ListExtensionsResponses = {
 
 export type ListExtensionsResponse =
   ListExtensionsResponses[keyof ListExtensionsResponses];
+
+export type CreateExtensionData = {
+  body: ExtensionCreate;
+  path?: never;
+  query?: never;
+  url: "/api/voice/extensions";
+};
+
+export type CreateExtensionErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type CreateExtensionError =
+  CreateExtensionErrors[keyof CreateExtensionErrors];
+
+export type CreateExtensionResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: Extension;
+};
+
+export type CreateExtensionResponse =
+  CreateExtensionResponses[keyof CreateExtensionResponses];
 
 export type GetExtensionData = {
   body?: never;
@@ -7390,6 +7576,42 @@ export type ListPhoneNumbersResponses = {
 
 export type ListPhoneNumbersResponse =
   ListPhoneNumbersResponses[keyof ListPhoneNumbersResponses];
+
+export type CreatePhoneNumberData = {
+  body: PhoneNumberCreate;
+  path?: never;
+  query?: never;
+  url: "/api/voice/phone-numbers";
+};
+
+export type CreatePhoneNumberErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type CreatePhoneNumberError =
+  CreatePhoneNumberErrors[keyof CreatePhoneNumberErrors];
+
+export type CreatePhoneNumberResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: PhoneNumber;
+};
+
+export type CreatePhoneNumberResponse =
+  CreatePhoneNumberResponses[keyof CreatePhoneNumberResponses];
 
 export type GetPhoneNumberData = {
   body?: never;

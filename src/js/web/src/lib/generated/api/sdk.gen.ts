@@ -107,6 +107,9 @@ import type {
   CreateDeviceData,
   CreateDeviceErrors,
   CreateDeviceResponses,
+  CreateExtensionData,
+  CreateExtensionErrors,
+  CreateExtensionResponses,
   CreateFaxEmailRouteData,
   CreateFaxEmailRouteErrors,
   CreateFaxEmailRouteResponses,
@@ -116,6 +119,9 @@ import type {
   CreateLocationData,
   CreateLocationErrors,
   CreateLocationResponses,
+  CreatePhoneNumberData,
+  CreatePhoneNumberErrors,
+  CreatePhoneNumberResponses,
   CreateRoleData,
   CreateRoleErrors,
   CreateRoleResponses,
@@ -286,6 +292,9 @@ import type {
   ListTeamInvitationsData,
   ListTeamInvitationsErrors,
   ListTeamInvitationsResponses,
+  ListTeamPermissionsData,
+  ListTeamPermissionsErrors,
+  ListTeamPermissionsResponses,
   ListTeamsData,
   ListTeamsErrors,
   ListTeamsResponses,
@@ -398,6 +407,9 @@ import type {
   UpdateTeamMemberData,
   UpdateTeamMemberErrors,
   UpdateTeamMemberResponses,
+  UpdateTeamPermissionsData,
+  UpdateTeamPermissionsErrors,
+  UpdateTeamPermissionsResponses,
   UpdateTeamResponses,
   UpdateTicketData,
   UpdateTicketErrors,
@@ -2436,6 +2448,42 @@ export const updateTeamMember = <ThrowOnError extends boolean = false>(
   });
 
 /**
+ * ListTeamPermissions
+ */
+export const listTeamPermissions = <ThrowOnError extends boolean = false>(
+  options: Options<ListTeamPermissionsData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    ListTeamPermissionsResponses,
+    ListTeamPermissionsErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/teams/{team_id}/permissions",
+    ...options,
+  });
+
+/**
+ * UpdateTeamPermissions
+ */
+export const updateTeamPermissions = <ThrowOnError extends boolean = false>(
+  options: Options<UpdateTeamPermissionsData, ThrowOnError>,
+) =>
+  (options.client ?? client).put<
+    UpdateTeamPermissionsResponses,
+    UpdateTeamPermissionsErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/teams/{team_id}/permissions",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
  * ListUsers
  */
 export const listUsers = <ThrowOnError extends boolean = false>(
@@ -2575,6 +2623,26 @@ export const listExtensions = <ThrowOnError extends boolean = false>(
     security: [{ scheme: "bearer", type: "http" }],
     url: "/api/voice/extensions",
     ...options,
+  });
+
+/**
+ * CreateExtension
+ */
+export const createExtension = <ThrowOnError extends boolean = false>(
+  options: Options<CreateExtensionData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    CreateExtensionResponses,
+    CreateExtensionErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/voice/extensions",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
   });
 
 /**
@@ -2875,6 +2943,26 @@ export const listPhoneNumbers = <ThrowOnError extends boolean = false>(
     security: [{ scheme: "bearer", type: "http" }],
     url: "/api/voice/phone-numbers",
     ...options,
+  });
+
+/**
+ * CreatePhoneNumber
+ */
+export const createPhoneNumber = <ThrowOnError extends boolean = false>(
+  options: Options<CreatePhoneNumberData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    CreatePhoneNumberResponses,
+    CreatePhoneNumberErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/voice/phone-numbers",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
   });
 
 /**

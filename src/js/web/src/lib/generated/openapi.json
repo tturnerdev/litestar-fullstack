@@ -1698,6 +1698,37 @@
         "title": "Extension",
         "type": "object"
       },
+      "ExtensionCreate": {
+        "properties": {
+          "displayName": {
+            "default": "",
+            "type": "string"
+          },
+          "extensionNumber": {
+            "type": "string"
+          },
+          "isActive": {
+            "default": true,
+            "type": "boolean"
+          },
+          "phoneNumberId": {
+            "oneOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "extensionNumber"
+        ],
+        "title": "ExtensionCreate",
+        "type": "object"
+      },
       "ExtensionUpdate": {
         "properties": {
           "displayName": {
@@ -2050,6 +2081,19 @@
           "sent"
         ],
         "title": "FaxStatus",
+        "type": "string"
+      },
+      "FeatureArea": {
+        "description": "Feature areas available for team role permissions.",
+        "enum": [
+          "DEVICES",
+          "VOICE",
+          "FAX",
+          "SUPPORT",
+          "ORGANIZATION",
+          "TEAMS"
+        ],
+        "title": "FeatureArea",
         "type": "string"
       },
       "ForgotPasswordRequest": {
@@ -3276,6 +3320,56 @@
         "title": "PhoneNumber",
         "type": "object"
       },
+      "PhoneNumberCreate": {
+        "properties": {
+          "callerIdName": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "isActive": {
+            "default": true,
+            "type": "boolean"
+          },
+          "label": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "number": {
+            "type": "string"
+          },
+          "numberType": {
+            "$ref": "#/components/schemas/PhoneNumberType"
+          },
+          "teamId": {
+            "oneOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "number"
+        ],
+        "title": "PhoneNumberCreate",
+        "type": "object"
+      },
       "PhoneNumberType": {
         "default": "local",
         "description": "Valid phone number types.",
@@ -3766,6 +3860,79 @@
           "role"
         ],
         "title": "TeamMemberUpdate",
+        "type": "object"
+      },
+      "TeamRolePermission": {
+        "properties": {
+          "canEdit": {
+            "type": "boolean"
+          },
+          "canView": {
+            "type": "boolean"
+          },
+          "featureArea": {
+            "$ref": "#/components/schemas/FeatureArea"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "role": {
+            "$ref": "#/components/schemas/TeamRoles"
+          },
+          "teamId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "canEdit",
+          "canView",
+          "featureArea",
+          "id",
+          "role",
+          "teamId"
+        ],
+        "title": "TeamRolePermission",
+        "type": "object"
+      },
+      "TeamRolePermissionEntry": {
+        "properties": {
+          "canEdit": {
+            "default": false,
+            "type": "boolean"
+          },
+          "canView": {
+            "default": false,
+            "type": "boolean"
+          },
+          "featureArea": {
+            "$ref": "#/components/schemas/FeatureArea"
+          },
+          "role": {
+            "$ref": "#/components/schemas/TeamRoles"
+          }
+        },
+        "required": [
+          "featureArea",
+          "role"
+        ],
+        "title": "TeamRolePermissionEntry",
+        "type": "object"
+      },
+      "TeamRolePermissionUpdate": {
+        "properties": {
+          "permissions": {
+            "items": {
+              "$ref": "#/components/schemas/TeamRolePermissionEntry"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "permissions"
+        ],
+        "title": "TeamRolePermissionUpdate",
         "type": "object"
       },
       "TeamRoles": {
@@ -5614,28 +5781,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
-            "name": "targetIdIn",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -5677,7 +5823,28 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
+            "name": "actionIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "targetIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -6003,28 +6170,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
-            "name": "targetIdIn",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -6066,7 +6212,28 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
+            "name": "actionIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "targetIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -6384,28 +6551,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
-            "name": "targetIdIn",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -6447,7 +6593,28 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
+            "name": "actionIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "targetIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -16894,6 +17061,172 @@
         ]
       }
     },
+    "/api/teams/{team_id}/permissions": {
+      "get": {
+        "deprecated": false,
+        "operationId": "ListTeamPermissions",
+        "parameters": [
+          {
+            "deprecated": false,
+            "description": "The team to retrieve permissions for.",
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "description": "The team to retrieve permissions for.",
+              "format": "uuid",
+              "title": "Team ID",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TeamRolePermission"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Request fulfilled, document follows",
+            "headers": {}
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "detail": "Bad Request",
+                      "extra": {},
+                      "status_code": 400
+                    }
+                  ],
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    },
+                    "status_code": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Bad request syntax or unsupported method"
+          }
+        },
+        "summary": "ListTeamPermissions",
+        "tags": [
+          "Team Permissions"
+        ]
+      },
+      "put": {
+        "deprecated": false,
+        "operationId": "UpdateTeamPermissions",
+        "parameters": [
+          {
+            "deprecated": false,
+            "description": "The team to update permissions for.",
+            "in": "path",
+            "name": "team_id",
+            "required": true,
+            "schema": {
+              "description": "The team to update permissions for.",
+              "format": "uuid",
+              "title": "Team ID",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TeamRolePermissionUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TeamRolePermission"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Request fulfilled, document follows",
+            "headers": {}
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "detail": "Bad Request",
+                      "extra": {},
+                      "status_code": 400
+                    }
+                  ],
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    },
+                    "status_code": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Bad request syntax or unsupported method"
+          }
+        },
+        "summary": "UpdateTeamPermissions",
+        "tags": [
+          "Team Permissions"
+        ]
+      }
+    },
     "/api/users": {
       "get": {
         "deprecated": false,
@@ -17893,6 +18226,75 @@
           }
         },
         "summary": "ListExtensions",
+        "tags": [
+          "Voice - Extensions"
+        ]
+      },
+      "post": {
+        "deprecated": false,
+        "operationId": "CreateExtension",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExtensionCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Extension"
+                }
+              }
+            },
+            "description": "Document created, URL follows",
+            "headers": {}
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "detail": "Bad Request",
+                      "extra": {},
+                      "status_code": 400
+                    }
+                  ],
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    },
+                    "status_code": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Bad request syntax or unsupported method"
+          }
+        },
+        "summary": "CreateExtension",
         "tags": [
           "Voice - Extensions"
         ]
@@ -19838,6 +20240,75 @@
           }
         },
         "summary": "ListPhoneNumbers",
+        "tags": [
+          "Voice - Phone Numbers"
+        ]
+      },
+      "post": {
+        "deprecated": false,
+        "operationId": "CreatePhoneNumber",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PhoneNumberCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhoneNumber"
+                }
+              }
+            },
+            "description": "Document created, URL follows",
+            "headers": {}
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "detail": "Bad Request",
+                      "extra": {},
+                      "status_code": 400
+                    }
+                  ],
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    },
+                    "status_code": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Bad request syntax or unsupported method"
+          }
+        },
+        "summary": "CreatePhoneNumber",
         "tags": [
           "Voice - Phone Numbers"
         ]

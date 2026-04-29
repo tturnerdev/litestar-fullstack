@@ -35,6 +35,12 @@ import type {
   CreateDeviceData,
   CreateDeviceErrors,
   CreateDeviceResponses,
+  CreateExtensionData,
+  CreateExtensionErrors,
+  CreateExtensionResponses,
+  CreatePhoneNumberData,
+  CreatePhoneNumberErrors,
+  CreatePhoneNumberResponses,
   CreateRoleData,
   CreateRoleErrors,
   CreateRoleResponses,
@@ -100,6 +106,8 @@ export type OperationName =
   | 'confirm_setup'
   | 'create_connection'
   | 'create_device'
+  | 'create_extension'
+  | 'create_phone_number'
   | 'create_role'
   | 'create_tag'
   | 'create_team'
@@ -115,6 +123,8 @@ export type OperationName =
   | 'initiate_setup'
   | 'list_connections'
   | 'list_devices'
+  | 'list_extensions'
+  | 'list_phone_numbers'
   | 'list_roles'
   | 'list_tags'
   | 'list_teams_api_teams'
@@ -146,6 +156,8 @@ export interface OperationDataTypes {
   'confirm_setup': ConfirmMfaSetupData
   'create_connection': CreateConnectionData
   'create_device': CreateDeviceData
+  'create_extension': CreateExtensionData
+  'create_phone_number': CreatePhoneNumberData
   'create_role': CreateRoleData
   'create_tag': CreateTagData
   'create_team': CreateTeamData
@@ -161,6 +173,8 @@ export interface OperationDataTypes {
   'initiate_setup': InitiateMfaSetupData
   'list_connections': CreateConnectionData
   'list_devices': CreateDeviceData
+  'list_extensions': CreateExtensionData
+  'list_phone_numbers': CreatePhoneNumberData
   'list_roles': CreateRoleData
   'list_tags': CreateTagData
   'list_teams_api_teams': CreateTeamData
@@ -193,6 +207,8 @@ export interface OperationResponseTypes {
   'confirm_setup': ConfirmMfaSetupResponses
   'create_connection': CreateConnectionResponses
   'create_device': CreateDeviceResponses
+  'create_extension': CreateExtensionResponses
+  'create_phone_number': CreatePhoneNumberResponses
   'create_role': CreateRoleResponses
   'create_tag': CreateTagResponses
   'create_team': CreateTeamResponses
@@ -208,6 +224,8 @@ export interface OperationResponseTypes {
   'initiate_setup': InitiateMfaSetupResponses
   'list_connections': CreateConnectionResponses
   'list_devices': CreateDeviceResponses
+  'list_extensions': CreateExtensionResponses
+  'list_phone_numbers': CreatePhoneNumberResponses
   'list_roles': CreateRoleResponses
   'list_tags': CreateTagResponses
   'list_teams_api_teams': CreateTeamResponses
@@ -240,6 +258,8 @@ export interface OperationErrorTypes {
   'confirm_setup': ConfirmMfaSetupErrors
   'create_connection': CreateConnectionErrors
   'create_device': CreateDeviceErrors
+  'create_extension': CreateExtensionErrors
+  'create_phone_number': CreatePhoneNumberErrors
   'create_role': CreateRoleErrors
   'create_tag': CreateTagErrors
   'create_team': CreateTeamErrors
@@ -255,6 +275,8 @@ export interface OperationErrorTypes {
   'initiate_setup': never
   'list_connections': CreateConnectionErrors
   'list_devices': CreateDeviceErrors
+  'list_extensions': CreateExtensionErrors
+  'list_phone_numbers': CreatePhoneNumberErrors
   'list_roles': CreateRoleErrors
   'list_tags': CreateTagErrors
   'list_teams_api_teams': CreateTeamErrors

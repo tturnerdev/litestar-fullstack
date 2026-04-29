@@ -1645,6 +1645,36 @@ export const ExtensionSchema = {
   type: "object",
 } as const;
 
+export const ExtensionCreateSchema = {
+  properties: {
+    displayName: {
+      default: "",
+      type: "string",
+    },
+    extensionNumber: {
+      type: "string",
+    },
+    isActive: {
+      default: true,
+      type: "boolean",
+    },
+    phoneNumberId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: ["extensionNumber"],
+  title: "ExtensionCreate",
+  type: "object",
+} as const;
+
 export const ExtensionUpdateSchema = {
   properties: {
     displayName: {
@@ -1981,6 +2011,13 @@ export const FaxStatusSchema = {
   description: "Valid values for fax message status.",
   enum: ["received", "delivered", "failed", "sending", "sent"],
   title: "FaxStatus",
+  type: "string",
+} as const;
+
+export const FeatureAreaSchema = {
+  description: "Feature areas available for team role permissions.",
+  enum: ["DEVICES", "VOICE", "FAX", "SUPPORT", "ORGANIZATION", "TEAMS"],
+  title: "FeatureArea",
   type: "string",
 } as const;
 
@@ -3162,6 +3199,55 @@ export const PhoneNumberSchema = {
   type: "object",
 } as const;
 
+export const PhoneNumberCreateSchema = {
+  properties: {
+    callerIdName: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    isActive: {
+      default: true,
+      type: "boolean",
+    },
+    label: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    number: {
+      type: "string",
+    },
+    numberType: {
+      $ref: "#/components/schemas/PhoneNumberType",
+    },
+    teamId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: ["number"],
+  title: "PhoneNumberCreate",
+  type: "object",
+} as const;
+
 export const PhoneNumberTypeSchema = {
   default: "local",
   description: "Valid phone number types.",
@@ -3616,6 +3702,70 @@ export const TeamMemberUpdateSchema = {
   },
   required: ["role"],
   title: "TeamMemberUpdate",
+  type: "object",
+} as const;
+
+export const TeamRolePermissionSchema = {
+  properties: {
+    canEdit: {
+      type: "boolean",
+    },
+    canView: {
+      type: "boolean",
+    },
+    featureArea: {
+      $ref: "#/components/schemas/FeatureArea",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    role: {
+      $ref: "#/components/schemas/TeamRoles",
+    },
+    teamId: {
+      format: "uuid",
+      type: "string",
+    },
+  },
+  required: ["canEdit", "canView", "featureArea", "id", "role", "teamId"],
+  title: "TeamRolePermission",
+  type: "object",
+} as const;
+
+export const TeamRolePermissionEntrySchema = {
+  properties: {
+    canEdit: {
+      default: false,
+      type: "boolean",
+    },
+    canView: {
+      default: false,
+      type: "boolean",
+    },
+    featureArea: {
+      $ref: "#/components/schemas/FeatureArea",
+    },
+    role: {
+      $ref: "#/components/schemas/TeamRoles",
+    },
+  },
+  required: ["featureArea", "role"],
+  title: "TeamRolePermissionEntry",
+  type: "object",
+} as const;
+
+export const TeamRolePermissionUpdateSchema = {
+  properties: {
+    permissions: {
+      items: {
+        $ref: "#/components/schemas/TeamRolePermissionEntry",
+      },
+      type: "array",
+    },
+  },
+  required: ["permissions"],
+  title: "TeamRolePermissionUpdate",
   type: "object",
 } as const;
 
