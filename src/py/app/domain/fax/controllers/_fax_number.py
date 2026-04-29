@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Annotated, Any
 from uuid import UUID
 
-from litestar import Controller, delete, get, patch
+from litestar import Controller, delete, get, patch, post
 from litestar.di import Provide
 from litestar.exceptions import PermissionDeniedException
 from litestar.params import Dependency, Parameter
@@ -15,7 +15,7 @@ from sqlalchemy.orm import selectinload
 from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.fax.guards import requires_fax_number_access
-from app.domain.fax.schemas import FaxNumber, FaxNumberUpdate
+from app.domain.fax.schemas import FaxNumber, FaxNumberCreate, FaxNumberUpdate
 from app.domain.fax.services import FaxNumberService
 from app.domain.notifications.deps import provide_notifications_service
 from app.lib import constants
@@ -90,6 +90,45 @@ class FaxNumberController(Controller):
             (m.FaxNumber.user_id == current_user.id) | (m.FaxNumber.team_id.in_(user_team_ids)),
         )
         return fax_numbers_service.to_schema(results, total, filters, schema_type=FaxNumber)
+
+    @post(operation_id="CreateFaxNumber", path="/api/fax/numbers")
+    async def create_fax_number(
+        self,
+        request: Request[m.User, Token, Any],
+        data: FaxNumberCreate,
+        fax_numbers_service: FaxNumberService,
+        audit_service: AuditLogService,
+        notifications_service: NotificationService,
+        current_user: m.User,
+    ) -> FaxNumber:
+        obj = data.to_dict()
+        obj["user_id"] = current_user.id
+        db_obj = await fax_numbers_service.create(obj)
+        after = capture_snapshot(db_obj)
+        await log_audit(
+            audit_service,
+            action="fax.number_create",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            actor_name=current_user.name,
+            target_type="fax_number",
+            target_id=db_obj.id,
+            target_label=db_obj.number,
+            before=None,
+            after=after,
+            request=request,
+        )
+        try:
+            await notifications_service.notify(
+                user_id=current_user.id,
+                title="Fax Number Created",
+                message=f"Your fax number '{db_obj.number}' has been provisioned.",
+                category="fax",
+                action_url="/fax/numbers",
+            )
+        except Exception:
+            pass
+        return fax_numbers_service.to_schema(db_obj, schema_type=FaxNumber)
 
     @get(
         operation_id="GetFaxNumber",

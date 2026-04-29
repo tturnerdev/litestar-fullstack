@@ -1,6 +1,10 @@
 import { Badge } from "@/components/ui/badge"
 
 const statusConfig: Record<string, { label: string; className: string }> = {
+  queued: {
+    label: "Queued",
+    className: "bg-slate-500/15 text-slate-600 dark:text-slate-400 border-slate-500/20",
+  },
   received: {
     label: "Received",
     className: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",

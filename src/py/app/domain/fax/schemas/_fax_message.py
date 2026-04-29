@@ -33,3 +33,10 @@ class FaxMessageCreate(CamelizedBaseStruct):
     status: FaxStatus = FaxStatus.SENDING
     file_path: str = ""
     file_size_bytes: int = 0
+
+
+class SendFax(CamelizedBaseStruct):
+    fax_number_id: UUID
+    destination_number: str
+    subject: str | None = None
+    body: str | None = None

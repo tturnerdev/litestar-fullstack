@@ -1,3 +1,4 @@
+import { useNavigate } from "@tanstack/react-router"
 import { FileText, FileUp, Send, X } from "lucide-react"
 import { useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -19,6 +20,7 @@ function formatBytes(bytes: number): string {
 }
 
 export function SendFaxForm() {
+  const navigate = useNavigate()
   const { data: faxNumbers, isLoading } = useFaxNumbers(1, 100)
   const sendFax = useSendFax()
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -86,12 +88,17 @@ export function SendFaxForm() {
     if (!validateNumber()) return
 
     sendFax.mutate(
-      { faxNumberId, remoteNumber: remoteNumber.replace(/[\s()-]/g, ""), file },
+      {
+        faxNumberId,
+        destinationNumber: remoteNumber.replace(/[\s()-]/g, ""),
+        subject: file.name,
+      },
       {
         onSuccess: () => {
           setFaxNumberId("")
           setRemoteNumber("")
           handleClearFile()
+          navigate({ to: "/fax/messages" })
         },
       },
     )

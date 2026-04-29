@@ -14,6 +14,7 @@ class FaxDirection(StrEnum):
 class FaxStatus(StrEnum):
     """Valid values for fax message status."""
 
+    QUEUED = "queued"
     RECEIVED = "received"
     DELIVERED = "delivered"
     FAILED = "failed"

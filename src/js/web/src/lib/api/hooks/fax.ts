@@ -34,7 +34,7 @@ export interface FaxMessage {
   remoteNumber: string
   remoteName: string | null
   pageCount: number
-  status: "received" | "delivered" | "failed" | "sending" | "sent"
+  status: "queued" | "received" | "delivered" | "failed" | "sending" | "sent"
   filePath: string
   fileSizeBytes: number
   errorMessage: string | null
@@ -65,6 +65,27 @@ async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
 // ---------------------------------------------------------------------------
 // Fax Numbers
 // ---------------------------------------------------------------------------
+
+export function useCreateFaxNumber() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (payload: { number: string; label?: string; isActive?: boolean; teamId?: string }) => {
+      return apiFetch<FaxNumber>("/api/fax/numbers", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["fax", "numbers"] })
+      toast.success("Fax number created")
+    },
+    onError: (error) => {
+      toast.error("Unable to create fax number", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
+    },
+  })
+}
 
 export function useFaxNumbers(page = 1, pageSize = 25) {
   return useQuery({
@@ -296,27 +317,14 @@ export function useSendFax() {
   return useMutation({
     mutationFn: async (payload: {
       faxNumberId: string
-      remoteNumber: string
-      file: File
+      destinationNumber: string
+      subject?: string
+      body?: string
     }) => {
-      const formData = new FormData()
-      formData.append("fax_number_id", payload.faxNumberId)
-      formData.append("remote_number", payload.remoteNumber)
-      formData.append("file", payload.file)
-      const response = await fetch("/api/fax/send", {
+      return apiFetch<FaxMessage>("/api/fax/send", {
         method: "POST",
-        body: formData,
-        credentials: "include",
-        headers: {
-          Authorization: `Bearer ${window.localStorage.getItem("access_token") ?? ""}`,
-          ...(window.__LITESTAR_CSRF__ ? { "x-csrftoken": window.__LITESTAR_CSRF__ } : {}),
-        },
+        body: JSON.stringify(payload),
       })
-      if (!response.ok) {
-        const detail = await response.json().catch(() => ({}))
-        throw new Error(detail?.detail ?? "Failed to send fax")
-      }
-      return response.json()
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["fax", "messages"] })

@@ -19,6 +19,13 @@ class FaxNumber(CamelizedBaseStruct):
     updated_at: datetime | None = None
 
 
+class FaxNumberCreate(CamelizedBaseStruct):
+    number: str
+    label: str | None = None
+    is_active: bool = True
+    team_id: UUID | None = None
+
+
 class FaxNumberUpdate(CamelizedBaseStruct, omit_defaults=True):
     label: str | msgspec.UnsetType | None = msgspec.UNSET
     is_active: bool | msgspec.UnsetType = msgspec.UNSET
