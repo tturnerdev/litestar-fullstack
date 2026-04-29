@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { useState } from "react"
-import { AlertCircle, CheckCircle2, Circle, Plug, Plus, Search, XCircle } from "lucide-react"
+import { AlertCircle, Cable, CheckCircle2, Circle, Plus, Search, XCircle } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { PageCardGrid, PageCardGridItem, PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { SkeletonCard } from "@/components/ui/skeleton"
@@ -106,26 +107,41 @@ function ConnectionsPage() {
             ))}
           </div>
         ) : isError ? (
-          <Card>
-            <CardContent className="py-8 text-center text-muted-foreground">
-              Unable to load connections. Try refreshing the page.
-            </CardContent>
-          </Card>
-        ) : !data?.items.length ? (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <Plug className="mx-auto mb-3 h-10 w-10 text-muted-foreground/40" />
-              <p className="font-medium">No connections yet</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Add your first connection to integrate with an external data source.
-              </p>
-              <Button size="sm" className="mt-4" asChild>
+          <EmptyState
+            icon={AlertCircle}
+            title="Unable to load connections"
+            description="Something went wrong while fetching your connections. Please try refreshing the page."
+            action={
+              <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+                Refresh page
+              </Button>
+            }
+          />
+        ) : !data?.items.length && !search ? (
+          <EmptyState
+            icon={Cable}
+            title="No connections yet"
+            description="Add your first connection to integrate with an external data source."
+            action={
+              <Button size="sm" asChild>
                 <Link to="/connections/new">
                   <Plus className="mr-2 h-4 w-4" /> Add connection
                 </Link>
               </Button>
-            </CardContent>
-          </Card>
+            }
+          />
+        ) : !data?.items.length ? (
+          <EmptyState
+            icon={Cable}
+            variant="no-results"
+            title="No results found"
+            description="No connections match your search. Try a different search term."
+            action={
+              <Button variant="outline" size="sm" onClick={() => setSearch("")}>
+                Clear search
+              </Button>
+            }
+          />
         ) : (
           <PageCardGrid>
             {data.items.map((conn) => (

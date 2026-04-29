@@ -1,4 +1,4 @@
-import { AlertTriangle, Loader2, Trash2 } from "lucide-react"
+import { AlertCircle, AlertTriangle, Loader2, Phone, Trash2 } from "lucide-react"
 import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { SkeletonTable } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -42,12 +43,16 @@ export function PhoneNumberTable() {
 
   if (isError || !data) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Phone Numbers</CardTitle>
-        </CardHeader>
-        <CardContent className="text-muted-foreground">We could not load phone numbers.</CardContent>
-      </Card>
+      <EmptyState
+        icon={AlertCircle}
+        title="Unable to load phone numbers"
+        description="Something went wrong while fetching your phone numbers. Please try refreshing the page."
+        action={
+          <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+            Refresh page
+          </Button>
+        }
+      />
     )
   }
 
@@ -88,8 +93,13 @@ export function PhoneNumberTable() {
           <TableBody>
             {data.items.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
-                  No phone numbers found.
+                <TableCell colSpan={6} className="p-0">
+                  <EmptyState
+                    icon={Phone}
+                    title="No phone numbers yet"
+                    description="Add your first phone number to start routing calls to your extensions."
+                    className="border-0 rounded-none"
+                  />
                 </TableCell>
               </TableRow>
             ) : (

@@ -1,9 +1,10 @@
 import { Link } from "@tanstack/react-router"
-import { Building2, ChevronRight, MapPin, Search } from "lucide-react"
+import { AlertCircle, Building2, ChevronRight, MapPin, Search } from "lucide-react"
 import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useAuthStore } from "@/lib/auth"
@@ -26,19 +27,11 @@ export function LocationList() {
 
   if (!currentTeam) {
     return (
-      <Card className="border-dashed border-2">
-        <CardContent className="py-16 text-center space-y-4">
-          <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-            <Building2 className="h-8 w-8 text-primary" />
-          </div>
-          <div className="space-y-2">
-            <h3 className="text-lg font-semibold">Select a team first</h3>
-            <p className="text-muted-foreground text-sm max-w-md mx-auto">
-              Locations belong to teams. Please select a team from the sidebar to view and manage locations.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      <EmptyState
+        icon={Building2}
+        title="Select a team first"
+        description="Locations belong to teams. Please select a team from the sidebar to view and manage locations."
+      />
     )
   }
 
@@ -55,32 +48,31 @@ export function LocationList() {
 
   if (isError) {
     return (
-      <Card className="border-dashed border-destructive/30 bg-destructive/5">
-        <CardContent className="py-12 text-center">
-          <p className="text-muted-foreground">We could not load locations yet. Try refreshing.</p>
-        </CardContent>
-      </Card>
+      <EmptyState
+        icon={AlertCircle}
+        title="Unable to load locations"
+        description="Something went wrong while fetching your locations. Please try refreshing the page."
+        action={
+          <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+            Refresh page
+          </Button>
+        }
+      />
     )
   }
 
   if (locations.length === 0 && !search && typeFilter === "all") {
     return (
-      <Card className="border-dashed border-2">
-        <CardContent className="py-16 text-center space-y-6">
-          <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-            <MapPin className="h-8 w-8 text-primary" />
-          </div>
-          <div className="space-y-2">
-            <h3 className="text-lg font-semibold">Add your first location</h3>
-            <p className="text-muted-foreground text-sm max-w-md mx-auto">
-              Locations help you track where devices and extensions are physically placed. Start by creating an addressed location like an office or branch.
-            </p>
-          </div>
-          <Button asChild size="lg">
+      <EmptyState
+        icon={MapPin}
+        title="No locations yet"
+        description="Locations help you track where devices and extensions are physically placed. Start by creating an addressed location like an office or branch."
+        action={
+          <Button size="sm" asChild>
             <Link to="/locations/new">Create location</Link>
           </Button>
-        </CardContent>
-      </Card>
+        }
+      />
     )
   }
 
@@ -129,13 +121,17 @@ export function LocationList() {
       )}
 
       {locations.length === 0 && (search || typeFilter !== "all") && (
-        <Card className="border-dashed">
-          <CardContent className="py-12 text-center">
-            <p className="text-muted-foreground">
-              No locations match {search ? `"${search}"` : "the selected filter"}
-            </p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={MapPin}
+          variant="no-results"
+          title="No results found"
+          description={`No locations match ${search ? `"${search}"` : "the selected filter"}. Try adjusting your search or filter criteria.`}
+          action={
+            <Button variant="outline" size="sm" onClick={() => { setSearch(""); setTypeFilter("all") }}>
+              Clear filters
+            </Button>
+          }
+        />
       )}
 
       {locations.length > 0 && (

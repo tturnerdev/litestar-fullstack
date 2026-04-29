@@ -1,9 +1,10 @@
 import { Link } from "@tanstack/react-router"
-import { Trash2 } from "lucide-react"
+import { AlertCircle, Printer, Trash2 } from "lucide-react"
 import { useState } from "react"
 import { DirectionBadge, FaxStatusBadge } from "@/components/fax/fax-status-badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/empty-state"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { SkeletonTable } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -27,14 +28,20 @@ export function FaxMessageTable() {
     return <SkeletonTable rows={6} />
   }
 
+  const hasFilters = !!direction || !!status
+
   if (isError || !data) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Fax Messages</CardTitle>
-        </CardHeader>
-        <CardContent className="text-muted-foreground">We could not load fax messages.</CardContent>
-      </Card>
+      <EmptyState
+        icon={AlertCircle}
+        title="Unable to load fax messages"
+        description="Something went wrong while fetching your fax messages. Please try refreshing the page."
+        action={
+          <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+            Refresh page
+          </Button>
+        }
+      />
     )
   }
 
@@ -92,8 +99,28 @@ export function FaxMessageTable() {
           <TableBody>
             {data.items.length === 0 && (
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-muted-foreground">
-                  No fax messages found.
+                <TableCell colSpan={6} className="p-0">
+                  {hasFilters ? (
+                    <EmptyState
+                      icon={Printer}
+                      variant="no-results"
+                      title="No results found"
+                      description="No fax messages match your current filters. Try adjusting your criteria."
+                      action={
+                        <Button variant="outline" size="sm" onClick={() => { setDirection(""); setStatus(""); setPage(1) }}>
+                          Clear filters
+                        </Button>
+                      }
+                      className="border-0 rounded-none"
+                    />
+                  ) : (
+                    <EmptyState
+                      icon={Printer}
+                      title="No fax messages yet"
+                      description="Fax messages will appear here once you send or receive your first fax."
+                      className="border-0 rounded-none"
+                    />
+                  )}
                 </TableCell>
               </TableRow>
             )}

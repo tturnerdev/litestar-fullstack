@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { LayoutGrid, List, Plus } from "lucide-react"
+import { AlertCircle, LayoutGrid, List, Phone, Plus } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { EmptyState } from "@/components/ui/empty-state"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { CreatePhoneNumberDialog } from "@/components/voice/create-phone-number-dialog"
 import { PhoneNumberCard } from "@/components/voice/phone-number-card"
@@ -77,11 +78,28 @@ function PhoneNumberCardGrid() {
   }
 
   if (isError || !data) {
-    return <p className="text-center text-muted-foreground">Unable to load phone numbers.</p>
+    return (
+      <EmptyState
+        icon={AlertCircle}
+        title="Unable to load phone numbers"
+        description="Something went wrong while fetching your phone numbers. Please try refreshing the page."
+        action={
+          <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+            Refresh page
+          </Button>
+        }
+      />
+    )
   }
 
   if (data.items.length === 0) {
-    return <p className="py-12 text-center text-muted-foreground">No phone numbers found.</p>
+    return (
+      <EmptyState
+        icon={Phone}
+        title="No phone numbers yet"
+        description="Add your first phone number to start routing calls to your extensions."
+      />
+    )
   }
 
   const totalPages = Math.max(1, Math.ceil(data.total / 12))

@@ -1,8 +1,10 @@
 import { Link } from "@tanstack/react-router"
+import { AlertCircle, Printer } from "lucide-react"
 import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/empty-state"
 import { SkeletonTable } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useFaxNumbers } from "@/lib/api/hooks/fax"
@@ -19,12 +21,16 @@ export function FaxNumberTable() {
 
   if (isError || !data) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Fax Numbers</CardTitle>
-        </CardHeader>
-        <CardContent className="text-muted-foreground">We could not load fax numbers.</CardContent>
-      </Card>
+      <EmptyState
+        icon={AlertCircle}
+        title="Unable to load fax numbers"
+        description="Something went wrong while fetching your fax numbers. Please try refreshing the page."
+        action={
+          <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+            Refresh page
+          </Button>
+        }
+      />
     )
   }
 
@@ -49,8 +55,13 @@ export function FaxNumberTable() {
           <TableBody>
             {data.items.length === 0 && (
               <TableRow>
-                <TableCell colSpan={5} className="text-center text-muted-foreground">
-                  No fax numbers found.
+                <TableCell colSpan={5} className="p-0">
+                  <EmptyState
+                    icon={Printer}
+                    title="No fax numbers yet"
+                    description="Add a fax number to start sending and receiving faxes."
+                    className="border-0 rounded-none"
+                  />
                 </TableCell>
               </TableRow>
             )}

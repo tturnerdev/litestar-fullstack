@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { LayoutGrid, List } from "lucide-react"
+import { LayoutGrid, List, Printer } from "lucide-react"
 import { useState } from "react"
 import { FaxNumberCard } from "@/components/fax/fax-number-card"
 import { FaxNumberTable } from "@/components/fax/fax-number-table"
 import { Button } from "@/components/ui/button"
+import { EmptyState } from "@/components/ui/empty-state"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { useFaxNumbers } from "@/lib/api/hooks/fax"
@@ -60,9 +61,11 @@ function FaxNumbersPage() {
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center gap-2 py-12 text-muted-foreground">
-            <p className="text-sm">No fax numbers found.</p>
-          </div>
+          <EmptyState
+            icon={Printer}
+            title="No fax numbers yet"
+            description="Add a fax number to start sending and receiving faxes."
+          />
         )}
       </PageSection>
     </PageContainer>
