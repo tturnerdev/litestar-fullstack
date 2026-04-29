@@ -1,6 +1,7 @@
 import { Link, Outlet, useRouterState } from "@tanstack/react-router"
 import { useMemo } from "react"
 import { AppSidebar } from "@/components/app-sidebar"
+import { HelpMenu } from "@/components/help/help-menu"
 import { Separator } from "@/components/ui/separator"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { useAuthStore } from "@/lib/auth"
@@ -97,16 +98,19 @@ export function AppLayout() {
                     <p className="font-heading text-lg font-semibold text-foreground">{header.title}</p>
                   </div>
                 </div>
-                {currentTeam && pathname !== "/teams/new" && !pathname.startsWith(`/teams/${currentTeam.id}`) && (
-                  <Link
-                    to="/teams/$teamId"
-                    params={{ teamId: currentTeam.id }}
-                    className="hidden items-center gap-2 rounded-full border border-border/60 bg-card/80 px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground md:flex"
-                  >
-                    Active team
-                    <span className="text-foreground">{currentTeam.name}</span>
-                  </Link>
-                )}
+                <div className="flex items-center gap-2">
+                  {currentTeam && pathname !== "/teams/new" && !pathname.startsWith(`/teams/${currentTeam.id}`) && (
+                    <Link
+                      to="/teams/$teamId"
+                      params={{ teamId: currentTeam.id }}
+                      className="hidden items-center gap-2 rounded-full border border-border/60 bg-card/80 px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground md:flex"
+                    >
+                      Active team
+                      <span className="text-foreground">{currentTeam.name}</span>
+                    </Link>
+                  )}
+                  <HelpMenu />
+                </div>
               </div>
             </header>
             <Outlet />
