@@ -1,7 +1,17 @@
-import { Calendar, ChevronDown, Lock, Tag, Unlock, User } from "lucide-react"
+import { useNavigate } from "@tanstack/react-router"
+import { Calendar, ChevronDown, Lock, Tag, Trash2, Unlock, User } from "lucide-react"
+import { useState } from "react"
 import { TicketPriorityBadge } from "@/components/support/ticket-priority-badge"
 import { TicketStatusBadge } from "@/components/support/ticket-status-badge"
 import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,7 +22,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Separator } from "@/components/ui/separator"
 import type { Ticket } from "@/lib/api/hooks/support"
-import { useCloseTicket, useReopenTicket, useUpdateTicket } from "@/lib/api/hooks/support"
+import { useCloseTicket, useDeleteTicket, useReopenTicket, useUpdateTicket } from "@/lib/api/hooks/support"
 
 interface TicketDetailHeaderProps {
   ticket: Ticket
@@ -31,9 +41,12 @@ const categoryLabels: Record<string, string> = {
 const priorities = ["low", "medium", "high", "urgent"] as const
 
 export function TicketDetailHeader({ ticket }: TicketDetailHeaderProps) {
+  const navigate = useNavigate()
   const closeTicket = useCloseTicket(ticket.id)
   const reopenTicket = useReopenTicket(ticket.id)
   const updateTicket = useUpdateTicket(ticket.id)
+  const deleteTicket = useDeleteTicket(ticket.id)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   const isClosed = ticket.status === "closed" || ticket.status === "resolved"
 
@@ -117,8 +130,50 @@ export function TicketDetailHeader({ ticket }: TicketDetailHeaderProps) {
               Close
             </Button>
           )}
+
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-7 text-xs text-destructive hover:bg-destructive/10"
+            onClick={() => setShowDeleteDialog(true)}
+          >
+            <Trash2 className="mr-1.5 h-3 w-3" />
+            Delete
+          </Button>
         </div>
       </div>
+
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete ticket</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete ticket{" "}
+              <span className="font-medium text-foreground">{ticket.ticketNumber}</span>? This will
+              permanently remove the ticket and all of its messages. This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteDialog(false)} disabled={deleteTicket.isPending}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={deleteTicket.isPending}
+              onClick={() => {
+                deleteTicket.mutate(undefined, {
+                  onSuccess: () => {
+                    setShowDeleteDialog(false)
+                    navigate({ to: "/support" })
+                  },
+                })
+              }}
+            >
+              {deleteTicket.isPending ? "Deleting..." : "Delete ticket"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

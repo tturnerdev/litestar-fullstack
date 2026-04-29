@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Annotated
 from uuid import UUID
 
-from litestar import Controller, get, patch, post
+from litestar import Controller, delete, get, patch, post
 from litestar.params import Dependency, Parameter
 
 from app.db import models as m
@@ -88,3 +88,19 @@ class ExtensionController(Controller):
         db_obj = await extensions_service.get_one(id=ext_id, user_id=current_user.id)
         db_obj = await extensions_service.update(item_id=db_obj.id, data=data.to_dict())
         return extensions_service.to_schema(db_obj, schema_type=Extension)
+
+    @delete(
+        operation_id="DeleteExtension",
+        path="/{ext_id:uuid}",
+        guards=[requires_extension_ownership],
+        return_dto=None,
+    )
+    async def delete_extension(
+        self,
+        extensions_service: ExtensionService,
+        current_user: m.User,
+        ext_id: Annotated[UUID, Parameter(title="Extension ID", description="The extension to delete.")],
+    ) -> None:
+        """Delete an extension."""
+        await extensions_service.get_one(id=ext_id, user_id=current_user.id)
+        await extensions_service.delete(ext_id)

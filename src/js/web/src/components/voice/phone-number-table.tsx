@@ -1,11 +1,20 @@
+import { AlertTriangle, Loader2, Trash2 } from "lucide-react"
 import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { SkeletonTable } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { usePhoneNumbers, useUpdatePhoneNumber } from "@/lib/api/hooks/voice"
+import { useDeletePhoneNumber, usePhoneNumbers, useUpdatePhoneNumber } from "@/lib/api/hooks/voice"
 
 const PAGE_SIZE = 25
 
@@ -24,8 +33,10 @@ export function PhoneNumberTable() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editLabel, setEditLabel] = useState("")
   const [editCallerId, setEditCallerId] = useState("")
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; number: string } | null>(null)
 
   const updateMutation = useUpdatePhoneNumber(editingId ?? "")
+  const deleteMutation = useDeletePhoneNumber()
 
   if (isLoading) return <SkeletonTable rows={6} />
 
@@ -116,9 +127,19 @@ export function PhoneNumberTable() {
                         </Button>
                       </div>
                     ) : (
-                      <Button size="sm" variant="outline" onClick={() => startEdit(pn.id, pn.label, pn.callerIdName)}>
-                        Edit
-                      </Button>
+                      <div className="flex justify-end gap-2">
+                        <Button size="sm" variant="outline" onClick={() => startEdit(pn.id, pn.label, pn.callerIdName)}>
+                          Edit
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                          onClick={() => setDeleteTarget({ id: pn.id, number: pn.number })}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     )}
                   </TableCell>
                 </TableRow>
@@ -142,6 +163,38 @@ export function PhoneNumberTable() {
           </div>
         )}
       </CardContent>
+
+      <Dialog open={deleteTarget !== null} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Delete Phone Number
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete <span className="font-mono font-medium">{deleteTarget?.number}</span>? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={deleteMutation.isPending}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (!deleteTarget) return
+                deleteMutation.mutate(deleteTarget.id, {
+                  onSuccess: () => setDeleteTarget(null),
+                })
+              }}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   )
 }

@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Annotated
 from uuid import UUID
 
-from litestar import Controller, get, patch
+from litestar import Controller, delete, get, patch
 from litestar.exceptions import PermissionDeniedException
 from litestar.params import Dependency, Parameter
 from sqlalchemy import select
@@ -139,3 +139,20 @@ class FaxNumberController(Controller):
             raise PermissionDeniedException(detail="Insufficient permissions to access this fax number.")
         db_obj = await fax_numbers_service.update(item_id=fax_number_id, data=data.to_dict())
         return fax_numbers_service.to_schema(db_obj, schema_type=FaxNumber)
+
+    @delete(
+        operation_id="DeleteFaxNumber",
+        path="/api/fax/numbers/{fax_number_id:uuid}",
+        guards=[requires_fax_number_access],
+    )
+    async def delete_fax_number(
+        self,
+        fax_numbers_service: FaxNumberService,
+        current_user: m.User,
+        fax_number_id: Annotated[UUID, Parameter(title="Fax Number ID", description="The fax number to delete.")],
+    ) -> None:
+        """Delete a fax number and its associated email routes."""
+        existing = await fax_numbers_service.get(fax_number_id)
+        if not _can_access_fax_number(current_user, existing):
+            raise PermissionDeniedException(detail="Insufficient permissions to delete this fax number.")
+        await fax_numbers_service.delete(fax_number_id)

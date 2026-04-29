@@ -164,6 +164,23 @@ export function useCreatePhoneNumber() {
   })
 }
 
+export function useDeletePhoneNumber() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (phoneNumberId: string) =>
+      apiFetch<void>(`/api/voice/phone-numbers/${phoneNumberId}`, { method: "DELETE" }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["voice", "phone-numbers"] })
+      toast.success("Phone number deleted")
+    },
+    onError: (error) => {
+      toast.error("Unable to delete phone number", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
+    },
+  })
+}
+
 // ---------------------------------------------------------------------------
 // Extensions
 // ---------------------------------------------------------------------------
@@ -218,6 +235,23 @@ export function useUpdateExtension(id: string) {
     },
     onError: (error) => {
       toast.error("Unable to update extension", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
+    },
+  })
+}
+
+export function useDeleteExtension() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (extensionId: string) =>
+      apiFetch<void>(`/api/voice/extensions/${extensionId}`, { method: "DELETE" }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["voice", "extensions"] })
+      toast.success("Extension deleted")
+    },
+    onError: (error) => {
+      toast.error("Unable to delete extension", {
         description: error instanceof Error ? error.message : "Try again later",
       })
     },

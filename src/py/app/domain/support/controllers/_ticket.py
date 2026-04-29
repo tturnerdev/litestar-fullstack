@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Annotated
 from uuid import UUID
 
-from litestar import Controller, get, patch, post
+from litestar import Controller, delete, get, patch, post
 from litestar.params import Dependency, Parameter
 from sqlalchemy.orm import selectinload
 
@@ -113,6 +113,19 @@ class TicketController(Controller):
             data=data.to_dict(),
         )
         return tickets_service.to_schema(db_obj, schema_type=Ticket)
+
+    @delete(
+        operation_id="DeleteTicket",
+        path="/api/support/tickets/{ticket_id:uuid}",
+        guards=[requires_support_agent],
+    )
+    async def delete_ticket(
+        self,
+        tickets_service: TicketService,
+        ticket_id: Annotated[UUID, Parameter(title="Ticket ID", description="The ticket to delete.")],
+    ) -> None:
+        """Delete a ticket and all associated messages/attachments."""
+        _ = await tickets_service.delete(ticket_id)
 
     @post(
         operation_id="CloseTicket",

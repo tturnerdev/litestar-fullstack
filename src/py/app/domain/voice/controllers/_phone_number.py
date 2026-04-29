@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Annotated
 from uuid import UUID
 
-from litestar import Controller, get, patch, post
+from litestar import Controller, delete, get, patch, post
 from litestar.params import Dependency, Parameter
 
 from app.db import models as m
@@ -88,3 +88,19 @@ class PhoneNumberController(Controller):
         db_obj = await phone_numbers_service.get_one(id=phone_number_id, user_id=current_user.id)
         db_obj = await phone_numbers_service.update(item_id=db_obj.id, data=data.to_dict())
         return phone_numbers_service.to_schema(db_obj, schema_type=PhoneNumber)
+
+    @delete(
+        operation_id="DeletePhoneNumber",
+        path="/{phone_number_id:uuid}",
+        guards=[requires_phone_number_access],
+        return_dto=None,
+    )
+    async def delete_phone_number(
+        self,
+        phone_numbers_service: PhoneNumberService,
+        current_user: m.User,
+        phone_number_id: Annotated[UUID, Parameter(title="Phone Number ID", description="The phone number to delete.")],
+    ) -> None:
+        """Delete a phone number."""
+        await phone_numbers_service.get_one(id=phone_number_id, user_id=current_user.id)
+        await phone_numbers_service.delete(phone_number_id)

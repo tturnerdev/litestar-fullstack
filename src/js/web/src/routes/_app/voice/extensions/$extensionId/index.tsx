@@ -1,9 +1,17 @@
-import { createFileRoute, Link } from "@tanstack/react-router"
-import { ArrowLeft, ArrowRight, BellOff, Mail, PhoneForwarded, Voicemail } from "lucide-react"
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
+import { AlertTriangle, ArrowLeft, ArrowRight, BellOff, Loader2, Mail, PhoneForwarded, Trash2, Voicemail } from "lucide-react"
 import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
@@ -14,6 +22,7 @@ import { DndSettingsForm } from "@/components/voice/dnd-settings-form"
 import { ForwardingRuleEditor } from "@/components/voice/forwarding-rule-editor"
 import { VoicemailSettingsForm } from "@/components/voice/voicemail-settings-form"
 import {
+  useDeleteExtension,
   useDndSettings,
   useExtension,
   useForwardingRules,
@@ -28,9 +37,17 @@ export const Route = createFileRoute("/_app/voice/extensions/$extensionId/")({
 
 function ExtensionSettingsPage() {
   const { extensionId } = Route.useParams()
+  const router = useRouter()
   const { data } = useExtension(extensionId)
+  const deleteExtension = useDeleteExtension()
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   const title = data ? `${data.displayName} (Ext. ${data.extensionNumber})` : "Extension Settings"
+
+  const handleDelete = async () => {
+    await deleteExtension.mutateAsync(extensionId)
+    router.navigate({ to: "/voice/extensions" })
+  }
 
   return (
     <PageContainer className="flex-1 space-y-8">
@@ -40,6 +57,15 @@ function ExtensionSettingsPage() {
         actions={
           <div className="flex items-center gap-2">
             <DndQuickToggle extensionId={extensionId} showLabel />
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
+              onClick={() => setShowDeleteDialog(true)}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete
+            </Button>
             <Button variant="outline" size="sm" asChild>
               <Link to="/voice/extensions">
                 <ArrowLeft className="mr-2 h-4 w-4" /> All Extensions
@@ -79,6 +105,38 @@ function ExtensionSettingsPage() {
           </TabsContent>
         </Tabs>
       </PageSection>
+
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Delete Extension
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete{" "}
+              <span className="font-medium">{data?.displayName}</span>
+              {data?.extensionNumber && (
+                <> (Ext. <span className="font-mono">{data.extensionNumber}</span>)</>
+              )}
+              ? This action cannot be undone. All associated forwarding rules, voicemail, and DND settings will be permanently removed.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteDialog(false)} disabled={deleteExtension.isPending}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={deleteExtension.isPending}
+            >
+              {deleteExtension.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PageContainer>
   )
 }

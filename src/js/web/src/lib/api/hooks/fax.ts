@@ -109,6 +109,26 @@ export function useUpdateFaxNumber(id: string) {
   })
 }
 
+export function useDeleteFaxNumber() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (faxNumberId: string) => {
+      return apiFetch<void>(`/api/fax/numbers/${faxNumberId}`, {
+        method: "DELETE",
+      })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["fax", "numbers"] })
+      toast.success("Fax number deleted")
+    },
+    onError: (error) => {
+      toast.error("Unable to delete fax number", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
+    },
+  })
+}
+
 // ---------------------------------------------------------------------------
 // Email Routes
 // ---------------------------------------------------------------------------

@@ -1,14 +1,22 @@
-import { createFileRoute, Link } from "@tanstack/react-router"
-import { ArrowLeft, Check, Pencil, X } from "lucide-react"
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
+import { ArrowLeft, Check, Pencil, Trash2, X } from "lucide-react"
 import { useState } from "react"
 import { EmailRouteEditor } from "@/components/fax/email-route-editor"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { SkeletonCard } from "@/components/ui/skeleton"
-import { useFaxNumber, useUpdateFaxNumber } from "@/lib/api/hooks/fax"
+import { useDeleteFaxNumber, useFaxNumber, useUpdateFaxNumber } from "@/lib/api/hooks/fax"
 
 export const Route = createFileRoute("/_app/fax/numbers/$faxNumberId/")({
   component: FaxNumberDetailPage,
@@ -16,9 +24,12 @@ export const Route = createFileRoute("/_app/fax/numbers/$faxNumberId/")({
 
 function FaxNumberDetailPage() {
   const { faxNumberId } = Route.useParams()
+  const navigate = useNavigate()
   const { data, isLoading, isError } = useFaxNumber(faxNumberId)
   const updateFaxNumber = useUpdateFaxNumber(faxNumberId)
+  const deleteFaxNumber = useDeleteFaxNumber()
   const [editingLabel, setEditingLabel] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [labelValue, setLabelValue] = useState("")
 
   function startEditingLabel() {
@@ -82,13 +93,56 @@ function FaxNumberDetailPage() {
         title={data.label ?? data.number}
         description={data.label ? data.number : undefined}
         actions={
-          <Button variant="outline" size="sm" asChild>
-            <Link to="/fax/numbers">
-              <ArrowLeft className="mr-2 h-4 w-4" /> Back to numbers
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-destructive hover:bg-destructive/10"
+              onClick={() => setShowDeleteDialog(true)}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/fax/numbers">
+                <ArrowLeft className="mr-2 h-4 w-4" /> Back to numbers
+              </Link>
+            </Button>
+          </div>
         }
       />
+
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete fax number</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete{" "}
+              <span className="font-medium text-foreground">{data.label ?? data.number}</span>?
+              This will also remove all associated email routes. This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteDialog(false)} disabled={deleteFaxNumber.isPending}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={deleteFaxNumber.isPending}
+              onClick={() => {
+                deleteFaxNumber.mutate(faxNumberId, {
+                  onSuccess: () => {
+                    setShowDeleteDialog(false)
+                    navigate({ to: "/fax/numbers" })
+                  },
+                })
+              }}
+            >
+              {deleteFaxNumber.isPending ? "Deleting..." : "Delete fax number"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <PageSection>
         <Card>

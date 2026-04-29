@@ -193,6 +193,28 @@ export function useReopenTicket(ticketId: string) {
   })
 }
 
+export function useDeleteTicket(ticketId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async () => {
+      await client.delete({
+        url: `/api/support/tickets/${ticketId}`,
+        security: [{ scheme: "bearer", type: "http" }],
+      } as never)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["support", "tickets"] })
+      queryClient.removeQueries({ queryKey: ["support", "ticket", ticketId] })
+      toast.success("Ticket deleted")
+    },
+    onError: (error) => {
+      toast.error("Unable to delete ticket", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
+    },
+  })
+}
+
 // ── Message Hooks ──────────────────────────────────────────────────────
 
 export function useTicketMessages(ticketId: string) {
