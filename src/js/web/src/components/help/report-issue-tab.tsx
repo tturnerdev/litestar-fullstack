@@ -1,6 +1,6 @@
 import html2canvas from "html2canvas-pro"
 import { Camera, FileUp, Loader2, X } from "lucide-react"
-import { useCallback, useRef } from "react"
+import { useCallback, useRef, useState } from "react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 
-const CATEGORIES = ["Bug", "Feature Request", "Performance Issue", "UI/UX Issue", "Other"] as const
+const CATEGORIES = ["Error / Bug", "Comment", "Feature Request", "Other"] as const
 export type IssueCategory = (typeof CATEGORIES)[number]
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
@@ -37,6 +37,7 @@ function formatFileSize(bytes: number): string {
 
 export function ReportIssueTab({ formData, onFormDataChange, onCaptureScreenshot, isCapturing }: ReportIssueTabProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const updateField = useCallback(
     <K extends keyof ReportFormData>(field: K, value: ReportFormData[K]) => {
@@ -91,15 +92,14 @@ export function ReportIssueTab({ formData, onFormDataChange, onCaptureScreenshot
       return
     }
 
-    const payload = {
+    // Debug logging
+    console.log("[Help] Issue report submitted:", {
       title: formData.title.trim(),
       category: formData.category,
       description: formData.description.trim(),
       screenshotAttached: !!formData.screenshot,
       fileCount: formData.files.length,
-    }
-
-    console.log("[Help] Issue report submitted:", payload)
+    })
     if (formData.screenshot) {
       console.log("[Help] Screenshot data URL length:", formData.screenshot.length)
     }
@@ -107,17 +107,67 @@ export function ReportIssueTab({ formData, onFormDataChange, onCaptureScreenshot
       console.log("[Help] Attached file:", file.name, formatFileSize(file.size))
     }
 
-    toast.success("Issue report submitted successfully", {
-      description: "Thank you for your feedback. Our team will review it shortly.",
-    })
+    setIsSubmitting(true)
 
-    onFormDataChange({
-      title: "",
-      category: "",
-      description: "",
-      screenshot: null,
-      files: [],
-    })
+    try {
+      const body = new FormData()
+      body.append("title", formData.title.trim())
+      body.append("category", formData.category)
+      body.append("description", formData.description.trim())
+
+      // Convert base64 data URL screenshot to a File object
+      if (formData.screenshot) {
+        const res = await fetch(formData.screenshot)
+        const blob = await res.blob()
+        body.append("screenshot", new File([blob], "screenshot.png", { type: "image/png" }))
+      }
+
+      for (const file of formData.files) {
+        body.append("files", file)
+      }
+
+      const headers: Record<string, string> = {}
+      const token = window.localStorage.getItem("access_token")
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`
+      }
+      const csrfToken = window.__LITESTAR_CSRF__
+      if (csrfToken) {
+        headers["X-XSRF-TOKEN"] = csrfToken
+      }
+
+      const apiUrl = import.meta.env.VITE_API_URL ?? ""
+      const response = await fetch(`${apiUrl}/api/support/feedback`, {
+        method: "POST",
+        headers,
+        body,
+        credentials: "include",
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null)
+        throw new Error(errorData?.detail ?? `Server error (${response.status})`)
+      }
+
+      toast.success("Issue report submitted successfully", {
+        description: "Thank you for your feedback. Our team will review it shortly.",
+      })
+
+      onFormDataChange({
+        title: "",
+        category: "",
+        description: "",
+        screenshot: null,
+        files: [],
+      })
+    } catch (err) {
+      console.error("[Help] Failed to submit issue report:", err)
+      toast.error("Failed to submit report", {
+        description: err instanceof Error ? err.message : "Please try again later.",
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -237,7 +287,16 @@ export function ReportIssueTab({ formData, onFormDataChange, onCaptureScreenshot
       </div>
 
       <div className="flex justify-end pt-2">
-        <Button type="submit">Submit Report</Button>
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? (
+            <>
+              <Loader2 className="size-4 animate-spin" />
+              Submitting...
+            </>
+          ) : (
+            "Submit Report"
+          )}
+        </Button>
       </div>
     </form>
   )
