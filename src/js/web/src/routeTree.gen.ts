@@ -25,6 +25,7 @@ import { Route as PublicForgotPasswordRouteImport } from './routes/_public/forgo
 import { Route as PublicAboutRouteImport } from './routes/_public/about'
 import { Route as AppTeamsRouteImport } from './routes/_app/teams'
 import { Route as AppSupportRouteImport } from './routes/_app/support'
+import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AppOrganizationRouteImport } from './routes/_app/organization'
 import { Route as AppLocationsRouteImport } from './routes/_app/locations'
 import { Route as AppHomeRouteImport } from './routes/_app/home'
@@ -151,6 +152,11 @@ const AppTeamsRoute = AppTeamsRouteImport.update({
 const AppSupportRoute = AppSupportRouteImport.update({
   id: '/support',
   path: '/support',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => AppRoute,
 } as any)
 const AppOrganizationRoute = AppOrganizationRouteImport.update({
@@ -420,6 +426,7 @@ export interface FileRoutesByFullPath {
   '/home': typeof AppHomeRoute
   '/locations': typeof AppLocationsRouteWithChildren
   '/organization': typeof AppOrganizationRouteWithChildren
+  '/settings': typeof AppSettingsRoute
   '/support': typeof AppSupportRouteWithChildren
   '/teams': typeof AppTeamsRouteWithChildren
   '/about': typeof PublicAboutRoute
@@ -480,6 +487,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/home': typeof AppHomeRoute
+  '/settings': typeof AppSettingsRoute
   '/about': typeof PublicAboutRoute
   '/forgot-password': typeof PublicForgotPasswordRoute
   '/landing': typeof PublicLandingRoute
@@ -543,6 +551,7 @@ export interface FileRoutesById {
   '/_app/home': typeof AppHomeRoute
   '/_app/locations': typeof AppLocationsRouteWithChildren
   '/_app/organization': typeof AppOrganizationRouteWithChildren
+  '/_app/settings': typeof AppSettingsRoute
   '/_app/support': typeof AppSupportRouteWithChildren
   '/_app/teams': typeof AppTeamsRouteWithChildren
   '/_public/about': typeof PublicAboutRoute
@@ -610,6 +619,7 @@ export interface FileRouteTypes {
     | '/home'
     | '/locations'
     | '/organization'
+    | '/settings'
     | '/support'
     | '/teams'
     | '/about'
@@ -670,6 +680,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/home'
+    | '/settings'
     | '/about'
     | '/forgot-password'
     | '/landing'
@@ -732,6 +743,7 @@ export interface FileRouteTypes {
     | '/_app/home'
     | '/_app/locations'
     | '/_app/organization'
+    | '/_app/settings'
     | '/_app/support'
     | '/_app/teams'
     | '/_public/about'
@@ -908,6 +920,13 @@ declare module '@tanstack/react-router' {
       path: '/support'
       fullPath: '/support'
       preLoaderRoute: typeof AppSupportRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/settings': {
+      id: '/_app/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/organization': {
@@ -1420,6 +1439,7 @@ interface AppRouteChildren {
   AppHomeRoute: typeof AppHomeRoute
   AppLocationsRoute: typeof AppLocationsRouteWithChildren
   AppOrganizationRoute: typeof AppOrganizationRouteWithChildren
+  AppSettingsRoute: typeof AppSettingsRoute
   AppSupportRoute: typeof AppSupportRouteWithChildren
   AppTeamsRoute: typeof AppTeamsRouteWithChildren
   AppFaxSendRoute: typeof AppFaxSendRoute
@@ -1446,6 +1466,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppHomeRoute: AppHomeRoute,
   AppLocationsRoute: AppLocationsRouteWithChildren,
   AppOrganizationRoute: AppOrganizationRouteWithChildren,
+  AppSettingsRoute: AppSettingsRoute,
   AppSupportRoute: AppSupportRouteWithChildren,
   AppTeamsRoute: AppTeamsRouteWithChildren,
   AppFaxSendRoute: AppFaxSendRoute,
