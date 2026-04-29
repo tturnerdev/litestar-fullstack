@@ -2,17 +2,47 @@ import { useQuery } from "@tanstack/react-query"
 import { Building2, Cable, Home, LifeBuoy, MapPin, Monitor, Phone, Printer, ShieldCheck, Users } from "lucide-react"
 import type * as React from "react"
 import { useEffect, useMemo } from "react"
-import { NavMain } from "@/components/nav-main"
+import { NavMain, type NavMainItem } from "@/components/nav-main"
 import { NavProjects } from "@/components/nav-projects"
 import { NavUser } from "@/components/nav-user"
 import { TeamSwitcher } from "@/components/team-switcher"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail } from "@/components/ui/sidebar"
 import { useAuthStore } from "@/lib/auth"
-import { listTeams, type Team } from "@/lib/generated/api"
+import { adminListUsers, listTeams, type Team } from "@/lib/generated/api"
+
+const BADGE_STALE_TIME = 60_000
+
+function useNavBadges(isAuthenticated: boolean, isSuperuser: boolean) {
+  const teamsCount = useQuery({
+    queryKey: ["nav-badge", "teams"],
+    queryFn: async () => {
+      const response = await listTeams({ query: { pageSize: 1 } })
+      return response.data?.total ?? 0
+    },
+    enabled: isAuthenticated,
+    staleTime: BADGE_STALE_TIME,
+  })
+
+  const usersCount = useQuery({
+    queryKey: ["nav-badge", "admin-users"],
+    queryFn: async () => {
+      const response = await adminListUsers({ query: { pageSize: 1 } })
+      return response.data?.total ?? 0
+    },
+    enabled: isAuthenticated && isSuperuser,
+    staleTime: BADGE_STALE_TIME,
+  })
+
+  return {
+    teams: teamsCount.data ?? null,
+    adminUsers: usersCount.data ?? null,
+  }
+}
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { teams, currentTeam, setTeams, setCurrentTeam, user, isAuthenticated } = useAuthStore()
+  const badges = useNavBadges(isAuthenticated, user?.isSuperuser ?? false)
 
   const {
     data: teamsData = [],
@@ -38,7 +68,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   }, [isError, isLoading, setTeams, storeIds, teamIds, teamsData])
 
   const navMain = useMemo(() => {
-    const items = [
+    const items: NavMainItem[] = [
       {
         title: "Home",
         to: "/home",
@@ -48,6 +78,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         title: "Teams",
         to: "/teams",
         icon: Users,
+        badge: badges.teams,
         items: [
           { title: "All teams", to: "/teams" },
           { title: "Create new", to: "/teams/new" },
@@ -120,11 +151,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         title: "Admin",
         to: "/admin",
         icon: ShieldCheck,
+        badge: badges.adminUsers,
       })
     }
 
     return items
-  }, [user?.isSuperuser])
+  }, [user?.isSuperuser, badges.teams, badges.adminUsers])
 
   const teamLinks = useMemo(
     () =>
