@@ -2,6 +2,7 @@ import { Link, Outlet, useRouterState } from "@tanstack/react-router"
 import { useMemo } from "react"
 import { AppSidebar } from "@/components/app-sidebar"
 import { HelpMenu } from "@/components/help/help-menu"
+import { NotificationBell } from "@/components/notifications/notification-bell"
 import { GlobalSearch } from "@/components/search/global-search"
 import { Separator } from "@/components/ui/separator"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
@@ -77,6 +78,9 @@ export function AppLayout() {
     if (pathname.startsWith("/admin")) {
       return { eyebrow: "Operations", title: "Admin" }
     }
+    if (pathname.startsWith("/notifications")) {
+      return { eyebrow: "Account", title: "Notifications" }
+    }
     if (pathname.startsWith("/profile")) {
       return { eyebrow: "Account", title: "Profile" }
     }
@@ -111,6 +115,7 @@ export function AppLayout() {
                     </Link>
                   )}
                   <GlobalSearch />
+                  <NotificationBell />
                   <HelpMenu />
                 </div>
               </div>

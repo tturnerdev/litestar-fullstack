@@ -1,6 +1,6 @@
 """Domain modules for the application."""
 
-from app.domain import accounts, connections, devices, fax, locations, support, system, tags, teams, voice
+from app.domain import accounts, connections, devices, fax, locations, notifications, support, system, tags, teams, voice
 
 __all__ = (
     "accounts",
@@ -8,6 +8,7 @@ __all__ = (
     "devices",
     "fax",
     "locations",
+    "notifications",
     "support",
     "system",
     "tags",

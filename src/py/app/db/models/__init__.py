@@ -16,6 +16,7 @@ from app.db.models._fax_number import FaxNumber
 from app.db.models._forwarding_rule import ForwardingRule
 from app.db.models._location import Location
 from app.db.models._location_type import LocationType
+from app.db.models._notification import Notification
 from app.db.models._oauth_account import UserOAuthAccount
 from app.db.models._organization import Organization
 from app.db.models._password_reset_token import PasswordResetToken
