@@ -36,6 +36,7 @@ import { Route as AppTeamsIndexRouteImport } from './routes/_app/teams/index'
 import { Route as AppSupportIndexRouteImport } from './routes/_app/support/index'
 import { Route as AppProfileIndexRouteImport } from './routes/_app/profile/index'
 import { Route as AppOrganizationIndexRouteImport } from './routes/_app/organization/index'
+import { Route as AppNotificationsIndexRouteImport } from './routes/_app/notifications/index'
 import { Route as AppLocationsIndexRouteImport } from './routes/_app/locations/index'
 import { Route as AppFaxIndexRouteImport } from './routes/_app/fax/index'
 import { Route as AppDevicesIndexRouteImport } from './routes/_app/devices/index'
@@ -206,6 +207,11 @@ const AppOrganizationIndexRoute = AppOrganizationIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppOrganizationRoute,
+} as any)
+const AppNotificationsIndexRoute = AppNotificationsIndexRouteImport.update({
+  id: '/notifications/',
+  path: '/notifications/',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppLocationsIndexRoute = AppLocationsIndexRouteImport.update({
   id: '/',
@@ -442,6 +448,7 @@ export interface FileRoutesByFullPath {
   '/devices/': typeof AppDevicesIndexRoute
   '/fax/': typeof AppFaxIndexRoute
   '/locations/': typeof AppLocationsIndexRoute
+  '/notifications/': typeof AppNotificationsIndexRoute
   '/organization/': typeof AppOrganizationIndexRoute
   '/profile/': typeof AppProfileIndexRoute
   '/support/': typeof AppSupportIndexRoute
@@ -496,6 +503,7 @@ export interface FileRoutesByTo {
   '/devices': typeof AppDevicesIndexRoute
   '/fax': typeof AppFaxIndexRoute
   '/locations': typeof AppLocationsIndexRoute
+  '/notifications': typeof AppNotificationsIndexRoute
   '/organization': typeof AppOrganizationIndexRoute
   '/profile': typeof AppProfileIndexRoute
   '/support': typeof AppSupportIndexRoute
@@ -563,6 +571,7 @@ export interface FileRoutesById {
   '/_app/devices/': typeof AppDevicesIndexRoute
   '/_app/fax/': typeof AppFaxIndexRoute
   '/_app/locations/': typeof AppLocationsIndexRoute
+  '/_app/notifications/': typeof AppNotificationsIndexRoute
   '/_app/organization/': typeof AppOrganizationIndexRoute
   '/_app/profile/': typeof AppProfileIndexRoute
   '/_app/support/': typeof AppSupportIndexRoute
@@ -629,6 +638,7 @@ export interface FileRouteTypes {
     | '/devices/'
     | '/fax/'
     | '/locations/'
+    | '/notifications/'
     | '/organization/'
     | '/profile/'
     | '/support/'
@@ -683,6 +693,7 @@ export interface FileRouteTypes {
     | '/devices'
     | '/fax'
     | '/locations'
+    | '/notifications'
     | '/organization'
     | '/profile'
     | '/support'
@@ -749,6 +760,7 @@ export interface FileRouteTypes {
     | '/_app/devices/'
     | '/_app/fax/'
     | '/_app/locations/'
+    | '/_app/notifications/'
     | '/_app/organization/'
     | '/_app/profile/'
     | '/_app/support/'
@@ -974,6 +986,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/organization/'
       preLoaderRoute: typeof AppOrganizationIndexRouteImport
       parentRoute: typeof AppOrganizationRoute
+    }
+    '/_app/notifications/': {
+      id: '/_app/notifications/'
+      path: '/notifications'
+      fullPath: '/notifications/'
+      preLoaderRoute: typeof AppNotificationsIndexRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_app/locations/': {
       id: '/_app/locations/'
@@ -1406,6 +1425,7 @@ interface AppRouteChildren {
   AppFaxSendRoute: typeof AppFaxSendRoute
   AppVoicePhoneNumbersRoute: typeof AppVoicePhoneNumbersRoute
   AppFaxIndexRoute: typeof AppFaxIndexRoute
+  AppNotificationsIndexRoute: typeof AppNotificationsIndexRoute
   AppProfileIndexRoute: typeof AppProfileIndexRoute
   AppVoiceIndexRoute: typeof AppVoiceIndexRoute
   AppFaxMessagesIndexRoute: typeof AppFaxMessagesIndexRoute
@@ -1431,6 +1451,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppFaxSendRoute: AppFaxSendRoute,
   AppVoicePhoneNumbersRoute: AppVoicePhoneNumbersRoute,
   AppFaxIndexRoute: AppFaxIndexRoute,
+  AppNotificationsIndexRoute: AppNotificationsIndexRoute,
   AppProfileIndexRoute: AppProfileIndexRoute,
   AppVoiceIndexRoute: AppVoiceIndexRoute,
   AppFaxMessagesIndexRoute: AppFaxMessagesIndexRoute,
