@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import {
+  type DashboardStats,
+  getDashboardStats,
   getOrganization,
   updateOrganization,
   type Organization,
@@ -12,6 +14,16 @@ export function useOrganization() {
     queryFn: async () => {
       const response = await getOrganization()
       return response.data as Organization
+    },
+  })
+}
+
+export function useOrganizationStats() {
+  return useQuery({
+    queryKey: ["organization", "stats"],
+    queryFn: async () => {
+      const response = await getDashboardStats()
+      return response.data as DashboardStats
     },
   })
 }

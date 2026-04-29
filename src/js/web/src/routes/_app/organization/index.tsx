@@ -17,6 +17,8 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
+import { OrganizationQuickLinks } from "@/components/organization/organization-quick-links"
+import { OrganizationStats } from "@/components/organization/organization-stats"
 import { useAuthStore } from "@/lib/auth"
 import { useOrganization, useUpdateOrganization } from "@/lib/api/hooks/organization"
 
@@ -418,6 +420,12 @@ function OrganizationSettingsPage() {
             </CardContent>
           </Card>
         </div>
+      </PageSection>
+      <PageSection>
+        <OrganizationStats />
+      </PageSection>
+      <PageSection>
+        <OrganizationQuickLinks />
       </PageSection>
     </PageContainer>
   )
