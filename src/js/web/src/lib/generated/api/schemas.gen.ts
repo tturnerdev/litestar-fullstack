@@ -2638,6 +2638,72 @@ export const MfaStatusSchema = {
   type: "object",
 } as const;
 
+export const NotificationSchema = {
+  properties: {
+    actionUrl: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    category: {
+      type: "string",
+    },
+    createdAt: {
+      format: "date-time",
+      type: "string",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    isRead: {
+      type: "boolean",
+    },
+    message: {
+      type: "string",
+    },
+    metadata: {
+      oneOf: [
+        {
+          additionalProperties: {},
+          type: "object",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    title: {
+      type: "string",
+    },
+    updatedAt: {
+      format: "date-time",
+      type: "string",
+    },
+    userId: {
+      format: "uuid",
+      type: "string",
+    },
+  },
+  required: [
+    "category",
+    "createdAt",
+    "id",
+    "isRead",
+    "message",
+    "title",
+    "updatedAt",
+    "userId",
+  ],
+  title: "Notification",
+  type: "object",
+} as const;
+
 export const OAuth2LoginSchema = {
   properties: {
     access_token: {
@@ -3450,6 +3516,77 @@ export const RoleUpdateSchema = {
   type: "object",
 } as const;
 
+export const SearchResponseSchema = {
+  properties: {
+    query: {
+      type: "string",
+    },
+    results: {
+      items: {
+        $ref: "#/components/schemas/SearchResultItem",
+      },
+      type: "array",
+    },
+    total: {
+      type: "integer",
+    },
+  },
+  required: ["query", "results", "total"],
+  title: "SearchResponse",
+  type: "object",
+} as const;
+
+export const SearchResultItemSchema = {
+  properties: {
+    description: {
+      type: "string",
+    },
+    id: {
+      type: "string",
+    },
+    label: {
+      type: "string",
+    },
+    type: {
+      type: "string",
+    },
+    url: {
+      type: "string",
+    },
+  },
+  required: ["description", "id", "label", "type", "url"],
+  title: "SearchResultItem",
+  type: "object",
+} as const;
+
+export const SyncResponseSchema = {
+  properties: {
+    domain: {
+      type: "string",
+    },
+    entity: {
+      additionalProperties: {},
+      type: "object",
+    },
+    field: {
+      type: "string",
+    },
+    synced: {
+      type: "boolean",
+    },
+    syncedAt: {
+      format: "date-time",
+      type: "string",
+    },
+    value: {
+      type: "string",
+    },
+  },
+  required: ["domain", "entity", "field", "synced", "syncedAt", "value"],
+  title: "SyncResponse",
+  type: "object",
+} as const;
+
 export const SystemHealthSchema = {
   properties: {
     app: {
@@ -4173,6 +4310,17 @@ export const TicketUserSchema = {
   },
   required: ["email", "id"],
   title: "TicketUser",
+  type: "object",
+} as const;
+
+export const UnreadCountSchema = {
+  properties: {
+    count: {
+      type: "integer",
+    },
+  },
+  required: ["count"],
+  title: "UnreadCount",
   type: "object",
 } as const;
 

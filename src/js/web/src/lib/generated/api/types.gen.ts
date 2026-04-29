@@ -716,6 +716,24 @@ export type MfaStatus = {
 };
 
 /**
+ * Notification
+ */
+export type Notification = {
+  actionUrl?: string | null;
+  category: string;
+  createdAt: string;
+  id: string;
+  isRead: boolean;
+  message: string;
+  metadata?: {
+    [key: string]: unknown;
+  } | null;
+  title: string;
+  updatedAt: string;
+  userId: string;
+};
+
+/**
  * OAuth2Login
  */
 export type OAuth2Login = {
@@ -936,6 +954,40 @@ export type RoleCreate = {
  */
 export type RoleUpdate = {
   name?: string | null;
+};
+
+/**
+ * SearchResponse
+ */
+export type SearchResponse = {
+  query: string;
+  results: Array<SearchResultItem>;
+  total: number;
+};
+
+/**
+ * SearchResultItem
+ */
+export type SearchResultItem = {
+  description: string;
+  id: string;
+  label: string;
+  type: string;
+  url: string;
+};
+
+/**
+ * SyncResponse
+ */
+export type SyncResponse = {
+  domain: string;
+  entity: {
+    [key: string]: unknown;
+  };
+  field: string;
+  synced: boolean;
+  syncedAt: string;
+  value: string;
 };
 
 /**
@@ -1178,6 +1230,13 @@ export type TicketUser = {
   email: string;
   id: string;
   name?: string | null;
+};
+
+/**
+ * UnreadCount
+ */
+export type UnreadCount = {
+  count: number;
 };
 
 /**
@@ -1668,10 +1727,10 @@ export type AdminListAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
+    actionIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
-    actionIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -1750,10 +1809,10 @@ export type AdminGetTargetAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
+    actionIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
-    actionIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -1830,10 +1889,10 @@ export type AdminGetUserAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
+    actionIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
-    actionIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -4002,6 +4061,192 @@ export type GetMfaStatusResponses = {
 export type GetMfaStatusResponse =
   GetMfaStatusResponses[keyof GetMfaStatusResponses];
 
+export type ListNotificationsData = {
+  body?: never;
+  path?: never;
+  query?: {
+    ids?: Array<string> | null;
+    createdBefore?: string | null;
+    createdAfter?: string | null;
+    updatedBefore?: string | null;
+    updatedAfter?: string | null;
+    currentPage?: number;
+    pageSize?: number;
+    /**
+     * Order by field
+     */
+    orderBy?: string | null;
+    /**
+     * Field to search
+     */
+    sortOrder?: "asc" | "desc" | null;
+  };
+  url: "/api/notifications";
+};
+
+export type ListNotificationsErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type ListNotificationsError =
+  ListNotificationsErrors[keyof ListNotificationsErrors];
+
+export type ListNotificationsResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: {
+    items?: Array<Notification>;
+    /**
+     * Maximal number of items to send.
+     */
+    limit?: number;
+    /**
+     * Offset from the beginning of the query.
+     */
+    offset?: number;
+    /**
+     * Total number of items.
+     */
+    total?: number;
+  };
+};
+
+export type ListNotificationsResponse =
+  ListNotificationsResponses[keyof ListNotificationsResponses];
+
+export type MarkAllNotificationsReadData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/api/notifications/mark-all-read";
+};
+
+export type MarkAllNotificationsReadResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: UnreadCount;
+};
+
+export type MarkAllNotificationsReadResponse =
+  MarkAllNotificationsReadResponses[keyof MarkAllNotificationsReadResponses];
+
+export type GetUnreadNotificationCountData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/api/notifications/unread-count";
+};
+
+export type GetUnreadNotificationCountResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: UnreadCount;
+};
+
+export type GetUnreadNotificationCountResponse =
+  GetUnreadNotificationCountResponses[keyof GetUnreadNotificationCountResponses];
+
+export type DeleteNotificationData = {
+  body?: never;
+  path: {
+    /**
+     * Notification ID
+     *
+     * The notification to delete.
+     */
+    notification_id: string;
+  };
+  query?: never;
+  url: "/api/notifications/{notification_id}";
+};
+
+export type DeleteNotificationErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type DeleteNotificationError =
+  DeleteNotificationErrors[keyof DeleteNotificationErrors];
+
+export type DeleteNotificationResponses = {
+  /**
+   * Request fulfilled, nothing follows
+   */
+  204: void;
+};
+
+export type DeleteNotificationResponse =
+  DeleteNotificationResponses[keyof DeleteNotificationResponses];
+
+export type MarkNotificationReadData = {
+  body?: never;
+  path: {
+    /**
+     * Notification ID
+     *
+     * The notification to mark as read.
+     */
+    notification_id: string;
+  };
+  query?: never;
+  url: "/api/notifications/{notification_id}/read";
+};
+
+export type MarkNotificationReadErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type MarkNotificationReadError =
+  MarkNotificationReadErrors[keyof MarkNotificationReadErrors];
+
+export type MarkNotificationReadResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: Notification;
+};
+
+export type MarkNotificationReadResponse =
+  MarkNotificationReadResponses[keyof MarkNotificationReadResponses];
+
 export type GetOrganizationData = {
   body?: never;
   path?: never;
@@ -4543,6 +4788,44 @@ export type RevokeRoleResponses = {
 
 export type RevokeRoleResponse = RevokeRoleResponses[keyof RevokeRoleResponses];
 
+export type GlobalSearchData = {
+  body?: never;
+  path?: never;
+  query?: {
+    q?: string;
+    limit?: number;
+  };
+  url: "/api/search";
+};
+
+export type GlobalSearchErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type GlobalSearchError = GlobalSearchErrors[keyof GlobalSearchErrors];
+
+export type GlobalSearchResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: SearchResponse;
+};
+
+export type GlobalSearchResponse =
+  GlobalSearchResponses[keyof GlobalSearchResponses];
+
 export type DeleteAttachmentData = {
   body?: never;
   path: {
@@ -4627,6 +4910,44 @@ export type GetAttachmentResponses = {
 
 export type GetAttachmentResponse =
   GetAttachmentResponses[keyof GetAttachmentResponses];
+
+export type SubmitFeedbackData = {
+  body: {
+    [key: string]: unknown;
+  };
+  path?: never;
+  query?: never;
+  url: "/api/support/feedback";
+};
+
+export type SubmitFeedbackErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type SubmitFeedbackError =
+  SubmitFeedbackErrors[keyof SubmitFeedbackErrors];
+
+export type SubmitFeedbackResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: Message;
+};
+
+export type SubmitFeedbackResponse =
+  SubmitFeedbackResponses[keyof SubmitFeedbackResponses];
 
 export type ListTicketsData = {
   body?: never;
@@ -5228,6 +5549,44 @@ export type ReopenTicketResponses = {
 
 export type ReopenTicketResponse =
   ReopenTicketResponses[keyof ReopenTicketResponses];
+
+export type SyncEntityData = {
+  body?: never;
+  path: {
+    domain: string;
+    field_name: string;
+    value: string;
+  };
+  query?: never;
+  url: "/api/sync/{domain}/{field_name}/{value}";
+};
+
+export type SyncEntityErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type SyncEntityError = SyncEntityErrors[keyof SyncEntityErrors];
+
+export type SyncEntityResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: SyncResponse;
+};
+
+export type SyncEntityResponse = SyncEntityResponses[keyof SyncEntityResponses];
 
 export type ListTagsData = {
   body?: never;

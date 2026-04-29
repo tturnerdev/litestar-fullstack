@@ -338,6 +338,19 @@
       ],
       "uri": "/api/support/tickets/{ticket_id}/messages/{msg_id}"
     },
+    "delete_notification": {
+      "method": "delete",
+      "methods": [
+        "DELETE"
+      ],
+      "parameterTypes": {
+        "notification_id": "UUID"
+      },
+      "parameters": [
+        "notification_id"
+      ],
+      "uri": "/api/notifications/{notification_id}"
+    },
     "delete_phone_number": {
       "method": "delete",
       "methods": [
@@ -769,6 +782,13 @@
       ],
       "uri": "/api/support/tickets/{ticket_id}"
     },
+    "get_unread_count": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "uri": "/api/notifications/unread-count"
+    },
     "get_user": {
       "method": "get",
       "methods": [
@@ -1119,6 +1139,24 @@
       },
       "uri": "/api/support/tickets/{ticket_id}/messages"
     },
+    "list_notifications": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "queryParameters": {
+        "createdAfter": "DateTime | undefined",
+        "createdBefore": "DateTime | undefined",
+        "currentPage": "number | undefined",
+        "ids": "string[] | undefined",
+        "orderBy": "string | undefined",
+        "pageSize": "number | undefined",
+        "sortOrder": "\"asc\" | \"desc\" | undefined",
+        "updatedAfter": "DateTime | undefined",
+        "updatedBefore": "DateTime | undefined"
+      },
+      "uri": "/api/notifications"
+    },
     "list_phone_numbers": {
       "method": "get",
       "methods": [
@@ -1347,6 +1385,26 @@
         "POST"
       ],
       "uri": "/api/access/logout"
+    },
+    "mark_all_read": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "uri": "/api/notifications/mark-all-read"
+    },
+    "mark_read": {
+      "method": "patch",
+      "methods": [
+        "PATCH"
+      ],
+      "parameterTypes": {
+        "notification_id": "UUID"
+      },
+      "parameters": [
+        "notification_id"
+      ],
+      "uri": "/api/notifications/{notification_id}/read"
     },
     "oauth:github:authorize": {
       "method": "get",
@@ -1581,6 +1639,24 @@
       },
       "uri": "/api/profile/oauth/{provider}/link"
     },
+    "submit_feedback": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "uri": "/api/support/feedback"
+    },
+    "system:global-search": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "queryParameters": {
+        "limit": "number | undefined",
+        "q": "string | undefined"
+      },
+      "uri": "/api/search"
+    },
     "system:health": {
       "method": "get",
       "methods": [
@@ -1594,6 +1670,23 @@
         "GET"
       ],
       "uri": "/api/config/oauth"
+    },
+    "system:sync-entity": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "domain": "string",
+        "field_name": "string",
+        "value": "string"
+      },
+      "parameters": [
+        "domain",
+        "field_name",
+        "value"
+      ],
+      "uri": "/api/sync/{domain}/{field_name}/{value}"
     },
     "test_connection": {
       "method": "post",

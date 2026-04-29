@@ -48,6 +48,7 @@ export type RouteName =
   | 'delete_forwarding_rule'
   | 'delete_location'
   | 'delete_message'
+  | 'delete_notification'
   | 'delete_phone_number'
   | 'delete_role'
   | 'delete_tag'
@@ -82,6 +83,7 @@ export type RouteName =
   | 'get_team'
   | 'get_team_api_teams_team_id:uuid'
   | 'get_ticket'
+  | 'get_unread_count'
   | 'get_user'
   | 'get_user_api_users_user_id:uuid'
   | 'get_user_logs'
@@ -101,6 +103,7 @@ export type RouteName =
   | 'list_locations'
   | 'list_logs'
   | 'list_messages'
+  | 'list_notifications'
   | 'list_phone_numbers'
   | 'list_roles'
   | 'list_tags'
@@ -114,6 +117,8 @@ export type RouteName =
   | 'list_voicemail_messages'
   | 'login'
   | 'logout'
+  | 'mark_all_read'
+  | 'mark_read'
   | 'oauth:github:authorize'
   | 'oauth:github:callback'
   | 'oauth:google:authorize'
@@ -136,8 +141,11 @@ export type RouteName =
   | 'set_forwarding_rules'
   | 'signup'
   | 'start_link'
+  | 'submit_feedback'
+  | 'system:global-search'
   | 'system:health'
   | 'system:oauth-config'
+  | 'system:sync-entity'
   | 'test_connection'
   | 'toggle_dnd'
   | 'unlink'
@@ -258,6 +266,9 @@ export interface RoutePathParams {
     msg_id: UUID;
     ticket_id: UUID;
   };
+  'delete_notification': {
+    notification_id: UUID;
+  };
   'delete_phone_number': {
     phone_number_id: UUID;
   };
@@ -348,6 +359,7 @@ export interface RoutePathParams {
   'get_ticket': {
     ticket_id: UUID;
   };
+  'get_unread_count': Record<string, never>;
   'get_user': {
     user_id: UUID;
   };
@@ -390,6 +402,7 @@ export interface RoutePathParams {
   'list_messages': {
     ticket_id: UUID;
   };
+  'list_notifications': Record<string, never>;
   'list_phone_numbers': Record<string, never>;
   'list_roles': Record<string, never>;
   'list_tags': Record<string, never>;
@@ -409,6 +422,10 @@ export interface RoutePathParams {
   };
   'login': Record<string, never>;
   'logout': Record<string, never>;
+  'mark_all_read': Record<string, never>;
+  'mark_read': {
+    notification_id: UUID;
+  };
   'oauth:github:authorize': Record<string, never>;
   'oauth:github:callback': Record<string, never>;
   'oauth:google:authorize': Record<string, never>;
@@ -450,8 +467,15 @@ export interface RoutePathParams {
   'start_link': {
     provider: string;
   };
+  'submit_feedback': Record<string, never>;
+  'system:global-search': Record<string, never>;
   'system:health': Record<string, never>;
   'system:oauth-config': Record<string, never>;
+  'system:sync-entity': {
+    domain: string;
+    field_name: string;
+    value: string;
+  };
   'test_connection': {
     connection_id: UUID;
   };
@@ -610,6 +634,7 @@ export interface RouteQueryParams {
   'delete_forwarding_rule': Record<string, never>;
   'delete_location': Record<string, never>;
   'delete_message': Record<string, never>;
+  'delete_notification': Record<string, never>;
   'delete_phone_number': Record<string, never>;
   'delete_role': Record<string, never>;
   'delete_tag': Record<string, never>;
@@ -670,6 +695,7 @@ export interface RouteQueryParams {
   'get_team': Record<string, never>;
   'get_team_api_teams_team_id:uuid': Record<string, never>;
   'get_ticket': Record<string, never>;
+  'get_unread_count': Record<string, never>;
   'get_user': Record<string, never>;
   'get_user_api_users_user_id:uuid': Record<string, never>;
   'get_user_logs': {
@@ -824,6 +850,17 @@ export interface RouteQueryParams {
     pageSize?: number;
     sortOrder?: "asc" | "desc";
   };
+  'list_notifications': {
+    createdAfter?: DateTime;
+    createdBefore?: DateTime;
+    currentPage?: number;
+    ids?: string[];
+    orderBy?: string;
+    pageSize?: number;
+    sortOrder?: "asc" | "desc";
+    updatedAfter?: DateTime;
+    updatedBefore?: DateTime;
+  };
   'list_phone_numbers': {
     createdAfter?: DateTime;
     createdBefore?: DateTime;
@@ -946,6 +983,8 @@ export interface RouteQueryParams {
   };
   'login': Record<string, never>;
   'logout': Record<string, never>;
+  'mark_all_read': Record<string, never>;
+  'mark_read': Record<string, never>;
   'oauth:github:authorize': {
     redirect_url?: string;
   };
@@ -985,8 +1024,14 @@ export interface RouteQueryParams {
   'start_link': {
     redirect_url?: string;
   };
+  'submit_feedback': Record<string, never>;
+  'system:global-search': {
+    limit?: number;
+    q?: string;
+  };
   'system:health': Record<string, never>;
   'system:oauth-config': Record<string, never>;
+  'system:sync-entity': Record<string, never>;
   'test_connection': Record<string, never>;
   'toggle_dnd': Record<string, never>;
   'unlink': Record<string, never>;
@@ -1256,6 +1301,13 @@ export const routeDefinitions = {
     pathParams: ['msg_id', 'ticket_id'] as const,
     queryParams: [] as const,
   },
+  'delete_notification': {
+    path: '/api/notifications/{notification_id}',
+    methods: ['DELETE'] as const,
+    method: 'delete',
+    pathParams: ['notification_id'] as const,
+    queryParams: [] as const,
+  },
   'delete_phone_number': {
     path: '/api/voice/phone-numbers/{phone_number_id}',
     methods: ['DELETE'] as const,
@@ -1494,6 +1546,13 @@ export const routeDefinitions = {
     pathParams: ['ticket_id'] as const,
     queryParams: [] as const,
   },
+  'get_unread_count': {
+    path: '/api/notifications/unread-count',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
   'get_user': {
     path: '/api/admin/users/{user_id}',
     methods: ['GET'] as const,
@@ -1629,6 +1688,13 @@ export const routeDefinitions = {
     pathParams: ['ticket_id'] as const,
     queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'sortOrder'] as const,
   },
+  'list_notifications': {
+    path: '/api/notifications',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
+  },
   'list_phone_numbers': {
     path: '/api/voice/phone-numbers',
     methods: ['GET'] as const,
@@ -1719,6 +1785,20 @@ export const routeDefinitions = {
     methods: ['POST'] as const,
     method: 'post',
     pathParams: [] as const,
+    queryParams: [] as const,
+  },
+  'mark_all_read': {
+    path: '/api/notifications/mark-all-read',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
+  'mark_read': {
+    path: '/api/notifications/{notification_id}/read',
+    methods: ['PATCH'] as const,
+    method: 'patch',
+    pathParams: ['notification_id'] as const,
     queryParams: [] as const,
   },
   'oauth:github:authorize': {
@@ -1875,6 +1955,20 @@ export const routeDefinitions = {
     pathParams: ['provider'] as const,
     queryParams: ['redirect_url'] as const,
   },
+  'submit_feedback': {
+    path: '/api/support/feedback',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
+  'system:global-search': {
+    path: '/api/search',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: ['limit', 'q'] as const,
+  },
   'system:health': {
     path: '/health',
     methods: ['GET'] as const,
@@ -1887,6 +1981,13 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: [] as const,
+    queryParams: [] as const,
+  },
+  'system:sync-entity': {
+    path: '/api/sync/{domain}/{field_name}/{value}',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['domain', 'field_name', 'value'] as const,
     queryParams: [] as const,
   },
   'test_connection': {

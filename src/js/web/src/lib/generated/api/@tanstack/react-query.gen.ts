@@ -63,6 +63,7 @@ import {
   deleteFaxNumber,
   deleteForwardingRule,
   deleteLocation,
+  deleteNotification,
   deletePhoneNumber,
   deleteRole,
   deleteTag,
@@ -92,9 +93,11 @@ import {
   getTag,
   getTeam,
   getTicket,
+  getUnreadNotificationCount,
   getUser,
   getVoicemailMessage,
   getVoicemailSettings,
+  globalSearch,
   initiateDisableMfaOAuth,
   initiateMfaSetup,
   listConnections,
@@ -105,6 +108,7 @@ import {
   listFaxNumbers,
   listForwardingRules,
   listLocations,
+  listNotifications,
   listPhoneNumbers,
   listRoles,
   listTags,
@@ -115,6 +119,8 @@ import {
   listTickets,
   listUsers,
   listVoicemailMessages,
+  markAllNotificationsRead,
+  markNotificationRead,
   oAuthConfig,
   type Options,
   pasteImage,
@@ -132,6 +138,8 @@ import {
   revokeSession,
   revokeUserRole,
   setForwardingRules,
+  submitFeedback,
+  syncEntity,
   systemHealth,
   testConnection,
   toggleDnd,
@@ -320,6 +328,9 @@ import type {
   DeleteLocationData,
   DeleteLocationError,
   DeleteLocationResponse,
+  DeleteNotificationData,
+  DeleteNotificationError,
+  DeleteNotificationResponse,
   DeletePhoneNumberData,
   DeletePhoneNumberError,
   DeletePhoneNumberResponse,
@@ -404,6 +415,8 @@ import type {
   GetTicketData,
   GetTicketError,
   GetTicketResponse,
+  GetUnreadNotificationCountData,
+  GetUnreadNotificationCountResponse,
   GetUserData,
   GetUserError,
   GetUserResponse,
@@ -413,6 +426,9 @@ import type {
   GetVoicemailSettingsData,
   GetVoicemailSettingsError,
   GetVoicemailSettingsResponse,
+  GlobalSearchData,
+  GlobalSearchError,
+  GlobalSearchResponse,
   InitiateDisableMfaOAuthData,
   InitiateDisableMfaOAuthError,
   InitiateDisableMfaOAuthResponse,
@@ -442,6 +458,9 @@ import type {
   ListLocationsData,
   ListLocationsError,
   ListLocationsResponse,
+  ListNotificationsData,
+  ListNotificationsError,
+  ListNotificationsResponse,
   ListPhoneNumbersData,
   ListPhoneNumbersError,
   ListPhoneNumbersResponse,
@@ -472,6 +491,11 @@ import type {
   ListVoicemailMessagesData,
   ListVoicemailMessagesError,
   ListVoicemailMessagesResponse,
+  MarkAllNotificationsReadData,
+  MarkAllNotificationsReadResponse,
+  MarkNotificationReadData,
+  MarkNotificationReadError,
+  MarkNotificationReadResponse,
   OAuthConfigData,
   OAuthConfigResponse,
   PasteImageData,
@@ -518,6 +542,12 @@ import type {
   SetForwardingRulesData,
   SetForwardingRulesError,
   SetForwardingRulesResponse,
+  SubmitFeedbackData,
+  SubmitFeedbackError,
+  SubmitFeedbackResponse,
+  SyncEntityData,
+  SyncEntityError,
+  SyncEntityResponse,
   SystemHealthData,
   SystemHealthResponse,
   TestConnectionData,
@@ -2397,6 +2427,143 @@ export const getMfaStatusOptions = (options?: Options<GetMfaStatusData>) =>
     queryKey: getMfaStatusQueryKey(options),
   });
 
+export const listNotificationsQueryKey = (
+  options?: Options<ListNotificationsData>,
+) => createQueryKey("listNotifications", options);
+
+/**
+ * ListNotifications
+ */
+export const listNotificationsOptions = (
+  options?: Options<ListNotificationsData>,
+) =>
+  queryOptions<
+    ListNotificationsResponse,
+    ListNotificationsError,
+    ListNotificationsResponse,
+    ReturnType<typeof listNotificationsQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listNotifications({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listNotificationsQueryKey(options),
+  });
+
+/**
+ * MarkAllRead
+ */
+export const markAllNotificationsReadMutation = (
+  options?: Partial<Options<MarkAllNotificationsReadData>>,
+): UseMutationOptions<
+  MarkAllNotificationsReadResponse,
+  DefaultError,
+  Options<MarkAllNotificationsReadData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    MarkAllNotificationsReadResponse,
+    DefaultError,
+    Options<MarkAllNotificationsReadData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await markAllNotificationsRead({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const getUnreadNotificationCountQueryKey = (
+  options?: Options<GetUnreadNotificationCountData>,
+) => createQueryKey("getUnreadNotificationCount", options);
+
+/**
+ * GetUnreadCount
+ */
+export const getUnreadNotificationCountOptions = (
+  options?: Options<GetUnreadNotificationCountData>,
+) =>
+  queryOptions<
+    GetUnreadNotificationCountResponse,
+    DefaultError,
+    GetUnreadNotificationCountResponse,
+    ReturnType<typeof getUnreadNotificationCountQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getUnreadNotificationCount({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getUnreadNotificationCountQueryKey(options),
+  });
+
+/**
+ * DeleteNotification
+ */
+export const deleteNotificationMutation = (
+  options?: Partial<Options<DeleteNotificationData>>,
+): UseMutationOptions<
+  DeleteNotificationResponse,
+  DeleteNotificationError,
+  Options<DeleteNotificationData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    DeleteNotificationResponse,
+    DeleteNotificationError,
+    Options<DeleteNotificationData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await deleteNotification({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * MarkRead
+ */
+export const markNotificationReadMutation = (
+  options?: Partial<Options<MarkNotificationReadData>>,
+): UseMutationOptions<
+  MarkNotificationReadResponse,
+  MarkNotificationReadError,
+  Options<MarkNotificationReadData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    MarkNotificationReadResponse,
+    MarkNotificationReadError,
+    Options<MarkNotificationReadData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await markNotificationRead({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
 export const getOrganizationQueryKey = (
   options?: Options<GetOrganizationData>,
 ) => createQueryKey("getOrganization", options);
@@ -2746,6 +2913,31 @@ export const revokeRoleMutation = (
   return mutationOptions;
 };
 
+export const globalSearchQueryKey = (options?: Options<GlobalSearchData>) =>
+  createQueryKey("globalSearch", options);
+
+/**
+ * Global Search
+ */
+export const globalSearchOptions = (options?: Options<GlobalSearchData>) =>
+  queryOptions<
+    GlobalSearchResponse,
+    GlobalSearchError,
+    GlobalSearchResponse,
+    ReturnType<typeof globalSearchQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await globalSearch({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: globalSearchQueryKey(options),
+  });
+
 /**
  * DeleteAttachment
  */
@@ -2797,6 +2989,33 @@ export const getAttachmentOptions = (options: Options<GetAttachmentData>) =>
     },
     queryKey: getAttachmentQueryKey(options),
   });
+
+/**
+ * SubmitFeedback
+ */
+export const submitFeedbackMutation = (
+  options?: Partial<Options<SubmitFeedbackData>>,
+): UseMutationOptions<
+  SubmitFeedbackResponse,
+  SubmitFeedbackError,
+  Options<SubmitFeedbackData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    SubmitFeedbackResponse,
+    SubmitFeedbackError,
+    Options<SubmitFeedbackData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await submitFeedback({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
 
 export const listTicketsQueryKey = (options?: Options<ListTicketsData>) =>
   createQueryKey("listTickets", options);
@@ -3145,6 +3364,31 @@ export const reopenTicketMutation = (
   };
   return mutationOptions;
 };
+
+export const syncEntityQueryKey = (options: Options<SyncEntityData>) =>
+  createQueryKey("syncEntity", options);
+
+/**
+ * Sync Entity
+ */
+export const syncEntityOptions = (options: Options<SyncEntityData>) =>
+  queryOptions<
+    SyncEntityResponse,
+    SyncEntityError,
+    SyncEntityResponse,
+    ReturnType<typeof syncEntityQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await syncEntity({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: syncEntityQueryKey(options),
+  });
 
 export const listTagsQueryKey = (options?: Options<ListTagsData>) =>
   createQueryKey("listTags", options);

@@ -20,10 +20,10 @@ class Notification(CamelizedBaseStruct):
     message: str
     category: str
     is_read: bool
-    action_url: str | None = None
-    metadata: dict[str, Any] | None = None
     created_at: datetime
     updated_at: datetime
+    action_url: str | None = None
+    metadata: dict[str, Any] | None = None
 
 
 class NotificationCreate(CamelizedBaseStruct):

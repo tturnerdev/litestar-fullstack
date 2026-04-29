@@ -2,6 +2,7 @@
 
 import {
   type Client,
+  formDataBodySerializer,
   type Options as Options2,
   type TDataShape,
   urlSearchParamsBodySerializer,
@@ -170,6 +171,9 @@ import type {
   DeleteLocationData,
   DeleteLocationErrors,
   DeleteLocationResponses,
+  DeleteNotificationData,
+  DeleteNotificationErrors,
+  DeleteNotificationResponses,
   DeletePhoneNumberData,
   DeletePhoneNumberErrors,
   DeletePhoneNumberResponses,
@@ -254,6 +258,8 @@ import type {
   GetTicketData,
   GetTicketErrors,
   GetTicketResponses,
+  GetUnreadNotificationCountData,
+  GetUnreadNotificationCountResponses,
   GetUserData,
   GetUserErrors,
   GetUserResponses,
@@ -263,6 +269,9 @@ import type {
   GetVoicemailSettingsData,
   GetVoicemailSettingsErrors,
   GetVoicemailSettingsResponses,
+  GlobalSearchData,
+  GlobalSearchErrors,
+  GlobalSearchResponses,
   InitiateDisableMfaOAuthData,
   InitiateDisableMfaOAuthErrors,
   InitiateDisableMfaOAuthResponses,
@@ -292,6 +301,9 @@ import type {
   ListLocationsData,
   ListLocationsErrors,
   ListLocationsResponses,
+  ListNotificationsData,
+  ListNotificationsErrors,
+  ListNotificationsResponses,
   ListPhoneNumbersData,
   ListPhoneNumbersErrors,
   ListPhoneNumbersResponses,
@@ -322,6 +334,11 @@ import type {
   ListVoicemailMessagesData,
   ListVoicemailMessagesErrors,
   ListVoicemailMessagesResponses,
+  MarkAllNotificationsReadData,
+  MarkAllNotificationsReadResponses,
+  MarkNotificationReadData,
+  MarkNotificationReadErrors,
+  MarkNotificationReadResponses,
   OAuthConfigData,
   OAuthConfigResponses,
   PasteImageData,
@@ -368,6 +385,12 @@ import type {
   SetForwardingRulesData,
   SetForwardingRulesErrors,
   SetForwardingRulesResponses,
+  SubmitFeedbackData,
+  SubmitFeedbackErrors,
+  SubmitFeedbackResponses,
+  SyncEntityData,
+  SyncEntityErrors,
+  SyncEntityResponses,
   SystemHealthData,
   SystemHealthResponses,
   TestConnectionData,
@@ -1608,6 +1631,88 @@ export const getMfaStatus = <ThrowOnError extends boolean = false>(
   );
 
 /**
+ * ListNotifications
+ */
+export const listNotifications = <ThrowOnError extends boolean = false>(
+  options?: Options<ListNotificationsData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    ListNotificationsResponses,
+    ListNotificationsErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/notifications",
+    ...options,
+  });
+
+/**
+ * MarkAllRead
+ */
+export const markAllNotificationsRead = <ThrowOnError extends boolean = false>(
+  options?: Options<MarkAllNotificationsReadData, ThrowOnError>,
+) =>
+  (options?.client ?? client).post<
+    MarkAllNotificationsReadResponses,
+    unknown,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/notifications/mark-all-read",
+    ...options,
+  });
+
+/**
+ * GetUnreadCount
+ */
+export const getUnreadNotificationCount = <
+  ThrowOnError extends boolean = false,
+>(
+  options?: Options<GetUnreadNotificationCountData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    GetUnreadNotificationCountResponses,
+    unknown,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/notifications/unread-count",
+    ...options,
+  });
+
+/**
+ * DeleteNotification
+ */
+export const deleteNotification = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteNotificationData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    DeleteNotificationResponses,
+    DeleteNotificationErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/notifications/{notification_id}",
+    ...options,
+  });
+
+/**
+ * MarkRead
+ */
+export const markNotificationRead = <ThrowOnError extends boolean = false>(
+  options: Options<MarkNotificationReadData, ThrowOnError>,
+) =>
+  (options.client ?? client).patch<
+    MarkNotificationReadResponses,
+    MarkNotificationReadErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/notifications/{notification_id}/read",
+    ...options,
+  });
+
+/**
  * GetOrganization
  */
 export const getOrganization = <ThrowOnError extends boolean = false>(
@@ -1834,6 +1939,22 @@ export const revokeRole = <ThrowOnError extends boolean = false>(
   });
 
 /**
+ * Global Search
+ */
+export const globalSearch = <ThrowOnError extends boolean = false>(
+  options?: Options<GlobalSearchData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    GlobalSearchResponses,
+    GlobalSearchErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/search",
+    ...options,
+  });
+
+/**
  * DeleteAttachment
  */
 export const deleteAttachment = <ThrowOnError extends boolean = false>(
@@ -1863,6 +1984,27 @@ export const getAttachment = <ThrowOnError extends boolean = false>(
     security: [{ scheme: "bearer", type: "http" }],
     url: "/api/support/attachments/{attachment_id}",
     ...options,
+  });
+
+/**
+ * SubmitFeedback
+ */
+export const submitFeedback = <ThrowOnError extends boolean = false>(
+  options: Options<SubmitFeedbackData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    SubmitFeedbackResponses,
+    SubmitFeedbackErrors,
+    ThrowOnError
+  >({
+    ...formDataBodySerializer,
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/support/feedback",
+    ...options,
+    headers: {
+      "Content-Type": null,
+      ...options.headers,
+    },
   });
 
 /**
@@ -2086,6 +2228,22 @@ export const reopenTicket = <ThrowOnError extends boolean = false>(
   >({
     security: [{ scheme: "bearer", type: "http" }],
     url: "/api/support/tickets/{ticket_id}/reopen",
+    ...options,
+  });
+
+/**
+ * Sync Entity
+ */
+export const syncEntity = <ThrowOnError extends boolean = false>(
+  options: Options<SyncEntityData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    SyncEntityResponses,
+    SyncEntityErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/sync/{domain}/{field_name}/{value}",
     ...options,
   });
 

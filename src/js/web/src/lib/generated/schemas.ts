@@ -66,8 +66,12 @@ import type {
   GetDashboardStatsResponses,
   GetMfaStatusData,
   GetMfaStatusResponses,
+  GetUnreadNotificationCountData,
+  GetUnreadNotificationCountResponses,
   InitiateMfaSetupData,
   InitiateMfaSetupResponses,
+  MarkAllNotificationsReadData,
+  MarkAllNotificationsReadResponses,
   OAuthConfigData,
   OAuthConfigResponses,
   RegenerateMfaBackupCodesData,
@@ -120,6 +124,7 @@ export type OperationName =
   | 'get_profile'
   | 'get_sessions'
   | 'get_stats'
+  | 'get_unread_count'
   | 'initiate_setup'
   | 'list_connections'
   | 'list_devices'
@@ -132,6 +137,7 @@ export type OperationName =
   | 'list_users_api_users'
   | 'login'
   | 'logout'
+  | 'mark_all_read'
   | 'refresh_token'
   | 'regenerate_backup_codes'
   | 'remove_account'
@@ -170,6 +176,7 @@ export interface OperationDataTypes {
   'get_profile': AccountProfileUpdateData
   'get_sessions': RevokeAllSessionsData
   'get_stats': GetDashboardStatsData
+  'get_unread_count': GetUnreadNotificationCountData
   'initiate_setup': InitiateMfaSetupData
   'list_connections': CreateConnectionData
   'list_devices': CreateDeviceData
@@ -182,6 +189,7 @@ export interface OperationDataTypes {
   'list_users_api_users': CreateUserData
   'login': AccountLoginData
   'logout': AccountLogoutData
+  'mark_all_read': MarkAllNotificationsReadData
   'refresh_token': TokenRefreshData
   'regenerate_backup_codes': RegenerateMfaBackupCodesData
   'remove_account': AccountProfileUpdateData
@@ -221,6 +229,7 @@ export interface OperationResponseTypes {
   'get_profile': AccountProfileUpdateResponses
   'get_sessions': RevokeAllSessionsResponses
   'get_stats': GetDashboardStatsResponses
+  'get_unread_count': GetUnreadNotificationCountResponses
   'initiate_setup': InitiateMfaSetupResponses
   'list_connections': CreateConnectionResponses
   'list_devices': CreateDeviceResponses
@@ -233,6 +242,7 @@ export interface OperationResponseTypes {
   'list_users_api_users': CreateUserResponses
   'login': AccountLoginResponses
   'logout': AccountLogoutResponses
+  'mark_all_read': MarkAllNotificationsReadResponses
   'refresh_token': TokenRefreshResponses
   'regenerate_backup_codes': RegenerateMfaBackupCodesResponses
   'remove_account': AccountProfileUpdateResponses
@@ -272,6 +282,7 @@ export interface OperationErrorTypes {
   'get_profile': AccountProfileUpdateErrors
   'get_sessions': never
   'get_stats': never
+  'get_unread_count': never
   'initiate_setup': never
   'list_connections': CreateConnectionErrors
   'list_devices': CreateDeviceErrors
@@ -284,6 +295,7 @@ export interface OperationErrorTypes {
   'list_users_api_users': CreateUserErrors
   'login': AccountLoginErrors
   'logout': never
+  'mark_all_read': never
   'refresh_token': never
   'regenerate_backup_codes': RegenerateMfaBackupCodesErrors
   'remove_account': AccountProfileUpdateErrors
