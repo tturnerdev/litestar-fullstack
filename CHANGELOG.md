@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.90.0 (2026-04-30)
+
+### Added
+- **CSV export** — Added export buttons to tags (Name, Slug), teams (Name, Description, Member Count), and connections (Name, Provider, Status, Type) list pages using the shared ExportButton component.
+
+### Improved
+- **Error retry** — Replaced `window.location.reload()` with in-place `refetch()` on error states across all 10 list pages (devices, support, teams, connections, tags, extensions, phone numbers, fax numbers, fax messages, locations). Button label changed from "Refresh page" to "Try again".
+
 ## v0.89.0 (2026-04-30)
 
 ### Added
