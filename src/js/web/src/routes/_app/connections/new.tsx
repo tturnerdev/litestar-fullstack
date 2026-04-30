@@ -13,7 +13,6 @@ import {
   Plug,
   ShieldCheck,
 } from "lucide-react"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,10 +41,17 @@ import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { useAuth } from "@/hooks/use-auth"
 import { useCreateConnection, type ConnectionCreate } from "@/lib/api/hooks/connections"
+import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/connections/new")({
   component: NewConnectionPage,
 })
+
+// ── Field limits ────────────────────────────────────────────────────────
+
+const NAME_MAX = 100
+const PROVIDER_MAX = 100
+const DESC_MAX = 500
 
 // ── Static data ──────────────────────────────────────────────────────────
 
@@ -200,7 +206,7 @@ function NewConnectionPage() {
   const justSubmittedRef = useRef(false)
 
   // Block navigation when form is dirty
-  useBlocker({
+  const blocker = useBlocker({
     shouldBlockFn: () => formDirty && !justSubmittedRef.current,
     withResolver: true,
   })
@@ -348,6 +354,7 @@ function NewConnectionPage() {
   const selectedTypeIcon = connectionTypes.find((t) => t.value === connectionType)?.icon
 
   return (
+    <>
     <PageContainer className="flex-1 space-y-8">
       <PageHeader
         eyebrow="Connections"
@@ -397,16 +404,24 @@ function NewConnectionPage() {
                     id="conn-name"
                     placeholder="e.g., Production PBX"
                     value={name}
-                    onChange={(e) => handleFieldChange("name", e.target.value, setName)}
+                    onChange={(e) => {
+                      if (e.target.value.length <= NAME_MAX) handleFieldChange("name", e.target.value, setName)
+                    }}
                     onBlur={() => handleFieldBlur("name", name)}
                     aria-invalid={!!errors.name}
+                    maxLength={NAME_MAX}
                     required
                   />
-                  {errors.name ? (
-                    <FieldError message={errors.name} />
-                  ) : (
-                    <FieldHint>A descriptive name to identify this connection.</FieldHint>
-                  )}
+                  <div className="flex items-center justify-between">
+                    {errors.name ? (
+                      <FieldError message={errors.name} />
+                    ) : (
+                      <FieldHint>A descriptive name to identify this connection.</FieldHint>
+                    )}
+                    <p className={cn("shrink-0 text-xs", name.length >= NAME_MAX ? "text-red-500" : "text-muted-foreground")}>
+                      {name.length}/{NAME_MAX}
+                    </p>
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="conn-type">
@@ -446,16 +461,24 @@ function NewConnectionPage() {
                   id="conn-provider"
                   placeholder="e.g., FreePBX, Zendesk, Twilio"
                   value={provider}
-                  onChange={(e) => handleFieldChange("provider", e.target.value, setProvider)}
+                  onChange={(e) => {
+                    if (e.target.value.length <= PROVIDER_MAX) handleFieldChange("provider", e.target.value, setProvider)
+                  }}
                   onBlur={() => handleFieldBlur("provider", provider)}
                   aria-invalid={!!errors.provider}
+                  maxLength={PROVIDER_MAX}
                   required
                 />
-                {errors.provider ? (
-                  <FieldError message={errors.provider} />
-                ) : (
-                  <FieldHint>The specific software or service provider (e.g., FreePBX, Zendesk).</FieldHint>
-                )}
+                <div className="flex items-center justify-between">
+                  {errors.provider ? (
+                    <FieldError message={errors.provider} />
+                  ) : (
+                    <FieldHint>The specific software or service provider (e.g., FreePBX, Zendesk).</FieldHint>
+                  )}
+                  <p className={cn("shrink-0 text-xs", provider.length >= PROVIDER_MAX ? "text-red-500" : "text-muted-foreground")}>
+                    {provider.length}/{PROVIDER_MAX}
+                  </p>
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -464,10 +487,18 @@ function NewConnectionPage() {
                   id="conn-description"
                   placeholder="Optional description of this connection"
                   value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  onChange={(e) => {
+                    if (e.target.value.length <= DESC_MAX) setDescription(e.target.value)
+                  }}
+                  maxLength={DESC_MAX}
                   rows={2}
                 />
-                <FieldHint>Optional notes about the purpose or configuration of this connection.</FieldHint>
+                <div className="flex items-center justify-between">
+                  <FieldHint>Optional notes about the purpose or configuration of this connection.</FieldHint>
+                  <p className={cn("shrink-0 text-xs", description.length >= DESC_MAX ? "text-red-500" : "text-muted-foreground")}>
+                    {description.length}/{DESC_MAX}
+                  </p>
+                </div>
               </div>
 
               {/* Host / Port */}
@@ -651,13 +682,23 @@ function NewConnectionPage() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Unsaved changes alert (shows when form is dirty and user is about to navigate) */}
-      {formDirty && (
-        <Alert variant="warning" className="fixed right-6 bottom-6 z-50 w-auto max-w-sm shadow-lg">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertDescription>You have unsaved changes on this form.</AlertDescription>
-        </Alert>
-      )}
     </PageContainer>
+
+    {/* -- Unsaved changes dialog ---------------------------------------- */}
+    <AlertDialog open={blocker.status === "blocked"} onOpenChange={() => blocker.reset?.()}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
+          <AlertDialogDescription>
+            You have unsaved changes to this connection. Are you sure you want to leave? Your changes will be lost.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={() => blocker.reset?.()}>Stay on page</AlertDialogCancel>
+          <AlertDialogAction onClick={() => blocker.proceed?.()}>Discard changes</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   )
 }

@@ -47,6 +47,8 @@ export const Route = createFileRoute("/_app/connections/")({
 
 // ── Constants ────────────────────────────────────────────────────────────
 
+const PAGE_SIZE = 25
+
 const typeLabels: Record<string, string> = {
   pbx: "PBX",
   helpdesk: "Helpdesk",
@@ -150,6 +152,7 @@ function ConnectionsPage() {
   const [search, setSearch] = useState("")
   const [typeFilter, setTypeFilter] = useState<string[]>([])
   const [statusFilter, setStatusFilter] = useState<string[]>([])
+  const [page, setPage] = useState(1)
 
   // Sort state
   const [sortKey, setSortKey] = useState<string | null>(null)
@@ -160,6 +163,8 @@ function ConnectionsPage() {
 
   // Queries & mutations
   const { data, isLoading, isError } = useConnections({
+    page,
+    pageSize: PAGE_SIZE,
     search: search || undefined,
     orderBy: sortKey ?? undefined,
     sortOrder: sortDir ?? undefined,
@@ -229,6 +234,7 @@ function ConnectionsPage() {
 
   const hasData = filteredItems.length > 0
   const hasAnyConnections = (data?.items.length ?? 0) > 0
+  const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / PAGE_SIZE))
 
   const breadcrumbs = (
     <Breadcrumb>
@@ -272,13 +278,19 @@ function ConnectionsPage() {
             <Input
               placeholder="Search by name or provider..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value)
+                setPage(1)
+              }}
               className="pl-9 pr-8"
             />
             {search && (
               <button
                 type="button"
-                onClick={() => setSearch("")}
+                onClick={() => {
+                  setSearch("")
+                  setPage(1)
+                }}
                 className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
               >
                 <X className="h-3.5 w-3.5" />
@@ -290,13 +302,19 @@ function ConnectionsPage() {
             label="Type"
             options={connectionTypeOptions}
             selected={typeFilter}
-            onChange={setTypeFilter}
+            onChange={(v) => {
+              setTypeFilter(v)
+              setPage(1)
+            }}
           />
           <FilterDropdown
             label="Status"
             options={statusOptions}
             selected={statusFilter}
-            onChange={setStatusFilter}
+            onChange={(v) => {
+              setStatusFilter(v)
+              setPage(1)
+            }}
           />
           {activeFilterCount > 0 && (
             <Button
@@ -306,6 +324,7 @@ function ConnectionsPage() {
               onClick={() => {
                 setTypeFilter([])
                 setStatusFilter([])
+                setPage(1)
               }}
             >
               Clear all filters
@@ -368,13 +387,17 @@ function ConnectionsPage() {
           />
         ) : (
           <div className="space-y-3">
-            {/* Result count */}
+            {/* Result count & pagination info */}
             <div className="flex items-center justify-between">
               <p className="text-xs text-muted-foreground">
-                {filteredItems.length === (data?.items.length ?? 0)
-                  ? `${filteredItems.length} connection${filteredItems.length !== 1 ? "s" : ""}`
-                  : `${filteredItems.length} of ${data?.items.length ?? 0} connections`}
+                {data?.total ?? filteredItems.length} connection{(data?.total ?? filteredItems.length) === 1 ? "" : "s"}
+                {activeFilterCount > 0 && " (filtered)"}
               </p>
+              {totalPages > 1 && (
+                <p className="text-xs text-muted-foreground">
+                  Page {page} of {totalPages}
+                </p>
+              )}
             </div>
 
             {/* Table */}
@@ -441,6 +464,28 @@ function ConnectionsPage() {
                 </TableBody>
               </Table>
             </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-end gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page <= 1}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page >= totalPages}
+                >
+                  Next
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </PageSection>

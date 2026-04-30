@@ -45,6 +45,8 @@ export const Route = createFileRoute("/_app/voice/extensions/")({
 
 // -- Constants ----------------------------------------------------------------
 
+const PAGE_SIZE = 25
+
 const statusOptions: FilterOption[] = [
   { value: "active", label: "Active" },
   { value: "inactive", label: "Inactive" },
@@ -84,6 +86,7 @@ function ExtensionsPage() {
   // Filter & search state
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState<string[]>([])
+  const [page, setPage] = useState(1)
 
   // Sort state
   const [sortKey, setSortKey] = useState<string | null>(null)
@@ -93,7 +96,7 @@ function ExtensionsPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
   // Queries & mutations
-  const { data, isLoading, isError } = useExtensions()
+  const { data, isLoading, isError } = useExtensions(page, PAGE_SIZE)
   const { data: phoneData } = usePhoneNumbers(1, 100)
   const deleteExtension = useDeleteExtension()
 
@@ -226,6 +229,7 @@ function ExtensionsPage() {
 
   const hasData = filteredItems.length > 0
   const hasAnyExtensions = (data?.items.length ?? 0) > 0
+  const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / PAGE_SIZE))
 
   const breadcrumbs = (
     <Breadcrumb>
@@ -278,13 +282,19 @@ function ExtensionsPage() {
             <Input
               placeholder="Search by extension, name, or phone number..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value)
+                setPage(1)
+              }}
               className="pl-9 pr-8"
             />
             {search && (
               <button
                 type="button"
-                onClick={() => setSearch("")}
+                onClick={() => {
+                  setSearch("")
+                  setPage(1)
+                }}
                 className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
               >
                 <X className="h-3.5 w-3.5" />
@@ -296,7 +306,10 @@ function ExtensionsPage() {
             label="Status"
             options={statusOptions}
             selected={statusFilter}
-            onChange={setStatusFilter}
+            onChange={(v) => {
+              setStatusFilter(v)
+              setPage(1)
+            }}
           />
           {activeFilterCount > 0 && (
             <Button
@@ -305,6 +318,7 @@ function ExtensionsPage() {
               className="text-xs text-muted-foreground"
               onClick={() => {
                 setStatusFilter([])
+                setPage(1)
               }}
             >
               Clear all filters
@@ -365,12 +379,17 @@ function ExtensionsPage() {
           />
         ) : (
           <div className="space-y-3">
-            {/* Result count */}
+            {/* Result count & pagination info */}
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">
-                {filteredItems.length} extension{filteredItems.length === 1 ? "" : "s"}
+                {data?.total ?? filteredItems.length} extension{(data?.total ?? filteredItems.length) === 1 ? "" : "s"}
                 {statusFilter.length > 0 && " (filtered)"}
               </p>
+              {totalPages > 1 && (
+                <p className="text-xs text-muted-foreground">
+                  Page {page} of {totalPages}
+                </p>
+              )}
             </div>
 
             {/* Table */}
@@ -436,6 +455,28 @@ function ExtensionsPage() {
                 </TableBody>
               </Table>
             </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-end gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page <= 1}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page >= totalPages}
+                >
+                  Next
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </PageSection>

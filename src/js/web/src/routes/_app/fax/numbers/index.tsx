@@ -42,6 +42,8 @@ export const Route = createFileRoute("/_app/fax/numbers/")({
 
 // -- Constants ----------------------------------------------------------------
 
+const PAGE_SIZE = 25
+
 const statusOptions: FilterOption[] = [
   { value: "active", label: "Active" },
   { value: "inactive", label: "Inactive" },
@@ -76,6 +78,7 @@ function FaxNumbersPage() {
   // Filter & search state
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState<string[]>([])
+  const [page, setPage] = useState(1)
 
   // Sort state
   const [sortKey, setSortKey] = useState<string | null>(null)
@@ -85,7 +88,7 @@ function FaxNumbersPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
   // Queries & mutations
-  const { data, isLoading, isError } = useFaxNumbers(1, 200)
+  const { data, isLoading, isError } = useFaxNumbers(page, PAGE_SIZE)
   const deleteFaxNumber = useDeleteFaxNumber()
 
   // Apply client-side search & filters
@@ -191,6 +194,7 @@ function FaxNumbersPage() {
 
   const hasData = filteredItems.length > 0
   const hasAnyNumbers = (data?.items.length ?? 0) > 0
+  const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / PAGE_SIZE))
 
   const breadcrumbs = (
     <Breadcrumb>
@@ -260,7 +264,10 @@ function FaxNumbersPage() {
             <Input
               placeholder="Search by number or label..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value)
+                setPage(1)
+              }}
               className="pl-9"
             />
           </div>
@@ -268,7 +275,10 @@ function FaxNumbersPage() {
             label="Status"
             options={statusOptions}
             selected={statusFilter}
-            onChange={setStatusFilter}
+            onChange={(v) => {
+              setStatusFilter(v)
+              setPage(1)
+            }}
           />
           {activeFilterCount > 0 && (
             <Button
@@ -277,6 +287,7 @@ function FaxNumbersPage() {
               className="text-xs text-muted-foreground"
               onClick={() => {
                 setStatusFilter([])
+                setPage(1)
               }}
             >
               Clear all filters
@@ -353,13 +364,17 @@ function FaxNumbersPage() {
           />
         ) : viewMode === "table" ? (
           <div className="space-y-3">
-            {/* Result count */}
+            {/* Result count & pagination info */}
             <div className="flex items-center justify-between">
               <p className="text-xs text-muted-foreground">
-                {filteredItems.length === (data?.items.length ?? 0)
-                  ? `${filteredItems.length} fax number${filteredItems.length !== 1 ? "s" : ""}`
-                  : `${filteredItems.length} of ${data?.items.length ?? 0} fax numbers`}
+                {data?.total ?? filteredItems.length} fax number{(data?.total ?? filteredItems.length) === 1 ? "" : "s"}
+                {activeFilterCount > 0 && " (filtered)"}
               </p>
+              {totalPages > 1 && (
+                <p className="text-xs text-muted-foreground">
+                  Page {page} of {totalPages}
+                </p>
+              )}
             </div>
 
             {/* Table */}
@@ -419,19 +434,62 @@ function FaxNumbersPage() {
                 </TableBody>
               </Table>
             </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-end gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page <= 1}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page >= totalPages}
+                >
+                  Next
+                </Button>
+              </div>
+            )}
           </div>
         ) : (
           <div className="space-y-3">
             <p className="text-xs text-muted-foreground">
-              {filteredItems.length === (data?.items.length ?? 0)
-                ? `${filteredItems.length} fax number${filteredItems.length !== 1 ? "s" : ""}`
-                : `${filteredItems.length} of ${data?.items.length ?? 0} fax numbers`}
+              {data?.total ?? filteredItems.length} fax number{(data?.total ?? filteredItems.length) === 1 ? "" : "s"}
+              {activeFilterCount > 0 && " (filtered)"}
             </p>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {filteredItems.map((faxNumber) => (
                 <FaxNumberCard key={faxNumber.id} faxNumber={faxNumber} />
               ))}
             </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-end gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page <= 1}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page >= totalPages}
+                >
+                  Next
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </PageSection>

@@ -37,6 +37,8 @@ export const Route = createFileRoute("/_app/tags/")({
 type SortField = "name" | "slug"
 type SortDir = "asc" | "desc"
 
+const PAGE_SIZE = 25
+
 function TagsPage() {
   const [search, setSearch] = useState("")
   const [deleteId, setDeleteId] = useState<string | null>(null)
@@ -44,9 +46,11 @@ function TagsPage() {
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false)
   const [sortField, setSortField] = useState<SortField>("name")
   const [sortDir, setSortDir] = useState<SortDir>("asc")
+  const [page, setPage] = useState(1)
   const { data, isLoading, isError } = useTags({
     search: search || undefined,
-    pageSize: 100,
+    page,
+    pageSize: PAGE_SIZE,
     orderBy: sortField,
     sortOrder: sortDir,
   })
@@ -54,6 +58,7 @@ function TagsPage() {
 
   const items = data?.items ?? []
   const totalCount = data?.total ?? items.length
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE))
 
   // Sort locally as a fallback (server may not support all sort options)
   const sortedItems = useMemo(() => {
@@ -172,13 +177,19 @@ function TagsPage() {
             <Input
               placeholder="Search tags..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value)
+                setPage(1)
+              }}
               className="pl-9 pr-8"
             />
             {search && (
               <button
                 type="button"
-                onClick={() => setSearch("")}
+                onClick={() => {
+                  setSearch("")
+                  setPage(1)
+                }}
                 className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
               >
                 <X className="h-3.5 w-3.5" />
@@ -240,7 +251,21 @@ function TagsPage() {
             }
           />
         ) : (
-          <div className="rounded-lg border">
+          <div className="space-y-3">
+            {/* Result count & pagination info */}
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
+                {totalCount} tag{totalCount === 1 ? "" : "s"}
+                {search && " (filtered)"}
+              </p>
+              {totalPages > 1 && (
+                <p className="text-xs text-muted-foreground">
+                  Page {page} of {totalPages}
+                </p>
+              )}
+            </div>
+
+            <div className="rounded-lg border">
             <Table aria-label="Tags">
               <TableHeader>
                 <TableRow>
@@ -316,6 +341,29 @@ function TagsPage() {
                 ))}
               </TableBody>
             </Table>
+          </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-end gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page <= 1}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page >= totalPages}
+                >
+                  Next
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </PageSection>

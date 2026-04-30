@@ -18,6 +18,8 @@ import { type Location, useBulkDeleteLocations, useLocations } from "@/lib/api/h
 
 const getId = (loc: Location) => loc.id
 
+const PAGE_SIZE = 25
+
 export function LocationList() {
   const { currentTeam } = useAuthStore()
   const navigate = useNavigate()
@@ -27,20 +29,23 @@ export function LocationList() {
   const [sortKey, setSortKey] = useState<string | null>(null)
   const [sortDir, setSortDir] = useState<SortDirection>(null)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [page, setPage] = useState(1)
 
   const teamId = currentTeam?.id ?? ""
 
   const { data, isLoading, isError } = useLocations({
     teamId,
+    page,
+    pageSize: PAGE_SIZE,
     search: search || undefined,
     locationType: typeFilter !== "all" ? typeFilter : undefined,
     orderBy: sortKey ?? undefined,
     sortOrder: sortDir ?? undefined,
-    pageSize: 100,
   })
 
   const locations = data?.items ?? []
   const total = data?.total ?? 0
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
   const bulk = useBulkDeleteLocations(teamId)
 
@@ -157,13 +162,19 @@ export function LocationList() {
             <Input
               placeholder="Search locations..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value)
+                setPage(1)
+              }}
               className="pl-10 pr-8"
             />
             {search && (
               <button
                 type="button"
-                onClick={() => setSearch("")}
+                onClick={() => {
+                  setSearch("")
+                  setPage(1)
+                }}
                 className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
               >
                 <X className="h-3.5 w-3.5" />
@@ -171,7 +182,7 @@ export function LocationList() {
               </button>
             )}
           </div>
-          <Select value={typeFilter} onValueChange={setTypeFilter}>
+          <Select value={typeFilter} onValueChange={(v) => { setTypeFilter(v); setPage(1) }}>
             <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder="All types" />
             </SelectTrigger>
@@ -183,28 +194,34 @@ export function LocationList() {
           </Select>
         </div>
 
-        {/* Result count */}
+        {/* Result count & pagination info */}
         {locations.length > 0 && (
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
-              {hasActiveFilters
-                ? `Showing ${locations.length} of ${total} location${total === 1 ? "" : "s"}`
-                : `${total} location${total === 1 ? "" : "s"}`}
+              {total} location{total === 1 ? "" : "s"}
               {hasActiveFilters && " (filtered)"}
             </p>
-            {hasActiveFilters && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-xs text-muted-foreground"
-                onClick={() => {
-                  setSearch("")
-                  setTypeFilter("all")
-                }}
-              >
-                Clear filters
-              </Button>
-            )}
+            <div className="flex items-center gap-3">
+              {hasActiveFilters && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs text-muted-foreground"
+                  onClick={() => {
+                    setSearch("")
+                    setTypeFilter("all")
+                    setPage(1)
+                  }}
+                >
+                  Clear filters
+                </Button>
+              )}
+              {totalPages > 1 && (
+                <p className="text-xs text-muted-foreground">
+                  Page {page} of {totalPages}
+                </p>
+              )}
+            </div>
           </div>
         )}
 
@@ -277,11 +294,26 @@ export function LocationList() {
           />
         )}
 
-        {/* Bottom count */}
-        {locations.length > 0 && (
-          <p className="text-xs text-muted-foreground text-center">
-            Showing {locations.length} location{locations.length === 1 ? "" : "s"}
-          </p>
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-end gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page <= 1}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page >= totalPages}
+            >
+              Next
+            </Button>
+          </div>
         )}
       </div>
 
