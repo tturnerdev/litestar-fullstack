@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.87.0 (2026-04-30)
+
+### Added
+- **Pagination controls** — Added Previous/Next pagination (PAGE_SIZE=25) to 7 list pages: connections, tags, voice extensions, phone numbers, fax numbers, devices, and locations. All pages now show "Page X of Y" with disabled state at bounds and auto-reset on search/filter changes.
+- **Connection form validation** — Character counters with maxLength on name (100), provider (100), and description (500) fields in both new and edit connection forms. Counter turns red at the limit.
+
+### Improved
+- **Connection edit unsaved changes** — Replaced passive alert banner with proper `useBlocker` + `AlertDialog` for unsaved changes protection, matching the pattern used on tag and extension edit forms.
+
 ## v0.86.0 (2026-04-30)
 
 ### Fixed
