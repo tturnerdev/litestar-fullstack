@@ -13,6 +13,8 @@ export interface FaxNumber {
   number: string
   label: string | null
   isActive: boolean
+  emailRoutes?: FaxEmailRoute[]
+  messageCount?: number
   createdAt: string | null
   updatedAt: string | null
 }

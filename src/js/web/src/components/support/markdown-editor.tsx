@@ -8,8 +8,12 @@ import {
   Link2,
   List,
   ListOrdered,
+  Maximize2,
+  Minimize2,
+  Minus,
   Pencil,
   Quote,
+  Strikethrough,
   Table,
 } from "lucide-react"
 import { useCallback, useRef, useState } from "react"
@@ -86,6 +90,11 @@ const toolbarActions: ToolbarAction[] = [
     action: (ta) => wrapSelection(ta, "_", "_"),
   },
   {
+    icon: Strikethrough,
+    label: "Strikethrough",
+    action: (ta) => wrapSelection(ta, "~~", "~~"),
+  },
+  {
     icon: Heading2,
     label: "Heading",
     action: (ta) => prefixLine(ta, "## "),
@@ -138,6 +147,11 @@ const toolbarActions: ToolbarAction[] = [
     label: "Table",
     action: (ta) => insertAtCursor(ta, "\n| Header | Header |\n|--------|--------|\n| Cell   | Cell   |\n"),
   },
+  {
+    icon: Minus,
+    label: "Horizontal rule",
+    action: (ta) => insertAtCursor(ta, "\n---\n"),
+  },
 ]
 
 export function MarkdownEditor({
@@ -151,6 +165,33 @@ export function MarkdownEditor({
 }: MarkdownEditorProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [activeTab, setActiveTab] = useState<string>("write")
+  const [isFullscreen, setIsFullscreen] = useState(false)
+  const [isDragOver, setIsDragOver] = useState(false)
+  const [activeFormats, setActiveFormats] = useState<Set<string>>(new Set())
+
+  const wordCount = value.trim() ? value.trim().split(/\s+/).length : 0
+
+  const detectActiveFormats = useCallback((textarea: HTMLTextAreaElement) => {
+    const { selectionStart, value: text } = textarea
+    const formats = new Set<string>()
+
+    // Check if cursor is inside **bold**
+    const beforeCursor = text.substring(0, selectionStart)
+    const afterCursor = text.substring(selectionStart)
+    if (/\*\*[^*]*$/.test(beforeCursor) && /^[^*]*\*\*/.test(afterCursor)) {
+      formats.add("Bold")
+    }
+    // Check if cursor is inside _italic_
+    if (/(?<!\w)_[^_]*$/.test(beforeCursor) && /^[^_]*_(?!\w)/.test(afterCursor)) {
+      formats.add("Italic")
+    }
+    // Check if cursor is inside ~~strikethrough~~
+    if (/~~[^~]*$/.test(beforeCursor) && /^[^~]*~~/.test(afterCursor)) {
+      formats.add("Strikethrough")
+    }
+
+    setActiveFormats(formats)
+  }, [])
 
   const applyAction = useCallback(
     (action: ToolbarAction["action"]) => {
@@ -181,7 +222,7 @@ export function MarkdownEditor({
         applyAction(toolbarActions[1].action)
         handled = true
       } else if (e.key === "k") {
-        applyAction(toolbarActions[4].action)
+        applyAction(toolbarActions[5].action)
         handled = true
       }
 
@@ -198,7 +239,7 @@ export function MarkdownEditor({
         <div className="flex items-center gap-0.5">
           {toolbarActions.map((action, index) => (
             <span key={action.label} className="contents">
-              {(index === 4 || index === 6 || index === 9) && (
+              {(index === 5 || index === 7 || index === 10) && (
                 <Separator orientation="vertical" className="mx-1 h-5" />
               )}
               <Tooltip>
@@ -207,7 +248,10 @@ export function MarkdownEditor({
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="h-7 w-7 p-0"
+                    className={cn(
+                      "h-7 w-7 p-0",
+                      activeFormats.has(action.label) && "bg-accent text-accent-foreground",
+                    )}
                     onClick={() => {
                       setActiveTab("write")
                       applyAction(action.action)
@@ -228,35 +272,92 @@ export function MarkdownEditor({
             </span>
           ))}
         </div>
-        <TabsList className="h-7 bg-transparent p-0">
-          <TabsTrigger value="write" className="h-6 gap-1 px-2 text-xs">
-            <Pencil className="h-3 w-3" />
-            Write
-          </TabsTrigger>
-          <TabsTrigger value="preview" className="h-6 gap-1 px-2 text-xs">
-            <Eye className="h-3 w-3" />
-            Preview
-          </TabsTrigger>
-        </TabsList>
+        <div className="flex items-center gap-1">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-7 w-7 p-0"
+                onClick={() => setIsFullscreen((prev) => !prev)}
+                disabled={disabled}
+              >
+                {isFullscreen ? (
+                  <Minimize2 className="h-3.5 w-3.5" />
+                ) : (
+                  <Maximize2 className="h-3.5 w-3.5" />
+                )}
+                <span className="sr-only">{isFullscreen ? "Exit fullscreen" : "Fullscreen"}</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{isFullscreen ? "Exit fullscreen" : "Fullscreen"}</TooltipContent>
+          </Tooltip>
+          <Separator orientation="vertical" className="mx-1 h-5" />
+          <TabsList className="h-7 bg-transparent p-0">
+            <TabsTrigger value="write" className="h-6 gap-1 px-2 text-xs">
+              <Pencil className="h-3 w-3" />
+              Write
+            </TabsTrigger>
+            <TabsTrigger value="preview" className="h-6 gap-1 px-2 text-xs">
+              <Eye className="h-3 w-3" />
+              Preview
+            </TabsTrigger>
+          </TabsList>
+        </div>
       </div>
       <TabsContent value="write" className="mt-0">
-        <textarea
-          ref={textareaRef}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          onKeyDown={handleKeyDown}
-          onPaste={onPaste}
-          onDrop={onDrop}
-          placeholder={placeholder}
-          disabled={disabled}
-          className={cn(
-            "flex w-full rounded-b-lg border border-border/80 bg-card/80 px-3 py-2 text-sm shadow-sm outline-none transition-colors",
-            "resize-none placeholder:text-muted-foreground",
-            "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
-            "disabled:cursor-not-allowed disabled:opacity-60",
+        <div className="relative">
+          <textarea
+            ref={textareaRef}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onKeyUp={() => {
+              if (textareaRef.current) detectActiveFormats(textareaRef.current)
+            }}
+            onClick={() => {
+              if (textareaRef.current) detectActiveFormats(textareaRef.current)
+            }}
+            onPaste={onPaste}
+            onDrop={(e) => {
+              setIsDragOver(false)
+              onDrop?.(e)
+            }}
+            onDragEnter={(e) => {
+              e.preventDefault()
+              setIsDragOver(true)
+            }}
+            onDragOver={(e) => {
+              e.preventDefault()
+              setIsDragOver(true)
+            }}
+            onDragLeave={(e) => {
+              // Only hide if leaving the textarea entirely
+              if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                setIsDragOver(false)
+              }
+            }}
+            placeholder={placeholder}
+            disabled={disabled}
+            className={cn(
+              "flex w-full rounded-b-lg border border-border/80 bg-card/80 px-3 py-2 text-sm shadow-sm outline-none transition-colors",
+              "resize-none placeholder:text-muted-foreground",
+              "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
+              "disabled:cursor-not-allowed disabled:opacity-60",
+              isDragOver && "border-dashed border-2 border-primary/50",
+            )}
+            style={{ minHeight: isFullscreen ? "400px" : minHeight }}
+          />
+          {isDragOver && (
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-b-lg bg-primary/5">
+              <span className="text-sm font-medium text-primary/70">Drop files here</span>
+            </div>
           )}
-          style={{ minHeight }}
-        />
+        </div>
+        <div className="flex justify-end px-1 pt-1">
+          <span className="text-xs text-muted-foreground">{wordCount} {wordCount === 1 ? "word" : "words"}</span>
+        </div>
       </TabsContent>
       <TabsContent value="preview" className="mt-0">
         <div

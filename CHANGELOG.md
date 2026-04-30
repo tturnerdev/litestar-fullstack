@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.44.0 (2026-04-30)
+
+### Improved
+- **Ticket reply form** — character counter, Ctrl+Enter keyboard shortcut, success animation with green checkmark, user avatar in header, left border accent, discard button with confirmation for long messages, and keyboard hint.
+- **Markdown editor** — word count display, fullscreen toggle, strikethrough and horizontal rule toolbar buttons, drag-over file drop indicator with overlay, and active formatting state detection highlighting toolbar buttons.
+- **Fax message list** — relative timestamps with full-date tooltips, debounced search by remote number, bulk selection with checkboxes and bulk delete, row hover highlighting, failed-status error tooltips, refresh button, result count text, and styled page count badges.
+- **Fax number card** — US phone number formatting, actual email route count display, message count with icon, animated status dot, hover scale effect, relative created date, quick Send Fax button, and warning indicator for missing email routes.
+
 ## v0.43.0 (2026-04-30)
 
 ### Improved

@@ -1,9 +1,12 @@
+import { useQueryClient } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
-import { FileText, Trash2 } from "lucide-react"
-import { useState } from "react"
+import { FileText, RefreshCw, Search, Trash2 } from "lucide-react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { DirectionBadge, FaxStatusBadge } from "@/components/fax/fax-status-badge"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   Dialog,
   DialogContent,
@@ -12,38 +15,131 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { SkeletonTable } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDeleteFaxMessage, useFaxMessages, useFaxNumbers } from "@/lib/api/hooks/fax"
 
 const PAGE_SIZE = 25
 
-function formatDate(dateStr: string | null): string {
+function timeAgo(dateStr: string | null): string {
+  if (!dateStr) return "--"
+  const now = Date.now()
+  const then = new Date(dateStr).getTime()
+  const seconds = Math.floor((now - then) / 1000)
+  if (seconds < 60) return "just now"
+  const minutes = Math.floor(seconds / 60)
+  if (minutes < 60) return `${minutes}m ago`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours}h ago`
+  const days = Math.floor(hours / 24)
+  if (days < 30) return `${days}d ago`
+  const months = Math.floor(days / 30)
+  if (months < 12) return `${months}mo ago`
+  const years = Math.floor(months / 12)
+  return `${years}y ago`
+}
+
+function formatFullDate(dateStr: string | null): string {
   if (!dateStr) return "--"
   return new Date(dateStr).toLocaleString()
+}
+
+function useDebounce<T>(value: T, delayMs: number): T {
+  const [debounced, setDebounced] = useState(value)
+  useEffect(() => {
+    const timer = setTimeout(() => setDebounced(value), delayMs)
+    return () => clearTimeout(timer)
+  }, [value, delayMs])
+  return debounced
 }
 
 export function FaxMessageList() {
   const [page, setPage] = useState(1)
   const [direction, setDirection] = useState<string>("")
   const [status, setStatus] = useState<string>("")
+  const [searchInput, setSearchInput] = useState("")
+  const debouncedSearch = useDebounce(searchInput, 300)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false)
+  const queryClient = useQueryClient()
+  const searchRef = useRef<HTMLInputElement>(null)
 
   const { data: faxNumbers } = useFaxNumbers(1, 100)
-  const { data, isLoading, isError } = useFaxMessages({
+  const { data, isLoading, isError, isFetching } = useFaxMessages({
     page,
     pageSize: PAGE_SIZE,
     direction: direction || undefined,
     status: status || undefined,
+    search: debouncedSearch || undefined,
   })
   const deleteMutation = useDeleteFaxMessage()
+
+  // Reset selection when data changes
+  useEffect(() => {
+    setSelectedIds(new Set())
+  }, [page, direction, status, debouncedSearch])
+
+  const allOnPageSelected = useMemo(() => {
+    if (!data?.items.length) return false
+    return data.items.every((msg) => selectedIds.has(msg.id))
+  }, [data?.items, selectedIds])
+
+  const someOnPageSelected = useMemo(() => {
+    if (!data?.items.length) return false
+    return data.items.some((msg) => selectedIds.has(msg.id)) && !allOnPageSelected
+  }, [data?.items, selectedIds, allOnPageSelected])
+
+  const toggleSelectAll = useCallback(() => {
+    if (!data?.items) return
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (allOnPageSelected) {
+        for (const msg of data.items) next.delete(msg.id)
+      } else {
+        for (const msg of data.items) next.add(msg.id)
+      }
+      return next
+    })
+  }, [data?.items, allOnPageSelected])
+
+  const toggleSelect = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }, [])
 
   function handleConfirmDelete() {
     if (!deleteTarget) return
     deleteMutation.mutate(deleteTarget, {
       onSuccess: () => setDeleteTarget(null),
     })
+  }
+
+  function handleBulkDelete() {
+    const ids = Array.from(selectedIds)
+    let completed = 0
+    for (const id of ids) {
+      deleteMutation.mutate(id, {
+        onSuccess: () => {
+          completed++
+          if (completed === ids.length) {
+            setSelectedIds(new Set())
+            setBulkDeleteOpen(false)
+          }
+        },
+      })
+    }
+  }
+
+  function handleRefresh() {
+    queryClient.invalidateQueries({ queryKey: ["fax", "messages"] })
   }
 
   function getFaxNumberLabel(faxNumberId: string): string {
@@ -68,6 +164,8 @@ export function FaxMessageList() {
   }
 
   const totalPages = Math.max(1, Math.ceil(data.total / PAGE_SIZE))
+  const startItem = (page - 1) * PAGE_SIZE + 1
+  const endItem = Math.min(page * PAGE_SIZE, data.total)
 
   return (
     <>
@@ -75,7 +173,20 @@ export function FaxMessageList() {
         <CardHeader>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <CardTitle>Fax Messages</CardTitle>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="relative">
+                <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  ref={searchRef}
+                  placeholder="Search remote number..."
+                  value={searchInput}
+                  onChange={(e) => {
+                    setSearchInput(e.target.value)
+                    setPage(1)
+                  }}
+                  className="w-[200px] pl-9"
+                />
+              </div>
               <Select
                 value={direction}
                 onValueChange={(v) => {
@@ -111,13 +222,57 @@ export function FaxMessageList() {
                   <SelectItem value="failed">Failed</SelectItem>
                 </SelectContent>
               </Select>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={handleRefresh}
+                    disabled={isFetching}
+                    className="shrink-0"
+                  >
+                    <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Refresh</TooltipContent>
+              </Tooltip>
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
+          {selectedIds.size > 0 && (
+            <div className="flex items-center gap-3 rounded-md border border-destructive/20 bg-destructive/5 px-4 py-2">
+              <span className="text-sm font-medium">
+                {selectedIds.size} message{selectedIds.size !== 1 ? "s" : ""} selected
+              </span>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => setBulkDeleteOpen(true)}
+              >
+                <Trash2 className="mr-2 h-3.5 w-3.5" />
+                Delete selected
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedIds(new Set())}
+              >
+                Clear selection
+              </Button>
+            </div>
+          )}
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-[40px]">
+                  <Checkbox
+                    checked={allOnPageSelected}
+                    indeterminate={someOnPageSelected}
+                    onChange={toggleSelectAll}
+                    aria-label="Select all messages on this page"
+                  />
+                </TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead>Direction</TableHead>
                 <TableHead>Remote Number</TableHead>
@@ -130,17 +285,18 @@ export function FaxMessageList() {
             <TableBody>
               {data.items.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-muted-foreground">
+                  <TableCell colSpan={8} className="text-center text-muted-foreground">
                     <div className="flex flex-col items-center gap-2 py-8">
                       <FileText className="h-8 w-8 text-muted-foreground/50" />
                       <p>No fax messages found.</p>
-                      {(direction || status) && (
+                      {(direction || status || searchInput) && (
                         <Button
                           variant="link"
                           size="sm"
                           onClick={() => {
                             setDirection("")
                             setStatus("")
+                            setSearchInput("")
                             setPage(1)
                           }}
                         >
@@ -152,9 +308,24 @@ export function FaxMessageList() {
                 </TableRow>
               )}
               {data.items.map((msg) => (
-                <TableRow key={msg.id} className="group">
+                <TableRow
+                  key={msg.id}
+                  className="group transition-colors hover:bg-muted/50"
+                >
+                  <TableCell>
+                    <Checkbox
+                      checked={selectedIds.has(msg.id)}
+                      onChange={() => toggleSelect(msg.id)}
+                      aria-label={`Select message from ${msg.remoteNumber}`}
+                    />
+                  </TableCell>
                   <TableCell className="text-muted-foreground whitespace-nowrap">
-                    {formatDate(msg.receivedAt)}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="cursor-default">{timeAgo(msg.receivedAt)}</span>
+                      </TooltipTrigger>
+                      <TooltipContent>{formatFullDate(msg.receivedAt)}</TooltipContent>
+                    </Tooltip>
                   </TableCell>
                   <TableCell>
                     <DirectionBadge direction={msg.direction} />
@@ -163,9 +334,25 @@ export function FaxMessageList() {
                   <TableCell className="text-muted-foreground text-sm">
                     {getFaxNumberLabel(msg.faxNumberId)}
                   </TableCell>
-                  <TableCell>{msg.pageCount}</TableCell>
                   <TableCell>
-                    <FaxStatusBadge status={msg.status} />
+                    <div className="flex items-center gap-1.5">
+                      <FileText className="h-3.5 w-3.5 text-muted-foreground" />
+                      <Badge variant="secondary" className="text-xs tabular-nums">
+                        {msg.pageCount}
+                      </Badge>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {msg.status === "failed" && msg.errorMessage ? (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span><FaxStatusBadge status={msg.status} /></span>
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs">{msg.errorMessage}</TooltipContent>
+                      </Tooltip>
+                    ) : (
+                      <FaxStatusBadge status={msg.status} />
+                    )}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
@@ -188,11 +375,13 @@ export function FaxMessageList() {
               ))}
             </TableBody>
           </Table>
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between">
-              <p className="text-xs text-muted-foreground">
-                Page {page} of {totalPages} ({data.total} total)
-              </p>
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-muted-foreground">
+              {data.total > 0
+                ? `Showing ${startItem}-${endItem} of ${data.total} messages`
+                : "No messages"}
+            </p>
+            {totalPages > 1 && (
               <div className="flex gap-2">
                 <Button
                   variant="outline"
@@ -211,11 +400,12 @@ export function FaxMessageList() {
                   Next
                 </Button>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </CardContent>
       </Card>
 
+      {/* Single delete dialog */}
       <Dialog open={deleteTarget !== null} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <DialogContent>
           <DialogHeader>
@@ -235,6 +425,31 @@ export function FaxMessageList() {
               disabled={deleteMutation.isPending}
             >
               {deleteMutation.isPending ? "Deleting..." : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bulk delete dialog */}
+      <Dialog open={bulkDeleteOpen} onOpenChange={(open) => !open && setBulkDeleteOpen(false)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete {selectedIds.size} Fax Message{selectedIds.size !== 1 ? "s" : ""}</DialogTitle>
+            <DialogDescription>
+              This will permanently delete the selected fax messages and their associated
+              documents. This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setBulkDeleteOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleBulkDelete}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? "Deleting..." : `Delete ${selectedIds.size} message${selectedIds.size !== 1 ? "s" : ""}`}
             </Button>
           </DialogFooter>
         </DialogContent>
