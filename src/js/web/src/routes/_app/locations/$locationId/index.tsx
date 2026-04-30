@@ -24,6 +24,7 @@ import { CopyButton } from "@/components/ui/copy-button"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
 import { useAuthStore } from "@/lib/auth"
+import { formatRelativeTime } from "@/lib/date-utils"
 import { useDeleteLocation, useLocation, useUpdateLocation, type Location } from "@/lib/api/hooks/locations"
 
 export const Route = createFileRoute("/_app/locations/$locationId/")({
@@ -33,23 +34,6 @@ export const Route = createFileRoute("/_app/locations/$locationId/")({
 // ---------------------------------------------------------------------------
 // Time helpers
 // ---------------------------------------------------------------------------
-
-function formatRelativeTime(value: string | null | undefined): string {
-  if (!value) return "Unknown"
-  const date = new Date(value)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffSecs = Math.floor(diffMs / 1000)
-  if (diffSecs < 60) return "Just now"
-  const diffMins = Math.floor(diffSecs / 60)
-  if (diffMins < 60) return `${diffMins} minute${diffMins === 1 ? "" : "s"} ago`
-  const diffHours = Math.floor(diffMins / 60)
-  if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? "" : "s"} ago`
-  const diffDays = Math.floor(diffHours / 24)
-  if (diffDays < 30) return `${diffDays} day${diffDays === 1 ? "" : "s"} ago`
-  const diffMonths = Math.floor(diffDays / 30)
-  return `${diffMonths} month${diffMonths === 1 ? "" : "s"} ago`
-}
 
 function formatDateTime(value: string | null | undefined): string {
   if (!value) return "Unknown"

@@ -2,6 +2,7 @@ import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
 import { useState } from "react"
 import {
   AlertTriangle,
+  ArrowLeft,
   ArrowRight,
   BellOff,
   Fingerprint,
@@ -41,6 +42,7 @@ import { Switch } from "@/components/ui/switch"
 import { CopyButton } from "@/components/ui/copy-button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { DndQuickToggle } from "@/components/voice/dnd-quick-toggle"
+import { formatRelativeTimeShort } from "@/lib/date-utils"
 import {
   useDeleteExtension,
   useDndSettings,
@@ -60,20 +62,6 @@ export const Route = createFileRoute("/_app/voice/extensions/$extensionId/")({
 function formatDateTime(value: string | null | undefined): string {
   if (!value) return "---"
   return new Date(value).toLocaleString()
-}
-
-function formatRelativeTime(value: string | null | undefined): string {
-  if (!value) return "Never"
-  const date = new Date(value)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffMins = Math.floor(diffMs / 60_000)
-  if (diffMins < 1) return "Just now"
-  if (diffMins < 60) return `${diffMins}m ago`
-  const diffHours = Math.floor(diffMins / 60)
-  if (diffHours < 24) return `${diffHours}h ago`
-  const diffDays = Math.floor(diffHours / 24)
-  return `${diffDays}d ago`
 }
 
 // -- Timestamp with tooltip ---------------------------------------------------
@@ -99,7 +87,7 @@ function TimestampField({
       <p className="text-sm text-muted-foreground">{label}</p>
       <Tooltip>
         <TooltipTrigger asChild>
-          <p className="cursor-default text-sm">{formatRelativeTime(value)}</p>
+          <p className="cursor-default text-sm">{formatRelativeTimeShort(value)}</p>
         </TooltipTrigger>
         <TooltipContent>{formatDateTime(value)}</TooltipContent>
       </Tooltip>
@@ -190,6 +178,12 @@ function ExtensionDetailPage() {
         }
         actions={
           <div className="flex items-center gap-3">
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/voice/extensions">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Extensions
+              </Link>
+            </Button>
             <DndQuickToggle extensionId={extensionId} showLabel />
             {!data.isActive && (
               <Badge

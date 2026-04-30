@@ -130,7 +130,8 @@ export function BulkActionBar({ selectedCount, selectedIds, onClearSelection, ac
           <AlertDialogHeader>
             <AlertDialogTitle>{pendingAction?.confirm?.title ?? "Confirm"}</AlertDialogTitle>
             <AlertDialogDescription>
-              {pendingAction?.confirm?.description ?? "Are you sure?"}
+              This will permanently delete {selectedIds.length}{" "}
+              {selectedIds.length === 1 ? "item" : "items"}. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -143,7 +144,7 @@ export function BulkActionBar({ selectedCount, selectedIds, onClearSelection, ac
               className={pendingAction?.variant === "destructive" ? "bg-destructive text-white hover:bg-destructive/90" : ""}
             >
               {executing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {pendingAction?.label ?? "Confirm"}
+              Delete {selectedIds.length} {selectedIds.length === 1 ? "item" : "items"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

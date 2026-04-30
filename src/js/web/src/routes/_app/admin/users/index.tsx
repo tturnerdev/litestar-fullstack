@@ -34,6 +34,7 @@ import { SkeletonTable } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { formatRelativeTimeShort } from "@/lib/date-utils"
 import { useAdminUsers, useAdminUpdateUser } from "@/lib/api/hooks/admin"
 import { adminDeleteUser, adminUpdateUser } from "@/lib/generated/api"
 import type { AdminUserSummary } from "@/lib/generated/api"
@@ -85,22 +86,6 @@ function getInitials(name: string | null | undefined, email: string): string {
 function formatDateTime(value: string | null | undefined): string {
   if (!value) return "Never"
   return new Date(value).toLocaleString()
-}
-
-function formatRelativeTime(value: string | null | undefined): string {
-  if (!value) return "Never"
-  const date = new Date(value)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffMins = Math.floor(diffMs / 60_000)
-  if (diffMins < 1) return "Just now"
-  if (diffMins < 60) return `${diffMins}m ago`
-  const diffHours = Math.floor(diffMins / 60)
-  if (diffHours < 24) return `${diffHours}h ago`
-  const diffDays = Math.floor(diffHours / 24)
-  if (diffDays < 30) return `${diffDays}d ago`
-  const diffMonths = Math.floor(diffDays / 30)
-  return `${diffMonths}mo ago`
 }
 
 function ActiveStatusIndicator({ isActive }: { isActive: boolean | undefined }) {
@@ -702,7 +687,7 @@ function UserRow({
         <Tooltip>
           <TooltipTrigger asChild>
             <span className="cursor-default text-xs text-muted-foreground">
-              {formatRelativeTime(user.createdAt)}
+              {formatRelativeTimeShort(user.createdAt)}
             </span>
           </TooltipTrigger>
           <TooltipContent>{formatDateTime(user.createdAt)}</TooltipContent>
