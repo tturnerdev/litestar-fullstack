@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.53.0 (2026-04-30)
+
+### Improved
+- **Ticket message** — reply button, copy message content, staff badge indicator, edited timestamp, thumbs-up reaction (local state), AlertDialog for delete confirmation, and left border color coding (blue staff/amber internal/gray regular).
+- **Organization stats** — hover scale on stat cards, verified-users progress bar, trend indicators (up/down arrows), staggered entrance animation, click-to-navigate to admin pages, refresh button with spin animation, and last-updated timestamp.
+- **Ticket table** — sortable column headers with direction arrows, relative timestamps with full-date tooltips, row hover highlight, priority colored dots, message count column, and improved empty state with contextual messaging.
+- **Create tag page** — Tags icon, live slug preview with Hash icon, character counter (50), color picker with 8 swatches, required field indicator, description textarea (200 chars), and useBlocker for unsaved changes.
+
 ## v0.52.0 (2026-04-30)
 
 ### Improved

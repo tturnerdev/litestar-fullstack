@@ -1,26 +1,74 @@
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
-import { useState } from "react"
-import { Loader2 } from "lucide-react"
+import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
+import { useCallback, useMemo, useRef, useState } from "react"
+import { Hash, Loader2, Tags } from "lucide-react"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 import { PageContainer, PageHeader } from "@/components/ui/page-layout"
 import { useCreateTag, type TagCreate } from "@/lib/api/hooks/tags"
+import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/tags/new")({
   component: NewTagPage,
 })
 
+const NAME_MAX = 50
+const DESC_MAX = 200
+
+const TAG_COLORS = [
+  { name: "Red", value: "#ef4444" },
+  { name: "Orange", value: "#f97316" },
+  { name: "Amber", value: "#f59e0b" },
+  { name: "Green", value: "#22c55e" },
+  { name: "Teal", value: "#14b8a6" },
+  { name: "Blue", value: "#3b82f6" },
+  { name: "Purple", value: "#a855f7" },
+  { name: "Pink", value: "#ec4899" },
+]
+
+function nameToSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+}
+
 function NewTagPage() {
   const router = useRouter()
   const createTag = useCreateTag()
+  const justSubmittedRef = useRef(false)
 
   const [name, setName] = useState("")
+  const [description, setDescription] = useState("")
+  const [selectedColor, setSelectedColor] = useState<string | null>(null)
+
+  const slug = useMemo(() => nameToSlug(name), [name])
+  const formDirty = name.trim() !== "" || description.trim() !== "" || selectedColor !== null
+
+  useBlocker({
+    shouldBlockFn: () => formDirty && !justSubmittedRef.current,
+    withResolver: true,
+  })
+
+  const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value
+    if (val.length <= NAME_MAX) setName(val)
+  }, [])
+
+  const handleDescriptionChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const val = e.target.value
+    if (val.length <= DESC_MAX) setDescription(val)
+  }, [])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    justSubmittedRef.current = true
 
     const payload: TagCreate = { name: name.trim() }
 
@@ -28,10 +76,13 @@ function NewTagPage() {
       onSuccess: () => {
         router.navigate({ to: "/tags" })
       },
+      onSettled: () => {
+        justSubmittedRef.current = false
+      },
     })
   }
 
-  const isValid = name.trim() !== ""
+  const isValid = name.trim() !== "" && name.length <= NAME_MAX
 
   return (
     <PageContainer className="flex-1 space-y-8">
@@ -54,22 +105,89 @@ function NewTagPage() {
 
       <Card className="max-w-xl">
         <CardHeader>
-          <CardTitle className="text-lg">Tag Details</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Tags className="h-5 w-5" />
+            Tag Details
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Name field */}
             <div className="space-y-2">
-              <Label htmlFor="tag-name">Name *</Label>
+              <Label htmlFor="tag-name">
+                Name <span className="text-red-500">*</span>
+              </Label>
               <Input
                 id="tag-name"
                 placeholder="e.g., Production, Priority, VIP"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={handleNameChange}
+                maxLength={NAME_MAX}
                 required
                 autoFocus
               />
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-muted-foreground">
+                  Display name for the tag.
+                </p>
+                <p className={cn("text-xs", name.length >= NAME_MAX ? "text-red-500" : "text-muted-foreground")}>
+                  {name.length}/{NAME_MAX}
+                </p>
+              </div>
+            </div>
+
+            {/* Slug preview */}
+            {name.trim() !== "" && (
+              <div className="flex items-center gap-2 rounded-md border border-dashed px-3 py-2">
+                <Hash className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                <span className="text-sm text-muted-foreground">Slug:</span>
+                <code className="text-sm font-mono">{slug || "—"}</code>
+              </div>
+            )}
+
+            {/* Description field */}
+            <div className="space-y-2">
+              <Label htmlFor="tag-description">Description</Label>
+              <Textarea
+                id="tag-description"
+                placeholder="Optional description for this tag..."
+                value={description}
+                onChange={handleDescriptionChange}
+                maxLength={DESC_MAX}
+                rows={3}
+                className="resize-none"
+              />
+              <div className="flex items-center justify-end">
+                <p className={cn("text-xs", description.length >= DESC_MAX ? "text-red-500" : "text-muted-foreground")}>
+                  {description.length}/{DESC_MAX}
+                </p>
+              </div>
+            </div>
+
+            {/* Color picker */}
+            <div className="space-y-2">
+              <Label>Color</Label>
+              <div className="flex flex-wrap gap-2">
+                {TAG_COLORS.map((color) => (
+                  <button
+                    key={color.value}
+                    type="button"
+                    title={color.name}
+                    className={cn(
+                      "h-8 w-8 rounded-full border-2 transition-all duration-150 hover:scale-110",
+                      selectedColor === color.value
+                        ? "border-foreground ring-2 ring-foreground/20"
+                        : "border-transparent",
+                    )}
+                    style={{ backgroundColor: color.value }}
+                    onClick={() =>
+                      setSelectedColor((prev) => (prev === color.value ? null : color.value))
+                    }
+                  />
+                ))}
+              </div>
               <p className="text-xs text-muted-foreground">
-                A URL-friendly slug will be generated automatically from the name.
+                Optional. Click a color to select, click again to deselect.
               </p>
             </div>
 

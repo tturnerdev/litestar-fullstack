@@ -37,8 +37,10 @@ export interface TicketMessage {
   author?: TicketUser | null
   isInternalNote: boolean
   isSystemMessage: boolean
+  isStaff?: boolean
   attachments: TicketAttachment[]
   createdAt?: string | null
+  updatedAt?: string | null
 }
 
 export interface TicketAttachment {

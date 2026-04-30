@@ -1,4 +1,4 @@
-import { AlertTriangle, Eye, Loader2, Trash2 } from "lucide-react"
+import { AlertTriangle, Check, Copy, Headphones, Loader2, Pencil, Reply, ThumbsUp, Trash2, Eye } from "lucide-react"
 import { useState } from "react"
 import { AttachmentList } from "@/components/support/attachment-list"
 import { TicketMessageSystem } from "@/components/support/ticket-message-system"
@@ -6,13 +6,13 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import {
   Tooltip,
   TooltipContent,
@@ -60,20 +60,33 @@ function getAvatarColor(identifier: string): string {
   return colors[Math.abs(hash) % colors.length]
 }
 
+function wasEdited(message: TicketMessageType): boolean {
+  if (!message.createdAt || !message.updatedAt) return false
+  const created = new Date(message.createdAt).getTime()
+  const updated = new Date(message.updatedAt).getTime()
+  // Consider edited if updated at least 1 second after creation
+  return updated - created > 1000
+}
+
 // ── Props ────────────────────────────────────────────────────────────────
 
 interface TicketMessageProps {
   message: TicketMessageType
   ticketId: string
   isFirstMessage?: boolean
+  onReply?: () => void
 }
 
 // ── Component ────────────────────────────────────────────────────────────
 
-export function TicketMessage({ message, ticketId, isFirstMessage = false }: TicketMessageProps) {
+export function TicketMessage({ message, ticketId, isFirstMessage = false, onReply }: TicketMessageProps) {
   const isInternal = message.isInternalNote
   const isSystem = message.isSystemMessage
+  const isStaff = message.isStaff === true
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const [thumbsUp, setThumbsUp] = useState(false)
+  const [thumbsUpCount, setThumbsUpCount] = useState(0)
   const deleteMutation = useDeleteTicketMessage(ticketId)
   const currentUser = useAuthStore((s) => s.user)
 
@@ -81,16 +94,39 @@ export function TicketMessage({ message, ticketId, isFirstMessage = false }: Tic
   const authorName = message.author?.name ?? message.author?.email ?? "Unknown"
   const authorInitial = message.author?.name?.[0]?.toUpperCase() ?? message.author?.email?.[0]?.toUpperCase() ?? "?"
   const avatarColor = getAvatarColor(message.author?.id ?? "unknown")
+  const edited = wasEdited(message)
 
   if (isSystem) {
     return <TicketMessageSystem message={message} />
   }
 
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(message.bodyMarkdown)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // Fallback: ignore if clipboard API is unavailable
+    }
+  }
+
+  const handleThumbsUp = () => {
+    setThumbsUp((prev) => !prev)
+    setThumbsUpCount((prev) => (thumbsUp ? prev - 1 : prev + 1))
+  }
+
+  const leftBorderColor = isInternal
+    ? "border-l-amber-500"
+    : isStaff
+      ? "border-l-blue-500"
+      : "border-l-muted-foreground/20"
+
   return (
     <>
       <Card
         className={cn(
-          "group transition-colors",
+          "group border-l-[3px] transition-colors",
+          leftBorderColor,
           isInternal && "border-amber-500/30 bg-amber-500/5",
           isFirstMessage && "border-primary/20 bg-primary/[0.02]",
           !isInternal && !isFirstMessage && "border-border/60",
@@ -120,34 +156,88 @@ export function TicketMessage({ message, ticketId, isFirstMessage = false }: Tic
                       Original
                     </Badge>
                   )}
+                  {isStaff && (
+                    <Badge variant="outline" className="h-4 border-blue-500/30 bg-blue-500/10 px-1.5 text-[10px] text-blue-700 dark:text-blue-400">
+                      <Headphones className="mr-0.5 h-2.5 w-2.5" />
+                      Staff
+                    </Badge>
+                  )}
                 </div>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <p className="cursor-default text-xs text-muted-foreground">
-                      {formatRelativeTime(message.createdAt)}
-                    </p>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" align="start">
-                    {message.createdAt ? new Date(message.createdAt).toLocaleString() : ""}
-                  </TooltipContent>
-                </Tooltip>
+                <div className="flex items-center gap-1.5">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <p className="cursor-default text-xs text-muted-foreground">
+                        {formatRelativeTime(message.createdAt)}
+                      </p>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" align="start">
+                      {message.createdAt ? new Date(message.createdAt).toLocaleString() : ""}
+                    </TooltipContent>
+                  </Tooltip>
+                  {edited && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="flex cursor-default items-center gap-0.5 text-[10px] text-muted-foreground/70">
+                          <Pencil className="h-2.5 w-2.5" />
+                          edited
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" align="start">
+                        Edited {message.updatedAt ? new Date(message.updatedAt).toLocaleString() : ""}
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+                </div>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               {isInternal && (
                 <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400 text-xs">
                   <Eye className="mr-1 h-3 w-3" />
                   Internal
                 </Badge>
               )}
-              <Button
-                size="sm"
-                variant="ghost"
-                className="h-7 w-7 p-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-destructive"
-                onClick={() => setShowDeleteDialog(true)}
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </Button>
+              {onReply && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 w-7 p-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-primary"
+                      onClick={onReply}
+                    >
+                      <Reply className="h-3.5 w-3.5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Reply</TooltipContent>
+                </Tooltip>
+              )}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 w-7 p-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-primary"
+                    onClick={handleCopy}
+                  >
+                    {copied ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{copied ? "Copied!" : "Copy message"}</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 w-7 p-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-destructive"
+                    onClick={() => setShowDeleteDialog(true)}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Delete</TooltipContent>
+              </Tooltip>
             </div>
           </div>
         </CardHeader>
@@ -159,23 +249,39 @@ export function TicketMessage({ message, ticketId, isFirstMessage = false }: Tic
           {message.attachments && message.attachments.length > 0 && (
             <AttachmentList attachments={message.attachments} className="pt-2" />
           )}
+          <div className="flex items-center gap-1 pt-1">
+            <Button
+              size="sm"
+              variant="ghost"
+              className={cn(
+                "h-6 gap-1 rounded-full px-2 text-xs",
+                thumbsUp
+                  ? "bg-blue-500/10 text-blue-600 hover:bg-blue-500/15 dark:text-blue-400"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
+              onClick={handleThumbsUp}
+            >
+              <ThumbsUp className={cn("h-3 w-3", thumbsUp && "fill-current")} />
+              {thumbsUpCount > 0 && <span>{thumbsUpCount}</span>}
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
-      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-destructive" />
               Delete message
-            </DialogTitle>
-            <DialogDescription>
+            </AlertDialogTitle>
+            <AlertDialogDescription>
               Are you sure you want to delete this message from{" "}
               <span className="font-medium text-foreground">{authorName}</span>?
               This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
             <Button variant="outline" onClick={() => setShowDeleteDialog(false)} disabled={deleteMutation.isPending}>
               Cancel
             </Button>
@@ -191,9 +297,9 @@ export function TicketMessage({ message, ticketId, isFirstMessage = false }: Tic
               {deleteMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Delete
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }

@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router"
 import { useQueryClient } from "@tanstack/react-query"
-import { CheckCircle, Download, LifeBuoy, Search, Trash2, X } from "lucide-react"
+import { ArrowDown, ArrowUp, ArrowUpDown, CheckCircle, Download, LifeBuoy, MessageSquare, Search, Trash2, X } from "lucide-react"
 import { useCallback, useMemo, useState } from "react"
 import { toast } from "sonner"
 import { TicketPriorityBadge } from "@/components/support/ticket-priority-badge"
@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { SkeletonTable } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useTableSelection } from "@/hooks/use-table-selection"
 import { type Ticket, type TicketFilters, useTickets } from "@/lib/api/hooks/support"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
@@ -20,6 +21,70 @@ import { client } from "@/lib/generated/api/client.gen"
 import { cn } from "@/lib/utils"
 
 const PAGE_SIZE = 25
+
+type SortField = "ticketNumber" | "subject" | "status" | "priority" | "category" | "updatedAt" | "messageCount"
+type SortDirection = "asc" | "desc"
+
+const priorityDotColors: Record<string, string> = {
+  low: "bg-zinc-400",
+  medium: "bg-blue-500",
+  high: "bg-amber-500",
+  urgent: "bg-red-500",
+}
+
+function formatRelativeTime(dateStr: string): string {
+  const now = Date.now()
+  const date = new Date(dateStr).getTime()
+  const diffMs = now - date
+  const diffSec = Math.floor(diffMs / 1000)
+  const diffMin = Math.floor(diffSec / 60)
+  const diffHr = Math.floor(diffMin / 60)
+  const diffDay = Math.floor(diffHr / 24)
+
+  if (diffSec < 60) return "just now"
+  if (diffMin < 60) return `${diffMin}m ago`
+  if (diffHr < 24) return `${diffHr}h ago`
+  if (diffDay < 30) return `${diffDay}d ago`
+  return new Date(dateStr).toLocaleDateString()
+}
+
+function SortableHeader({
+  label,
+  field,
+  currentField,
+  currentDirection,
+  onSort,
+  className,
+}: {
+  label: string
+  field: SortField
+  currentField: SortField | null
+  currentDirection: SortDirection
+  onSort: (field: SortField) => void
+  className?: string
+}) {
+  const isActive = currentField === field
+  return (
+    <TableHead className={className}>
+      <button
+        type="button"
+        className="flex items-center gap-1 hover:text-foreground transition-colors -ml-1 px-1 py-0.5 rounded"
+        onClick={() => onSort(field)}
+      >
+        {label}
+        {isActive ? (
+          currentDirection === "asc" ? (
+            <ArrowUp className="h-3 w-3" />
+          ) : (
+            <ArrowDown className="h-3 w-3" />
+          )
+        ) : (
+          <ArrowUpDown className="h-3 w-3 opacity-40" />
+        )}
+      </button>
+    </TableHead>
+  )
+}
 
 const csvHeaders: CsvHeader<Ticket>[] = [
   { label: "Ticket #", accessor: (t) => t.ticketNumber },
@@ -37,10 +102,59 @@ export function TicketTable() {
   const [page, setPage] = useState(1)
   const [filters, setFilters] = useState<TicketFilters>({})
   const [searchInput, setSearchInput] = useState("")
+  const [sortField, setSortField] = useState<SortField | null>(null)
+  const [sortDirection, setSortDirection] = useState<SortDirection>("desc")
   const { data, isLoading, isError } = useTickets(page, PAGE_SIZE, filters)
   const queryClient = useQueryClient()
 
-  const items: Ticket[] = useMemo(() => data?.items ?? [], [data])
+  const handleSort = useCallback((field: SortField) => {
+    setSortField((prev) => {
+      if (prev === field) {
+        setSortDirection((d) => (d === "asc" ? "desc" : "asc"))
+        return field
+      }
+      setSortDirection("desc")
+      return field
+    })
+  }, [])
+
+  const priorityOrder: Record<string, number> = useMemo(() => ({ low: 0, medium: 1, high: 2, urgent: 3 }), [])
+
+  const items: Ticket[] = useMemo(() => {
+    const raw = data?.items ?? []
+    if (!sortField) return raw
+    const sorted = [...raw].sort((a, b) => {
+      let cmp = 0
+      switch (sortField) {
+        case "ticketNumber":
+          cmp = (a.ticketNumber ?? "").localeCompare(b.ticketNumber ?? "")
+          break
+        case "subject":
+          cmp = a.subject.localeCompare(b.subject)
+          break
+        case "status":
+          cmp = a.status.localeCompare(b.status)
+          break
+        case "priority":
+          cmp = (priorityOrder[a.priority] ?? 0) - (priorityOrder[b.priority] ?? 0)
+          break
+        case "category":
+          cmp = (a.category ?? "").localeCompare(b.category ?? "")
+          break
+        case "messageCount":
+          cmp = a.messageCount - b.messageCount
+          break
+        case "updatedAt": {
+          const aTime = new Date(a.updatedAt ?? a.createdAt ?? 0).getTime()
+          const bTime = new Date(b.updatedAt ?? b.createdAt ?? 0).getTime()
+          cmp = aTime - bTime
+          break
+        }
+      }
+      return sortDirection === "asc" ? cmp : -cmp
+    })
+    return sorted
+  }, [data, sortField, sortDirection, priorityOrder])
   const selection = useTableSelection(items, getId)
 
   const updateFilter = useCallback(
@@ -272,9 +386,16 @@ export function TicketTable() {
               </Button>
             </div>
           ) : data.items.length === 0 ? (
-            <div className="py-12 text-center">
-              <p className="text-muted-foreground text-sm">No tickets match your filters.</p>
-              <Button variant="link" size="sm" onClick={clearFilters} className="mt-2">
+            <div className="py-16 text-center space-y-4">
+              <div className="mx-auto w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                <LifeBuoy className="h-6 w-6 text-muted-foreground" />
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-medium">No tickets match your filters</p>
+                <p className="text-xs text-muted-foreground">Try adjusting your search or filter criteria.</p>
+              </div>
+              <Button variant="outline" size="sm" onClick={clearFilters}>
+                <X className="mr-1 h-3 w-3" />
                 Clear filters
               </Button>
             </div>
@@ -291,79 +412,103 @@ export function TicketTable() {
                         aria-label="Select all tickets"
                       />
                     </TableHead>
-                    <TableHead className="w-[100px]">Ticket</TableHead>
-                    <TableHead>Subject</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Priority</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Updated</TableHead>
+                    <SortableHeader label="Ticket" field="ticketNumber" currentField={sortField} currentDirection={sortDirection} onSort={handleSort} className="w-[100px]" />
+                    <SortableHeader label="Subject" field="subject" currentField={sortField} currentDirection={sortDirection} onSort={handleSort} />
+                    <SortableHeader label="Status" field="status" currentField={sortField} currentDirection={sortDirection} onSort={handleSort} />
+                    <SortableHeader label="Priority" field="priority" currentField={sortField} currentDirection={sortDirection} onSort={handleSort} />
+                    <SortableHeader label="Category" field="category" currentField={sortField} currentDirection={sortDirection} onSort={handleSort} />
+                    <SortableHeader label="Messages" field="messageCount" currentField={sortField} currentDirection={sortDirection} onSort={handleSort} />
+                    <SortableHeader label="Updated" field="updatedAt" currentField={sortField} currentDirection={sortDirection} onSort={handleSort} />
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {data.items.map((ticket) => (
-                    <TableRow
-                      key={ticket.id}
-                      className={cn(!ticket.isReadByUser && "bg-primary/[0.02]")}
-                      data-state={selection.isSelected(ticket.id) ? "selected" : undefined}
-                    >
-                      <TableCell>
-                        <Checkbox
-                          checked={selection.isSelected(ticket.id)}
-                          onChange={() => selection.toggle(ticket.id)}
-                          aria-label={`Select ticket ${ticket.ticketNumber}`}
-                        />
-                      </TableCell>
-                      <TableCell className="font-mono text-xs text-muted-foreground">
-                        <div className="flex items-center gap-1.5">
-                          {!ticket.isReadByUser && (
-                            <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                          )}
-                          {ticket.ticketNumber}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Link
-                          to="/support/$ticketId"
-                          params={{ ticketId: ticket.id }}
-                          className={cn(
-                            "hover:underline",
-                            ticket.isReadByUser ? "font-medium" : "font-semibold",
-                          )}
-                        >
-                          {ticket.subject}
-                        </Link>
-                        {ticket.latestMessagePreview && (
-                          <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
-                            {ticket.latestMessagePreview}
-                          </p>
+                  {items.map((ticket) => {
+                    const displayDate = ticket.updatedAt ?? ticket.createdAt
+                    const dotColor = priorityDotColors[ticket.priority] ?? "bg-zinc-400"
+                    return (
+                      <TableRow
+                        key={ticket.id}
+                        className={cn(
+                          "transition-colors duration-150 hover:bg-muted/50",
+                          !ticket.isReadByUser && "bg-primary/[0.02]",
                         )}
-                      </TableCell>
-                      <TableCell>
-                        <TicketStatusBadge status={ticket.status} />
-                      </TableCell>
-                      <TableCell>
-                        <TicketPriorityBadge priority={ticket.priority} />
-                      </TableCell>
-                      <TableCell className="text-sm capitalize text-muted-foreground">
-                        {ticket.category ?? "—"}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
-                        {ticket.updatedAt
-                          ? new Date(ticket.updatedAt).toLocaleDateString()
-                          : ticket.createdAt
-                            ? new Date(ticket.createdAt).toLocaleDateString()
-                            : "—"}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button asChild variant="outline" size="sm">
-                          <Link to="/support/$ticketId" params={{ ticketId: ticket.id }}>
-                            View
+                        data-state={selection.isSelected(ticket.id) ? "selected" : undefined}
+                      >
+                        <TableCell>
+                          <Checkbox
+                            checked={selection.isSelected(ticket.id)}
+                            onChange={() => selection.toggle(ticket.id)}
+                            aria-label={`Select ticket ${ticket.ticketNumber}`}
+                          />
+                        </TableCell>
+                        <TableCell className="font-mono text-xs text-muted-foreground">
+                          <div className="flex items-center gap-1.5">
+                            {!ticket.isReadByUser && (
+                              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+                            )}
+                            {ticket.ticketNumber}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Link
+                            to="/support/$ticketId"
+                            params={{ ticketId: ticket.id }}
+                            className={cn(
+                              "hover:underline",
+                              ticket.isReadByUser ? "font-medium" : "font-semibold",
+                            )}
+                          >
+                            {ticket.subject}
                           </Link>
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                          {ticket.latestMessagePreview && (
+                            <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
+                              {ticket.latestMessagePreview}
+                            </p>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <TicketStatusBadge status={ticket.status} />
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <span className={cn("h-2 w-2 rounded-full shrink-0", dotColor)} />
+                            <TicketPriorityBadge priority={ticket.priority} />
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-sm capitalize text-muted-foreground">
+                          {ticket.category ?? "—"}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1.5 text-muted-foreground">
+                            <MessageSquare className="h-3.5 w-3.5" />
+                            <span className="text-sm">{ticket.messageCount}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground text-sm">
+                          {displayDate ? (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className="cursor-default">{formatRelativeTime(displayDate)}</span>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                {new Date(displayDate).toLocaleString()}
+                              </TooltipContent>
+                            </Tooltip>
+                          ) : (
+                            "—"
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button asChild variant="outline" size="sm">
+                            <Link to="/support/$ticketId" params={{ ticketId: ticket.id }}>
+                              View
+                            </Link>
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })}
                 </TableBody>
               </Table>
               {Math.ceil(data.total / PAGE_SIZE) > 1 && (
