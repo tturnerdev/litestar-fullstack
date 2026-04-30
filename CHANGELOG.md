@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.91.0 (2026-04-30)
+
+### Improved
+- **Tags bulk actions** — Replaced inline bulk delete button with shared `BulkActionBar` component, adding bulk export (selected tags to CSV) alongside bulk delete with built-in confirmation dialog.
+- **Detail page skeletons** — Upgraded 6 detail pages (devices, teams, locations, connections, extensions, fax numbers) from generic `SkeletonCard` to tailored skeleton layouts that mirror each page's actual card/section structure with staggered reveal animations.
+
 ## v0.90.0 (2026-04-30)
 
 ### Added
