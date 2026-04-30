@@ -1,8 +1,31 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
-import { ArrowLeft, Check, Pencil, Trash2, X } from "lucide-react"
-import { useState } from "react"
+import { useCallback, useMemo, useState } from "react"
+import {
+  AlertTriangle,
+  ArrowLeft,
+  ArrowUpRight,
+  Check,
+  Copy,
+  Eye,
+  Hash,
+  MessageSquare,
+  Pencil,
+  Phone,
+  Send,
+  Trash2,
+  X,
+} from "lucide-react"
+import { DirectionBadge, FaxStatusBadge } from "@/components/fax/fax-status-badge"
 import { EmailRouteEditor } from "@/components/fax/email-route-editor"
 import { Badge } from "@/components/ui/badge"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -16,11 +39,129 @@ import {
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { SkeletonCard } from "@/components/ui/skeleton"
-import { useDeleteFaxNumber, useFaxNumber, useUpdateFaxNumber } from "@/lib/api/hooks/fax"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import {
+  useDeleteFaxNumber,
+  useFaxMessages,
+  useFaxNumber,
+  useUpdateFaxNumber,
+} from "@/lib/api/hooks/fax"
 
 export const Route = createFileRoute("/_app/fax/numbers/$faxNumberId/")({
   component: FaxNumberDetailPage,
 })
+
+// ── Helpers ──────────────────────────────────────────────────────────────
+
+function formatPhoneNumber(raw: string): string {
+  const digits = raw.replace(/\D/g, "")
+  if (digits.length === 11 && digits.startsWith("1")) {
+    return `+1 (${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7)}`
+  }
+  if (digits.length === 10) {
+    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`
+  }
+  return raw
+}
+
+function formatDateTime(value: string | null | undefined): string {
+  if (!value) return "---"
+  return new Date(value).toLocaleString()
+}
+
+function formatRelativeTime(value: string | null | undefined): string {
+  if (!value) return "Never"
+  const date = new Date(value)
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffMins = Math.floor(diffMs / 60_000)
+  if (diffMins < 1) return "Just now"
+  if (diffMins < 60) return `${diffMins}m ago`
+  const diffHours = Math.floor(diffMins / 60)
+  if (diffHours < 24) return `${diffHours}h ago`
+  const diffDays = Math.floor(diffHours / 24)
+  if (diffDays < 30) return `${diffDays}d ago`
+  const diffMonths = Math.floor(diffDays / 30)
+  return `${diffMonths}mo ago`
+}
+
+// ── Copy button ──────────────────────────────────────────────────────────
+
+function CopyButton({ value, label }: { value: string; label: string }) {
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = useCallback(async () => {
+    await navigator.clipboard.writeText(value)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }, [value])
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-6 w-6 text-muted-foreground hover:text-foreground"
+          onClick={handleCopy}
+        >
+          {copied ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
+          <span className="sr-only">Copy {label}</span>
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>{copied ? "Copied!" : `Copy ${label}`}</TooltipContent>
+    </Tooltip>
+  )
+}
+
+// ── Timestamp with tooltip ──────────────────────────────────────────────
+
+function TimestampField({
+  label,
+  value,
+}: {
+  label: string
+  value: string | null | undefined
+}) {
+  if (!value) {
+    return (
+      <div>
+        <p className="text-muted-foreground text-sm">{label}</p>
+        <p className="text-sm">---</p>
+      </div>
+    )
+  }
+
+  return (
+    <div>
+      <p className="text-muted-foreground text-sm">{label}</p>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <p className="cursor-default text-sm">{formatRelativeTime(value)}</p>
+        </TooltipTrigger>
+        <TooltipContent>{formatDateTime(value)}</TooltipContent>
+      </Tooltip>
+    </div>
+  )
+}
+
+// ── Status badge ────────────────────────────────────────────────────────
+
+function ActiveStatusBadge({ isActive }: { isActive: boolean }) {
+  return isActive ? (
+    <Badge className="gap-1 bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400">
+      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+      Active
+    </Badge>
+  ) : (
+    <Badge variant="outline" className="gap-1 text-muted-foreground">
+      <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
+      Inactive
+    </Badge>
+  )
+}
+
+// ── Main page ───────────────────────────────────────────────────────────
 
 function FaxNumberDetailPage() {
   const { faxNumberId } = Route.useParams()
@@ -28,9 +169,35 @@ function FaxNumberDetailPage() {
   const { data, isLoading, isError } = useFaxNumber(faxNumberId)
   const updateFaxNumber = useUpdateFaxNumber(faxNumberId)
   const deleteFaxNumber = useDeleteFaxNumber()
+
+  // Fetch recent messages (last 5) -- filter client-side by faxNumberId
+  const { data: messagesData } = useFaxMessages({
+    page: 1,
+    pageSize: 50,
+    orderBy: "received_at",
+    sortOrder: "desc",
+  })
+
   const [editingLabel, setEditingLabel] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [labelValue, setLabelValue] = useState("")
+
+  // Filter messages for this fax number and take the last 5
+  const recentMessages = useMemo(() => {
+    if (!messagesData?.items) return []
+    return messagesData.items
+      .filter((msg) => msg.faxNumberId === faxNumberId)
+      .slice(0, 5)
+  }, [messagesData?.items, faxNumberId])
+
+  // Message count summary
+  const messageCounts = useMemo(() => {
+    if (!messagesData?.items) return { sent: 0, received: 0, total: 0 }
+    const forNumber = messagesData.items.filter((msg) => msg.faxNumberId === faxNumberId)
+    const sent = forNumber.filter((msg) => msg.direction === "outbound").length
+    const received = forNumber.filter((msg) => msg.direction === "inbound").length
+    return { sent, received, total: sent + received }
+  }, [messagesData?.items, faxNumberId])
 
   function startEditingLabel() {
     setLabelValue(data?.label ?? "")
@@ -90,10 +257,43 @@ function FaxNumberDetailPage() {
     <PageContainer className="flex-1 space-y-8">
       <PageHeader
         eyebrow="Communications"
-        title={data.label ?? data.number}
-        description={data.label ? data.number : undefined}
+        title={data.label ?? formatPhoneNumber(data.number)}
+        description={data.label ? formatPhoneNumber(data.number) : undefined}
+        breadcrumbs={
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/home">Home</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/fax">Fax</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/fax/numbers">Numbers</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>{data.label ?? data.number}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        }
         actions={
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            <ActiveStatusBadge isActive={data.isActive} />
+            <Button size="sm" asChild>
+              <Link to="/fax/send">
+                <Send className="mr-2 h-4 w-4" /> Send Fax
+              </Link>
+            </Button>
             <Button variant="outline" size="sm" asChild>
               <Link to="/fax/numbers/$faxNumberId/edit" params={{ faxNumberId }}>
                 <Pencil className="mr-2 h-4 w-4" /> Edit
@@ -110,21 +310,25 @@ function FaxNumberDetailPage() {
             </Button>
             <Button variant="outline" size="sm" asChild>
               <Link to="/fax/numbers">
-                <ArrowLeft className="mr-2 h-4 w-4" /> Back to numbers
+                <ArrowLeft className="mr-2 h-4 w-4" /> Back
               </Link>
             </Button>
           </div>
         }
       />
 
+      {/* Delete confirmation dialog */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete fax number</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Delete fax number?
+            </DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete{" "}
-              <span className="font-medium text-foreground">{data.label ?? data.number}</span>?
-              This will also remove all associated email routes. This action cannot be undone.
+              This will permanently delete{" "}
+              <strong>{data.label ?? formatPhoneNumber(data.number)}</strong> and all
+              associated email routes. This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -149,19 +353,23 @@ function FaxNumberDetailPage() {
         </DialogContent>
       </Dialog>
 
+      {/* Number Info */}
       <PageSection>
         <Card>
           <CardHeader>
-            <CardTitle>Details</CardTitle>
+            <div className="flex items-center gap-2">
+              <Phone className="h-5 w-5 text-muted-foreground" />
+              <CardTitle>Number Info</CardTitle>
+            </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4 text-sm md:grid-cols-2">
+          <CardContent>
+            <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
               <div>
-                <p className="text-muted-foreground mb-1">Number</p>
-                <p className="font-mono text-base">{data.number}</p>
+                <p className="text-muted-foreground">Fax Number</p>
+                <p className="font-mono text-base font-medium">{formatPhoneNumber(data.number)}</p>
               </div>
               <div>
-                <p className="text-muted-foreground mb-1">Label</p>
+                <p className="text-muted-foreground">Label</p>
                 {editingLabel ? (
                   <div className="flex items-center gap-2">
                     <Input
@@ -189,7 +397,7 @@ function FaxNumberDetailPage() {
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
-                    <p>{data.label || "--"}</p>
+                    <p className="font-medium">{data.label || "---"}</p>
                     <Button variant="ghost" size="sm" onClick={startEditingLabel} className="h-7 w-7 p-0">
                       <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
                     </Button>
@@ -197,43 +405,177 @@ function FaxNumberDetailPage() {
                 )}
               </div>
               <div>
-                <p className="text-muted-foreground mb-1">Status</p>
-                <Badge variant={data.isActive ? "default" : "secondary"}>
-                  {data.isActive ? "Active" : "Inactive"}
-                </Badge>
+                <p className="text-muted-foreground">Status</p>
+                <div className="mt-0.5 flex items-center gap-3">
+                  <ActiveStatusBadge isActive={data.isActive} />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => updateFaxNumber.mutate({ isActive: !data.isActive })}
+                    disabled={updateFaxNumber.isPending}
+                  >
+                    {updateFaxNumber.isPending
+                      ? "..."
+                      : data.isActive
+                        ? "Deactivate"
+                        : "Activate"}
+                  </Button>
+                </div>
               </div>
               <div>
-                <p className="text-muted-foreground mb-1">Assignment</p>
+                <p className="text-muted-foreground">Assignment</p>
                 <p>{data.teamId ? "Team" : "Personal"}</p>
               </div>
-              <div>
-                <p className="text-muted-foreground mb-1">Created</p>
-                <p>{data.createdAt ? new Date(data.createdAt).toLocaleDateString() : "--"}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground mb-1">Updated</p>
-                <p>{data.updatedAt ? new Date(data.updatedAt).toLocaleDateString() : "--"}</p>
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-2 pt-2 border-t border-border/40">
-              <Button
-                variant={data.isActive ? "outline" : "default"}
-                onClick={() => updateFaxNumber.mutate({ isActive: !data.isActive })}
-                disabled={updateFaxNumber.isPending}
-              >
-                {updateFaxNumber.isPending
-                  ? "Updating..."
-                  : data.isActive
-                    ? "Deactivate Number"
-                    : "Activate Number"}
-              </Button>
+              {messageCounts.total > 0 && (
+                <div className="md:col-span-2">
+                  <p className="text-muted-foreground">Message Summary</p>
+                  <div className="mt-1 flex items-center gap-3">
+                    <Badge variant="outline" className="gap-1.5 font-mono text-xs">
+                      <ArrowUpRight className="h-3 w-3 text-violet-500" />
+                      {messageCounts.sent} sent
+                    </Badge>
+                    <Badge variant="outline" className="gap-1.5 font-mono text-xs">
+                      <ArrowLeft className="h-3 w-3 text-blue-500" />
+                      {messageCounts.received} received
+                    </Badge>
+                  </div>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
       </PageSection>
 
+      {/* Email Routes */}
       <PageSection delay={0.1}>
         <EmailRouteEditor faxNumberId={faxNumberId} />
+      </PageSection>
+
+      {/* Recent Messages */}
+      <PageSection delay={0.15}>
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <MessageSquare className="h-5 w-5 text-muted-foreground" />
+                <CardTitle>Recent Messages</CardTitle>
+              </div>
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/fax/messages">
+                  View all <ArrowUpRight className="ml-1 h-3.5 w-3.5" />
+                </Link>
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {recentMessages.length === 0 ? (
+              <div className="flex flex-col items-center gap-2 py-6 text-center">
+                <MessageSquare className="h-8 w-8 text-muted-foreground/50" />
+                <p className="text-sm text-muted-foreground">No messages yet for this number.</p>
+                <Button size="sm" variant="outline" asChild>
+                  <Link to="/fax/send">
+                    <Send className="mr-2 h-3.5 w-3.5" /> Send a fax
+                  </Link>
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {recentMessages.map((msg) => (
+                  <Link
+                    key={msg.id}
+                    to="/fax/messages/$messageId"
+                    params={{ messageId: msg.id }}
+                    className="flex items-center justify-between rounded-md border border-border/60 px-3 py-2.5 transition-colors hover:bg-muted/50"
+                  >
+                    <div className="flex items-center gap-3">
+                      <DirectionBadge direction={msg.direction} />
+                      <div className="flex flex-col gap-0.5">
+                        <span className="font-mono text-sm">{msg.remoteNumber}</span>
+                        {msg.remoteName && (
+                          <span className="text-xs text-muted-foreground">{msg.remoteName}</span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <FaxStatusBadge status={msg.status} />
+                      <Badge variant="outline" className="font-mono text-xs">
+                        {msg.pageCount} pg{msg.pageCount === 1 ? "" : "s"}
+                      </Badge>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="cursor-default whitespace-nowrap text-xs text-muted-foreground">
+                            {formatRelativeTime(msg.receivedAt ?? msg.createdAt)}
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {formatDateTime(msg.receivedAt ?? msg.createdAt)}
+                        </TooltipContent>
+                      </Tooltip>
+                      <Eye className="h-3.5 w-3.5 text-muted-foreground" />
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </PageSection>
+
+      {/* Metadata */}
+      <PageSection delay={0.2}>
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Hash className="h-5 w-5 text-muted-foreground" />
+              <CardTitle>Metadata</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-4">
+              <div>
+                <p className="text-muted-foreground text-sm">Fax Number ID</p>
+                <div className="flex items-center gap-1">
+                  <p className="font-mono text-xs">{faxNumberId}</p>
+                  <CopyButton value={faxNumberId} label="fax number ID" />
+                </div>
+              </div>
+              <TimestampField label="Created" value={data.createdAt} />
+              <TimestampField label="Updated" value={data.updatedAt} />
+              <div>
+                <p className="text-muted-foreground text-sm">Owner</p>
+                <p className="text-sm">{data.teamId ? "Team-assigned" : "Personal"}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </PageSection>
+
+      {/* Danger Zone */}
+      <PageSection delay={0.25}>
+        <Card className="border-destructive/30">
+          <CardHeader>
+            <CardTitle className="text-destructive">Danger Zone</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium text-sm">Delete this fax number</p>
+                <p className="text-sm text-muted-foreground">
+                  This action cannot be undone. All email routes and message associations will be
+                  permanently removed.
+                </p>
+              </div>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => setShowDeleteDialog(true)}
+              >
+                <Trash2 className="mr-2 h-4 w-4" /> Delete
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </PageSection>
     </PageContainer>
   )

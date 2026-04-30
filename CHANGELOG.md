@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.26.0 (2026-04-30)
+
+### Improved
+- **Fax number detail page** — organized sections (Number Info, Email Routes, Recent Messages, Metadata), formatted phone number display, inline active toggle, message count summary, send fax quick link, copy buttons, and relative timestamps.
+- **Fax message detail page** — organized sections (Message Info, Transmission Details, Content preview, Metadata), direction/status badges, PDF preview iframe, error banners for failed messages, copy buttons, and danger zone delete.
+
 ## v0.25.0 (2026-04-30)
 
 ### Improved
