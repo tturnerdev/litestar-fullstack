@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.84.0 (2026-04-30)
+
+### Refactored
+- **Final utility consolidation** — Replaced local `formatDateTime` in 18 route files, `formatFileSize` in 4 support/help files (using shared `formatBytes`), `formatFullDateTime` in active-sessions and voicemail, and `formatFullDate` in 3 fax components. All date and number formatting now uses shared `lib/date-utils.ts` and `lib/format-utils.ts`. Total duplication removed across v0.80-v0.84: ~1,250 lines.
+
 ## v0.83.0 (2026-04-30)
 
 ### Refactored
