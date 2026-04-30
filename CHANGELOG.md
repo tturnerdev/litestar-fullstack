@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.64.0 (2026-04-30)
+
+### Fixed
+- **AlertDialog sweep** — Converted ALL remaining delete/destructive confirmation dialogs from `Dialog` to `AlertDialog` across the entire frontend. Affected: fax message list (single + bulk delete), extension detail delete, fax number delete, fax message detail delete, support ticket delete (header + detail), email route delete, connection delete, forwarding rule delete, device action destructive confirm, location delete, MFA disable. AlertDialog prevents accidental dismissal by clicking outside the overlay.
+
+### Improved
+- **MFA disable dialog** — Loader2 spinners on confirm, improved security warning text, cancel button, password autoComplete.
+- **Notifications page** — AlertDialog for bulk delete-all-read, timestamp tooltips, category count badges on filters, hover ChevronRight for actionable items, Loader2 consistency, entrance animations.
+- **Voicemail settings form** — PIN validation with counter (4-6 digits), section icons, toggle dimming, save checkmark animation, greeting type icons, human-readable duration and retention helpers.
+- **Invite member dialog** — Email chip animations, submission progress ("Sending 1 of 3..."), invalid email feedback, header icon, max recipients hint, role change highlight.
+- **Voicemail message list** — AlertDialog for single/bulk deletes, row striping, timestamp tooltips, pulse unread indicator, selected count badge.
+- **Fax message detail** — Status-aware card border, US phone formatting, font-medium values, page count badge, file size on download buttons.
+- **Location delete dialog** — Cancel button added, AlertTriangle icon.
+- **Device actions** — Proper AlertDialogAction/Cancel in destructive confirm.
+
 ## v0.60.0 (2026-04-30)
 
 ### Improved
