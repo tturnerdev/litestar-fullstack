@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.74.0 (2026-04-30)
+
+### Improved
+- **Table row stripes** — Added alternating `bg-muted/20` backgrounds to all 13 data tables across admin support, fax, devices, voice, users, teams pages plus tags and fax email-routes for improved scannability.
+- **Danger zones** — Added dedicated Danger Zone cards with `border-destructive/30` styling to device detail and extension detail pages, matching the existing fax number pattern.
+- **Section icons** — Added Settings/Wrench icons to device SIP and Advanced Configuration sections, MapPin icon to location information header.
+
 ## v0.73.0 (2026-04-30)
 
 ### Fixed
