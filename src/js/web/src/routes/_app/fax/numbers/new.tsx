@@ -1,0 +1,126 @@
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
+import { useState } from "react"
+import { Loader2 } from "lucide-react"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { PageContainer, PageHeader } from "@/components/ui/page-layout"
+import { Switch } from "@/components/ui/switch"
+import { useAuth } from "@/hooks/use-auth"
+import { useCreateFaxNumber } from "@/lib/api/hooks/fax"
+
+export const Route = createFileRoute("/_app/fax/numbers/new")({
+  component: NewFaxNumberPage,
+})
+
+function NewFaxNumberPage() {
+  const router = useRouter()
+  const { currentTeam } = useAuth()
+  const createFaxNumber = useCreateFaxNumber()
+
+  const [number, setNumber] = useState("")
+  const [label, setLabel] = useState("")
+  const [isActive, setIsActive] = useState(true)
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+
+    const payload: { number: string; label?: string; isActive?: boolean; teamId?: string } = {
+      number: number.trim(),
+    }
+
+    if (label.trim()) payload.label = label.trim()
+    if (!isActive) payload.isActive = false
+    if (currentTeam) payload.teamId = currentTeam.id
+
+    createFaxNumber.mutate(payload, {
+      onSuccess: () => {
+        router.navigate({ to: "/fax/numbers" })
+      },
+    })
+  }
+
+  const isValid = number.trim() !== ""
+
+  return (
+    <PageContainer className="flex-1 space-y-8">
+      <PageHeader
+        eyebrow="Fax"
+        title="New Number"
+        description="Add a new fax number to your account."
+        breadcrumbs={
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem><BreadcrumbLink asChild><Link to="/home">Home</Link></BreadcrumbLink></BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem><BreadcrumbLink asChild><Link to="/fax/numbers">Fax Numbers</Link></BreadcrumbLink></BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem><BreadcrumbPage>New Number</BreadcrumbPage></BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        }
+      />
+
+      <Card className="max-w-xl">
+        <CardHeader>
+          <CardTitle className="text-lg">Fax Number Details</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="fax-number">Number *</Label>
+              <Input
+                id="fax-number"
+                placeholder="e.g., +15551234567"
+                value={number}
+                onChange={(e) => setNumber(e.target.value)}
+                required
+                autoFocus
+              />
+              <p className="text-xs text-muted-foreground">
+                Enter the full phone number including country code.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="fax-label">Label</Label>
+              <Input
+                id="fax-label"
+                placeholder="e.g., Main Fax, Billing Dept"
+                value={label}
+                onChange={(e) => setLabel(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                An optional friendly name to identify this number.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-between rounded-lg border border-border/60 bg-muted/20 p-4">
+              <div>
+                <p className="font-medium text-sm">Active</p>
+                <p className="text-xs text-muted-foreground">Enable this number to send and receive faxes.</p>
+              </div>
+              <Switch checked={isActive} onCheckedChange={setIsActive} />
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => router.navigate({ to: "/fax/numbers" })}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={!isValid || createFaxNumber.isPending}>
+                {createFaxNumber.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Create Number
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </PageContainer>
+  )
+}

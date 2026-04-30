@@ -94,6 +94,11 @@ function FaxNumberDetailPage() {
         description={data.label ? data.number : undefined}
         actions={
           <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/fax/numbers/$faxNumberId/edit" params={{ faxNumberId }}>
+                <Pencil className="mr-2 h-4 w-4" /> Edit
+              </Link>
+            </Button>
             <Button
               variant="outline"
               size="sm"

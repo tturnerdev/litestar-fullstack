@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
-import { AlertTriangle, ArrowLeft, ArrowRight, BellOff, Loader2, Mail, PhoneForwarded, Trash2, Voicemail } from "lucide-react"
+import { AlertTriangle, ArrowLeft, ArrowRight, BellOff, Loader2, Mail, Pencil, PhoneForwarded, Trash2, Voicemail } from "lucide-react"
 import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -57,6 +57,12 @@ function ExtensionSettingsPage() {
         actions={
           <div className="flex items-center gap-2">
             <DndQuickToggle extensionId={extensionId} showLabel />
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/voice/extensions/$extensionId/edit" params={{ extensionId }}>
+                <Pencil className="mr-2 h-4 w-4" />
+                Edit
+              </Link>
+            </Button>
             <Button
               variant="outline"
               size="sm"

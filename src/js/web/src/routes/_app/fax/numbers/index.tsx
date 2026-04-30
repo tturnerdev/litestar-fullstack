@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router"
-import { LayoutGrid, List, Printer } from "lucide-react"
+import { createFileRoute, Link } from "@tanstack/react-router"
+import { LayoutGrid, List, Plus, Printer } from "lucide-react"
 import { useState } from "react"
 import { FaxNumberCard } from "@/components/fax/fax-number-card"
 import { FaxNumberTable } from "@/components/fax/fax-number-table"
@@ -24,23 +24,30 @@ function FaxNumbersPage() {
         title="Fax Numbers"
         description="Manage your fax numbers and configure email delivery routes."
         actions={
-          <div className="flex gap-1 rounded-lg border border-border/60 p-0.5">
-            <Button
-              variant={viewMode === "table" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setViewMode("table")}
-              className="h-8 px-2"
-            >
-              <List className="h-4 w-4" />
+          <div className="flex items-center gap-3">
+            <Button size="sm" asChild>
+              <Link to="/fax/numbers/new">
+                <Plus className="mr-2 h-4 w-4" /> New Number
+              </Link>
             </Button>
-            <Button
-              variant={viewMode === "cards" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setViewMode("cards")}
-              className="h-8 px-2"
-            >
-              <LayoutGrid className="h-4 w-4" />
-            </Button>
+            <div className="flex gap-1 rounded-lg border border-border/60 p-0.5">
+              <Button
+                variant={viewMode === "table" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("table")}
+                className="h-8 px-2"
+              >
+                <List className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === "cards" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("cards")}
+                className="h-8 px-2"
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         }
       />
