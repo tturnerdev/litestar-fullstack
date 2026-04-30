@@ -4,6 +4,7 @@ import {
   CheckCircle2,
   Clock,
   Hash,
+  Info,
   Loader2,
   Monitor,
   Phone,
@@ -99,7 +100,12 @@ function DataValue({ value }: { value: unknown }) {
 function DataSection({ data, nested = false }: { data: Record<string, unknown>; nested?: boolean }) {
   const entries = Object.entries(data)
   if (entries.length === 0) {
-    return <p className="text-sm text-muted-foreground italic">No data</p>
+    return (
+      <div className="flex items-center gap-2 py-2 text-sm text-muted-foreground">
+        <Info className="h-4 w-4 shrink-0" />
+        <span className="italic">No fields returned for this record.</span>
+      </div>
+    )
   }
   return (
     <dl className={nested ? "space-y-1 pl-4 border-l border-border/40" : "space-y-2"}>
@@ -139,7 +145,10 @@ function SourceCard({ name, result }: { name: string; result: SourceResult }) {
         ) : result.data && Object.keys(result.data).length > 0 ? (
           <DataSection data={result.data} />
         ) : (
-          <p className="text-sm text-muted-foreground italic">No data returned</p>
+          <div className="flex items-center gap-2 py-2 text-sm text-muted-foreground">
+            <Info className="h-4 w-4 shrink-0" />
+            <span className="italic">This source returned no data for the lookup.</span>
+          </div>
         )}
       </CardContent>
     </Card>

@@ -2,6 +2,7 @@ import { Download, DownloadCloud, File, FileText, ImageIcon, Paperclip } from "l
 import { useMemo, useState } from "react"
 import { AttachmentPreview } from "@/components/support/attachment-preview"
 import { Button } from "@/components/ui/button"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import type { TicketAttachment } from "@/lib/api/hooks/support"
 import { cn } from "@/lib/utils"
 
@@ -104,15 +105,25 @@ export function AttachmentList({ attachments, className }: AttachmentListProps) 
                   <Icon className={cn("h-4 w-4 shrink-0", iconStylesByCategory[category])} />
                 )}
                 {isPreviewable ? (
-                  <button
-                    type="button"
-                    onClick={() => setPreviewAttachment(attachment)}
-                    className="max-w-[180px] truncate text-left hover:underline"
-                  >
-                    {attachment.fileName}
-                  </button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        onClick={() => setPreviewAttachment(attachment)}
+                        className="max-w-[180px] truncate text-left hover:underline"
+                      >
+                        {attachment.fileName}
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>{attachment.fileName}</TooltipContent>
+                  </Tooltip>
                 ) : (
-                  <span className="max-w-[180px] truncate">{attachment.fileName}</span>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="max-w-[180px] truncate">{attachment.fileName}</span>
+                    </TooltipTrigger>
+                    <TooltipContent>{attachment.fileName}</TooltipContent>
+                  </Tooltip>
                 )}
                 <span className="text-xs text-muted-foreground">
                   {formatFileSize(attachment.fileSizeBytes)}

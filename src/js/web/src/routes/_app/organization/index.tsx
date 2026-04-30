@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import {
   Select,
   SelectContent,
@@ -280,7 +281,12 @@ function OrganizationSettingsPage() {
                     {org?.logoUrl ? (
                       <>
                         <img src={org.logoUrl} alt="Organization logo" className="h-10 w-10 rounded-lg border object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none" }} />
-                        <span className="text-sm text-muted-foreground truncate max-w-xs">{org.logoUrl}</span>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="text-sm text-muted-foreground truncate max-w-xs">{org.logoUrl}</span>
+                          </TooltipTrigger>
+                          <TooltipContent>{org.logoUrl}</TooltipContent>
+                        </Tooltip>
                       </>
                     ) : (
                       <span className="text-sm text-muted-foreground italic">Not set</span>

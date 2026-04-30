@@ -126,13 +126,13 @@ function ServiceStatusGrid({
       name: "Cache / Queue Broker",
       icon: Zap,
       status: hasWorkers ? ("healthy" as const) : ("unknown" as const),
-      detail: hasWorkers ? "Redis" : "No data available",
+      detail: hasWorkers ? "Redis" : "Not detected",
     },
     {
       name: "Task Workers",
       icon: Cpu,
       status: hasWorkers ? ("healthy" as const) : ("unknown" as const),
-      detail: hasWorkers ? `${workerQueues.length} queue${workerQueues.length !== 1 ? "s" : ""}` : "No data available",
+      detail: hasWorkers ? `${workerQueues.length} queue${workerQueues.length !== 1 ? "s" : ""}` : "No workers running",
     },
     {
       name: "Application Server",

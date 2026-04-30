@@ -2,6 +2,7 @@ import { File as FileIcon, FileText, FileUp, Image, Loader2, X } from "lucide-re
 import { useCallback, useRef, useState } from "react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 
 interface PendingFile {
@@ -196,7 +197,12 @@ export function AttachmentUpload({
                 )}
               >
                 {getFileTypeIcon(f.name, "h-3 w-3 shrink-0 text-muted-foreground")}
-                <span className="max-w-[150px] truncate">{f.name}</span>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="max-w-[150px] truncate">{f.name}</span>
+                  </TooltipTrigger>
+                  <TooltipContent>{f.name}</TooltipContent>
+                </Tooltip>
                 <span className="text-muted-foreground">({formatFileSize(f.size)})</span>
                 <button
                   type="button"
@@ -291,7 +297,12 @@ export function AttachmentUpload({
             >
               <div className="flex items-center gap-2 min-w-0">
                 {getFileTypeIcon(f.name, "h-4 w-4 shrink-0 text-muted-foreground")}
-                <span className="truncate text-sm">{f.name}</span>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="truncate text-sm">{f.name}</span>
+                  </TooltipTrigger>
+                  <TooltipContent>{f.name}</TooltipContent>
+                </Tooltip>
                 <span className="shrink-0 text-xs text-muted-foreground">
                   {formatFileSize(f.size)}
                 </span>

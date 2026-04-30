@@ -145,7 +145,12 @@ export function TicketMessage({ message, ticketId, isFirstMessage = false, onRep
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <p className="truncate text-sm font-medium">{authorName}</p>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <p className="truncate text-sm font-medium">{authorName}</p>
+                    </TooltipTrigger>
+                    <TooltipContent>{authorName}</TooltipContent>
+                  </Tooltip>
                   {isOwnMessage && (
                     <Badge variant="outline" className="h-4 border-primary/30 bg-primary/5 px-1.5 text-[10px] text-primary">
                       You
