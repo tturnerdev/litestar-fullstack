@@ -409,8 +409,21 @@ function MessageRow({ message, isExpanded, isSelected, isEvenRow, onExpand, onDe
             {message.isUrgent && <Badge variant="destructive" className="text-xs">Urgent</Badge>}
           </div>
         </TableCell>
-        <TableCell className="max-w-xs truncate text-sm text-muted-foreground">
-          {transcriptionPreview ?? <span className="italic">No transcription</span>}
+        <TableCell className="max-w-xs text-sm text-muted-foreground">
+          {transcriptionPreview ? (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="block truncate">{transcriptionPreview}</span>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-sm">
+                  <p>{transcriptionPreview}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          ) : (
+            <span className="italic">No transcription</span>
+          )}
         </TableCell>
         <TableCell className="text-right">
           <div className="flex items-center justify-end gap-1">

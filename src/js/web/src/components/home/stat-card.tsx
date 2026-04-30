@@ -3,6 +3,7 @@ import { motion } from "framer-motion"
 import { Minus, TrendingDown, TrendingUp, type LucideIcon } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 
 interface TrendInfo {
@@ -69,7 +70,14 @@ export function StatCard({ label, value, icon: Icon, iconClassName, isLoading, t
               <p className="text-2xl font-semibold tracking-tight">{value ?? 0}</p>
               {trend && <TrendIndicator trend={trend} />}
             </div>
-            <p className="truncate text-sm text-muted-foreground">{label}</p>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <p className="truncate text-sm text-muted-foreground">{label}</p>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                <p>{label}</p>
+              </TooltipContent>
+            </Tooltip>
           </>
         )}
       </div>

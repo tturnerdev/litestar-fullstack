@@ -35,6 +35,7 @@ import { Separator } from "@/components/ui/separator"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useFaxNumbers, useSendFax } from "@/lib/api/hooks/fax"
 
 // ---------------------------------------------------------------------------
@@ -456,9 +457,16 @@ export function SendFaxForm() {
                             <FileText className="h-5 w-5 text-primary" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate">
-                              {file.name}
-                            </p>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <p className="text-sm font-medium truncate">
+                                  {file.name}
+                                </p>
+                              </TooltipTrigger>
+                              <TooltipContent side="top" className="max-w-sm">
+                                <p>{file.name}</p>
+                              </TooltipContent>
+                            </Tooltip>
                             <div className="flex items-center gap-2 text-xs text-muted-foreground">
                               <span>{formatBytes(file.size)}</span>
                               <Badge variant="secondary" className="text-[10px] px-1.5 py-0">

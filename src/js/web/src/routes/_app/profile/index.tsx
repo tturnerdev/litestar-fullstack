@@ -13,6 +13,7 @@ import { ProfileHero } from "@/components/profile/profile-hero"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Separator } from "@/components/ui/separator"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { useProfile } from "@/lib/api/hooks/profile"
 import { profileOAuthAccountsQueryKey } from "@/lib/generated/api/@tanstack/react-query.gen"
@@ -86,7 +87,14 @@ function QuickLinksCard() {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium">{link.title}</p>
-                <p className="truncate text-xs text-muted-foreground">{link.description}</p>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <p className="truncate text-xs text-muted-foreground">{link.description}</p>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="max-w-sm">
+                    <p>{link.description}</p>
+                  </TooltipContent>
+                </Tooltip>
               </div>
               <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5" />
             </Link>

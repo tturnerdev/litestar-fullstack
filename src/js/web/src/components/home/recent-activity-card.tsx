@@ -3,6 +3,7 @@ import { Activity, ArrowRight, LogIn, Pencil, Plus, Trash2, type LucideIcon } fr
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import type { ActivityLogEntry } from "@/lib/generated/api"
 
 function formatRelativeTime(dateStr: string): string {
@@ -135,10 +136,20 @@ export function RecentActivityCard({ activities, isLoading, isAdmin = false }: R
                         </Badge>
                       )}
                     </div>
-                    <p className="truncate text-xs text-muted-foreground">
-                      {activity.actorEmail ?? "System"}
-                      {activity.targetLabel ? ` • ${activity.targetLabel}` : ""}
-                    </p>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <p className="truncate text-xs text-muted-foreground">
+                          {activity.actorEmail ?? "System"}
+                          {activity.targetLabel ? ` • ${activity.targetLabel}` : ""}
+                        </p>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="max-w-sm">
+                        <p>
+                          {activity.actorEmail ?? "System"}
+                          {activity.targetLabel ? ` • ${activity.targetLabel}` : ""}
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
                   </div>
                   <span className="shrink-0 pt-0.5 text-xs text-muted-foreground">{formatRelativeTime(activity.createdAt)}</span>
                 </div>

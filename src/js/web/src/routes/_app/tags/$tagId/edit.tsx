@@ -143,12 +143,18 @@ function EditTagPage() {
                 placeholder="e.g., Production, Priority, VIP"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                maxLength={50}
                 required
                 autoFocus
               />
-              <p className="text-xs text-muted-foreground">
-                Current slug: <span className="font-mono">{data.slug}</span>
-              </p>
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-muted-foreground">
+                  Current slug: <span className="font-mono">{data.slug}</span>
+                </p>
+                <span className={`text-xs ${name.length >= 50 ? "text-red-500" : name.length > 40 ? "text-amber-500" : "text-muted-foreground"}`}>
+                  {name.length}/50
+                </span>
+              </div>
             </div>
 
             <div className="flex items-center justify-end gap-2 pt-2">

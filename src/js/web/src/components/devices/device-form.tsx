@@ -67,7 +67,7 @@ function formatMacAddress(raw: string): string {
 // ---------------------------------------------------------------------------
 
 const createDeviceSchema = z.object({
-  name: z.string().min(1, "Device name is required"),
+  name: z.string().min(1, "Device name is required").max(100, "Name must be 100 characters or fewer"),
   deviceType: z.string().min(1, "Device type is required"),
   macAddress: z
     .string()
@@ -120,6 +120,7 @@ export function CreateDeviceForm() {
   })
 
   const { isDirty, isSubmitting } = form.formState
+  const nameLength = (form.watch("name") ?? "").length
 
   // Block navigation when form is dirty ---------------------------------
   const blocker = useBlocker({
@@ -173,9 +174,14 @@ export function CreateDeviceForm() {
               <FormItem>
                 <RequiredLabel>Device Name</RequiredLabel>
                 <FormControl>
-                  <Input placeholder="Desk Phone - Office" {...field} />
+                  <Input placeholder="Desk Phone - Office" maxLength={100} {...field} />
                 </FormControl>
-                <FormDescription>A friendly label to identify this device.</FormDescription>
+                <div className="flex items-center justify-between">
+                  <FormDescription>A friendly label to identify this device.</FormDescription>
+                  <span className={`text-xs ${nameLength > 90 ? "text-amber-500" : "text-muted-foreground"}`}>
+                    {nameLength}/100
+                  </span>
+                </div>
                 <FormMessage />
               </FormItem>
             )}

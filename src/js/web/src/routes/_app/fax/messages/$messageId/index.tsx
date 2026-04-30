@@ -438,7 +438,14 @@ function FaxMessageDetailPage() {
               <div>
                 <p className="text-muted-foreground">File Path</p>
                 <div className="flex items-center gap-1">
-                  <p className="truncate font-mono text-xs">{data.filePath || "---"}</p>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <p className="truncate font-mono text-xs">{data.filePath || "---"}</p>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-sm">
+                      <p>{data.filePath || "---"}</p>
+                    </TooltipContent>
+                  </Tooltip>
                   {data.filePath && <CopyButton value={data.filePath} label="file path" />}
                 </div>
               </div>
