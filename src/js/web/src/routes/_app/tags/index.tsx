@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { cn } from "@/lib/utils"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { AlertCircle, ArrowUpDown, Download, Home, Loader2, Pencil, Plus, Search, Tags, Trash2, X } from "lucide-react"
 import {
   AlertDialog,
@@ -31,6 +31,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useTags, useDeleteTag } from "@/lib/api/hooks/tags"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
+import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import type { Tag } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/tags/")({
@@ -49,13 +50,20 @@ const csvHeaders: CsvHeader<Tag>[] = [
 
 function TagsPage() {
   const [search, setSearch] = useState("")
+  const debouncedSearch = useDebouncedValue(search)
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [sortField, setSortField] = useState<SortField>("name")
   const [sortDir, setSortDir] = useState<SortDir>("asc")
   const [page, setPage] = useState(1)
+
+  // Reset page when debounced search changes
+  useEffect(() => {
+    setPage(1)
+  }, [debouncedSearch])
+
   const { data, isLoading, isError, refetch } = useTags({
-    search: search || undefined,
+    search: debouncedSearch || undefined,
     page,
     pageSize: PAGE_SIZE,
     orderBy: sortField,
@@ -199,19 +207,13 @@ function TagsPage() {
             <Input
               placeholder="Search tags..."
               value={search}
-              onChange={(e) => {
-                setSearch(e.target.value)
-                setPage(1)
-              }}
+              onChange={(e) => setSearch(e.target.value)}
               className="pl-9 pr-8"
             />
             {search && (
               <button
                 type="button"
-                onClick={() => {
-                  setSearch("")
-                  setPage(1)
-                }}
+                onClick={() => setSearch("")}
                 className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
               >
                 <X className="h-3.5 w-3.5" />

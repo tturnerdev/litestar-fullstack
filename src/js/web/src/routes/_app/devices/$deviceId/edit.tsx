@@ -156,7 +156,7 @@ function EditDeviceForm({ deviceId, initialData }: EditDeviceFormProps) {
 
   const form = useForm<EditDeviceFormData>({
     resolver: zodResolver(editDeviceSchema),
-    defaultValues: {
+    values: {
       name: initialData.name,
       deviceType: initialData.deviceType,
       macAddress: initialData.macAddress ?? "",

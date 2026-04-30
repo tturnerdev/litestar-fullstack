@@ -72,6 +72,13 @@ function EditLocationPage() {
   const [nameError, setNameError] = useState<string | undefined>()
   const [nameTouched, setNameTouched] = useState(false)
 
+  // Reset form state when navigating to a different location
+  useEffect(() => {
+    setInitialized(false)
+    setNameTouched(false)
+    setNameError(undefined)
+  }, [locationId])
+
   // Pre-populate form fields when data loads
   useEffect(() => {
     if (data && !initialized) {

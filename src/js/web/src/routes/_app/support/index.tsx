@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { useQueryClient } from "@tanstack/react-query"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   AlertCircle,
   CheckCircle,
@@ -40,6 +40,7 @@ import { type Ticket, useTickets } from "@/lib/api/hooks/support"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { client } from "@/lib/generated/api/client.gen"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
+import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/support/")({
@@ -93,12 +94,18 @@ const csvHeaders: CsvHeader<Ticket>[] = [
 function SupportPage() {
   // Filter & search state
   const [search, setSearch] = useState("")
+  const debouncedSearch = useDebouncedValue(search)
   const [statusFilter, setStatusFilter] = useState<string[]>([])
   const [priorityFilter, setPriorityFilter] = useState<string[]>([])
   const [categoryFilter, setCategoryFilter] = useState<string[]>([])
   const [startDate, setStartDate] = useState("")
   const [endDate, setEndDate] = useState("")
   const [page, setPage] = useState(1)
+
+  // Reset page when debounced search changes
+  useEffect(() => {
+    setPage(1)
+  }, [debouncedSearch])
 
   // Sort state
   const [sortKey, setSortKey] = useState<string | null>(null)
@@ -113,14 +120,14 @@ function SupportPage() {
   // so when multiple are selected we rely on client-side filtering)
   const serverFilters = useMemo(() => {
     return {
-      search: search || undefined,
+      search: debouncedSearch || undefined,
       status: statusFilter.length === 1 ? statusFilter[0] : undefined,
       priority: priorityFilter.length === 1 ? priorityFilter[0] : undefined,
       category: categoryFilter.length === 1 ? categoryFilter[0] : undefined,
       orderBy: sortKey ?? undefined,
       sortOrder: sortDir ?? undefined,
     }
-  }, [search, statusFilter, priorityFilter, categoryFilter, sortKey, sortDir])
+  }, [debouncedSearch, statusFilter, priorityFilter, categoryFilter, sortKey, sortDir])
 
   const { data, isLoading, isError, refetch } = useTickets(page, PAGE_SIZE, serverFilters)
 
@@ -203,7 +210,6 @@ function SupportPage() {
   const handleSearchChange = useCallback(
     (value: string) => {
       setSearch(value)
-      setPage(1)
     },
     [],
   )

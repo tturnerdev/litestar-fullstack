@@ -33,6 +33,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useAuthStore } from "@/lib/auth"
 import { useTeams, useDeleteTeam } from "@/lib/api/hooks/teams"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
+import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import type { Team } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/teams/")({
@@ -78,6 +79,7 @@ function TeamsPage() {
 
   // Search state
   const [search, setSearch] = useState("")
+  const debouncedSearch = useDebouncedValue(search)
 
   // Sort state
   const [sortKey, setSortKey] = useState<string | null>(null)
@@ -88,7 +90,7 @@ function TeamsPage() {
 
   // Query
   const { data, isLoading, isError, refetch } = useTeams({
-    search: search || undefined,
+    search: debouncedSearch || undefined,
     orderBy: sortKey ?? undefined,
     sortOrder: sortDir ?? undefined,
   })

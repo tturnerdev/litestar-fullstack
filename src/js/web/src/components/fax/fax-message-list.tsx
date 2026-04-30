@@ -24,24 +24,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDeleteFaxMessage, useFaxMessages, useFaxNumbers } from "@/lib/api/hooks/fax"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
+import { useDebouncedValue } from "@/hooks/use-debounced-value"
 
 const PAGE_SIZE = 25
-
-function useDebounce<T>(value: T, delayMs: number): T {
-  const [debounced, setDebounced] = useState(value)
-  useEffect(() => {
-    const timer = setTimeout(() => setDebounced(value), delayMs)
-    return () => clearTimeout(timer)
-  }, [value, delayMs])
-  return debounced
-}
 
 export function FaxMessageList() {
   const [page, setPage] = useState(1)
   const [direction, setDirection] = useState<string>("")
   const [status, setStatus] = useState<string>("")
   const [searchInput, setSearchInput] = useState("")
-  const debouncedSearch = useDebounce(searchInput, 300)
+  const debouncedSearch = useDebouncedValue(searchInput)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false)

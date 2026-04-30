@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   AlertCircle,
   Cable,
@@ -42,6 +42,7 @@ import {
 } from "@/lib/api/hooks/connections"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
+import { useDebouncedValue } from "@/hooks/use-debounced-value"
 
 export const Route = createFileRoute("/_app/connections/")({
   component: ConnectionsPage,
@@ -159,9 +160,15 @@ function TestConnectionButton({ connectionId }: { connectionId: string }) {
 function ConnectionsPage() {
   // Filter & search state
   const [search, setSearch] = useState("")
+  const debouncedSearch = useDebouncedValue(search)
   const [typeFilter, setTypeFilter] = useState<string[]>([])
   const [statusFilter, setStatusFilter] = useState<string[]>([])
   const [page, setPage] = useState(1)
+
+  // Reset page when debounced search changes
+  useEffect(() => {
+    setPage(1)
+  }, [debouncedSearch])
 
   // Sort state
   const [sortKey, setSortKey] = useState<string | null>(null)
@@ -174,7 +181,7 @@ function ConnectionsPage() {
   const { data, isLoading, isError, refetch } = useConnections({
     page,
     pageSize: PAGE_SIZE,
-    search: search || undefined,
+    search: debouncedSearch || undefined,
     orderBy: sortKey ?? undefined,
     sortOrder: sortDir ?? undefined,
   })
@@ -299,19 +306,13 @@ function ConnectionsPage() {
             <Input
               placeholder="Search by name or provider..."
               value={search}
-              onChange={(e) => {
-                setSearch(e.target.value)
-                setPage(1)
-              }}
+              onChange={(e) => setSearch(e.target.value)}
               className="pl-9 pr-8"
             />
             {search && (
               <button
                 type="button"
-                onClick={() => {
-                  setSearch("")
-                  setPage(1)
-                }}
+                onClick={() => setSearch("")}
                 className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
               >
                 <X className="h-3.5 w-3.5" />

@@ -104,7 +104,7 @@ function EditExtensionForm({ extensionId, initialData }: EditExtensionFormProps)
 
   const form = useForm<EditExtensionFormData>({
     resolver: zodResolver(editExtensionSchema),
-    defaultValues: {
+    values: {
       displayName: initialData.displayName ?? "",
       isActive: initialData.isActive,
       phoneNumberId: initialData.phoneNumberId ?? "",

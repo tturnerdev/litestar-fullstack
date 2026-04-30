@@ -62,6 +62,13 @@ function EditTeamPage() {
   const [nameError, setNameError] = useState<string | undefined>()
   const [nameTouched, setNameTouched] = useState(false)
 
+  // Reset form state when navigating to a different team
+  useEffect(() => {
+    setInitialized(false)
+    setNameTouched(false)
+    setNameError(undefined)
+  }, [teamId])
+
   // Pre-populate form fields when data loads
   useEffect(() => {
     if (data && !initialized) {

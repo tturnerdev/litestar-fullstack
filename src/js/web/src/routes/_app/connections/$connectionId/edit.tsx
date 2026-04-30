@@ -192,6 +192,15 @@ function EditConnectionPage() {
 
   const credentialFields = getCredentialFields(authType)
 
+  // Reset form state when navigating to a different connection
+  useEffect(() => {
+    setInitialized(false)
+    setErrors({})
+    setTouched({})
+    setCredentials({})
+    setPendingAuthType(null)
+  }, [connectionId])
+
   // Pre-populate form fields when connection data loads
   useEffect(() => {
     if (data && !initialized) {

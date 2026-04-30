@@ -34,6 +34,11 @@ function EditTagPage() {
   const [initialized, setInitialized] = useState(false)
   const justSubmittedRef = useRef(false)
 
+  // Reset form state when navigating to a different tag
+  useEffect(() => {
+    setInitialized(false)
+  }, [tagId])
+
   // Pre-populate form fields when tag data loads
   useEffect(() => {
     if (data && !initialized) {

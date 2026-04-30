@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { AlertCircle, Building2, Download, Eye, MapPin, MoreVertical, Pencil, Search, X } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { BulkActionBar, createBulkDeleteAction } from "@/components/ui/bulk-action-bar"
@@ -16,6 +16,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { useAuthStore } from "@/lib/auth"
 import { type Location, useBulkDeleteLocations, useLocations } from "@/lib/api/hooks/locations"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
+import { useDebouncedValue } from "@/hooks/use-debounced-value"
 
 const getId = (loc: Location) => loc.id
 
@@ -37,11 +38,17 @@ export function LocationList() {
   const navigate = useNavigate()
 
   const [search, setSearch] = useState("")
+  const debouncedSearch = useDebouncedValue(search)
   const [typeFilter, setTypeFilter] = useState<string>("all")
   const [sortKey, setSortKey] = useState<string | null>(null)
   const [sortDir, setSortDir] = useState<SortDirection>(null)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [page, setPage] = useState(1)
+
+  // Reset page when debounced search changes
+  useEffect(() => {
+    setPage(1)
+  }, [debouncedSearch])
 
   const teamId = currentTeam?.id ?? ""
 
@@ -49,7 +56,7 @@ export function LocationList() {
     teamId,
     page,
     pageSize: PAGE_SIZE,
-    search: search || undefined,
+    search: debouncedSearch || undefined,
     locationType: typeFilter !== "all" ? typeFilter : undefined,
     orderBy: sortKey ?? undefined,
     sortOrder: sortDir ?? undefined,
@@ -180,19 +187,13 @@ export function LocationList() {
             <Input
               placeholder="Search locations..."
               value={search}
-              onChange={(e) => {
-                setSearch(e.target.value)
-                setPage(1)
-              }}
+              onChange={(e) => setSearch(e.target.value)}
               className="pl-10 pr-8"
             />
             {search && (
               <button
                 type="button"
-                onClick={() => {
-                  setSearch("")
-                  setPage(1)
-                }}
+                onClick={() => setSearch("")}
                 className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
               >
                 <X className="h-3.5 w-3.5" />

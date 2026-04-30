@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   AlertCircle,
   Eye,
@@ -38,6 +38,7 @@ import {
   useFaxNumbers,
 } from "@/lib/api/hooks/fax"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
+import { useDebouncedValue } from "@/hooks/use-debounced-value"
 
 export const Route = createFileRoute("/_app/fax/messages/")({
   component: FaxMessagesPage,
@@ -73,11 +74,17 @@ function formatPages(count: number): string {
 function FaxMessagesPage() {
   // Filter & search state
   const [search, setSearch] = useState("")
+  const debouncedSearch = useDebouncedValue(search)
   const [directionFilter, setDirectionFilter] = useState<string[]>([])
   const [statusFilter, setStatusFilter] = useState<string[]>([])
   const [startDate, setStartDate] = useState("")
   const [endDate, setEndDate] = useState("")
   const [page, setPage] = useState(1)
+
+  // Reset page when debounced search changes
+  useEffect(() => {
+    setPage(1)
+  }, [debouncedSearch])
 
   // Sort state
   const [sortKey, setSortKey] = useState<string | null>(null)
@@ -91,7 +98,7 @@ function FaxMessagesPage() {
   const { data, isLoading, isError, refetch } = useFaxMessages({
     page,
     pageSize: PAGE_SIZE,
-    search: search || undefined,
+    search: debouncedSearch || undefined,
     direction: directionFilter.length === 1 ? directionFilter[0] : undefined,
     status: statusFilter.length === 1 ? statusFilter[0] : undefined,
     orderBy: sortKey ?? undefined,
@@ -247,19 +254,13 @@ function FaxMessagesPage() {
             <Input
               placeholder="Search by number, sender, or subject..."
               value={search}
-              onChange={(e) => {
-                setSearch(e.target.value)
-                setPage(1)
-              }}
+              onChange={(e) => setSearch(e.target.value)}
               className="pl-9 pr-8"
             />
             {search && (
               <button
                 type="button"
-                onClick={() => {
-                  setSearch("")
-                  setPage(1)
-                }}
+                onClick={() => setSearch("")}
                 className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
               >
                 <X className="h-3.5 w-3.5" />

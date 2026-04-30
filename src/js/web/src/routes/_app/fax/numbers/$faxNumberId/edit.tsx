@@ -39,6 +39,11 @@ function EditFaxNumberPage() {
   const [initialized, setInitialized] = useState(false)
   const justSubmittedRef = useRef(false)
 
+  // Reset form state when navigating to a different fax number
+  useEffect(() => {
+    setInitialized(false)
+  }, [faxNumberId])
+
   // Pre-populate form fields when fax number data loads
   useEffect(() => {
     if (data && !initialized) {
