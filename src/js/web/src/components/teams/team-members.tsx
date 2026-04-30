@@ -1,14 +1,24 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { ChevronDown, Clock, Crown, Mail, Shield, User, UserMinus, X } from "lucide-react"
-import { useState } from "react"
+import { AlertTriangle, ChevronDown, Clock, Crown, Loader2, Mail, RotateCw, Search, Shield, User, UserMinus, X } from "lucide-react"
+import { useMemo, useState } from "react"
 import { toast } from "sonner"
 import { InviteMemberDialog } from "@/components/teams/invite-member-dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { useAuthStore } from "@/lib/auth"
 import {
@@ -49,6 +59,28 @@ function getMemberColor(identifier: string): string {
   return colors[index]
 }
 
+function timeAgo(dateString: string): string {
+  const now = Date.now()
+  const then = new Date(dateString).getTime()
+  const seconds = Math.floor((now - then) / 1000)
+
+  if (seconds < 60) return "just now"
+  const minutes = Math.floor(seconds / 60)
+  if (minutes < 60) return `${minutes}m ago`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours}h ago`
+  const days = Math.floor(hours / 24)
+  if (days < 7) return `${days}d ago`
+  const weeks = Math.floor(days / 7)
+  if (weeks < 5) return `${weeks}w ago`
+  const months = Math.floor(days / 30)
+  if (months < 12) return `${months}mo ago`
+  const years = Math.floor(days / 365)
+  return `${years}y ago`
+}
+
+type RoleFilter = "ALL" | "OWNER" | "ADMIN" | "MEMBER"
+
 interface TeamMembersProps {
   team: Team
   teamId: string
@@ -60,6 +92,8 @@ export function TeamMembers({ team, teamId, canManageMembers, isOwner }: TeamMem
   const queryClient = useQueryClient()
   const { user } = useAuthStore()
   const [removeMember, setRemoveMember] = useState<TeamMember | null>(null)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [roleFilter, setRoleFilter] = useState<RoleFilter>("ALL")
   const members = team.members ?? []
 
   const { data: invitationsData } = useQuery({
@@ -74,6 +108,47 @@ export function TeamMembers({ team, teamId, canManageMembers, isOwner }: TeamMem
   })
 
   const pendingInvitations = invitationsData?.filter((inv) => !inv.isAccepted) ?? []
+
+  const roleCounts = useMemo(() => {
+    let owners = 0
+    let admins = 0
+    let memberCount = 0
+    for (const m of members) {
+      if (m.isOwner) owners++
+      else if (m.role === "ADMIN") admins++
+      else memberCount++
+    }
+    return { owners, admins, members: memberCount }
+  }, [members])
+
+  const roleCountDescription = useMemo(() => {
+    const parts: string[] = []
+    if (roleCounts.owners > 0) parts.push(`${roleCounts.owners} owner${roleCounts.owners !== 1 ? "s" : ""}`)
+    if (roleCounts.admins > 0) parts.push(`${roleCounts.admins} admin${roleCounts.admins !== 1 ? "s" : ""}`)
+    if (roleCounts.members > 0) parts.push(`${roleCounts.members} member${roleCounts.members !== 1 ? "s" : ""}`)
+    return parts.length > 0 ? ` (${parts.join(", ")})` : ""
+  }, [roleCounts])
+
+  const filteredMembers = useMemo(() => {
+    let result = members
+
+    if (roleFilter !== "ALL") {
+      result = result.filter((m) => {
+        if (roleFilter === "OWNER") return m.isOwner
+        if (roleFilter === "ADMIN") return m.role === "ADMIN" && !m.isOwner
+        return m.role === "MEMBER" || (!m.role && !m.isOwner)
+      })
+    }
+
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase()
+      result = result.filter(
+        (m) => (m.name && m.name.toLowerCase().includes(query)) || m.email.toLowerCase().includes(query),
+      )
+    }
+
+    return result
+  }, [members, roleFilter, searchQuery])
 
   const removeMemberMutation = useMutation({
     mutationFn: async (memberEmail: string) => {
@@ -182,6 +257,13 @@ export function TeamMembers({ team, teamId, canManageMembers, isOwner }: TeamMem
     )
   }
 
+  const roleFilterButtons: { label: string; value: RoleFilter }[] = [
+    { label: "All", value: "ALL" },
+    { label: "Owners", value: "OWNER" },
+    { label: "Admins", value: "ADMIN" },
+    { label: "Members", value: "MEMBER" },
+  ]
+
   return (
     <div className="space-y-6">
       <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
@@ -189,87 +271,121 @@ export function TeamMembers({ team, teamId, canManageMembers, isOwner }: TeamMem
           <div className="space-y-1.5">
             <CardTitle>Members</CardTitle>
             <CardDescription>
-              {members.length} member{members.length !== 1 ? "s" : ""} in this team
+              {members.length} member{members.length !== 1 ? "s" : ""} in this team{roleCountDescription}
             </CardDescription>
           </div>
           {canManageMembers && <InviteMemberDialog teamId={teamId} />}
         </CardHeader>
-        <CardContent className="space-y-2">
-          {members.map((member: TeamMember) => {
-            const isSelf = member.userId === user?.id
-            const colorClass = getMemberColor(member.email)
-
-            return (
-              <div
-                key={member.id}
-                className={`flex items-center justify-between rounded-xl border p-3 transition-colors ${isSelf ? "border-primary/30 bg-primary/5" : "border-border/60 bg-background/60 hover:bg-muted/30"}`}
+        <CardContent className="space-y-3">
+          {/* Role filter buttons */}
+          <div className="flex items-center gap-1.5">
+            {roleFilterButtons.map((btn) => (
+              <Button
+                key={btn.value}
+                variant={roleFilter === btn.value ? "secondary" : "ghost"}
+                size="sm"
+                className="h-7 px-2.5 text-xs"
+                onClick={() => setRoleFilter(btn.value)}
               >
-                <div className="flex items-center gap-3">
-                  <Avatar className={`h-9 w-9 ${colorClass}`}>
-                    <AvatarFallback className={`text-xs font-semibold ${colorClass}`}>
-                      {getMemberInitials(member.name, member.email)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col">
-                    <div className="flex items-center gap-2">
-                      <p className="font-medium text-sm text-foreground">{member.name ?? member.email}</p>
-                      {isSelf && (
-                        <Badge variant="secondary" className="text-[10px]">
-                          You
-                        </Badge>
-                      )}
+                {btn.label}
+              </Button>
+            ))}
+          </div>
+
+          {/* Search input - only show when 5+ members */}
+          {members.length >= 5 && (
+            <div className="relative">
+              <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search by name or email..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="h-8 pl-8 text-sm"
+              />
+            </div>
+          )}
+
+          {/* Member list */}
+          <div className="space-y-2">
+            {filteredMembers.map((member: TeamMember) => {
+              const isSelf = member.userId === user?.id
+              const colorClass = getMemberColor(member.email)
+
+              return (
+                <div
+                  key={member.id}
+                  className={`flex items-center justify-between rounded-xl border p-3 transition-colors ${isSelf ? "border-primary/30 bg-primary/5" : "border-border/60 bg-background/60 hover:bg-muted/30"}`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Avatar className={`h-9 w-9 ${colorClass}`}>
+                      <AvatarFallback className={`text-xs font-semibold ${colorClass}`}>
+                        {getMemberInitials(member.name, member.email)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-sm text-foreground">{member.name ?? member.email}</p>
+                        {isSelf && (
+                          <Badge variant="secondary" className="text-[10px]">
+                            You
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-muted-foreground text-xs">{member.email}</p>
                     </div>
-                    <p className="text-muted-foreground text-xs">{member.email}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {canChangeRole(member) ? (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-7 gap-1 px-2 text-xs">
+                            {getRoleBadge(member)}
+                            <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                          <DropdownMenuLabel>Change role</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => updateRoleMutation.mutate({ userId: member.userId, role: "ADMIN" })}
+                            disabled={member.role === "ADMIN"}
+                          >
+                            <Shield className="mr-2 h-4 w-4 text-blue-500" />
+                            <div>
+                              <p className="font-medium">Admin</p>
+                              <p className="text-xs text-muted-foreground">Can manage members and settings</p>
+                            </div>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => updateRoleMutation.mutate({ userId: member.userId, role: "MEMBER" })}
+                            disabled={member.role === "MEMBER" || !member.role}
+                          >
+                            <User className="mr-2 h-4 w-4" />
+                            <div>
+                              <p className="font-medium">Member</p>
+                              <p className="text-xs text-muted-foreground">Can view and collaborate</p>
+                            </div>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    ) : (
+                      getRoleBadge(member)
+                    )}
+                    {canRemoveMember(member) && (
+                      <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive" onClick={() => setRemoveMember(member)}>
+                        <UserMinus className="h-4 w-4" />
+                        <span className="sr-only">Remove member</span>
+                      </Button>
+                    )}
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  {canChangeRole(member) ? (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-7 gap-1 px-2 text-xs">
-                          {getRoleBadge(member)}
-                          <ChevronDown className="h-3 w-3 text-muted-foreground" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48">
-                        <DropdownMenuLabel>Change role</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={() => updateRoleMutation.mutate({ userId: member.userId, role: "ADMIN" })}
-                          disabled={member.role === "ADMIN"}
-                        >
-                          <Shield className="mr-2 h-4 w-4 text-blue-500" />
-                          <div>
-                            <p className="font-medium">Admin</p>
-                            <p className="text-xs text-muted-foreground">Can manage members and settings</p>
-                          </div>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => updateRoleMutation.mutate({ userId: member.userId, role: "MEMBER" })}
-                          disabled={member.role === "MEMBER" || !member.role}
-                        >
-                          <User className="mr-2 h-4 w-4" />
-                          <div>
-                            <p className="font-medium">Member</p>
-                            <p className="text-xs text-muted-foreground">Can view and collaborate</p>
-                          </div>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  ) : (
-                    getRoleBadge(member)
-                  )}
-                  {canRemoveMember(member) && (
-                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive" onClick={() => setRemoveMember(member)}>
-                      <UserMinus className="h-4 w-4" />
-                      <span className="sr-only">Remove member</span>
-                    </Button>
-                  )}
-                </div>
-              </div>
-            )
-          })}
-          {members.length === 0 && <div className="py-8 text-center text-sm text-muted-foreground">No members yet. Invite someone to get started.</div>}
+              )
+            })}
+            {filteredMembers.length === 0 && members.length > 0 && (
+              <div className="py-8 text-center text-sm text-muted-foreground">No members match the current filters.</div>
+            )}
+            {members.length === 0 && <div className="py-8 text-center text-sm text-muted-foreground">No members yet. Invite someone to get started.</div>}
+          </div>
         </CardContent>
       </Card>
 
@@ -295,21 +411,36 @@ export function TeamMembers({ team, teamId, canManageMembers, isOwner }: TeamMem
                   <div>
                     <p className="text-sm font-medium">{invitation.email}</p>
                     <p className="text-xs text-muted-foreground">
-                      Invited as {invitation.role.toLowerCase()} &middot; {new Date(invitation.createdAt).toLocaleDateString()}
+                      Invited as {invitation.role.toLowerCase()} &middot; {timeAgo(invitation.createdAt)}
                     </p>
                   </div>
                 </div>
                 {canManageMembers && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
-                    onClick={() => cancelInvitationMutation.mutate(invitation.id)}
-                    disabled={cancelInvitationMutation.isPending}
-                  >
-                    <X className="h-4 w-4" />
-                    <span className="sr-only">Cancel invitation</span>
-                  </Button>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 gap-1 px-2 text-xs text-muted-foreground hover:text-foreground"
+                      onClick={() => {
+                        toast.info("Invitation resent", {
+                          description: `A new invitation has been sent to ${invitation.email}.`,
+                        })
+                      }}
+                    >
+                      <RotateCw className="h-3.5 w-3.5" />
+                      Resend
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
+                      onClick={() => cancelInvitationMutation.mutate(invitation.id)}
+                      disabled={cancelInvitationMutation.isPending}
+                    >
+                      <X className="h-4 w-4" />
+                      <span className="sr-only">Cancel invitation</span>
+                    </Button>
+                  </div>
                 )}
               </div>
             ))}
@@ -317,30 +448,44 @@ export function TeamMembers({ team, teamId, canManageMembers, isOwner }: TeamMem
         </Card>
       )}
 
-      {/* Remove Member Confirmation Dialog */}
-      <Dialog open={!!removeMember} onOpenChange={(open) => !open && setRemoveMember(null)}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Remove member</DialogTitle>
-            <DialogDescription>
+      {/* Remove Member Confirmation AlertDialog */}
+      <AlertDialog open={!!removeMember} onOpenChange={(open) => !open && setRemoveMember(null)}>
+        <AlertDialogContent className="sm:max-w-md">
+          <AlertDialogHeader>
+            <div className="flex items-center gap-2">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-destructive/10">
+                <AlertTriangle className="h-5 w-5 text-destructive" />
+              </div>
+              <AlertDialogTitle>Remove member</AlertDialogTitle>
+            </div>
+            <AlertDialogDescription>
               Are you sure you want to remove <strong>{removeMember?.name ?? removeMember?.email}</strong> from this team? They will lose access to all team resources.
-            </DialogDescription>
-          </DialogHeader>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
           <Separator />
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setRemoveMember(null)}>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setRemoveMember(null)}>
               Cancel
-            </Button>
-            <Button
-              variant="destructive"
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className={buttonDestructiveClass}
               disabled={removeMemberMutation.isPending}
               onClick={() => removeMember && removeMemberMutation.mutate(removeMember.email)}
             >
-              {removeMemberMutation.isPending ? "Removing..." : "Remove member"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+              {removeMemberMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Removing...
+                </>
+              ) : (
+                "Remove member"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
+
+const buttonDestructiveClass = "bg-destructive text-white hover:bg-destructive/90"

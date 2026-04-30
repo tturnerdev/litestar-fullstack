@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.56.0 (2026-04-30)
+
+### Improved
+- **Extension table** — AlertDialog delete, row hover and striping, selected row highlight, active status dots, total count in header, result count text, Settings icon on action button, and Phone icon empty state.
+- **Team list** — sort dropdown (name/members), grid/list view toggle, inactive team badge, relative created dates, result count in header, and "Create Team" placeholder card with dashed border.
+- **Team members** — AlertDialog remove confirmation with spinner, search/filter by name or email, role filter buttons, member count per role breakdown, relative invitation dates, resend invitation button, and filtered empty state.
+- **Team settings** — AlertDialog delete with consequences list, character counters (100/500), unsaved changes banner with Save/Discard, Settings and AlertTriangle icons, name field description, and form reset on save.
+
 ## v0.55.0 (2026-04-30)
 
 ### Improved

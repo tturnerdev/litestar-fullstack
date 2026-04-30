@@ -1,20 +1,20 @@
 import { Link } from "@tanstack/react-router"
 import { useQueryClient } from "@tanstack/react-query"
-import { AlertTriangle, Download, Loader2, Trash2 } from "lucide-react"
+import { AlertTriangle, Download, Loader2, Phone, Settings, Trash2 } from "lucide-react"
 import { useCallback, useMemo, useState } from "react"
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
 import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
 import { SkeletonTable } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useTableSelection } from "@/hooks/use-table-selection"
@@ -111,7 +111,7 @@ export function ExtensionTable() {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>Extensions</CardTitle>
+            <CardTitle>Extensions ({data.total})</CardTitle>
             <Button variant="outline" size="sm" onClick={handleExportAll} disabled={items.length === 0}>
               <Download className="mr-1 h-3.5 w-3.5" />
               Export All
@@ -141,14 +141,18 @@ export function ExtensionTable() {
               {data.items.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
-                    No extensions found.
+                    <div className="flex flex-col items-center gap-2">
+                      <Phone className="h-6 w-6 text-muted-foreground/60" />
+                      No extensions found.
+                    </div>
                   </TableCell>
                 </TableRow>
               ) : (
-                data.items.map((ext) => (
+                data.items.map((ext, idx) => (
                   <TableRow
                     key={ext.id}
                     data-state={selection.isSelected(ext.id) ? "selected" : undefined}
+                    className={`hover:bg-muted/50 ${idx % 2 === 0 ? "bg-muted/20" : ""} ${selection.isSelected(ext.id) ? "bg-primary/10" : ""}`}
                   >
                     <TableCell>
                       <Checkbox
@@ -161,12 +165,16 @@ export function ExtensionTable() {
                     <TableCell>{ext.displayName}</TableCell>
                     <TableCell>{ext.phoneNumberId ? <Badge variant="secondary">Assigned</Badge> : <span className="text-muted-foreground">--</span>}</TableCell>
                     <TableCell>
-                      <Badge variant={ext.isActive ? "default" : "outline"}>{ext.isActive ? "Active" : "Inactive"}</Badge>
+                      <div className="flex items-center gap-1.5">
+                        <span className={`inline-block h-2 w-2 rounded-full ${ext.isActive ? "bg-green-500" : "bg-gray-400"}`} />
+                        <Badge variant={ext.isActive ? "default" : "outline"}>{ext.isActive ? "Active" : "Inactive"}</Badge>
+                      </div>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button asChild variant="outline" size="sm">
                           <Link to="/voice/extensions/$extensionId" params={{ extensionId: ext.id }}>
+                            <Settings className="mr-1 h-3.5 w-3.5" />
                             Settings
                           </Link>
                         </Button>
@@ -185,38 +193,43 @@ export function ExtensionTable() {
               )}
             </TableBody>
           </Table>
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">
-                Page {page} of {totalPages}
-              </p>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>
-                  Previous
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>
-                  Next
-                </Button>
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              Showing {items.length} of {data.total} extension{data.total === 1 ? "" : "s"}
+            </p>
+            {totalPages > 1 && (
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-muted-foreground">
+                  Page {page} of {totalPages}
+                </span>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>
+                    Previous
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>
+                    Next
+                  </Button>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </CardContent>
 
-        <Dialog open={deleteTarget !== null} onOpenChange={(open) => !open && setDeleteTarget(null)}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
+        <AlertDialog open={deleteTarget !== null} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5 text-destructive" />
                 Delete Extension
-              </DialogTitle>
-              <DialogDescription>
+              </AlertDialogTitle>
+              <AlertDialogDescription>
                 Are you sure you want to delete extension{" "}
                 <span className="font-medium">{deleteTarget?.displayName}</span>{" "}
                 (Ext. <span className="font-mono">{deleteTarget?.extensionNumber}</span>)? This action cannot be undone.
                 All associated forwarding rules, voicemail, and DND settings will be permanently removed.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
               <Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={deleteMutation.isPending}>
                 Cancel
               </Button>
@@ -233,9 +246,9 @@ export function ExtensionTable() {
                 {deleteMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Delete
               </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </Card>
 
       <BulkActionBar
