@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { createFileRoute, Link } from "@tanstack/react-router"
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { cn } from "@/lib/utils"
 import {
   AlertCircle,
@@ -9,6 +9,7 @@ import {
   Printer,
   Search,
   Send,
+  X,
   XCircle,
 } from "lucide-react"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
@@ -95,6 +96,7 @@ function StatsCardSkeleton() {
 }
 
 function AdminFaxPage() {
+  const navigate = useNavigate()
   const [numberPage, setNumberPage] = useState(1)
   const [numberSearch, setNumberSearch] = useState("")
 
@@ -208,7 +210,7 @@ function AdminFaxPage() {
                 </TableHeader>
                 <TableBody>
                   {recentMessages.map((msg, index) => (
-                    <TableRow key={msg.id} className={cn("hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")}>
+                    <TableRow key={msg.id} className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")} onClick={() => navigate({ to: "/fax/messages/$messageId", params: { messageId: msg.id } })}>
                       <TableCell>
                         <Badge variant={msg.direction === "inbound" ? "outline" : "secondary"}>
                           <span className="flex items-center gap-1">
@@ -257,8 +259,21 @@ function AdminFaxPage() {
                       setNumberSearch(e.target.value)
                       setNumberPage(1)
                     }}
-                    className="pl-9"
+                    className="pl-9 pr-8"
                   />
+                  {numberSearch && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNumberSearch("")
+                        setNumberPage(1)
+                      }}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                      <span className="sr-only">Clear search</span>
+                    </button>
+                  )}
                 </div>
                 <Link to="/fax/numbers">
                   <Button variant="outline" size="sm" className="gap-1.5">
@@ -297,7 +312,7 @@ function AdminFaxPage() {
                   </TableHeader>
                   <TableBody>
                     {faxNumbers.map((fn, index) => (
-                      <TableRow key={fn.id} className={cn("hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")}>
+                      <TableRow key={fn.id} className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")} onClick={() => navigate({ to: "/fax/numbers/$faxNumberId", params: { faxNumberId: fn.id } })}>
                         <TableCell className="font-mono font-medium">{fn.number}</TableCell>
                         <TableCell className="text-muted-foreground">{fn.label ?? "—"}</TableCell>
                         <TableCell className="text-muted-foreground">{fn.teamName ?? "—"}</TableCell>

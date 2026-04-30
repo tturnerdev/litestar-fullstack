@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { createFileRoute, Link } from "@tanstack/react-router"
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { cn } from "@/lib/utils"
 import {
   AlertCircle,
@@ -10,6 +10,7 @@ import {
   Signal,
   SignalZero,
   Wifi,
+  X,
 } from "lucide-react"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
@@ -94,6 +95,7 @@ function StatsCardSkeleton() {
 }
 
 function AdminDevicesPage() {
+  const navigate = useNavigate()
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState("")
 
@@ -205,7 +207,7 @@ function AdminDevicesPage() {
                 </TableHeader>
                 <TableBody>
                   {recentDevices.map((device, index) => (
-                    <TableRow key={device.id} className={cn("hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")}>
+                    <TableRow key={device.id} className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")} onClick={() => navigate({ to: "/devices/$deviceId", params: { deviceId: device.id } })}>
                       <TableCell className="font-medium">{device.name}</TableCell>
                       <TableCell className="font-mono text-muted-foreground text-sm">{device.macAddress ?? "—"}</TableCell>
                       <TableCell className="text-muted-foreground">{device.model ?? "—"}</TableCell>
@@ -248,8 +250,21 @@ function AdminDevicesPage() {
                     setSearch(e.target.value)
                     setPage(1)
                   }}
-                  className="pl-9"
+                  className="pl-9 pr-8"
                 />
+                {search && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearch("")
+                      setPage(1)
+                    }}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                    <span className="sr-only">Clear search</span>
+                  </button>
+                )}
               </div>
             </div>
           </CardHeader>
@@ -282,7 +297,7 @@ function AdminDevicesPage() {
                   </TableHeader>
                   <TableBody>
                     {devices.map((device, index) => (
-                      <TableRow key={device.id} className={cn("hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")}>
+                      <TableRow key={device.id} className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")} onClick={() => navigate({ to: "/devices/$deviceId", params: { deviceId: device.id } })}>
                         <TableCell className="font-medium">{device.name}</TableCell>
                         <TableCell className="font-mono text-muted-foreground text-sm">{device.macAddress ?? "—"}</TableCell>
                         <TableCell className="text-muted-foreground">{device.model ?? "—"}</TableCell>

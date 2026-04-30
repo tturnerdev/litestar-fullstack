@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { createFileRoute, Link } from "@tanstack/react-router"
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { cn } from "@/lib/utils"
 import {
   AlertCircle,
@@ -9,6 +9,7 @@ import {
   PhoneOff,
   Search,
   Signal,
+  X,
 } from "lucide-react"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
@@ -87,6 +88,7 @@ function StatsCardSkeleton() {
 }
 
 function AdminVoicePage() {
+  const navigate = useNavigate()
   const [phoneNumberPage, setPhoneNumberPage] = useState(1)
   const [phoneSearch, setPhoneSearch] = useState("")
 
@@ -174,8 +176,21 @@ function AdminVoicePage() {
                       setPhoneSearch(e.target.value)
                       setPhoneNumberPage(1)
                     }}
-                    className="pl-9"
+                    className="pl-9 pr-8"
                   />
+                  {phoneSearch && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPhoneSearch("")
+                        setPhoneNumberPage(1)
+                      }}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                      <span className="sr-only">Clear search</span>
+                    </button>
+                  )}
                 </div>
                 <Link to="/voice/phone-numbers">
                   <Button variant="outline" size="sm" className="gap-1.5">
@@ -298,7 +313,7 @@ function AdminVoicePage() {
                 </TableHeader>
                 <TableBody>
                   {recentExtensions.map((ext, index) => (
-                    <TableRow key={ext.id} className={cn("hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")}>
+                    <TableRow key={ext.id} className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")} onClick={() => navigate({ to: "/voice/extensions/$extensionId", params: { extensionId: ext.id } })}>
                       <TableCell className="font-mono font-medium">{ext.extensionNumber}</TableCell>
                       <TableCell className="text-muted-foreground">{ext.displayName}</TableCell>
                       <TableCell className="text-muted-foreground">{ext.ownerEmail ?? "—"}</TableCell>

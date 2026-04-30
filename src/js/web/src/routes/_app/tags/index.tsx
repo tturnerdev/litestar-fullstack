@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { cn } from "@/lib/utils"
 import { useMemo, useState } from "react"
-import { AlertCircle, ArrowUpDown, Home, Loader2, Pencil, Plus, Search, Tags, Trash2 } from "lucide-react"
+import { AlertCircle, ArrowUpDown, Home, Loader2, Pencil, Plus, Search, Tags, Trash2, X } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -173,8 +173,18 @@ function TagsPage() {
               placeholder="Search tags..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9"
+              className="pl-9 pr-8"
             />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch("")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-3.5 w-3.5" />
+                <span className="sr-only">Clear search</span>
+              </button>
+            )}
           </div>
           {selected.size > 0 && (
             <Button variant="destructive" size="sm" onClick={() => setBulkDeleteOpen(true)}>
