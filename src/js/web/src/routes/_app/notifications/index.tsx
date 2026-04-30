@@ -1,11 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router"
 import {
+  AlertTriangle,
   Bell,
   BellOff,
   CheckCheck,
   ChevronLeft,
   ChevronRight,
   Laptop,
+  Loader2,
   Mail,
   MessageSquare,
   Phone,
@@ -15,6 +17,16 @@ import {
   Users,
 } from "lucide-react"
 import { useState } from "react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -22,6 +34,7 @@ import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import {
   type NotificationItem,
   useDeleteAllRead,
@@ -48,6 +61,13 @@ function timeAgo(dateStr: string): string {
   if (weeks < 5) return `${weeks}w ago`
   const months = Math.floor(days / 30)
   return `${months}mo ago`
+}
+
+function formatDateTime(dateStr: string): string {
+  return new Date(dateStr).toLocaleString(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  })
 }
 
 export const Route = createFileRoute("/_app/notifications/")({
@@ -119,7 +139,7 @@ function NotificationCard({ notification }: { notification: NotificationItem }) 
     <Card
       hover
       className={cn(
-        "transition-all",
+        "group/card transition-all",
         !notification.isRead && "border-primary/20 bg-accent/30",
         notification.actionUrl && "cursor-pointer",
       )}
@@ -140,8 +160,16 @@ function NotificationCard({ notification }: { notification: NotificationItem }) 
             </Badge>
           </div>
           <p className="mt-0.5 text-sm text-muted-foreground">{notification.message}</p>
-          <p className="mt-1 text-xs text-muted-foreground/70">{relativeTime}</p>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <p className="mt-1 cursor-default text-xs text-muted-foreground/70">{relativeTime}</p>
+            </TooltipTrigger>
+            <TooltipContent>{formatDateTime(notification.createdAt)}</TooltipContent>
+          </Tooltip>
         </div>
+        {notification.actionUrl && (
+          <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground/0 transition-colors group-hover/card:text-muted-foreground" />
+        )}
         <div className="flex shrink-0 items-center gap-1">
           {!notification.isRead && (
             <Button
@@ -196,7 +224,7 @@ function NotificationPreferences() {
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-8">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
         </CardContent>
       </Card>
@@ -278,6 +306,7 @@ function NotificationPreferences() {
 function NotificationsPage() {
   const [page, setPage] = useState(1)
   const [activeCategory, setActiveCategory] = useState<string>("all")
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const pageSize = 20
 
   const { data: unreadData } = useUnreadCount()
@@ -293,6 +322,11 @@ function NotificationsPage() {
 
   const filteredNotifications =
     activeCategory === "all" ? notifications : notifications.filter((n) => n.category === activeCategory)
+
+  const categoryCounts = notifications.reduce<Record<string, number>>((acc, n) => {
+    acc[n.category] = (acc[n.category] ?? 0) + 1
+    return acc
+  }, {})
 
   const hasAnyNotifications = total > 0
   const isEmptyUnfiltered = !isLoading && !hasAnyNotifications
@@ -310,7 +344,7 @@ function NotificationsPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => deleteAllRead.mutate()}
+                onClick={() => setDeleteConfirmOpen(true)}
                 disabled={deleteAllRead.isPending}
                 className="text-destructive hover:text-destructive"
               >
@@ -330,7 +364,7 @@ function NotificationsPage() {
 
       <PageSection delay={0.1}>
         {isEmptyUnfiltered ? (
-          <div className="flex flex-col items-center justify-center py-24 text-center">
+          <div className="flex animate-in fade-in flex-col items-center justify-center py-24 text-center">
             <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-muted">
               <BellOff className="h-10 w-10 text-muted-foreground/40" />
             </div>
@@ -342,29 +376,44 @@ function NotificationsPage() {
         ) : (
           <>
             <div className="flex flex-wrap gap-2">
-              {CATEGORIES.map(({ value, label }) => (
-                <Button
-                  key={value}
-                  variant={activeCategory === value ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => {
-                    setActiveCategory(value)
-                    setPage(1)
-                  }}
-                  className="text-xs"
-                >
-                  {label}
-                </Button>
-              ))}
+              {CATEGORIES.map(({ value, label }) => {
+                const count = value === "all" ? notifications.length : (categoryCounts[value] ?? 0)
+                const isActive = activeCategory === value
+                return (
+                  <Button
+                    key={value}
+                    variant={isActive ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => {
+                      setActiveCategory(value)
+                      setPage(1)
+                    }}
+                    className="gap-1.5 text-xs"
+                  >
+                    {label}
+                    {count > 0 && (
+                      <Badge
+                        variant={isActive ? "secondary" : "outline"}
+                        className={cn(
+                          "ml-0.5 h-5 min-w-5 justify-center px-1.5 text-[0.6rem]",
+                          isActive && "bg-primary-foreground/20 text-primary-foreground",
+                        )}
+                      >
+                        {count}
+                      </Badge>
+                    )}
+                  </Button>
+                )
+              })}
             </div>
 
             <div className="mt-4 space-y-3">
               {isLoading ? (
                 <div className="flex items-center justify-center py-16">
-                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                 </div>
               ) : isEmptyFiltered ? (
-                <div className="flex flex-col items-center justify-center py-16 text-center">
+                <div className="flex animate-in fade-in flex-col items-center justify-center py-16 text-center">
                   <Bell className="mb-3 h-12 w-12 text-muted-foreground/30" />
                   <p className="text-lg font-medium text-muted-foreground">No notifications</p>
                   <p className="text-sm text-muted-foreground/70">
@@ -400,6 +449,39 @@ function NotificationsPage() {
       <PageSection delay={0.2}>
         <NotificationPreferences />
       </PageSection>
+
+      <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10">
+                <AlertTriangle className="h-5 w-5 text-destructive" />
+              </div>
+              <AlertDialogTitle>Delete all read notifications</AlertDialogTitle>
+            </div>
+            <AlertDialogDescription>
+              This will permanently delete {readCount} read notification{readCount !== 1 ? "s" : ""}. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeleteConfirmOpen(false)} disabled={deleteAllRead.isPending}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                deleteAllRead.mutate(undefined, {
+                  onSuccess: () => setDeleteConfirmOpen(false),
+                })
+              }}
+              disabled={deleteAllRead.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteAllRead.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Delete {readCount} notification{readCount !== 1 ? "s" : ""}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PageContainer>
   )
 }
