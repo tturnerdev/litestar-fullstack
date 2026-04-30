@@ -1,3 +1,4 @@
+import * as React from "react"
 import { useCallback, useRef, useState } from "react"
 import { Link } from "@tanstack/react-router"
 import { motion, AnimatePresence } from "framer-motion"
@@ -15,6 +16,7 @@ const APP_VERSION = "v0.37.0"
 interface HelpDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  defaultTab?: string
 }
 
 const DEFAULT_FORM_DATA: ReportFormData = {
@@ -69,11 +71,24 @@ function AnimatedSection({ children, delay = 0 }: { children: React.ReactNode; d
 // Component
 // ---------------------------------------------------------------------------
 
-export function HelpDialog({ open, onOpenChange }: HelpDialogProps) {
+export function HelpDialog({ open, onOpenChange, defaultTab }: HelpDialogProps) {
   const [activeTab, setActiveTab] = useState("resources")
   const [formData, setFormData] = useState<ReportFormData>(DEFAULT_FORM_DATA)
   const [isCapturing, setIsCapturing] = useState(false)
   const [showShortcuts, setShowShortcuts] = useState(false)
+
+  // Apply defaultTab when the dialog opens
+  React.useEffect(() => {
+    if (open && defaultTab) {
+      if (defaultTab === "shortcuts") {
+        setShowShortcuts(true)
+        setActiveTab("resources")
+      } else {
+        setShowShortcuts(false)
+        setActiveTab(defaultTab)
+      }
+    }
+  }, [open, defaultTab])
   const formDataRef = useRef<ReportFormData>(formData)
 
   // Keep ref in sync so the capture callback always sees current form data

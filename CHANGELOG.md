@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.49.0 (2026-04-30)
+
+### Improved
+- **Help menu** — added Keyboard Shortcuts, What's New (with "New" badge), and Contact Support menu items with separators and keyboard shortcut hints.
+- **Help dialog** — `defaultTab` prop support for opening directly to shortcuts or resources tab.
+- **Resources tab** — grouped into Documentation and Community sections with headers, colored icon backgrounds, search/filter input, "Updated" badge on API docs, and hover card effects.
+- **Nav projects** — colored team avatars with initials, 5-item limit with collapsible "Show more", optional member count badge, active state highlighting, and hover transitions.
+- **Theme toggle** — three-state cycle (light/dark/system) with rotation animation, tooltip, pulse effect on change, and colored dot indicator.
+- **About page** — hero section with gradient background and CTAs, product feature cards with colored icons, team member cards, contact section, staggered framer-motion entrance animations, and styled footer.
+
 ## v0.48.0 (2026-04-30)
 
 ### Improved

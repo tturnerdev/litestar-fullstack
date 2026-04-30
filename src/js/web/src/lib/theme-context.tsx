@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react"
 
-type ThemeMode = "light" | "dark" | "system"
+export type ThemeMode = "light" | "dark" | "system"
 type ResolvedTheme = "light" | "dark"
 
 type ThemeContextType = {
