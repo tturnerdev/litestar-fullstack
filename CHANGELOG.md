@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.43.0 (2026-04-30)
+
+### Improved
+- **Extension settings form** — unsaved changes banner, Switch toggle for active status, field descriptions, phone number display, relative timestamps, Cancel/Reset button, and section separators.
+- **DND schedule picker** — header with CalendarClock icon, pill-shaped day toggles with color transitions, weekly total hours indicator, tooltip time ranges on schedule bars, matching-preset checkmarks, clear schedule button, and section separators.
+- **Device card** — colored icon backgrounds by device type, pulse animation for provisioning status, line count badge, hover scale effect, relative timestamps, colored top border by active status, firmware version badge, and copy MAC button on hover.
+- **Ticket list item** — category icons (HelpCircle/Bug/Lightbulb/Wrench), message count indicator, relative timestamps, hover ChevronRight, unread left border accent, and SLA clock indicator for urgent/high open tickets.
+
 ## v0.42.0 (2026-04-30)
 
 ### Improved
