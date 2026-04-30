@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router"
-import { AlertCircle, Printer } from "lucide-react"
+import { AlertCircle, ArrowRight, Check, Copy, Printer } from "lucide-react"
 import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -7,9 +7,42 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { EmptyState } from "@/components/ui/empty-state"
 import { SkeletonTable } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useFaxNumbers } from "@/lib/api/hooks/fax"
 
 const PAGE_SIZE = 25
+
+/** Format a +1XXXXXXXXXX number as (XXX) XXX-XXXX, pass through others unchanged. */
+function formatPhoneNumber(raw: string): string {
+  const match = raw.match(/^\+1(\d{3})(\d{3})(\d{4})$/)
+  if (match) return `(${match[1]}) ${match[2]}-${match[3]}`
+  return raw
+}
+
+function CopyNumberButton({ number }: { number: string }) {
+  const [copied, setCopied] = useState(false)
+
+  function handleCopy() {
+    navigator.clipboard.writeText(number)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={handleCopy}>
+          {copied ? (
+            <Check className="h-3.5 w-3.5 text-green-500" />
+          ) : (
+            <Copy className="h-3.5 w-3.5 text-muted-foreground" />
+          )}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>Copy number</TooltipContent>
+    </Tooltip>
+  )
+}
 
 export function FaxNumberTable() {
   const [page, setPage] = useState(1)
@@ -39,7 +72,7 @@ export function FaxNumberTable() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Fax Numbers</CardTitle>
+        <CardTitle>Fax Numbers ({data.total})</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <Table>
@@ -65,20 +98,29 @@ export function FaxNumberTable() {
                 </TableCell>
               </TableRow>
             )}
-            {data.items.map((faxNumber) => (
-              <TableRow key={faxNumber.id}>
-                <TableCell className="font-mono">{faxNumber.number}</TableCell>
+            {data.items.map((faxNumber, index) => (
+              <TableRow key={faxNumber.id} className={`hover:bg-muted/50 ${index % 2 === 0 ? "bg-muted/20" : ""}`}>
+                <TableCell>
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-mono">{formatPhoneNumber(faxNumber.number)}</span>
+                    <CopyNumberButton number={faxNumber.number} />
+                  </div>
+                </TableCell>
                 <TableCell className="text-muted-foreground">{faxNumber.label ?? "—"}</TableCell>
                 <TableCell>
-                  <Badge variant={faxNumber.isActive ? "default" : "secondary"}>
-                    {faxNumber.isActive ? "Active" : "Inactive"}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <span className={`inline-block h-2 w-2 rounded-full ${faxNumber.isActive ? "bg-green-500" : "bg-gray-400"}`} />
+                    <Badge variant={faxNumber.isActive ? "default" : "secondary"}>
+                      {faxNumber.isActive ? "Active" : "Inactive"}
+                    </Badge>
+                  </div>
                 </TableCell>
-                <TableCell className="text-muted-foreground">—</TableCell>
+                <TableCell className="text-muted-foreground">{"—"}</TableCell>
                 <TableCell className="text-right">
                   <Button asChild variant="outline" size="sm">
                     <Link to="/fax/numbers/$faxNumberId" params={{ faxNumberId: faxNumber.id }}>
                       Manage
+                      <ArrowRight className="ml-1.5 h-4 w-4" />
                     </Link>
                   </Button>
                 </TableCell>
@@ -86,21 +128,24 @@ export function FaxNumberTable() {
             ))}
           </TableBody>
         </Table>
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between">
-            <p className="text-xs text-muted-foreground">
-              Page {page} of {totalPages}
-            </p>
-            <div className="flex gap-2">
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            Showing {data.items.length} of {data.total} fax numbers
+          </p>
+          {totalPages > 1 && (
+            <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>
                 Previous
               </Button>
+              <span className="text-sm text-muted-foreground">
+                Page {page} of {totalPages}
+              </span>
               <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>
                 Next
               </Button>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </CardContent>
     </Card>
   )

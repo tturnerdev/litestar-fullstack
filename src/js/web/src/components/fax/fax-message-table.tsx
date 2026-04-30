@@ -1,22 +1,74 @@
 import { Link } from "@tanstack/react-router"
-import { AlertCircle, Printer, Trash2 } from "lucide-react"
+import { AlertCircle, Check, Copy, Printer, RefreshCw, Trash2, X } from "lucide-react"
 import { useState } from "react"
 import { DirectionBadge, FaxStatusBadge } from "@/components/fax/fax-status-badge"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { SkeletonTable } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDeleteFaxMessage, useFaxMessages } from "@/lib/api/hooks/fax"
 
 const PAGE_SIZE = 25
+
+function timeAgo(dateStr: string | null): string {
+  if (!dateStr) return "—"
+  const now = Date.now()
+  const then = new Date(dateStr).getTime()
+  const diffMs = now - then
+  if (diffMs < 0) return "just now"
+  const seconds = Math.floor(diffMs / 1000)
+  if (seconds < 60) return "just now"
+  const minutes = Math.floor(seconds / 60)
+  if (minutes < 60) return `${minutes}m ago`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours}h ago`
+  if (hours < 48) return "Yesterday"
+  const days = Math.floor(hours / 24)
+  if (days < 30) return `${days}d ago`
+  const months = Math.floor(days / 30)
+  if (months < 12) return `${months}mo ago`
+  const years = Math.floor(months / 12)
+  return `${years}y ago`
+}
+
+function formatFullDate(dateStr: string | null): string {
+  if (!dateStr) return "—"
+  return new Date(dateStr).toLocaleString()
+}
+
+function formatUSPhone(phone: string): string {
+  const cleaned = phone.replace(/\D/g, "")
+  if (cleaned.length === 11 && cleaned.startsWith("1")) {
+    const area = cleaned.slice(1, 4)
+    const prefix = cleaned.slice(4, 7)
+    const line = cleaned.slice(7)
+    return `(${area}) ${prefix}-${line}`
+  }
+  return phone
+}
 
 export function FaxMessageTable() {
   const [page, setPage] = useState(1)
   const [direction, setDirection] = useState<string>("")
   const [status, setStatus] = useState<string>("")
-  const { data, isLoading, isError } = useFaxMessages({
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; remoteNumber: string } | null>(null)
+  const [copiedId, setCopiedId] = useState<string | null>(null)
+
+  const { data, isLoading, isError, isFetching, refetch } = useFaxMessages({
     page,
     pageSize: PAGE_SIZE,
     direction: direction || undefined,
@@ -29,6 +81,7 @@ export function FaxMessageTable() {
   }
 
   const hasFilters = !!direction || !!status
+  const activeFilterCount = (direction ? 1 : 0) + (status ? 1 : 0)
 
   if (isError || !data) {
     return (
@@ -46,132 +99,221 @@ export function FaxMessageTable() {
   }
 
   const totalPages = Math.max(1, Math.ceil(data.total / PAGE_SIZE))
+  const showingStart = (page - 1) * PAGE_SIZE + 1
+  const showingEnd = Math.min(page * PAGE_SIZE, data.total)
 
-  function formatDate(dateStr: string | null): string {
-    if (!dateStr) return "—"
-    return new Date(dateStr).toLocaleString()
+  function clearFilters() {
+    setDirection("")
+    setStatus("")
+    setPage(1)
+  }
+
+  function handleCopy(id: string, value: string) {
+    void navigator.clipboard.writeText(value).then(() => {
+      setCopiedId(id)
+      setTimeout(() => setCopiedId(null), 2000)
+    })
+  }
+
+  function handleDeleteConfirm() {
+    if (deleteTarget) {
+      deleteMutation.mutate(deleteTarget.id)
+      setDeleteTarget(null)
+    }
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle>Fax Messages</CardTitle>
-          <div className="flex gap-2">
-            <Select value={direction} onValueChange={(v) => { setDirection(v === "all" ? "" : v); setPage(1) }}>
-              <SelectTrigger className="w-[140px]">
-                <SelectValue placeholder="Direction" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All directions</SelectItem>
-                <SelectItem value="inbound">Inbound</SelectItem>
-                <SelectItem value="outbound">Outbound</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={status} onValueChange={(v) => { setStatus(v === "all" ? "" : v); setPage(1) }}>
-              <SelectTrigger className="w-[140px]">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All statuses</SelectItem>
-                <SelectItem value="received">Received</SelectItem>
-                <SelectItem value="delivered">Delivered</SelectItem>
-                <SelectItem value="sent">Sent</SelectItem>
-                <SelectItem value="sending">Sending</SelectItem>
-                <SelectItem value="failed">Failed</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Date</TableHead>
-              <TableHead>Direction</TableHead>
-              <TableHead>Remote Number</TableHead>
-              <TableHead>Pages</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {data.items.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={6} className="p-0">
-                  {hasFilters ? (
-                    <EmptyState
-                      icon={Printer}
-                      variant="no-results"
-                      title="No results found"
-                      description="No fax messages match your current filters. Try adjusting your criteria."
-                      action={
-                        <Button variant="outline" size="sm" onClick={() => { setDirection(""); setStatus(""); setPage(1) }}>
-                          Clear filters
-                        </Button>
-                      }
-                      className="border-0 rounded-none"
-                    />
-                  ) : (
-                    <EmptyState
-                      icon={Printer}
-                      title="No fax messages yet"
-                      description="Fax messages will appear here once you send or receive your first fax."
-                      className="border-0 rounded-none"
-                    />
-                  )}
-                </TableCell>
-              </TableRow>
-            )}
-            {data.items.map((msg) => (
-              <TableRow key={msg.id}>
-                <TableCell className="text-muted-foreground">{formatDate(msg.receivedAt)}</TableCell>
-                <TableCell>
-                  <DirectionBadge direction={msg.direction} />
-                </TableCell>
-                <TableCell className="font-mono">{msg.remoteNumber}</TableCell>
-                <TableCell>{msg.pageCount}</TableCell>
-                <TableCell>
-                  <FaxStatusBadge status={msg.status} />
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
-                    <Button asChild variant="outline" size="sm">
-                      <Link to="/fax/messages/$messageId" params={{ messageId: msg.id }}>
-                        View
-                      </Link>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => deleteMutation.mutate(msg.id)}
-                      disabled={deleteMutation.isPending}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-        {totalPages > 1 && (
+    <>
+      <Card>
+        <CardHeader>
           <div className="flex items-center justify-between">
-            <p className="text-xs text-muted-foreground">
-              Page {page} of {totalPages}
-            </p>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>
-                Previous
+            <div className="flex items-center gap-2">
+              <CardTitle>Fax Messages</CardTitle>
+              {data.total > 0 && (
+                <span className="text-sm font-normal text-muted-foreground">({data.total})</span>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-9 w-9"
+                onClick={() => refetch()}
+                disabled={isFetching}
+              >
+                <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
               </Button>
-              <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>
-                Next
-              </Button>
+              <Select value={direction} onValueChange={(v) => { setDirection(v === "all" ? "" : v); setPage(1) }}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="Direction" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All directions</SelectItem>
+                  <SelectItem value="inbound">Inbound</SelectItem>
+                  <SelectItem value="outbound">Outbound</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={status} onValueChange={(v) => { setStatus(v === "all" ? "" : v); setPage(1) }}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All statuses</SelectItem>
+                  <SelectItem value="received">Received</SelectItem>
+                  <SelectItem value="delivered">Delivered</SelectItem>
+                  <SelectItem value="sent">Sent</SelectItem>
+                  <SelectItem value="sending">Sending</SelectItem>
+                  <SelectItem value="failed">Failed</SelectItem>
+                </SelectContent>
+              </Select>
+              {hasFilters && (
+                <>
+                  <Badge variant="secondary" className="tabular-nums">
+                    {activeFilterCount} active
+                  </Badge>
+                  <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={clearFilters}>
+                    <X className="mr-1 h-3 w-3" />
+                    Clear all
+                  </Button>
+                </>
+              )}
             </div>
           </div>
-        )}
-      </CardContent>
-    </Card>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Date</TableHead>
+                <TableHead>Direction</TableHead>
+                <TableHead>Remote Number</TableHead>
+                <TableHead>Pages</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {data.items.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={6} className="p-0">
+                    {hasFilters ? (
+                      <EmptyState
+                        icon={Printer}
+                        variant="no-results"
+                        title="No results found"
+                        description="No fax messages match your current filters. Try adjusting your criteria."
+                        action={
+                          <Button variant="outline" size="sm" onClick={clearFilters}>
+                            Clear filters
+                          </Button>
+                        }
+                        className="border-0 rounded-none"
+                      />
+                    ) : (
+                      <EmptyState
+                        icon={Printer}
+                        title="No fax messages yet"
+                        description="Fax messages will appear here once you send or receive your first fax."
+                        className="border-0 rounded-none"
+                      />
+                    )}
+                  </TableCell>
+                </TableRow>
+              )}
+              {data.items.map((msg, index) => (
+                <TableRow key={msg.id} className={`hover:bg-muted/50 ${index % 2 === 1 ? "bg-muted/20" : ""}`}>
+                  <TableCell className="text-muted-foreground">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="cursor-default">{timeAgo(msg.receivedAt)}</span>
+                      </TooltipTrigger>
+                      <TooltipContent>{formatFullDate(msg.receivedAt)}</TooltipContent>
+                    </Tooltip>
+                  </TableCell>
+                  <TableCell>
+                    <DirectionBadge direction={msg.direction} />
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1">
+                      <span className="font-mono">{formatUSPhone(msg.remoteNumber)}</span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={() => handleCopy(msg.id, msg.remoteNumber)}
+                      >
+                        {copiedId === msg.id ? (
+                          <Check className="h-3 w-3 text-green-500" />
+                        ) : (
+                          <Copy className="h-3 w-3 text-muted-foreground" />
+                        )}
+                      </Button>
+                    </div>
+                  </TableCell>
+                  <TableCell>{msg.pageCount}</TableCell>
+                  <TableCell>
+                    <FaxStatusBadge status={msg.status} />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-2">
+                      <Button asChild variant="outline" size="sm">
+                        <Link to="/fax/messages/$messageId" params={{ messageId: msg.id }}>
+                          View
+                        </Link>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setDeleteTarget({ id: msg.id, remoteNumber: msg.remoteNumber })}
+                        disabled={deleteMutation.isPending}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          {data.total > 0 && (
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-muted-foreground">
+                Showing {showingStart}–{showingEnd} of {data.total} messages
+              </p>
+              {totalPages > 1 && (
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>
+                    Previous
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>
+                    Next
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <AlertDialog open={deleteTarget !== null} onOpenChange={(open) => { if (!open) setDeleteTarget(null) }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete fax message?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the fax message {deleteTarget ? `to/from ${formatUSPhone(deleteTarget.remoteNumber)}` : ""}. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeleteTarget(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={handleDeleteConfirm}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }

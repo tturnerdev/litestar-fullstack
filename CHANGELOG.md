@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.54.0 (2026-04-30)
+
+### Improved
+- **Phone number table** — switched delete to AlertDialog, US phone formatting, colored type icons (MapPin/Globe/Flag), active status dots, row hover and striping, copy number button, Loader2 on edit save, and result count text.
+- **Fax number table** — row hover and striping, US phone formatting, active status dots, total count in header, copy number button, ArrowRight icon on Manage button, and result count text.
+- **Fax message table** — relative timestamps with tooltip, row hover and striping, US phone formatting, total in header, result range text, AlertDialog delete confirmation, refresh button with spin animation, active filter count badge, clear-all filters button, and copy remote number.
+- **Keyboard shortcuts dialog** — search/filter input with empty state, section separators, shortcut count in description, category icons (Compass/Layout/Zap), "+" between modifier keys, alternating row backgrounds, max-height scroll container, and "Press Esc to close" hint.
+
 ## v0.53.0 (2026-04-30)
 
 ### Improved
