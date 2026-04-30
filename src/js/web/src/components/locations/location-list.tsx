@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router"
 import { useCallback, useMemo, useState } from "react"
-import { AlertCircle, Building2, MapPin, MoreVertical, Search } from "lucide-react"
+import { AlertCircle, Building2, Eye, MapPin, MoreVertical, Pencil, Search } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { BulkActionBar, createBulkDeleteAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { SkeletonTable } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAuthStore } from "@/lib/auth"
 import { type Location, useBulkDeleteLocations, useLocations } from "@/lib/api/hooks/locations"
 
@@ -232,10 +233,11 @@ export function LocationList() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {locations.map((location) => (
+                {locations.map((location, index) => (
                   <LocationRow
                     key={location.id}
                     location={location}
+                    index={index}
                     selected={selectedIds.has(location.id)}
                     onToggle={() => toggleOne(location.id)}
                     onRowClick={() => handleRowClick(location.id)}
@@ -290,11 +292,13 @@ export function LocationList() {
 
 function LocationRow({
   location,
+  index,
   selected,
   onToggle,
   onRowClick,
 }: {
   location: Location
+  index: number
   selected: boolean
   onToggle: () => void
   onRowClick: () => void
@@ -306,12 +310,15 @@ function LocationRow({
   const addressSummary = addressParts.join(", ")
 
   const description = location.description ?? ""
-  const truncatedDescription = description.length > 80 ? `${description.slice(0, 80)}...` : description
+  const isDescriptionTruncated = description.length > 80
+  const truncatedDescription = isDescriptionTruncated ? `${description.slice(0, 80)}...` : description
+
+  const isAddressLong = addressSummary.length > 50
 
   return (
     <TableRow
       data-state={selected ? "selected" : undefined}
-      className="cursor-pointer"
+      className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`}
       onClick={(e) => {
         // Don't navigate when clicking on checkbox or dropdown
         const target = e.target as HTMLElement
@@ -342,13 +349,35 @@ function LocationRow({
         </Link>
       </TableCell>
       <TableCell>
-        <Badge variant={isAddressed ? "default" : "secondary"} className="text-[10px]">
-          {isAddressed ? "Addressed" : "Physical"}
+        <Badge variant={isAddressed ? "default" : "secondary"} className="inline-flex items-center gap-1 text-[10px]">
+          {isAddressed ? (
+            <>
+              <Building2 className="h-3 w-3" />
+              Addressed
+            </>
+          ) : (
+            <>
+              <MapPin className="h-3 w-3" />
+              Physical
+            </>
+          )}
         </Badge>
       </TableCell>
       <TableCell>
         {addressSummary ? (
-          <span className="text-sm text-muted-foreground">{addressSummary}</span>
+          <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+            <MapPin className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70" />
+            {isAddressLong ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="truncate max-w-[200px]">{addressSummary}</span>
+                </TooltipTrigger>
+                <TooltipContent>{addressSummary}</TooltipContent>
+              </Tooltip>
+            ) : (
+              <span>{addressSummary}</span>
+            )}
+          </span>
         ) : (
           <span className="text-sm text-muted-foreground/50">--</span>
         )}
@@ -364,7 +393,16 @@ function LocationRow({
       </TableCell>
       <TableCell>
         {truncatedDescription ? (
-          <span className="text-sm text-muted-foreground">{truncatedDescription}</span>
+          isDescriptionTruncated ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="text-sm text-muted-foreground cursor-default">{truncatedDescription}</span>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs">{description}</TooltipContent>
+            </Tooltip>
+          ) : (
+            <span className="text-sm text-muted-foreground">{truncatedDescription}</span>
+          )
         ) : (
           <span className="text-sm text-muted-foreground/50">--</span>
         )}
@@ -386,7 +424,14 @@ function LocationRow({
           <DropdownMenuContent align="end">
             <DropdownMenuItem asChild>
               <Link to="/locations/$locationId" params={{ locationId: location.id }}>
+                <Eye className="mr-2 h-4 w-4" />
                 View details
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/locations/$locationId/edit" params={{ locationId: location.id }}>
+                <Pencil className="mr-2 h-4 w-4" />
+                Edit
               </Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
