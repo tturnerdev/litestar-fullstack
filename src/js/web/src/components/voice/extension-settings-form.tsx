@@ -8,29 +8,10 @@ import { Switch } from "@/components/ui/switch"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { useExtension, useUpdateExtension, usePhoneNumber } from "@/lib/api/hooks/voice"
 import { AlertTriangle, Clock, Phone, RotateCcw, Save } from "lucide-react"
+import { formatRelativeTime } from "@/lib/date-utils"
 
 interface ExtensionSettingsFormProps {
   extensionId: string
-}
-
-function formatRelativeTime(dateString: string | null): string | null {
-  if (!dateString) return null
-  const date = new Date(dateString)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffSeconds = Math.floor(diffMs / 1000)
-  const diffMinutes = Math.floor(diffSeconds / 60)
-  const diffHours = Math.floor(diffMinutes / 60)
-  const diffDays = Math.floor(diffHours / 24)
-
-  if (diffDays > 30) {
-    const diffMonths = Math.floor(diffDays / 30)
-    return diffMonths === 1 ? "1 month ago" : `${diffMonths} months ago`
-  }
-  if (diffDays > 0) return diffDays === 1 ? "1 day ago" : `${diffDays} days ago`
-  if (diffHours > 0) return diffHours === 1 ? "1 hour ago" : `${diffHours} hours ago`
-  if (diffMinutes > 0) return diffMinutes === 1 ? "1 minute ago" : `${diffMinutes} minutes ago`
-  return "just now"
 }
 
 export function ExtensionSettingsForm({ extensionId }: ExtensionSettingsFormProps) {

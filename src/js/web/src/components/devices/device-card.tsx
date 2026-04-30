@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { formatRelativeTimeShort } from "@/lib/date-utils"
 import { cn } from "@/lib/utils"
 
 const deviceTypeLabels: Record<string, string> = {
@@ -32,25 +33,6 @@ const deviceTypeIconBg: Record<string, string> = {
   ata: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
   conference: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
   other: "bg-slate-500/10 text-slate-600 dark:text-slate-400",
-}
-
-function formatRelativeTime(value: string | null | undefined): string {
-  if (!value) return "Never"
-  const date = new Date(value)
-  const now = Date.now()
-  const diffMs = now - date.getTime()
-  if (diffMs < 0) return "Just now"
-  const diffSec = Math.floor(diffMs / 1000)
-  if (diffSec < 60) return "Just now"
-  const diffMin = Math.floor(diffSec / 60)
-  if (diffMin < 60) return `${diffMin}m ago`
-  const diffHr = Math.floor(diffMin / 60)
-  if (diffHr < 24) return `${diffHr}h ago`
-  const diffDay = Math.floor(diffHr / 24)
-  if (diffDay < 30) return `${diffDay}d ago`
-  const diffMonth = Math.floor(diffDay / 30)
-  if (diffMonth < 12) return `${diffMonth}mo ago`
-  return `${Math.floor(diffMonth / 12)}y ago`
 }
 
 interface DeviceCardProps {
@@ -201,7 +183,7 @@ export function DeviceCard({ device, lineCount, onReboot, onToggleActive }: Devi
             <span className="text-muted-foreground">Last seen</span>
             <Tooltip>
               <TooltipTrigger asChild>
-                <p className="truncate">{formatRelativeTime(device.lastSeenAt)}</p>
+                <p className="truncate">{formatRelativeTimeShort(device.lastSeenAt)}</p>
               </TooltipTrigger>
               <TooltipContent>
                 {device.lastSeenAt ? new Date(device.lastSeenAt).toLocaleString() : "Never"}

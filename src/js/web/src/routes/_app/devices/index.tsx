@@ -41,6 +41,7 @@ import {
 } from "@/lib/api/hooks/devices"
 import { deleteDevice, type Device } from "@/lib/generated/api"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
+import { formatRelativeTimeShort } from "@/lib/date-utils"
 
 export const Route = createFileRoute("/_app/devices/")({
   component: DevicesPage,
@@ -91,20 +92,6 @@ const csvHeaders: CsvHeader<Device>[] = [
 function formatDateTime(value: string | null | undefined): string {
   if (!value) return "Never"
   return new Date(value).toLocaleString()
-}
-
-function formatRelativeTime(value: string | null | undefined): string {
-  if (!value) return "Never"
-  const date = new Date(value)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffMins = Math.floor(diffMs / 60_000)
-  if (diffMins < 1) return "Just now"
-  if (diffMins < 60) return `${diffMins}m ago`
-  const diffHours = Math.floor(diffMins / 60)
-  if (diffHours < 24) return `${diffHours}h ago`
-  const diffDays = Math.floor(diffHours / 24)
-  return `${diffDays}d ago`
 }
 
 // -- Per-row action buttons ---------------------------------------------------
@@ -573,7 +560,7 @@ function DeviceRow({
         <Tooltip>
           <TooltipTrigger asChild>
             <span className="cursor-default text-xs text-muted-foreground">
-              {formatRelativeTime(device.lastSeenAt)}
+              {formatRelativeTimeShort(device.lastSeenAt)}
             </span>
           </TooltipTrigger>
           <TooltipContent>{formatDateTime(device.lastSeenAt)}</TooltipContent>

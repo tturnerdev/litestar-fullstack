@@ -18,6 +18,7 @@ import { useTableSelection } from "@/hooks/use-table-selection"
 import { type Ticket, type TicketFilters, useTickets } from "@/lib/api/hooks/support"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { client } from "@/lib/generated/api/client.gen"
+import { formatRelativeTimeShort } from "@/lib/date-utils"
 import { cn } from "@/lib/utils"
 
 const PAGE_SIZE = 25
@@ -30,22 +31,6 @@ const priorityDotColors: Record<string, string> = {
   medium: "bg-blue-500",
   high: "bg-amber-500",
   urgent: "bg-red-500",
-}
-
-function formatRelativeTime(dateStr: string): string {
-  const now = Date.now()
-  const date = new Date(dateStr).getTime()
-  const diffMs = now - date
-  const diffSec = Math.floor(diffMs / 1000)
-  const diffMin = Math.floor(diffSec / 60)
-  const diffHr = Math.floor(diffMin / 60)
-  const diffDay = Math.floor(diffHr / 24)
-
-  if (diffSec < 60) return "just now"
-  if (diffMin < 60) return `${diffMin}m ago`
-  if (diffHr < 24) return `${diffHr}h ago`
-  if (diffDay < 30) return `${diffDay}d ago`
-  return new Date(dateStr).toLocaleDateString()
 }
 
 function SortableHeader({
@@ -489,7 +474,7 @@ export function TicketTable() {
                           {displayDate ? (
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <span className="cursor-default">{formatRelativeTime(displayDate)}</span>
+                                <span className="cursor-default">{formatRelativeTimeShort(displayDate)}</span>
                               </TooltipTrigger>
                               <TooltipContent>
                                 {new Date(displayDate).toLocaleString()}

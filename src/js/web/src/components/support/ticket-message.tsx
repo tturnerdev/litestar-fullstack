@@ -21,26 +21,10 @@ import {
 import type { TicketMessage as TicketMessageType } from "@/lib/api/hooks/support"
 import { useDeleteTicketMessage } from "@/lib/api/hooks/support"
 import { useAuthStore } from "@/lib/auth"
+import { formatRelativeTimeShort } from "@/lib/date-utils"
 import { cn } from "@/lib/utils"
 
 // ── Helpers ──────────────────────────────────────────────────────────────
-
-function formatRelativeTime(dateStr: string | null | undefined): string {
-  if (!dateStr) return ""
-  const date = new Date(dateStr)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffSec = Math.floor(diffMs / 1000)
-  const diffMin = Math.floor(diffSec / 60)
-  const diffHr = Math.floor(diffMin / 60)
-  const diffDays = Math.floor(diffHr / 24)
-
-  if (diffSec < 60) return "just now"
-  if (diffMin < 60) return `${diffMin}m ago`
-  if (diffHr < 24) return `${diffHr}h ago`
-  if (diffDays < 7) return `${diffDays}d ago`
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: date.getFullYear() !== now.getFullYear() ? "numeric" : undefined })
-}
 
 function getAvatarColor(identifier: string): string {
   const colors = [
@@ -172,7 +156,7 @@ export function TicketMessage({ message, ticketId, isFirstMessage = false, onRep
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <p className="cursor-default text-xs text-muted-foreground">
-                        {formatRelativeTime(message.createdAt)}
+                        {formatRelativeTimeShort(message.createdAt)}
                       </p>
                     </TooltipTrigger>
                     <TooltipContent side="bottom" align="start">

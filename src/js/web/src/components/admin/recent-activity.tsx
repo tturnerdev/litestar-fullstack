@@ -16,6 +16,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAdminRecentActivity } from "@/lib/api/hooks/admin"
+import { formatRelativeTimeShort } from "@/lib/date-utils"
 
 function getActionStyle(action: string) {
   const lower = action.toLowerCase()
@@ -99,21 +100,6 @@ function getActionStyle(action: string) {
     label: "Created",
     variant: "outline" as const,
   }
-}
-
-function formatRelativeTime(dateString: string): string {
-  const now = Date.now()
-  const date = new Date(dateString).getTime()
-  const diffSeconds = Math.floor((now - date) / 1000)
-
-  if (diffSeconds < 60) return "just now"
-  const diffMinutes = Math.floor(diffSeconds / 60)
-  if (diffMinutes < 60) return `${diffMinutes}m ago`
-  const diffHours = Math.floor(diffMinutes / 60)
-  if (diffHours < 24) return `${diffHours}h ago`
-  const diffDays = Math.floor(diffHours / 24)
-  if (diffDays < 7) return `${diffDays}d ago`
-  return new Date(dateString).toLocaleDateString()
 }
 
 function formatFullTimestamp(dateString: string): string {
@@ -243,7 +229,7 @@ export function RecentActivity() {
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <span className="mt-0.5 shrink-0 text-[11px] tabular-nums text-muted-foreground">
-                          {formatRelativeTime(activity.createdAt)}
+                          {formatRelativeTimeShort(activity.createdAt)}
                         </span>
                       </TooltipTrigger>
                       <TooltipContent side="left" className="text-xs">

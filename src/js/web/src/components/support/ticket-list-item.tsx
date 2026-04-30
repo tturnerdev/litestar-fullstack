@@ -4,6 +4,7 @@ import { TicketPriorityBadge } from "@/components/support/ticket-priority-badge"
 import { TicketStatusBadge } from "@/components/support/ticket-status-badge"
 import type { Ticket } from "@/lib/api/hooks/support"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { formatRelativeTimeShort } from "@/lib/date-utils"
 import { cn } from "@/lib/utils"
 
 const categoryConfig: Record<string, { icon: typeof HelpCircle; label: string }> = {
@@ -12,25 +13,6 @@ const categoryConfig: Record<string, { icon: typeof HelpCircle; label: string }>
   feature_request: { icon: Lightbulb, label: "Feature" },
   technical: { icon: Wrench, label: "Technical" },
   billing: { icon: MessageSquare, label: "Billing" },
-}
-
-function formatRelativeTime(value: string | null | undefined): string {
-  if (!value) return ""
-  const date = new Date(value)
-  const now = Date.now()
-  const diffMs = now - date.getTime()
-  if (diffMs < 0) return "Just now"
-  const diffSec = Math.floor(diffMs / 1000)
-  if (diffSec < 60) return "Just now"
-  const diffMin = Math.floor(diffSec / 60)
-  if (diffMin < 60) return `${diffMin}m ago`
-  const diffHr = Math.floor(diffMin / 60)
-  if (diffHr < 24) return `${diffHr}h ago`
-  const diffDay = Math.floor(diffHr / 24)
-  if (diffDay < 30) return `${diffDay}d ago`
-  const diffMonth = Math.floor(diffDay / 30)
-  if (diffMonth < 12) return `${diffMonth}mo ago`
-  return `${Math.floor(diffMonth / 12)}y ago`
 }
 
 interface TicketListItemProps {
@@ -98,7 +80,7 @@ export function TicketListItem({ ticket }: TicketListItemProps) {
         <TicketStatusBadge status={ticket.status} />
         <TicketPriorityBadge priority={ticket.priority} />
         <span className="w-16 text-right text-xs text-muted-foreground">
-          {formatRelativeTime(ticket.updatedAt ?? ticket.createdAt)}
+          {formatRelativeTimeShort(ticket.updatedAt ?? ticket.createdAt)}
         </span>
         <ChevronRight className="h-4 w-4 text-muted-foreground/0 transition-all group-hover:text-muted-foreground" />
       </div>

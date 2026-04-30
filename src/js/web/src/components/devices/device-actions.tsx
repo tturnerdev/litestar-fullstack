@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { Separator } from "@/components/ui/separator"
+import { formatRelativeTimeShort } from "@/lib/date-utils"
 import { cn } from "@/lib/utils"
 
 // ---------------------------------------------------------------------------
@@ -115,20 +116,6 @@ function DestructiveDialog({ open, onOpenChange, title, description, confirmLabe
 // Helpers
 // ---------------------------------------------------------------------------
 
-function formatTimeAgo(dateString: string): string {
-  const date = new Date(dateString)
-  const now = new Date()
-  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000)
-
-  if (seconds < 60) return "just now"
-  const minutes = Math.floor(seconds / 60)
-  if (minutes < 60) return `${minutes}m ago`
-  const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours}h ago`
-  const days = Math.floor(hours / 24)
-  return `${days}d ago`
-}
-
 // ---------------------------------------------------------------------------
 // Reboot Button
 // ---------------------------------------------------------------------------
@@ -154,7 +141,7 @@ export function RebootButton({ onReboot, isPending, lastRebootedAt, size = "defa
             </Button>
             {lastRebootedAt && (
               <span className="mt-1 text-xs text-muted-foreground">
-                Last rebooted: {formatTimeAgo(lastRebootedAt)}
+                Last rebooted: {formatRelativeTimeShort(lastRebootedAt)}
               </span>
             )}
           </div>
@@ -380,7 +367,7 @@ export function DeviceActions({
   const [deleteOpen, setDeleteOpen] = useState(false)
 
   const rebootSubtitle = lastRebootedAt
-    ? `Restart device · Last: ${formatTimeAgo(lastRebootedAt)}`
+    ? `Restart device · Last: ${formatRelativeTimeShort(lastRebootedAt)}`
     : "Restart device"
 
   return (

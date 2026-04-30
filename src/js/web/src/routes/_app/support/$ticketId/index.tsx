@@ -63,6 +63,7 @@ import {
   useTicket,
   useUpdateTicket,
 } from "@/lib/api/hooks/support"
+import { formatRelativeTimeShort } from "@/lib/date-utils"
 
 export const Route = createFileRoute("/_app/support/$ticketId/")({
   component: TicketDetailPage,
@@ -93,27 +94,6 @@ const statuses = [
 
 // ── Helpers ─────────────────────────────────────────────────────────────
 
-function formatRelativeTime(dateStr: string | null | undefined): string {
-  if (!dateStr) return "--"
-  const date = new Date(dateStr)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffSec = Math.floor(diffMs / 1000)
-  const diffMin = Math.floor(diffSec / 60)
-  const diffHr = Math.floor(diffMin / 60)
-  const diffDays = Math.floor(diffHr / 24)
-
-  if (diffSec < 60) return "just now"
-  if (diffMin < 60) return `${diffMin}m ago`
-  if (diffHr < 24) return `${diffHr}h ago`
-  if (diffDays < 7) return `${diffDays}d ago`
-  return date.toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: date.getFullYear() !== now.getFullYear() ? "numeric" : undefined,
-  })
-}
-
 function formatDateTime(value: string | null | undefined): string {
   if (!value) return "--"
   return new Date(value).toLocaleString()
@@ -143,7 +123,7 @@ function TimestampField({
           <Tooltip>
             <TooltipTrigger asChild>
               <p className="mt-0.5 cursor-default text-sm">
-                {formatRelativeTime(value)}
+                {formatRelativeTimeShort(value)}
               </p>
             </TooltipTrigger>
             <TooltipContent>{formatDateTime(value)}</TooltipContent>

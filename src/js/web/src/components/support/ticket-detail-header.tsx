@@ -50,6 +50,7 @@ import {
 } from "@/components/ui/tooltip"
 import type { Ticket } from "@/lib/api/hooks/support"
 import { useCloseTicket, useDeleteTicket, useReopenTicket, useUpdateTicket } from "@/lib/api/hooks/support"
+import { formatRelativeTimeShort } from "@/lib/date-utils"
 
 interface TicketDetailHeaderProps {
   ticket: Ticket
@@ -68,23 +69,6 @@ const categoryLabels: Record<string, string> = {
 const categories = Object.keys(categoryLabels) as string[]
 
 const priorities = ["low", "medium", "high", "urgent"] as const
-
-function formatRelativeTime(dateStr: string | null | undefined): string {
-  if (!dateStr) return "--"
-  const date = new Date(dateStr)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffSec = Math.floor(diffMs / 1000)
-  const diffMin = Math.floor(diffSec / 60)
-  const diffHr = Math.floor(diffMin / 60)
-  const diffDays = Math.floor(diffHr / 24)
-
-  if (diffSec < 60) return "just now"
-  if (diffMin < 60) return `${diffMin}m ago`
-  if (diffHr < 24) return `${diffHr}h ago`
-  if (diffDays < 7) return `${diffDays}d ago`
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: date.getFullYear() !== now.getFullYear() ? "numeric" : undefined })
-}
 
 // ── SLA Helpers ───────────────────────────────────────────────────────────
 
@@ -474,7 +458,7 @@ export function TicketDetailHeader({ ticket }: TicketDetailHeaderProps) {
             <TooltipTrigger asChild>
               <div className="flex items-center gap-1.5 cursor-default">
                 <Calendar className="h-3.5 w-3.5" />
-                <span>Created {formatRelativeTime(ticket.createdAt)}</span>
+                <span>Created {formatRelativeTimeShort(ticket.createdAt)}</span>
               </div>
             </TooltipTrigger>
             <TooltipContent>
@@ -487,7 +471,7 @@ export function TicketDetailHeader({ ticket }: TicketDetailHeaderProps) {
               <TooltipTrigger asChild>
                 <div className="flex items-center gap-1.5 cursor-default">
                   <Clock className="h-3.5 w-3.5" />
-                  <span>Updated {formatRelativeTime(ticket.updatedAt)}</span>
+                  <span>Updated {formatRelativeTimeShort(ticket.updatedAt)}</span>
                 </div>
               </TooltipTrigger>
               <TooltipContent>
@@ -501,7 +485,7 @@ export function TicketDetailHeader({ ticket }: TicketDetailHeaderProps) {
               <TooltipTrigger asChild>
                 <div className="flex items-center gap-1.5 cursor-default">
                   <Lock className="h-3.5 w-3.5" />
-                  <span>Closed {formatRelativeTime(ticket.closedAt)}</span>
+                  <span>Closed {formatRelativeTimeShort(ticket.closedAt)}</span>
                 </div>
               </TooltipTrigger>
               <TooltipContent>
@@ -515,7 +499,7 @@ export function TicketDetailHeader({ ticket }: TicketDetailHeaderProps) {
               <TooltipTrigger asChild>
                 <div className="flex items-center gap-1.5 cursor-default">
                   <Lock className="h-3.5 w-3.5" />
-                  <span>Resolved {formatRelativeTime(ticket.resolvedAt)}</span>
+                  <span>Resolved {formatRelativeTimeShort(ticket.resolvedAt)}</span>
                 </div>
               </TooltipTrigger>
               <TooltipContent>

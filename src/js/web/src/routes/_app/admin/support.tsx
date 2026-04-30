@@ -24,6 +24,7 @@ import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAdminSupportStats, useAdminTickets } from "@/lib/api/hooks/admin"
+import { formatRelativeTimeShort } from "@/lib/date-utils"
 
 export const Route = createFileRoute("/_app/admin/support")({
   component: AdminSupportPage,
@@ -112,20 +113,6 @@ function StatsCardSkeleton() {
       </CardContent>
     </Card>
   )
-}
-
-function formatTimeAgo(dateStr: string): string {
-  const now = new Date()
-  const date = new Date(dateStr)
-  const diffMs = now.getTime() - date.getTime()
-  const diffMins = Math.floor(diffMs / 60000)
-  if (diffMins < 1) return "Just now"
-  if (diffMins < 60) return `${diffMins}m ago`
-  const diffHours = Math.floor(diffMins / 60)
-  if (diffHours < 24) return `${diffHours}h ago`
-  const diffDays = Math.floor(diffHours / 24)
-  if (diffDays < 7) return `${diffDays}d ago`
-  return date.toLocaleDateString()
 }
 
 function AdminSupportPage() {
@@ -273,7 +260,7 @@ function AdminSupportPage() {
                           {statusLabel[ticket.status] ?? ticket.status}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">{formatTimeAgo(ticket.createdAt)}</TableCell>
+                      <TableCell className="text-muted-foreground text-sm">{formatRelativeTimeShort(ticket.createdAt)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

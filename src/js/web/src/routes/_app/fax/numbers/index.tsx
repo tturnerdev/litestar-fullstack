@@ -34,6 +34,7 @@ import { nextSortDirection, SortableHeader, type SortDirection } from "@/compone
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { type FaxNumber, useDeleteFaxNumber, useFaxNumbers } from "@/lib/api/hooks/fax"
+import { formatRelativeTimeShort } from "@/lib/date-utils"
 
 export const Route = createFileRoute("/_app/fax/numbers/")({
   component: FaxNumbersPage,
@@ -68,22 +69,6 @@ function StatusIndicator({ isActive }: { isActive: boolean }) {
 function formatDateTime(value: string | null | undefined): string {
   if (!value) return "Never"
   return new Date(value).toLocaleString()
-}
-
-function formatRelativeTime(value: string | null | undefined): string {
-  if (!value) return "--"
-  const date = new Date(value)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffMins = Math.floor(diffMs / 60_000)
-  if (diffMins < 1) return "Just now"
-  if (diffMins < 60) return `${diffMins}m ago`
-  const diffHours = Math.floor(diffMins / 60)
-  if (diffHours < 24) return `${diffHours}h ago`
-  const diffDays = Math.floor(diffHours / 24)
-  if (diffDays < 30) return `${diffDays}d ago`
-  const diffMonths = Math.floor(diffDays / 30)
-  return `${diffMonths}mo ago`
 }
 
 // -- Main page ----------------------------------------------------------------
@@ -516,7 +501,7 @@ function FaxNumberRow({
         <Tooltip>
           <TooltipTrigger asChild>
             <span className="cursor-default text-xs text-muted-foreground">
-              {formatRelativeTime(faxNumber.createdAt)}
+              {formatRelativeTimeShort(faxNumber.createdAt)}
             </span>
           </TooltipTrigger>
           <TooltipContent>{formatDateTime(faxNumber.createdAt)}</TooltipContent>

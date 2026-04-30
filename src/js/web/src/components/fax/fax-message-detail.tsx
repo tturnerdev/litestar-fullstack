@@ -31,24 +31,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import type { FaxMessage } from "@/lib/api/hooks/fax"
 import { useDownloadFaxDocument } from "@/lib/api/hooks/fax"
+import { formatRelativeTimeShort } from "@/lib/date-utils"
 import { formatBytes, formatPhoneNumber } from "@/lib/format-utils"
-
-function formatRelativeTime(dateStr: string | null): string {
-  if (!dateStr) return "--"
-  const now = Date.now()
-  const date = new Date(dateStr).getTime()
-  const diffMs = now - date
-  const diffSec = Math.floor(diffMs / 1000)
-  if (diffSec < 60) return "just now"
-  const diffMin = Math.floor(diffSec / 60)
-  if (diffMin < 60) return `${diffMin}m ago`
-  const diffHr = Math.floor(diffMin / 60)
-  if (diffHr < 24) return `${diffHr}h ago`
-  const diffDays = Math.floor(diffHr / 24)
-  if (diffDays < 30) return `${diffDays}d ago`
-  const diffMonths = Math.floor(diffDays / 30)
-  return `${diffMonths}mo ago`
-}
 
 function formatFullDate(dateStr: string | null): string {
   if (!dateStr) return "--"
@@ -61,7 +45,7 @@ function RelativeTimestamp({ dateStr }: { dateStr: string | null }) {
     <Tooltip>
       <TooltipTrigger asChild>
         <span className="cursor-default border-b border-dotted border-muted-foreground/40">
-          {formatRelativeTime(dateStr)}
+          {formatRelativeTimeShort(dateStr)}
         </span>
       </TooltipTrigger>
       <TooltipContent>{formatFullDate(dateStr)}</TooltipContent>

@@ -19,6 +19,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { useOAuthConfig } from "@/hooks/use-oauth-config"
 import { useOAuthAccounts, useStartOAuthLink, useUnlinkOAuthAccount } from "@/lib/api/hooks/auth"
+import { formatRelativeTimeShort } from "@/lib/date-utils"
 
 const providerMeta: Record<string, { label: string; iconBg: string }> = {
   github: {
@@ -29,24 +30,6 @@ const providerMeta: Record<string, { label: string; iconBg: string }> = {
     label: "Google",
     iconBg: "bg-blue-50 dark:bg-blue-950/40",
   },
-}
-
-function formatRelativeTime(value: string | null | undefined): string {
-  if (!value) return "Never"
-  const date = new Date(value)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffMins = Math.floor(diffMs / 60_000)
-  if (diffMins < 1) return "Just now"
-  if (diffMins < 60) return `${diffMins}m ago`
-  const diffHours = Math.floor(diffMins / 60)
-  if (diffHours < 24) return `${diffHours}h ago`
-  const diffDays = Math.floor(diffHours / 24)
-  if (diffDays < 30) return `${diffDays}d ago`
-  const diffMonths = Math.floor(diffDays / 30)
-  if (diffMonths < 12) return `${diffMonths}mo ago`
-  const diffYears = Math.floor(diffMonths / 12)
-  return `${diffYears}y ago`
 }
 
 export function ConnectedAccounts() {
@@ -159,12 +142,12 @@ export function ConnectedAccounts() {
                         <p className="text-muted-foreground text-sm">{account.email}</p>
                         <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
                           {account.linkedAt && (
-                            <span>Connected {formatRelativeTime(account.linkedAt)}</span>
+                            <span>Connected {formatRelativeTimeShort(account.linkedAt)}</span>
                           )}
                           {account.lastLoginAt && (
                             <span className="flex items-center gap-1">
                               <LogIn className="h-3 w-3" />
-                              Last login {formatRelativeTime(account.lastLoginAt)}
+                              Last login {formatRelativeTimeShort(account.lastLoginAt)}
                             </span>
                           )}
                         </div>

@@ -5,22 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import type { ActivityLogEntry } from "@/lib/generated/api"
-
-function formatRelativeTime(dateStr: string): string {
-  const date = new Date(dateStr)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffSeconds = Math.floor(diffMs / 1000)
-  const diffMinutes = Math.floor(diffSeconds / 60)
-  const diffHours = Math.floor(diffMinutes / 60)
-  const diffDays = Math.floor(diffHours / 24)
-
-  if (diffSeconds < 60) return "just now"
-  if (diffMinutes < 60) return `${diffMinutes}m ago`
-  if (diffHours < 24) return `${diffHours}h ago`
-  if (diffDays < 7) return `${diffDays}d ago`
-  return date.toLocaleDateString()
-}
+import { formatRelativeTimeShort } from "@/lib/date-utils"
 
 function formatActionLabel(action: string): string {
   return action
@@ -151,7 +136,7 @@ export function RecentActivityCard({ activities, isLoading, isAdmin = false }: R
                       </TooltipContent>
                     </Tooltip>
                   </div>
-                  <span className="shrink-0 pt-0.5 text-xs text-muted-foreground">{formatRelativeTime(activity.createdAt)}</span>
+                  <span className="shrink-0 pt-0.5 text-xs text-muted-foreground">{formatRelativeTimeShort(activity.createdAt)}</span>
                 </div>
               )
             })}

@@ -36,6 +36,7 @@ import {
   useFaxMessages,
   useFaxNumbers,
 } from "@/lib/api/hooks/fax"
+import { formatRelativeTimeShort } from "@/lib/date-utils"
 
 export const Route = createFileRoute("/_app/fax/messages/")({
   component: FaxMessagesPage,
@@ -64,22 +65,6 @@ const PAGE_SIZE = 25
 function formatDateTime(value: string | null | undefined): string {
   if (!value) return "Never"
   return new Date(value).toLocaleString()
-}
-
-function formatRelativeTime(value: string | null | undefined): string {
-  if (!value) return "--"
-  const date = new Date(value)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffMins = Math.floor(diffMs / 60_000)
-  if (diffMins < 1) return "Just now"
-  if (diffMins < 60) return `${diffMins}m ago`
-  const diffHours = Math.floor(diffMins / 60)
-  if (diffHours < 24) return `${diffHours}h ago`
-  const diffDays = Math.floor(diffHours / 24)
-  if (diffDays < 30) return `${diffDays}d ago`
-  const diffMonths = Math.floor(diffDays / 30)
-  return `${diffMonths}mo ago`
 }
 
 function formatPages(count: number): string {
@@ -479,7 +464,7 @@ function FaxMessageRow({
         <Tooltip>
           <TooltipTrigger asChild>
             <span className="cursor-default whitespace-nowrap text-xs text-muted-foreground">
-              {formatRelativeTime(msg.receivedAt ?? msg.createdAt)}
+              {formatRelativeTimeShort(msg.receivedAt ?? msg.createdAt)}
             </span>
           </TooltipTrigger>
           <TooltipContent>{formatDateTime(msg.receivedAt ?? msg.createdAt)}</TooltipContent>

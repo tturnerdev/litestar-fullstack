@@ -38,6 +38,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { type Ticket, useTickets } from "@/lib/api/hooks/support"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { client } from "@/lib/generated/api/client.gen"
+import { formatRelativeTimeShort } from "@/lib/date-utils"
 import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/support/")({
@@ -89,20 +90,6 @@ const csvHeaders: CsvHeader<Ticket>[] = [
 function formatDateTime(value: string | null | undefined): string {
   if (!value) return "Never"
   return new Date(value).toLocaleString()
-}
-
-function formatRelativeTime(value: string | null | undefined): string {
-  if (!value) return "Never"
-  const date = new Date(value)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffMins = Math.floor(diffMs / 60_000)
-  if (diffMins < 1) return "Just now"
-  if (diffMins < 60) return `${diffMins}m ago`
-  const diffHours = Math.floor(diffMins / 60)
-  if (diffHours < 24) return `${diffHours}h ago`
-  const diffDays = Math.floor(diffHours / 24)
-  return `${diffDays}d ago`
 }
 
 // ── Main page ────────────────────────────────────────────────────────────
@@ -639,7 +626,7 @@ function TicketRow({
         <Tooltip>
           <TooltipTrigger asChild>
             <span className="cursor-default text-xs text-muted-foreground">
-              {formatRelativeTime(ticket.createdAt)}
+              {formatRelativeTimeShort(ticket.createdAt)}
             </span>
           </TooltipTrigger>
           <TooltipContent>{formatDateTime(ticket.createdAt)}</TooltipContent>
@@ -649,7 +636,7 @@ function TicketRow({
         <Tooltip>
           <TooltipTrigger asChild>
             <span className="cursor-default text-xs text-muted-foreground">
-              {formatRelativeTime(ticket.updatedAt)}
+              {formatRelativeTimeShort(ticket.updatedAt)}
             </span>
           </TooltipTrigger>
           <TooltipContent>{formatDateTime(ticket.updatedAt)}</TooltipContent>

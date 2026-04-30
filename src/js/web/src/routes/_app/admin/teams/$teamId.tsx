@@ -38,6 +38,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { CopyButton } from "@/components/ui/copy-button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAdminTeam, useAdminUpdateTeam } from "@/lib/api/hooks/admin"
+import { formatRelativeTimeShort } from "@/lib/date-utils"
 import {
   deleteTeamInvitation,
   listTeamInvitations,
@@ -58,23 +59,6 @@ function getTeamInitials(name: string): string {
     return (parts[0][0] + parts[1][0]).toUpperCase()
   }
   return parts[0].slice(0, 2).toUpperCase()
-}
-
-function formatRelativeTime(value: string | null | undefined): string {
-  if (!value) return "Never"
-  const date = new Date(value)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffMins = Math.floor(diffMs / 60_000)
-  if (diffMins < 1) return "Just now"
-  if (diffMins < 60) return `${diffMins}m ago`
-  const diffHours = Math.floor(diffMins / 60)
-  if (diffHours < 24) return `${diffHours}h ago`
-  const diffDays = Math.floor(diffHours / 24)
-  if (diffDays < 30) return `${diffDays}d ago`
-  const diffMonths = Math.floor(diffDays / 30)
-  if (diffMonths < 12) return `${diffMonths}mo ago`
-  return `${Math.floor(diffMonths / 12)}y ago`
 }
 
 function formatDateTime(value: string | null | undefined): string {
@@ -109,7 +93,7 @@ function TimestampField({
         <TooltipTrigger asChild>
           <p className="inline-flex cursor-default items-center gap-1.5 text-sm">
             {Icon && <Icon className="h-3.5 w-3.5 text-muted-foreground" />}
-            {formatRelativeTime(value)}
+            {formatRelativeTimeShort(value)}
           </p>
         </TooltipTrigger>
         <TooltipContent>{formatDateTime(value)}</TooltipContent>
@@ -697,7 +681,7 @@ function InvitationsCard({ teamId }: { teamId: string }) {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <span className="cursor-default text-muted-foreground">
-                        {formatRelativeTime(inv.createdAt)}
+                        {formatRelativeTimeShort(inv.createdAt)}
                       </span>
                     </TooltipTrigger>
                     <TooltipContent>{formatDateTime(inv.createdAt)}</TooltipContent>
