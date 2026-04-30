@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.77.0 (2026-04-30)
+
+### Improved
+- **Breadcrumb navigation** — Added breadcrumbs to all list pages missing them: support, devices, connections, fax messages/numbers, voice extensions/phone-numbers. All pages now have consistent Home > Section (> Subsection) navigation.
+- **Theme-aware colors** — Fixed `group-hover:text-white` in admin stat cards to use `group-hover:text-primary-foreground` for proper dark mode support.
+
 ## v0.76.0 (2026-04-30)
 
 ### Improved
