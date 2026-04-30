@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.76.0 (2026-04-30)
+
+### Improved
+- **Search clear buttons** — Added X clear button to all 14 search inputs across the app: tags, admin support/fax/devices/voice, support tickets, devices, fax messages, voice extensions/phone-numbers, connections, admin users/teams, and location list. Pagination resets on clear where applicable.
+- **Clickable admin table rows** — Admin dashboard table rows now navigate to detail pages on click: support tickets, devices, fax messages/numbers, and voice extensions.
+- **Alternating row stripes** — Added `bg-muted/20` alternating backgrounds to all 13 data tables for improved scannability.
+- **Danger zones** — Added dedicated Danger Zone cards to device detail and extension detail pages.
+- **Section icons** — Added icons to device SIP/Advanced Configuration and location information headers.
+
 ## v0.74.0 (2026-04-30)
 
 ### Improved
