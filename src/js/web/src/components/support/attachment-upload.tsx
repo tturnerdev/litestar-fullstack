@@ -3,6 +3,7 @@ import { useCallback, useRef, useState } from "react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { formatBytes } from "@/lib/format-utils"
 import { cn } from "@/lib/utils"
 
 interface PendingFile {
@@ -57,12 +58,6 @@ function getFileTypeBorderColor(name: string): string {
   return "border-l-gray-400"
 }
 
-function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-}
-
 let fileIdCounter = 0
 
 export function AttachmentUpload({
@@ -88,7 +83,7 @@ export function AttachmentUpload({
         }
         if (file.size > MAX_FILE_SIZE) {
           toast.error(`"${file.name}" exceeds the 10 MB limit`, {
-            description: `File size: ${formatFileSize(file.size)}.`,
+            description: `File size: ${formatBytes(file.size)}.`,
           })
           continue
         }
@@ -203,7 +198,7 @@ export function AttachmentUpload({
                   </TooltipTrigger>
                   <TooltipContent>{f.name}</TooltipContent>
                 </Tooltip>
-                <span className="text-muted-foreground">({formatFileSize(f.size)})</span>
+                <span className="text-muted-foreground">({formatBytes(f.size)})</span>
                 <button
                   type="button"
                   onClick={() => removeFile(f.id)}
@@ -304,7 +299,7 @@ export function AttachmentUpload({
                   <TooltipContent>{f.name}</TooltipContent>
                 </Tooltip>
                 <span className="shrink-0 text-xs text-muted-foreground">
-                  {formatFileSize(f.size)}
+                  {formatBytes(f.size)}
                 </span>
               </div>
               <button

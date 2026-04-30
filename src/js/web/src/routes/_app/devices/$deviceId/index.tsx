@@ -34,7 +34,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { CopyButton } from "@/components/ui/copy-button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { formatRelativeTimeShort } from "@/lib/date-utils"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import {
   useDeleteDevice,
   useDevice,
@@ -56,13 +56,6 @@ const deviceTypeLabels: Record<string, string> = {
   ata: "ATA",
   conference: "Conference",
   other: "Other",
-}
-
-// ── Formatting helpers ──────────────────────────────────────────────────
-
-function formatDateTime(value: string | null | undefined): string {
-  if (!value) return "---"
-  return new Date(value).toLocaleString()
 }
 
 // ── Timestamp with tooltip ──────────────────────────────────────────────

@@ -24,21 +24,12 @@ import { CopyButton } from "@/components/ui/copy-button"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
 import { useAuthStore } from "@/lib/auth"
-import { formatRelativeTime } from "@/lib/date-utils"
+import { formatDateTime, formatRelativeTime } from "@/lib/date-utils"
 import { useDeleteLocation, useLocation, useUpdateLocation, type Location } from "@/lib/api/hooks/locations"
 
 export const Route = createFileRoute("/_app/locations/$locationId/")({
   component: LocationDetailPage,
 })
-
-// ---------------------------------------------------------------------------
-// Time helpers
-// ---------------------------------------------------------------------------
-
-function formatDateTime(value: string | null | undefined): string {
-  if (!value) return "Unknown"
-  return new Date(value).toLocaleString()
-}
 
 // ---------------------------------------------------------------------------
 // Main page

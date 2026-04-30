@@ -37,7 +37,7 @@ import {
   usePhoneNumbers,
 } from "@/lib/api/hooks/voice"
 import { type CsvHeader } from "@/lib/csv-export"
-import { formatRelativeTimeShort } from "@/lib/date-utils"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 
 export const Route = createFileRoute("/_app/voice/extensions/")({
   component: ExtensionsPage,
@@ -74,11 +74,6 @@ function StatusIndicator({ isActive }: { isActive: boolean }) {
       Inactive
     </span>
   )
-}
-
-function formatDateTime(value: string | null | undefined): string {
-  if (!value) return "Never"
-  return new Date(value).toLocaleString()
 }
 
 // -- Main page ----------------------------------------------------------------

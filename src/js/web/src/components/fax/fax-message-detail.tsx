@@ -31,13 +31,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import type { FaxMessage } from "@/lib/api/hooks/fax"
 import { useDownloadFaxDocument } from "@/lib/api/hooks/fax"
-import { formatRelativeTimeShort } from "@/lib/date-utils"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { formatBytes, formatPhoneNumber } from "@/lib/format-utils"
-
-function formatFullDate(dateStr: string | null): string {
-  if (!dateStr) return "--"
-  return new Date(dateStr).toLocaleString()
-}
 
 function RelativeTimestamp({ dateStr }: { dateStr: string | null }) {
   if (!dateStr) return <span>--</span>
@@ -48,7 +43,7 @@ function RelativeTimestamp({ dateStr }: { dateStr: string | null }) {
           {formatRelativeTimeShort(dateStr)}
         </span>
       </TooltipTrigger>
-      <TooltipContent>{formatFullDate(dateStr)}</TooltipContent>
+      <TooltipContent>{formatDateTime(dateStr, "--")}</TooltipContent>
     </Tooltip>
   )
 }

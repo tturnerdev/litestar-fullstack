@@ -47,7 +47,7 @@ import { SkeletonCard } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
 import { CopyButton } from "@/components/ui/copy-button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { formatRelativeTimeShort } from "@/lib/date-utils"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import {
   useConnection,
   useDeleteConnection,
@@ -74,13 +74,6 @@ const authTypeLabels: Record<string, string> = {
   oauth2: "OAuth 2.0",
   token: "Token",
   none: "None",
-}
-
-// ── Formatting helpers ──────────────────────────────────────────────────
-
-function formatDateTime(value: string | null | undefined): string {
-  if (!value) return "---"
-  return new Date(value).toLocaleString()
 }
 
 // ── Status badge ────────────────────────────────────────────────────────

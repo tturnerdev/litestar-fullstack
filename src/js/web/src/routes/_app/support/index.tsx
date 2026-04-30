@@ -38,7 +38,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { type Ticket, useTickets } from "@/lib/api/hooks/support"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { client } from "@/lib/generated/api/client.gen"
-import { formatRelativeTimeShort } from "@/lib/date-utils"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/support/")({
@@ -86,11 +86,6 @@ const csvHeaders: CsvHeader<Ticket>[] = [
 ]
 
 // ── Helpers ──────────────────────────────────────────────────────────────
-
-function formatDateTime(value: string | null | undefined): string {
-  if (!value) return "Never"
-  return new Date(value).toLocaleString()
-}
 
 // ── Main page ────────────────────────────────────────────────────────────
 

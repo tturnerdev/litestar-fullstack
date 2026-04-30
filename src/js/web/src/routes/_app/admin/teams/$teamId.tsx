@@ -38,7 +38,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { CopyButton } from "@/components/ui/copy-button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAdminTeam, useAdminUpdateTeam } from "@/lib/api/hooks/admin"
-import { formatRelativeTimeShort } from "@/lib/date-utils"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import {
   deleteTeamInvitation,
   listTeamInvitations,
@@ -61,10 +61,6 @@ function getTeamInitials(name: string): string {
   return parts[0].slice(0, 2).toUpperCase()
 }
 
-function formatDateTime(value: string | null | undefined): string {
-  if (!value) return "---"
-  return new Date(value).toLocaleString()
-}
 
 // -- Reusable sub-components ------------------------------------------------
 

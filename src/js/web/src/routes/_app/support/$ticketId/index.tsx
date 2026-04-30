@@ -63,7 +63,7 @@ import {
   useTicket,
   useUpdateTicket,
 } from "@/lib/api/hooks/support"
-import { formatRelativeTimeShort } from "@/lib/date-utils"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 
 export const Route = createFileRoute("/_app/support/$ticketId/")({
   component: TicketDetailPage,
@@ -91,13 +91,6 @@ const statuses = [
   { value: "resolved", label: "Resolved" },
   { value: "closed", label: "Closed" },
 ] as const
-
-// ── Helpers ─────────────────────────────────────────────────────────────
-
-function formatDateTime(value: string | null | undefined): string {
-  if (!value) return "--"
-  return new Date(value).toLocaleString()
-}
 
 // ── Timestamp field ─────────────────────────────────────────────────────
 

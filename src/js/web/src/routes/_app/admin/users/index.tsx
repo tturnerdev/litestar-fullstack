@@ -34,7 +34,7 @@ import { SkeletonTable } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { formatRelativeTimeShort } from "@/lib/date-utils"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { useAdminUsers, useAdminUpdateUser } from "@/lib/api/hooks/admin"
 import { adminDeleteUser, adminUpdateUser } from "@/lib/generated/api"
 import type { AdminUserSummary } from "@/lib/generated/api"
@@ -81,11 +81,6 @@ function getInitials(name: string | null | undefined, email: string): string {
     return name.slice(0, 2).toUpperCase()
   }
   return email.slice(0, 2).toUpperCase()
-}
-
-function formatDateTime(value: string | null | undefined): string {
-  if (!value) return "Never"
-  return new Date(value).toLocaleString()
 }
 
 function ActiveStatusIndicator({ isActive }: { isActive: boolean | undefined }) {

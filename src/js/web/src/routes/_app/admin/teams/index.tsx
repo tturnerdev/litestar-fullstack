@@ -28,7 +28,7 @@ import { SkeletonTable } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { formatRelativeTimeShort } from "@/lib/date-utils"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { useAdminTeams } from "@/lib/api/hooks/admin"
 import { adminDeleteTeam } from "@/lib/generated/api"
 import type { AdminTeamSummary } from "@/lib/generated/api"
@@ -56,10 +56,6 @@ const statusOptions: FilterOption[] = [
 
 // -- Helpers ------------------------------------------------------------------
 
-function formatDateTime(value: string | null | undefined): string {
-  if (!value) return "Never"
-  return new Date(value).toLocaleString()
-}
 
 function ActiveStatusIndicator({ isActive }: { isActive: boolean | undefined }) {
   if (isActive) {

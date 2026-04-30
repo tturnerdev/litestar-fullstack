@@ -45,6 +45,7 @@ import { CopyButton } from "@/components/ui/copy-button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { DirectionBadge, FaxStatusBadge } from "@/components/fax/fax-status-badge"
 import { useDeleteFaxMessage, useDownloadFaxDocument, useFaxMessage } from "@/lib/api/hooks/fax"
+import { formatDateTime } from "@/lib/date-utils"
 import { formatBytes } from "@/lib/format-utils"
 
 export const Route = createFileRoute("/_app/fax/messages/$messageId/")({
@@ -52,11 +53,6 @@ export const Route = createFileRoute("/_app/fax/messages/$messageId/")({
 })
 
 // -- Formatting helpers -----------------------------------------------------
-
-function formatDateTime(value: string | null | undefined): string {
-  if (!value) return "---"
-  return new Date(value).toLocaleString()
-}
 
 function formatRelativeTime(value: string | null | undefined): string {
   if (!value) return "Never"

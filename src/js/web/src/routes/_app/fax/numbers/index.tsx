@@ -34,7 +34,7 @@ import { nextSortDirection, SortableHeader, type SortDirection } from "@/compone
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { type FaxNumber, useDeleteFaxNumber, useFaxNumbers } from "@/lib/api/hooks/fax"
-import { formatRelativeTimeShort } from "@/lib/date-utils"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 
 export const Route = createFileRoute("/_app/fax/numbers/")({
   component: FaxNumbersPage,
@@ -66,10 +66,6 @@ function StatusIndicator({ isActive }: { isActive: boolean }) {
   )
 }
 
-function formatDateTime(value: string | null | undefined): string {
-  if (!value) return "Never"
-  return new Date(value).toLocaleString()
-}
 
 // -- Main page ----------------------------------------------------------------
 

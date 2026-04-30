@@ -21,14 +21,9 @@ import { SkeletonTable } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDeleteFaxMessage, useFaxMessages } from "@/lib/api/hooks/fax"
-import { formatRelativeTimeShort } from "@/lib/date-utils"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 
 const PAGE_SIZE = 25
-
-function formatFullDate(dateStr: string | null): string {
-  if (!dateStr) return "—"
-  return new Date(dateStr).toLocaleString()
-}
 
 function formatUSPhone(phone: string): string {
   const cleaned = phone.replace(/\D/g, "")
@@ -208,7 +203,7 @@ export function FaxMessageTable() {
                       <TooltipTrigger asChild>
                         <span className="cursor-default">{formatRelativeTimeShort(msg.receivedAt)}</span>
                       </TooltipTrigger>
-                      <TooltipContent>{formatFullDate(msg.receivedAt)}</TooltipContent>
+                      <TooltipContent>{formatDateTime(msg.receivedAt)}</TooltipContent>
                     </Tooltip>
                   </TableCell>
                   <TableCell>

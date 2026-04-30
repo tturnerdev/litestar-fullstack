@@ -36,7 +36,7 @@ import {
   useFaxMessages,
   useFaxNumbers,
 } from "@/lib/api/hooks/fax"
-import { formatRelativeTimeShort } from "@/lib/date-utils"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 
 export const Route = createFileRoute("/_app/fax/messages/")({
   component: FaxMessagesPage,
@@ -62,10 +62,6 @@ const PAGE_SIZE = 25
 
 // -- Helpers ------------------------------------------------------------------
 
-function formatDateTime(value: string | null | undefined): string {
-  if (!value) return "Never"
-  return new Date(value).toLocaleString()
-}
 
 function formatPages(count: number): string {
   return `${count} pg${count === 1 ? "" : "s"}`

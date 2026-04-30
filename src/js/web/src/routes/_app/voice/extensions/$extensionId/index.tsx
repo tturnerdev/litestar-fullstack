@@ -42,7 +42,7 @@ import { Switch } from "@/components/ui/switch"
 import { CopyButton } from "@/components/ui/copy-button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { DndQuickToggle } from "@/components/voice/dnd-quick-toggle"
-import { formatRelativeTimeShort } from "@/lib/date-utils"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import {
   useDeleteExtension,
   useDndSettings,
@@ -57,12 +57,6 @@ export const Route = createFileRoute("/_app/voice/extensions/$extensionId/")({
   component: ExtensionDetailPage,
 })
 
-// -- Formatting helpers -------------------------------------------------------
-
-function formatDateTime(value: string | null | undefined): string {
-  if (!value) return "---"
-  return new Date(value).toLocaleString()
-}
 
 // -- Timestamp with tooltip ---------------------------------------------------
 

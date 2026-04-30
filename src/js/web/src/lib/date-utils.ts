@@ -52,3 +52,15 @@ export function formatFullDateTime(dateStr: string): string {
     timeZoneName: "short",
   })
 }
+
+/**
+ * Format a date string using the browser's default locale string.
+ * Returns "---" (or a custom fallback) for null/undefined input.
+ */
+export function formatDateTime(dateStr: string | null | undefined, fallback = "---"): string {
+  if (!dateStr) return fallback
+  return new Date(dateStr).toLocaleString()
+}
+
+/** @deprecated Use {@link formatDateTime} instead. */
+export const formatFullDate = formatDateTime

@@ -4,17 +4,12 @@ import { AttachmentPreview } from "@/components/support/attachment-preview"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import type { TicketAttachment } from "@/lib/api/hooks/support"
+import { formatBytes } from "@/lib/format-utils"
 import { cn } from "@/lib/utils"
 
 interface AttachmentListProps {
   attachments: TicketAttachment[]
   className?: string
-}
-
-function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
 function getFileIcon(contentType: string) {
@@ -126,7 +121,7 @@ export function AttachmentList({ attachments, className }: AttachmentListProps) 
                   </Tooltip>
                 )}
                 <span className="text-xs text-muted-foreground">
-                  {formatFileSize(attachment.fileSizeBytes)}
+                  {formatBytes(attachment.fileSizeBytes)}
                 </span>
                 <a
                   href={downloadUrl}
@@ -141,7 +136,7 @@ export function AttachmentList({ attachments, className }: AttachmentListProps) 
         </div>
 
         <p className="text-xs text-muted-foreground">
-          {nonInlineAttachments.length} {nonInlineAttachments.length === 1 ? "file" : "files"}, {formatFileSize(totalBytes)} total
+          {nonInlineAttachments.length} {nonInlineAttachments.length === 1 ? "file" : "files"}, {formatBytes(totalBytes)} total
         </p>
       </div>
 

@@ -16,6 +16,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useActiveSessions, useRevokeAllSessions, useRevokeSession } from "@/lib/api/hooks/profile"
+import { formatFullDateTime } from "@/lib/date-utils"
 import type { ActiveSession } from "@/lib/generated/api/types.gen"
 
 type DeviceCategory = "Desktop" | "Mobile" | "Tablet"
@@ -57,20 +58,6 @@ function formatLastActive(dateStr: string): string {
   if (hours < 24) return `${hours}h ago`
   if (days === 1) return "1 day ago"
   return `${days} days ago`
-}
-
-function formatFullDateTime(dateStr: string): string {
-  const date = new Date(dateStr)
-  return date.toLocaleString(undefined, {
-    weekday: "short",
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    timeZoneName: "short",
-  })
 }
 
 function parseDeviceInfo(deviceInfo: string | null | undefined): {

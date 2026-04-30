@@ -39,7 +39,7 @@ import {
   useDeleteConnection,
   useTestAnyConnection,
 } from "@/lib/api/hooks/connections"
-import { formatRelativeTimeShort } from "@/lib/date-utils"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 
 export const Route = createFileRoute("/_app/connections/")({
   component: ConnectionsPage,
@@ -109,10 +109,6 @@ function StatusIndicator({ status }: { status: string }) {
   }
 }
 
-function formatDateTime(value: string | null | undefined): string {
-  if (!value) return "Never"
-  return new Date(value).toLocaleString()
-}
 
 // ── Per-row test button ──────────────────────────────────────────────────
 

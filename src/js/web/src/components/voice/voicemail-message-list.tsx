@@ -26,6 +26,7 @@ import {
   useVoicemailMessages,
   type VoicemailMessage,
 } from "@/lib/api/hooks/voice"
+import { formatFullDateTime } from "@/lib/date-utils"
 
 const PAGE_SIZE = 15
 
@@ -50,19 +51,6 @@ function formatReceivedAt(dateStr: string): string {
   }
 
   return date.toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })
-}
-
-function formatFullDateTime(dateStr: string): string {
-  const date = new Date(dateStr)
-  return date.toLocaleString(undefined, {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-    second: "2-digit",
-  })
 }
 
 interface VoicemailMessageListProps {

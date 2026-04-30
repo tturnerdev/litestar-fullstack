@@ -48,6 +48,7 @@ import {
   useFaxNumber,
   useUpdateFaxNumber,
 } from "@/lib/api/hooks/fax"
+import { formatDateTime } from "@/lib/date-utils"
 import { formatPhoneNumber } from "@/lib/format-utils"
 
 export const Route = createFileRoute("/_app/fax/numbers/$faxNumberId/")({
@@ -55,11 +56,6 @@ export const Route = createFileRoute("/_app/fax/numbers/$faxNumberId/")({
 })
 
 // ── Helpers ──────────────────────────────────────────────────────────────
-
-function formatDateTime(value: string | null | undefined): string {
-  if (!value) return "---"
-  return new Date(value).toLocaleString()
-}
 
 function formatRelativeTime(value: string | null | undefined): string {
   if (!value) return "Never"

@@ -46,7 +46,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { CopyButton } from "@/components/ui/copy-button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAdminUpdateUser, useAdminUser } from "@/lib/api/hooks/admin"
-import { formatRelativeTimeShort } from "@/lib/date-utils"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 
 export const Route = createFileRoute("/_app/admin/users/$userId")({
   component: AdminUserDetailPage,
@@ -63,11 +63,6 @@ function getInitials(name: string | null | undefined, email: string): string {
     return parts[0].slice(0, 2).toUpperCase()
   }
   return email.slice(0, 2).toUpperCase()
-}
-
-function formatDateTime(value: string | null | undefined): string {
-  if (!value) return "---"
-  return new Date(value).toLocaleString()
 }
 
 // -- Reusable sub-components ------------------------------------------------

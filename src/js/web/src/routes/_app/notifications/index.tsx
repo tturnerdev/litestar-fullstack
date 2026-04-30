@@ -47,15 +47,8 @@ import {
   useUpdateNotificationPreferences,
 } from "@/lib/api/hooks/notifications"
 import { Skeleton, SkeletonCard } from "@/components/ui/skeleton"
-import { formatRelativeTimeShort } from "@/lib/date-utils"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { cn } from "@/lib/utils"
-
-function formatDateTime(dateStr: string): string {
-  return new Date(dateStr).toLocaleString(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  })
-}
 
 export const Route = createFileRoute("/_app/notifications/")({
   component: NotificationsPage,

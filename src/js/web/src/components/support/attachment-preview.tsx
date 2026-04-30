@@ -13,19 +13,12 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import type { TicketAttachment } from "@/lib/api/hooks/support"
+import { formatBytes } from "@/lib/format-utils"
 
 const MIN_ZOOM = 0.5
 const MAX_ZOOM = 3
 const ZOOM_STEP = 0.25
 const DEFAULT_ZOOM = 1
-
-function formatFileSize(bytes: number): string {
-  if (bytes === 0) return "0 B"
-  const k = 1024
-  const sizes = ["B", "KB", "MB", "GB"]
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return `${Number.parseFloat((bytes / k ** i).toFixed(1))} ${sizes[i]}`
-}
 
 interface AttachmentPreviewProps {
   attachment: TicketAttachment
@@ -132,7 +125,7 @@ export function AttachmentPreview({ attachment, onClose, onPrev, onNext }: Attac
         {/* File info bar */}
         <div className="flex items-center justify-between border-b bg-muted/30 px-4 py-2">
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
-            <span>{formatFileSize(attachment.fileSizeBytes)}</span>
+            <span>{formatBytes(attachment.fileSizeBytes)}</span>
             <span className="text-border">|</span>
             <span>{attachment.contentType}</span>
           </div>

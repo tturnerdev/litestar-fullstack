@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
+import { formatBytes } from "@/lib/format-utils"
 
 const CATEGORIES = ["Error / Bug", "Comment", "Feature Request", "Other"] as const
 export type IssueCategory = (typeof CATEGORIES)[number]
@@ -37,12 +38,6 @@ interface ReportIssueTabProps {
   onFormDataChange: (data: ReportFormData) => void
   onCaptureScreenshot: () => void
   isCapturing: boolean
-}
-
-function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
 export function ReportIssueTab({ formData, onFormDataChange, onCaptureScreenshot, isCapturing }: ReportIssueTabProps) {
@@ -118,7 +113,7 @@ export function ReportIssueTab({ formData, onFormDataChange, onCaptureScreenshot
       console.log("[Help] Screenshot data URL length:", formData.screenshot.length)
     }
     for (const file of formData.files) {
-      console.log("[Help] Attached file:", file.name, formatFileSize(file.size))
+      console.log("[Help] Attached file:", file.name, formatBytes(file.size))
     }
 
     setIsSubmitting(true)
@@ -329,7 +324,7 @@ export function ReportIssueTab({ formData, onFormDataChange, onCaptureScreenshot
                 <li key={`${file.name}-${index}`} className="flex items-center justify-between rounded-md border border-border/60 bg-card/50 px-3 py-1.5 text-sm">
                   <span className="truncate pr-2">
                     {file.name}
-                    <span className="ml-2 text-xs text-muted-foreground">{formatFileSize(file.size)}</span>
+                    <span className="ml-2 text-xs text-muted-foreground">{formatBytes(file.size)}</span>
                   </span>
                   <button
                     type="button"
@@ -342,7 +337,7 @@ export function ReportIssueTab({ formData, onFormDataChange, onCaptureScreenshot
               ))}
             </ul>
             <p className="text-xs text-muted-foreground">
-              {formData.files.length} {formData.files.length === 1 ? "file" : "files"}, {formatFileSize(totalAttachmentSize)} total
+              {formData.files.length} {formData.files.length === 1 ? "file" : "files"}, {formatBytes(totalAttachmentSize)} total
             </p>
           </>
         )}

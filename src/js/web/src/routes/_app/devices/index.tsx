@@ -41,7 +41,7 @@ import {
 } from "@/lib/api/hooks/devices"
 import { deleteDevice, type Device } from "@/lib/generated/api"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
-import { formatRelativeTimeShort } from "@/lib/date-utils"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 
 export const Route = createFileRoute("/_app/devices/")({
   component: DevicesPage,
@@ -89,10 +89,6 @@ const csvHeaders: CsvHeader<Device>[] = [
 
 // -- Helpers ------------------------------------------------------------------
 
-function formatDateTime(value: string | null | undefined): string {
-  if (!value) return "Never"
-  return new Date(value).toLocaleString()
-}
 
 // -- Per-row action buttons ---------------------------------------------------
 
