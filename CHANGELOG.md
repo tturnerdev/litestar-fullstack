@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.79.0 (2026-04-30)
+
+### Improved
+- **Result count display** — Updated filtered result counts on devices, fax numbers, phone numbers, and connections pages to show "X of Y items" when filters are active instead of "(filtered)" suffix.
+- **Teams list page** — Added breadcrumbs (Home > Teams) and search clear button.
+
 ## v0.78.0 (2026-04-30)
 
 ### Improved
