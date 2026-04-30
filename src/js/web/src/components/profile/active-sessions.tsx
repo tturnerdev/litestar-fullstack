@@ -1,10 +1,20 @@
-import { Globe, Monitor, Smartphone, Tablet, Trash2, MapPin, ShieldCheck } from "lucide-react"
-import { useMemo, useState } from "react"
+import { AlertTriangle, Globe, Loader2, MapPin, Monitor, RefreshCw, ShieldCheck, Smartphone, Tablet, Trash2 } from "lucide-react"
+import { useCallback, useEffect, useMemo, useState } from "react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { SkeletonCard } from "@/components/ui/skeleton"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useActiveSessions, useRevokeAllSessions, useRevokeSession } from "@/lib/api/hooks/profile"
 import type { ActiveSession } from "@/lib/generated/api/types.gen"
 
@@ -47,6 +57,20 @@ function formatLastActive(dateStr: string): string {
   if (hours < 24) return `${hours}h ago`
   if (days === 1) return "1 day ago"
   return `${days} days ago`
+}
+
+function formatFullDateTime(dateStr: string): string {
+  const date = new Date(dateStr)
+  return date.toLocaleString(undefined, {
+    weekday: "short",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    timeZoneName: "short",
+  })
 }
 
 function parseDeviceInfo(deviceInfo: string | null | undefined): {
@@ -101,19 +125,33 @@ const deviceCategoryIcon: Record<DeviceCategory, typeof Monitor> = {
   Tablet: Tablet,
 }
 
+const deviceCategoryIconColor: Record<DeviceCategory, string> = {
+  Desktop: "text-blue-500",
+  Mobile: "text-green-500",
+  Tablet: "text-amber-500",
+}
+
 function SessionItem({
   session,
   onRevoke,
   isRevoking,
+  confirmingId,
+  onConfirmStart,
+  onConfirmCancel,
 }: {
   session: ActiveSession
   onRevoke: (id: string) => void
   isRevoking: boolean
+  confirmingId: string | null
+  onConfirmStart: (id: string) => void
+  onConfirmCancel: () => void
 }) {
   const { browser, os, category } = parseDeviceInfo(session.deviceInfo)
   const DeviceIcon = deviceCategoryIcon[category]
+  const iconColor = deviceCategoryIconColor[category]
   const lastActive = formatLastActive(session.createdAt)
   const expiresAt = formatTimeAgo(session.expiresAt)
+  const expiresAtFull = formatFullDateTime(session.expiresAt)
 
   // ActiveSession type may have location fields depending on the backend
   const sessionAny = session as Record<string, unknown>
@@ -121,6 +159,7 @@ function SessionItem({
   const city = sessionAny.city as string | undefined
   const region = sessionAny.region as string | undefined
   const country = sessionAny.country as string | undefined
+  const ipAddress = sessionAny.ipAddress as string | undefined
 
   let locationStr: string | null = null
   if (location && typeof location === "string") {
@@ -129,12 +168,14 @@ function SessionItem({
     locationStr = [city, region, country].filter(Boolean).join(", ")
   }
 
+  const isConfirming = confirmingId === session.id
+
   return (
     <div
       className={`flex items-center justify-between gap-4 rounded-lg border px-4 py-3 ${
         session.isCurrent
           ? "border-emerald-500/30 bg-emerald-500/5"
-          : "border-border/60 bg-muted/30"
+          : "border-border/60 bg-muted/30 hover:bg-muted/50 transition-colors"
       }`}
     >
       <div className="flex items-center gap-3">
@@ -144,7 +185,7 @@ function SessionItem({
           }`}
         >
           <DeviceIcon
-            className={`h-4 w-4 ${session.isCurrent ? "text-emerald-600" : "text-muted-foreground"}`}
+            className={`h-4 w-4 ${session.isCurrent ? "text-emerald-600" : iconColor}`}
           />
         </div>
         <div className="min-w-0">
@@ -162,26 +203,67 @@ function SessionItem({
           <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
             <span>{lastActive}</span>
             <span>&middot;</span>
-            <span>Expires {expiresAt}</span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="cursor-default">Expires {expiresAt}</span>
+              </TooltipTrigger>
+              <TooltipContent>{expiresAtFull}</TooltipContent>
+            </Tooltip>
           </div>
-          <div className="flex items-center gap-1 text-muted-foreground text-xs mt-0.5">
-            <MapPin className="h-3 w-3 shrink-0" />
-            <span>{locationStr ?? "Unknown location"}</span>
+          <div className="flex items-center gap-2 text-muted-foreground text-xs mt-0.5">
+            <div className="flex items-center gap-1">
+              <MapPin className="h-3 w-3 shrink-0" />
+              <span>{locationStr ?? "Unknown location"}</span>
+            </div>
+            {ipAddress && (
+              <>
+                <span>&middot;</span>
+                <div className="flex items-center gap-1">
+                  <Globe className="h-3 w-3 shrink-0" />
+                  <span>{ipAddress}</span>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
 
       {!session.isCurrent && (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => onRevoke(session.id)}
-          disabled={isRevoking}
-          className="text-destructive hover:text-destructive shrink-0"
-        >
-          <Trash2 className="mr-1.5 h-3.5 w-3.5" />
-          Revoke
-        </Button>
+        <div className="shrink-0">
+          {isConfirming ? (
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs text-muted-foreground whitespace-nowrap">Are you sure?</span>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => onRevoke(session.id)}
+                disabled={isRevoking}
+                className="h-7 px-2 text-xs"
+              >
+                Confirm
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onConfirmCancel}
+                className="h-7 px-2 text-xs"
+              >
+                Cancel
+              </Button>
+            </div>
+          ) : (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onConfirmStart(session.id)}
+              disabled={isRevoking}
+              className="text-destructive hover:text-destructive"
+            >
+              <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+              Revoke
+            </Button>
+          )}
+        </div>
       )}
     </div>
   )
@@ -223,15 +305,41 @@ function groupSessionsByDevice(sessions: ActiveSession[]): GroupedSessions[] {
 }
 
 export function ActiveSessions() {
-  const { data, isLoading, isError } = useActiveSessions()
+  const { data, isLoading, isError, isFetching, refetch } = useActiveSessions()
   const revokeOne = useRevokeSession()
   const revokeAll = useRevokeAllSessions()
   const [confirmRevokeAll, setConfirmRevokeAll] = useState(false)
+  const [confirmingId, setConfirmingId] = useState<string | null>(null)
 
   const sessions: ActiveSession[] = data?.items ?? []
   const otherSessionCount = sessions.filter((s) => !s.isCurrent).length
 
   const grouped = useMemo(() => groupSessionsByDevice(sessions), [sessions])
+
+  // Auto-revert inline confirmation after 3 seconds
+  useEffect(() => {
+    if (confirmingId === null) return
+    const timer = setTimeout(() => {
+      setConfirmingId(null)
+    }, 3000)
+    return () => clearTimeout(timer)
+  }, [confirmingId])
+
+  const handleConfirmStart = useCallback((id: string) => {
+    setConfirmingId(id)
+  }, [])
+
+  const handleConfirmCancel = useCallback(() => {
+    setConfirmingId(null)
+  }, [])
+
+  const handleRevoke = useCallback(
+    (id: string) => {
+      revokeOne.mutate(id)
+      setConfirmingId(null)
+    },
+    [revokeOne],
+  )
 
   if (isLoading) {
     return <SkeletonCard />
@@ -253,22 +361,40 @@ export function ActiveSessions() {
       <CardHeader>
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-1.5">
-            <CardTitle>Active sessions</CardTitle>
+            <div className="flex items-center gap-2">
+              <CardTitle>Active sessions</CardTitle>
+              {sessions.length > 0 && (
+                <Badge variant="secondary" className="text-xs">
+                  {sessions.length} active
+                </Badge>
+              )}
+            </div>
             <CardDescription>
               Manage your active sessions across devices. If you see a session you don't recognize, revoke it immediately.
             </CardDescription>
           </div>
-          {otherSessionCount > 0 && (
+          <div className="flex items-center gap-2 shrink-0">
             <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setConfirmRevokeAll(true)}
-              disabled={revokeAll.isPending}
-              className="shrink-0"
+              variant="ghost"
+              size="icon"
+              onClick={() => refetch()}
+              disabled={isFetching}
+              className="h-8 w-8"
             >
-              Revoke all others
+              <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
+              <span className="sr-only">Refresh sessions</span>
             </Button>
-          )}
+            {otherSessionCount > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setConfirmRevokeAll(true)}
+                disabled={revokeAll.isPending}
+              >
+                Revoke all others
+              </Button>
+            )}
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -293,8 +419,11 @@ export function ActiveSessions() {
                       <SessionItem
                         key={session.id}
                         session={session}
-                        onRevoke={(id) => revokeOne.mutate(id)}
+                        onRevoke={handleRevoke}
                         isRevoking={revokeOne.isPending}
+                        confirmingId={confirmingId}
+                        onConfirmStart={handleConfirmStart}
+                        onConfirmCancel={handleConfirmCancel}
                       />
                     ))}
                   </div>
@@ -305,37 +434,43 @@ export function ActiveSessions() {
         )}
       </CardContent>
 
-      <Dialog open={confirmRevokeAll} onOpenChange={setConfirmRevokeAll}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Revoke all other sessions?</DialogTitle>
-            <DialogDescription>
+      <AlertDialog open={confirmRevokeAll} onOpenChange={setConfirmRevokeAll}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <div className="flex items-center gap-2">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-amber-500/10">
+                <AlertTriangle className="h-5 w-5 text-amber-500" />
+              </div>
+              <AlertDialogTitle>Revoke all other sessions?</AlertDialogTitle>
+            </div>
+            <AlertDialogDescription>
               This will sign you out of all other devices. You'll stay signed in on this device.
-            </DialogDescription>
-          </DialogHeader>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
           <div className="rounded-md border border-amber-500/20 bg-amber-500/5 p-3">
             <p className="text-sm text-amber-700 dark:text-amber-400">
               {otherSessionCount} other session{otherSessionCount !== 1 ? "s" : ""} will be revoked.
               Anyone using those sessions will need to sign in again.
             </p>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmRevokeAll(false)}>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setConfirmRevokeAll(false)}>
               Cancel
-            </Button>
-            <Button
-              variant="destructive"
+            </AlertDialogCancel>
+            <AlertDialogAction
               onClick={async () => {
                 await revokeAll.mutateAsync()
                 setConfirmRevokeAll(false)
               }}
               disabled={revokeAll.isPending}
+              className="bg-destructive text-white shadow-md hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:bg-destructive/60"
             >
+              {revokeAll.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {revokeAll.isPending ? "Revoking..." : `Revoke ${otherSessionCount} session${otherSessionCount !== 1 ? "s" : ""}`}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   )
 }

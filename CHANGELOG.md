@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.58.0 (2026-04-30)
+
+### Improved
+- **Active sessions** — AlertDialog for revoke-all, inline single-session revoke confirmation with auto-revert, tooltips on expiry timestamps, session count badge, IP address display, colored device icons, hover highlights, and refresh button.
+- **Admin charts** — period toggle (7d/30d/90d), card descriptions, total summary counters, period-filtered data, primary color consistency, increased chart height, animation duration, cursor line on hover, and pulse skeleton loading.
+- **Admin quick actions** — grouped sections (Users & Teams/System/Support) with separators, staggered entrance animation, active route highlighting, keyboard shortcut hints, action count description, and compact mode with show-all toggle.
+
 ## v0.57.0 (2026-04-30)
 
 ### Improved
