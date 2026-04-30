@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.89.0 (2026-04-30)
+
+### Added
+- **Character counters on all forms** — Added maxLength constraints and 3-tier color character counters (muted → amber at 80% → red at limit) to text fields across 10 form components: teams create/edit (name 100, description 500), locations create/edit (name 100, description 500), support ticket create/edit (subject 200, description 2000), fax number create/edit (label 100), device create (name 100), and extension edit (display name 100).
+
 ## v0.88.0 (2026-04-30)
 
 ### Added
