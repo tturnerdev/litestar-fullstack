@@ -1,5 +1,5 @@
-import { RotateCcw, Upload } from "lucide-react"
-import { useRef, useState } from "react"
+import { BellRing, CheckCircle2, Mic, RotateCcw, Settings2, Upload, User, Volume2, Wrench } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -27,12 +27,32 @@ const DEFAULTS = {
   autoDeleteDays: "90",
 } as const
 
+function formatDuration(seconds: number): string {
+  if (seconds < 60) return `${seconds} seconds`
+  const mins = Math.floor(seconds / 60)
+  const secs = seconds % 60
+  if (secs === 0) return mins === 1 ? "1 minute" : `${mins} minutes`
+  return `${mins}m ${secs}s`
+}
+
+function formatRetention(days: number): string {
+  if (days < 7) return `${days} day${days !== 1 ? "s" : ""}`
+  if (days < 30) {
+    const weeks = Math.floor(days / 7)
+    return `≈ ${weeks} week${weeks !== 1 ? "s" : ""}`
+  }
+  const months = Math.round(days / 30)
+  return `≈ ${months} month${months !== 1 ? "s" : ""}`
+}
+
 export function VoicemailSettingsForm({ extensionId }: { extensionId: string }) {
   const { data, isLoading, isError } = useVoicemailSettings(extensionId)
   const updateMutation = useUpdateVoicemailSettings(extensionId)
   const uploadMutation = useUploadVoicemailGreeting(extensionId)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [dirty, setDirty] = useState(false)
+  const [showSaveSuccess, setShowSaveSuccess] = useState(false)
+  const [pinError, setPinError] = useState("")
 
   const [isEnabled, setIsEnabled] = useState<boolean | null>(null)
   const [pin, setPin] = useState("")
@@ -42,6 +62,12 @@ export function VoicemailSettingsForm({ extensionId }: { extensionId: string }) 
   const [emailAttachAudio, setEmailAttachAudio] = useState<boolean | null>(null)
   const [transcriptionEnabled, setTranscriptionEnabled] = useState<boolean | null>(null)
   const [autoDeleteDays, setAutoDeleteDays] = useState("")
+
+  useEffect(() => {
+    if (!showSaveSuccess) return
+    const timer = setTimeout(() => setShowSaveSuccess(false), 1500)
+    return () => clearTimeout(timer)
+  }, [showSaveSuccess])
 
   if (isLoading) return <SkeletonCard />
 
@@ -79,6 +105,8 @@ export function VoicemailSettingsForm({ extensionId }: { extensionId: string }) 
       onSuccess: () => {
         setDirty(false)
         setPin("")
+        setPinError("")
+        setShowSaveSuccess(true)
       },
     })
   }
@@ -131,14 +159,17 @@ export function VoicemailSettingsForm({ extensionId }: { extensionId: string }) 
 
         {/* ── General ──────────────────────────────────────────────────── */}
         <div>
-          <h3 className="text-sm font-semibold tracking-tight">General</h3>
+          <h3 className="flex items-center gap-1.5 text-sm font-semibold tracking-tight">
+            <Settings2 className="h-3.5 w-3.5 text-muted-foreground" />
+            General
+          </h3>
           <p className="text-xs text-muted-foreground">Basic voicemail behavior and greeting configuration.</p>
         </div>
 
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
             <Label>Voicemail enabled</Label>
-            <p className="text-xs text-muted-foreground">When disabled, callers will not be able to leave voicemails on this extension.</p>
+            <p className={`text-xs text-muted-foreground transition-opacity ${!currentEnabled ? "opacity-50" : ""}`}>When disabled, callers will not be able to leave voicemails on this extension.</p>
           </div>
           <Switch
             checked={!!currentEnabled}
@@ -160,9 +191,24 @@ export function VoicemailSettingsForm({ extensionId }: { extensionId: string }) 
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="default">Default</SelectItem>
-              <SelectItem value="custom">Custom</SelectItem>
-              <SelectItem value="name_only">Name only</SelectItem>
+              <SelectItem value="default">
+                <span className="flex items-center gap-2">
+                  <Volume2 className="h-3.5 w-3.5 text-muted-foreground" />
+                  Default
+                </span>
+              </SelectItem>
+              <SelectItem value="custom">
+                <span className="flex items-center gap-2">
+                  <Mic className="h-3.5 w-3.5 text-muted-foreground" />
+                  Custom
+                </span>
+              </SelectItem>
+              <SelectItem value="name_only">
+                <span className="flex items-center gap-2">
+                  <User className="h-3.5 w-3.5 text-muted-foreground" />
+                  Name only
+                </span>
+              </SelectItem>
             </SelectContent>
           </Select>
           <p className="text-xs text-muted-foreground">{GREETING_TYPE_DESCRIPTIONS[currentGreeting ?? "default"]}</p>
@@ -201,39 +247,65 @@ export function VoicemailSettingsForm({ extensionId }: { extensionId: string }) 
         <div className="space-y-2">
           <Label htmlFor="vm-max-length">Max message length (seconds)</Label>
           <p className="text-xs text-muted-foreground">Maximum recording duration for each voicemail message. Callers will be cut off after this limit.</p>
-          <Input
-            id="vm-max-length"
-            type="number"
-            min={10}
-            max={600}
-            value={currentMaxLength}
-            onChange={(e) => {
-              setMaxLength(e.target.value)
-              setDirty(true)
-            }}
-          />
+          <div className="flex items-center gap-3">
+            <Input
+              id="vm-max-length"
+              type="number"
+              min={10}
+              max={600}
+              className="max-w-[140px]"
+              value={currentMaxLength}
+              onChange={(e) => {
+                setMaxLength(e.target.value)
+                setDirty(true)
+              }}
+            />
+            {currentMaxLength && Number(currentMaxLength) > 0 && (
+              <span className="text-xs text-muted-foreground">= {formatDuration(Number(currentMaxLength))}</span>
+            )}
+          </div>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="vm-pin">Access PIN</Label>
-          <p className="text-xs text-muted-foreground">Used to access voicemail remotely by phone. Must be numeric.</p>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="vm-pin">Access PIN</Label>
+            {pin && (
+              <span className={`text-xs ${pin.length >= 4 && pin.length <= 6 ? "text-muted-foreground" : "text-destructive"}`}>
+                {pin.length}/4-6 digits
+              </span>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground">Used to access voicemail remotely by phone. Must be 4-6 digits.</p>
           <Input
             id="vm-pin"
             type="password"
+            inputMode="numeric"
             placeholder="Enter new PIN"
+            className={pinError ? "border-destructive focus-visible:ring-destructive" : ""}
             value={pin}
             onChange={(e) => {
-              setPin(e.target.value)
+              const value = e.target.value
+              if (value && !/^\d*$/.test(value)) {
+                setPinError("PIN must contain only digits")
+                return
+              }
+              if (value.length > 6) return
+              setPinError(value.length > 0 && value.length < 4 ? "PIN must be at least 4 digits" : "")
+              setPin(value)
               setDirty(true)
             }}
           />
+          {pinError && <p className="text-xs text-destructive">{pinError}</p>}
         </div>
 
         <Separator />
 
         {/* ── Notifications ────────────────────────────────────────────── */}
         <div>
-          <h3 className="text-sm font-semibold tracking-tight">Notifications</h3>
+          <h3 className="flex items-center gap-1.5 text-sm font-semibold tracking-tight">
+            <BellRing className="h-3.5 w-3.5 text-muted-foreground" />
+            Notifications
+          </h3>
           <p className="text-xs text-muted-foreground">Control how you are notified when new voicemails arrive.</p>
         </div>
 
@@ -241,7 +313,7 @@ export function VoicemailSettingsForm({ extensionId }: { extensionId: string }) 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label>Email notification</Label>
-              <p className="text-xs text-muted-foreground">Send an email alert whenever a new voicemail is received on this extension.</p>
+              <p className={`text-xs text-muted-foreground transition-opacity ${!currentEmailNotif ? "opacity-50" : ""}`}>Send an email alert whenever a new voicemail is received on this extension.</p>
             </div>
             <Switch
               checked={!!currentEmailNotif}
@@ -252,7 +324,7 @@ export function VoicemailSettingsForm({ extensionId }: { extensionId: string }) 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label>Attach audio to email</Label>
-              <p className="text-xs text-muted-foreground">Include the voicemail recording as an audio attachment in the notification email.</p>
+              <p className={`text-xs text-muted-foreground transition-opacity ${!currentAttachAudio ? "opacity-50" : ""}`}>Include the voicemail recording as an audio attachment in the notification email.</p>
             </div>
             <Switch
               checked={!!currentAttachAudio}
@@ -265,31 +337,40 @@ export function VoicemailSettingsForm({ extensionId }: { extensionId: string }) 
 
         {/* ── Advanced ─────────────────────────────────────────────────── */}
         <div>
-          <h3 className="text-sm font-semibold tracking-tight">Advanced</h3>
+          <h3 className="flex items-center gap-1.5 text-sm font-semibold tracking-tight">
+            <Wrench className="h-3.5 w-3.5 text-muted-foreground" />
+            Advanced
+          </h3>
           <p className="text-xs text-muted-foreground">Retention and transcription settings.</p>
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="vm-auto-delete">Retention period (days)</Label>
           <p className="text-xs text-muted-foreground">Automatically delete voicemails older than this number of days. Leave empty to keep messages indefinitely.</p>
-          <Input
-            id="vm-auto-delete"
-            type="number"
-            min={1}
-            max={365}
-            placeholder="Leave empty to keep forever"
-            value={currentAutoDelete}
-            onChange={(e) => {
-              setAutoDeleteDays(e.target.value)
-              setDirty(true)
-            }}
-          />
+          <div className="flex items-center gap-3">
+            <Input
+              id="vm-auto-delete"
+              type="number"
+              min={1}
+              max={365}
+              className="max-w-[140px]"
+              placeholder="Forever"
+              value={currentAutoDelete}
+              onChange={(e) => {
+                setAutoDeleteDays(e.target.value)
+                setDirty(true)
+              }}
+            />
+            {currentAutoDelete && Number(currentAutoDelete) >= 7 && (
+              <span className="text-xs text-muted-foreground">{formatRetention(Number(currentAutoDelete))}</span>
+            )}
+          </div>
         </div>
 
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
             <Label>Transcription</Label>
-            <p className="text-xs text-muted-foreground">Automatically convert voicemail audio to text so you can read messages without listening.</p>
+            <p className={`text-xs text-muted-foreground transition-opacity ${!currentTranscription ? "opacity-50" : ""}`}>Automatically convert voicemail audio to text so you can read messages without listening.</p>
           </div>
           <Switch
             checked={!!currentTranscription}
@@ -301,8 +382,22 @@ export function VoicemailSettingsForm({ extensionId }: { extensionId: string }) 
 
         {/* ── Actions ──────────────────────────────────────────────────── */}
         <div className="flex items-center gap-3">
-          <Button onClick={handleSave} disabled={!dirty || updateMutation.isPending}>
-            {updateMutation.isPending ? "Saving..." : "Save changes"}
+          <Button
+            onClick={handleSave}
+            disabled={(!dirty && !showSaveSuccess) || updateMutation.isPending || !!pinError}
+            variant={showSaveSuccess ? "outline" : "default"}
+            className={showSaveSuccess ? "border-green-500/50 text-green-600 dark:text-green-400" : ""}
+          >
+            {showSaveSuccess ? (
+              <>
+                <CheckCircle2 className="mr-1.5 h-4 w-4" />
+                Saved
+              </>
+            ) : updateMutation.isPending ? (
+              "Saving..."
+            ) : (
+              "Save changes"
+            )}
           </Button>
           <Button variant="outline" onClick={handleResetToDefaults}>
             <RotateCcw className="mr-1.5 h-3.5 w-3.5" />

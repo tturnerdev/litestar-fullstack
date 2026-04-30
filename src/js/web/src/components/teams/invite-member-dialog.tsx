@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQueryClient } from "@tanstack/react-query"
-import { CheckCircle2, Loader2, ShieldCheck, User, UserPlus, X } from "lucide-react"
-import { useState } from "react"
+import { CheckCircle2, Loader2, ShieldCheck, User, UserPlus, X, XCircle } from "lucide-react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import * as z from "zod"
@@ -50,6 +50,9 @@ const roleOptions = [
 export function InviteMemberDialog({ teamId }: InviteMemberDialogProps) {
   const [open, setOpen] = useState(false)
   const [pendingEmails, setPendingEmails] = useState<string[]>([])
+  const [sendProgress, setSendProgress] = useState<{ current: number; total: number } | null>(null)
+  const [roleHighlight, setRoleHighlight] = useState(false)
+  const roleCardRef = useRef<HTMLDivElement>(null)
   const queryClient = useQueryClient()
 
   const form = useForm<InviteFormData>({
@@ -83,6 +86,20 @@ export function InviteMemberDialog({ teamId }: InviteMemberDialogProps) {
     }
   }
 
+  const handleRoleChange = useCallback((onChange: (value: string) => void, value: string) => {
+    onChange(value)
+    if (pendingEmails.length > 0) {
+      setRoleHighlight(true)
+    }
+  }, [pendingEmails.length])
+
+  useEffect(() => {
+    if (roleHighlight) {
+      const timer = setTimeout(() => setRoleHighlight(false), 800)
+      return () => clearTimeout(timer)
+    }
+  }, [roleHighlight])
+
   const onSubmit = async (data: InviteFormData) => {
     const allEmails = [...pendingEmails]
     if (data.email && emailRegex.test(data.email) && !allEmails.includes(data.email)) {
@@ -97,20 +114,25 @@ export function InviteMemberDialog({ teamId }: InviteMemberDialogProps) {
     const succeeded: string[] = []
     const failed: string[] = []
 
-    for (const email of allEmails) {
+    setSendProgress({ current: 0, total: allEmails.length })
+
+    for (let i = 0; i < allEmails.length; i++) {
+      setSendProgress({ current: i + 1, total: allEmails.length })
       try {
         await createTeamInvitation({
           path: { team_id: teamId },
           body: {
-            email,
+            email: allEmails[i],
             role: data.role as TeamRoles,
           },
         })
-        succeeded.push(email)
+        succeeded.push(allEmails[i])
       } catch {
-        failed.push(email)
+        failed.push(allEmails[i])
       }
     }
+
+    setSendProgress(null)
 
     await queryClient.invalidateQueries({ queryKey: ["team", teamId] })
     await queryClient.invalidateQueries({ queryKey: ["teamInvitations", teamId] })
@@ -140,6 +162,7 @@ export function InviteMemberDialog({ teamId }: InviteMemberDialogProps) {
     if (!next) {
       form.reset()
       setPendingEmails([])
+      setSendProgress(null)
     }
   }
 
@@ -155,8 +178,15 @@ export function InviteMemberDialog({ teamId }: InviteMemberDialogProps) {
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Invite Team Member</DialogTitle>
-          <DialogDescription>Send an invitation to join this team. They'll receive an email to accept or decline.</DialogDescription>
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
+              <UserPlus className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <DialogTitle>Invite Team Member</DialogTitle>
+              <DialogDescription>Send an invitation to join this team. They'll receive an email to accept or decline.</DialogDescription>
+            </div>
+          </div>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
@@ -174,9 +204,13 @@ export function InviteMemberDialog({ teamId }: InviteMemberDialogProps) {
                           type="email"
                           placeholder="colleague@company.com"
                           onKeyDown={handleKeyDown}
+                          className={currentEmail.length > 2 && !isCurrentEmailValid ? "pr-10 border-destructive/50 focus-visible:ring-destructive/30" : currentEmail.length > 0 && isCurrentEmailValid ? "pr-10" : ""}
                         />
                         {currentEmail.length > 0 && isCurrentEmailValid && (
-                          <CheckCircle2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-emerald-500" />
+                          <CheckCircle2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-emerald-500 transition-opacity duration-200" />
+                        )}
+                        {currentEmail.length > 2 && !isCurrentEmailValid && (
+                          <XCircle className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-destructive/60 transition-opacity duration-200" />
                         )}
                       </div>
                     </FormControl>
@@ -187,6 +221,9 @@ export function InviteMemberDialog({ teamId }: InviteMemberDialogProps) {
                     )}
                   </div>
                   <FormMessage />
+                  {pendingEmails.length > 0 && (
+                    <p className="text-xs text-muted-foreground/60">Up to 10 recipients per batch</p>
+                  )}
                 </FormItem>
               )}
             />
@@ -198,12 +235,16 @@ export function InviteMemberDialog({ teamId }: InviteMemberDialogProps) {
                 </p>
                 <div className="flex flex-wrap gap-1.5">
                   {pendingEmails.map((email) => (
-                    <Badge key={email} variant="secondary" className="gap-1 pl-2 pr-1 py-1">
+                    <Badge
+                      key={email}
+                      variant="secondary"
+                      className="gap-1 pl-2 pr-1 py-1 animate-in fade-in zoom-in-95 duration-200"
+                    >
                       {email}
                       <button
                         type="button"
                         onClick={() => removeEmail(email)}
-                        className="ml-0.5 rounded-full p-0.5 hover:bg-muted-foreground/20"
+                        className="ml-0.5 rounded-full p-0.5 transition-colors hover:bg-muted-foreground/20"
                       >
                         <X className="h-3 w-3" />
                         <span className="sr-only">Remove {email}</span>
@@ -233,7 +274,7 @@ export function InviteMemberDialog({ teamId }: InviteMemberDialogProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Role</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={(v) => handleRoleChange(field.onChange, v)} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a role">
@@ -265,14 +306,20 @@ export function InviteMemberDialog({ teamId }: InviteMemberDialogProps) {
               )}
             />
 
-            <Card className="border-dashed">
+            <Card
+              ref={roleCardRef}
+              className={`border-dashed transition-all duration-500 ${roleHighlight ? "border-primary/50 bg-primary/5 ring-1 ring-primary/20" : ""}`}
+            >
               <CardContent className="p-3">
                 <p className="text-xs font-medium text-muted-foreground mb-1.5">
                   {selectedRole?.label} permissions
                 </p>
                 <ul className="space-y-1">
                   {rolePermissions[currentRole]?.map((perm) => (
-                    <li key={perm} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <li
+                      key={perm}
+                      className="flex items-center gap-1.5 text-xs text-muted-foreground animate-in fade-in slide-in-from-left-1 duration-200"
+                    >
                       <CheckCircle2 className="h-3 w-3 shrink-0 text-emerald-500" />
                       {perm}
                     </li>
@@ -294,7 +341,9 @@ export function InviteMemberDialog({ teamId }: InviteMemberDialogProps) {
                 {form.formState.isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Sending...
+                    {sendProgress && sendProgress.total > 1
+                      ? `Sending ${sendProgress.current} of ${sendProgress.total}...`
+                      : "Sending..."}
                   </>
                 ) : totalCount > 1 ? (
                   `Send ${totalCount} Invitations`
