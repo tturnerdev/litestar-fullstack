@@ -45,6 +45,7 @@ import { CopyButton } from "@/components/ui/copy-button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { DirectionBadge, FaxStatusBadge } from "@/components/fax/fax-status-badge"
 import { useDeleteFaxMessage, useDownloadFaxDocument, useFaxMessage } from "@/lib/api/hooks/fax"
+import { formatBytes } from "@/lib/format-utils"
 
 export const Route = createFileRoute("/_app/fax/messages/$messageId/")({
   component: FaxMessageDetailPage,
@@ -69,14 +70,6 @@ function formatRelativeTime(value: string | null | undefined): string {
   if (diffHours < 24) return `${diffHours}h ago`
   const diffDays = Math.floor(diffHours / 24)
   return `${diffDays}d ago`
-}
-
-function formatBytes(bytes: number): string {
-  if (bytes === 0) return "0 B"
-  const k = 1024
-  const sizes = ["B", "KB", "MB", "GB"]
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return `${Number.parseFloat((bytes / k ** i).toFixed(1))} ${sizes[i]}`
 }
 
 // -- Timestamp with tooltip -------------------------------------------------

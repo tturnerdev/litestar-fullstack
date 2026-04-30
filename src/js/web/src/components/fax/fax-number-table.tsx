@@ -9,15 +9,9 @@ import { SkeletonTable } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useFaxNumbers } from "@/lib/api/hooks/fax"
+import { formatPhoneNumber } from "@/lib/format-utils"
 
 const PAGE_SIZE = 25
-
-/** Format a +1XXXXXXXXXX number as (XXX) XXX-XXXX, pass through others unchanged. */
-function formatPhoneNumber(raw: string): string {
-  const match = raw.match(/^\+1(\d{3})(\d{3})(\d{4})$/)
-  if (match) return `(${match[1]}) ${match[2]}-${match[3]}`
-  return raw
-}
 
 function CopyNumberButton({ number }: { number: string }) {
   const [copied, setCopied] = useState(false)

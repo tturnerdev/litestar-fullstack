@@ -18,6 +18,7 @@ import { useTableSelection } from "@/hooks/use-table-selection"
 import { useDevices, useRebootDevice, useUpdateDevice } from "@/lib/api/hooks/devices"
 import { deleteDevice } from "@/lib/generated/api"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
+import { formatRelativeTimeShort } from "@/lib/date-utils"
 
 const PAGE_SIZE = 20
 
@@ -95,21 +96,6 @@ function formatLastSeen(value: string | null | undefined): string {
   if (!value) return "Never"
   const date = new Date(value)
   return date.toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })
-}
-
-function timeAgo(dateStr: string): string {
-  const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000)
-  if (seconds < 60) return "just now"
-  const minutes = Math.floor(seconds / 60)
-  if (minutes < 60) return `${minutes}m ago`
-  const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours}h ago`
-  const days = Math.floor(hours / 24)
-  if (days < 7) return `${days}d ago`
-  const weeks = Math.floor(days / 7)
-  if (weeks < 5) return `${weeks}w ago`
-  const months = Math.floor(days / 30)
-  return `${months}mo ago`
 }
 
 function SortableHeader({
@@ -542,7 +528,7 @@ function DeviceRow({
           {device.lastSeenAt ? (
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="cursor-default">{timeAgo(device.lastSeenAt)}</span>
+                <span className="cursor-default">{formatRelativeTimeShort(device.lastSeenAt)}</span>
               </TooltipTrigger>
               <TooltipContent>{formatLastSeen(device.lastSeenAt)}</TooltipContent>
             </Tooltip>

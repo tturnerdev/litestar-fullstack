@@ -4,34 +4,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import type { FaxNumber } from "@/lib/api/hooks/fax"
-
-function formatPhoneNumber(phone: string): string {
-  const digits = phone.replace(/\D/g, "")
-  // Handle US numbers: strip leading 1 if 11 digits
-  const normalized = digits.length === 11 && digits.startsWith("1") ? digits.slice(1) : digits
-  if (normalized.length === 10) {
-    return `${normalized.slice(0, 3)}-${normalized.slice(3, 6)}-${normalized.slice(6)}`
-  }
-  return phone
-}
-
-function timeAgo(dateStr: string | null): string {
-  if (!dateStr) return ""
-  const now = Date.now()
-  const then = new Date(dateStr).getTime()
-  const seconds = Math.floor((now - then) / 1000)
-  if (seconds < 60) return "just now"
-  const minutes = Math.floor(seconds / 60)
-  if (minutes < 60) return `${minutes}m ago`
-  const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours}h ago`
-  const days = Math.floor(hours / 24)
-  if (days < 30) return `${days}d ago`
-  const months = Math.floor(days / 30)
-  if (months < 12) return `${months}mo ago`
-  const years = Math.floor(months / 12)
-  return `${years}y ago`
-}
+import { formatRelativeTimeShort } from "@/lib/date-utils"
+import { formatPhoneNumber } from "@/lib/format-utils"
 
 interface FaxNumberCardProps {
   faxNumber: FaxNumber
@@ -40,7 +14,6 @@ interface FaxNumberCardProps {
 export function FaxNumberCard({ faxNumber }: FaxNumberCardProps) {
   const emailRouteCount = faxNumber.emailRoutes?.length ?? 0
   const messageCount = faxNumber.messageCount ?? 0
-  const createdAgo = timeAgo(faxNumber.createdAt)
 
   return (
     <Card className="transition-transform duration-200 hover:scale-[1.02]">
@@ -126,11 +99,11 @@ export function FaxNumberCard({ faxNumber }: FaxNumberCardProps) {
           </Button>
         </div>
       </CardContent>
-      {createdAgo && (
+      {faxNumber.createdAt && (
         <CardFooter className="pt-0">
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Clock className="h-3 w-3" />
-            <span>Created {createdAgo}</span>
+            <span>Created {formatRelativeTimeShort(faxNumber.createdAt)}</span>
           </div>
         </CardFooter>
       )}

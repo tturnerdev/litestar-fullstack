@@ -11,6 +11,7 @@ import { SkeletonCard } from "@/components/ui/skeleton"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { formatRelativeTimeShort } from "@/lib/date-utils"
 import { useAuthStore } from "@/lib/auth"
 import { listTeams, type Team } from "@/lib/generated/api"
 
@@ -36,23 +37,6 @@ function getTeamColor(name: string): string {
   ]
   const index = name.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length
   return colors[index]
-}
-
-function timeAgo(dateString: string): string {
-  const now = Date.now()
-  const then = new Date(dateString).getTime()
-  const seconds = Math.floor((now - then) / 1000)
-  if (seconds < 60) return "just now"
-  const minutes = Math.floor(seconds / 60)
-  if (minutes < 60) return `${minutes}m ago`
-  const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours}h ago`
-  const days = Math.floor(hours / 24)
-  if (days < 30) return `${days}d ago`
-  const months = Math.floor(days / 30)
-  if (months < 12) return `${months}mo ago`
-  const years = Math.floor(months / 12)
-  return `${years}y ago`
 }
 
 type SortOption = "name-asc" | "name-desc" | "members-most" | "members-fewest"
@@ -297,7 +281,7 @@ export function TeamList() {
                       <ChevronRight className="h-4 w-4 transition-transform group-hover/link:translate-x-0.5" />
                     </Link>
                     {createdAt && (
-                      <span className="text-[10px] text-muted-foreground/60">Created {timeAgo(createdAt)}</span>
+                      <span className="text-[10px] text-muted-foreground/60">Created {formatRelativeTimeShort(createdAt)}</span>
                     )}
                   </div>
                 </CardContent>
@@ -404,7 +388,7 @@ export function TeamList() {
                       {memberCount}
                     </span>
                     {createdAt && (
-                      <span className="hidden sm:block text-[10px] text-muted-foreground/60">{timeAgo(createdAt)}</span>
+                      <span className="hidden sm:block text-[10px] text-muted-foreground/60">{formatRelativeTimeShort(createdAt)}</span>
                     )}
                     <Link to="/teams/$teamId" params={{ teamId: team.id }}>
                       <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />

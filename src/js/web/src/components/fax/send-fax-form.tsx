@@ -37,6 +37,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useFaxNumbers, useSendFax } from "@/lib/api/hooks/fax"
+import { formatBytes } from "@/lib/format-utils"
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -50,14 +51,6 @@ const MAX_FILE_SIZE = 20 * 1024 * 1024
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-
-function formatBytes(bytes: number): string {
-  if (bytes === 0) return "0 B"
-  const k = 1024
-  const sizes = ["B", "KB", "MB", "GB"]
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return `${Number.parseFloat((bytes / k ** i).toFixed(1))} ${sizes[i]}`
-}
 
 /** Format phone number input as user types: +1 (212) 555-1234 */
 function formatPhoneDisplay(value: string): string {

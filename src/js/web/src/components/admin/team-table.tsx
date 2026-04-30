@@ -15,25 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import type { AdminTeamSummary } from "@/lib/generated/api"
 import { useAdminTeams } from "@/lib/api/hooks/admin"
-
-function timeAgo(dateString: string): string {
-  const date = new Date(dateString)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffSeconds = Math.floor(diffMs / 1000)
-  const diffMinutes = Math.floor(diffSeconds / 60)
-  const diffHours = Math.floor(diffMinutes / 60)
-  const diffDays = Math.floor(diffHours / 24)
-  const diffMonths = Math.floor(diffDays / 30)
-  const diffYears = Math.floor(diffDays / 365)
-
-  if (diffSeconds < 60) return "just now"
-  if (diffMinutes < 60) return `${diffMinutes}m ago`
-  if (diffHours < 24) return `${diffHours}h ago`
-  if (diffDays < 30) return `${diffDays}d ago`
-  if (diffMonths < 12) return `${diffMonths}mo ago`
-  return `${diffYears}y ago`
-}
+import { formatRelativeTimeShort } from "@/lib/date-utils"
 
 const TEAM_EXPORT_COLUMNS = [
   { key: "name", header: "Name" },
@@ -159,7 +141,7 @@ export function TeamTable() {
                 <TableCell className="text-muted-foreground">
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <span>{timeAgo(team.createdAt)}</span>
+                      <span>{formatRelativeTimeShort(team.createdAt)}</span>
                     </TooltipTrigger>
                     <TooltipContent>{new Date(team.createdAt).toLocaleString()}</TooltipContent>
                   </Tooltip>

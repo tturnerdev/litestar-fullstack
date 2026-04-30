@@ -31,6 +31,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import type { FaxMessage } from "@/lib/api/hooks/fax"
 import { useDownloadFaxDocument } from "@/lib/api/hooks/fax"
+import { formatBytes, formatPhoneNumber } from "@/lib/format-utils"
 
 function formatRelativeTime(dateStr: string | null): string {
   if (!dateStr) return "--"
@@ -52,23 +53,6 @@ function formatRelativeTime(dateStr: string | null): string {
 function formatFullDate(dateStr: string | null): string {
   if (!dateStr) return "--"
   return new Date(dateStr).toLocaleString()
-}
-
-function formatBytes(bytes: number): string {
-  if (bytes === 0) return "0 B"
-  const k = 1024
-  const sizes = ["B", "KB", "MB", "GB"]
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return `${Number.parseFloat((bytes / k ** i).toFixed(1))} ${sizes[i]}`
-}
-
-function formatPhoneNumber(phone: string): string {
-  const digits = phone.replace(/\D/g, "")
-  const raw = digits.length === 11 && digits.startsWith("1") ? digits.slice(1) : digits
-  if (raw.length === 10) {
-    return `(${raw.slice(0, 3)}) ${raw.slice(3, 6)}-${raw.slice(6)}`
-  }
-  return phone
 }
 
 function RelativeTimestamp({ dateStr }: { dateStr: string | null }) {

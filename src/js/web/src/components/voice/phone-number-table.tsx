@@ -17,15 +17,9 @@ import { SkeletonTable } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDeletePhoneNumber, usePhoneNumbers, useUpdatePhoneNumber } from "@/lib/api/hooks/voice"
+import { formatPhoneNumber } from "@/lib/format-utils"
 
 const PAGE_SIZE = 25
-
-/** Format a +1XXXXXXXXXX number as (XXX) XXX-XXXX, pass through others unchanged. */
-function formatPhoneNumber(raw: string): string {
-  const match = raw.match(/^\+1(\d{3})(\d{3})(\d{4})$/)
-  if (match) return `(${match[1]}) ${match[2]}-${match[3]}`
-  return raw
-}
 
 const typeConfig: Record<string, { icon: typeof MapPin; label: string; color: string }> = {
   local: { icon: MapPin, label: "Local", color: "text-blue-500" },

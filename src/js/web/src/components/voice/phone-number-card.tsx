@@ -25,21 +25,11 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useDeletePhoneNumber } from "@/lib/api/hooks/voice"
 import type { PhoneNumber } from "@/lib/api/hooks/voice"
+import { formatPhoneNumber } from "@/lib/format-utils"
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-
-/** Format a phone number as (XXX) XXX-XXXX for US numbers (+1...) */
-function formatPhoneNumber(raw: string): string {
-  const digits = raw.replace(/\D/g, "")
-  // US number: strip leading 1 if 11 digits
-  const national = digits.length === 11 && digits.startsWith("1") ? digits.slice(1) : digits
-  if (national.length === 10) {
-    return `(${national.slice(0, 3)}) ${national.slice(3, 6)}-${national.slice(6)}`
-  }
-  return raw
-}
 
 /** Return a relative time string such as "Created 3 days ago" */
 function relativeTime(iso: string): string {
