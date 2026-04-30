@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { EmptyState } from "@/components/ui/empty-state"
 import { useAdminDevices, useAdminDeviceStats } from "@/lib/api/hooks/admin"
 
 export const Route = createFileRoute("/_app/admin/devices")({
@@ -188,11 +189,11 @@ function AdminDevicesPage() {
                 <span>Unable to load devices.</span>
               </div>
             ) : recentDevices.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                <HardDrive className="h-10 w-10 mb-3 opacity-40" />
-                <p className="font-medium">No devices found</p>
-                <p className="text-sm mt-1">Devices will appear here once registered.</p>
-              </div>
+              <EmptyState
+                icon={HardDrive}
+                title="No recent devices"
+                description="Devices will appear here once registered."
+              />
             ) : (
               <Table aria-label="Recent devices">
                 <TableHeader>
@@ -213,7 +214,14 @@ function AdminDevicesPage() {
                       <TableCell className="text-muted-foreground">{device.model ?? "—"}</TableCell>
                       <TableCell className="text-muted-foreground">{device.teamName ?? "—"}</TableCell>
                       <TableCell>
-                        <Badge variant={statusVariant[device.status] ?? "outline"}>{device.status}</Badge>
+                        <Badge variant={statusVariant[device.status] ?? "outline"} className="gap-1.5">
+                          <span className={cn("h-1.5 w-1.5 rounded-full", {
+                            "bg-emerald-500": device.status === "online",
+                            "bg-red-500": device.status === "offline" || device.status === "error",
+                            "bg-amber-500": device.status === "provisioning",
+                          })} />
+                          {device.status}
+                        </Badge>
                       </TableCell>
                       <TableCell className="text-muted-foreground">
                         {device.lastSeenAt ? new Date(device.lastSeenAt).toLocaleString() : "Never"}
@@ -277,11 +285,17 @@ function AdminDevicesPage() {
                 <span>Unable to load devices.</span>
               </div>
             ) : devices.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                <Search className="h-10 w-10 mb-3 opacity-40" />
-                <p className="font-medium">{search ? "No devices match your search" : "No devices found"}</p>
-                <p className="text-sm mt-1">{search ? "Try a different search term." : "Devices will appear here once registered."}</p>
-              </div>
+              <EmptyState
+                icon={Search}
+                variant="no-results"
+                title="No devices found"
+                description="No devices match your search. Try a different search term."
+                action={
+                  <Button variant="outline" size="sm" onClick={() => setSearch("")}>
+                    Clear search
+                  </Button>
+                }
+              />
             ) : (
               <>
                 <Table aria-label="All devices">
@@ -303,7 +317,14 @@ function AdminDevicesPage() {
                         <TableCell className="text-muted-foreground">{device.model ?? "—"}</TableCell>
                         <TableCell className="text-muted-foreground">{device.teamName ?? "—"}</TableCell>
                         <TableCell>
-                          <Badge variant={statusVariant[device.status] ?? "outline"}>{device.status}</Badge>
+                          <Badge variant={statusVariant[device.status] ?? "outline"} className="gap-1.5">
+                          <span className={cn("h-1.5 w-1.5 rounded-full", {
+                            "bg-emerald-500": device.status === "online",
+                            "bg-red-500": device.status === "offline" || device.status === "error",
+                            "bg-amber-500": device.status === "provisioning",
+                          })} />
+                          {device.status}
+                        </Badge>
                         </TableCell>
                         <TableCell className="text-muted-foreground">
                           {device.lastSeenAt ? new Date(device.lastSeenAt).toLocaleString() : "Never"}

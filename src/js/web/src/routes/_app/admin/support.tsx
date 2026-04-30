@@ -12,6 +12,7 @@ import {
   TicketCheck,
   X,
 } from "lucide-react"
+import { EmptyState } from "@/components/ui/empty-state"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { Badge } from "@/components/ui/badge"
@@ -221,11 +222,11 @@ function AdminSupportPage() {
                 <span>Unable to load tickets.</span>
               </div>
             ) : recentTickets.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                <TicketCheck className="h-10 w-10 mb-3 opacity-40" />
-                <p className="font-medium">No recent tickets</p>
-                <p className="text-sm mt-1">Support tickets will appear here once created.</p>
-              </div>
+              <EmptyState
+                icon={TicketCheck}
+                title="No recent tickets"
+                description="Support tickets will appear here once created."
+              />
             ) : (
               <Table aria-label="Recent support tickets">
                 <TableHeader>
@@ -250,10 +251,27 @@ function AdminSupportPage() {
                         </Tooltip>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={priorityVariant[ticket.priority] ?? "outline"}>{ticket.priority}</Badge>
+                        <Badge variant={priorityVariant[ticket.priority] ?? "outline"} className="gap-1.5">
+                          <span className={cn("h-1.5 w-1.5 rounded-full", {
+                            "bg-gray-400": ticket.priority === "low",
+                            "bg-amber-500": ticket.priority === "medium",
+                            "bg-orange-500": ticket.priority === "high",
+                            "bg-red-500": ticket.priority === "urgent",
+                          })} />
+                          {ticket.priority}
+                        </Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={statusVariant[ticket.status] ?? "outline"}>{statusLabel[ticket.status] ?? ticket.status}</Badge>
+                        <Badge variant={statusVariant[ticket.status] ?? "outline"} className="gap-1.5">
+                          <span className={cn("h-1.5 w-1.5 rounded-full", {
+                            "bg-blue-500": ticket.status === "open",
+                            "bg-amber-500": ticket.status === "in_progress",
+                            "bg-violet-500": ticket.status === "waiting_on_customer" || ticket.status === "waiting_on_support",
+                            "bg-emerald-500": ticket.status === "resolved",
+                            "bg-gray-400": ticket.status === "closed",
+                          })} />
+                          {statusLabel[ticket.status] ?? ticket.status}
+                        </Badge>
                       </TableCell>
                       <TableCell className="text-muted-foreground text-sm">{formatTimeAgo(ticket.createdAt)}</TableCell>
                     </TableRow>
@@ -315,11 +333,17 @@ function AdminSupportPage() {
                 <span>Unable to load tickets.</span>
               </div>
             ) : tickets.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                <Search className="h-10 w-10 mb-3 opacity-40" />
-                <p className="font-medium">{search ? "No tickets match your search" : "No tickets found"}</p>
-                <p className="text-sm mt-1">{search ? "Try a different search term." : "Support tickets will appear here once created."}</p>
-              </div>
+              <EmptyState
+                icon={Search}
+                variant="no-results"
+                title="No tickets found"
+                description="No tickets match your search. Try a different search term."
+                action={
+                  <Button variant="outline" size="sm" onClick={() => setSearch("")}>
+                    Clear search
+                  </Button>
+                }
+              />
             ) : (
               <>
                 <Table aria-label="All support tickets">
@@ -349,10 +373,27 @@ function AdminSupportPage() {
                         <TableCell className="text-muted-foreground">{ticket.creatorEmail ?? "—"}</TableCell>
                         <TableCell className="text-muted-foreground">{ticket.assignedToEmail ?? "Unassigned"}</TableCell>
                         <TableCell>
-                          <Badge variant={priorityVariant[ticket.priority] ?? "outline"}>{ticket.priority}</Badge>
+                          <Badge variant={priorityVariant[ticket.priority] ?? "outline"} className="gap-1.5">
+                          <span className={cn("h-1.5 w-1.5 rounded-full", {
+                            "bg-gray-400": ticket.priority === "low",
+                            "bg-amber-500": ticket.priority === "medium",
+                            "bg-orange-500": ticket.priority === "high",
+                            "bg-red-500": ticket.priority === "urgent",
+                          })} />
+                          {ticket.priority}
+                        </Badge>
                         </TableCell>
                         <TableCell>
-                          <Badge variant={statusVariant[ticket.status] ?? "outline"}>{statusLabel[ticket.status] ?? ticket.status}</Badge>
+                          <Badge variant={statusVariant[ticket.status] ?? "outline"} className="gap-1.5">
+                          <span className={cn("h-1.5 w-1.5 rounded-full", {
+                            "bg-blue-500": ticket.status === "open",
+                            "bg-amber-500": ticket.status === "in_progress",
+                            "bg-violet-500": ticket.status === "waiting_on_customer" || ticket.status === "waiting_on_support",
+                            "bg-emerald-500": ticket.status === "resolved",
+                            "bg-gray-400": ticket.status === "closed",
+                          })} />
+                          {statusLabel[ticket.status] ?? ticket.status}
+                        </Badge>
                         </TableCell>
                         <TableCell className="text-muted-foreground">{new Date(ticket.createdAt).toLocaleString()}</TableCell>
                       </TableRow>

@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { EmptyState } from "@/components/ui/empty-state"
 import { useAdminFaxMessages, useAdminFaxNumbers, useAdminFaxStats } from "@/lib/api/hooks/admin"
 
 export const Route = createFileRoute("/_app/admin/fax")({
@@ -191,11 +192,11 @@ function AdminFaxPage() {
                 <span>Unable to load fax messages.</span>
               </div>
             ) : recentMessages.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                <FileText className="h-10 w-10 mb-3 opacity-40" />
-                <p className="font-medium">No recent fax activity</p>
-                <p className="text-sm mt-1">Fax messages will appear here once sent or received.</p>
-              </div>
+              <EmptyState
+                icon={FileText}
+                title="No recent fax activity"
+                description="Fax messages will appear here once sent or received."
+              />
             ) : (
               <Table aria-label="Recent fax activity">
                 <TableHeader>
@@ -223,7 +224,15 @@ function AdminFaxPage() {
                       <TableCell className="font-mono text-muted-foreground">{msg.remoteNumber}</TableCell>
                       <TableCell className="text-muted-foreground">{msg.pageCount}</TableCell>
                       <TableCell>
-                        <Badge variant={statusVariant[msg.status] ?? "outline"}>{msg.status}</Badge>
+                        <Badge variant={statusVariant[msg.status] ?? "outline"} className="gap-1.5">
+                          <span className={cn("h-1.5 w-1.5 rounded-full", {
+                            "bg-emerald-500": msg.status === "completed" || msg.status === "delivered",
+                            "bg-amber-500": msg.status === "sending",
+                            "bg-gray-400": msg.status === "queued",
+                            "bg-red-500": msg.status === "failed",
+                          })} />
+                          {msg.status}
+                        </Badge>
                       </TableCell>
                       <TableCell className="text-muted-foreground">{new Date(msg.receivedAt).toLocaleString()}</TableCell>
                     </TableRow>
@@ -293,11 +302,17 @@ function AdminFaxPage() {
                 <span>Unable to load fax numbers.</span>
               </div>
             ) : faxNumbers.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                <Printer className="h-10 w-10 mb-3 opacity-40" />
-                <p className="font-medium">{numberSearch ? "No numbers match your search" : "No fax numbers found"}</p>
-                <p className="text-sm mt-1">{numberSearch ? "Try a different search term." : "Fax numbers will appear here once added."}</p>
-              </div>
+              <EmptyState
+                icon={Search}
+                variant="no-results"
+                title="No fax numbers found"
+                description="No fax numbers match your search. Try a different search term."
+                action={
+                  <Button variant="outline" size="sm" onClick={() => setNumberSearch("")}>
+                    Clear search
+                  </Button>
+                }
+              />
             ) : (
               <>
                 <Table aria-label="Fax numbers">
@@ -318,7 +333,10 @@ function AdminFaxPage() {
                         <TableCell className="text-muted-foreground">{fn.teamName ?? "—"}</TableCell>
                         <TableCell className="text-muted-foreground">{fn.ownerEmail ?? "Unassigned"}</TableCell>
                         <TableCell>
-                          <Badge variant={fn.isActive ? "default" : "secondary"}>{fn.isActive ? "Active" : "Inactive"}</Badge>
+                          <Badge variant={fn.isActive ? "default" : "secondary"} className="gap-1.5">
+                            <span className={cn("h-1.5 w-1.5 rounded-full", fn.isActive ? "bg-emerald-500" : "bg-gray-400")} />
+                            {fn.isActive ? "Active" : "Inactive"}
+                          </Badge>
                         </TableCell>
                       </TableRow>
                     ))}

@@ -11,6 +11,7 @@ import {
   Signal,
   X,
 } from "lucide-react"
+import { EmptyState } from "@/components/ui/empty-state"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { Badge } from "@/components/ui/badge"
@@ -210,11 +211,17 @@ function AdminVoicePage() {
                 <span>Unable to load phone numbers.</span>
               </div>
             ) : phoneNumbers.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                <Phone className="h-10 w-10 mb-3 opacity-40" />
-                <p className="font-medium">{phoneSearch ? "No numbers match your search" : "No phone numbers found"}</p>
-                <p className="text-sm mt-1">{phoneSearch ? "Try a different search term." : "Phone numbers will appear here once added."}</p>
-              </div>
+              <EmptyState
+                icon={Search}
+                variant="no-results"
+                title="No phone numbers found"
+                description="No phone numbers match your search. Try a different search term."
+                action={
+                  <Button variant="outline" size="sm" onClick={() => setPhoneSearch("")}>
+                    Clear search
+                  </Button>
+                }
+              />
             ) : (
               <>
                 <Table aria-label="Phone numbers">
@@ -237,7 +244,10 @@ function AdminVoicePage() {
                         <TableCell className="text-muted-foreground">{pn.teamName ?? "—"}</TableCell>
                         <TableCell className="text-muted-foreground">{pn.ownerEmail ?? "Unassigned"}</TableCell>
                         <TableCell>
-                          <Badge variant={pn.isActive ? "default" : "secondary"}>{pn.isActive ? "Active" : "Inactive"}</Badge>
+                          <Badge variant={pn.isActive ? "default" : "secondary"} className="gap-1.5">
+                            <span className={cn("h-1.5 w-1.5 rounded-full", pn.isActive ? "bg-emerald-500" : "bg-gray-400")} />
+                            {pn.isActive ? "Active" : "Inactive"}
+                          </Badge>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -295,11 +305,11 @@ function AdminVoicePage() {
                 <span>Unable to load extensions.</span>
               </div>
             ) : recentExtensions.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                <Hash className="h-10 w-10 mb-3 opacity-40" />
-                <p className="font-medium">No extensions found</p>
-                <p className="text-sm mt-1">Extensions will appear here once configured.</p>
-              </div>
+              <EmptyState
+                icon={Hash}
+                title="No extensions found"
+                description="Extensions will appear here once configured."
+              />
             ) : (
               <Table aria-label="Extensions">
                 <TableHeader>
@@ -319,7 +329,10 @@ function AdminVoicePage() {
                       <TableCell className="text-muted-foreground">{ext.ownerEmail ?? "—"}</TableCell>
                       <TableCell className="font-mono text-muted-foreground">{ext.phoneNumber ?? "—"}</TableCell>
                       <TableCell>
-                        <Badge variant={ext.isActive ? "default" : "secondary"}>{ext.isActive ? "Active" : "Inactive"}</Badge>
+                        <Badge variant={ext.isActive ? "default" : "secondary"} className="gap-1.5">
+                          <span className={cn("h-1.5 w-1.5 rounded-full", ext.isActive ? "bg-emerald-500" : "bg-gray-400")} />
+                          {ext.isActive ? "Active" : "Inactive"}
+                        </Badge>
                       </TableCell>
                     </TableRow>
                   ))}
