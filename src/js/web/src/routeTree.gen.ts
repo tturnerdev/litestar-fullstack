@@ -34,6 +34,7 @@ import { Route as AppConnectionsRouteImport } from './routes/_app/connections'
 import { Route as AppAdminRouteImport } from './routes/_app/admin'
 import { Route as AppVoiceIndexRouteImport } from './routes/_app/voice/index'
 import { Route as AppTeamsIndexRouteImport } from './routes/_app/teams/index'
+import { Route as AppTagsIndexRouteImport } from './routes/_app/tags/index'
 import { Route as AppSupportIndexRouteImport } from './routes/_app/support/index'
 import { Route as AppProfileIndexRouteImport } from './routes/_app/profile/index'
 import { Route as AppOrganizationIndexRouteImport } from './routes/_app/organization/index'
@@ -45,6 +46,7 @@ import { Route as AppConnectionsIndexRouteImport } from './routes/_app/connectio
 import { Route as AppAdminIndexRouteImport } from './routes/_app/admin/index'
 import { Route as AppVoicePhoneNumbersRouteImport } from './routes/_app/voice/phone-numbers'
 import { Route as AppTeamsNewRouteImport } from './routes/_app/teams/new'
+import { Route as AppTagsNewRouteImport } from './routes/_app/tags/new'
 import { Route as AppSupportNewRouteImport } from './routes/_app/support/new'
 import { Route as AppLocationsNewRouteImport } from './routes/_app/locations/new'
 import { Route as AppLocationsLocationIdRouteImport } from './routes/_app/locations/$locationId'
@@ -70,6 +72,8 @@ import { Route as AppAdminUsersIndexRouteImport } from './routes/_app/admin/user
 import { Route as AppAdminTeamsIndexRouteImport } from './routes/_app/admin/teams/index'
 import { Route as PublicAuthGoogleCallbackRouteImport } from './routes/_public/auth/google/callback'
 import { Route as PublicAuthGithubCallbackRouteImport } from './routes/_public/auth/github/callback'
+import { Route as AppTagsTagIdEditRouteImport } from './routes/_app/tags/$tagId/edit'
+import { Route as AppSupportTicketIdEditRouteImport } from './routes/_app/support/$ticketId/edit'
 import { Route as AppDevicesDeviceIdEditRouteImport } from './routes/_app/devices/$deviceId/edit'
 import { Route as AppConnectionsConnectionIdEditRouteImport } from './routes/_app/connections/$connectionId/edit'
 import { Route as AppAdminUsersUserIdRouteImport } from './routes/_app/admin/users/$userId'
@@ -205,6 +209,11 @@ const AppTeamsIndexRoute = AppTeamsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppTeamsRoute,
 } as any)
+const AppTagsIndexRoute = AppTagsIndexRouteImport.update({
+  id: '/tags/',
+  path: '/tags/',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppSupportIndexRoute = AppSupportIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -259,6 +268,11 @@ const AppTeamsNewRoute = AppTeamsNewRouteImport.update({
   id: '/new',
   path: '/new',
   getParentRoute: () => AppTeamsRoute,
+} as any)
+const AppTagsNewRoute = AppTagsNewRouteImport.update({
+  id: '/tags/new',
+  path: '/tags/new',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppSupportNewRoute = AppSupportNewRouteImport.update({
   id: '/new',
@@ -390,6 +404,16 @@ const PublicAuthGithubCallbackRoute =
     path: '/auth/github/callback',
     getParentRoute: () => PublicRoute,
   } as any)
+const AppTagsTagIdEditRoute = AppTagsTagIdEditRouteImport.update({
+  id: '/tags/$tagId/edit',
+  path: '/tags/$tagId/edit',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSupportTicketIdEditRoute = AppSupportTicketIdEditRouteImport.update({
+  id: '/$ticketId/edit',
+  path: '/$ticketId/edit',
+  getParentRoute: () => AppSupportRoute,
+} as any)
 const AppDevicesDeviceIdEditRoute = AppDevicesDeviceIdEditRouteImport.update({
   id: '/$deviceId/edit',
   path: '/$deviceId/edit',
@@ -489,6 +513,7 @@ export interface FileRoutesByFullPath {
   '/locations/$locationId': typeof AppLocationsLocationIdRouteWithChildren
   '/locations/new': typeof AppLocationsNewRoute
   '/support/new': typeof AppSupportNewRoute
+  '/tags/new': typeof AppTagsNewRoute
   '/teams/new': typeof AppTeamsNewRoute
   '/voice/phone-numbers': typeof AppVoicePhoneNumbersRoute
   '/admin/': typeof AppAdminIndexRoute
@@ -500,12 +525,15 @@ export interface FileRoutesByFullPath {
   '/organization/': typeof AppOrganizationIndexRoute
   '/profile/': typeof AppProfileIndexRoute
   '/support/': typeof AppSupportIndexRoute
+  '/tags/': typeof AppTagsIndexRoute
   '/teams/': typeof AppTeamsIndexRoute
   '/voice/': typeof AppVoiceIndexRoute
   '/admin/teams/$teamId': typeof AppAdminTeamsTeamIdRoute
   '/admin/users/$userId': typeof AppAdminUsersUserIdRoute
   '/connections/$connectionId/edit': typeof AppConnectionsConnectionIdEditRoute
   '/devices/$deviceId/edit': typeof AppDevicesDeviceIdEditRoute
+  '/support/$ticketId/edit': typeof AppSupportTicketIdEditRoute
+  '/tags/$tagId/edit': typeof AppTagsTagIdEditRoute
   '/auth/github/callback': typeof PublicAuthGithubCallbackRoute
   '/auth/google/callback': typeof PublicAuthGoogleCallbackRoute
   '/admin/teams/': typeof AppAdminTeamsIndexRoute
@@ -552,6 +580,7 @@ export interface FileRoutesByTo {
   '/fax/send': typeof AppFaxSendRoute
   '/locations/new': typeof AppLocationsNewRoute
   '/support/new': typeof AppSupportNewRoute
+  '/tags/new': typeof AppTagsNewRoute
   '/teams/new': typeof AppTeamsNewRoute
   '/voice/phone-numbers': typeof AppVoicePhoneNumbersRoute
   '/admin': typeof AppAdminIndexRoute
@@ -563,12 +592,15 @@ export interface FileRoutesByTo {
   '/organization': typeof AppOrganizationIndexRoute
   '/profile': typeof AppProfileIndexRoute
   '/support': typeof AppSupportIndexRoute
+  '/tags': typeof AppTagsIndexRoute
   '/teams': typeof AppTeamsIndexRoute
   '/voice': typeof AppVoiceIndexRoute
   '/admin/teams/$teamId': typeof AppAdminTeamsTeamIdRoute
   '/admin/users/$userId': typeof AppAdminUsersUserIdRoute
   '/connections/$connectionId/edit': typeof AppConnectionsConnectionIdEditRoute
   '/devices/$deviceId/edit': typeof AppDevicesDeviceIdEditRoute
+  '/support/$ticketId/edit': typeof AppSupportTicketIdEditRoute
+  '/tags/$tagId/edit': typeof AppTagsTagIdEditRoute
   '/auth/github/callback': typeof PublicAuthGithubCallbackRoute
   '/auth/google/callback': typeof PublicAuthGoogleCallbackRoute
   '/admin/teams': typeof AppAdminTeamsIndexRoute
@@ -627,6 +659,7 @@ export interface FileRoutesById {
   '/_app/locations/$locationId': typeof AppLocationsLocationIdRouteWithChildren
   '/_app/locations/new': typeof AppLocationsNewRoute
   '/_app/support/new': typeof AppSupportNewRoute
+  '/_app/tags/new': typeof AppTagsNewRoute
   '/_app/teams/new': typeof AppTeamsNewRoute
   '/_app/voice/phone-numbers': typeof AppVoicePhoneNumbersRoute
   '/_app/admin/': typeof AppAdminIndexRoute
@@ -638,12 +671,15 @@ export interface FileRoutesById {
   '/_app/organization/': typeof AppOrganizationIndexRoute
   '/_app/profile/': typeof AppProfileIndexRoute
   '/_app/support/': typeof AppSupportIndexRoute
+  '/_app/tags/': typeof AppTagsIndexRoute
   '/_app/teams/': typeof AppTeamsIndexRoute
   '/_app/voice/': typeof AppVoiceIndexRoute
   '/_app/admin/teams/$teamId': typeof AppAdminTeamsTeamIdRoute
   '/_app/admin/users/$userId': typeof AppAdminUsersUserIdRoute
   '/_app/connections/$connectionId/edit': typeof AppConnectionsConnectionIdEditRoute
   '/_app/devices/$deviceId/edit': typeof AppDevicesDeviceIdEditRoute
+  '/_app/support/$ticketId/edit': typeof AppSupportTicketIdEditRoute
+  '/_app/tags/$tagId/edit': typeof AppTagsTagIdEditRoute
   '/_public/auth/github/callback': typeof PublicAuthGithubCallbackRoute
   '/_public/auth/google/callback': typeof PublicAuthGoogleCallbackRoute
   '/_app/admin/teams/': typeof AppAdminTeamsIndexRoute
@@ -701,6 +737,7 @@ export interface FileRouteTypes {
     | '/locations/$locationId'
     | '/locations/new'
     | '/support/new'
+    | '/tags/new'
     | '/teams/new'
     | '/voice/phone-numbers'
     | '/admin/'
@@ -712,12 +749,15 @@ export interface FileRouteTypes {
     | '/organization/'
     | '/profile/'
     | '/support/'
+    | '/tags/'
     | '/teams/'
     | '/voice/'
     | '/admin/teams/$teamId'
     | '/admin/users/$userId'
     | '/connections/$connectionId/edit'
     | '/devices/$deviceId/edit'
+    | '/support/$ticketId/edit'
+    | '/tags/$tagId/edit'
     | '/auth/github/callback'
     | '/auth/google/callback'
     | '/admin/teams/'
@@ -764,6 +804,7 @@ export interface FileRouteTypes {
     | '/fax/send'
     | '/locations/new'
     | '/support/new'
+    | '/tags/new'
     | '/teams/new'
     | '/voice/phone-numbers'
     | '/admin'
@@ -775,12 +816,15 @@ export interface FileRouteTypes {
     | '/organization'
     | '/profile'
     | '/support'
+    | '/tags'
     | '/teams'
     | '/voice'
     | '/admin/teams/$teamId'
     | '/admin/users/$userId'
     | '/connections/$connectionId/edit'
     | '/devices/$deviceId/edit'
+    | '/support/$ticketId/edit'
+    | '/tags/$tagId/edit'
     | '/auth/github/callback'
     | '/auth/google/callback'
     | '/admin/teams'
@@ -838,6 +882,7 @@ export interface FileRouteTypes {
     | '/_app/locations/$locationId'
     | '/_app/locations/new'
     | '/_app/support/new'
+    | '/_app/tags/new'
     | '/_app/teams/new'
     | '/_app/voice/phone-numbers'
     | '/_app/admin/'
@@ -849,12 +894,15 @@ export interface FileRouteTypes {
     | '/_app/organization/'
     | '/_app/profile/'
     | '/_app/support/'
+    | '/_app/tags/'
     | '/_app/teams/'
     | '/_app/voice/'
     | '/_app/admin/teams/$teamId'
     | '/_app/admin/users/$userId'
     | '/_app/connections/$connectionId/edit'
     | '/_app/devices/$deviceId/edit'
+    | '/_app/support/$ticketId/edit'
+    | '/_app/tags/$tagId/edit'
     | '/_public/auth/github/callback'
     | '/_public/auth/google/callback'
     | '/_app/admin/teams/'
@@ -1060,6 +1108,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppTeamsIndexRouteImport
       parentRoute: typeof AppTeamsRoute
     }
+    '/_app/tags/': {
+      id: '/_app/tags/'
+      path: '/tags'
+      fullPath: '/tags/'
+      preLoaderRoute: typeof AppTagsIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/support/': {
       id: '/_app/support/'
       path: '/'
@@ -1136,6 +1191,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/teams/new'
       preLoaderRoute: typeof AppTeamsNewRouteImport
       parentRoute: typeof AppTeamsRoute
+    }
+    '/_app/tags/new': {
+      id: '/_app/tags/new'
+      path: '/tags/new'
+      fullPath: '/tags/new'
+      preLoaderRoute: typeof AppTagsNewRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_app/support/new': {
       id: '/_app/support/new'
@@ -1311,6 +1373,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/auth/github/callback'
       preLoaderRoute: typeof PublicAuthGithubCallbackRouteImport
       parentRoute: typeof PublicRoute
+    }
+    '/_app/tags/$tagId/edit': {
+      id: '/_app/tags/$tagId/edit'
+      path: '/tags/$tagId/edit'
+      fullPath: '/tags/$tagId/edit'
+      preLoaderRoute: typeof AppTagsTagIdEditRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/support/$ticketId/edit': {
+      id: '/_app/support/$ticketId/edit'
+      path: '/$ticketId/edit'
+      fullPath: '/support/$ticketId/edit'
+      preLoaderRoute: typeof AppSupportTicketIdEditRouteImport
+      parentRoute: typeof AppSupportRoute
     }
     '/_app/devices/$deviceId/edit': {
       id: '/_app/devices/$deviceId/edit'
@@ -1519,12 +1595,14 @@ const AppOrganizationRouteWithChildren = AppOrganizationRoute._addFileChildren(
 interface AppSupportRouteChildren {
   AppSupportNewRoute: typeof AppSupportNewRoute
   AppSupportIndexRoute: typeof AppSupportIndexRoute
+  AppSupportTicketIdEditRoute: typeof AppSupportTicketIdEditRoute
   AppSupportTicketIdIndexRoute: typeof AppSupportTicketIdIndexRoute
 }
 
 const AppSupportRouteChildren: AppSupportRouteChildren = {
   AppSupportNewRoute: AppSupportNewRoute,
   AppSupportIndexRoute: AppSupportIndexRoute,
+  AppSupportTicketIdEditRoute: AppSupportTicketIdEditRoute,
   AppSupportTicketIdIndexRoute: AppSupportTicketIdIndexRoute,
 }
 
@@ -1562,11 +1640,14 @@ interface AppRouteChildren {
   AppSupportRoute: typeof AppSupportRouteWithChildren
   AppTeamsRoute: typeof AppTeamsRouteWithChildren
   AppFaxSendRoute: typeof AppFaxSendRoute
+  AppTagsNewRoute: typeof AppTagsNewRoute
   AppVoicePhoneNumbersRoute: typeof AppVoicePhoneNumbersRoute
   AppFaxIndexRoute: typeof AppFaxIndexRoute
   AppNotificationsIndexRoute: typeof AppNotificationsIndexRoute
   AppProfileIndexRoute: typeof AppProfileIndexRoute
+  AppTagsIndexRoute: typeof AppTagsIndexRoute
   AppVoiceIndexRoute: typeof AppVoiceIndexRoute
+  AppTagsTagIdEditRoute: typeof AppTagsTagIdEditRoute
   AppFaxMessagesIndexRoute: typeof AppFaxMessagesIndexRoute
   AppFaxNumbersIndexRoute: typeof AppFaxNumbersIndexRoute
   AppVoiceExtensionsIndexRoute: typeof AppVoiceExtensionsIndexRoute
@@ -1589,11 +1670,14 @@ const AppRouteChildren: AppRouteChildren = {
   AppSupportRoute: AppSupportRouteWithChildren,
   AppTeamsRoute: AppTeamsRouteWithChildren,
   AppFaxSendRoute: AppFaxSendRoute,
+  AppTagsNewRoute: AppTagsNewRoute,
   AppVoicePhoneNumbersRoute: AppVoicePhoneNumbersRoute,
   AppFaxIndexRoute: AppFaxIndexRoute,
   AppNotificationsIndexRoute: AppNotificationsIndexRoute,
   AppProfileIndexRoute: AppProfileIndexRoute,
+  AppTagsIndexRoute: AppTagsIndexRoute,
   AppVoiceIndexRoute: AppVoiceIndexRoute,
+  AppTagsTagIdEditRoute: AppTagsTagIdEditRoute,
   AppFaxMessagesIndexRoute: AppFaxMessagesIndexRoute,
   AppFaxNumbersIndexRoute: AppFaxNumbersIndexRoute,
   AppVoiceExtensionsIndexRoute: AppVoiceExtensionsIndexRoute,

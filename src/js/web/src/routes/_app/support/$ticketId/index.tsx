@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router"
-import { AlertCircle, ArrowLeft, MessageSquare } from "lucide-react"
+import { AlertCircle, ArrowLeft, MessageSquare, Pencil } from "lucide-react"
 import { TicketConversation } from "@/components/support/ticket-conversation"
 import { TicketDetailHeader } from "@/components/support/ticket-detail-header"
 import { TicketPriorityBadge } from "@/components/support/ticket-priority-badge"
@@ -150,6 +150,11 @@ function TicketDetailPage() {
           <div className="flex items-center gap-3">
             <TicketStatusBadge status={ticket.status} />
             <TicketPriorityBadge priority={ticket.priority} />
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/support/$ticketId/edit" params={{ ticketId }}>
+                <Pencil className="mr-2 h-4 w-4" /> Edit
+              </Link>
+            </Button>
             <Button variant="outline" size="sm" asChild>
               <Link to="/support">
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back to Tickets

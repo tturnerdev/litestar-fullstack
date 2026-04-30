@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.13.0 (2026-04-29)
+
+### Added
+- **Tags frontend** — complete CRUD UI for tags: list page with search and delete confirmation, create page, edit page. New React Query hooks (`useTags`, `useTag`, `useCreateTag`, `useUpdateTag`, `useDeleteTag`).
+- **Support ticket edit page** (`/support/:id/edit`) — edit subject, status, priority, and category with dirty-field diffing. Edit button added to ticket detail page.
+
 ## v0.12.0 (2026-04-29)
 
 ### Added
