@@ -138,6 +138,22 @@ export function AttachmentList({ attachments, className }: AttachmentListProps) 
         <AttachmentPreview
           attachment={previewAttachment}
           onClose={() => setPreviewAttachment(null)}
+          onPrev={(() => {
+            const previewableAttachments = sortedAttachments.filter(
+              (a) => a.contentType.startsWith("image/") || a.contentType === "application/pdf",
+            )
+            const idx = previewableAttachments.findIndex((a) => a.id === previewAttachment.id)
+            if (idx > 0) return () => setPreviewAttachment(previewableAttachments[idx - 1])
+            return undefined
+          })()}
+          onNext={(() => {
+            const previewableAttachments = sortedAttachments.filter(
+              (a) => a.contentType.startsWith("image/") || a.contentType === "application/pdf",
+            )
+            const idx = previewableAttachments.findIndex((a) => a.id === previewAttachment.id)
+            if (idx < previewableAttachments.length - 1) return () => setPreviewAttachment(previewableAttachments[idx + 1])
+            return undefined
+          })()}
         />
       )}
     </>

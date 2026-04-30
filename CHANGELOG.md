@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.47.0 (2026-04-30)
+
+### Improved
+- **Fax message detail** — relative timestamps with tooltips, copy buttons on remote number and message ID, error Alert banner for failed messages, formatted phone numbers, resend button for failed outbound, email delivery badges, section separators, and print button.
+- **Attachment preview** — file info bar, image zoom controls (50%-300%), fit-to-window button, prev/next navigation with keyboard arrows, loading skeleton, entrance animations, and keyboard shortcut hints bar.
+- **Create extension dialog** — Phone icon, field descriptions, numeric-only validation, display name character counter, required field indicator, loading spinner, active status Switch toggle, and success toast.
+- **Create phone number dialog** — Hash icon, field descriptions, E.164 format validation, required indicator, type-specific icons in select, loading spinner, live preview section, and success toast.
+
 ## v0.46.0 (2026-04-30)
 
 ### Improved
