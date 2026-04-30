@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.40.0 (2026-04-30)
+
+### Improved
+- **Team switcher** — colored team avatars, active team checkmark, team count subtitle, search filter for 5+ teams, and "Manage teams" link.
+- **Error boundary** — copy error details button, framer-motion entrance, deterministic error reference code (ERR-XXXXXXXX), collapsible stack trace, and gradient background.
+- **Email verification banner** — 60-second resend countdown timer, slide-down entrance animation, pulsing mail icon, and session-dismissible X button.
+- **Password change card** — real-time confirm password match indicator with animated icons, and success state animation with auto-reset after password update.
+
 ## v0.39.0 (2026-04-30)
 
 ### Improved
