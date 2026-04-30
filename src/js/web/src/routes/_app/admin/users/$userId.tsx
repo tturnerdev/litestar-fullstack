@@ -3,9 +3,7 @@ import {
   ArrowLeft,
   BadgeCheck,
   Calendar,
-  Check,
   Clock,
-  Copy,
   KeyRound,
   Link2,
   Lock,
@@ -21,7 +19,7 @@ import {
   UserX,
   Users,
 } from "lucide-react"
-import { useCallback, useState } from "react"
+import { useState } from "react"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { DeleteUserDialog } from "@/components/admin/delete-user-dialog"
 import { EditUserDialog } from "@/components/admin/edit-user-dialog"
@@ -45,6 +43,7 @@ import { Separator } from "@/components/ui/separator"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { CopyButton } from "@/components/ui/copy-button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAdminUpdateUser, useAdminUser } from "@/lib/api/hooks/admin"
 
@@ -88,33 +87,6 @@ function formatDateTime(value: string | null | undefined): string {
 }
 
 // -- Reusable sub-components ------------------------------------------------
-
-function CopyButton({ value, label }: { value: string; label: string }) {
-  const [copied, setCopied] = useState(false)
-
-  const handleCopy = useCallback(async () => {
-    await navigator.clipboard.writeText(value)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }, [value])
-
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-6 w-6 text-muted-foreground hover:text-foreground"
-          onClick={handleCopy}
-        >
-          {copied ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
-          <span className="sr-only">Copy {label}</span>
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>{copied ? "Copied!" : `Copy ${label}`}</TooltipContent>
-    </Tooltip>
-  )
-}
 
 function TimestampField({
   label,

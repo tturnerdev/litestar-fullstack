@@ -1,13 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { Building2, Check, Copy, Globe, Hash, Mail, MapPin, Pencil, Save, Users, X } from "lucide-react"
+import { Building2, Globe, Hash, Mail, MapPin, Pencil, Save, Users, X } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
-import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { CopyButton } from "@/components/ui/copy-button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import {
   Select,
@@ -70,34 +70,6 @@ interface OrgFormData {
   country: string
   timezone: string
   defaultLanguage: string
-}
-
-function CopyButton({ value, label }: { value: string; label: string }) {
-  const [copied, setCopied] = useState(false)
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(value)
-      setCopied(true)
-      toast.success(`${label} copied!`)
-      setTimeout(() => setCopied(false), 2000)
-    } catch {
-      toast.error("Failed to copy to clipboard")
-    }
-  }
-
-  return (
-    <Button
-      variant="ghost"
-      size="icon"
-      className="h-6 w-6 text-muted-foreground hover:text-foreground"
-      onClick={handleCopy}
-      title={`Copy ${label.toLowerCase()}`}
-      aria-label="Copy to clipboard"
-    >
-      {copied ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
-    </Button>
-  )
 }
 
 function OrganizationSettingsPage() {

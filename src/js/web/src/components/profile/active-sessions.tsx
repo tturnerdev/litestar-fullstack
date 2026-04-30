@@ -170,6 +170,17 @@ function SessionItem({
 
   const isConfirming = confirmingId === session.id
 
+  useEffect(() => {
+    if (confirmingId === null) return
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        onConfirmCancel()
+      }
+    }
+    document.addEventListener("keydown", onKeyDown)
+    return () => document.removeEventListener("keydown", onKeyDown)
+  }, [confirmingId, onConfirmCancel])
+
   return (
     <div
       className={`flex items-center justify-between gap-4 rounded-lg border px-4 py-3 ${
@@ -239,6 +250,7 @@ function SessionItem({
                 onClick={() => onRevoke(session.id)}
                 disabled={isRevoking}
                 className="h-7 px-2 text-xs"
+                autoFocus
               >
                 Confirm
               </Button>

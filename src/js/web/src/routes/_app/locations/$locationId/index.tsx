@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
 import { useState } from "react"
-import { AlertTriangle, ArrowLeft, Check, Clock, Copy, ExternalLink, Loader2, MapPin, Pencil, Trash2 } from "lucide-react"
+import { AlertTriangle, ArrowLeft, Clock, ExternalLink, Loader2, MapPin, Pencil, Trash2 } from "lucide-react"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { SkeletonCard } from "@/components/ui/skeleton"
+import { CopyButton } from "@/components/ui/copy-button"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
 import { useAuthStore } from "@/lib/auth"
@@ -53,35 +54,6 @@ function formatRelativeTime(value: string | null | undefined): string {
 function formatDateTime(value: string | null | undefined): string {
   if (!value) return "Unknown"
   return new Date(value).toLocaleString()
-}
-
-// ---------------------------------------------------------------------------
-// Copy button
-// ---------------------------------------------------------------------------
-
-function CopyButton({ value }: { value: string }) {
-  const [copied, setCopied] = useState(false)
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(value)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch {
-      // Clipboard API may not be available
-    }
-  }
-
-  return (
-    <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={handleCopy}>
-      {copied ? (
-        <Check className="h-3 w-3 text-emerald-500" />
-      ) : (
-        <Copy className="h-3 w-3 text-muted-foreground" />
-      )}
-      <span className="sr-only">Copy ID</span>
-    </Button>
-  )
 }
 
 // ---------------------------------------------------------------------------
@@ -381,7 +353,7 @@ function LocationDetailPage() {
                   <p className="text-xs font-medium text-muted-foreground">Location ID</p>
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-xs break-all">{data.id}</span>
-                    <CopyButton value={data.id} />
+                    <CopyButton value={data.id} label="location ID" />
                   </div>
                 </div>
                 {data.createdAt && (

@@ -1,10 +1,8 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
-import { useCallback, useState } from "react"
+import { useState } from "react"
 import {
   AlertTriangle,
   ArrowLeft,
-  Check,
-  Copy,
   Cpu,
   Fingerprint,
   Loader2,
@@ -34,6 +32,7 @@ import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-lay
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
+import { CopyButton } from "@/components/ui/copy-button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import {
   useDeleteDevice,
@@ -77,35 +76,6 @@ function formatRelativeTime(value: string | null | undefined): string {
   if (diffHours < 24) return `${diffHours}h ago`
   const diffDays = Math.floor(diffHours / 24)
   return `${diffDays}d ago`
-}
-
-// ── Copy button ─────────────────────────────────────────────────────────
-
-function CopyButton({ value, label }: { value: string; label: string }) {
-  const [copied, setCopied] = useState(false)
-
-  const handleCopy = useCallback(async () => {
-    await navigator.clipboard.writeText(value)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }, [value])
-
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-6 w-6 text-muted-foreground hover:text-foreground"
-          onClick={handleCopy}
-        >
-          {copied ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
-          <span className="sr-only">Copy {label}</span>
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>{copied ? "Copied!" : `Copy ${label}`}</TooltipContent>
-    </Tooltip>
-  )
 }
 
 // ── Timestamp with tooltip ──────────────────────────────────────────────

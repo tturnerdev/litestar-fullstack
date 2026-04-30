@@ -1,14 +1,12 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
-import { useCallback, useState } from "react"
+import { useState } from "react"
 import {
   AlertCircle,
   AlertTriangle,
   ArrowLeft,
   Calendar,
-  Check,
   ChevronDown,
   Clock,
-  Copy,
   Hash,
   Loader2,
   Lock,
@@ -56,6 +54,7 @@ import {
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
+import { CopyButton } from "@/components/ui/copy-button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import {
   useCloseTicket,
@@ -118,39 +117,6 @@ function formatRelativeTime(dateStr: string | null | undefined): string {
 function formatDateTime(value: string | null | undefined): string {
   if (!value) return "--"
   return new Date(value).toLocaleString()
-}
-
-// ── Copy Button ─────────────────────────────────────────────────────────
-
-function CopyButton({ value, label }: { value: string; label: string }) {
-  const [copied, setCopied] = useState(false)
-
-  const handleCopy = useCallback(async () => {
-    await navigator.clipboard.writeText(value)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }, [value])
-
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-6 w-6 text-muted-foreground hover:text-foreground"
-          onClick={handleCopy}
-        >
-          {copied ? (
-            <Check className="h-3 w-3 text-emerald-500" />
-          ) : (
-            <Copy className="h-3 w-3" />
-          )}
-          <span className="sr-only">Copy {label}</span>
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>{copied ? "Copied!" : `Copy ${label}`}</TooltipContent>
-    </Tooltip>
-  )
 }
 
 // ── Timestamp field ─────────────────────────────────────────────────────

@@ -1,14 +1,12 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
-import { useCallback, useState } from "react"
+import { useState } from "react"
 import {
   AlertCircle,
   AlertTriangle,
   ArrowDownLeft,
   ArrowLeft,
   ArrowUpRight,
-  Check,
   Clock,
-  Copy,
   Download,
   FileText,
   Hash,
@@ -43,6 +41,7 @@ import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-lay
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { SkeletonCard } from "@/components/ui/skeleton"
+import { CopyButton } from "@/components/ui/copy-button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { DirectionBadge, FaxStatusBadge } from "@/components/fax/fax-status-badge"
 import { useDeleteFaxMessage, useDownloadFaxDocument, useFaxMessage } from "@/lib/api/hooks/fax"
@@ -78,35 +77,6 @@ function formatBytes(bytes: number): string {
   const sizes = ["B", "KB", "MB", "GB"]
   const i = Math.floor(Math.log(bytes) / Math.log(k))
   return `${Number.parseFloat((bytes / k ** i).toFixed(1))} ${sizes[i]}`
-}
-
-// -- Copy button ------------------------------------------------------------
-
-function CopyButton({ value, label }: { value: string; label: string }) {
-  const [copied, setCopied] = useState(false)
-
-  const handleCopy = useCallback(async () => {
-    await navigator.clipboard.writeText(value)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }, [value])
-
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-6 w-6 text-muted-foreground hover:text-foreground"
-          onClick={handleCopy}
-        >
-          {copied ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
-          <span className="sr-only">Copy {label}</span>
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>{copied ? "Copied!" : `Copy ${label}`}</TooltipContent>
-    </Tooltip>
-  )
 }
 
 // -- Timestamp with tooltip -------------------------------------------------

@@ -3,15 +3,13 @@ import { createFileRoute, Link, useParams } from "@tanstack/react-router"
 import {
   Activity,
   ArrowLeft,
-  Check,
-  Copy,
   Crown,
   Pencil,
   Settings,
   Shield,
   Users,
 } from "lucide-react"
-import { useCallback, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { TeamActivity } from "@/components/teams/team-activity"
 import { TeamMembers } from "@/components/teams/team-members"
 import { TeamSettings } from "@/components/teams/team-settings"
@@ -31,7 +29,7 @@ import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-lay
 import { Separator } from "@/components/ui/separator"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { CopyButton } from "@/components/ui/copy-button"
 import { useAuthStore } from "@/lib/auth"
 import { getTeam, type TeamMember } from "@/lib/generated/api"
 
@@ -63,35 +61,6 @@ function getTeamColor(name: string): string {
   ]
   const index = name.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length
   return colors[index]
-}
-
-// ── Copy button ─────────────────────────────────────────────────────────
-
-function CopyButton({ value, label }: { value: string; label: string }) {
-  const [copied, setCopied] = useState(false)
-
-  const handleCopy = useCallback(async () => {
-    await navigator.clipboard.writeText(value)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }, [value])
-
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-6 w-6 text-muted-foreground hover:text-foreground"
-          onClick={handleCopy}
-        >
-          {copied ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
-          <span className="sr-only">Copy {label}</span>
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>{copied ? "Copied!" : `Copy ${label}`}</TooltipContent>
-    </Tooltip>
-  )
 }
 
 // ── Main component ──────────────────────────────────────────────────────
