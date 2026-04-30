@@ -25,16 +25,18 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
@@ -341,44 +343,52 @@ function ExtensionDetailPage() {
       </PageSection>
 
       {/* Delete confirmation dialog */}
-      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-destructive" />
               Delete Extension
-            </DialogTitle>
-            <DialogDescription>
+            </AlertDialogTitle>
+            <AlertDialogDescription>
               Are you sure you want to delete{" "}
-              <span className="font-medium">{data.displayName}</span>
+              <span className="font-medium text-foreground">{data.displayName}</span>
               {data.extensionNumber && (
-                <> (Ext. <span className="font-mono">{data.extensionNumber}</span>)</>
+                <> (Ext. <span className="font-mono text-foreground">{data.extensionNumber}</span>)</>
               )}
-              ? This action cannot be undone. All associated forwarding rules, voicemail,
-              and DND settings will be permanently removed.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
+              ? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="rounded-md border border-destructive/20 bg-destructive/5 px-4 py-3">
+            <p className="mb-2 text-sm font-medium text-destructive">The following will be permanently removed:</p>
+            <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
+              <li>All call forwarding rules</li>
+              <li>Voicemail settings and messages</li>
+              <li>Do Not Disturb configuration</li>
+            </ul>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel
               onClick={() => setShowDeleteDialog(false)}
               disabled={deleteExtension.isPending}
             >
               Cancel
-            </Button>
-            <Button
-              variant="destructive"
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className={buttonVariants({ variant: "destructive" })}
               onClick={handleDelete}
               disabled={deleteExtension.isPending}
             >
-              {deleteExtension.isPending && (
+              {deleteExtension.isPending ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="mr-2 h-4 w-4" />
               )}
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+              Delete Extension
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PageContainer>
   )
 }
