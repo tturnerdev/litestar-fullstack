@@ -3,13 +3,23 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   Check,
   Crown,
+  Home,
   Plus,
   Search,
   Shield,
   Users,
+  X,
 } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 import { BulkActionBar, createBulkDeleteAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -151,12 +161,31 @@ function TeamsPage() {
   const hasData = sortedItems.length > 0
   const hasAnyTeams = (data?.items.length ?? 0) > 0
 
+  const breadcrumbs = (
+    <Breadcrumb>
+      <BreadcrumbList>
+        <BreadcrumbItem>
+          <BreadcrumbLink asChild>
+            <Link to="/">
+              <Home className="h-3.5 w-3.5" />
+            </Link>
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem>
+          <BreadcrumbPage>Teams</BreadcrumbPage>
+        </BreadcrumbItem>
+      </BreadcrumbList>
+    </Breadcrumb>
+  )
+
   return (
     <PageContainer className="flex-1 space-y-8">
       <PageHeader
         eyebrow="Workspace"
         title="Teams"
         description="Manage your teams and collaborate with members."
+        breadcrumbs={breadcrumbs}
         actions={
           <Button size="sm" asChild>
             <Link to="/teams/new">
@@ -175,8 +204,18 @@ function TeamsPage() {
               placeholder="Search teams by name..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9"
+              className="pl-9 pr-8"
             />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch("")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-3.5 w-3.5" />
+                <span className="sr-only">Clear search</span>
+              </button>
+            )}
           </div>
         </div>
       </PageSection>

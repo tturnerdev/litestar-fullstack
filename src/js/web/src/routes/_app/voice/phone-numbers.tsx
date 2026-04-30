@@ -536,9 +536,10 @@ function PhoneNumbersPage() {
           <div className="space-y-3">
             {/* Result count */}
             <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">
-                {filteredItems.length} phone number{filteredItems.length === 1 ? "" : "s"}
-                {(typeFilter.length > 0 || statusFilter.length > 0 || search) && " (filtered)"}
+              <p className="text-xs text-muted-foreground">
+                {filteredItems.length === (data?.items.length ?? 0)
+                  ? `${filteredItems.length} phone number${filteredItems.length !== 1 ? "s" : ""}`
+                  : `${filteredItems.length} of ${data?.items.length ?? 0} phone numbers`}
               </p>
             </div>
 

@@ -374,9 +374,10 @@ function FaxNumbersPage() {
           <div className="space-y-3">
             {/* Result count */}
             <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">
-                {filteredItems.length} fax number{filteredItems.length === 1 ? "" : "s"}
-                {statusFilter.length > 0 && " (filtered)"}
+              <p className="text-xs text-muted-foreground">
+                {filteredItems.length === (data?.items.length ?? 0)
+                  ? `${filteredItems.length} fax number${filteredItems.length !== 1 ? "s" : ""}`
+                  : `${filteredItems.length} of ${data?.items.length ?? 0} fax numbers`}
               </p>
             </div>
 
@@ -440,9 +441,10 @@ function FaxNumbersPage() {
           </div>
         ) : (
           <div className="space-y-3">
-            <p className="text-sm text-muted-foreground">
-              {filteredItems.length} fax number{filteredItems.length === 1 ? "" : "s"}
-              {statusFilter.length > 0 && " (filtered)"}
+            <p className="text-xs text-muted-foreground">
+              {filteredItems.length === (data?.items.length ?? 0)
+                ? `${filteredItems.length} fax number${filteredItems.length !== 1 ? "s" : ""}`
+                : `${filteredItems.length} of ${data?.items.length ?? 0} fax numbers`}
             </p>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {filteredItems.map((faxNumber) => (
