@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.23.0 (2026-04-30)
+
+### Improved
+- **Admin teams page** — search, sortable columns, bulk delete, member counts, active/inactive status indicators, relative timestamps, export, and pagination. `useAdminTeams` hook now supports named params with sort.
+- **Admin audit log** — unified search, multi-select action/resource type filters, date range presets (today/7d/30d/90d/custom), sortable columns, removable filter chips, expandable detail rows with 3-column layout, and CSV export options.
+
 ## v0.22.0 (2026-04-30)
 
 ### Improved

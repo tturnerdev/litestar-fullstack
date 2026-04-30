@@ -42,7 +42,7 @@ export function TeamTable() {
   const [search, setSearch] = useState("")
   const [sortKey, setSortKey] = useState<string | null>(null)
   const [sortDirection, setSortDirection] = useState<SortDirection>(null)
-  const { data, isLoading, isError, refetch } = useAdminTeams(page, PAGE_SIZE)
+  const { data, isLoading, isError, refetch } = useAdminTeams({ page, pageSize: PAGE_SIZE })
 
   if (isLoading) {
     return <SkeletonTable rows={6} />

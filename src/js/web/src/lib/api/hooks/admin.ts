@@ -126,13 +126,24 @@ export function useAdminUsers(params?: {
   })
 }
 
-export function useAdminTeams(page = 1, pageSize = 25) {
+export function useAdminTeams(params?: {
+  page?: number
+  pageSize?: number
+  search?: string
+  orderBy?: string
+  sortOrder?: "asc" | "desc"
+}) {
+  const { page = 1, pageSize = 25, search, orderBy, sortOrder } = params ?? {}
   return useQuery({
-    queryKey: ["admin", "teams", page, pageSize],
+    queryKey: ["admin", "teams", page, pageSize, search, orderBy, sortOrder],
     queryFn: async () => {
       const query = {
         currentPage: page,
         pageSize,
+        searchString: search,
+        searchIgnoreCase: search ? true : undefined,
+        orderBy: orderBy ?? undefined,
+        sortOrder: sortOrder ?? undefined,
       } as unknown as AdminListTeamsData["query"]
       const response = await adminListTeams({ query })
       return response.data as { items: AdminTeamSummary[]; total: number }
@@ -146,13 +157,39 @@ export function useAdminAuditLogs(params: {
   search?: string
   actions?: string[]
   actorEmail?: string
-  targetType?: string
+  targetTypes?: string[]
   startDate?: string
   endDate?: string
+  orderBy?: string
+  sortOrder?: "asc" | "desc"
 }) {
-  const { page = 1, pageSize = 50, search, actions, actorEmail, targetType, startDate, endDate } = params
+  const {
+    page = 1,
+    pageSize = 50,
+    search,
+    actions,
+    actorEmail,
+    targetTypes,
+    startDate,
+    endDate,
+    orderBy,
+    sortOrder,
+  } = params
   return useQuery({
-    queryKey: ["admin", "audit", page, pageSize, search, actions, actorEmail, targetType, startDate, endDate],
+    queryKey: [
+      "admin",
+      "audit",
+      page,
+      pageSize,
+      search,
+      actions,
+      actorEmail,
+      targetTypes,
+      startDate,
+      endDate,
+      orderBy,
+      sortOrder,
+    ],
     queryFn: async () => {
       const query = {
         currentPage: page,
@@ -160,9 +197,11 @@ export function useAdminAuditLogs(params: {
         searchString: actorEmail || search || undefined,
         searchIgnoreCase: actorEmail || search ? true : undefined,
         actionIn: actions && actions.length > 0 ? actions : undefined,
-        targetTypeIn: targetType ? [targetType] : undefined,
+        targetTypeIn: targetTypes && targetTypes.length > 0 ? targetTypes : undefined,
         createdAfter: startDate,
         createdBefore: endDate,
+        orderBy: orderBy ?? undefined,
+        sortOrder: sortOrder ?? undefined,
       } as unknown as AdminListAuditLogsData["query"]
       const response = await adminListAuditLogs({
         query,
@@ -176,14 +215,14 @@ export function useAdminAuditLogsExport(params: {
   search?: string
   actions?: string[]
   actorEmail?: string
-  targetType?: string
+  targetTypes?: string[]
   startDate?: string
   endDate?: string
   enabled?: boolean
 }) {
-  const { search, actions, actorEmail, targetType, startDate, endDate, enabled = false } = params
+  const { search, actions, actorEmail, targetTypes, startDate, endDate, enabled = false } = params
   return useQuery({
-    queryKey: ["admin", "audit", "export", search, actions, actorEmail, targetType, startDate, endDate],
+    queryKey: ["admin", "audit", "export", search, actions, actorEmail, targetTypes, startDate, endDate],
     queryFn: async () => {
       const query = {
         currentPage: 1,
@@ -191,7 +230,7 @@ export function useAdminAuditLogsExport(params: {
         searchString: actorEmail || search || undefined,
         searchIgnoreCase: actorEmail || search ? true : undefined,
         actionIn: actions && actions.length > 0 ? actions : undefined,
-        targetTypeIn: targetType ? [targetType] : undefined,
+        targetTypeIn: targetTypes && targetTypes.length > 0 ? targetTypes : undefined,
         createdAfter: startDate,
         createdBefore: endDate,
       } as unknown as AdminListAuditLogsData["query"]
