@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { AlertTriangle, Loader2, Power, RefreshCw, RotateCcw, Trash2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/dialog"
 import {
   AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -31,20 +33,16 @@ interface ConfirmDialogProps {
   title: string
   description: string
   confirmLabel: string
-  variant?: "default" | "destructive"
   isPending?: boolean
   onConfirm: () => void
 }
 
-function ConfirmDialog({ open, onOpenChange, title, description, confirmLabel, variant = "default", isPending, onConfirm }: ConfirmDialogProps) {
+function ConfirmDialog({ open, onOpenChange, title, description, confirmLabel, isPending, onConfirm }: ConfirmDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            {variant === "destructive" && <AlertTriangle className="h-5 w-5 text-destructive" />}
-            {title}
-          </DialogTitle>
+          <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
         <DialogFooter>
@@ -52,7 +50,6 @@ function ConfirmDialog({ open, onOpenChange, title, description, confirmLabel, v
             Cancel
           </Button>
           <Button
-            variant={variant === "destructive" ? "destructive" : "default"}
             onClick={() => {
               onConfirm()
               onOpenChange(false)
@@ -94,11 +91,11 @@ function DestructiveDialog({ open, onOpenChange, title, description, confirmLabe
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
+          <AlertDialogCancel onClick={() => onOpenChange(false)} disabled={isPending}>
             Cancel
-          </Button>
-          <Button
-            variant="destructive"
+          </AlertDialogCancel>
+          <AlertDialogAction
+            className={buttonVariants({ variant: "destructive" })}
             onClick={() => {
               onConfirm()
               onOpenChange(false)
@@ -107,7 +104,7 @@ function DestructiveDialog({ open, onOpenChange, title, description, confirmLabe
           >
             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {confirmLabel}
-          </Button>
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
