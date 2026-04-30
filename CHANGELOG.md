@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.28.0 (2026-04-30)
+
+### Improved
+- **Voice forwarding page** — breadcrumbs with extension name, rules table with priority/condition/destination/timeout, inline enabled toggles, add-rule dialog with condition-aware fields, delete confirmation, and empty/loading/error states.
+- **Admin team detail page** — hero section with gradient avatar and status badge, organized sections (Info, Statistics, Members with avatars, Admin Actions with toggle, Invitations, Danger Zone), copy buttons, and relative timestamps.
+
 ## v0.27.0 (2026-04-30)
 
 ### Improved

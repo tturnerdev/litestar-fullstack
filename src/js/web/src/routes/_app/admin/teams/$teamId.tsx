@@ -1,21 +1,43 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { ArrowLeft, Check, Pencil, Trash2, X } from "lucide-react"
-import { useState } from "react"
+import {
+  ArrowLeft,
+  Calendar,
+  Check,
+  Clock,
+  Copy,
+  Hash,
+  Mail,
+  Pencil,
+  Shield,
+  Trash2,
+  UserCheck,
+  UserX,
+  Users,
+} from "lucide-react"
+import { useCallback, useState } from "react"
 import { toast } from "sonner"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { DeleteTeamDialog } from "@/components/admin/delete-team-dialog"
 import { EditTeamDialog } from "@/components/admin/edit-team-dialog"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { Separator } from "@/components/ui/separator"
 import { SkeletonCard } from "@/components/ui/skeleton"
+import { Switch } from "@/components/ui/switch"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Textarea } from "@/components/ui/textarea"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAdminTeam, useAdminUpdateTeam } from "@/lib/api/hooks/admin"
 import {
   deleteTeamInvitation,
@@ -29,10 +51,133 @@ export const Route = createFileRoute("/_app/admin/teams/$teamId")({
   component: AdminTeamDetailPage,
 })
 
+// -- Helpers -----------------------------------------------------------------
+
+function getTeamInitials(name: string): string {
+  const parts = name.trim().split(/\s+/)
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[1][0]).toUpperCase()
+  }
+  return parts[0].slice(0, 2).toUpperCase()
+}
+
+function formatRelativeTime(value: string | null | undefined): string {
+  if (!value) return "Never"
+  const date = new Date(value)
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffMins = Math.floor(diffMs / 60_000)
+  if (diffMins < 1) return "Just now"
+  if (diffMins < 60) return `${diffMins}m ago`
+  const diffHours = Math.floor(diffMins / 60)
+  if (diffHours < 24) return `${diffHours}h ago`
+  const diffDays = Math.floor(diffHours / 24)
+  if (diffDays < 30) return `${diffDays}d ago`
+  const diffMonths = Math.floor(diffDays / 30)
+  if (diffMonths < 12) return `${diffMonths}mo ago`
+  return `${Math.floor(diffMonths / 12)}y ago`
+}
+
+function formatDateTime(value: string | null | undefined): string {
+  if (!value) return "---"
+  return new Date(value).toLocaleString()
+}
+
+// -- Reusable sub-components ------------------------------------------------
+
+function CopyButton({ value, label }: { value: string; label: string }) {
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = useCallback(async () => {
+    await navigator.clipboard.writeText(value)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }, [value])
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-6 w-6 text-muted-foreground hover:text-foreground"
+          onClick={handleCopy}
+        >
+          {copied ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
+          <span className="sr-only">Copy {label}</span>
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>{copied ? "Copied!" : `Copy ${label}`}</TooltipContent>
+    </Tooltip>
+  )
+}
+
+function TimestampField({
+  label,
+  value,
+  icon: Icon,
+}: {
+  label: string
+  value: string | null | undefined
+  icon?: React.ComponentType<{ className?: string }>
+}) {
+  if (!value) {
+    return (
+      <div>
+        <p className="text-sm text-muted-foreground">{label}</p>
+        <p className="text-sm">---</p>
+      </div>
+    )
+  }
+
+  return (
+    <div>
+      <p className="text-sm text-muted-foreground">{label}</p>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <p className="inline-flex cursor-default items-center gap-1.5 text-sm">
+            {Icon && <Icon className="h-3.5 w-3.5 text-muted-foreground" />}
+            {formatRelativeTime(value)}
+          </p>
+        </TooltipTrigger>
+        <TooltipContent>{formatDateTime(value)}</TooltipContent>
+      </Tooltip>
+    </div>
+  )
+}
+
+function SectionHeading({
+  icon: Icon,
+  title,
+  description,
+  actions,
+}: {
+  icon: React.ComponentType<{ className?: string }>
+  title: string
+  description?: string
+  actions?: React.ReactNode
+}) {
+  return (
+    <div className="flex items-start justify-between">
+      <div className="space-y-1">
+        <h3 className="flex items-center gap-2 text-lg font-semibold tracking-tight">
+          <Icon className="h-5 w-5 text-muted-foreground" />
+          {title}
+        </h3>
+        {description && <p className="text-sm text-muted-foreground">{description}</p>}
+      </div>
+      {actions}
+    </div>
+  )
+}
+
+// -- Main page component ----------------------------------------------------
+
 function AdminTeamDetailPage() {
   const { teamId } = Route.useParams()
   const navigate = useNavigate()
   const { data, isLoading, isError } = useAdminTeam(teamId)
+  const updateTeam = useAdminUpdateTeam(teamId)
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
 
@@ -42,6 +187,7 @@ function AdminTeamDetailPage() {
         <PageHeader eyebrow="Administration" title="Team Details" />
         <AdminNav />
         <PageSection>
+          <SkeletonCard />
           <SkeletonCard />
         </PageSection>
       </PageContainer>
@@ -66,43 +212,63 @@ function AdminTeamDetailPage() {
         <PageSection>
           <Card>
             <CardHeader>
-              <CardTitle>Team detail</CardTitle>
+              <CardTitle>Team not found</CardTitle>
             </CardHeader>
-            <CardContent className="text-muted-foreground">We could not load this team.</CardContent>
+            <CardContent className="text-muted-foreground">
+              We could not load this team. It may have been deleted or you may not have permission to view it.
+            </CardContent>
           </Card>
         </PageSection>
       </PageContainer>
     )
   }
 
+  const initials = getTeamInitials(data.name)
+  const members = data.members ?? []
+  const memberCount = data.memberCount ?? members.length
+
   return (
     <PageContainer className="flex-1 space-y-8">
       <PageHeader
         eyebrow="Administration"
         title={data.name}
-        description="Manage team settings, members, and invitations."
+        description="View and manage team settings, members, and invitations."
         breadcrumbs={
           <Breadcrumb>
             <BreadcrumbList>
-              <BreadcrumbItem><BreadcrumbLink asChild><Link to="/admin">Admin</Link></BreadcrumbLink></BreadcrumbItem>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/home">Home</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
               <BreadcrumbSeparator />
-              <BreadcrumbItem><BreadcrumbLink asChild><Link to="/admin/teams">Teams</Link></BreadcrumbLink></BreadcrumbItem>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/admin">Admin</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
               <BreadcrumbSeparator />
-              <BreadcrumbItem><BreadcrumbPage>{data.name}</BreadcrumbPage></BreadcrumbItem>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/admin/teams">Teams</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>{data.name}</BreadcrumbPage>
+              </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         }
         actions={
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={() => setEditOpen(true)}>
-              <Pencil className="mr-2 h-4 w-4" /> Edit
-            </Button>
-            <Button variant="outline" size="sm" className="text-destructive hover:text-destructive" onClick={() => setDeleteOpen(true)}>
-              <Trash2 className="mr-2 h-4 w-4" /> Delete
+              <Pencil className="mr-2 h-4 w-4" />
+              Edit
             </Button>
             <Button variant="outline" size="sm" asChild>
               <Link to="/admin/teams">
-                <ArrowLeft className="mr-2 h-4 w-4" /> Back to teams
+                <ArrowLeft className="mr-2 h-4 w-4" /> Back
               </Link>
             </Button>
           </div>
@@ -110,38 +276,256 @@ function AdminTeamDetailPage() {
       />
       <AdminNav />
 
+      {/* Hero section */}
       <PageSection>
-        <Tabs defaultValue="overview">
-          <TabsList>
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="members">Members ({data.members?.length ?? 0})</TabsTrigger>
-            <TabsTrigger value="invitations">Invitations</TabsTrigger>
-          </TabsList>
+        <Card className="overflow-hidden">
+          <div className="h-24 bg-gradient-to-r from-primary/20 via-primary/10 to-transparent" />
+          <CardContent className="relative -mt-12 pb-6">
+            <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-end">
+              <div className="rounded-full bg-background p-1 shadow-md ring-2 ring-background">
+                <Avatar className="h-24 w-24 text-3xl">
+                  <AvatarFallback className="bg-primary/10 text-primary text-3xl font-semibold">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
 
-          <TabsContent value="overview" className="space-y-6 pt-4">
-            <TeamInfoCard
-              teamId={teamId}
-              name={data.name}
-              description={data.description}
-              slug={data.slug}
-              ownerEmail={data.ownerEmail}
-              memberCount={data.memberCount}
-              isActive={data.isActive}
-              createdAt={data.createdAt}
-              updatedAt={data.updatedAt}
-            />
-          </TabsContent>
+              <div className="flex-1 space-y-1.5 text-center sm:pb-1 sm:text-left">
+                <div className="flex flex-col items-center gap-2 sm:flex-row sm:flex-wrap">
+                  <h2 className="text-2xl font-semibold tracking-tight">{data.name}</h2>
+                  <Badge
+                    variant={data.isActive ? "default" : "secondary"}
+                    className={
+                      data.isActive
+                        ? "gap-1 bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400"
+                        : "gap-1"
+                    }
+                  >
+                    {data.isActive ? (
+                      <>
+                        <UserCheck className="h-3 w-3" />
+                        Active
+                      </>
+                    ) : (
+                      <>
+                        <UserX className="h-3 w-3" />
+                        Inactive
+                      </>
+                    )}
+                  </Badge>
+                </div>
 
-          <TabsContent value="members" className="pt-4">
-            <MembersCard members={data.members ?? []} />
-          </TabsContent>
+                <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-sm text-muted-foreground sm:justify-start">
+                  {data.slug && (
+                    <span className="inline-flex items-center gap-1.5">
+                      <Hash className="h-3.5 w-3.5" />
+                      {data.slug}
+                    </span>
+                  )}
+                  {data.ownerEmail && (
+                    <span className="inline-flex items-center gap-1.5">
+                      <Mail className="h-3.5 w-3.5" />
+                      {data.ownerEmail}
+                    </span>
+                  )}
+                  <span className="inline-flex items-center gap-1.5">
+                    <Users className="h-3.5 w-3.5" />
+                    {memberCount} member{memberCount !== 1 ? "s" : ""}
+                  </span>
+                </div>
 
-          <TabsContent value="invitations" className="pt-4">
-            <InvitationsCard teamId={teamId} />
-          </TabsContent>
-        </Tabs>
+                {data.description && (
+                  <p className="text-sm text-muted-foreground">{data.description}</p>
+                )}
+              </div>
+            </div>
+
+            <Separator className="my-4" />
+
+            {/* Team ID with copy */}
+            <div className="flex items-center justify-end gap-1 text-xs text-muted-foreground">
+              <span className="font-mono">{teamId.slice(0, 8)}...</span>
+              <CopyButton value={teamId} label="team ID" />
+            </div>
+          </CardContent>
+        </Card>
       </PageSection>
 
+      {/* Team Info + Statistics side-by-side */}
+      <PageSection delay={0.1}>
+        <div className="grid gap-6 lg:grid-cols-2">
+          {/* Team Info */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-muted-foreground" />
+                <CardTitle>Team Info</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 text-sm sm:grid-cols-2">
+                <div>
+                  <p className="text-muted-foreground">Name</p>
+                  <p className="font-medium">{data.name}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Slug</p>
+                  <p className="font-mono text-xs">{data.slug}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Owner</p>
+                  <p>{data.ownerEmail ?? "---"}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Status</p>
+                  <Badge
+                    variant={data.isActive ? "default" : "secondary"}
+                    className={
+                      data.isActive
+                        ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+                        : ""
+                    }
+                  >
+                    {data.isActive ? "Active" : "Inactive"}
+                  </Badge>
+                </div>
+                <div className="sm:col-span-2">
+                  <p className="text-muted-foreground">Description</p>
+                  <p className="text-sm">{data.description || "No description provided."}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Team ID</p>
+                  <div className="flex items-center gap-1">
+                    <p className="font-mono text-xs">{teamId.slice(0, 8)}...</p>
+                    <CopyButton value={teamId} label="team ID" />
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Statistics */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Clock className="h-5 w-5 text-muted-foreground" />
+                <CardTitle>Statistics</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 text-sm sm:grid-cols-2">
+                <div>
+                  <p className="text-muted-foreground">Total members</p>
+                  <p className="flex items-center gap-1.5 text-xl font-semibold">
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                    {memberCount}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Owner</p>
+                  <p className="text-sm">{data.ownerEmail ?? "No owner"}</p>
+                </div>
+                <TimestampField label="Created" value={data.createdAt} icon={Calendar} />
+                <TimestampField label="Last updated" value={data.updatedAt} icon={Clock} />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </PageSection>
+
+      <Separator />
+
+      {/* Members */}
+      <PageSection delay={0.15}>
+        <SectionHeading
+          icon={Users}
+          title="Members"
+          description={`${memberCount} member${memberCount !== 1 ? "s" : ""} in this team.`}
+        />
+        <MembersCard members={members} />
+      </PageSection>
+
+      <Separator />
+
+      {/* Invitations */}
+      <PageSection delay={0.2}>
+        <SectionHeading
+          icon={Mail}
+          title="Invitations"
+          description="Pending and accepted team invitations."
+        />
+        <InvitationsCard teamId={teamId} />
+      </PageSection>
+
+      <Separator />
+
+      {/* Admin Actions */}
+      <PageSection delay={0.25}>
+        <SectionHeading
+          icon={Shield}
+          title="Admin Actions"
+          description="Toggle team properties and manage access."
+        />
+        <Card>
+          <CardContent className="divide-y pt-6">
+            {/* Active toggle */}
+            <div className="flex items-center justify-between py-4 first:pt-0 last:pb-0">
+              <div className="space-y-0.5">
+                <p className="text-sm font-medium">Team active</p>
+                <p className="text-xs text-muted-foreground">
+                  {data.isActive
+                    ? "Team is active and accessible to all members."
+                    : "Team is deactivated and members cannot access it."}
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <Badge
+                  variant={data.isActive ? "default" : "secondary"}
+                  className={
+                    data.isActive
+                      ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+                      : ""
+                  }
+                >
+                  {data.isActive ? "Active" : "Inactive"}
+                </Badge>
+                <Switch
+                  checked={data.isActive ?? false}
+                  onCheckedChange={() => updateTeam.mutate({ is_active: !data.isActive })}
+                  disabled={updateTeam.isPending}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </PageSection>
+
+      <Separator />
+
+      {/* Danger Zone */}
+      <PageSection delay={0.3}>
+        <Card className="border-destructive/30">
+          <CardHeader>
+            <CardTitle className="text-destructive">Danger Zone</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">Delete this team</p>
+                <p className="text-sm text-muted-foreground">
+                  Permanently remove <strong>{data.name}</strong> and all associated data, memberships, and invitations. This action cannot be undone.
+                </p>
+              </div>
+              <Button variant="destructive" size="sm" onClick={() => setDeleteOpen(true)}>
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </PageSection>
+
+      {/* Dialogs */}
       <EditTeamDialog
         teamId={teamId}
         currentName={data.name}
@@ -161,162 +545,6 @@ function AdminTeamDetailPage() {
   )
 }
 
-/* ---------- Overview / Info Card with inline edit ---------- */
-
-interface TeamInfoCardProps {
-  teamId: string
-  name: string
-  description: string | null | undefined
-  slug: string
-  ownerEmail: string | null | undefined
-  memberCount: number | undefined
-  isActive: boolean | undefined
-  createdAt: string
-  updatedAt: string
-}
-
-function TeamInfoCard({ teamId, name, description, slug, ownerEmail, memberCount, isActive, createdAt, updatedAt }: TeamInfoCardProps) {
-  const updateTeam = useAdminUpdateTeam(teamId)
-
-  const [editingField, setEditingField] = useState<"name" | "description" | null>(null)
-  const [editValue, setEditValue] = useState("")
-
-  const startEdit = (field: "name" | "description", current: string) => {
-    setEditingField(field)
-    setEditValue(current)
-  }
-
-  const cancelEdit = () => {
-    setEditingField(null)
-    setEditValue("")
-  }
-
-  const saveEdit = () => {
-    if (!editingField) return
-    const payload: Record<string, unknown> = {}
-    if (editingField === "name") {
-      if (!editValue.trim()) return
-      payload.name = editValue.trim()
-    } else {
-      payload.description = editValue.trim() || null
-    }
-    updateTeam.mutate(payload, { onSuccess: () => cancelEdit() })
-  }
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Team Information</CardTitle>
-        <CardDescription>Core details for this team.</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="grid gap-4 text-sm md:grid-cols-2">
-          {/* Name */}
-          <div className="space-y-1">
-            <p className="text-muted-foreground">Name</p>
-            {editingField === "name" ? (
-              <div className="flex items-center gap-2">
-                <Input value={editValue} onChange={(e) => setEditValue(e.target.value)} className="h-8" autoFocus />
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={saveEdit} disabled={updateTeam.isPending}>
-                  <Check className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={cancelEdit}>
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            ) : (
-              <div className="group flex items-center gap-2">
-                <p>{name}</p>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 w-6 p-0 opacity-0 transition-opacity group-hover:opacity-100"
-                  onClick={() => startEdit("name", name)}
-                >
-                  <Pencil className="h-3 w-3" />
-                </Button>
-              </div>
-            )}
-          </div>
-
-          {/* Slug */}
-          <div className="space-y-1">
-            <p className="text-muted-foreground">Slug</p>
-            <p>{slug}</p>
-          </div>
-
-          {/* Owner */}
-          <div className="space-y-1">
-            <p className="text-muted-foreground">Owner</p>
-            <p>{ownerEmail ?? "---"}</p>
-          </div>
-
-          {/* Members */}
-          <div className="space-y-1">
-            <p className="text-muted-foreground">Members</p>
-            <p>{memberCount ?? 0}</p>
-          </div>
-
-          {/* Status */}
-          <div className="space-y-1">
-            <p className="text-muted-foreground">Status</p>
-            <Badge variant={isActive ? "default" : "secondary"}>{isActive ? "Active" : "Inactive"}</Badge>
-          </div>
-
-          {/* Created */}
-          <div className="space-y-1">
-            <p className="text-muted-foreground">Created</p>
-            <p>{new Date(createdAt).toLocaleString()}</p>
-          </div>
-
-          {/* Updated */}
-          <div className="space-y-1">
-            <p className="text-muted-foreground">Last Updated</p>
-            <p>{new Date(updatedAt).toLocaleString()}</p>
-          </div>
-        </div>
-
-        {/* Description - full width */}
-        <div className="space-y-1">
-          <p className="text-sm text-muted-foreground">Description</p>
-          {editingField === "description" ? (
-            <div className="space-y-2">
-              <Textarea value={editValue} onChange={(e) => setEditValue(e.target.value)} rows={3} autoFocus />
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={saveEdit} disabled={updateTeam.isPending}>
-                  {updateTeam.isPending ? "Saving..." : "Save"}
-                </Button>
-                <Button variant="ghost" size="sm" onClick={cancelEdit}>
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div className="group flex items-start gap-2">
-              <p className="text-sm">{description || "No description provided."}</p>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 w-6 shrink-0 p-0 opacity-0 transition-opacity group-hover:opacity-100"
-                onClick={() => startEdit("description", description ?? "")}
-              >
-                <Pencil className="h-3 w-3" />
-              </Button>
-            </div>
-          )}
-        </div>
-
-        {/* Action buttons */}
-        <div className="flex flex-wrap gap-2 border-t pt-4">
-          <Button variant="outline" onClick={() => updateTeam.mutate({ is_active: !isActive })} disabled={updateTeam.isPending}>
-            {isActive ? "Deactivate" : "Activate"}
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
 /* ---------- Members Card ---------- */
 
 interface MembersCardProps {
@@ -327,6 +555,7 @@ interface MembersCardProps {
       id: string
       email: string
       name?: string | null
+      avatarUrl?: string | null
     }
   }>
 }
@@ -335,21 +564,16 @@ function MembersCard({ members }: MembersCardProps) {
   if (members.length === 0) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle>Members</CardTitle>
-        </CardHeader>
-        <CardContent className="text-muted-foreground">This team has no members.</CardContent>
+        <CardContent className="py-8 text-center text-sm text-muted-foreground">
+          This team has no members.
+        </CardContent>
       </Card>
     )
   }
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Members</CardTitle>
-        <CardDescription>{members.length} member{members.length !== 1 ? "s" : ""} in this team.</CardDescription>
-      </CardHeader>
-      <CardContent>
+      <CardContent className="pt-6">
         <Table>
           <TableHeader>
             <TableRow>
@@ -357,26 +581,47 @@ function MembersCard({ members }: MembersCardProps) {
               <TableHead>Email</TableHead>
               <TableHead>Role</TableHead>
               <TableHead>Owner</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {members.map((member) => (
               <TableRow key={member.user.id}>
                 <TableCell className="font-medium">
-                  <Link
-                    to="/admin/users/$userId"
-                    params={{ userId: member.user.id }}
-                    className="hover:underline"
-                  >
-                    {member.user.name ?? member.user.email}
-                  </Link>
+                  <div className="flex items-center gap-2">
+                    <Avatar className="h-7 w-7 text-xs">
+                      <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                        {(member.user.name ?? member.user.email).slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <Link
+                      to="/admin/users/$userId"
+                      params={{ userId: member.user.id }}
+                      className="hover:underline"
+                    >
+                      {member.user.name ?? member.user.email.split("@")[0]}
+                    </Link>
+                  </div>
                 </TableCell>
                 <TableCell className="text-muted-foreground">{member.user.email}</TableCell>
                 <TableCell>
-                  <Badge variant="outline">{member.role}</Badge>
+                  <Badge variant="outline" className="capitalize">{member.role}</Badge>
                 </TableCell>
                 <TableCell>
-                  {member.isOwner ? <Badge variant="default">Owner</Badge> : "---"}
+                  {member.isOwner ? (
+                    <Badge className="gap-1 bg-amber-100 text-amber-700 hover:bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400">
+                      Owner
+                    </Badge>
+                  ) : (
+                    <span className="text-muted-foreground">---</span>
+                  )}
+                </TableCell>
+                <TableCell className="text-right">
+                  <Button asChild variant="ghost" size="sm">
+                    <Link to="/admin/users/$userId" params={{ userId: member.user.id }}>
+                      View user
+                    </Link>
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}
@@ -425,10 +670,9 @@ function InvitationsCard({ teamId }: { teamId: string }) {
   if (isError || !data) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle>Invitations</CardTitle>
-        </CardHeader>
-        <CardContent className="text-muted-foreground">Could not load invitations.</CardContent>
+        <CardContent className="py-8 text-center text-sm text-muted-foreground">
+          Could not load invitations.
+        </CardContent>
       </Card>
     )
   }
@@ -436,59 +680,73 @@ function InvitationsCard({ teamId }: { teamId: string }) {
   const pending = data.items.filter((inv) => !inv.isAccepted)
   const accepted = data.items.filter((inv) => inv.isAccepted)
 
+  if (data.items.length === 0) {
+    return (
+      <Card>
+        <CardContent className="py-8 text-center text-sm text-muted-foreground">
+          No invitations for this team.
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Invitations</CardTitle>
-        <CardDescription>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
           {pending.length} pending, {accepted.length} accepted
-        </CardDescription>
+        </div>
       </CardHeader>
       <CardContent>
-        {data.items.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No invitations for this team.</p>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Email</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Sent</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Email</TableHead>
+              <TableHead>Role</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Sent</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {data.items.map((inv) => (
+              <TableRow key={inv.id}>
+                <TableCell className="font-medium">{inv.email}</TableCell>
+                <TableCell>
+                  <Badge variant="outline">{inv.role}</Badge>
+                </TableCell>
+                <TableCell>
+                  <Badge variant={inv.isAccepted ? "default" : "secondary"}>
+                    {inv.isAccepted ? "Accepted" : "Pending"}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="cursor-default text-muted-foreground">
+                        {formatRelativeTime(inv.createdAt)}
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent>{formatDateTime(inv.createdAt)}</TooltipContent>
+                  </Tooltip>
+                </TableCell>
+                <TableCell className="text-right">
+                  {!inv.isAccepted && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive hover:text-destructive"
+                      onClick={() => revokeInvitation.mutate(inv.id)}
+                      disabled={revokeInvitation.isPending}
+                    >
+                      Revoke
+                    </Button>
+                  )}
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.items.map((inv) => (
-                <TableRow key={inv.id}>
-                  <TableCell className="font-medium">{inv.email}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{inv.role}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={inv.isAccepted ? "default" : "secondary"}>
-                      {inv.isAccepted ? "Accepted" : "Pending"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">{new Date(inv.createdAt).toLocaleDateString()}</TableCell>
-                  <TableCell className="text-right">
-                    {!inv.isAccepted && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-destructive hover:text-destructive"
-                        onClick={() => revokeInvitation.mutate(inv.id)}
-                        disabled={revokeInvitation.isPending}
-                      >
-                        Revoke
-                      </Button>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
+            ))}
+          </TableBody>
+        </Table>
       </CardContent>
     </Card>
   )
