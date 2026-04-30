@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.94.0 (2026-04-30)
+
+### Fixed
+- **Edit form reset on navigation** — Fixed edit forms retaining previous item's data when navigating between items (e.g., device A → device B edit). Applied `values` prop for react-hook-form pages (device, extension) and param-change reset for manual state pages (teams, locations, connections, fax numbers, tags).
+- **Search debouncing** — Added shared `useDebouncedValue` hook (300ms) and applied to 7 list pages with server-side search (devices, support, teams, connections, tags, fax messages, locations), preventing API calls on every keystroke. Consolidated fax-message-list's local debounce implementation.
+
 ## v0.93.0 (2026-04-30)
 
 ### Added
