@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.60.0 (2026-04-30)
+
+### Improved
+- **Voicemail message list** — AlertDialog confirmation for single and bulk deletes, row hover and alternating stripes, timestamp tooltips with full date, pulse animation on unread indicator, selected count badge, disabled bulk buttons when nothing selected.
+- **Fax message detail** — Switched delete Dialog to AlertDialog (prevents accidental dismissal), status-aware top border color (green/amber/red), US phone formatting with parentheses, font-medium values in detail grid, page count badge on document preview, file size on download buttons.
+
+## v0.59.0 (2026-04-30)
+
+### Improved
+- **Voicemail settings form** — PIN validation with character counter (4-6 digits, numeric only), section icons (Settings2/BellRing/Wrench), toggle description dimming when off, save success animation with checkmark, greeting type icons in select (Volume2/Mic/User), human-readable duration helpers for max length and retention period.
+- **Invite member dialog** — Email chip entrance animations, submission progress counter ("Sending 1 of 3..."), invalid email XCircle feedback, UserPlus header icon, max recipients hint, role change highlight animation on permission card.
+
 ## v0.58.0 (2026-04-30)
 
 ### Improved
