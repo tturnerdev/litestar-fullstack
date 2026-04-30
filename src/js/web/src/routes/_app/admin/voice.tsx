@@ -214,7 +214,7 @@ function AdminVoicePage() {
                   </TableHeader>
                   <TableBody>
                     {phoneNumbers.map((pn) => (
-                      <TableRow key={pn.id}>
+                      <TableRow key={pn.id} className="hover:bg-muted/50 transition-colors">
                         <TableCell className="font-mono font-medium">{pn.number}</TableCell>
                         <TableCell className="text-muted-foreground">{pn.label ?? "—"}</TableCell>
                         <TableCell className="text-muted-foreground capitalize">{pn.numberType}</TableCell>
@@ -297,7 +297,7 @@ function AdminVoicePage() {
                 </TableHeader>
                 <TableBody>
                   {recentExtensions.map((ext) => (
-                    <TableRow key={ext.id}>
+                    <TableRow key={ext.id} className="hover:bg-muted/50 transition-colors">
                       <TableCell className="font-mono font-medium">{ext.extensionNumber}</TableCell>
                       <TableCell className="text-muted-foreground">{ext.displayName}</TableCell>
                       <TableCell className="text-muted-foreground">{ext.ownerEmail ?? "—"}</TableCell>

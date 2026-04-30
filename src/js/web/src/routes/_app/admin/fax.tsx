@@ -207,7 +207,7 @@ function AdminFaxPage() {
                 </TableHeader>
                 <TableBody>
                   {recentMessages.map((msg) => (
-                    <TableRow key={msg.id}>
+                    <TableRow key={msg.id} className="hover:bg-muted/50 transition-colors">
                       <TableCell>
                         <Badge variant={msg.direction === "inbound" ? "outline" : "secondary"}>
                           <span className="flex items-center gap-1">
@@ -296,7 +296,7 @@ function AdminFaxPage() {
                   </TableHeader>
                   <TableBody>
                     {faxNumbers.map((fn) => (
-                      <TableRow key={fn.id}>
+                      <TableRow key={fn.id} className="hover:bg-muted/50 transition-colors">
                         <TableCell className="font-mono font-medium">{fn.number}</TableCell>
                         <TableCell className="text-muted-foreground">{fn.label ?? "—"}</TableCell>
                         <TableCell className="text-muted-foreground">{fn.teamName ?? "—"}</TableCell>

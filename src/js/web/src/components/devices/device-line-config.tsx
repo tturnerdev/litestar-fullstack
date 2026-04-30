@@ -183,7 +183,7 @@ export function DeviceLineConfig({ deviceId }: DeviceLineConfigProps) {
               </TableHeader>
               <TableBody>
                 {currentLines.map((line, index) => (
-                  <TableRow key={line.lineNumber}>
+                  <TableRow key={line.lineNumber} className="hover:bg-muted/50 transition-colors">
                     <TableCell className="w-10 px-2">
                       <GripVertical className="h-4 w-4 text-muted-foreground/40" />
                     </TableCell>

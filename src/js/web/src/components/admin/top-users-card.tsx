@@ -3,6 +3,7 @@ import { TrendingUp } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAdminUsers } from "@/lib/api/hooks/admin"
 
 const RANK_COLORS = [
@@ -106,9 +107,19 @@ export function TopUsersCard() {
                 <AvatarFallback>{getInitials(user.name, user.email)}</AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{user.name ?? user.email}</p>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <p className="text-sm font-medium truncate">{user.name ?? user.email}</p>
+                  </TooltipTrigger>
+                  <TooltipContent>{user.name ?? user.email}</TooltipContent>
+                </Tooltip>
                 {user.name && (
-                  <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                    </TooltipTrigger>
+                    <TooltipContent>{user.email}</TooltipContent>
+                  </Tooltip>
                 )}
                 <div className="mt-1 h-1.5 w-full rounded-full bg-muted">
                   <div

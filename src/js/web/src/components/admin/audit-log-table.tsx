@@ -421,11 +421,20 @@ function AuditDetailRow({ entry, colSpan }: { entry: AuditLogEntry; colSpan: num
               Request
             </h4>
             <DetailField label="IP Address" value={entry.ipAddress} mono />
-            <DetailField
-              label="User Agent"
-              value={entry.userAgent}
-              className="max-w-xs truncate"
-            />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span>
+                  <DetailField
+                    label="User Agent"
+                    value={entry.userAgent}
+                    className="max-w-xs truncate"
+                  />
+                </span>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-sm break-all">
+                {entry.userAgent ?? "N/A"}
+              </TooltipContent>
+            </Tooltip>
             <DetailField
               label="Timestamp"
               value={new Date(entry.createdAt).toLocaleString()}

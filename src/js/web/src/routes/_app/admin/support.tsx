@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAdminSupportStats, useAdminTickets } from "@/lib/api/hooks/admin"
 
 export const Route = createFileRoute("/_app/admin/support")({
@@ -235,9 +236,16 @@ function AdminSupportPage() {
                 </TableHeader>
                 <TableBody>
                   {recentTickets.map((ticket) => (
-                    <TableRow key={ticket.id}>
+                    <TableRow key={ticket.id} className="hover:bg-muted/50 transition-colors">
                       <TableCell className="font-mono text-sm">{ticket.ticketNumber}</TableCell>
-                      <TableCell className="font-medium max-w-[300px] truncate">{ticket.subject}</TableCell>
+                      <TableCell className="font-medium max-w-[300px] truncate">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span>{ticket.subject}</span>
+                          </TooltipTrigger>
+                          <TooltipContent>{ticket.subject}</TooltipContent>
+                        </Tooltip>
+                      </TableCell>
                       <TableCell>
                         <Badge variant={priorityVariant[ticket.priority] ?? "outline"}>{ticket.priority}</Badge>
                       </TableCell>
@@ -312,9 +320,16 @@ function AdminSupportPage() {
                   </TableHeader>
                   <TableBody>
                     {tickets.map((ticket) => (
-                      <TableRow key={ticket.id}>
+                      <TableRow key={ticket.id} className="hover:bg-muted/50 transition-colors">
                         <TableCell className="font-mono text-sm">{ticket.ticketNumber}</TableCell>
-                        <TableCell className="font-medium max-w-[250px] truncate">{ticket.subject}</TableCell>
+                        <TableCell className="font-medium max-w-[250px] truncate">
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span>{ticket.subject}</span>
+                            </TooltipTrigger>
+                            <TooltipContent>{ticket.subject}</TooltipContent>
+                          </Tooltip>
+                        </TableCell>
                         <TableCell className="text-muted-foreground">{ticket.creatorEmail ?? "—"}</TableCell>
                         <TableCell className="text-muted-foreground">{ticket.assignedToEmail ?? "Unassigned"}</TableCell>
                         <TableCell>

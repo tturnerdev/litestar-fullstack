@@ -204,7 +204,7 @@ function AdminDevicesPage() {
                 </TableHeader>
                 <TableBody>
                   {recentDevices.map((device) => (
-                    <TableRow key={device.id}>
+                    <TableRow key={device.id} className="hover:bg-muted/50 transition-colors">
                       <TableCell className="font-medium">{device.name}</TableCell>
                       <TableCell className="font-mono text-muted-foreground text-sm">{device.macAddress ?? "—"}</TableCell>
                       <TableCell className="text-muted-foreground">{device.model ?? "—"}</TableCell>
@@ -281,7 +281,7 @@ function AdminDevicesPage() {
                   </TableHeader>
                   <TableBody>
                     {devices.map((device) => (
-                      <TableRow key={device.id}>
+                      <TableRow key={device.id} className="hover:bg-muted/50 transition-colors">
                         <TableCell className="font-medium">{device.name}</TableCell>
                         <TableCell className="font-mono text-muted-foreground text-sm">{device.macAddress ?? "—"}</TableCell>
                         <TableCell className="text-muted-foreground">{device.model ?? "—"}</TableCell>

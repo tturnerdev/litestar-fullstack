@@ -487,7 +487,7 @@ function FaxEmailRoutesPage() {
                 </TableHeader>
                 <TableBody>
                   {routes.map((route) => (
-                    <TableRow key={route.id}>
+                    <TableRow key={route.id} className="hover:bg-muted/50 transition-colors">
                       <TableCell className="font-mono text-sm">
                         {route.emailAddress}
                       </TableCell>

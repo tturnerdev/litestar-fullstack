@@ -3,6 +3,7 @@ import { Bug, ChevronRight, Clock, HelpCircle, Lightbulb, MessageSquare, Wrench 
 import { TicketPriorityBadge } from "@/components/support/ticket-priority-badge"
 import { TicketStatusBadge } from "@/components/support/ticket-status-badge"
 import type { Ticket } from "@/lib/api/hooks/support"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 
 const categoryConfig: Record<string, { icon: typeof HelpCircle; label: string }> = {
@@ -63,9 +64,14 @@ export function TicketListItem({ ticket }: TicketListItemProps) {
           {isUnread && (
             <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
           )}
-          <span className={cn("truncate text-sm font-medium", isUnread && "font-semibold")}>
-            {ticket.subject}
-          </span>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className={cn("truncate text-sm font-medium", isUnread && "font-semibold")}>
+                {ticket.subject}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>{ticket.subject}</TooltipContent>
+          </Tooltip>
         </div>
         {ticket.latestMessagePreview && (
           <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">

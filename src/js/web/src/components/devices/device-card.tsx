@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 
 const deviceTypeLabels: Record<string, string> = {
@@ -156,7 +157,12 @@ export function DeviceCard({ device, lineCount, onReboot, onToggleActive }: Devi
             <div className="group/mac flex items-center gap-1">
               <div className="min-w-0">
                 <span className="text-muted-foreground">MAC</span>
-                <p className="truncate font-mono">{device.macAddress}</p>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <p className="truncate font-mono">{device.macAddress}</p>
+                  </TooltipTrigger>
+                  <TooltipContent>{device.macAddress}</TooltipContent>
+                </Tooltip>
               </div>
               <Button
                 variant="ghost"
@@ -172,18 +178,35 @@ export function DeviceCard({ device, lineCount, onReboot, onToggleActive }: Devi
           {device.deviceModel && (
             <div>
               <span className="text-muted-foreground">Model</span>
-              <p className="truncate">{device.deviceModel}</p>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <p className="truncate">{device.deviceModel}</p>
+                </TooltipTrigger>
+                <TooltipContent>{device.deviceModel}</TooltipContent>
+              </Tooltip>
             </div>
           )}
           {device.ipAddress && (
             <div>
               <span className="text-muted-foreground">IP</span>
-              <p className="truncate font-mono">{device.ipAddress}</p>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <p className="truncate font-mono">{device.ipAddress}</p>
+                </TooltipTrigger>
+                <TooltipContent>{device.ipAddress}</TooltipContent>
+              </Tooltip>
             </div>
           )}
           <div>
             <span className="text-muted-foreground">Last seen</span>
-            <p className="truncate">{formatRelativeTime(device.lastSeenAt)}</p>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <p className="truncate">{formatRelativeTime(device.lastSeenAt)}</p>
+              </TooltipTrigger>
+              <TooltipContent>
+                {device.lastSeenAt ? new Date(device.lastSeenAt).toLocaleString() : "Never"}
+              </TooltipContent>
+            </Tooltip>
           </div>
         </div>
       </CardContent>
