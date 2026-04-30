@@ -39,7 +39,7 @@ import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
-import { SkeletonCard } from "@/components/ui/skeleton"
+import { Skeleton } from "@/components/ui/skeleton"
 import { CopyButton } from "@/components/ui/copy-button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import {
@@ -179,9 +179,79 @@ function FaxNumberDetailPage() {
   if (isLoading) {
     return (
       <PageContainer className="flex-1 space-y-8">
-        <PageHeader eyebrow="Communications" title="Fax Number Details" />
+        {/* Header skeleton */}
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-36" />
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-4 w-36" />
+        </div>
+        {/* Number Info card */}
         <PageSection>
-          <SkeletonCard />
+          <div className="rounded-xl border border-border/60 bg-card/80 p-6 space-y-4">
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-5 w-5 rounded" />
+              <Skeleton className="h-6 w-28" />
+            </div>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="space-y-1.5">
+                  <Skeleton className="h-3.5 w-24" />
+                  <Skeleton className="h-5 w-36" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </PageSection>
+        {/* Email Routes card */}
+        <PageSection delay={0.1}>
+          <div className="rounded-xl border border-border/60 bg-card/80 p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-5 w-5 rounded" />
+                <Skeleton className="h-6 w-28" />
+              </div>
+              <Skeleton className="h-9 w-28 rounded-md" />
+            </div>
+            <div className="space-y-2">
+              {Array.from({ length: 2 }).map((_, i) => (
+                <Skeleton key={i} className="h-14 w-full rounded-md" />
+              ))}
+            </div>
+          </div>
+        </PageSection>
+        {/* Recent Messages card */}
+        <PageSection delay={0.15}>
+          <div className="rounded-xl border border-border/60 bg-card/80 p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-5 w-5 rounded" />
+                <Skeleton className="h-6 w-36" />
+              </div>
+              <Skeleton className="h-8 w-20 rounded-md" />
+            </div>
+            <div className="space-y-2">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Skeleton key={i} className="h-12 w-full rounded-md" />
+              ))}
+            </div>
+          </div>
+        </PageSection>
+        {/* Metadata card */}
+        <PageSection delay={0.2}>
+          <div className="rounded-xl border border-border/60 bg-card/80 p-6 space-y-4">
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-5 w-5 rounded" />
+              <Skeleton className="h-6 w-24" />
+            </div>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="space-y-1.5">
+                  <Skeleton className="h-3.5 w-20" />
+                  <Skeleton className="h-5 w-32" />
+                </div>
+              ))}
+            </div>
+          </div>
         </PageSection>
       </PageContainer>
     )

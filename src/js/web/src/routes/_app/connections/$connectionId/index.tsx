@@ -43,7 +43,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Separator } from "@/components/ui/separator"
-import { SkeletonCard } from "@/components/ui/skeleton"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
 import { CopyButton } from "@/components/ui/copy-button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
@@ -160,9 +160,77 @@ function ConnectionDetailPage() {
   if (isLoading) {
     return (
       <PageContainer className="flex-1 space-y-8">
-        <PageHeader eyebrow="Connections" title="Connection Details" />
+        {/* Header skeleton */}
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-8 w-56" />
+          <Skeleton className="h-4 w-44" />
+        </div>
+        {/* Connection Info card */}
         <PageSection>
-          <SkeletonCard />
+          <div className="rounded-xl border border-border/60 bg-card/80 p-6 space-y-4">
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-5 w-5 rounded" />
+              <Skeleton className="h-6 w-32" />
+            </div>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="space-y-1.5">
+                  <Skeleton className="h-3.5 w-20" />
+                  <Skeleton className="h-5 w-32" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </PageSection>
+        {/* Server Config card */}
+        <PageSection delay={0.1}>
+          <div className="rounded-xl border border-border/60 bg-card/80 p-6 space-y-4">
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-5 w-5 rounded" />
+              <Skeleton className="h-6 w-40" />
+            </div>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="space-y-1.5">
+                  <Skeleton className="h-3.5 w-16" />
+                  <Skeleton className="h-5 w-28" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </PageSection>
+        {/* Authentication card */}
+        <PageSection delay={0.15}>
+          <div className="rounded-xl border border-border/60 bg-card/80 p-6 space-y-4">
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-5 w-5 rounded" />
+              <Skeleton className="h-6 w-32" />
+            </div>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <div className="space-y-1.5">
+                <Skeleton className="h-3.5 w-20" />
+                <Skeleton className="h-5 w-24" />
+              </div>
+              <div className="md:col-span-2 lg:col-span-2 space-y-1.5">
+                <Skeleton className="h-3.5 w-24" />
+                <div className="flex gap-2">
+                  <Skeleton className="h-6 w-20 rounded-full" />
+                  <Skeleton className="h-6 w-24 rounded-full" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </PageSection>
+        {/* Settings card */}
+        <PageSection delay={0.2}>
+          <div className="rounded-xl border border-border/60 bg-card/80 p-6 space-y-4">
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-5 w-5 rounded" />
+              <Skeleton className="h-6 w-24" />
+            </div>
+            <Skeleton className="h-32 w-full rounded-md" />
+          </div>
         </PageSection>
       </PageContainer>
     )

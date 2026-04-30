@@ -13,6 +13,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
+import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -50,7 +51,6 @@ function TagsPage() {
   const [search, setSearch] = useState("")
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [selected, setSelected] = useState<Set<string>>(new Set())
-  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false)
   const [sortField, setSortField] = useState<SortField>("name")
   const [sortDir, setSortDir] = useState<SortDir>("asc")
   const [page, setPage] = useState(1)
@@ -129,21 +129,24 @@ function TagsPage() {
     })
   }
 
-  const handleBulkDelete = () => {
-    const ids = Array.from(selected)
-    let completed = 0
-    for (const id of ids) {
-      deleteTag.mutate(id, {
-        onSuccess: () => {
-          completed++
-          if (completed === ids.length) {
-            setSelected(new Set())
-            setBulkDeleteOpen(false)
-          }
-        },
-      })
-    }
-  }
+  const bulkActions = useMemo(
+    () => [
+      createBulkDeleteAction(
+        (id) => deleteTag.mutateAsync(id),
+        () => refetch(),
+        { label: "Delete Selected" },
+      ),
+      createExportAction<Tag>(
+        "tags",
+        [
+          { label: "Name", accessor: (t) => t.name },
+          { label: "Slug", accessor: (t) => t.slug },
+        ],
+        (ids) => sortedItems.filter((t) => ids.includes(t.id)),
+      ),
+    ],
+    [deleteTag, refetch, sortedItems],
+  )
 
   const breadcrumbs = (
     <Breadcrumb>
@@ -216,12 +219,6 @@ function TagsPage() {
               </button>
             )}
           </div>
-          {selected.size > 0 && (
-            <Button variant="destructive" size="sm" onClick={() => setBulkDeleteOpen(true)}>
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete {selected.size} tag{selected.size !== 1 ? "s" : ""}
-            </Button>
-          )}
         </div>
       </PageSection>
 
@@ -412,31 +409,12 @@ function TagsPage() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Bulk delete confirmation */}
-      <AlertDialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete {selected.size} tag{selected.size !== 1 ? "s" : ""}</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete {selected.size} tag{selected.size !== 1 ? "s" : ""}? This action cannot be undone. Any resources
-              currently using these tags will have them removed.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setBulkDeleteOpen(false)} disabled={deleteTag.isPending}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleBulkDelete}
-              disabled={deleteTag.isPending}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {deleteTag.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Delete {selected.size} tag{selected.size !== 1 ? "s" : ""}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <BulkActionBar
+        selectedCount={selected.size}
+        selectedIds={Array.from(selected)}
+        onClearSelection={() => setSelected(new Set())}
+        actions={bulkActions}
+      />
     </PageContainer>
   )
 }

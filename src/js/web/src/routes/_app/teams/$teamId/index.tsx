@@ -27,7 +27,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Separator } from "@/components/ui/separator"
-import { SkeletonCard } from "@/components/ui/skeleton"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { CopyButton } from "@/components/ui/copy-button"
 import { useAuthStore } from "@/lib/auth"
@@ -91,9 +91,54 @@ function TeamDetail() {
   if (isTeamLoading) {
     return (
       <PageContainer className="flex-1 space-y-8">
-        <PageHeader eyebrow="Teams" title="Team Details" />
+        {/* Header skeleton */}
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-4 w-64" />
+        </div>
+        {/* Team info card skeleton */}
         <PageSection>
-          <SkeletonCard />
+          <div className="rounded-xl border border-border/60 bg-card/80 p-6 shadow-md shadow-primary/10">
+            <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
+              <Skeleton className="h-16 w-16 rounded-full" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-6 w-40" />
+                <Skeleton className="h-4 w-56" />
+                <div className="flex gap-1.5">
+                  <Skeleton className="h-5 w-14 rounded-full" />
+                  <Skeleton className="h-5 w-16 rounded-full" />
+                </div>
+              </div>
+              <div className="flex gap-6 sm:gap-8">
+                <div className="text-center space-y-1">
+                  <Skeleton className="h-8 w-10 mx-auto" />
+                  <Skeleton className="h-3 w-16" />
+                </div>
+                <Separator orientation="vertical" className="hidden h-12 sm:block" />
+                <div className="text-center space-y-1">
+                  <Skeleton className="h-5 w-24" />
+                  <Skeleton className="h-3 w-12 mx-auto" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </PageSection>
+        {/* Tabs skeleton */}
+        <PageSection delay={0.1}>
+          <Skeleton className="h-10 w-64 rounded-lg" />
+          <div className="mt-6 space-y-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-4 rounded-lg border border-border/60 p-4">
+                <Skeleton className="h-10 w-10 rounded-full" />
+                <div className="flex-1 space-y-1.5">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-3 w-44" />
+                </div>
+                <Skeleton className="h-5 w-16 rounded-full" />
+              </div>
+            ))}
+          </div>
         </PageSection>
       </PageContainer>
     )

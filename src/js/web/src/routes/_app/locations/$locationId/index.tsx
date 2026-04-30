@@ -19,7 +19,7 @@ import { buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
-import { SkeletonCard } from "@/components/ui/skeleton"
+import { Skeleton } from "@/components/ui/skeleton"
 import { CopyButton } from "@/components/ui/copy-button"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
@@ -92,9 +92,78 @@ function LocationDetailPage() {
   if (isLoading) {
     return (
       <PageContainer className="flex-1 space-y-8">
-        <PageHeader eyebrow="Locations" title="Location Details" />
+        {/* Header skeleton */}
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-28" />
+          <Skeleton className="h-8 w-52" />
+          <Skeleton className="h-4 w-64" />
+        </div>
+        {/* Two-column layout skeleton */}
         <PageSection>
-          <SkeletonCard />
+          <div className="grid gap-6 md:grid-cols-[1.1fr_0.9fr]">
+            {/* Main column */}
+            <div className="space-y-6">
+              {/* Location Info card */}
+              <div className="rounded-xl border border-border/60 bg-card/80 p-6 shadow-md shadow-primary/10 space-y-4">
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-5 w-5 rounded" />
+                  <Skeleton className="h-6 w-40" />
+                </div>
+                <div className="space-y-4">
+                  <Skeleton className="h-3 w-16" />
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <div key={i} className="space-y-1.5">
+                        <Skeleton className="h-3.5 w-20" />
+                        <Skeleton className="h-5 w-36" />
+                      </div>
+                    ))}
+                  </div>
+                  <Separator />
+                  <Skeleton className="h-3 w-16" />
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {Array.from({ length: 6 }).map((_, i) => (
+                      <div key={i} className="space-y-1.5">
+                        <Skeleton className="h-3.5 w-24" />
+                        <Skeleton className="h-5 w-32" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              {/* Danger zone */}
+              <div className="rounded-xl border border-destructive/30 bg-card/80 p-6 space-y-3">
+                <Skeleton className="h-6 w-28" />
+                <Skeleton className="h-16 w-full rounded-lg" />
+              </div>
+            </div>
+            {/* Sidebar */}
+            <div className="space-y-4">
+              {/* Metadata card */}
+              <div className="rounded-xl border border-border/60 bg-card/80 p-6 shadow-md shadow-primary/10 space-y-4">
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-4 w-4 rounded" />
+                  <Skeleton className="h-5 w-24" />
+                </div>
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="space-y-1">
+                    <Skeleton className="h-3 w-20" />
+                    <Skeleton className="h-5 w-40" />
+                  </div>
+                ))}
+              </div>
+              {/* Sub-locations card */}
+              <div className="rounded-xl border border-border/60 bg-card/80 p-6 shadow-md shadow-primary/10 space-y-3">
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-4 w-4 rounded" />
+                  <Skeleton className="h-5 w-28" />
+                </div>
+                {Array.from({ length: 2 }).map((_, i) => (
+                  <Skeleton key={i} className="h-14 w-full rounded-xl" />
+                ))}
+              </div>
+            </div>
+          </div>
         </PageSection>
       </PageContainer>
     )
