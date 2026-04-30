@@ -1,11 +1,22 @@
-import { AlertTriangle, CheckSquare, Inbox, Mail, MailOpen, Square, Trash2 } from "lucide-react"
+import { AlertTriangle, CheckSquare, Inbox, Loader2, Mail, MailOpen, Square, Trash2 } from "lucide-react"
 import { useState } from "react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { EmptyState } from "@/components/ui/empty-state"
 import { SkeletonTable } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { VoicemailPlayer } from "@/components/voice/voicemail-player"
 import {
   useBulkDeleteVoicemailMessages,
@@ -41,6 +52,19 @@ function formatReceivedAt(dateStr: string): string {
   return date.toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })
 }
 
+function formatFullDateTime(dateStr: string): string {
+  const date = new Date(dateStr)
+  return date.toLocaleString(undefined, {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+  })
+}
+
 interface VoicemailMessageListProps {
   extensionId: string
 }
@@ -49,6 +73,8 @@ export function VoicemailMessageList({ extensionId }: VoicemailMessageListProps)
   const [page, setPage] = useState(1)
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false)
+  const [singleDeleteId, setSingleDeleteId] = useState<string | null>(null)
   const { data, isLoading, isError } = useVoicemailMessages(extensionId, page, PAGE_SIZE)
   const deleteMutation = useDeleteVoicemailMessage(extensionId)
   const markReadMutation = useMarkVoicemailRead(extensionId)
@@ -100,23 +126,30 @@ export function VoicemailMessageList({ extensionId }: VoicemailMessageListProps)
     })
   }
 
-  function handleBulkDelete() {
+  function handleBulkDeleteConfirm() {
     const ids = Array.from(selectedIds)
     bulkDeleteMutation.mutate(ids, {
       onSuccess: () => {
         setSelectedIds(new Set())
+        setBulkDeleteOpen(false)
         if (expandedId && ids.includes(expandedId)) setExpandedId(null)
       },
     })
   }
 
-  function handleDelete(messageId: string) {
-    deleteMutation.mutate(messageId)
-    if (expandedId === messageId) setExpandedId(null)
-    setSelectedIds((prev) => {
-      const next = new Set(prev)
-      next.delete(messageId)
-      return next
+  function handleDeleteConfirm() {
+    if (!singleDeleteId) return
+    const messageId = singleDeleteId
+    deleteMutation.mutate(messageId, {
+      onSuccess: () => {
+        setSingleDeleteId(null)
+        if (expandedId === messageId) setExpandedId(null)
+        setSelectedIds((prev) => {
+          const next = new Set(prev)
+          next.delete(messageId)
+          return next
+        })
+      },
     })
   }
 
@@ -153,30 +186,30 @@ export function VoicemailMessageList({ extensionId }: VoicemailMessageListProps)
           {unreadCount > 0 && (
             <Badge variant="secondary">{unreadCount} unread</Badge>
           )}
+          {someSelected && (
+            <Badge variant="outline">{selectedIds.size} selected</Badge>
+          )}
         </div>
-        {someSelected && (
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">{selectedIds.size} selected</span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleBulkMarkRead}
-              disabled={bulkMarkReadMutation.isPending}
-            >
-              <MailOpen className="mr-1 h-4 w-4" />
-              Mark read
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleBulkDelete}
-              disabled={bulkDeleteMutation.isPending}
-            >
-              <Trash2 className="mr-1 h-4 w-4" />
-              Delete
-            </Button>
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleBulkMarkRead}
+            disabled={!someSelected || bulkMarkReadMutation.isPending}
+          >
+            <MailOpen className="mr-1 h-4 w-4" />
+            Mark read
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setBulkDeleteOpen(true)}
+            disabled={!someSelected || bulkDeleteMutation.isPending}
+          >
+            <Trash2 className="mr-1 h-4 w-4" />
+            Delete
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <Table>
@@ -201,14 +234,15 @@ export function VoicemailMessageList({ extensionId }: VoicemailMessageListProps)
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.items.map((msg) => (
+            {data.items.map((msg, index) => (
               <MessageRow
                 key={msg.id}
                 message={msg}
                 isExpanded={expandedId === msg.id}
                 isSelected={selectedIds.has(msg.id)}
+                isEvenRow={index % 2 === 0}
                 onExpand={() => handleExpand(msg)}
-                onDelete={() => handleDelete(msg.id)}
+                onDelete={() => setSingleDeleteId(msg.id)}
                 onToggleRead={() => handleToggleRead(msg)}
                 onToggleSelect={() => toggleSelect(msg.id)}
               />
@@ -232,6 +266,77 @@ export function VoicemailMessageList({ extensionId }: VoicemailMessageListProps)
           </div>
         )}
       </CardContent>
+
+      {/* Bulk delete confirmation */}
+      <AlertDialog open={bulkDeleteOpen} onOpenChange={(open) => { if (!bulkDeleteMutation.isPending) setBulkDeleteOpen(open) }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="size-5" />
+              Delete voicemail messages
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete {selectedIds.size} voicemail{" "}
+              {selectedIds.size === 1 ? "message" : "messages"}. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={bulkDeleteMutation.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleBulkDeleteConfirm}
+              disabled={bulkDeleteMutation.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {bulkDeleteMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-1 size-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="mr-1 size-4" />
+                  Delete {selectedIds.size} {selectedIds.size === 1 ? "message" : "messages"}
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Single delete confirmation */}
+      <AlertDialog open={singleDeleteId !== null} onOpenChange={(open) => { if (!open && !deleteMutation.isPending) setSingleDeleteId(null) }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="size-5" />
+              Delete voicemail
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete this voicemail message. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              disabled={deleteMutation.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-1 size-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="mr-1 size-4" />
+                  Delete
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   )
 }
@@ -240,13 +345,14 @@ interface MessageRowProps {
   message: VoicemailMessage
   isExpanded: boolean
   isSelected: boolean
+  isEvenRow: boolean
   onExpand: () => void
   onDelete: () => void
   onToggleRead: () => void
   onToggleSelect: () => void
 }
 
-function MessageRow({ message, isExpanded, isSelected, onExpand, onDelete, onToggleRead, onToggleSelect }: MessageRowProps) {
+function MessageRow({ message, isExpanded, isSelected, isEvenRow, onExpand, onDelete, onToggleRead, onToggleSelect }: MessageRowProps) {
   const callerDisplay = message.callerName ?? message.callerNumber
   const transcriptionPreview = message.transcription
     ? message.transcription.length > 60
@@ -257,7 +363,7 @@ function MessageRow({ message, isExpanded, isSelected, onExpand, onDelete, onTog
   return (
     <>
       <TableRow
-        className={`cursor-pointer ${!message.isRead ? "bg-primary/5 font-medium" : ""} ${isSelected ? "bg-primary/10" : ""}`}
+        className={`cursor-pointer transition-colors hover:bg-muted/50 ${isEvenRow ? "bg-muted/20" : ""} ${!message.isRead ? "bg-primary/5 font-medium" : ""} ${isSelected ? "bg-primary/10" : ""}`}
         onClick={onExpand}
       >
         <TableCell>
@@ -275,7 +381,7 @@ function MessageRow({ message, isExpanded, isSelected, onExpand, onDelete, onTog
         </TableCell>
         <TableCell>
           <div className="flex items-center gap-1">
-            {!message.isRead && <div className="h-2 w-2 rounded-full bg-primary" />}
+            {!message.isRead && <div className="h-2.5 w-2.5 animate-pulse rounded-full bg-primary" />}
             {message.isUrgent && <AlertTriangle className="h-3.5 w-3.5 text-destructive" />}
           </div>
         </TableCell>
@@ -290,7 +396,16 @@ function MessageRow({ message, isExpanded, isSelected, onExpand, onDelete, onTog
         <TableCell className="tabular-nums">{formatDuration(message.durationSeconds)}</TableCell>
         <TableCell>
           <div className="flex items-center gap-2">
-            <span className="text-sm">{formatReceivedAt(message.receivedAt)}</span>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="text-sm">{formatReceivedAt(message.receivedAt)}</span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{formatFullDateTime(message.receivedAt)}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             {message.isUrgent && <Badge variant="destructive" className="text-xs">Urgent</Badge>}
           </div>
         </TableCell>
