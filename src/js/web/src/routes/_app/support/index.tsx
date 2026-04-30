@@ -9,6 +9,7 @@ import {
   Plus,
   Search,
   Trash2,
+  X,
 } from "lucide-react"
 import { toast } from "sonner"
 import { TicketPriorityBadge } from "@/components/support/ticket-priority-badge"
@@ -320,8 +321,18 @@ function SupportPage() {
               placeholder="Search by subject or description..."
               value={search}
               onChange={(e) => handleSearchChange(e.target.value)}
-              className="pl-9"
+              className="pl-9 pr-8"
             />
+            {search && (
+              <button
+                type="button"
+                onClick={() => handleSearchChange("")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-3.5 w-3.5" />
+                <span className="sr-only">Clear search</span>
+              </button>
+            )}
           </div>
           <FilterDropdown
             label="Status"

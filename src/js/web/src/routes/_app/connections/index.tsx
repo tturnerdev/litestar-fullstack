@@ -8,6 +8,7 @@ import {
   Loader2,
   Plus,
   Search,
+  X,
   Zap,
   XCircle,
 } from "lucide-react"
@@ -261,8 +262,18 @@ function ConnectionsPage() {
               placeholder="Search by name or provider..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9"
+              className="pl-9 pr-8"
             />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch("")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-3.5 w-3.5" />
+                <span className="sr-only">Clear search</span>
+              </button>
+            )}
           </div>
           <FilterDropdown
             label="Type"
