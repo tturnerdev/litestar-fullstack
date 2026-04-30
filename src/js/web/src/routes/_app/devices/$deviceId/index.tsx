@@ -1,11 +1,28 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
-import { useState } from "react"
-import { ArrowLeft, Loader2, Pencil } from "lucide-react"
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
-import { DeviceActions } from "@/components/devices/device-actions"
+import { useCallback, useState } from "react"
+import {
+  ArrowLeft,
+  Check,
+  Copy,
+  Cpu,
+  Fingerprint,
+  Loader2,
+  Network,
+  Pencil,
+  Phone,
+} from "lucide-react"
+import { RebootButton, ReprovisionButton, ToggleActiveButton, DeleteButton } from "@/components/devices/device-actions"
 import { DeviceLineConfig } from "@/components/devices/device-line-config"
 import { DeviceStatusBadge } from "@/components/devices/device-status-badge"
 import { Badge } from "@/components/ui/badge"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -14,11 +31,21 @@ import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-lay
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
-import { useDeleteDevice, useDevice, useRebootDevice, useReprovisionDevice, useUpdateDevice } from "@/lib/api/hooks/devices"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import {
+  useDeleteDevice,
+  useDevice,
+  useDeviceLines,
+  useRebootDevice,
+  useReprovisionDevice,
+  useUpdateDevice,
+} from "@/lib/api/hooks/devices"
 
 export const Route = createFileRoute("/_app/devices/$deviceId/")({
   component: DeviceDetailPage,
 })
+
+// ── Label maps ──────────────────────────────────────────────────────────
 
 const deviceTypeLabels: Record<string, string> = {
   desk_phone: "Desk Phone",
@@ -28,10 +55,88 @@ const deviceTypeLabels: Record<string, string> = {
   other: "Other",
 }
 
+// ── Formatting helpers ──────────────────────────────────────────────────
+
 function formatDateTime(value: string | null | undefined): string {
   if (!value) return "---"
   return new Date(value).toLocaleString()
 }
+
+function formatRelativeTime(value: string | null | undefined): string {
+  if (!value) return "Never"
+  const date = new Date(value)
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffMins = Math.floor(diffMs / 60_000)
+  if (diffMins < 1) return "Just now"
+  if (diffMins < 60) return `${diffMins}m ago`
+  const diffHours = Math.floor(diffMins / 60)
+  if (diffHours < 24) return `${diffHours}h ago`
+  const diffDays = Math.floor(diffHours / 24)
+  return `${diffDays}d ago`
+}
+
+// ── Copy button ─────────────────────────────────────────────────────────
+
+function CopyButton({ value, label }: { value: string; label: string }) {
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = useCallback(async () => {
+    await navigator.clipboard.writeText(value)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }, [value])
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-6 w-6 text-muted-foreground hover:text-foreground"
+          onClick={handleCopy}
+        >
+          {copied ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
+          <span className="sr-only">Copy {label}</span>
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>{copied ? "Copied!" : `Copy ${label}`}</TooltipContent>
+    </Tooltip>
+  )
+}
+
+// ── Timestamp with tooltip ──────────────────────────────────────────────
+
+function TimestampField({
+  label,
+  value,
+}: {
+  label: string
+  value: string | null | undefined
+}) {
+  if (!value) {
+    return (
+      <div>
+        <p className="text-muted-foreground text-sm">{label}</p>
+        <p className="text-sm">---</p>
+      </div>
+    )
+  }
+
+  return (
+    <div>
+      <p className="text-muted-foreground text-sm">{label}</p>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <p className="cursor-default text-sm">{formatRelativeTime(value)}</p>
+        </TooltipTrigger>
+        <TooltipContent>{formatDateTime(value)}</TooltipContent>
+      </Tooltip>
+    </div>
+  )
+}
+
+// ── Main page ───────────────────────────────────────────────────────────
 
 function DeviceDetailPage() {
   const { deviceId } = Route.useParams()
@@ -41,6 +146,7 @@ function DeviceDetailPage() {
   const deleteDevice = useDeleteDevice()
   const rebootDevice = useRebootDevice(deviceId)
   const reprovisionDevice = useReprovisionDevice(deviceId)
+  const linesQuery = useDeviceLines(deviceId)
 
   if (isLoading) {
     return (
@@ -84,6 +190,8 @@ function DeviceDetailPage() {
     router.navigate({ to: "/devices" })
   }
 
+  const lines = linesQuery.data?.items ?? []
+
   return (
     <PageContainer className="flex-1 space-y-8">
       <PageHeader
@@ -93,11 +201,21 @@ function DeviceDetailPage() {
         breadcrumbs={
           <Breadcrumb>
             <BreadcrumbList>
-              <BreadcrumbItem><BreadcrumbLink asChild><Link to="/home">Home</Link></BreadcrumbLink></BreadcrumbItem>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/home">Home</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
               <BreadcrumbSeparator />
-              <BreadcrumbItem><BreadcrumbLink asChild><Link to="/devices">Devices</Link></BreadcrumbLink></BreadcrumbItem>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/devices">Devices</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
               <BreadcrumbSeparator />
-              <BreadcrumbItem><BreadcrumbPage>{data.name}</BreadcrumbPage></BreadcrumbItem>
+              <BreadcrumbItem>
+                <BreadcrumbPage>{data.name}</BreadcrumbPage>
+              </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         }
@@ -105,7 +223,10 @@ function DeviceDetailPage() {
           <div className="flex items-center gap-3">
             <DeviceStatusBadge status={data.status} />
             {!data.isActive && (
-              <Badge variant="outline" className="border-muted-foreground/30 text-muted-foreground">
+              <Badge
+                variant="outline"
+                className="border-muted-foreground/30 text-muted-foreground"
+              >
                 Disabled
               </Badge>
             )}
@@ -114,14 +235,26 @@ function DeviceDetailPage() {
                 <Pencil className="mr-2 h-4 w-4" /> Edit
               </Link>
             </Button>
-            <Button variant="outline" size="sm" asChild>
-              <Link to="/devices">
-                <ArrowLeft className="mr-2 h-4 w-4" /> Back to devices
-              </Link>
-            </Button>
+            <RebootButton
+              onReboot={() => rebootDevice.mutate()}
+              isPending={rebootDevice.isPending}
+              size="sm"
+            />
+            <ReprovisionButton
+              onReprovision={() => reprovisionDevice.mutate()}
+              isPending={reprovisionDevice.isPending}
+              size="sm"
+            />
+            <DeleteButton
+              deviceName={data.name}
+              onDelete={handleDelete}
+              isPending={deleteDevice.isPending}
+              size="sm"
+            />
           </div>
         }
       />
+
       <PageSection>
         <Tabs defaultValue="overview">
           <TabsList>
@@ -130,18 +263,175 @@ function DeviceDetailPage() {
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview" className="mt-6">
-            <OverviewTab
-              data={data}
-              onReboot={() => rebootDevice.mutate()}
-              onReprovision={() => reprovisionDevice.mutate()}
-              onToggleActive={() => updateDevice.mutate({ isActive: !data.isActive })}
-              onDelete={handleDelete}
-              rebootPending={rebootDevice.isPending}
-              reprovisionPending={reprovisionDevice.isPending}
-              togglePending={updateDevice.isPending}
-              deletePending={deleteDevice.isPending}
-            />
+          <TabsContent value="overview" className="mt-6 space-y-6">
+            {/* Device Info */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Cpu className="h-5 w-5 text-muted-foreground" />
+                  <CardTitle>Device Info</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
+                  <div>
+                    <p className="text-muted-foreground">Name</p>
+                    <p className="font-medium">{data.name}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Type</p>
+                    <p>{deviceTypeLabels[data.deviceType] ?? data.deviceType}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Status</p>
+                    <div className="mt-0.5">
+                      <DeviceStatusBadge status={data.status} />
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Model</p>
+                    <p>{data.deviceModel || "---"}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Manufacturer</p>
+                    <p>{data.manufacturer || "---"}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Active</p>
+                    <div className="mt-0.5 flex items-center gap-2">
+                      <p>{data.isActive ? "Yes" : "No"}</p>
+                      <ToggleActiveButton
+                        isActive={data.isActive ?? true}
+                        onToggle={() => updateDevice.mutate({ isActive: !data.isActive })}
+                        isPending={updateDevice.isPending}
+                        size="sm"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Network */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Network className="h-5 w-5 text-muted-foreground" />
+                  <CardTitle>Network</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
+                  <div>
+                    <p className="text-muted-foreground">MAC Address</p>
+                    <div className="flex items-center gap-1">
+                      <p className="font-mono text-xs">{data.macAddress || "---"}</p>
+                      {data.macAddress && (
+                        <CopyButton value={data.macAddress} label="MAC address" />
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">IP Address</p>
+                    <div className="flex items-center gap-1">
+                      <p className="font-mono text-xs">{data.ipAddress || "---"}</p>
+                      {data.ipAddress && (
+                        <CopyButton value={data.ipAddress} label="IP address" />
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Firmware Version</p>
+                    <p className="font-mono text-xs">{data.firmwareVersion || "---"}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">SIP Username</p>
+                    <p className="font-mono text-xs">{data.sipUsername}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">SIP Server</p>
+                    <p className="font-mono text-xs">{data.sipServer}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Lines / Extensions */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Phone className="h-5 w-5 text-muted-foreground" />
+                  <CardTitle>Lines / Extensions</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {linesQuery.isLoading ? (
+                  <p className="text-sm text-muted-foreground">Loading lines...</p>
+                ) : lines.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">
+                    No lines assigned. Go to the Lines tab to configure line assignments.
+                  </p>
+                ) : (
+                  <div className="space-y-2">
+                    {lines.map((line) => (
+                      <div
+                        key={line.id}
+                        className="flex items-center justify-between rounded-md border px-3 py-2"
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-muted font-mono text-xs font-medium">
+                            {line.lineNumber}
+                          </span>
+                          <span className="text-sm font-medium">{line.label}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="text-xs">
+                            {line.lineType}
+                          </Badge>
+                          {line.isActive === false && (
+                            <Badge variant="outline" className="border-muted-foreground/30 text-xs text-muted-foreground">
+                              Inactive
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Metadata */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Fingerprint className="h-5 w-5 text-muted-foreground" />
+                  <CardTitle>Metadata</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-4">
+                  <div>
+                    <p className="text-muted-foreground text-sm">Device ID</p>
+                    <div className="flex items-center gap-1">
+                      <p className="font-mono text-xs">{deviceId}</p>
+                      <CopyButton value={deviceId} label="device ID" />
+                    </div>
+                  </div>
+                  <TimestampField label="Last Seen" value={data.lastSeenAt} />
+                  <TimestampField label="Provisioned" value={data.provisionedAt} />
+                  {data.teamId && (
+                    <div>
+                      <p className="text-muted-foreground text-sm">Team ID</p>
+                      <div className="flex items-center gap-1">
+                        <p className="font-mono text-xs">{data.teamId}</p>
+                        <CopyButton value={data.teamId} label="team ID" />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="lines" className="mt-6">
@@ -154,87 +444,6 @@ function DeviceDetailPage() {
         </Tabs>
       </PageSection>
     </PageContainer>
-  )
-}
-
-// ---------------------------------------------------------------------------
-// Overview Tab
-// ---------------------------------------------------------------------------
-
-interface OverviewTabProps {
-  data: {
-    name: string
-    deviceType: string
-    status: string
-    isActive?: boolean
-    macAddress?: string | null
-    deviceModel?: string | null
-    manufacturer?: string | null
-    firmwareVersion?: string | null
-    ipAddress?: string | null
-    sipUsername: string
-    sipServer: string
-    lastSeenAt?: string | null
-    provisionedAt?: string | null
-  }
-  onReboot: () => void
-  onReprovision: () => void
-  onToggleActive: () => void
-  onDelete: () => void
-  rebootPending?: boolean
-  reprovisionPending?: boolean
-  togglePending?: boolean
-  deletePending?: boolean
-}
-
-function OverviewTab({ data, onReboot, onReprovision, onToggleActive, onDelete, rebootPending, reprovisionPending, togglePending, deletePending }: OverviewTabProps) {
-  return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Device Information</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
-            <InfoField label="Name" value={data.name} />
-            <InfoField label="Type" value={deviceTypeLabels[data.deviceType] ?? data.deviceType} />
-            <InfoField label="Status">
-              <DeviceStatusBadge status={data.status} />
-            </InfoField>
-            <InfoField label="Active" value={data.isActive ? "Yes" : "No"} />
-            <InfoField label="MAC Address" value={data.macAddress} mono />
-            <InfoField label="Model" value={data.deviceModel} />
-            <InfoField label="Manufacturer" value={data.manufacturer} />
-            <InfoField label="Firmware" value={data.firmwareVersion} />
-            <InfoField label="IP Address" value={data.ipAddress} mono />
-            <InfoField label="SIP Username" value={data.sipUsername} mono />
-            <InfoField label="SIP Server" value={data.sipServer} mono />
-            <InfoField label="Last Seen" value={formatDateTime(data.lastSeenAt)} />
-            <InfoField label="Provisioned" value={formatDateTime(data.provisionedAt)} />
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Actions</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <DeviceActions
-            deviceName={data.name}
-            isActive={data.isActive ?? true}
-            onReboot={onReboot}
-            onReprovision={onReprovision}
-            onToggleActive={onToggleActive}
-            onDelete={onDelete}
-            rebootPending={rebootPending}
-            reprovisionPending={reprovisionPending}
-            togglePending={togglePending}
-            deletePending={deletePending}
-          />
-        </CardContent>
-      </Card>
-    </div>
   )
 }
 
@@ -353,29 +562,6 @@ function SettingsTab({ deviceId, data }: SettingsTabProps) {
           </div>
         </CardContent>
       </Card>
-    </div>
-  )
-}
-
-// ---------------------------------------------------------------------------
-// Info Field helper
-// ---------------------------------------------------------------------------
-
-function InfoField({
-  label,
-  value,
-  mono,
-  children,
-}: {
-  label: string
-  value?: string | null
-  mono?: boolean
-  children?: React.ReactNode
-}) {
-  return (
-    <div>
-      <p className="text-muted-foreground">{label}</p>
-      {children ?? <p className={mono ? "font-mono text-xs" : ""}>{value ?? "---"}</p>}
     </div>
   )
 }

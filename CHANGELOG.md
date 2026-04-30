@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.19.0 (2026-04-30)
+
+### Improved
+- **Device detail page** — reorganized into sectioned cards (Info, Network, Lines/Extensions, Metadata) with copy buttons for MAC/IP/ID, reboot/reprovision confirmation dialogs in header, relative timestamps, and assigned lines display.
+- **Voice extensions list page** — search by number/name, active/inactive filter, sortable columns, bulk delete/export, phone number resolution from IDs, relative timestamps, and row-click navigation to detail.
+
 ## v0.18.0 (2026-04-30)
 
 ### Improved
