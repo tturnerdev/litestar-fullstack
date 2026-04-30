@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.32.0 (2026-04-30)
+
+### Improved
+- **Support ticket create page** — category icon grid, priority radio cards with color coding, field descriptions, response time SLA sidebar, unsaved changes warning dialog, subject/description length validation.
+- **Device create page** — MAC address auto-formatting, IP address validation, device type icons, required field indicators, field descriptions, unsaved changes blocker, and section separators.
+
 ## v0.31.0 (2026-04-30)
 
 ### Added
