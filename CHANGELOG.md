@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.29.0 (2026-04-30)
+
+### Improved
+- **Voice DND page** — breadcrumbs with extension name, large visual DND status card with color-coded background and oversized toggle, quick summary cards for mode/schedule/allowed callers, loading/error states.
+- **Fax send page** — sectioned form layout (From/To/Content), drag-and-drop file upload with type/size validation, phone number formatting, text content tab with live preview, confirmation dialog with summary, success state with view-message link.
+
 ## v0.28.0 (2026-04-30)
 
 ### Improved
