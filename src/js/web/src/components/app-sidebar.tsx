@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { Bell, Building2, Cable, Home, LifeBuoy, MapPin, Monitor, Phone, Printer, Settings, ShieldCheck, Users } from "lucide-react"
+import { Bell, Building2, Cable, Home, LifeBuoy, MapPin, Monitor, Phone, Printer, Settings, ShieldCheck, Tags, Users } from "lucide-react"
 import type * as React from "react"
 import { useEffect, useMemo } from "react"
 import { NavMain, type NavMainItem } from "@/components/nav-main"
@@ -131,6 +131,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         items: [
           { title: "Tickets", to: "/support" },
           { title: "New Ticket", to: "/support/new" },
+        ],
+      },
+      {
+        title: "Tags",
+        to: "/tags",
+        icon: Tags,
+        items: [
+          { title: "All tags", to: "/tags" },
+          { title: "Create new", to: "/tags/new" },
         ],
       },
     ]

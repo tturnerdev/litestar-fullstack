@@ -309,6 +309,40 @@ export function useDownloadFaxDocument(messageId: string) {
 }
 
 // ---------------------------------------------------------------------------
+// All Email Routes (aggregated across fax numbers)
+// ---------------------------------------------------------------------------
+
+export interface FaxEmailRouteWithNumber extends FaxEmailRoute {
+  faxNumber: string
+  faxNumberLabel: string | null
+}
+
+export function useAllFaxEmailRoutes() {
+  return useQuery({
+    queryKey: ["fax", "emailRoutes", "all"],
+    queryFn: async () => {
+      const numbersResp = await apiFetch<PaginatedResponse<FaxNumber>>(
+        "/api/fax/numbers?currentPage=1&pageSize=200",
+      )
+      const allRoutes: FaxEmailRouteWithNumber[] = []
+      for (const num of numbersResp.items) {
+        const routesResp = await apiFetch<PaginatedResponse<FaxEmailRoute>>(
+          `/api/fax/numbers/${num.id}/email-routes?currentPage=1&pageSize=200`,
+        )
+        for (const route of routesResp.items) {
+          allRoutes.push({
+            ...route,
+            faxNumber: num.number,
+            faxNumberLabel: num.label,
+          })
+        }
+      }
+      return allRoutes
+    },
+  })
+}
+
+// ---------------------------------------------------------------------------
 // Send Fax
 // ---------------------------------------------------------------------------
 

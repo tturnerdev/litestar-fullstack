@@ -5,6 +5,7 @@ import {
   FileText,
   Hash,
   Inbox,
+  Mail,
   Send,
 } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -131,6 +132,21 @@ function FaxOverviewPage() {
                 <p className="font-medium text-sm">Message History</p>
                 <p className="text-xs text-muted-foreground">
                   View sent and received faxes
+                </p>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" />
+            </Link>
+            <Link
+              to="/fax/email-routes"
+              className="group flex items-center gap-3 rounded-lg bg-background/60 p-3 transition-all hover:bg-background hover:shadow-sm"
+            >
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 transition-colors group-hover:bg-amber-500 group-hover:text-white dark:text-amber-400">
+                <Mail className="h-4 w-4" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-sm">Email Routes</p>
+                <p className="text-xs text-muted-foreground">
+                  Manage fax-to-email delivery rules
                 </p>
               </div>
               <ChevronRight className="h-4 w-4 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" />

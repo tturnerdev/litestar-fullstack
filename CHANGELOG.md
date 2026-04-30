@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.15.0 (2026-04-29)
+
+### Added
+- **Fax email routes page** (`/fax/email-routes`) — full management UI with table, create/edit/delete dialogs, fax number association, failure alert toggles. "Email Routes" card added to fax dashboard.
+- **Tags in sidebar navigation** — "Tags" section added to app sidebar with "All tags" and "Create new" sub-items.
+
 ## v0.14.0 (2026-04-29)
 
 ### Added

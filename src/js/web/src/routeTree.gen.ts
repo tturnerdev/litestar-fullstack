@@ -51,6 +51,7 @@ import { Route as AppSupportNewRouteImport } from './routes/_app/support/new'
 import { Route as AppLocationsNewRouteImport } from './routes/_app/locations/new'
 import { Route as AppLocationsLocationIdRouteImport } from './routes/_app/locations/$locationId'
 import { Route as AppFaxSendRouteImport } from './routes/_app/fax/send'
+import { Route as AppFaxEmailRoutesRouteImport } from './routes/_app/fax/email-routes'
 import { Route as AppDevicesNewRouteImport } from './routes/_app/devices/new'
 import { Route as AppConnectionsNewRouteImport } from './routes/_app/connections/new'
 import { Route as AppConnectionsConnectionIdRouteImport } from './routes/_app/connections/$connectionId'
@@ -298,6 +299,11 @@ const AppFaxSendRoute = AppFaxSendRouteImport.update({
   path: '/fax/send',
   getParentRoute: () => AppRoute,
 } as any)
+const AppFaxEmailRoutesRoute = AppFaxEmailRoutesRouteImport.update({
+  id: '/fax/email-routes',
+  path: '/fax/email-routes',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppDevicesNewRoute = AppDevicesNewRouteImport.update({
   id: '/new',
   path: '/new',
@@ -535,6 +541,7 @@ export interface FileRoutesByFullPath {
   '/connections/$connectionId': typeof AppConnectionsConnectionIdRouteWithChildren
   '/connections/new': typeof AppConnectionsNewRoute
   '/devices/new': typeof AppDevicesNewRoute
+  '/fax/email-routes': typeof AppFaxEmailRoutesRoute
   '/fax/send': typeof AppFaxSendRoute
   '/locations/$locationId': typeof AppLocationsLocationIdRouteWithChildren
   '/locations/new': typeof AppLocationsNewRoute
@@ -607,6 +614,7 @@ export interface FileRoutesByTo {
   '/admin/voice': typeof AppAdminVoiceRoute
   '/connections/new': typeof AppConnectionsNewRoute
   '/devices/new': typeof AppDevicesNewRoute
+  '/fax/email-routes': typeof AppFaxEmailRoutesRoute
   '/fax/send': typeof AppFaxSendRoute
   '/locations/new': typeof AppLocationsNewRoute
   '/support/new': typeof AppSupportNewRoute
@@ -689,6 +697,7 @@ export interface FileRoutesById {
   '/_app/connections/$connectionId': typeof AppConnectionsConnectionIdRouteWithChildren
   '/_app/connections/new': typeof AppConnectionsNewRoute
   '/_app/devices/new': typeof AppDevicesNewRoute
+  '/_app/fax/email-routes': typeof AppFaxEmailRoutesRoute
   '/_app/fax/send': typeof AppFaxSendRoute
   '/_app/locations/$locationId': typeof AppLocationsLocationIdRouteWithChildren
   '/_app/locations/new': typeof AppLocationsNewRoute
@@ -771,6 +780,7 @@ export interface FileRouteTypes {
     | '/connections/$connectionId'
     | '/connections/new'
     | '/devices/new'
+    | '/fax/email-routes'
     | '/fax/send'
     | '/locations/$locationId'
     | '/locations/new'
@@ -843,6 +853,7 @@ export interface FileRouteTypes {
     | '/admin/voice'
     | '/connections/new'
     | '/devices/new'
+    | '/fax/email-routes'
     | '/fax/send'
     | '/locations/new'
     | '/support/new'
@@ -924,6 +935,7 @@ export interface FileRouteTypes {
     | '/_app/connections/$connectionId'
     | '/_app/connections/new'
     | '/_app/devices/new'
+    | '/_app/fax/email-routes'
     | '/_app/fax/send'
     | '/_app/locations/$locationId'
     | '/_app/locations/new'
@@ -1275,6 +1287,13 @@ declare module '@tanstack/react-router' {
       path: '/fax/send'
       fullPath: '/fax/send'
       preLoaderRoute: typeof AppFaxSendRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/fax/email-routes': {
+      id: '/_app/fax/email-routes'
+      path: '/fax/email-routes'
+      fullPath: '/fax/email-routes'
+      preLoaderRoute: typeof AppFaxEmailRoutesRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/devices/new': {
@@ -1717,6 +1736,7 @@ interface AppRouteChildren {
   AppSettingsRoute: typeof AppSettingsRoute
   AppSupportRoute: typeof AppSupportRouteWithChildren
   AppTeamsRoute: typeof AppTeamsRouteWithChildren
+  AppFaxEmailRoutesRoute: typeof AppFaxEmailRoutesRoute
   AppFaxSendRoute: typeof AppFaxSendRoute
   AppTagsNewRoute: typeof AppTagsNewRoute
   AppVoicePhoneNumbersRoute: typeof AppVoicePhoneNumbersRoute
@@ -1751,6 +1771,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppSettingsRoute: AppSettingsRoute,
   AppSupportRoute: AppSupportRouteWithChildren,
   AppTeamsRoute: AppTeamsRouteWithChildren,
+  AppFaxEmailRoutesRoute: AppFaxEmailRoutesRoute,
   AppFaxSendRoute: AppFaxSendRoute,
   AppTagsNewRoute: AppTagsNewRoute,
   AppVoicePhoneNumbersRoute: AppVoicePhoneNumbersRoute,
