@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.17.0 (2026-04-30)
+
+### Improved
+- **Devices list page** — table view with search, type/status filter dropdowns, sortable columns, bulk delete, per-row reboot/reprovision buttons, IP address column, and last-seen timestamps. Device status badges now use colored dot indicators with pulse animation for provisioning state.
+- **Support tickets list page** — search, status/priority/category filters, sortable columns, bulk close/delete, relative timestamps, category badges, and improved empty states.
+
 ## v0.16.0 (2026-04-30)
 
 ### Improved

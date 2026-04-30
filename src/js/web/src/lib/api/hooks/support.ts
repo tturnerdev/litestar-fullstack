@@ -63,6 +63,8 @@ export interface TicketFilters {
   priority?: string
   category?: string
   search?: string
+  orderBy?: string
+  sortOrder?: string
 }
 
 // ── Ticket Hooks ───────────────────────────────────────────────────────
@@ -76,6 +78,8 @@ export function useTickets(page = 1, pageSize = 25, filters?: TicketFilters) {
       if (filters?.priority && filters.priority !== "all") query.priority = filters.priority
       if (filters?.category && filters.category !== "all") query.category = filters.category
       if (filters?.search) query.search = filters.search
+      if (filters?.orderBy) query.orderBy = filters.orderBy
+      if (filters?.sortOrder) query.sortOrder = filters.sortOrder
       const response = await client.get({
         url: "/api/support/tickets",
         query,
