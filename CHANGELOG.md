@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.82.0 (2026-04-30)
+
+### Refactored
+- **Utility consolidation** — Replaced local `timeAgo` functions in 10 component files with shared `formatRelativeTimeShort` from `lib/date-utils.ts`. Extracted `formatPhoneNumber` (6 files) and `formatBytes` (3 files) into new `lib/format-utils.ts`, removing ~270 lines of duplicated utility code.
+
 ## v0.81.0 (2026-04-30)
 
 ### Refactored
