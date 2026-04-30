@@ -8,6 +8,21 @@ interface NotificationCategories {
   faxNotifications: boolean
 }
 
+const SETTINGS_DEFAULTS = {
+  compactMode: false,
+  emailNotifications: true,
+  pushNotifications: false,
+  notificationCategories: {
+    tickets: true,
+    teamUpdates: true,
+    deviceAlerts: true,
+    faxNotifications: false,
+  } satisfies NotificationCategories,
+  defaultPageSize: 25 as 10 | 25 | 50 | 100,
+  dateFormat: "relative" as "relative" | "absolute",
+  sidebarCollapsed: false,
+}
+
 interface SettingsState {
   // Appearance
   compactMode: boolean
@@ -30,28 +45,24 @@ interface SettingsState {
   setDefaultPageSize: (value: 10 | 25 | 50 | 100) => void
   setDateFormat: (value: "relative" | "absolute") => void
   setSidebarCollapsed: (value: boolean) => void
+  resetToDefaults: () => void
 }
 
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
       // Appearance defaults
-      compactMode: false,
+      compactMode: SETTINGS_DEFAULTS.compactMode,
 
       // Notification defaults
-      emailNotifications: true,
-      pushNotifications: false,
-      notificationCategories: {
-        tickets: true,
-        teamUpdates: true,
-        deviceAlerts: true,
-        faxNotifications: false,
-      },
+      emailNotifications: SETTINGS_DEFAULTS.emailNotifications,
+      pushNotifications: SETTINGS_DEFAULTS.pushNotifications,
+      notificationCategories: { ...SETTINGS_DEFAULTS.notificationCategories },
 
       // Display defaults
-      defaultPageSize: 25,
-      dateFormat: "relative",
-      sidebarCollapsed: false,
+      defaultPageSize: SETTINGS_DEFAULTS.defaultPageSize,
+      dateFormat: SETTINGS_DEFAULTS.dateFormat,
+      sidebarCollapsed: SETTINGS_DEFAULTS.sidebarCollapsed,
 
       // Actions
       setCompactMode: (value) => set({ compactMode: value }),
@@ -67,6 +78,16 @@ export const useSettingsStore = create<SettingsState>()(
       setDefaultPageSize: (value) => set({ defaultPageSize: value }),
       setDateFormat: (value) => set({ dateFormat: value }),
       setSidebarCollapsed: (value) => set({ sidebarCollapsed: value }),
+      resetToDefaults: () =>
+        set({
+          compactMode: SETTINGS_DEFAULTS.compactMode,
+          emailNotifications: SETTINGS_DEFAULTS.emailNotifications,
+          pushNotifications: SETTINGS_DEFAULTS.pushNotifications,
+          notificationCategories: { ...SETTINGS_DEFAULTS.notificationCategories },
+          defaultPageSize: SETTINGS_DEFAULTS.defaultPageSize,
+          dateFormat: SETTINGS_DEFAULTS.dateFormat,
+          sidebarCollapsed: SETTINGS_DEFAULTS.sidebarCollapsed,
+        }),
     }),
     {
       name: "settings-storage",

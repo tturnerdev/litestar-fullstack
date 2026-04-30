@@ -1,12 +1,32 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { Calendar, Hash, Layout, Monitor, Moon, PanelLeftClose, Sun } from "lucide-react"
+import { AnimatePresence, motion } from "framer-motion"
+import {
+  Bell,
+  Calendar,
+  Check,
+  Hash,
+  Keyboard,
+  Layout,
+  Monitor,
+  Moon,
+  PanelLeftClose,
+  Palette,
+  RotateCcw,
+  Sun,
+} from "lucide-react"
+import { useCallback, useRef, useState } from "react"
+import { toast } from "sonner"
 import { NotificationPreferences } from "@/components/settings/notification-preferences"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { cn } from "@/lib/utils"
 import { useSettingsStore } from "@/lib/settings-store"
 import { useTheme } from "@/lib/theme-context"
 
@@ -14,31 +34,217 @@ export const Route = createFileRoute("/_app/settings")({
   component: SettingsPage,
 })
 
-function SettingsPage() {
-  return (
-    <PageContainer className="flex-1 space-y-8" maxWidth="xl">
-      <PageHeader eyebrow="Preferences" title="Settings" description="Customize the look and behavior of the application." />
+const NAV_ITEMS = [
+  { id: "appearance", label: "Appearance", icon: Palette },
+  { id: "notifications", label: "Notifications", icon: Bell },
+  { id: "display", label: "Display", icon: Layout },
+  { id: "shortcuts", label: "Shortcuts", icon: Keyboard },
+] as const
 
-      <PageSection delay={0.1}>
-        <div className="space-y-6">
-          <AppearanceSection />
-          <NotificationPreferences />
-          <DisplaySection />
+type SectionId = (typeof NAV_ITEMS)[number]["id"]
+
+function SettingsPage() {
+  const [activeSection, setActiveSection] = useState<SectionId>("appearance")
+  const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({})
+  const { resetToDefaults } = useSettingsStore()
+
+  const scrollToSection = useCallback((id: SectionId) => {
+    setActiveSection(id)
+    const el = sectionRefs.current[id]
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" })
+    }
+  }, [])
+
+  const handleReset = useCallback(() => {
+    resetToDefaults()
+    toast.success("Settings reset to defaults", {
+      description: "All display preferences have been restored.",
+    })
+  }, [resetToDefaults])
+
+  return (
+    <PageContainer className="flex-1" maxWidth="xl">
+      <PageHeader
+        eyebrow="Preferences"
+        title="Settings"
+        description="Customize the look and behavior of the application."
+        actions={
+          <Button variant="outline" size="sm" onClick={handleReset}>
+            <RotateCcw className="h-4 w-4" />
+            Reset to defaults
+          </Button>
+        }
+      />
+
+      <div className="flex gap-8">
+        {/* Sidebar navigation */}
+        <nav className="hidden w-48 shrink-0 md:block">
+          <div className="sticky top-24 space-y-1">
+            {NAV_ITEMS.map(({ id, label, icon: Icon }) => (
+              <button
+                key={id}
+                type="button"
+                onClick={() => scrollToSection(id)}
+                className={cn(
+                  "flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                  activeSection === id
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                )}
+              >
+                <Icon className="h-4 w-4" />
+                {label}
+              </button>
+            ))}
+            <Separator className="my-3" />
+            <button
+              type="button"
+              onClick={handleReset}
+              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <RotateCcw className="h-4 w-4" />
+              Reset all
+            </button>
+          </div>
+        </nav>
+
+        {/* Main content */}
+        <div className="min-w-0 flex-1 space-y-8 pb-16">
+          <PageSection delay={0.1}>
+            <div ref={(el) => { sectionRefs.current.appearance = el }} className="scroll-mt-24">
+              <AppearanceSection onNavigate={() => setActiveSection("appearance")} />
+            </div>
+          </PageSection>
+
+          <PageSection delay={0.15}>
+            <div ref={(el) => { sectionRefs.current.notifications = el }} className="scroll-mt-24">
+              <NotificationPreferences />
+            </div>
+          </PageSection>
+
+          <PageSection delay={0.2}>
+            <div ref={(el) => { sectionRefs.current.display = el }} className="scroll-mt-24">
+              <DisplaySection />
+            </div>
+          </PageSection>
+
+          <PageSection delay={0.25}>
+            <div ref={(el) => { sectionRefs.current.shortcuts = el }} className="scroll-mt-24">
+              <KeyboardShortcutsSection />
+            </div>
+          </PageSection>
         </div>
-      </PageSection>
+      </div>
     </PageContainer>
   )
 }
 
-function AppearanceSection() {
+/* -----------------------------------------------------------------------
+ * Theme preview mini cards
+ * ----------------------------------------------------------------------- */
+
+function ThemePreviewCard({
+  mode,
+  isActive,
+  icon: Icon,
+  label,
+}: {
+  mode: "light" | "dark" | "system"
+  isActive: boolean
+  icon: React.ComponentType<{ className?: string }>
+  label: string
+}) {
+  const previewBg = mode === "dark" ? "bg-zinc-900" : mode === "light" ? "bg-white" : "bg-gradient-to-br from-white to-zinc-900"
+  const previewFg = mode === "dark" ? "bg-zinc-700" : mode === "light" ? "bg-zinc-200" : "bg-zinc-400"
+  const previewAccent = mode === "dark" ? "bg-blue-500" : mode === "light" ? "bg-blue-600" : "bg-blue-500"
+
+  return (
+    <Label
+      htmlFor={`theme-${mode}`}
+      className={cn(
+        "group flex cursor-pointer flex-col gap-3 rounded-xl border-2 p-4 transition-all duration-200",
+        isActive
+          ? "border-primary bg-primary/5 shadow-sm shadow-primary/10"
+          : "border-border/40 hover:border-border hover:bg-accent/50",
+      )}
+    >
+      <RadioGroupItem value={mode} id={`theme-${mode}`} className="sr-only" />
+      {/* Mini preview */}
+      <div
+        className={cn(
+          "relative flex h-20 w-full overflow-hidden rounded-lg border border-border/60",
+          previewBg,
+        )}
+      >
+        {/* Sidebar preview */}
+        <div className={cn("h-full w-6 border-r border-border/30", mode === "dark" ? "bg-zinc-800" : "bg-zinc-100")}>
+          <div className={cn("mx-1 mt-2 h-1 w-4 rounded-full", previewAccent)} />
+          <div className={cn("mx-1 mt-1.5 h-1 w-4 rounded-full", previewFg)} />
+          <div className={cn("mx-1 mt-1.5 h-1 w-4 rounded-full", previewFg)} />
+        </div>
+        {/* Content preview */}
+        <div className="flex-1 p-2">
+          <div className={cn("mb-1.5 h-1.5 w-12 rounded-full", previewFg)} />
+          <div className={cn("mb-1 h-1 w-full rounded-full", previewFg, "opacity-60")} />
+          <div className={cn("mb-1 h-1 w-3/4 rounded-full", previewFg, "opacity-60")} />
+          <div className={cn("mt-2 h-3 w-8 rounded", previewAccent, "opacity-80")} />
+        </div>
+        {/* Active indicator */}
+        <AnimatePresence>
+          {isActive && (
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0, opacity: 0 }}
+              className="absolute right-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground"
+            >
+              <Check className="h-3 w-3" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+      <div className="flex items-center gap-2">
+        <Icon className={cn("h-4 w-4", isActive ? "text-primary" : "text-muted-foreground")} />
+        <span className={cn("text-sm font-medium", isActive ? "text-primary" : "text-foreground")}>{label}</span>
+      </div>
+    </Label>
+  )
+}
+
+/* -----------------------------------------------------------------------
+ * Appearance section
+ * ----------------------------------------------------------------------- */
+
+function AppearanceSection({ onNavigate }: { onNavigate: () => void }) {
   const { mode, setMode } = useTheme()
   const { compactMode, setCompactMode } = useSettingsStore()
+
+  const handleThemeChange = useCallback(
+    (v: string) => {
+      setMode(v as "light" | "dark" | "system")
+      onNavigate()
+      const labels: Record<string, string> = { light: "Light", dark: "Dark", system: "System" }
+      toast.success(`Theme set to ${labels[v]}`)
+    },
+    [setMode, onNavigate],
+  )
+
+  const handleCompactChange = useCallback(
+    (checked: boolean) => {
+      setCompactMode(checked)
+      toast.success(checked ? "Compact mode enabled" : "Compact mode disabled")
+    },
+    [setCompactMode],
+  )
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Sun className="h-5 w-5 text-muted-foreground" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+            <Palette className="h-4 w-4 text-primary" />
+          </div>
           Appearance
         </CardTitle>
         <CardDescription>Control how the application looks on your device.</CardDescription>
@@ -46,70 +252,85 @@ function AppearanceSection() {
       <CardContent className="space-y-6">
         <div className="space-y-3">
           <Label className="text-sm font-medium">Theme</Label>
-          <RadioGroup value={mode} onValueChange={(v) => setMode(v as "light" | "dark" | "system")} className="grid grid-cols-3 gap-3">
-            <Label
-              htmlFor="theme-light"
-              className="flex cursor-pointer flex-col items-center gap-2 rounded-lg border border-border/60 p-4 transition-colors hover:bg-accent has-[button[data-state=checked]]:border-primary has-[button[data-state=checked]]:bg-primary/5"
-            >
-              <RadioGroupItem value="light" id="theme-light" className="sr-only" />
-              <Sun className="h-6 w-6" />
-              <span className="text-sm font-medium">Light</span>
-            </Label>
-            <Label
-              htmlFor="theme-dark"
-              className="flex cursor-pointer flex-col items-center gap-2 rounded-lg border border-border/60 p-4 transition-colors hover:bg-accent has-[button[data-state=checked]]:border-primary has-[button[data-state=checked]]:bg-primary/5"
-            >
-              <RadioGroupItem value="dark" id="theme-dark" className="sr-only" />
-              <Moon className="h-6 w-6" />
-              <span className="text-sm font-medium">Dark</span>
-            </Label>
-            <Label
-              htmlFor="theme-system"
-              className="flex cursor-pointer flex-col items-center gap-2 rounded-lg border border-border/60 p-4 transition-colors hover:bg-accent has-[button[data-state=checked]]:border-primary has-[button[data-state=checked]]:bg-primary/5"
-            >
-              <RadioGroupItem value="system" id="theme-system" className="sr-only" />
-              <Monitor className="h-6 w-6" />
-              <span className="text-sm font-medium">System</span>
-            </Label>
+          <RadioGroup
+            value={mode}
+            onValueChange={handleThemeChange}
+            className="grid grid-cols-3 gap-3"
+          >
+            <ThemePreviewCard mode="light" isActive={mode === "light"} icon={Sun} label="Light" />
+            <ThemePreviewCard mode="dark" isActive={mode === "dark"} icon={Moon} label="Dark" />
+            <ThemePreviewCard mode="system" isActive={mode === "system"} icon={Monitor} label="System" />
           </RadioGroup>
         </div>
 
-        <div className="flex items-center justify-between">
+        <Separator />
+
+        <div className="flex items-center justify-between rounded-lg border border-border/60 p-4">
           <div className="space-y-0.5">
             <Label htmlFor="compact-mode" className="text-sm font-medium">
               Compact mode
             </Label>
             <p className="text-sm text-muted-foreground">Reduce padding and spacing throughout the interface.</p>
           </div>
-          <Switch id="compact-mode" checked={compactMode} onCheckedChange={setCompactMode} />
+          <Switch id="compact-mode" checked={compactMode} onCheckedChange={handleCompactChange} />
         </div>
       </CardContent>
     </Card>
   )
 }
 
+/* -----------------------------------------------------------------------
+ * Display section
+ * ----------------------------------------------------------------------- */
+
 function DisplaySection() {
   const { defaultPageSize, setDefaultPageSize, dateFormat, setDateFormat, sidebarCollapsed, setSidebarCollapsed } = useSettingsStore()
+
+  const handlePageSizeChange = useCallback(
+    (v: string) => {
+      setDefaultPageSize(Number(v) as 10 | 25 | 50 | 100)
+      toast.success(`Default page size set to ${v}`)
+    },
+    [setDefaultPageSize],
+  )
+
+  const handleDateFormatChange = useCallback(
+    (v: string) => {
+      setDateFormat(v as "relative" | "absolute")
+      toast.success(`Date format set to ${v}`)
+    },
+    [setDateFormat],
+  )
+
+  const handleSidebarChange = useCallback(
+    (checked: boolean) => {
+      setSidebarCollapsed(checked)
+      toast.success(checked ? "Sidebar will start collapsed" : "Sidebar will start expanded")
+    },
+    [setSidebarCollapsed],
+  )
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Layout className="h-5 w-5 text-muted-foreground" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
+            <Layout className="h-4 w-4 text-blue-500" />
+          </div>
           Display Preferences
         </CardTitle>
         <CardDescription>Configure how data is displayed across the application.</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="flex items-center justify-between">
+      <CardContent className="space-y-2">
+        <div className="flex items-center justify-between rounded-lg border border-border/60 p-4">
           <div className="space-y-0.5">
             <Label className="flex items-center gap-1.5 text-sm font-medium">
-              <Hash className="h-3.5 w-3.5" />
+              <Hash className="h-3.5 w-3.5 text-muted-foreground" />
               Default page size
             </Label>
             <p className="text-sm text-muted-foreground">Number of rows displayed per page in tables.</p>
           </div>
-          <Select value={String(defaultPageSize)} onValueChange={(v) => setDefaultPageSize(Number(v) as 10 | 25 | 50 | 100)}>
+          <Select value={String(defaultPageSize)} onValueChange={handlePageSizeChange}>
             <SelectTrigger className="w-24">
               <SelectValue />
             </SelectTrigger>
@@ -122,17 +343,17 @@ function DisplaySection() {
           </Select>
         </div>
 
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between rounded-lg border border-border/60 p-4">
           <div className="space-y-0.5">
             <Label className="flex items-center gap-1.5 text-sm font-medium">
-              <Calendar className="h-3.5 w-3.5" />
+              <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
               Date format
             </Label>
             <p className="text-sm text-muted-foreground">
-              {dateFormat === "relative" ? 'Show dates like "2h ago" or "yesterday".' : "Show dates like \"Apr 28, 2026\"."}
+              {dateFormat === "relative" ? 'Show dates like "2h ago" or "yesterday".' : 'Show dates like "Apr 28, 2026".'}
             </p>
           </div>
-          <Select value={dateFormat} onValueChange={(v) => setDateFormat(v as "relative" | "absolute")}>
+          <Select value={dateFormat} onValueChange={handleDateFormatChange}>
             <SelectTrigger className="w-32">
               <SelectValue />
             </SelectTrigger>
@@ -143,16 +364,103 @@ function DisplaySection() {
           </Select>
         </div>
 
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between rounded-lg border border-border/60 p-4">
           <div className="space-y-0.5">
             <Label htmlFor="sidebar-collapsed" className="flex items-center gap-1.5 text-sm font-medium">
-              <PanelLeftClose className="h-3.5 w-3.5" />
+              <PanelLeftClose className="h-3.5 w-3.5 text-muted-foreground" />
               Sidebar collapsed by default
             </Label>
             <p className="text-sm text-muted-foreground">Start with the sidebar in its collapsed state.</p>
           </div>
-          <Switch id="sidebar-collapsed" checked={sidebarCollapsed} onCheckedChange={setSidebarCollapsed} />
+          <Switch id="sidebar-collapsed" checked={sidebarCollapsed} onCheckedChange={handleSidebarChange} />
         </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+/* -----------------------------------------------------------------------
+ * Keyboard shortcuts section
+ * ----------------------------------------------------------------------- */
+
+function Kbd({ children }: { children: React.ReactNode }) {
+  return (
+    <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded border border-border bg-muted px-1.5 font-mono text-[0.6875rem] font-medium text-muted-foreground">
+      {children}
+    </kbd>
+  )
+}
+
+const SHORTCUTS = [
+  {
+    category: "Navigation",
+    items: [
+      { keys: ["Ctrl", "K"], description: "Open global search" },
+      { keys: ["G", "H"], description: "Go to dashboard" },
+      { keys: ["G", "S"], description: "Go to settings" },
+      { keys: ["G", "D"], description: "Go to devices" },
+    ],
+  },
+  {
+    category: "Actions",
+    items: [
+      { keys: ["Ctrl", "B"], description: "Toggle sidebar" },
+      { keys: ["Ctrl", "J"], description: "Toggle theme" },
+      { keys: ["?"], description: "Show all shortcuts" },
+      { keys: ["Esc"], description: "Close dialog / cancel" },
+    ],
+  },
+]
+
+function KeyboardShortcutsSection() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10">
+            <Keyboard className="h-4 w-4 text-amber-500" />
+          </div>
+          Keyboard Shortcuts
+        </CardTitle>
+        <CardDescription>Navigate and perform actions quickly without leaving the keyboard.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-6">
+          {SHORTCUTS.map((group) => (
+            <div key={group.category}>
+              <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                {group.category}
+              </h4>
+              <div className="space-y-1">
+                {group.items.map((shortcut) => (
+                  <div
+                    key={shortcut.description}
+                    className="flex items-center justify-between rounded-lg px-3 py-2.5 transition-colors hover:bg-muted/50"
+                  >
+                    <span className="text-sm text-foreground">{shortcut.description}</span>
+                    <div className="flex items-center gap-1">
+                      {shortcut.keys.map((key, i) => (
+                        <span key={`${shortcut.description}-${key}-${i}`} className="flex items-center gap-1">
+                          {i > 0 && <span className="text-xs text-muted-foreground">+</span>}
+                          <Kbd>{key}</Kbd>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+        <Separator className="my-4" />
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <p className="text-xs text-muted-foreground">
+              Press <Kbd>?</Kbd> anywhere to view the full list of keyboard shortcuts.
+            </p>
+          </TooltipTrigger>
+          <TooltipContent>Opens the keyboard shortcuts dialog</TooltipContent>
+        </Tooltip>
       </CardContent>
     </Card>
   )

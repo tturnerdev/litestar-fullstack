@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.24.0 (2026-04-30)
+
+### Improved
+- **Admin dashboard** — stat cards with trend indicators (up/down arrows), improved activity feed with action icons and actor names, system health with per-service icons and worker queue stats, additional quick action links.
+- **Settings page** — sticky sidebar navigation, theme preview cards with UI wireframes, toast confirmations on every change, "Reset to defaults" button, keyboard shortcuts section, bordered display preference rows, and colored notification category icons with active count.
+
 ## v0.23.0 (2026-04-30)
 
 ### Improved

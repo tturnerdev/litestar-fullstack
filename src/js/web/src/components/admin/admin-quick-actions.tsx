@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router"
-import { ChevronRight, FileText, ShieldCheck, UserPlus, Users } from "lucide-react"
+import { ChevronRight, FileText, Monitor, Phone, ShieldCheck, Ticket, UserPlus, Users } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 const actions = [
@@ -13,16 +13,16 @@ const actions = [
     to: "/admin/users",
   },
   {
-    label: "Create Team",
-    description: "Set up a workspace",
+    label: "Manage Teams",
+    description: "Configure workspaces",
     icon: Users,
     color: "text-blue-600 dark:text-blue-400",
     bg: "bg-blue-500/10",
     hoverBg: "group-hover/action:bg-blue-500",
-    to: "/teams/new",
+    to: "/admin/teams",
   },
   {
-    label: "View Audit Logs",
+    label: "View Audit Log",
     description: "Review all events",
     icon: FileText,
     color: "text-amber-600 dark:text-amber-400",
@@ -39,6 +39,33 @@ const actions = [
     hoverBg: "group-hover/action:bg-violet-500",
     to: "/admin/teams",
   },
+  {
+    label: "Manage Devices",
+    description: "View provisioned devices",
+    icon: Monitor,
+    color: "text-cyan-600 dark:text-cyan-400",
+    bg: "bg-cyan-500/10",
+    hoverBg: "group-hover/action:bg-cyan-500",
+    to: "/admin/devices",
+  },
+  {
+    label: "Voice & Numbers",
+    description: "Phone number management",
+    icon: Phone,
+    color: "text-pink-600 dark:text-pink-400",
+    bg: "bg-pink-500/10",
+    hoverBg: "group-hover/action:bg-pink-500",
+    to: "/admin/voice",
+  },
+  {
+    label: "Support Tickets",
+    description: "View open tickets",
+    icon: Ticket,
+    color: "text-orange-600 dark:text-orange-400",
+    bg: "bg-orange-500/10",
+    hoverBg: "group-hover/action:bg-orange-500",
+    to: "/admin/support",
+  },
 ] as const
 
 export function AdminQuickActions() {
@@ -47,25 +74,25 @@ export function AdminQuickActions() {
       <CardHeader>
         <CardTitle>Quick Actions</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-1.5">
+      <CardContent className="space-y-1">
         {actions.map((action) => {
           const Icon = action.icon
           return (
             <Link
               key={action.label}
               to={action.to}
-              className="group/action flex items-center gap-3 rounded-lg bg-background/60 p-3 transition-all hover:bg-background hover:shadow-sm"
+              className="group/action flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all hover:bg-muted/60"
             >
               <div
-                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${action.bg} ${action.color} transition-colors ${action.hoverBg} group-hover/action:text-white`}
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${action.bg} ${action.color} transition-colors ${action.hoverBg} group-hover/action:text-white`}
               >
-                <Icon className="h-4 w-4" />
+                <Icon className="h-3.5 w-3.5" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium">{action.label}</p>
-                <p className="text-xs text-muted-foreground">{action.description}</p>
+                <p className="text-sm font-medium leading-tight">{action.label}</p>
+                <p className="text-[11px] text-muted-foreground">{action.description}</p>
               </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground/50 transition-transform group-hover/action:translate-x-0.5 group-hover/action:text-foreground" />
+              <ChevronRight className="h-4 w-4 text-muted-foreground/40 transition-transform group-hover/action:translate-x-0.5 group-hover/action:text-muted-foreground" />
             </Link>
           )
         })}
