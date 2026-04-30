@@ -1,5 +1,5 @@
-import { Globe, Monitor, Smartphone, Trash2 } from "lucide-react"
-import { useState } from "react"
+import { Globe, Monitor, Smartphone, Tablet, Trash2, MapPin, ShieldCheck } from "lucide-react"
+import { useMemo, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -7,6 +7,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { useActiveSessions, useRevokeAllSessions, useRevokeSession } from "@/lib/api/hooks/profile"
 import type { ActiveSession } from "@/lib/generated/api/types.gen"
+
+type DeviceCategory = "Desktop" | "Mobile" | "Tablet"
 
 function formatTimeAgo(dateStr: string): string {
   const date = new Date(dateStr)
@@ -32,17 +34,37 @@ function formatTimeAgo(dateStr: string): string {
   return isFuture ? `in ${relative}` : `${relative} ago`
 }
 
+function formatLastActive(dateStr: string): string {
+  const date = new Date(dateStr)
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const minutes = Math.floor(diffMs / 60000)
+  const hours = Math.floor(diffMs / 3600000)
+  const days = Math.floor(diffMs / 86400000)
+
+  if (minutes < 2) return "Active now"
+  if (minutes < 60) return `${minutes}m ago`
+  if (hours < 24) return `${hours}h ago`
+  if (days === 1) return "1 day ago"
+  return `${days} days ago`
+}
+
 function parseDeviceInfo(deviceInfo: string | null | undefined): {
   browser: string
   os: string
-  isMobile: boolean
+  category: DeviceCategory
 } {
   if (!deviceInfo) {
-    return { browser: "Unknown browser", os: "Unknown", isMobile: false }
+    return { browser: "Unknown browser", os: "Unknown", category: "Desktop" }
   }
 
   const ua = deviceInfo.toLowerCase()
-  const isMobile = /mobile|android|iphone|ipad/i.test(ua)
+  const isTablet = /ipad|tablet|kindle|silk/i.test(ua) || (/android/i.test(ua) && !/mobile/i.test(ua))
+  const isMobile = !isTablet && /mobile|android|iphone/i.test(ua)
+
+  let category: DeviceCategory = "Desktop"
+  if (isTablet) category = "Tablet"
+  else if (isMobile) category = "Mobile"
 
   let browser = "Unknown browser"
   if (ua.includes("firefox")) {
@@ -70,7 +92,13 @@ function parseDeviceInfo(deviceInfo: string | null | undefined): {
     os = "iOS"
   }
 
-  return { browser, os, isMobile }
+  return { browser, os, category }
+}
+
+const deviceCategoryIcon: Record<DeviceCategory, typeof Monitor> = {
+  Desktop: Monitor,
+  Mobile: Smartphone,
+  Tablet: Tablet,
 }
 
 function SessionItem({
@@ -82,16 +110,42 @@ function SessionItem({
   onRevoke: (id: string) => void
   isRevoking: boolean
 }) {
-  const { browser, os, isMobile } = parseDeviceInfo(session.deviceInfo)
-  const DeviceIcon = isMobile ? Smartphone : Monitor
-  const createdAgo = formatTimeAgo(session.createdAt)
+  const { browser, os, category } = parseDeviceInfo(session.deviceInfo)
+  const DeviceIcon = deviceCategoryIcon[category]
+  const lastActive = formatLastActive(session.createdAt)
   const expiresAt = formatTimeAgo(session.expiresAt)
 
+  // ActiveSession type may have location fields depending on the backend
+  const sessionAny = session as Record<string, unknown>
+  const location = sessionAny.location as string | undefined
+  const city = sessionAny.city as string | undefined
+  const region = sessionAny.region as string | undefined
+  const country = sessionAny.country as string | undefined
+
+  let locationStr: string | null = null
+  if (location && typeof location === "string") {
+    locationStr = location
+  } else if (city || region || country) {
+    locationStr = [city, region, country].filter(Boolean).join(", ")
+  }
+
   return (
-    <div className="flex items-center justify-between gap-4 rounded-lg border border-border/60 bg-muted/30 px-4 py-3">
+    <div
+      className={`flex items-center justify-between gap-4 rounded-lg border px-4 py-3 ${
+        session.isCurrent
+          ? "border-emerald-500/30 bg-emerald-500/5"
+          : "border-border/60 bg-muted/30"
+      }`}
+    >
       <div className="flex items-center gap-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-muted">
-          <DeviceIcon className="h-4 w-4 text-muted-foreground" />
+        <div
+          className={`flex h-9 w-9 items-center justify-center rounded-full ${
+            session.isCurrent ? "bg-emerald-500/10" : "bg-muted"
+          }`}
+        >
+          <DeviceIcon
+            className={`h-4 w-4 ${session.isCurrent ? "text-emerald-600" : "text-muted-foreground"}`}
+          />
         </div>
         <div className="min-w-0">
           <div className="flex items-center gap-2">
@@ -99,14 +153,21 @@ function SessionItem({
               {browser} on {os}
             </p>
             {session.isCurrent && (
-              <Badge variant="secondary" className="text-xs">
-                Current
+              <Badge className="border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-xs gap-1">
+                <ShieldCheck className="h-3 w-3" />
+                This device
               </Badge>
             )}
           </div>
-          <p className="text-muted-foreground text-xs">
-            Signed in {createdAgo} &middot; Expires {expiresAt}
-          </p>
+          <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
+            <span>{lastActive}</span>
+            <span>&middot;</span>
+            <span>Expires {expiresAt}</span>
+          </div>
+          <div className="flex items-center gap-1 text-muted-foreground text-xs mt-0.5">
+            <MapPin className="h-3 w-3 shrink-0" />
+            <span>{locationStr ?? "Unknown location"}</span>
+          </div>
         </div>
       </div>
 
@@ -126,11 +187,51 @@ function SessionItem({
   )
 }
 
+interface GroupedSessions {
+  category: DeviceCategory
+  sessions: ActiveSession[]
+}
+
+function groupSessionsByDevice(sessions: ActiveSession[]): GroupedSessions[] {
+  const groups: Record<DeviceCategory, ActiveSession[]> = {
+    Desktop: [],
+    Mobile: [],
+    Tablet: [],
+  }
+
+  for (const session of sessions) {
+    const { category } = parseDeviceInfo(session.deviceInfo)
+    groups[category].push(session)
+  }
+
+  // Sort each group: current session first, then by creation date descending
+  const sortSessions = (a: ActiveSession, b: ActiveSession) => {
+    if (a.isCurrent && !b.isCurrent) return -1
+    if (!a.isCurrent && b.isCurrent) return 1
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  }
+
+  const result: GroupedSessions[] = []
+  const order: DeviceCategory[] = ["Desktop", "Mobile", "Tablet"]
+  for (const cat of order) {
+    if (groups[cat].length > 0) {
+      groups[cat].sort(sortSessions)
+      result.push({ category: cat, sessions: groups[cat] })
+    }
+  }
+  return result
+}
+
 export function ActiveSessions() {
   const { data, isLoading, isError } = useActiveSessions()
   const revokeOne = useRevokeSession()
   const revokeAll = useRevokeAllSessions()
   const [confirmRevokeAll, setConfirmRevokeAll] = useState(false)
+
+  const sessions: ActiveSession[] = data?.items ?? []
+  const otherSessionCount = sessions.filter((s) => !s.isCurrent).length
+
+  const grouped = useMemo(() => groupSessionsByDevice(sessions), [sessions])
 
   if (isLoading) {
     return <SkeletonCard />
@@ -146,9 +247,6 @@ export function ActiveSessions() {
       </Card>
     )
   }
-
-  const sessions: ActiveSession[] = data?.items ?? []
-  const otherSessionCount = sessions.filter((s) => !s.isCurrent).length
 
   return (
     <Card>
@@ -180,15 +278,29 @@ export function ActiveSessions() {
             <p className="text-sm text-muted-foreground">No active sessions found.</p>
           </div>
         ) : (
-          <div className="space-y-3">
-            {sessions.map((session) => (
-              <SessionItem
-                key={session.id}
-                session={session}
-                onRevoke={(id) => revokeOne.mutate(id)}
-                isRevoking={revokeOne.isPending}
-              />
-            ))}
+          <div className="space-y-5">
+            {grouped.map((group) => {
+              const GroupIcon = deviceCategoryIcon[group.category]
+              return (
+                <div key={group.category} className="space-y-2">
+                  <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    <GroupIcon className="h-3.5 w-3.5" />
+                    {group.category}
+                    <span className="text-muted-foreground/60">({group.sessions.length})</span>
+                  </div>
+                  <div className="space-y-2">
+                    {group.sessions.map((session) => (
+                      <SessionItem
+                        key={session.id}
+                        session={session}
+                        onRevoke={(id) => revokeOne.mutate(id)}
+                        isRevoking={revokeOne.isPending}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )
+            })}
           </div>
         )}
       </CardContent>
@@ -198,9 +310,15 @@ export function ActiveSessions() {
           <DialogHeader>
             <DialogTitle>Revoke all other sessions?</DialogTitle>
             <DialogDescription>
-              This will sign you out of all other devices and browsers. Your current session will not be affected.
+              This will sign you out of all other devices. You'll stay signed in on this device.
             </DialogDescription>
           </DialogHeader>
+          <div className="rounded-md border border-amber-500/20 bg-amber-500/5 p-3">
+            <p className="text-sm text-amber-700 dark:text-amber-400">
+              {otherSessionCount} other session{otherSessionCount !== 1 ? "s" : ""} will be revoked.
+              Anyone using those sessions will need to sign in again.
+            </p>
+          </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setConfirmRevokeAll(false)}>
               Cancel
@@ -213,7 +331,7 @@ export function ActiveSessions() {
               }}
               disabled={revokeAll.isPending}
             >
-              {revokeAll.isPending ? "Revoking..." : "Revoke all"}
+              {revokeAll.isPending ? "Revoking..." : `Revoke ${otherSessionCount} session${otherSessionCount !== 1 ? "s" : ""}`}
             </Button>
           </DialogFooter>
         </DialogContent>

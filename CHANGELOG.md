@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.41.0 (2026-04-30)
+
+### Improved
+- **Voicemail player** — volume control with mute toggle, playback speed (1x/1.5x/2x), draggable progress knob, keyboard controls (space/arrows), and styled container.
+- **MFA profile section** — visual status banner (green Protected / amber Not Protected), backup codes progress bar with color thresholds, info tooltips, and "enabled on" date display.
+- **Invite member dialog** — toast notifications, bulk email invitations with removable badges, email validation checkmark, loading spinner, and role permissions preview card.
+- **Active sessions** — current session "This device" highlight with green badge, location info with MapPin, sessions grouped by device type (Desktop/Mobile/Tablet), compact relative timestamps, and revoke-all confirmation with count.
+
 ## v0.40.0 (2026-04-30)
 
 ### Improved
