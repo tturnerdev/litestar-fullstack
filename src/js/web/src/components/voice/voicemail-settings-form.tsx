@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { useUpdateVoicemailSettings, useUploadVoicemailGreeting, useVoicemailSettings } from "@/lib/api/hooks/voice"
+import { formatDurationHuman } from "@/lib/format-utils"
 
 const GREETING_TYPE_DESCRIPTIONS: Record<string, string> = {
   default: "Plays the system default greeting.",
@@ -26,14 +27,6 @@ const DEFAULTS = {
   transcriptionEnabled: true,
   autoDeleteDays: "90",
 } as const
-
-function formatDuration(seconds: number): string {
-  if (seconds < 60) return `${seconds} seconds`
-  const mins = Math.floor(seconds / 60)
-  const secs = seconds % 60
-  if (secs === 0) return mins === 1 ? "1 minute" : `${mins} minutes`
-  return `${mins}m ${secs}s`
-}
 
 function formatRetention(days: number): string {
   if (days < 7) return `${days} day${days !== 1 ? "s" : ""}`
@@ -261,7 +254,7 @@ export function VoicemailSettingsForm({ extensionId }: { extensionId: string }) 
               }}
             />
             {currentMaxLength && Number(currentMaxLength) > 0 && (
-              <span className="text-xs text-muted-foreground">= {formatDuration(Number(currentMaxLength))}</span>
+              <span className="text-xs text-muted-foreground">= {formatDurationHuman(Number(currentMaxLength))}</span>
             )}
           </div>
         </div>

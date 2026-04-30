@@ -241,7 +241,7 @@ function TagsPage() {
           />
         ) : (
           <div className="rounded-lg border">
-            <Table>
+            <Table aria-label="Tags">
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[40px]">

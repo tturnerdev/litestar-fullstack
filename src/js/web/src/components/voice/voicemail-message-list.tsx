@@ -27,14 +27,9 @@ import {
   type VoicemailMessage,
 } from "@/lib/api/hooks/voice"
 import { formatFullDateTime } from "@/lib/date-utils"
+import { formatDuration } from "@/lib/format-utils"
 
 const PAGE_SIZE = 15
-
-function formatDuration(seconds: number): string {
-  const mins = Math.floor(seconds / 60)
-  const secs = seconds % 60
-  return `${mins}:${secs.toString().padStart(2, "0")}`
-}
 
 function formatReceivedAt(dateStr: string): string {
   const date = new Date(dateStr)

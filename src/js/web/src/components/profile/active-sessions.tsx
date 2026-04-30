@@ -379,6 +379,7 @@ export function ActiveSessions() {
               onClick={() => refetch()}
               disabled={isFetching}
               className="h-8 w-8"
+              aria-label="Refresh sessions"
             >
               <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
               <span className="sr-only">Refresh sessions</span>

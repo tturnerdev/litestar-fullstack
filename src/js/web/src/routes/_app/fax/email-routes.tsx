@@ -475,7 +475,7 @@ function FaxEmailRoutesPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <Table>
+              <Table aria-label="Email routes">
                 <TableHeader>
                   <TableRow>
                     <TableHead>Email Address</TableHead>

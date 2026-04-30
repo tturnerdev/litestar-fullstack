@@ -34,6 +34,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { useDevice, useUpdateDevice } from "@/lib/api/hooks/devices"
+import { formatMacAddress } from "@/lib/format-utils"
 
 export const Route = createFileRoute("/_app/devices/$deviceId/edit")({
   component: EditDevicePage,
@@ -57,16 +58,6 @@ const deviceTypes: { value: string; label: string; icon: LucideIcon }[] = [
 
 const MAC_REGEX = /^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$/
 const IPV4_REGEX = /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/
-
-/** Auto-format a raw MAC string into XX:XX:XX:XX:XX:XX as the user types. */
-function formatMacAddress(raw: string): string {
-  const hex = raw.replace(/[^0-9A-Fa-f]/g, "").toUpperCase().slice(0, 12)
-  const parts: string[] = []
-  for (let i = 0; i < hex.length; i += 2) {
-    parts.push(hex.slice(i, i + 2))
-  }
-  return parts.join(":")
-}
 
 // ---------------------------------------------------------------------------
 // Schema

@@ -28,3 +28,37 @@ export function formatBytes(bytes: number | null | undefined): string {
   const i = Math.floor(Math.log(bytes) / Math.log(k))
   return `${Number.parseFloat((bytes / k ** i).toFixed(1))} ${sizes[i]}`
 }
+
+/**
+ * Format a duration in seconds as MM:SS (e.g. "2:05").
+ */
+export function formatDuration(seconds: number): string {
+  const mins = Math.floor(seconds / 60)
+  const secs = seconds % 60
+  return `${mins}:${secs.toString().padStart(2, "0")}`
+}
+
+/**
+ * Format a duration in seconds as human-readable text.
+ * Examples: "45 seconds", "2 minutes", "1m 30s"
+ */
+export function formatDurationHuman(seconds: number): string {
+  if (seconds < 60) return `${seconds} seconds`
+  const mins = Math.floor(seconds / 60)
+  const secs = seconds % 60
+  if (secs === 0) return mins === 1 ? "1 minute" : `${mins} minutes`
+  return `${mins}m ${secs}s`
+}
+
+/**
+ * Auto-format a raw MAC string into XX:XX:XX:XX:XX:XX as the user types.
+ * Strips non-hex characters, uppercases, and inserts colons every 2 chars.
+ */
+export function formatMacAddress(raw: string): string {
+  const hex = raw.replace(/[^0-9A-Fa-f]/g, "").toUpperCase().slice(0, 12)
+  const parts: string[] = []
+  for (let i = 0; i < hex.length; i += 2) {
+    parts.push(hex.slice(i, i + 2))
+  }
+  return parts.join(":")
+}

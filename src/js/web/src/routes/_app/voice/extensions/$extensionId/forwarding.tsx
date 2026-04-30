@@ -316,7 +316,7 @@ function RulesTable({
   }
 
   return (
-    <Table>
+    <Table aria-label="Forwarding rules">
       <TableHeader>
         <TableRow>
           <TableHead className="w-20">Priority</TableHead>

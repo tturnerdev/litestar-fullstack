@@ -545,7 +545,7 @@ function PhoneNumbersPage() {
 
             {/* Table */}
             <div className="rounded-md border border-border/60 bg-card/80">
-              <Table>
+              <Table aria-label="Phone numbers">
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-10">
