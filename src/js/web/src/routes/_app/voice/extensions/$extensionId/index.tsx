@@ -1,7 +1,30 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
-import { AlertTriangle, ArrowLeft, ArrowRight, BellOff, Loader2, Mail, Pencil, PhoneForwarded, Trash2, Voicemail } from "lucide-react"
-import { useState } from "react"
+import { useCallback, useState } from "react"
+import {
+  AlertTriangle,
+  ArrowRight,
+  BellOff,
+  Check,
+  Copy,
+  Fingerprint,
+  Loader2,
+  Mail,
+  Pencil,
+  Phone,
+  PhoneForwarded,
+  Settings,
+  Trash2,
+  Voicemail,
+} from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -12,15 +35,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { SkeletonCard } from "@/components/ui/skeleton"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Switch } from "@/components/ui/switch"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { DndQuickToggle } from "@/components/voice/dnd-quick-toggle"
-import { DndSettingsForm } from "@/components/voice/dnd-settings-form"
-import { ForwardingRuleEditor } from "@/components/voice/forwarding-rule-editor"
-import { VoicemailSettingsForm } from "@/components/voice/voicemail-settings-form"
 import {
   useDeleteExtension,
   useDndSettings,
@@ -32,17 +51,138 @@ import {
 } from "@/lib/api/hooks/voice"
 
 export const Route = createFileRoute("/_app/voice/extensions/$extensionId/")({
-  component: ExtensionSettingsPage,
+  component: ExtensionDetailPage,
 })
 
-function ExtensionSettingsPage() {
+// -- Formatting helpers -------------------------------------------------------
+
+function formatDateTime(value: string | null | undefined): string {
+  if (!value) return "---"
+  return new Date(value).toLocaleString()
+}
+
+function formatRelativeTime(value: string | null | undefined): string {
+  if (!value) return "Never"
+  const date = new Date(value)
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffMins = Math.floor(diffMs / 60_000)
+  if (diffMins < 1) return "Just now"
+  if (diffMins < 60) return `${diffMins}m ago`
+  const diffHours = Math.floor(diffMins / 60)
+  if (diffHours < 24) return `${diffHours}h ago`
+  const diffDays = Math.floor(diffHours / 24)
+  return `${diffDays}d ago`
+}
+
+// -- Copy button --------------------------------------------------------------
+
+function CopyButton({ value, label }: { value: string; label: string }) {
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = useCallback(async () => {
+    await navigator.clipboard.writeText(value)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }, [value])
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-6 w-6 text-muted-foreground hover:text-foreground"
+          onClick={handleCopy}
+        >
+          {copied ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
+          <span className="sr-only">Copy {label}</span>
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>{copied ? "Copied!" : `Copy ${label}`}</TooltipContent>
+    </Tooltip>
+  )
+}
+
+// -- Timestamp with tooltip ---------------------------------------------------
+
+function TimestampField({
+  label,
+  value,
+}: {
+  label: string
+  value: string | null | undefined
+}) {
+  if (!value) {
+    return (
+      <div>
+        <p className="text-sm text-muted-foreground">{label}</p>
+        <p className="text-sm">---</p>
+      </div>
+    )
+  }
+
+  return (
+    <div>
+      <p className="text-sm text-muted-foreground">{label}</p>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <p className="cursor-default text-sm">{formatRelativeTime(value)}</p>
+        </TooltipTrigger>
+        <TooltipContent>{formatDateTime(value)}</TooltipContent>
+      </Tooltip>
+    </div>
+  )
+}
+
+// -- Main page ----------------------------------------------------------------
+
+function ExtensionDetailPage() {
   const { extensionId } = Route.useParams()
   const router = useRouter()
-  const { data } = useExtension(extensionId)
+  const { data, isLoading, isError } = useExtension(extensionId)
+  const updateExtension = useUpdateExtension(extensionId)
   const deleteExtension = useDeleteExtension()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
-  const title = data ? `${data.displayName} (Ext. ${data.extensionNumber})` : "Extension Settings"
+  if (isLoading) {
+    return (
+      <PageContainer className="flex-1 space-y-8">
+        <PageHeader eyebrow="Voice" title="Extension Details" />
+        <PageSection>
+          <SkeletonCard />
+        </PageSection>
+      </PageContainer>
+    )
+  }
+
+  if (isError || !data) {
+    return (
+      <PageContainer className="flex-1 space-y-8">
+        <PageHeader
+          eyebrow="Voice"
+          title="Extension Details"
+          actions={
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/voice/extensions">Back to extensions</Link>
+            </Button>
+          }
+        />
+        <PageSection>
+          <Card>
+            <CardHeader>
+              <CardTitle>Extension detail</CardTitle>
+            </CardHeader>
+            <CardContent className="text-muted-foreground">
+              We could not load this extension.
+            </CardContent>
+          </Card>
+        </PageSection>
+      </PageContainer>
+    )
+  }
+
+  const title = `${data.displayName} (Ext. ${data.extensionNumber})`
 
   const handleDelete = async () => {
     await deleteExtension.mutateAsync(extensionId)
@@ -54,13 +194,42 @@ function ExtensionSettingsPage() {
       <PageHeader
         eyebrow="Voice"
         title={title}
+        description={data.isActive ? undefined : "This extension is currently disabled"}
+        breadcrumbs={
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/home">Home</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/voice/extensions">Extensions</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>{data.displayName}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        }
         actions={
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <DndQuickToggle extensionId={extensionId} showLabel />
+            {!data.isActive && (
+              <Badge
+                variant="outline"
+                className="border-muted-foreground/30 text-muted-foreground"
+              >
+                Disabled
+              </Badge>
+            )}
             <Button variant="outline" size="sm" asChild>
               <Link to="/voice/extensions/$extensionId/edit" params={{ extensionId }}>
-                <Pencil className="mr-2 h-4 w-4" />
-                Edit
+                <Pencil className="mr-2 h-4 w-4" /> Edit
               </Link>
             </Button>
             <Button
@@ -72,46 +241,106 @@ function ExtensionSettingsPage() {
               <Trash2 className="mr-2 h-4 w-4" />
               Delete
             </Button>
-            <Button variant="outline" size="sm" asChild>
-              <Link to="/voice/extensions">
-                <ArrowLeft className="mr-2 h-4 w-4" /> All Extensions
-              </Link>
-            </Button>
           </div>
         }
       />
 
+      {/* Extension Info */}
       <PageSection>
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Phone className="h-5 w-5 text-muted-foreground" />
+              <CardTitle>Extension Info</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-4">
+              <div>
+                <p className="text-muted-foreground">Extension Number</p>
+                <p className="font-mono font-medium">{data.extensionNumber}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Display Name</p>
+                <p className="font-medium">{data.displayName}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Phone Number</p>
+                <p>{data.phoneNumberId ? "Assigned" : "Not assigned"}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Active</p>
+                <div className="mt-0.5 flex items-center gap-2">
+                  <p>{data.isActive ? "Yes" : "No"}</p>
+                  <Switch
+                    checked={data.isActive}
+                    onCheckedChange={(checked) =>
+                      updateExtension.mutate({ isActive: checked })
+                    }
+                    disabled={updateExtension.isPending}
+                  />
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </PageSection>
+
+      {/* Call Settings */}
+      <PageSection delay={0.1}>
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Settings className="h-5 w-5 text-muted-foreground" />
+              <CardTitle>Call Settings</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <CallSettingsSummary extensionId={extensionId} />
+          </CardContent>
+        </Card>
+      </PageSection>
+
+      {/* Sub-page links (voicemail, forwarding, dnd) */}
+      <PageSection delay={0.15}>
         <SubPageLinks extensionId={extensionId} />
       </PageSection>
 
-      <PageSection delay={0.1}>
-        <Tabs defaultValue="general">
-          <TabsList>
-            <TabsTrigger value="general">General</TabsTrigger>
-            <TabsTrigger value="voicemail">Voicemail</TabsTrigger>
-            <TabsTrigger value="forwarding">Forwarding</TabsTrigger>
-            <TabsTrigger value="dnd">DND</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="general" className="mt-6">
-            <GeneralTab extensionId={extensionId} />
-          </TabsContent>
-
-          <TabsContent value="voicemail" className="mt-6">
-            <VoicemailSettingsForm extensionId={extensionId} />
-          </TabsContent>
-
-          <TabsContent value="forwarding" className="mt-6">
-            <ForwardingRuleEditor extensionId={extensionId} />
-          </TabsContent>
-
-          <TabsContent value="dnd" className="mt-6">
-            <DndSettingsForm extensionId={extensionId} />
-          </TabsContent>
-        </Tabs>
+      {/* Metadata */}
+      <PageSection delay={0.2}>
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Fingerprint className="h-5 w-5 text-muted-foreground" />
+              <CardTitle>Metadata</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Extension ID</p>
+                <div className="flex items-center gap-1">
+                  <p className="font-mono text-xs">{extensionId}</p>
+                  <CopyButton value={extensionId} label="extension ID" />
+                </div>
+              </div>
+              <TimestampField label="Created" value={data.createdAt} />
+              <TimestampField label="Last Updated" value={data.updatedAt} />
+              {data.phoneNumberId && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Phone Number ID</p>
+                  <div className="flex items-center gap-1">
+                    <p className="font-mono text-xs">{data.phoneNumberId}</p>
+                    <CopyButton value={data.phoneNumberId} label="phone number ID" />
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </PageSection>
 
+      {/* Delete confirmation dialog */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent>
           <DialogHeader>
@@ -121,15 +350,20 @@ function ExtensionSettingsPage() {
             </DialogTitle>
             <DialogDescription>
               Are you sure you want to delete{" "}
-              <span className="font-medium">{data?.displayName}</span>
-              {data?.extensionNumber && (
+              <span className="font-medium">{data.displayName}</span>
+              {data.extensionNumber && (
                 <> (Ext. <span className="font-mono">{data.extensionNumber}</span>)</>
               )}
-              ? This action cannot be undone. All associated forwarding rules, voicemail, and DND settings will be permanently removed.
+              ? This action cannot be undone. All associated forwarding rules, voicemail,
+              and DND settings will be permanently removed.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowDeleteDialog(false)} disabled={deleteExtension.isPending}>
+            <Button
+              variant="outline"
+              onClick={() => setShowDeleteDialog(false)}
+              disabled={deleteExtension.isPending}
+            >
               Cancel
             </Button>
             <Button
@@ -137,7 +371,9 @@ function ExtensionSettingsPage() {
               onClick={handleDelete}
               disabled={deleteExtension.isPending}
             >
-              {deleteExtension.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {deleteExtension.isPending && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
               Delete
             </Button>
           </DialogFooter>
@@ -146,6 +382,63 @@ function ExtensionSettingsPage() {
     </PageContainer>
   )
 }
+
+// -- Call settings summary ----------------------------------------------------
+
+function CallSettingsSummary({ extensionId }: { extensionId: string }) {
+  const { data: dndSettings } = useDndSettings(extensionId)
+  const { data: fwdRules } = useForwardingRules(extensionId)
+  const { data: vmSettings } = useVoicemailSettings(extensionId)
+
+  const dndEnabled = dndSettings?.isEnabled ?? false
+  const ruleCount = fwdRules?.items?.length ?? 0
+  const activeRules = fwdRules?.items?.filter((r) => r.isActive).length ?? 0
+  const vmEnabled = vmSettings?.isEnabled ?? false
+
+  return (
+    <div className="grid gap-4 text-sm md:grid-cols-3">
+      <div className="flex items-start gap-3">
+        <BellOff className="mt-0.5 h-4 w-4 text-muted-foreground" />
+        <div>
+          <p className="text-muted-foreground">Do Not Disturb</p>
+          <div className="mt-0.5 flex items-center gap-2">
+            {dndEnabled ? (
+              <Badge variant="destructive" className="gap-1 text-xs">
+                <BellOff className="h-3 w-3" />
+                Active
+                {dndSettings?.mode && dndSettings.mode !== "always"
+                  ? ` (${dndSettings.mode})`
+                  : ""}
+              </Badge>
+            ) : (
+              <span>Off</span>
+            )}
+          </div>
+        </div>
+      </div>
+      <div className="flex items-start gap-3">
+        <PhoneForwarded className="mt-0.5 h-4 w-4 text-muted-foreground" />
+        <div>
+          <p className="text-muted-foreground">Forwarding Rules</p>
+          <p className="mt-0.5">
+            {ruleCount > 0
+              ? `${activeRules} of ${ruleCount} rules active`
+              : "No rules configured"}
+          </p>
+        </div>
+      </div>
+      <div className="flex items-start gap-3">
+        <Voicemail className="mt-0.5 h-4 w-4 text-muted-foreground" />
+        <div>
+          <p className="text-muted-foreground">Voicemail</p>
+          <p className="mt-0.5">{vmEnabled ? "Enabled" : "Disabled"}</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// -- Sub-page links -----------------------------------------------------------
 
 function SubPageLinks({ extensionId }: { extensionId: string }) {
   const { data: vmSettings } = useVoicemailSettings(extensionId)
@@ -179,9 +472,10 @@ function SubPageLinks({ extensionId }: { extensionId: string }) {
     },
     {
       label: "Call Forwarding",
-      description: ruleCount > 0
-        ? `${activeRules} of ${ruleCount} rules active`
-        : "No forwarding rules configured",
+      description:
+        ruleCount > 0
+          ? `${activeRules} of ${ruleCount} rules active`
+          : "No forwarding rules configured",
       to: "/voice/extensions/$extensionId/forwarding" as const,
       icon: PhoneForwarded,
       badge: ruleCount > 0 ? (
@@ -226,87 +520,5 @@ function SubPageLinks({ extensionId }: { extensionId: string }) {
         </Card>
       ))}
     </div>
-  )
-}
-
-function GeneralTab({ extensionId }: { extensionId: string }) {
-  const { data, isLoading, isError } = useExtension(extensionId)
-  const updateMutation = useUpdateExtension(extensionId)
-  const [displayName, setDisplayName] = useState("")
-  const [dirty, setDirty] = useState(false)
-
-  if (isLoading) return <SkeletonCard />
-
-  if (isError || !data) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>General</CardTitle>
-        </CardHeader>
-        <CardContent className="text-muted-foreground">Unable to load extension details.</CardContent>
-      </Card>
-    )
-  }
-
-  const currentDisplayName = displayName || data.displayName
-
-  function handleSave() {
-    const payload: Record<string, unknown> = {}
-    if (displayName) payload.displayName = displayName
-    updateMutation.mutate(payload, {
-      onSuccess: () => setDirty(false),
-    })
-  }
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>General Settings</CardTitle>
-        <CardDescription>Basic configuration for this extension.</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="space-y-2">
-          <Label>Extension number</Label>
-          <Input value={data.extensionNumber} disabled />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="ext-display-name">Display name</Label>
-          <p className="text-xs text-muted-foreground">This name appears in the directory and call logs.</p>
-          <Input
-            id="ext-display-name"
-            value={currentDisplayName}
-            onChange={(e) => {
-              setDisplayName(e.target.value)
-              setDirty(true)
-            }}
-          />
-        </div>
-
-        <div className="flex items-center justify-between">
-          <div>
-            <Label>Status</Label>
-            <p className="text-xs text-muted-foreground">Whether this extension can receive calls.</p>
-          </div>
-          <Badge variant={data.isActive ? "default" : "outline"}>
-            {data.isActive ? "Active" : "Inactive"}
-          </Badge>
-        </div>
-
-        {data.phoneNumberId && (
-          <div className="flex items-center justify-between">
-            <div>
-              <Label>Linked phone number</Label>
-              <p className="text-xs text-muted-foreground">A DID number routes directly to this extension.</p>
-            </div>
-            <Badge variant="secondary">Assigned</Badge>
-          </div>
-        )}
-
-        <Button onClick={handleSave} disabled={!dirty || updateMutation.isPending}>
-          {updateMutation.isPending ? "Saving..." : "Save changes"}
-        </Button>
-      </CardContent>
-    </Card>
   )
 }

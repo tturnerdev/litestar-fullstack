@@ -24,6 +24,8 @@ export interface Extension {
   phoneNumberId: string | null
   displayName: string
   isActive: boolean
+  createdAt: string | null
+  updatedAt: string | null
 }
 
 export interface VoicemailSettings {

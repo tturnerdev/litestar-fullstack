@@ -1,5 +1,6 @@
 """Extension schemas."""
 
+from datetime import datetime
 from uuid import UUID
 
 import msgspec
@@ -16,6 +17,8 @@ class Extension(CamelizedBaseStruct):
     phone_number_id: UUID | None = None
     display_name: str = ""
     is_active: bool = True
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
 
 
 class ExtensionCreate(CamelizedBaseStruct):

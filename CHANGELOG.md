@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.25.0 (2026-04-30)
+
+### Improved
+- **Admin domain pages** (devices, fax, voice, support) — colored icon stat cards with hover links, loading skeletons, error states, empty states, recent items tables, section headers with descriptions, and "View all" navigation buttons.
+- **Voice extension detail page** — organized into sectioned cards (Info, Call Settings, Metadata) with inline active toggle, DND/forwarding/voicemail summaries, copy buttons, relative timestamps, and delete confirmation.
+- Extension schema now includes `created_at` and `updated_at` fields.
+
 ## v0.24.0 (2026-04-30)
 
 ### Improved
