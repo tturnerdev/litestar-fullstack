@@ -336,7 +336,7 @@ function FaxMessagesPage() {
             </div>
 
             {/* Table */}
-            <div className="rounded-md border border-border/60 bg-card/80">
+            <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
               <Table aria-label="Fax messages">
                 <TableHeader>
                   <TableRow>
@@ -354,6 +354,7 @@ function FaxMessagesPage() {
                       currentSort={sortKey}
                       currentDirection={sortDir}
                       onSort={handleSort}
+                      className="hidden md:table-cell"
                     />
                     <SortableHeader
                       label="Direction"
@@ -361,6 +362,7 @@ function FaxMessagesPage() {
                       currentSort={sortKey}
                       currentDirection={sortDir}
                       onSort={handleSort}
+                      className="hidden md:table-cell"
                     />
                     <SortableHeader
                       label="Remote Number"
@@ -369,8 +371,8 @@ function FaxMessagesPage() {
                       currentDirection={sortDir}
                       onSort={handleSort}
                     />
-                    <TableHead>Fax Line</TableHead>
-                    <TableHead>Pages</TableHead>
+                    <TableHead className="hidden md:table-cell">Fax Line</TableHead>
+                    <TableHead className="hidden md:table-cell">Pages</TableHead>
                     <SortableHeader
                       label="Status"
                       sortKey="status"
@@ -456,7 +458,7 @@ function FaxMessageRow({
           aria-label={`Select message from ${msg.remoteNumber}`}
         />
       </TableCell>
-      <TableCell>
+      <TableCell className="hidden md:table-cell">
         <Tooltip>
           <TooltipTrigger asChild>
             <span className="cursor-default whitespace-nowrap text-xs text-muted-foreground">
@@ -466,7 +468,7 @@ function FaxMessageRow({
           <TooltipContent>{formatDateTime(msg.receivedAt ?? msg.createdAt)}</TooltipContent>
         </Tooltip>
       </TableCell>
-      <TableCell>
+      <TableCell className="hidden md:table-cell">
         <DirectionBadge direction={msg.direction} />
       </TableCell>
       <TableCell>
@@ -477,10 +479,10 @@ function FaxMessageRow({
           )}
         </div>
       </TableCell>
-      <TableCell>
+      <TableCell className="hidden md:table-cell">
         <span className="text-sm text-muted-foreground">{faxLineName || "--"}</span>
       </TableCell>
-      <TableCell>
+      <TableCell className="hidden md:table-cell">
         <Badge variant="outline" className="font-mono text-xs">
           {formatPages(msg.pageCount)}
         </Badge>

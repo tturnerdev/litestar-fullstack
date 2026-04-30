@@ -128,7 +128,7 @@ function NewTagPage() {
               />
               <div className="flex items-center justify-between">
                 <p className="text-xs text-muted-foreground">
-                  Display name for the tag.
+                  The display name shown when tagging resources.
                 </p>
                 <p className={cn("text-xs", name.length >= NAME_MAX ? "text-red-500" : "text-muted-foreground")}>
                   {name.length}/{NAME_MAX}
@@ -138,10 +138,15 @@ function NewTagPage() {
 
             {/* Slug preview */}
             {name.trim() !== "" && (
-              <div className="flex items-center gap-2 rounded-md border border-dashed px-3 py-2">
-                <Hash className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                <span className="text-sm text-muted-foreground">Slug:</span>
-                <code className="text-sm font-mono">{slug || "—"}</code>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 rounded-md border border-dashed px-3 py-2">
+                  <Hash className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                  <span className="text-sm text-muted-foreground">Slug:</span>
+                  <code className="text-sm font-mono">{slug || "—"}</code>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  URL-friendly identifier, auto-generated from name.
+                </p>
               </div>
             )}
 
@@ -157,8 +162,11 @@ function NewTagPage() {
                 rows={3}
                 className="resize-none"
               />
-              <div className="flex items-center justify-end">
-                <p className={cn("text-xs", description.length >= DESC_MAX ? "text-red-500" : "text-muted-foreground")}>
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-muted-foreground">
+                  Optional notes about when or how to use this tag.
+                </p>
+                <p className={cn("shrink-0 text-xs", description.length >= DESC_MAX ? "text-red-500" : "text-muted-foreground")}>
                   {description.length}/{DESC_MAX}
                 </p>
               </div>
@@ -187,7 +195,7 @@ function NewTagPage() {
                 ))}
               </div>
               <p className="text-xs text-muted-foreground">
-                Optional. Click a color to select, click again to deselect.
+                Choose a color to visually distinguish this tag. Click again to deselect.
               </p>
             </div>
 

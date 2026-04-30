@@ -147,6 +147,9 @@ function EditTagPage() {
                 required
                 autoFocus
               />
+              <p className="text-xs text-muted-foreground">
+                The display name shown when tagging resources.
+              </p>
               <div className="flex items-center justify-between">
                 <p className="text-xs text-muted-foreground">
                   Current slug: <span className="font-mono">{data.slug}</span>

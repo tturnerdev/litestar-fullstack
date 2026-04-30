@@ -206,15 +206,15 @@ function PhoneNumberRow({
       <TableCell>
         <span className="font-mono text-sm">{pn.number}</span>
       </TableCell>
-      <TableCell>
+      <TableCell className="hidden md:table-cell">
         <span className="text-sm">{pn.label ?? <span className="text-muted-foreground">--</span>}</span>
       </TableCell>
-      <TableCell>
+      <TableCell className="hidden md:table-cell">
         <Badge variant={typeBadgeVariant[pn.numberType] ?? "outline"}>
           {typeLabels[pn.numberType] ?? pn.numberType}
         </Badge>
       </TableCell>
-      <TableCell>
+      <TableCell className="hidden md:table-cell">
         <span className="text-sm">{pn.callerIdName ?? <span className="text-muted-foreground">--</span>}</span>
       </TableCell>
       <TableCell>
@@ -565,7 +565,7 @@ function PhoneNumbersPage() {
             </div>
 
             {/* Table */}
-            <div className="rounded-md border border-border/60 bg-card/80">
+            <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
               <Table aria-label="Phone numbers">
                 <TableHeader>
                   <TableRow>
@@ -590,6 +590,7 @@ function PhoneNumbersPage() {
                       currentSort={sortKey}
                       currentDirection={sortDir}
                       onSort={handleSort}
+                      className="hidden md:table-cell"
                     />
                     <SortableHeader
                       label="Type"
@@ -597,6 +598,7 @@ function PhoneNumbersPage() {
                       currentSort={sortKey}
                       currentDirection={sortDir}
                       onSort={handleSort}
+                      className="hidden md:table-cell"
                     />
                     <SortableHeader
                       label="Caller ID"
@@ -604,6 +606,7 @@ function PhoneNumbersPage() {
                       currentSort={sortKey}
                       currentDirection={sortDir}
                       onSort={handleSort}
+                      className="hidden md:table-cell"
                     />
                     <SortableHeader
                       label="Status"

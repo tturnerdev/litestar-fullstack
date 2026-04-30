@@ -296,7 +296,7 @@ function TeamsPage() {
             </div>
 
             {/* Table */}
-            <div className="rounded-md border border-border/60 bg-card/80">
+            <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
               <Table aria-label="Teams">
                 <TableHeader>
                   <TableRow>
@@ -322,9 +322,9 @@ function TeamsPage() {
                       currentDirection={sortDir}
                       onSort={handleSort}
                     />
-                    <TableHead>Your Role</TableHead>
-                    <TableHead>Tags</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead className="hidden md:table-cell">Your Role</TableHead>
+                    <TableHead className="hidden md:table-cell">Tags</TableHead>
+                    <TableHead className="hidden md:table-cell">Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -430,7 +430,7 @@ function TeamRow({
           {memberCount}
         </span>
       </TableCell>
-      <TableCell>
+      <TableCell className="hidden md:table-cell">
         {isOwner ? (
           <Badge className="gap-1 bg-amber-500/15 text-amber-700 hover:bg-amber-500/20 dark:text-amber-400">
             <Crown className="h-3 w-3" />
@@ -449,7 +449,7 @@ function TeamRow({
           <span className="text-xs text-muted-foreground">--</span>
         )}
       </TableCell>
-      <TableCell>
+      <TableCell className="hidden md:table-cell">
         {tags.length > 0 ? (
           <div className="flex flex-wrap gap-1">
             {tags.slice(0, 2).map((tag) => (
@@ -467,7 +467,7 @@ function TeamRow({
           <span className="text-xs text-muted-foreground">--</span>
         )}
       </TableCell>
-      <TableCell>
+      <TableCell className="hidden md:table-cell">
         {team.isActive === false ? (
           <Badge variant="destructive" className="text-[10px]">Inactive</Badge>
         ) : (

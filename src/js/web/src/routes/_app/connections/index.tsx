@@ -422,7 +422,7 @@ function ConnectionsPage() {
             </div>
 
             {/* Table */}
-            <div className="rounded-md border border-border/60 bg-card/80">
+            <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
               <Table aria-label="Connections">
                 <TableHeader>
                   <TableRow>
@@ -447,6 +447,7 @@ function ConnectionsPage() {
                       currentSort={sortKey}
                       currentDirection={sortDir}
                       onSort={handleSort}
+                      className="hidden md:table-cell"
                     />
                     <SortableHeader
                       label="Status"
@@ -455,13 +456,14 @@ function ConnectionsPage() {
                       currentDirection={sortDir}
                       onSort={handleSort}
                     />
-                    <TableHead>Host</TableHead>
+                    <TableHead className="hidden md:table-cell">Host</TableHead>
                     <SortableHeader
                       label="Last Tested"
                       sortKey="last_health_check"
                       currentSort={sortKey}
                       currentDirection={sortDir}
                       onSort={handleSort}
+                      className="hidden md:table-cell"
                     />
                     <SortableHeader
                       label="Created"
@@ -469,6 +471,7 @@ function ConnectionsPage() {
                       currentSort={sortKey}
                       currentDirection={sortDir}
                       onSort={handleSort}
+                      className="hidden md:table-cell"
                     />
                     <TableHead className="w-20 text-right">Actions</TableHead>
                   </TableRow>
@@ -554,7 +557,7 @@ function ConnectionRow({
           <span className="text-xs text-muted-foreground">{conn.provider}</span>
         </Link>
       </TableCell>
-      <TableCell>
+      <TableCell className="hidden md:table-cell">
         <Badge variant={typeBadgeVariant[conn.connectionType] ?? "outline"}>
           {typeLabels[conn.connectionType] ?? conn.connectionType}
         </Badge>
@@ -569,7 +572,7 @@ function ConnectionRow({
           )}
         </div>
       </TableCell>
-      <TableCell>
+      <TableCell className="hidden md:table-cell">
         {conn.host ? (
           <span className="font-mono text-xs text-muted-foreground">
             {conn.host}
@@ -579,7 +582,7 @@ function ConnectionRow({
           <span className="text-xs text-muted-foreground">--</span>
         )}
       </TableCell>
-      <TableCell>
+      <TableCell className="hidden md:table-cell">
         <Tooltip>
           <TooltipTrigger asChild>
             <span className="cursor-default text-xs text-muted-foreground">
@@ -589,7 +592,7 @@ function ConnectionRow({
           <TooltipContent>{formatDateTime(conn.lastHealthCheck)}</TooltipContent>
         </Tooltip>
       </TableCell>
-      <TableCell>
+      <TableCell className="hidden md:table-cell">
         <Tooltip>
           <TooltipTrigger asChild>
             <span className="cursor-default text-xs text-muted-foreground">

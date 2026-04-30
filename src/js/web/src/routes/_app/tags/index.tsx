@@ -281,7 +281,7 @@ function TagsPage() {
               )}
             </div>
 
-            <div className="rounded-lg border">
+            <div className="overflow-x-auto rounded-lg border">
             <Table aria-label="Tags">
               <TableHeader>
                 <TableRow>
@@ -303,7 +303,7 @@ function TagsPage() {
                       <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />
                     </button>
                   </TableHead>
-                  <TableHead>
+                  <TableHead className="hidden md:table-cell">
                     <button
                       type="button"
                       className="inline-flex items-center gap-1 font-medium hover:text-foreground transition-colors"
@@ -333,7 +333,7 @@ function TagsPage() {
                     <TableCell className="font-medium">
                       <Badge variant="secondary">{tag.name}</Badge>
                     </TableCell>
-                    <TableCell className="font-mono text-xs text-muted-foreground">{tag.slug}</TableCell>
+                    <TableCell className="hidden md:table-cell font-mono text-xs text-muted-foreground">{tag.slug}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
                         <Button variant="ghost" size="icon" className="h-8 w-8" asChild>

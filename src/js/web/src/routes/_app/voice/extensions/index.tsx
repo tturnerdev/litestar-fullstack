@@ -393,7 +393,7 @@ function ExtensionsPage() {
             </div>
 
             {/* Table */}
-            <div className="rounded-md border border-border/60 bg-card/80">
+            <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
               <Table aria-label="Extensions">
                 <TableHeader>
                   <TableRow>
@@ -425,6 +425,7 @@ function ExtensionsPage() {
                       currentSort={sortKey}
                       currentDirection={sortDir}
                       onSort={handleSort}
+                      className="hidden md:table-cell"
                     />
                     <SortableHeader
                       label="Status"
@@ -433,7 +434,7 @@ function ExtensionsPage() {
                       currentDirection={sortDir}
                       onSort={handleSort}
                     />
-                    <TableHead>Created</TableHead>
+                    <TableHead className="hidden md:table-cell">Created</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -535,7 +536,7 @@ function ExtensionRow({
         </Link>
       </TableCell>
       <TableCell>{ext.displayName}</TableCell>
-      <TableCell>
+      <TableCell className="hidden md:table-cell">
         {phoneNumber ? (
           <span className="font-mono text-xs">{phoneNumber}</span>
         ) : (
@@ -545,7 +546,7 @@ function ExtensionRow({
       <TableCell>
         <StatusIndicator isActive={ext.isActive} />
       </TableCell>
-      <TableCell>
+      <TableCell className="hidden md:table-cell">
         <Tooltip>
           <TooltipTrigger asChild>
             <span className="cursor-default text-xs text-muted-foreground">

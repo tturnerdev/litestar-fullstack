@@ -441,7 +441,7 @@ function SupportPage() {
             </div>
 
             {/* Table */}
-            <div className="rounded-md border border-border/60 bg-card/80">
+            <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
               <Table aria-label="Support tickets">
                 <TableHeader>
                   <TableRow>
@@ -474,14 +474,16 @@ function SupportPage() {
                       currentSort={sortKey}
                       currentDirection={sortDir}
                       onSort={handleSort}
+                      className="hidden md:table-cell"
                     />
-                    <TableHead>Category</TableHead>
+                    <TableHead className="hidden md:table-cell">Category</TableHead>
                     <SortableHeader
                       label="Created"
                       sortKey="created_at"
                       currentSort={sortKey}
                       currentDirection={sortDir}
                       onSort={handleSort}
+                      className="hidden md:table-cell"
                     />
                     <SortableHeader
                       label="Updated"
@@ -489,6 +491,7 @@ function SupportPage() {
                       currentSort={sortKey}
                       currentDirection={sortDir}
                       onSort={handleSort}
+                      className="hidden md:table-cell"
                     />
                     <TableHead className="w-20 text-right">Actions</TableHead>
                   </TableRow>
@@ -605,10 +608,10 @@ function TicketRow({
       <TableCell>
         <TicketStatusBadge status={ticket.status} />
       </TableCell>
-      <TableCell>
+      <TableCell className="hidden md:table-cell">
         <TicketPriorityBadge priority={ticket.priority} />
       </TableCell>
-      <TableCell>
+      <TableCell className="hidden md:table-cell">
         {ticket.category ? (
           <Badge variant="outline" className="text-xs capitalize">
             {ticket.category}
@@ -617,7 +620,7 @@ function TicketRow({
           <span className="text-xs text-muted-foreground">--</span>
         )}
       </TableCell>
-      <TableCell>
+      <TableCell className="hidden md:table-cell">
         <Tooltip>
           <TooltipTrigger asChild>
             <span className="cursor-default text-xs text-muted-foreground">
@@ -627,7 +630,7 @@ function TicketRow({
           <TooltipContent>{formatDateTime(ticket.createdAt)}</TooltipContent>
         </Tooltip>
       </TableCell>
-      <TableCell>
+      <TableCell className="hidden md:table-cell">
         <Tooltip>
           <TooltipTrigger asChild>
             <span className="cursor-default text-xs text-muted-foreground">

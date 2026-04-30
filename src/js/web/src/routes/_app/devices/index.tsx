@@ -432,7 +432,7 @@ function DevicesPage() {
             </div>
 
             {/* Table */}
-            <div className="rounded-md border border-border/60 bg-card/80">
+            <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
               <Table aria-label="Devices">
                 <TableHeader>
                   <TableRow>
@@ -457,6 +457,7 @@ function DevicesPage() {
                       currentSort={sortKey}
                       currentDirection={sortDir}
                       onSort={handleSort}
+                      className="hidden md:table-cell"
                     />
                     <SortableHeader
                       label="Status"
@@ -465,13 +466,14 @@ function DevicesPage() {
                       currentDirection={sortDir}
                       onSort={handleSort}
                     />
-                    <TableHead>MAC Address</TableHead>
+                    <TableHead className="hidden md:table-cell">MAC Address</TableHead>
                     <SortableHeader
                       label="IP Address"
                       sortKey="ip_address"
                       currentSort={sortKey}
                       currentDirection={sortDir}
                       onSort={handleSort}
+                      className="hidden md:table-cell"
                     />
                     <SortableHeader
                       label="Last Seen"
@@ -479,6 +481,7 @@ function DevicesPage() {
                       currentSort={sortKey}
                       currentDirection={sortDir}
                       onSort={handleSort}
+                      className="hidden md:table-cell"
                     />
                     <TableHead className="w-40 text-right">Actions</TableHead>
                   </TableRow>
@@ -575,7 +578,7 @@ function DeviceRow({
           </Badge>
         )}
       </TableCell>
-      <TableCell>
+      <TableCell className="hidden md:table-cell">
         <Badge variant="outline">
           {deviceTypeLabels[device.deviceType] ?? device.deviceType}
         </Badge>
@@ -583,21 +586,21 @@ function DeviceRow({
       <TableCell>
         <DeviceStatusBadge status={device.status} />
       </TableCell>
-      <TableCell>
+      <TableCell className="hidden md:table-cell">
         {device.macAddress ? (
           <span className="font-mono text-xs text-muted-foreground">{device.macAddress}</span>
         ) : (
           <span className="text-xs text-muted-foreground">--</span>
         )}
       </TableCell>
-      <TableCell>
+      <TableCell className="hidden md:table-cell">
         {device.ipAddress ? (
           <span className="font-mono text-xs text-muted-foreground">{device.ipAddress}</span>
         ) : (
           <span className="text-xs text-muted-foreground">--</span>
         )}
       </TableCell>
-      <TableCell>
+      <TableCell className="hidden md:table-cell">
         <Tooltip>
           <TooltipTrigger asChild>
             <span className="cursor-default text-xs text-muted-foreground">
