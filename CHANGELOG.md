@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.83.0 (2026-04-30)
+
+### Refactored
+- **Complete date utility consolidation** — Replaced ALL remaining local `formatRelativeTime`, `timeAgo`, and `formatTimeAgo` functions across 24 files with shared imports from `lib/date-utils.ts`. Combined with v0.81-v0.82, this eliminates ~700 lines of duplicated time-formatting code codebase-wide.
+
 ## v0.82.0 (2026-04-30)
 
 ### Refactored
