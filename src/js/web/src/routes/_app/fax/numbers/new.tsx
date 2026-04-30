@@ -1,6 +1,16 @@
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
-import { useState } from "react"
-import { Loader2 } from "lucide-react"
+import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
+import { useRef, useState } from "react"
+import { AlertTriangle, Loader2 } from "lucide-react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -19,13 +29,22 @@ function NewFaxNumberPage() {
   const router = useRouter()
   const { currentTeam } = useAuth()
   const createFaxNumber = useCreateFaxNumber()
+  const justSubmittedRef = useRef(false)
 
   const [number, setNumber] = useState("")
   const [label, setLabel] = useState("")
   const [isActive, setIsActive] = useState(true)
 
+  const formDirty = number.trim() !== "" || label.trim() !== "" || !isActive
+
+  const blocker = useBlocker({
+    shouldBlockFn: () => formDirty && !justSubmittedRef.current,
+    withResolver: true,
+  })
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    justSubmittedRef.current = true
 
     const payload: { number: string; label?: string; isActive?: boolean; teamId?: string } = {
       number: number.trim(),
@@ -39,12 +58,16 @@ function NewFaxNumberPage() {
       onSuccess: () => {
         router.navigate({ to: "/fax/numbers" })
       },
+      onSettled: () => {
+        justSubmittedRef.current = false
+      },
     })
   }
 
   const isValid = number.trim() !== ""
 
   return (
+    <>
     <PageContainer className="flex-1 space-y-8">
       <PageHeader
         eyebrow="Fax"
@@ -122,5 +145,25 @@ function NewFaxNumberPage() {
         </CardContent>
       </Card>
     </PageContainer>
+
+      {/* Unsaved changes dialog */}
+      <AlertDialog open={blocker.status === "blocked"} onOpenChange={(open) => !open && blocker.reset?.()}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-500" />
+              Unsaved Changes
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              You have unsaved changes on this form. If you leave now, your progress will be lost.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => blocker.reset?.()}>Stay on Page</AlertDialogCancel>
+            <AlertDialogAction onClick={() => blocker.proceed?.()}>Discard Changes</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }

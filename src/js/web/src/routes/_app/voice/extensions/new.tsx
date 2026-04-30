@@ -1,9 +1,19 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
-import { AlertCircle, Loader2 } from "lucide-react"
+import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
+import { AlertCircle, AlertTriangle, Loader2 } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -43,6 +53,15 @@ function NewExtensionPage() {
     },
   })
 
+  // Unsaved changes detection
+  const isFormDirty = form.formState.isDirty && !form.formState.isSubmitting
+
+  // Router navigation blocker
+  const blocker = useBlocker({
+    shouldBlockFn: () => isFormDirty,
+    withResolver: true,
+  })
+
   const onSubmit = async (data: CreateExtensionFormData) => {
     const payload: Record<string, unknown> = {
       extensionNumber: data.extensionNumber,
@@ -53,6 +72,8 @@ function NewExtensionPage() {
 
     try {
       await createExtension.mutateAsync(payload)
+      // Reset dirty state before navigating so blocker doesn't fire
+      form.reset(data)
       router.navigate({ to: "/voice/extensions" })
     } catch (_error) {
       form.setError("root", {
@@ -62,6 +83,7 @@ function NewExtensionPage() {
   }
 
   return (
+    <>
     <PageContainer className="flex-1 space-y-8">
       <PageHeader
         eyebrow="Voice"
@@ -180,5 +202,25 @@ function NewExtensionPage() {
         </CardContent>
       </Card>
     </PageContainer>
+
+      {/* Unsaved changes dialog */}
+      <AlertDialog open={blocker.status === "blocked"} onOpenChange={(open) => !open && blocker.reset?.()}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-500" />
+              Unsaved Changes
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              You have unsaved changes on this form. If you leave now, your progress will be lost.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => blocker.reset?.()}>Stay on Page</AlertDialogCancel>
+            <AlertDialogAction onClick={() => blocker.proceed?.()}>Discard Changes</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }

@@ -1,11 +1,21 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQuery } from "@tanstack/react-query"
-import { Link, useRouter } from "@tanstack/react-router"
-import { AlertCircle, Loader2, Plus, X } from "lucide-react"
+import { Link, useBlocker, useRouter } from "@tanstack/react-router"
+import { AlertCircle, AlertTriangle, Loader2, Plus, X } from "lucide-react"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
@@ -92,7 +102,17 @@ export function CreateTeamForm() {
   const nameValue = form.watch("name")
   const isValid = nameValue.trim() !== ""
 
+  // Unsaved changes detection
+  const isFormDirty = (form.formState.isDirty || selectedTags.length > 0) && !form.formState.isSubmitting
+
+  // Router navigation blocker
+  const blocker = useBlocker({
+    shouldBlockFn: () => isFormDirty,
+    withResolver: true,
+  })
+
   return (
+    <>
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         {/* Basic Info */}
@@ -227,5 +247,25 @@ export function CreateTeamForm() {
         </div>
       </form>
     </Form>
+
+      {/* Unsaved changes dialog */}
+      <AlertDialog open={blocker.status === "blocked"} onOpenChange={(open) => !open && blocker.reset?.()}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-500" />
+              Unsaved Changes
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              You have unsaved changes on this form. If you leave now, your progress will be lost.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => blocker.reset?.()}>Stay on Page</AlertDialogCancel>
+            <AlertDialogAction onClick={() => blocker.proceed?.()}>Discard Changes</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }

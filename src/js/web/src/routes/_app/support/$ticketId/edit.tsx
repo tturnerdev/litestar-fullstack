@@ -1,9 +1,19 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { createFileRoute, Link, useParams, useRouter } from "@tanstack/react-router"
-import { AlertCircle, ArrowLeft, Loader2 } from "lucide-react"
+import { createFileRoute, Link, useBlocker, useParams, useRouter } from "@tanstack/react-router"
+import { AlertCircle, AlertTriangle, ArrowLeft, Loader2 } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -102,6 +112,15 @@ function EditTicketForm({ ticketId }: { ticketId: string }) {
       : undefined,
   })
 
+  // Unsaved changes detection
+  const isFormDirty = form.formState.isDirty && !form.formState.isSubmitting
+
+  // Router navigation blocker
+  const blocker = useBlocker({
+    shouldBlockFn: () => isFormDirty,
+    withResolver: true,
+  })
+
   if (isLoading) {
     return <EditTicketSkeleton />
   }
@@ -133,6 +152,8 @@ function EditTicketForm({ ticketId }: { ticketId: string }) {
 
     try {
       await updateTicket.mutateAsync(changes)
+      // Reset dirty state before navigating so blocker doesn't fire
+      form.reset(data)
       router.navigate({
         to: "/support/$ticketId",
         params: { ticketId },
@@ -145,6 +166,7 @@ function EditTicketForm({ ticketId }: { ticketId: string }) {
   }
 
   return (
+    <>
     <PageContainer className="flex-1 space-y-8">
       <PageHeader
         eyebrow="Helpdesk"
@@ -308,6 +330,26 @@ function EditTicketForm({ ticketId }: { ticketId: string }) {
         </CardContent>
       </Card>
     </PageContainer>
+
+      {/* Unsaved changes dialog */}
+      <AlertDialog open={blocker.status === "blocked"} onOpenChange={(open) => !open && blocker.reset?.()}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-500" />
+              Unsaved Changes
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              You have unsaved changes on this form. If you leave now, your progress will be lost.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => blocker.reset?.()}>Stay on Page</AlertDialogCancel>
+            <AlertDialogAction onClick={() => blocker.proceed?.()}>Discard Changes</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }
 

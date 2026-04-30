@@ -96,9 +96,8 @@ function getCategoryColor(category: string) {
   }
 }
 
-function NotificationCard({ notification }: { notification: NotificationItem }) {
+function NotificationCard({ notification, onRequestDelete }: { notification: NotificationItem; onRequestDelete: (id: string) => void }) {
   const markRead = useMarkRead()
-  const deleteNotification = useDeleteNotification()
   const navigate = Route.useNavigate()
 
   const Icon = getCategoryIcon(notification.category)
@@ -172,7 +171,7 @@ function NotificationCard({ notification }: { notification: NotificationItem }) 
             className="h-8 w-8 text-muted-foreground hover:text-destructive"
             onClick={(e) => {
               e.stopPropagation()
-              deleteNotification.mutate(notification.id)
+              onRequestDelete(notification.id)
             }}
             title="Delete"
             aria-label="Delete notification"
@@ -278,12 +277,14 @@ function NotificationsPage() {
   const [page, setPage] = useState(1)
   const [activeCategory, setActiveCategory] = useState<string>("all")
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+  const [deleteId, setDeleteId] = useState<string | null>(null)
   const pageSize = 20
 
   const { data: unreadData } = useUnreadCount()
   const { data, isLoading } = useNotifications(page, pageSize)
   const markAllRead = useMarkAllRead()
   const deleteAllRead = useDeleteAllRead()
+  const deleteNotification = useDeleteNotification()
 
   const unreadCount = unreadData?.count ?? 0
   const notifications = data?.items ?? []
@@ -395,7 +396,7 @@ function NotificationsPage() {
                 </div>
               ) : (
                 filteredNotifications.map((notification) => (
-                  <NotificationCard key={notification.id} notification={notification} />
+                  <NotificationCard key={notification.id} notification={notification} onRequestDelete={setDeleteId} />
                 ))
               )}
             </div>
@@ -451,6 +452,36 @@ function NotificationsPage() {
             >
               {deleteAllRead.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Delete {readCount} notification{readCount !== 1 ? "s" : ""}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete single notification confirmation */}
+      <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete notification</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this notification? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeleteId(null)} disabled={deleteNotification.isPending}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (!deleteId) return
+                deleteNotification.mutate(deleteId, {
+                  onSuccess: () => setDeleteId(null),
+                })
+              }}
+              disabled={deleteNotification.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteNotification.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
