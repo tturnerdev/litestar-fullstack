@@ -1,13 +1,14 @@
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { createFileRoute, useNavigate, useParams } from "@tanstack/react-router"
 import { AnimatePresence, motion } from "framer-motion"
-import { CheckCircle, Users, XCircle } from "lucide-react"
+import { AlertCircle, CheckCircle, Users, XCircle } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { Icons } from "@/components/icons"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/empty-state"
 import { PageContainer } from "@/components/ui/page-layout"
 import { acceptTeamInvitation, getTeam, rejectTeamInvitation } from "@/lib/generated/api"
 
@@ -23,7 +24,7 @@ function AcceptInvitationPage() {
   const [status, setStatus] = useState<"pending" | "accepting" | "declining" | "accepted" | "declined" | "error">("pending")
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
-  const { data: team, isLoading: isTeamLoading } = useQuery({
+  const { data: team, isLoading: isTeamLoading, isError: isTeamError } = useQuery({
     queryKey: ["team", teamId],
     queryFn: async () => {
       const response = await getTeam({ path: { team_id: teamId } })
@@ -99,6 +100,23 @@ function AcceptInvitationPage() {
   const isComplete = status === "accepted" || status === "declined"
 
   const memberCount = team?.members?.length
+
+  if (isTeamError) {
+    return (
+      <PageContainer className="flex flex-1 items-center justify-center">
+        <EmptyState
+          icon={AlertCircle}
+          title="Unable to load invitation"
+          description="This invitation may be invalid or expired. Please check the link and try again."
+          action={
+            <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+              Refresh page
+            </Button>
+          }
+        />
+      </PageContainer>
+    )
+  }
 
   return (
     <PageContainer className="relative flex flex-1 items-center justify-center overflow-hidden">

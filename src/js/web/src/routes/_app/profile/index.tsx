@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query"
 import { Link, createFileRoute, useNavigate, useSearch } from "@tanstack/react-router"
-import { ArrowRight, Bell, ChevronRight, Link2, Monitor, Palette, Shield, User as UserIcon } from "lucide-react"
+import { AlertCircle, ArrowRight, Bell, ChevronRight, Link2, Monitor, Palette, Shield, User as UserIcon } from "lucide-react"
 import { useEffect } from "react"
 import { toast } from "sonner"
 import { z } from "zod"
@@ -10,7 +10,9 @@ import { MfaSection } from "@/components/profile/mfa-section"
 import { PasswordChangeCard } from "@/components/profile/password-change-card"
 import { PersonalInfoForm } from "@/components/profile/personal-info-form"
 import { ProfileHero } from "@/components/profile/profile-hero"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/empty-state"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Separator } from "@/components/ui/separator"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
@@ -110,7 +112,7 @@ function ProfilePage() {
   const navigate = useNavigate()
   const searchParams = useSearch({ from: "/_app/profile/" })
   const authUser = useAuthStore((s) => s.user)
-  const { data: profile, isLoading } = useProfile()
+  const { data: profile, isLoading, isError } = useProfile()
 
   const user = profile ?? authUser
 
@@ -135,6 +137,26 @@ function ProfilePage() {
         <PageSection>
           <SkeletonCard />
           <SkeletonCard />
+        </PageSection>
+      </PageContainer>
+    )
+  }
+
+  if (isError) {
+    return (
+      <PageContainer className="flex-1 space-y-8" maxWidth="4xl">
+        <PageHeader eyebrow="Account" title="Profile" description="Manage your personal information, security, and connected accounts." />
+        <PageSection>
+          <EmptyState
+            icon={AlertCircle}
+            title="Unable to load profile"
+            description="Something went wrong. Please try refreshing the page."
+            action={
+              <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+                Refresh page
+              </Button>
+            }
+          />
         </PageSection>
       </PageContainer>
     )

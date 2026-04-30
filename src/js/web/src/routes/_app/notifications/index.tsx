@@ -46,6 +46,7 @@ import {
   useUnreadCount,
   useUpdateNotificationPreferences,
 } from "@/lib/api/hooks/notifications"
+import { Skeleton, SkeletonCard } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 function timeAgo(dateStr: string): string {
@@ -217,18 +218,7 @@ function NotificationPreferences() {
   const updatePrefs = useUpdateNotificationPreferences()
 
   if (isLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Notification Preferences</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-          </div>
-        </CardContent>
-      </Card>
-    )
+    return <SkeletonCard />
   }
 
   if (!prefs) return null
@@ -409,8 +399,10 @@ function NotificationsPage() {
 
             <div className="mt-4 space-y-3">
               {isLoading ? (
-                <div className="flex items-center justify-center py-16">
-                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                <div className="space-y-3">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Skeleton key={i} className="h-16 w-full rounded-lg" />
+                  ))}
                 </div>
               ) : isEmptyFiltered ? (
                 <div className="flex animate-in fade-in flex-col items-center justify-center py-16 text-center">
