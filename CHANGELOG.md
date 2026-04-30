@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.20.0 (2026-04-30)
+
+### Improved
+- **Support ticket detail page** — two-column layout with conversation thread and metadata sidebar. Quick-change dropdowns for status/priority, organized timeline with copy buttons, inline reopen button on closed tickets.
+- **Fax numbers list page** — search, active/inactive filter, sortable columns, bulk delete, status indicators, email routes column, quick link to messages, and card/table view toggle.
+
 ## v0.19.0 (2026-04-30)
 
 ### Improved
