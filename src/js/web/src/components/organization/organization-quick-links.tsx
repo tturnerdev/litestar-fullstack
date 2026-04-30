@@ -1,5 +1,5 @@
-import { Link } from "@tanstack/react-router"
-import { ChevronRight, ScrollText, ShieldCheck, Users, UsersRound } from "lucide-react"
+import { Link, useLocation } from "@tanstack/react-router"
+import { ChevronRight, Compass, ScrollText, ShieldCheck, Users, UsersRound } from "lucide-react"
 import { Card, CardContent, CardTitle } from "@/components/ui/card"
 import { useAuthStore } from "@/lib/auth"
 
@@ -52,9 +52,12 @@ const quickLinks: QuickLinkItem[] = [
   },
 ]
 
+const kbdHints = ["1", "2", "3", "4"]
+
 export function OrganizationQuickLinks() {
   const user = useAuthStore((state) => state.user)
   const isSuperuser = user?.isSuperuser ?? false
+  const { pathname } = useLocation()
 
   const visibleLinks = quickLinks.filter(
     (link) => !link.requiresSuperuser || isSuperuser,
@@ -66,24 +69,43 @@ export function OrganizationQuickLinks() {
 
   return (
     <div className="space-y-3">
-      <h2 className="text-lg font-semibold">Quick Links</h2>
+      <h2 className="flex items-center gap-2 text-lg font-semibold">
+        <Compass className="h-5 w-5 text-muted-foreground" />
+        Quick Links
+      </h2>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {visibleLinks.map((link) => (
-          <Link key={link.to} to={link.to}>
-            <Card hover className="h-full">
-              <CardContent className="flex items-center gap-4 py-5">
-                <div className={`group flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors ${link.bgColor}`}>
-                  <link.icon className={`h-5 w-5 ${link.color} transition-colors group-hover:text-white`} />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <CardTitle className="text-sm">{link.title}</CardTitle>
-                  <p className="mt-0.5 text-xs text-muted-foreground">{link.description}</p>
-                </div>
-                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50" />
-              </CardContent>
-            </Card>
-          </Link>
-        ))}
+        {visibleLinks.map((link, index) => {
+          const isActive = pathname === link.to || pathname.startsWith(`${link.to}/`)
+          return (
+            <Link key={link.to} to={link.to}>
+              <Card
+                hover
+                className={`group h-full transition-transform duration-200 hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-2 fill-mode-both ${
+                  isActive ? "border-l-2 border-l-primary" : ""
+                }`}
+                style={{ animationDelay: `${index * 75}ms` }}
+              >
+                <CardContent className="flex items-center gap-4 py-5">
+                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors ${link.bgColor}`}>
+                    <link.icon className={`h-5 w-5 ${link.color} transition-colors group-hover:text-white`} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <CardTitle className="text-sm">{link.title}</CardTitle>
+                      {index < kbdHints.length && (
+                        <kbd className="hidden rounded border border-border/60 bg-muted/60 px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground/60 sm:inline-block">
+                          {kbdHints[index]}
+                        </kbd>
+                      )}
+                    </div>
+                    <p className="mt-0.5 text-xs text-muted-foreground">{link.description}</p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-1" />
+                </CardContent>
+              </Card>
+            </Link>
+          )
+        })}
       </div>
     </div>
   )

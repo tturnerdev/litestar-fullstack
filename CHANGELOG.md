@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.57.0 (2026-04-30)
+
+### Improved
+- **Admin team table** — row hover and striping, active status dots, relative dates with tooltips, Users icon on member counts, total in header, and clickable rows.
+- **Top users card** — ranked numbers with gold/silver/bronze, hover highlights, trend arrow for active users, clickable rows linking to user detail, graded progress bar colors, and subtitle.
+- **User activity timeline** — colored timeline dots by action type, hover highlights, expandable details toggle, show-more pagination, filter pills (All/Logins/Changes/Security), and EmptyState.
+- **Recent activity feed** — real notification data integration, relative timestamps, hover ChevronRight, clickable rows, scrollable max-height, dividers between items, and empty state.
+- **Organization quick links** — hover scale, staggered entrance animation, ChevronRight slide, Compass section icon, active route highlighting, and keyboard hints.
+- **Feature areas grid** — hover scale, staggered entrance, pulse shimmer on loading, zero-count styling, count fade-in, saturated icon bg on hover, and bottom border accent.
+
 ## v0.56.0 (2026-04-30)
 
 ### Improved

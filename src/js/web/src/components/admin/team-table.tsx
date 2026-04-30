@@ -1,5 +1,5 @@
-import { Link } from "@tanstack/react-router"
-import { Search, Users2 } from "lucide-react"
+import { Link, useNavigate } from "@tanstack/react-router"
+import { Search, Users, Users2 } from "lucide-react"
 import { useMemo, useState } from "react"
 import { TeamRowActions } from "@/components/admin/team-row-actions"
 import { Badge } from "@/components/ui/badge"
@@ -12,8 +12,28 @@ import { Input } from "@/components/ui/input"
 import { SkeletonTable } from "@/components/ui/skeleton"
 import { type SortDirection, SortableHeader, nextSortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import type { AdminTeamSummary } from "@/lib/generated/api"
 import { useAdminTeams } from "@/lib/api/hooks/admin"
+
+function timeAgo(dateString: string): string {
+  const date = new Date(dateString)
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffSeconds = Math.floor(diffMs / 1000)
+  const diffMinutes = Math.floor(diffSeconds / 60)
+  const diffHours = Math.floor(diffMinutes / 60)
+  const diffDays = Math.floor(diffHours / 24)
+  const diffMonths = Math.floor(diffDays / 30)
+  const diffYears = Math.floor(diffDays / 365)
+
+  if (diffSeconds < 60) return "just now"
+  if (diffMinutes < 60) return `${diffMinutes}m ago`
+  if (diffHours < 24) return `${diffHours}h ago`
+  if (diffDays < 30) return `${diffDays}d ago`
+  if (diffMonths < 12) return `${diffMonths}mo ago`
+  return `${diffYears}y ago`
+}
 
 const TEAM_EXPORT_COLUMNS = [
   { key: "name", header: "Name" },
@@ -38,6 +58,7 @@ function compareValues(a: unknown, b: unknown, direction: SortDirection): number
 }
 
 export function TeamTable() {
+  const navigate = useNavigate()
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState("")
   const [sortKey, setSortKey] = useState<string | null>(null)
@@ -82,7 +103,7 @@ export function TeamTable() {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
-        <CardTitle>Teams</CardTitle>
+        <CardTitle>Teams{data.total > 0 ? ` (${data.total})` : ""}</CardTitle>
         <div className="flex items-center gap-3">
           <div className="relative w-64">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -111,22 +132,39 @@ export function TeamTable() {
                 </TableCell>
               </TableRow>
             )}
-            {sortedItems.map((team) => (
-              <TableRow key={team.id}>
+            {sortedItems.map((team, index) => (
+              <TableRow
+                key={team.id}
+                className={`cursor-pointer hover:bg-muted/50 ${index % 2 === 1 ? "bg-muted/20" : ""}`}
+                onClick={() => navigate({ to: "/admin/teams/$teamId", params: { teamId: team.id } })}
+              >
                 <TableCell className="font-medium">
-                  <Link to="/admin/teams/$teamId" params={{ teamId: team.id }} className="hover:underline">
+                  <Link to="/admin/teams/$teamId" params={{ teamId: team.id }} className="hover:underline" onClick={(e) => e.stopPropagation()}>
                     {team.name}
                   </Link>
                 </TableCell>
                 <TableCell className="text-muted-foreground">{team.slug}</TableCell>
-                <TableCell>{team.memberCount ?? 0}</TableCell>
                 <TableCell>
-                  <Badge variant={team.isActive ? "default" : "secondary"}>{team.isActive ? "Active" : "Inactive"}</Badge>
+                  <span className="inline-flex items-center gap-1.5 text-sm">
+                    <Users className="h-3.5 w-3.5 text-muted-foreground" />
+                    {team.memberCount ?? 0}
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className={`h-2 w-2 rounded-full ${team.isActive ? "bg-green-500" : "bg-gray-400"}`} />
+                    <Badge variant={team.isActive ? "default" : "secondary"}>{team.isActive ? "Active" : "Inactive"}</Badge>
+                  </span>
                 </TableCell>
                 <TableCell className="text-muted-foreground">
-                  {new Date(team.createdAt).toLocaleDateString()}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span>{timeAgo(team.createdAt)}</span>
+                    </TooltipTrigger>
+                    <TooltipContent>{new Date(team.createdAt).toLocaleString()}</TooltipContent>
+                  </Tooltip>
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                   <TeamRowActions team={team} />
                 </TableCell>
               </TableRow>

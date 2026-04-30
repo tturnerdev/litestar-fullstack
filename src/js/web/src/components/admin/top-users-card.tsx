@@ -1,7 +1,27 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Link } from "@tanstack/react-router"
+import { TrendingUp } from "lucide-react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useAdminUsers } from "@/lib/api/hooks/admin"
+
+const RANK_COLORS = [
+  "bg-amber-400 text-amber-950",
+  "bg-gray-300 text-gray-700",
+  "bg-amber-600 text-amber-50",
+] as const
+
+function getRankStyle(index: number): string {
+  if (index < 3) return RANK_COLORS[index]
+  return "bg-muted text-muted-foreground"
+}
+
+function getBarColor(index: number): string {
+  if (index === 0) return "bg-primary"
+  if (index === 1) return "bg-primary/80"
+  if (index === 2) return "bg-primary/60"
+  return "bg-primary/40"
+}
 
 function getInitials(name: string | null | undefined, email: string): string {
   if (name) {
@@ -22,6 +42,7 @@ export function TopUsersCard() {
       <Card>
         <CardHeader>
           <CardTitle className="text-sm font-semibold">Most active users</CardTitle>
+          <CardDescription>By login count</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {Array.from({ length: 5 }).map((_, i) => (
@@ -45,6 +66,7 @@ export function TopUsersCard() {
       <Card>
         <CardHeader>
           <CardTitle className="text-sm font-semibold">Most active users</CardTitle>
+          <CardDescription>By login count</CardDescription>
         </CardHeader>
         <CardContent className="text-muted-foreground text-sm">Unable to load user activity.</CardContent>
       </Card>
@@ -61,16 +83,25 @@ export function TopUsersCard() {
     <Card>
       <CardHeader>
         <CardTitle className="text-sm font-semibold">Most active users</CardTitle>
+        <CardDescription>By login count</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {sorted.length === 0 && (
           <p className="text-muted-foreground text-sm">No user activity yet.</p>
         )}
-        {sorted.map((user) => {
+        {sorted.map((user, index) => {
           const count = user.loginCount ?? 0
           const pct = maxCount > 0 ? (count / maxCount) * 100 : 0
           return (
-            <div key={user.id} className="flex items-center gap-3">
+            <Link
+              key={user.id}
+              to="/admin/users/$userId"
+              params={{ userId: user.id }}
+              className="flex items-center gap-3 hover:bg-muted/50 rounded-lg px-2 py-1.5 -mx-2 transition-colors"
+            >
+              <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${getRankStyle(index)}`}>
+                {index + 1}
+              </span>
               <Avatar className="size-8 text-xs">
                 <AvatarFallback>{getInitials(user.name, user.email)}</AvatarFallback>
               </Avatar>
@@ -81,15 +112,16 @@ export function TopUsersCard() {
                 )}
                 <div className="mt-1 h-1.5 w-full rounded-full bg-muted">
                   <div
-                    className="h-1.5 rounded-full bg-primary transition-all duration-500"
+                    className={`h-1.5 rounded-full ${getBarColor(index)} transition-all duration-500`}
                     style={{ width: `${pct}%` }}
                   />
                 </div>
               </div>
-              <span className="text-xs font-medium tabular-nums text-muted-foreground whitespace-nowrap">
+              <span className="flex items-center gap-1 text-xs font-medium tabular-nums text-muted-foreground whitespace-nowrap">
                 {count} {count === 1 ? "login" : "logins"}
+                {count > 10 && <TrendingUp className="h-3 w-3 text-emerald-500" />}
               </span>
-            </div>
+            </Link>
           )
         })}
       </CardContent>

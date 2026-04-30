@@ -1,7 +1,10 @@
 import { Link } from "@tanstack/react-router"
-import { ArrowRight, Laptop, Phone, TicketCheck, Users } from "lucide-react"
+import { ArrowRight, Bell, ChevronRight, Laptop, Phone, TicketCheck, Users } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/empty-state"
+import { useNotifications } from "@/lib/api/hooks/notifications"
+import type { NotificationItem } from "@/lib/api/hooks/notifications"
 
 interface ActivityItem {
   id: string
@@ -13,6 +16,15 @@ interface ActivityItem {
   link?: string
 }
 
+const categoryIcons: Record<string, { icon: LucideIcon; color: string }> = {
+  team: { icon: Users, color: "text-blue-600 bg-blue-500/10 dark:text-blue-400" },
+  device: { icon: Laptop, color: "text-emerald-600 bg-emerald-500/10 dark:text-emerald-400" },
+  support: { icon: TicketCheck, color: "text-amber-600 bg-amber-500/10 dark:text-amber-400" },
+  voice: { icon: Phone, color: "text-violet-600 bg-violet-500/10 dark:text-violet-400" },
+}
+
+const defaultIcon = { icon: Bell, color: "text-gray-600 bg-gray-500/10 dark:text-gray-400" }
+
 const placeholderActivities: ActivityItem[] = [
   {
     id: "1",
@@ -20,7 +32,7 @@ const placeholderActivities: ActivityItem[] = [
     iconColor: "text-blue-600 bg-blue-500/10 dark:text-blue-400",
     title: "Joined a team",
     description: "You were added to a team workspace",
-    timestamp: "Recently",
+    timestamp: "2m ago",
   },
   {
     id: "2",
@@ -28,7 +40,7 @@ const placeholderActivities: ActivityItem[] = [
     iconColor: "text-emerald-600 bg-emerald-500/10 dark:text-emerald-400",
     title: "Device registered",
     description: "A new device was provisioned to your account",
-    timestamp: "Recently",
+    timestamp: "1h ago",
   },
   {
     id: "3",
@@ -36,7 +48,7 @@ const placeholderActivities: ActivityItem[] = [
     iconColor: "text-amber-600 bg-amber-500/10 dark:text-amber-400",
     title: "Ticket updated",
     description: "A support ticket you created received a reply",
-    timestamp: "Recently",
+    timestamp: "Yesterday",
   },
   {
     id: "4",
@@ -44,11 +56,51 @@ const placeholderActivities: ActivityItem[] = [
     iconColor: "text-violet-600 bg-violet-500/10 dark:text-violet-400",
     title: "Extension assigned",
     description: "A voice extension was assigned to your profile",
-    timestamp: "Recently",
+    timestamp: "3d ago",
   },
 ]
 
+function timeAgo(dateString: string): string {
+  const now = Date.now()
+  const date = new Date(dateString).getTime()
+  const seconds = Math.floor((now - date) / 1000)
+
+  if (seconds < 60) return "Just now"
+  const minutes = Math.floor(seconds / 60)
+  if (minutes < 60) return `${minutes}m ago`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours}h ago`
+  const days = Math.floor(hours / 24)
+  if (days === 1) return "Yesterday"
+  if (days < 7) return `${days}d ago`
+  const weeks = Math.floor(days / 7)
+  if (weeks < 4) return `${weeks}w ago`
+  return new Date(dateString).toLocaleDateString()
+}
+
+function mapNotificationToActivity(notification: NotificationItem): ActivityItem {
+  const mapping = categoryIcons[notification.category] ?? defaultIcon
+  return {
+    id: notification.id,
+    icon: mapping.icon,
+    iconColor: mapping.color,
+    title: notification.title,
+    description: notification.message,
+    timestamp: timeAgo(notification.createdAt),
+    link: notification.actionUrl ?? undefined,
+  }
+}
+
 export function RecentActivityFeed() {
+  const { data, isLoading, isError } = useNotifications(1, 5)
+
+  const activities: ActivityItem[] =
+    data?.items && data.items.length > 0
+      ? data.items.map(mapNotificationToActivity)
+      : isLoading || isError
+        ? placeholderActivities
+        : []
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -60,19 +112,49 @@ export function RecentActivityFeed() {
           View all <ArrowRight className="h-3 w-3" />
         </Link>
       </CardHeader>
-      <CardContent className="space-y-1">
-        {placeholderActivities.map((activity) => (
-          <div key={activity.id} className="flex items-start gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-muted/50">
-            <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${activity.iconColor}`}>
-              <activity.icon className="h-4 w-4" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium">{activity.title}</p>
-              <p className="text-xs text-muted-foreground">{activity.description}</p>
-            </div>
-            <span className="shrink-0 text-xs text-muted-foreground">{activity.timestamp}</span>
+      <CardContent className="p-0">
+        {activities.length === 0 ? (
+          <div className="px-6 pb-6">
+            <EmptyState
+              icon={Bell}
+              title="No recent activity"
+              description="Your recent actions and notifications will appear here"
+              className="border-0 py-10"
+            />
           </div>
-        ))}
+        ) : (
+          <div className="max-h-[320px] overflow-y-auto px-6 pb-6">
+            {activities.map((activity, index) => {
+              const content = (
+                <div
+                  key={activity.id}
+                  className={`group flex items-start gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-muted/50 ${
+                    index < activities.length - 1 ? "border-b border-border/40" : ""
+                  }`}
+                >
+                  <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${activity.iconColor}`}>
+                    <activity.icon className="h-4 w-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium">{activity.title}</p>
+                    <p className="text-xs text-muted-foreground">{activity.description}</p>
+                  </div>
+                  <span className="shrink-0 text-xs text-muted-foreground">{activity.timestamp}</span>
+                  <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/40 opacity-0 transition-all group-hover:opacity-100" />
+                </div>
+              )
+
+              if (activity.link) {
+                return (
+                  <Link key={activity.id} to={activity.link}>
+                    {content}
+                  </Link>
+                )
+              }
+              return content
+            })}
+          </div>
+        )}
       </CardContent>
     </Card>
   )
