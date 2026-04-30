@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.85.0 (2026-04-30)
+
+### Improved
+- **Table accessibility** — Added `aria-label` attributes to 11 data tables (support, fax messages, extensions, phone numbers, devices, fax numbers, connections, tags, teams, email routes, forwarding rules) and 2 icon buttons (active-sessions refresh, profile copy email).
+
+### Refactored
+- **Format utility extraction** — Moved `formatDuration`, `formatDurationHuman`, and `formatMacAddress` from local component implementations to shared `lib/format-utils.ts`, removing duplication from voicemail and device components.
+
 ## v0.84.0 (2026-04-30)
 
 ### Refactored
