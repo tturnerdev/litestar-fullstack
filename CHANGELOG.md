@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.95.0 (2026-04-30)
+
+### Added
+- **URL-persisted tabs** — Device detail and gateway page tabs now persist in URL search params (`?tab=lines`). Refreshing or sharing a link preserves the active tab. Uses `replace: true` to avoid polluting browser history.
+- **Per-route document titles** — Added `useDocumentTitle` hook applied to 19 route pages. Browser tab now shows context-aware titles like "Devices | Admin Portal". Detail pages show item name (e.g., "Lobby Phone | Admin Portal") once data loads.
+
 ## v0.94.0 (2026-04-30)
 
 ### Fixed
