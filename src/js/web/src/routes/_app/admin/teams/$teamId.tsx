@@ -530,6 +530,7 @@ function AdminTeamDetailPage() {
         teamId={teamId}
         currentName={data.name}
         currentDescription={data.description}
+        currentIsActive={data.isActive}
         open={editOpen}
         onOpenChange={setEditOpen}
       />

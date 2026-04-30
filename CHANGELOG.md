@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.52.0 (2026-04-30)
+
+### Improved
+- **Ticket conversation** — "Jump to latest" floating button, visual date separators between days, system message filter toggle with hidden count badge, entrance animations, unread indicator line, and "Scroll to top" button.
+- **Ticket detail header** — copy ticket number button, category quick-change dropdown, SLA timer indicator (green/amber/red by age), watch/unwatch toggle, separators between action groups, tooltips on dropdowns, and assignee avatar display.
+- **Edit team dialog (admin)** — Users icon, field descriptions, character counters (50/500), required indicator, loading spinner, dirty state tracking, optional active status Switch, and section separators.
+- **Delete team dialog (admin)** — switched to AlertDialog, AlertTriangle icon, type-to-confirm team name, deletion consequences summary, loading spinner, and red-tinted header.
+- **Tags list page** — breadcrumbs, bulk selection with checkboxes and bulk delete, sortable Name/Slug columns, tag count in description, and row hover highlighting.
+
 ## v0.51.0 (2026-04-30)
 
 ### Improved

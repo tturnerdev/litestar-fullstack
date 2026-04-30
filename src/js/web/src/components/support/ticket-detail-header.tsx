@@ -1,19 +1,26 @@
 import { useNavigate } from "@tanstack/react-router"
 import {
   Calendar,
+  Check,
   ChevronDown,
   Clock,
+  Copy,
+  Eye,
+  EyeOff,
   Lock,
   Mail,
   Tag,
+  Timer,
   Trash2,
   Unlock,
   User,
   Users,
 } from "lucide-react"
-import { useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { TicketPriorityBadge } from "@/components/support/ticket-priority-badge"
 import { TicketStatusBadge } from "@/components/support/ticket-status-badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import {
@@ -55,6 +62,8 @@ const categoryLabels: Record<string, string> = {
   general: "General",
 }
 
+const categories = Object.keys(categoryLabels) as string[]
+
 const priorities = ["low", "medium", "high", "urgent"] as const
 
 function formatRelativeTime(dateStr: string | null | undefined): string {
@@ -74,6 +83,53 @@ function formatRelativeTime(dateStr: string | null | undefined): string {
   return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: date.getFullYear() !== now.getFullYear() ? "numeric" : undefined })
 }
 
+// ── SLA Helpers ───────────────────────────────────────────────────────────
+
+function getHoursSinceCreation(createdAt: string | null | undefined): number {
+  if (!createdAt) return 0
+  return (Date.now() - new Date(createdAt).getTime()) / (1000 * 60 * 60)
+}
+
+function formatSlaTime(hours: number): string {
+  if (hours < 1) return `${Math.floor(hours * 60)}m`
+  if (hours < 24) return `${Math.floor(hours)}h`
+  const days = Math.floor(hours / 24)
+  const remainingHours = Math.floor(hours % 24)
+  return remainingHours > 0 ? `${days}d ${remainingHours}h` : `${days}d`
+}
+
+function getSlaColor(hours: number): string {
+  if (hours < 4) return "text-emerald-600 dark:text-emerald-400"
+  if (hours < 24) return "text-amber-600 dark:text-amber-400"
+  return "text-red-600 dark:text-red-400"
+}
+
+function getSlaBgColor(hours: number): string {
+  if (hours < 4) return "bg-emerald-500/10 border-emerald-500/30"
+  if (hours < 24) return "bg-amber-500/10 border-amber-500/30"
+  return "bg-red-500/10 border-red-500/30"
+}
+
+// ── Assignee avatar helpers ───────────────────────────────────────────────
+
+function getAvatarColor(identifier: string): string {
+  const colors = [
+    "bg-blue-500/15 text-blue-700 dark:text-blue-400",
+    "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400",
+    "bg-violet-500/15 text-violet-700 dark:text-violet-400",
+    "bg-amber-500/15 text-amber-700 dark:text-amber-400",
+    "bg-rose-500/15 text-rose-700 dark:text-rose-400",
+    "bg-cyan-500/15 text-cyan-700 dark:text-cyan-400",
+  ]
+  let hash = 0
+  for (let i = 0; i < identifier.length; i++) {
+    hash = identifier.charCodeAt(i) + ((hash << 5) - hash)
+  }
+  return colors[Math.abs(hash) % colors.length]
+}
+
+// ── Component ─────────────────────────────────────────────────────────────
+
 export function TicketDetailHeader({ ticket }: TicketDetailHeaderProps) {
   const navigate = useNavigate()
   const closeTicket = useCloseTicket(ticket.id)
@@ -81,42 +137,185 @@ export function TicketDetailHeader({ ticket }: TicketDetailHeaderProps) {
   const updateTicket = useUpdateTicket(ticket.id)
   const deleteTicket = useDeleteTicket(ticket.id)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const [watching, setWatching] = useState(false)
 
   const isClosed = ticket.status === "closed" || ticket.status === "resolved"
+  const isHighPriority = ticket.priority === "high" || ticket.priority === "urgent"
+  const showSla = isHighPriority && !isClosed
+
+  // Live-updating SLA timer for high/urgent open tickets
+  const [slaHours, setSlaHours] = useState(() => getHoursSinceCreation(ticket.createdAt))
+
+  useEffect(() => {
+    if (!showSla) return
+    setSlaHours(getHoursSinceCreation(ticket.createdAt))
+    const interval = setInterval(() => {
+      setSlaHours(getHoursSinceCreation(ticket.createdAt))
+    }, 60_000) // update every minute
+    return () => clearInterval(interval)
+  }, [showSla, ticket.createdAt])
+
+  const slaColor = useMemo(() => getSlaColor(slaHours), [slaHours])
+  const slaBgColor = useMemo(() => getSlaBgColor(slaHours), [slaHours])
+
+  const handleCopyTicketNumber = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(ticket.ticketNumber)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // Fallback -- silently ignore if clipboard API not available
+    }
+  }, [ticket.ticketNumber])
 
   return (
     <Card className="border-border/60 bg-card/80">
       <CardContent className="py-4">
         {/* Action bar */}
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
-          <span className="font-mono text-xs text-muted-foreground">{ticket.ticketNumber}</span>
+          {/* Ticket number with copy button */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                onClick={handleCopyTicketNumber}
+                className="group/copy flex items-center gap-1.5 rounded-md px-1.5 py-0.5 font-mono text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                {ticket.ticketNumber}
+                {copied ? (
+                  <Check className="h-3 w-3 text-emerald-500" />
+                ) : (
+                  <Copy className="h-3 w-3 opacity-0 transition-opacity group-hover/copy:opacity-100" />
+                )}
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>{copied ? "Copied!" : "Copy ticket number"}</TooltipContent>
+          </Tooltip>
+
           <Separator orientation="vertical" className="h-4" />
           <TicketStatusBadge status={ticket.status} />
           <Separator orientation="vertical" className="h-4" />
           <TicketPriorityBadge priority={ticket.priority} />
 
-          <div className="ml-auto flex items-center gap-2">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="h-7 text-xs">
-                  Priority
-                  <ChevronDown className="ml-1 h-3 w-3" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Change Priority</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {priorities.map((p) => (
-                  <DropdownMenuItem
-                    key={p}
-                    onClick={() => updateTicket.mutate({ priority: p })}
-                    disabled={ticket.priority === p}
+          {/* SLA indicator for high/urgent open tickets */}
+          {showSla && (
+            <>
+              <Separator orientation="vertical" className="h-4" />
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Badge
+                    variant="outline"
+                    className={`gap-1 text-xs ${slaBgColor} ${slaColor}`}
                   >
-                    <TicketPriorityBadge priority={p} />
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+                    <Timer className="h-3 w-3" />
+                    {formatSlaTime(slaHours)}
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <div className="text-xs">
+                    <p className="font-medium">Time since opened</p>
+                    <p className="text-muted-foreground">
+                      {slaHours < 4
+                        ? "Within SLA target (< 4h)"
+                        : slaHours < 24
+                          ? "Approaching SLA limit (< 24h)"
+                          : "SLA target exceeded (> 24h)"}
+                    </p>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </>
+          )}
+
+          <Separator orientation="vertical" className="ml-auto hidden h-4 sm:block" />
+
+          <div className="ml-auto flex items-center gap-2 sm:ml-0">
+            {/* Watch/Unwatch toggle */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant={watching ? "secondary" : "ghost"}
+                  size="sm"
+                  className="h-7 w-7 p-0"
+                  onClick={() => setWatching((prev) => !prev)}
+                >
+                  {watching ? (
+                    <Eye className="h-3.5 w-3.5" />
+                  ) : (
+                    <EyeOff className="h-3.5 w-3.5" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {watching ? "Unwatch -- stop receiving notifications" : "Watch -- receive notifications for updates"}
+              </TooltipContent>
+            </Tooltip>
+
+            <Separator orientation="vertical" className="h-4" />
+
+            {/* Priority dropdown */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm" className="h-7 text-xs">
+                        Priority
+                        <ChevronDown className="ml-1 h-3 w-3" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>Change Priority</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      {priorities.map((p) => (
+                        <DropdownMenuItem
+                          key={p}
+                          onClick={() => updateTicket.mutate({ priority: p })}
+                          disabled={ticket.priority === p}
+                        >
+                          <TicketPriorityBadge priority={p} />
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>Change the ticket priority level</TooltipContent>
+            </Tooltip>
+
+            {/* Category dropdown */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm" className="h-7 text-xs">
+                        <Tag className="mr-1 h-3 w-3" />
+                        {ticket.category ? (categoryLabels[ticket.category] ?? ticket.category) : "Category"}
+                        <ChevronDown className="ml-1 h-3 w-3" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>Change Category</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      {categories.map((cat) => (
+                        <DropdownMenuItem
+                          key={cat}
+                          onClick={() => updateTicket.mutate({ category: cat })}
+                          disabled={ticket.category === cat}
+                        >
+                          {categoryLabels[cat] ?? cat}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>Change the ticket category</TooltipContent>
+            </Tooltip>
+
+            <Separator orientation="vertical" className="h-4" />
 
             {isClosed ? (
               <Button
@@ -176,11 +375,24 @@ export function TicketDetailHeader({ ticket }: TicketDetailHeaderProps) {
             </div>
           </div>
 
-          {/* Assigned to */}
+          {/* Assigned to -- with avatar */}
           <div className="flex items-start gap-2.5">
-            <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center">
-              <Users className="h-3.5 w-3.5 text-muted-foreground" />
-            </div>
+            {ticket.assignedTo ? (
+              <Avatar className="mt-0.5 h-5 w-5 text-[10px]">
+                {ticket.assignedTo.avatarUrl ? (
+                  <AvatarImage src={ticket.assignedTo.avatarUrl} alt={ticket.assignedTo.name ?? ""} />
+                ) : null}
+                <AvatarFallback
+                  className={`text-[10px] font-medium ${getAvatarColor(ticket.assignedTo.id)}`}
+                >
+                  {(ticket.assignedTo.name?.[0] ?? ticket.assignedTo.email?.[0] ?? "?").toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            ) : (
+              <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center">
+                <Users className="h-3.5 w-3.5 text-muted-foreground" />
+              </div>
+            )}
             <div className="min-w-0">
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Assigned To

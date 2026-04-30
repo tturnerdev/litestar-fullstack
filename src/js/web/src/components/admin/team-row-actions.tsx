@@ -52,6 +52,7 @@ export function TeamRowActions({ team }: TeamRowActionsProps) {
         teamId={team.id}
         currentName={team.name}
         currentDescription={null}
+        currentIsActive={team.isActive}
         open={editOpen}
         onOpenChange={setEditOpen}
       />

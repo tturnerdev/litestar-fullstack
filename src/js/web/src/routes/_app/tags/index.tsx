@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { useState } from "react"
-import { AlertCircle, Loader2, Pencil, Plus, Search, Tags, Trash2 } from "lucide-react"
+import { useMemo, useState } from "react"
+import { AlertCircle, ArrowUpDown, Home, Loader2, Pencil, Plus, Search, Tags, Trash2 } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,7 +12,16 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
@@ -24,25 +33,128 @@ export const Route = createFileRoute("/_app/tags/")({
   component: TagsPage,
 })
 
+type SortField = "name" | "slug"
+type SortDir = "asc" | "desc"
+
 function TagsPage() {
   const [search, setSearch] = useState("")
   const [deleteId, setDeleteId] = useState<string | null>(null)
-  const { data, isLoading, isError } = useTags({ search: search || undefined, pageSize: 100 })
+  const [selected, setSelected] = useState<Set<string>>(new Set())
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false)
+  const [sortField, setSortField] = useState<SortField>("name")
+  const [sortDir, setSortDir] = useState<SortDir>("asc")
+  const { data, isLoading, isError } = useTags({
+    search: search || undefined,
+    pageSize: 100,
+    orderBy: sortField,
+    sortOrder: sortDir,
+  })
   const deleteTag = useDeleteTag()
+
+  const items = data?.items ?? []
+  const totalCount = data?.total ?? items.length
+
+  // Sort locally as a fallback (server may not support all sort options)
+  const sortedItems = useMemo(() => {
+    const copy = [...items]
+    copy.sort((a, b) => {
+      const aVal = sortField === "name" ? a.name.toLowerCase() : a.slug.toLowerCase()
+      const bVal = sortField === "name" ? b.name.toLowerCase() : b.slug.toLowerCase()
+      if (aVal < bVal) return sortDir === "asc" ? -1 : 1
+      if (aVal > bVal) return sortDir === "asc" ? 1 : -1
+      return 0
+    })
+    return copy
+  }, [items, sortField, sortDir])
+
+  const allSelected = sortedItems.length > 0 && selected.size === sortedItems.length
+  const someSelected = selected.size > 0 && selected.size < sortedItems.length
+
+  const toggleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"))
+    } else {
+      setSortField(field)
+      setSortDir("asc")
+    }
+  }
+
+  const toggleAll = () => {
+    if (allSelected) {
+      setSelected(new Set())
+    } else {
+      setSelected(new Set(sortedItems.map((t) => t.id)))
+    }
+  }
+
+  const toggleOne = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
 
   const handleDelete = () => {
     if (!deleteId) return
     deleteTag.mutate(deleteId, {
-      onSuccess: () => setDeleteId(null),
+      onSuccess: () => {
+        setDeleteId(null)
+        setSelected((prev) => {
+          const next = new Set(prev)
+          next.delete(deleteId)
+          return next
+        })
+      },
     })
   }
+
+  const handleBulkDelete = () => {
+    const ids = Array.from(selected)
+    let completed = 0
+    for (const id of ids) {
+      deleteTag.mutate(id, {
+        onSuccess: () => {
+          completed++
+          if (completed === ids.length) {
+            setSelected(new Set())
+            setBulkDeleteOpen(false)
+          }
+        },
+      })
+    }
+  }
+
+  const breadcrumbs = (
+    <Breadcrumb>
+      <BreadcrumbList>
+        <BreadcrumbItem>
+          <BreadcrumbLink asChild>
+            <Link to="/">
+              <Home className="h-3.5 w-3.5" />
+            </Link>
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem>
+          <BreadcrumbPage>Tags</BreadcrumbPage>
+        </BreadcrumbItem>
+      </BreadcrumbList>
+    </Breadcrumb>
+  )
 
   return (
     <PageContainer className="flex-1 space-y-8">
       <PageHeader
         eyebrow="Administration"
         title="Tags"
-        description="Create and manage tags for organizing resources across the system."
+        description={
+          totalCount > 0 && !isLoading
+            ? `Create and manage tags for organizing resources across the system. ${totalCount} tag${totalCount !== 1 ? "s" : ""}.`
+            : "Create and manage tags for organizing resources across the system."
+        }
+        breadcrumbs={breadcrumbs}
         actions={
           <Button size="sm" asChild>
             <Link to="/tags/new">
@@ -63,6 +175,12 @@ function TagsPage() {
               className="pl-9"
             />
           </div>
+          {selected.size > 0 && (
+            <Button variant="destructive" size="sm" onClick={() => setBulkDeleteOpen(true)}>
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete {selected.size} tag{selected.size !== 1 ? "s" : ""}
+            </Button>
+          )}
         </div>
       </PageSection>
 
@@ -85,7 +203,7 @@ function TagsPage() {
               </Button>
             }
           />
-        ) : !data?.items.length && !search ? (
+        ) : !sortedItems.length && !search ? (
           <EmptyState
             icon={Tags}
             title="No tags yet"
@@ -98,7 +216,7 @@ function TagsPage() {
               </Button>
             }
           />
-        ) : !data?.items.length ? (
+        ) : !sortedItems.length ? (
           <EmptyState
             icon={Tags}
             variant="no-results"
@@ -115,14 +233,51 @@ function TagsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Slug</TableHead>
+                  <TableHead className="w-[40px]">
+                    <Checkbox
+                      checked={allSelected}
+                      indeterminate={someSelected}
+                      onChange={toggleAll}
+                      aria-label="Select all tags"
+                    />
+                  </TableHead>
+                  <TableHead>
+                    <button
+                      type="button"
+                      className="inline-flex items-center gap-1 font-medium hover:text-foreground transition-colors"
+                      onClick={() => toggleSort("name")}
+                    >
+                      Name
+                      <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />
+                    </button>
+                  </TableHead>
+                  <TableHead>
+                    <button
+                      type="button"
+                      className="inline-flex items-center gap-1 font-medium hover:text-foreground transition-colors"
+                      onClick={() => toggleSort("slug")}
+                    >
+                      Slug
+                      <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />
+                    </button>
+                  </TableHead>
                   <TableHead className="w-[100px] text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.items.map((tag) => (
-                  <TableRow key={tag.id}>
+                {sortedItems.map((tag) => (
+                  <TableRow
+                    key={tag.id}
+                    className="transition-colors hover:bg-muted/50"
+                    data-selected={selected.has(tag.id) || undefined}
+                  >
+                    <TableCell>
+                      <Checkbox
+                        checked={selected.has(tag.id)}
+                        onChange={() => toggleOne(tag.id)}
+                        aria-label={`Select ${tag.name}`}
+                      />
+                    </TableCell>
                     <TableCell className="font-medium">
                       <Badge variant="secondary">{tag.name}</Badge>
                     </TableCell>
@@ -154,7 +309,7 @@ function TagsPage() {
         )}
       </PageSection>
 
-      {/* Delete confirmation dialog */}
+      {/* Delete single tag confirmation */}
       <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -174,6 +329,32 @@ function TagsPage() {
             >
               {deleteTag.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Bulk delete confirmation */}
+      <AlertDialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete {selected.size} tag{selected.size !== 1 ? "s" : ""}</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete {selected.size} tag{selected.size !== 1 ? "s" : ""}? This action cannot be undone. Any resources
+              currently using these tags will have them removed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setBulkDeleteOpen(false)} disabled={deleteTag.isPending}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleBulkDelete}
+              disabled={deleteTag.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteTag.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Delete {selected.size} tag{selected.size !== 1 ? "s" : ""}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
