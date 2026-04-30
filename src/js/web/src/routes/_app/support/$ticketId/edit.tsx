@@ -24,13 +24,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useTicket, useUpdateTicket } from "@/lib/api/hooks/support"
+import { cn } from "@/lib/utils"
+
+// ── Field limits ──────────────────────────────────────────────────────
+
+const SUBJECT_MAX = 200
 
 export const Route = createFileRoute("/_app/support/$ticketId/edit")({
   component: EditTicketPage,
 })
 
 const editTicketSchema = z.object({
-  subject: z.string().min(1, "Subject is required"),
+  subject: z.string().min(1, "Subject is required").max(200, "Subject must be under 200 characters"),
   priority: z.string().min(1),
   status: z.string().min(1),
   category: z.string().optional(),
@@ -217,9 +222,14 @@ function EditTicketForm({ ticketId }: { ticketId: string }) {
                   <FormItem>
                     <FormLabel>Subject</FormLabel>
                     <FormControl>
-                      <Input placeholder="Brief summary of the issue" {...field} />
+                      <Input placeholder="Brief summary of the issue" maxLength={SUBJECT_MAX} {...field} />
                     </FormControl>
-                    <FormMessage />
+                    <div className="flex items-center justify-between">
+                      <FormMessage />
+                      <p className={cn("shrink-0 text-xs", field.value.length >= SUBJECT_MAX ? "text-destructive" : field.value.length >= SUBJECT_MAX * 0.8 ? "text-amber-500" : "text-muted-foreground")}>
+                        {field.value.length}/{SUBJECT_MAX}
+                      </p>
+                    </div>
                   </FormItem>
                 )}
               />

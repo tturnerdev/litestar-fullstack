@@ -40,11 +40,16 @@ import { Separator } from "@/components/ui/separator"
 import { useCreateTicket } from "@/lib/api/hooks/support"
 import { cn } from "@/lib/utils"
 
+// ── Field limits ──────────────────────────────────────────────────────
+
+const SUBJECT_MAX = 200
+const DESC_MAX = 2000
+
 // ── Schema ──────────────────────────────────────────────────────────────
 
 const createTicketSchema = z.object({
-  subject: z.string().min(1, "Subject is required").max(200, "Subject must be under 200 characters"),
-  bodyMarkdown: z.string().min(10, "Description must be at least 10 characters"),
+  subject: z.string().min(1, "Subject is required").max(SUBJECT_MAX, "Subject must be under 200 characters"),
+  bodyMarkdown: z.string().min(10, "Description must be at least 10 characters").max(DESC_MAX, "Description must be under 2000 characters"),
   priority: z.string().min(1, "Priority is required"),
   category: z.string().optional(),
 })
@@ -183,9 +188,14 @@ export function CreateTicketForm() {
                   Subject <RequiredIndicator />
                 </FormLabel>
                 <FormControl>
-                  <Input placeholder="Brief summary of your issue" {...field} />
+                  <Input placeholder="Brief summary of your issue" maxLength={SUBJECT_MAX} {...field} />
                 </FormControl>
-                <FormDescription>A clear, concise title helps our team triage faster.</FormDescription>
+                <div className="flex items-center justify-between">
+                  <FormDescription>A clear, concise title helps our team triage faster.</FormDescription>
+                  <p className={cn("shrink-0 text-xs", field.value.length >= SUBJECT_MAX ? "text-destructive" : field.value.length >= SUBJECT_MAX * 0.8 ? "text-amber-500" : "text-muted-foreground")}>
+                    {field.value.length}/{SUBJECT_MAX}
+                  </p>
+                </div>
                 <FormMessage />
               </FormItem>
             )}
@@ -295,9 +305,14 @@ export function CreateTicketForm() {
                     minHeight="180px"
                   />
                 </FormControl>
-                <FormDescription>
-                  Include steps to reproduce, expected behavior, and any error messages. Markdown formatting is supported.
-                </FormDescription>
+                <div className="flex items-center justify-between">
+                  <FormDescription>
+                    Include steps to reproduce, expected behavior, and any error messages. Markdown formatting is supported.
+                  </FormDescription>
+                  <p className={cn("shrink-0 text-xs", field.value.length >= DESC_MAX ? "text-destructive" : field.value.length >= DESC_MAX * 0.8 ? "text-amber-500" : "text-muted-foreground")}>
+                    {field.value.length}/{DESC_MAX}
+                  </p>
+                </div>
                 <FormMessage />
               </FormItem>
             )}

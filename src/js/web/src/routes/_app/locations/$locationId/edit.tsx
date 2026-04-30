@@ -20,6 +20,12 @@ import { SkeletonCard } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
 import { useAuthStore } from "@/lib/auth"
 import { useLocation, useUpdateLocation, type LocationUpdate } from "@/lib/api/hooks/locations"
+import { cn } from "@/lib/utils"
+
+// ── Field limits ──────────────────────────────────────────────────────
+
+const NAME_MAX = 100
+const DESC_MAX = 500
 
 export const Route = createFileRoute("/_app/locations/$locationId/edit")({
   component: EditLocationPage,
@@ -272,13 +278,19 @@ function EditLocationPage() {
                   onChange={(e) => handleNameChange(e.target.value)}
                   onBlur={handleNameBlur}
                   aria-invalid={!!nameError}
+                  maxLength={NAME_MAX}
                   required
                 />
-                {nameError ? (
-                  <FieldError message={nameError} />
-                ) : (
-                  <FieldHint>A descriptive name for this location.</FieldHint>
-                )}
+                <div className="flex items-center justify-between">
+                  {nameError ? (
+                    <FieldError message={nameError} />
+                  ) : (
+                    <FieldHint>A descriptive name for this location.</FieldHint>
+                  )}
+                  <p className={cn("shrink-0 text-xs", name.length >= NAME_MAX ? "text-destructive" : name.length >= NAME_MAX * 0.8 ? "text-amber-500" : "text-muted-foreground")}>
+                    {name.length}/{NAME_MAX}
+                  </p>
+                </div>
               </div>
 
               {/* Description */}
@@ -289,9 +301,15 @@ function EditLocationPage() {
                   placeholder="Optional description of this location"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
+                  maxLength={DESC_MAX}
                   rows={3}
                 />
-                <FieldHint>Optional notes about this location.</FieldHint>
+                <div className="flex items-center justify-between">
+                  <FieldHint>Optional notes about this location.</FieldHint>
+                  <p className={cn("shrink-0 text-xs", description.length >= DESC_MAX ? "text-destructive" : description.length >= DESC_MAX * 0.8 ? "text-amber-500" : "text-muted-foreground")}>
+                    {description.length}/{DESC_MAX}
+                  </p>
+                </div>
               </div>
 
               {/* Address fields (ADDRESSED type only) */}

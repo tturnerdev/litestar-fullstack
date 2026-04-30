@@ -23,6 +23,12 @@ import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
 import { createTeam, listTags } from "@/lib/generated/api"
+import { cn } from "@/lib/utils"
+
+// ── Field limits ──────────────────────────────────────────────────────
+
+const NAME_MAX = 100
+const DESC_MAX = 500
 
 const createTeamSchema = z.object({
   name: z
@@ -125,11 +131,16 @@ export function CreateTeamForm() {
                 Team Name <span className="text-destructive">*</span>
               </FormLabel>
               <FormControl>
-                <Input placeholder="e.g., Engineering, Sales, Support" {...field} />
+                <Input placeholder="e.g., Engineering, Sales, Support" maxLength={NAME_MAX} {...field} />
               </FormControl>
-              <FormDescription>
-                A unique, descriptive name for your team.
-              </FormDescription>
+              <div className="flex items-center justify-between">
+                <FormDescription>
+                  A unique, descriptive name for your team.
+                </FormDescription>
+                <p className={cn("shrink-0 text-xs", field.value.length >= NAME_MAX ? "text-destructive" : field.value.length >= NAME_MAX * 0.8 ? "text-amber-500" : "text-muted-foreground")}>
+                  {field.value.length}/{NAME_MAX}
+                </p>
+              </div>
               <FormMessage />
             </FormItem>
           )}
@@ -146,12 +157,18 @@ export function CreateTeamForm() {
                   placeholder="Briefly describe this team's purpose and responsibilities..."
                   className="resize-none"
                   rows={3}
+                  maxLength={DESC_MAX}
                   {...field}
                 />
               </FormControl>
-              <FormDescription>
-                Help others understand what this team does. This is optional.
-              </FormDescription>
+              <div className="flex items-center justify-between">
+                <FormDescription>
+                  Help others understand what this team does. This is optional.
+                </FormDescription>
+                <p className={cn("shrink-0 text-xs", (field.value?.length ?? 0) >= DESC_MAX ? "text-destructive" : (field.value?.length ?? 0) >= DESC_MAX * 0.8 ? "text-amber-500" : "text-muted-foreground")}>
+                  {field.value?.length ?? 0}/{DESC_MAX}
+                </p>
+              </div>
               <FormMessage />
             </FormItem>
           )}

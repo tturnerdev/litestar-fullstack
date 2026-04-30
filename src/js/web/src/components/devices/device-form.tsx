@@ -31,10 +31,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator"
 import { useCreateDevice } from "@/lib/api/hooks/devices"
 import { formatMacAddress } from "@/lib/format-utils"
+import { cn } from "@/lib/utils"
 
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
+
+const NAME_MAX = 100
 
 const deviceTypes: { value: string; label: string; icon: LucideIcon }[] = [
   { value: "desk_phone", label: "Desk Phone", icon: Phone },
@@ -56,7 +59,7 @@ const IPV4_REGEX = /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?
 // ---------------------------------------------------------------------------
 
 const createDeviceSchema = z.object({
-  name: z.string().min(1, "Device name is required").max(100, "Name must be 100 characters or fewer"),
+  name: z.string().min(1, "Device name is required").max(NAME_MAX, "Name must be 100 characters or fewer"),
   deviceType: z.string().min(1, "Device type is required"),
   macAddress: z
     .string()
@@ -163,13 +166,13 @@ export function CreateDeviceForm() {
               <FormItem>
                 <RequiredLabel>Device Name</RequiredLabel>
                 <FormControl>
-                  <Input placeholder="Desk Phone - Office" maxLength={100} {...field} />
+                  <Input placeholder="Desk Phone - Office" maxLength={NAME_MAX} {...field} />
                 </FormControl>
                 <div className="flex items-center justify-between">
                   <FormDescription>A friendly label to identify this device.</FormDescription>
-                  <span className={`text-xs ${nameLength > 90 ? "text-amber-500" : "text-muted-foreground"}`}>
-                    {nameLength}/100
-                  </span>
+                  <p className={cn("shrink-0 text-xs", nameLength >= NAME_MAX ? "text-destructive" : nameLength >= NAME_MAX * 0.8 ? "text-amber-500" : "text-muted-foreground")}>
+                    {nameLength}/{NAME_MAX}
+                  </p>
                 </div>
                 <FormMessage />
               </FormItem>

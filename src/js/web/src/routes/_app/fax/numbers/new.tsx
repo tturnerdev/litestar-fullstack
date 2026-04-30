@@ -20,10 +20,13 @@ import { PageContainer, PageHeader } from "@/components/ui/page-layout"
 import { Switch } from "@/components/ui/switch"
 import { useAuth } from "@/hooks/use-auth"
 import { useCreateFaxNumber } from "@/lib/api/hooks/fax"
+import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/fax/numbers/new")({
   component: NewFaxNumberPage,
 })
+
+const LABEL_MAX = 100
 
 function NewFaxNumberPage() {
   const router = useRouter()
@@ -113,11 +116,19 @@ function NewFaxNumberPage() {
                 id="fax-label"
                 placeholder="e.g., Main Fax, Billing Dept"
                 value={label}
-                onChange={(e) => setLabel(e.target.value)}
+                onChange={(e) => {
+                  if (e.target.value.length <= LABEL_MAX) setLabel(e.target.value)
+                }}
+                maxLength={LABEL_MAX}
               />
-              <p className="text-xs text-muted-foreground">
-                An optional friendly name to identify this number.
-              </p>
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-muted-foreground">
+                  An optional friendly name to identify this number.
+                </p>
+                <p className={cn("shrink-0 text-xs", label.length >= LABEL_MAX ? "text-destructive" : label.length >= LABEL_MAX * 0.8 ? "text-amber-500" : "text-muted-foreground")}>
+                  {label.length}/{LABEL_MAX}
+                </p>
+              </div>
             </div>
 
             <div className="flex items-center justify-between rounded-lg border border-border/60 bg-muted/20 p-4">

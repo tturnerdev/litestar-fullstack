@@ -23,17 +23,21 @@ import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
 import { useAuthStore } from "@/lib/auth"
 import { useCreateLocation, useLocations } from "@/lib/api/hooks/locations"
+import { cn } from "@/lib/utils"
+
+const NAME_MAX = 100
+const DESC_MAX = 500
 
 const createLocationSchema = z
   .object({
     name: z
       .string()
       .min(1, "Location name is required")
-      .max(100, "Name must be 100 characters or fewer"),
+      .max(NAME_MAX, "Name must be 100 characters or fewer"),
     locationType: z.enum(["ADDRESSED", "PHYSICAL"], { message: "Location type is required" }),
     description: z
       .string()
-      .max(500, "Description must be 500 characters or fewer")
+      .max(DESC_MAX, "Description must be 500 characters or fewer")
       .optional(),
     parentId: z.string().optional(),
     addressLine1: z.string().optional(),
@@ -176,13 +180,13 @@ export function CreateLocationForm() {
                   <RequiredIndicator />
                 </FormLabel>
                 <FormControl>
-                  <Input placeholder="Main Office" maxLength={100} {...field} />
+                  <Input placeholder="Main Office" maxLength={NAME_MAX} {...field} />
                 </FormControl>
                 <div className="flex items-center justify-between">
                   <FormDescription>A descriptive name for this location.</FormDescription>
-                  <span className={`text-xs ${nameLength > 90 ? "text-amber-500" : "text-muted-foreground"}`}>
-                    {nameLength}/100
-                  </span>
+                  <p className={cn("shrink-0 text-xs", nameLength >= NAME_MAX ? "text-destructive" : nameLength >= NAME_MAX * 0.8 ? "text-amber-500" : "text-muted-foreground")}>
+                    {nameLength}/{NAME_MAX}
+                  </p>
                 </div>
                 <FormMessage />
               </FormItem>
@@ -226,13 +230,13 @@ export function CreateLocationForm() {
               <FormItem>
                 <FormLabel>Description</FormLabel>
                 <FormControl>
-                  <Textarea placeholder="Optional description of this location..." rows={3} maxLength={500} {...field} />
+                  <Textarea placeholder="Optional description of this location..." rows={3} maxLength={DESC_MAX} {...field} />
                 </FormControl>
                 <div className="flex items-center justify-between">
                   <FormDescription>A brief summary of this location's purpose or usage.</FormDescription>
-                  <span className={`text-xs ${descriptionLength > 450 ? "text-amber-500" : "text-muted-foreground"}`}>
-                    {descriptionLength}/500
-                  </span>
+                  <p className={cn("shrink-0 text-xs", descriptionLength >= DESC_MAX ? "text-destructive" : descriptionLength >= DESC_MAX * 0.8 ? "text-amber-500" : "text-muted-foreground")}>
+                    {descriptionLength}/{DESC_MAX}
+                  </p>
                 </div>
                 <FormMessage />
               </FormItem>

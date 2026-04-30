@@ -26,13 +26,18 @@ import { Separator } from "@/components/ui/separator"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { useExtension, usePhoneNumbers, useUpdateExtension } from "@/lib/api/hooks/voice"
+import { cn } from "@/lib/utils"
+
+// ── Field limits ──────────────────────────────────────────────────────
+
+const DISPLAY_NAME_MAX = 100
 
 export const Route = createFileRoute("/_app/voice/extensions/$extensionId/edit")({
   component: EditExtensionPage,
 })
 
 const editExtensionSchema = z.object({
-  displayName: z.string().optional(),
+  displayName: z.string().max(DISPLAY_NAME_MAX, "Display name must be 100 characters or less").optional(),
   isActive: z.boolean(),
   phoneNumberId: z.string().optional(),
 })
@@ -182,9 +187,14 @@ function EditExtensionForm({ extensionId, initialData }: EditExtensionFormProps)
                   <FormItem>
                     <FormLabel>Display Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Front Desk" {...field} />
+                      <Input placeholder="Front Desk" maxLength={DISPLAY_NAME_MAX} {...field} />
                     </FormControl>
-                    <FormDescription>This name appears in the directory and call logs.</FormDescription>
+                    <div className="flex items-center justify-between">
+                      <FormDescription>This name appears in the directory and call logs.</FormDescription>
+                      <p className={cn("shrink-0 text-xs", (field.value?.length ?? 0) >= DISPLAY_NAME_MAX ? "text-destructive" : (field.value?.length ?? 0) >= DISPLAY_NAME_MAX * 0.8 ? "text-amber-500" : "text-muted-foreground")}>
+                        {field.value?.length ?? 0}/{DISPLAY_NAME_MAX}
+                      </p>
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
