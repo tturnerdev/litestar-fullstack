@@ -1,9 +1,11 @@
-import { Info, Loader2, Lock, Users } from "lucide-react"
+import { BarChart3, CheckCircle2, CreditCard, Info, LifeBuoy, Loader2, Lock, Monitor, Phone, Printer, Users, XCircle } from "lucide-react"
+import type { LucideIcon } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Separator } from "@/components/ui/separator"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAdminUser } from "@/lib/api/hooks/admin"
 
 interface ManagePermissionsDialogProps {
@@ -12,14 +14,14 @@ interface ManagePermissionsDialogProps {
   onOpenChange: (open: boolean) => void
 }
 
-const FEATURE_AREAS = [
-  { key: "voice", label: "Voice" },
-  { key: "fax", label: "Fax" },
-  { key: "devices", label: "Devices" },
-  { key: "support", label: "Support" },
-  { key: "billing", label: "Billing" },
-  { key: "reporting", label: "Reporting" },
-] as const
+const FEATURE_AREAS: readonly { key: string; label: string; icon: LucideIcon }[] = [
+  { key: "voice", label: "Voice", icon: Phone },
+  { key: "fax", label: "Fax", icon: Printer },
+  { key: "devices", label: "Devices", icon: Monitor },
+  { key: "support", label: "Support", icon: LifeBuoy },
+  { key: "billing", label: "Billing", icon: CreditCard },
+  { key: "reporting", label: "Reporting", icon: BarChart3 },
+]
 
 function getRolePermissions(role: string | null | undefined): Record<string, { canView: boolean; canEdit: boolean }> {
   const permissions: Record<string, { canView: boolean; canEdit: boolean }> = {}
@@ -33,6 +35,17 @@ function getRolePermissions(role: string | null | undefined): Record<string, { c
   return permissions
 }
 
+function countAllowed(permissions: Record<string, { canView: boolean; canEdit: boolean }>): { allowed: number; total: number } {
+  let allowed = 0
+  let total = 0
+  for (const key of Object.keys(permissions)) {
+    if (permissions[key].canView) allowed++
+    if (permissions[key].canEdit) allowed++
+    total += 2
+  }
+  return { allowed, total }
+}
+
 export function ManagePermissionsDialog({ userId, open, onOpenChange }: ManagePermissionsDialogProps) {
   const { data: user, isLoading } = useAdminUser(userId)
 
@@ -42,7 +55,10 @@ export function ManagePermissionsDialog({ userId, open, onOpenChange }: ManagePe
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Manage Permissions</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <Lock className="h-5 w-5 text-muted-foreground" />
+            Manage Permissions
+          </DialogTitle>
           <DialogDescription>
             View the effective permissions for this user based on their team roles.
           </DialogDescription>
@@ -75,8 +91,9 @@ export function ManagePermissionsDialog({ userId, open, onOpenChange }: ManagePe
 
             {teams.map((team) => {
               const permissions = getRolePermissions(team.role)
+              const { allowed, total } = countAllowed(permissions)
               return (
-                <div key={team.teamId} className="space-y-2">
+                <div key={team.teamId} className="space-y-2 rounded-lg border p-4 transition-shadow hover:shadow-sm">
                   <div className="flex items-center gap-2">
                     <Users className="h-4 w-4 text-muted-foreground" />
                     <h4 className="text-sm font-medium">{team.teamName}</h4>
@@ -102,8 +119,13 @@ export function ManagePermissionsDialog({ userId, open, onOpenChange }: ManagePe
                         {FEATURE_AREAS.map((area) => {
                           const perm = permissions[area.key]
                           return (
-                            <TableRow key={area.key}>
-                              <TableCell className="text-sm">{area.label}</TableCell>
+                            <TableRow key={area.key} className="hover:bg-muted/50">
+                              <TableCell className="text-sm">
+                                <div className="flex items-center gap-2">
+                                  <area.icon className="h-4 w-4 text-muted-foreground" />
+                                  {area.label}
+                                </div>
+                              </TableCell>
                               <TableCell className="text-center">
                                 <PermissionIndicator allowed={perm.canView} />
                               </TableCell>
@@ -115,6 +137,11 @@ export function ManagePermissionsDialog({ userId, open, onOpenChange }: ManagePe
                         })}
                       </TableBody>
                     </Table>
+                  </div>
+                  <div className="flex justify-end">
+                    <span className="text-xs text-muted-foreground">
+                      {allowed}/{total} permissions granted
+                    </span>
                   </div>
                 </div>
               )
@@ -147,11 +174,19 @@ export function ManagePermissionsDialog({ userId, open, onOpenChange }: ManagePe
 
 function PermissionIndicator({ allowed }: { allowed: boolean }) {
   return (
-    <span
-      className={`inline-block h-2.5 w-2.5 rounded-full ${
-        allowed ? "bg-green-500" : "bg-muted-foreground/30"
-      }`}
-      title={allowed ? "Allowed" : "Not allowed"}
-    />
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span className="inline-flex items-center justify-center">
+          {allowed ? (
+            <CheckCircle2 className="h-4 w-4 text-green-500" />
+          ) : (
+            <XCircle className="h-4 w-4 text-muted-foreground/40" />
+          )}
+        </span>
+      </TooltipTrigger>
+      <TooltipContent>
+        {allowed ? "Allowed" : "Not allowed"}
+      </TooltipContent>
+    </Tooltip>
   )
 }

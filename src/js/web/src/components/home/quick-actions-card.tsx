@@ -1,6 +1,8 @@
 import { Link } from "@tanstack/react-router"
 import { ChevronRight, type LucideIcon, Plus, Settings, ShieldCheck, Tag, Users } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator"
 
 interface QuickAction {
   key: string
@@ -10,6 +12,8 @@ interface QuickAction {
   icon: LucideIcon
   iconBgClassName: string
   iconTextClassName: string
+  shortcut?: string
+  isNew?: boolean
 }
 
 const defaultActions: QuickAction[] = [
@@ -21,6 +25,8 @@ const defaultActions: QuickAction[] = [
     icon: Plus,
     iconBgClassName: "bg-primary/10 group-hover:bg-primary",
     iconTextClassName: "text-primary group-hover:text-primary-foreground",
+    shortcut: "T",
+    isNew: true,
   },
   {
     key: "browse-teams",
@@ -30,6 +36,7 @@ const defaultActions: QuickAction[] = [
     icon: Users,
     iconBgClassName: "bg-blue-500/10 group-hover:bg-blue-500",
     iconTextClassName: "text-blue-600 dark:text-blue-400 group-hover:text-white dark:group-hover:text-white",
+    shortcut: "D",
   },
   {
     key: "manage-tags",
@@ -48,6 +55,7 @@ const defaultActions: QuickAction[] = [
     icon: Settings,
     iconBgClassName: "bg-orange-500/10 group-hover:bg-orange-500",
     iconTextClassName: "text-orange-600 dark:text-orange-400 group-hover:text-white dark:group-hover:text-white",
+    shortcut: "P",
   },
 ]
 
@@ -60,38 +68,58 @@ const adminActions: QuickAction[] = [
     icon: ShieldCheck,
     iconBgClassName: "bg-violet-500/10 group-hover:bg-violet-500",
     iconTextClassName: "text-violet-600 dark:text-violet-400 group-hover:text-white dark:group-hover:text-white",
+    shortcut: "A",
   },
 ]
 
 interface QuickActionsCardProps {
   isSuperuser?: boolean
+  teamCount?: number
 }
 
-export function QuickActionsCard({ isSuperuser }: QuickActionsCardProps) {
+export function QuickActionsCard({ isSuperuser, teamCount }: QuickActionsCardProps) {
   const actions = isSuperuser ? [...defaultActions, ...adminActions] : defaultActions
 
   return (
     <Card className="border-border/40 bg-linear-to-br from-muted/30 to-muted/10">
       <CardHeader className="space-y-1 pb-3">
         <CardTitle className="text-lg">Quick Actions</CardTitle>
-        <CardDescription>Common tasks</CardDescription>
+        <CardDescription>{actions.length} actions available</CardDescription>
       </CardHeader>
       <CardContent className="space-y-1.5">
-        {actions.map((action) => (
-          <Link
-            key={action.key}
-            to={action.to}
-            className="group flex items-center gap-3 rounded-lg bg-background/60 p-3 transition-all hover:bg-background hover:shadow-sm"
-          >
-            <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors ${action.iconBgClassName} ${action.iconTextClassName}`}>
-              <action.icon className="h-4 w-4" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium">{action.label}</p>
-              <p className="text-xs text-muted-foreground">{action.description}</p>
-            </div>
-            <ChevronRight className="h-4 w-4 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" />
-          </Link>
+        {actions.map((action, index) => (
+          <div key={action.key}>
+            {isSuperuser && action.key === "admin-console" && (
+              <Separator className="my-2" />
+            )}
+            <Link
+              to={action.to}
+              className="animate-in fade-in slide-in-from-left-2 group flex items-center gap-3 rounded-lg bg-background/60 p-3 fill-mode-both transition-all hover:bg-background hover:shadow-sm"
+              style={{ animationDelay: `${index * 50}ms` }}
+            >
+              <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors ${action.iconBgClassName} ${action.iconTextClassName}`}>
+                <action.icon className="h-4 w-4" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="flex items-center text-sm font-medium">
+                  {action.label}
+                  {action.isNew && (
+                    <Badge variant="default" className="ml-2 h-4 text-[9px]">NEW</Badge>
+                  )}
+                  {action.key === "browse-teams" && teamCount !== undefined && teamCount > 0 && (
+                    <Badge variant="secondary" className="ml-2 h-4 text-[9px]">{teamCount}</Badge>
+                  )}
+                </p>
+                <p className="text-xs text-muted-foreground">{action.description}</p>
+              </div>
+              {action.shortcut && (
+                <kbd className="ml-auto hidden rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground group-hover:inline">
+                  {action.shortcut}
+                </kbd>
+              )}
+              <ChevronRight className="h-4 w-4 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" />
+            </Link>
+          </div>
         ))}
       </CardContent>
     </Card>

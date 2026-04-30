@@ -160,7 +160,7 @@ function HomePage() {
       <PageSection delay={0.12}>
         <div className="grid gap-6 md:grid-cols-2">
           <TeamsCard teams={teams} isLoading={teamsLoading} />
-          <QuickActionsCard isSuperuser={isSuperuser} />
+          <QuickActionsCard isSuperuser={isSuperuser} teamCount={teams.length} />
         </div>
       </PageSection>
 

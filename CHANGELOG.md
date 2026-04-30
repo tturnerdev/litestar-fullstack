@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.55.0 (2026-04-30)
+
+### Improved
+- **Join team dialog** — UserPlus header icon, user info summary card, team count label, description snippets in select, visual role cards instead of dropdown, success animation, and section separator.
+- **Manage permissions dialog** — Lock header icon, CheckCircle2/XCircle permission icons with tooltips, feature-area icons (Phone/Printer/Monitor/LifeBuoy/CreditCard/BarChart3), row hover, team section cards, and per-team summary footer.
+- **Manage roles dialog** — Shield header icon, violet role badges, inline remove confirmation with auto-revert, team row hover, role/team counts, ShieldOff/UsersRound empty state icons, spinner on assign, and success checkmark animation on role change.
+- **Quick actions card** — keyboard shortcut hints on hover, "NEW" badge, team count badge, separator before admin actions, staggered entrance animation, and action count in description.
+- **Getting started card** — numbered steps, dismiss with localStorage persistence, celebration state when complete, time estimates, and active-item highlight.
+- **Quick stats** — hover scale, animated count fade-in, trend arrow for teams, zero-state styling with "Set up" text, hover ArrowRight icon, and pulse skeleton loading.
+
 ## v0.54.0 (2026-04-30)
 
 ### Improved
