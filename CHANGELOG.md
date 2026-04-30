@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.46.0 (2026-04-30)
+
+### Improved
+- **Device actions** — 2x2 card grid layout with colored icon backgrounds, section grouping (Operations/Management), AlertDialog for destructive actions, descriptive subtitles, tooltips, and optional "last rebooted" timestamp.
+- **DND quick toggle** — pulsing red dot indicator when active, loading spinner, red-tinted background, DND mode in tooltip, compact icon-only mode, and keyboard shortcut ("d" key).
+- **Email route editor** — inline email validation indicator, test route button with toast, animated count badge, enhanced empty state with MailPlus icon, delete confirmation AlertDialog, active/inactive colored dot counts, and bulk activate/deactivate toggle.
+- **Email route row** — Switch toggles replacing badge buttons, colored mail icon, hover highlighting, status toggle toasts, copy email button, inline delete confirmation with auto-revert timer, row entrance animation, and test route button.
+
 ## v0.45.0 (2026-04-30)
 
 ### Improved
