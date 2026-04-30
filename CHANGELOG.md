@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.45.0 (2026-04-30)
+
+### Improved
+- **Device line config** — unsaved changes banner, Switch toggle for active status, drag handle indicators, line count in header, colored type badges, styled empty state with Cable icon, remove confirmation AlertDialog, and section separators.
+- **Attachment list** — header with Paperclip icon and count, attachments grouped by type, image thumbnails as preview tiles, total file size summary, hover scale effects, type-based color tinting (purple/red/gray), and "Download all" button.
+- **Attachment upload** — file type and size validation with toast errors, file-type-specific icons, upload pulse animation, animated drag-over styling, compact mode file count badge, "Clear all" button, and colored left borders by file type.
+- **Ticket system messages** — action-type parsing with contextual icons and colors (status/priority/assignment/close/reopen), relative timestamps, horizontal divider lines flanking the pill, entrance fade animation, and actor name display.
+
 ## v0.44.0 (2026-04-30)
 
 ### Improved

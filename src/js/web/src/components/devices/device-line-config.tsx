@@ -1,12 +1,25 @@
 import { useState } from "react"
-import { Loader2, Plus, Trash2 } from "lucide-react"
+import { AlertTriangle, Cable, GripVertical, Loader2, Plus, Save, Trash2 } from "lucide-react"
 import type { DeviceLineAssignment } from "@/lib/generated/api"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Separator } from "@/components/ui/separator"
 import { SkeletonCard } from "@/components/ui/skeleton"
+import { Switch } from "@/components/ui/switch"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useDeviceLines, useSetDeviceLines, type SetDeviceLinesPayload } from "@/lib/api/hooks/devices"
 
@@ -117,94 +130,152 @@ export function DeviceLineConfig({ deviceId }: DeviceLineConfigProps) {
 
   return (
     <Card>
+      {dirty && (
+        <div className="flex items-center gap-2 rounded-t-lg border-b border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-sm text-amber-700 dark:text-amber-400">
+          <AlertTriangle className="h-4 w-4 shrink-0" />
+          <span className="font-medium">You have unsaved changes</span>
+        </div>
+      )}
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
-        <CardTitle>Line Assignments</CardTitle>
-        <Button variant="outline" size="sm" onClick={addLine}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Line
-        </Button>
+        <div className="flex items-center gap-3">
+          <CardTitle>Line Assignments</CardTitle>
+          {currentLines.length > 0 && (
+            <span className="text-sm text-muted-foreground">
+              {currentLines.length} {currentLines.length === 1 ? "line" : "lines"} configured
+            </span>
+          )}
+        </div>
+        {currentLines.length > 0 && (
+          <Button variant="outline" size="sm" onClick={addLine}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Line
+          </Button>
+        )}
       </CardHeader>
       <CardContent className="space-y-4">
         {currentLines.length === 0 ? (
-          <p className="py-8 text-center text-muted-foreground text-sm">
-            No line assignments configured. Click "Add Line" to assign extensions to line keys.
-          </p>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-16">Line</TableHead>
-                <TableHead>Label</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Extension ID</TableHead>
-                <TableHead className="w-20">Active</TableHead>
-                <TableHead className="w-16" />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {currentLines.map((line, index) => (
-                <TableRow key={line.lineNumber}>
-                  <TableCell className="font-mono font-medium">{line.lineNumber}</TableCell>
-                  <TableCell>
-                    <Input
-                      value={line.label}
-                      onChange={(e) => updateLine(index, "label", e.target.value)}
-                      className="h-8"
-                      placeholder="Line label"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Select value={line.lineType} onValueChange={(v) => updateLine(index, "lineType", v)}>
-                      <SelectTrigger className="h-8 w-32">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {lineTypes.map((t) => (
-                          <SelectItem key={t.value} value={t.value}>
-                            {t.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </TableCell>
-                  <TableCell>
-                    <Input
-                      value={line.extensionId}
-                      onChange={(e) => updateLine(index, "extensionId", e.target.value)}
-                      className="h-8 font-mono text-xs"
-                      placeholder="Optional extension ID"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant="outline"
-                      className={`cursor-pointer ${line.isActive ? lineTypeBadgeClasses[line.lineType] ?? "" : "text-muted-foreground"}`}
-                      onClick={() => updateLine(index, "isActive", !line.isActive)}
-                    >
-                      {line.isActive ? "Yes" : "No"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive" onClick={() => removeLine(index)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
-
-        {dirty && (
-          <div className="flex items-center justify-end gap-2 border-t pt-4">
-            <Button variant="ghost" onClick={handleReset} disabled={setLinesMutation.isPending}>
-              Reset
-            </Button>
-            <Button onClick={handleSave} disabled={setLinesMutation.isPending}>
-              {setLinesMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Line Assignments
+          <div className="flex flex-col items-center justify-center gap-4 py-12">
+            <Cable className="h-12 w-12 text-muted-foreground/40" />
+            <div className="text-center">
+              <p className="font-medium text-muted-foreground">No line assignments configured</p>
+              <p className="mt-1 text-sm text-muted-foreground/70">
+                Assign extensions to line keys to configure this device.
+              </p>
+            </div>
+            <Button onClick={addLine}>
+              <Plus className="mr-2 h-4 w-4" />
+              Add first line
             </Button>
           </div>
+        ) : (
+          <>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-10" />
+                  <TableHead className="w-16">Line</TableHead>
+                  <TableHead>Label</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Extension ID</TableHead>
+                  <TableHead className="w-20">Active</TableHead>
+                  <TableHead className="w-16" />
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {currentLines.map((line, index) => (
+                  <TableRow key={line.lineNumber}>
+                    <TableCell className="w-10 px-2">
+                      <GripVertical className="h-4 w-4 text-muted-foreground/40" />
+                    </TableCell>
+                    <TableCell className="font-mono font-medium">{line.lineNumber}</TableCell>
+                    <TableCell>
+                      <Input
+                        value={line.label}
+                        onChange={(e) => updateLine(index, "label", e.target.value)}
+                        className="h-8"
+                        placeholder="Line label"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Select value={line.lineType} onValueChange={(v) => updateLine(index, "lineType", v)}>
+                          <SelectTrigger className="h-8 w-32">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {lineTypes.map((t) => (
+                              <SelectItem key={t.value} value={t.value}>
+                                {t.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Badge variant="outline" className={lineTypeBadgeClasses[line.lineType] ?? ""}>
+                          {lineTypes.find((t) => t.value === line.lineType)?.label ?? line.lineType}
+                        </Badge>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Input
+                        value={line.extensionId}
+                        onChange={(e) => updateLine(index, "extensionId", e.target.value)}
+                        className="h-8 font-mono text-xs"
+                        placeholder="Optional extension ID"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Switch
+                        checked={line.isActive}
+                        onCheckedChange={(checked) => updateLine(index, "isActive", checked)}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Remove line {line.lineNumber}?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This will remove &quot;{line.label}&quot; from the configuration. This change won&apos;t take effect until you save.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => removeLine(index)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                              Remove
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+
+            {dirty && (
+              <>
+                <Separator />
+                <div className="flex items-center justify-end gap-2">
+                  <Button variant="ghost" onClick={handleReset} disabled={setLinesMutation.isPending}>
+                    Reset
+                  </Button>
+                  <Button onClick={handleSave} disabled={setLinesMutation.isPending}>
+                    {setLinesMutation.isPending ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Save className="mr-2 h-4 w-4" />
+                    )}
+                    Save Line Assignments
+                  </Button>
+                </div>
+              </>
+            )}
+          </>
         )}
       </CardContent>
     </Card>
