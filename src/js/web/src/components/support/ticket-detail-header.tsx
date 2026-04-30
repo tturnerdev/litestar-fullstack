@@ -369,11 +369,21 @@ export function TicketDetailHeader({ ticket }: TicketDetailHeaderProps) {
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Reporter
               </p>
-              <p className="mt-0.5 truncate font-medium">
-                {ticket.user?.name ?? ticket.user?.email ?? "Unknown"}
-              </p>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <p className="mt-0.5 truncate font-medium">
+                    {ticket.user?.name ?? ticket.user?.email ?? "Unknown"}
+                  </p>
+                </TooltipTrigger>
+                <TooltipContent>{ticket.user?.name ?? ticket.user?.email ?? "Unknown"}</TooltipContent>
+              </Tooltip>
               {ticket.user?.name && ticket.user?.email && (
-                <p className="truncate text-xs text-muted-foreground">{ticket.user.email}</p>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <p className="truncate text-xs text-muted-foreground">{ticket.user.email}</p>
+                  </TooltipTrigger>
+                  <TooltipContent>{ticket.user.email}</TooltipContent>
+                </Tooltip>
               )}
             </div>
           </div>
@@ -402,13 +412,23 @@ export function TicketDetailHeader({ ticket }: TicketDetailHeaderProps) {
               </p>
               {ticket.assignedTo ? (
                 <>
-                  <p className="mt-0.5 truncate font-medium">
-                    {ticket.assignedTo.name ?? ticket.assignedTo.email}
-                  </p>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <p className="mt-0.5 truncate font-medium">
+                        {ticket.assignedTo.name ?? ticket.assignedTo.email}
+                      </p>
+                    </TooltipTrigger>
+                    <TooltipContent>{ticket.assignedTo.name ?? ticket.assignedTo.email}</TooltipContent>
+                  </Tooltip>
                   {ticket.assignedTo.name && ticket.assignedTo.email && (
-                    <p className="truncate text-xs text-muted-foreground">
-                      {ticket.assignedTo.email}
-                    </p>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <p className="truncate text-xs text-muted-foreground">
+                          {ticket.assignedTo.email}
+                        </p>
+                      </TooltipTrigger>
+                      <TooltipContent>{ticket.assignedTo.email}</TooltipContent>
+                    </Tooltip>
                   )}
                 </>
               ) : (

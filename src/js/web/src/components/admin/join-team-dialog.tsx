@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAdminUser } from "@/lib/api/hooks/admin"
 import {
   addMemberToTeam,
@@ -133,9 +134,19 @@ export function JoinTeamDialog({ userId, userName, open, onOpenChange }: JoinTea
               <div className="flex items-center gap-2">
                 <User className="h-4 w-4 text-muted-foreground" />
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium">{user?.name ?? userName}</p>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <p className="truncate text-sm font-medium">{user?.name ?? userName}</p>
+                    </TooltipTrigger>
+                    <TooltipContent>{user?.name ?? userName}</TooltipContent>
+                  </Tooltip>
                   {user?.email && (
-                    <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+                      </TooltipTrigger>
+                      <TooltipContent>{user.email}</TooltipContent>
+                    </Tooltip>
                   )}
                 </div>
               </div>

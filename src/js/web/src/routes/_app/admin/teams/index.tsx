@@ -461,9 +461,14 @@ function TeamRow({
           <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10 text-primary">
             <Users className="h-4 w-4" />
           </div>
-          <span className="font-medium truncate group-hover:underline">
-            {team.name}
-          </span>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="font-medium truncate group-hover:underline">
+                {team.name}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>{team.name}</TooltipContent>
+          </Tooltip>
         </Link>
       </TableCell>
       <TableCell>

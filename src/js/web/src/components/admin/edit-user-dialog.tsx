@@ -13,6 +13,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { Switch } from "@/components/ui/switch"
 import { useAdminUpdateUser } from "@/lib/api/hooks/admin"
 import type { AdminUserSummary, AdminUserDetail } from "@/lib/generated/api"
@@ -101,7 +102,12 @@ export function EditUserDialog({ user, open, onOpenChange }: EditUserDialogProps
         {/* User info header */}
         <div className="flex items-center justify-between rounded-md bg-muted/50 px-3 py-2.5">
           <div className="min-w-0 space-y-0.5">
-            <p className="truncate text-sm font-medium">{user.email}</p>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <p className="truncate text-sm font-medium">{user.email}</p>
+              </TooltipTrigger>
+              <TooltipContent>{user.email}</TooltipContent>
+            </Tooltip>
             <div className="flex items-center gap-2">
               {user.isVerified ? (
                 <span className="inline-flex items-center gap-1 text-xs text-green-600">
