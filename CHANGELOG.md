@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.88.0 (2026-04-30)
+
+### Added
+- **Unsaved changes protection** — Added `useBlocker` + `AlertDialog` to 4 create/edit forms that were missing it: create team, create fax number, create extension, and support ticket edit. All forms now warn before navigating away with unsaved changes.
+- **Notification delete confirmation** — Added AlertDialog confirmation before deleting individual notifications on the notifications list page, preventing accidental deletions.
+
 ## v0.87.0 (2026-04-30)
 
 ### Added
