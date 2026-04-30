@@ -224,7 +224,7 @@ function AdminSupportPage() {
                 <p className="text-sm mt-1">Support tickets will appear here once created.</p>
               </div>
             ) : (
-              <Table>
+              <Table aria-label="Recent support tickets">
                 <TableHeader>
                   <TableRow>
                     <TableHead>Ticket #</TableHead>
@@ -306,7 +306,7 @@ function AdminSupportPage() {
               </div>
             ) : (
               <>
-                <Table>
+                <Table aria-label="All support tickets">
                   <TableHeader>
                     <TableRow>
                       <TableHead>Ticket #</TableHead>

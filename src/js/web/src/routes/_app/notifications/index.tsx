@@ -182,6 +182,7 @@ function NotificationCard({ notification }: { notification: NotificationItem }) 
                 markRead.mutate(notification.id)
               }}
               title="Mark as read"
+              aria-label="Mark as read"
             >
               <CheckCheck className="h-4 w-4" />
             </Button>
@@ -195,6 +196,7 @@ function NotificationCard({ notification }: { notification: NotificationItem }) 
               deleteNotification.mutate(notification.id)
             }}
             title="Delete"
+            aria-label="Delete notification"
           >
             <Trash2 className="h-4 w-4" />
           </Button>

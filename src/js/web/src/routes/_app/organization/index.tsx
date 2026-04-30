@@ -93,6 +93,7 @@ function CopyButton({ value, label }: { value: string; label: string }) {
       className="h-6 w-6 text-muted-foreground hover:text-foreground"
       onClick={handleCopy}
       title={`Copy ${label.toLowerCase()}`}
+      aria-label="Copy to clipboard"
     >
       {copied ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
     </Button>

@@ -201,7 +201,7 @@ function AdminVoicePage() {
               </div>
             ) : (
               <>
-                <Table>
+                <Table aria-label="Phone numbers">
                   <TableHeader>
                     <TableRow>
                       <TableHead>Number</TableHead>
@@ -285,7 +285,7 @@ function AdminVoicePage() {
                 <p className="text-sm mt-1">Extensions will appear here once configured.</p>
               </div>
             ) : (
-              <Table>
+              <Table aria-label="Extensions">
                 <TableHeader>
                   <TableRow>
                     <TableHead>Extension</TableHead>

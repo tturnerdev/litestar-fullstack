@@ -194,7 +194,7 @@ function AdminFaxPage() {
                 <p className="text-sm mt-1">Fax messages will appear here once sent or received.</p>
               </div>
             ) : (
-              <Table>
+              <Table aria-label="Recent fax activity">
                 <TableHeader>
                   <TableRow>
                     <TableHead>Direction</TableHead>
@@ -284,7 +284,7 @@ function AdminFaxPage() {
               </div>
             ) : (
               <>
-                <Table>
+                <Table aria-label="Fax numbers">
                   <TableHeader>
                     <TableRow>
                       <TableHead>Number</TableHead>

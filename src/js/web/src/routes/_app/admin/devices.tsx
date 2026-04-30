@@ -191,7 +191,7 @@ function AdminDevicesPage() {
                 <p className="text-sm mt-1">Devices will appear here once registered.</p>
               </div>
             ) : (
-              <Table>
+              <Table aria-label="Recent devices">
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
@@ -268,7 +268,7 @@ function AdminDevicesPage() {
               </div>
             ) : (
               <>
-                <Table>
+                <Table aria-label="All devices">
                   <TableHeader>
                     <TableRow>
                       <TableHead>Name</TableHead>

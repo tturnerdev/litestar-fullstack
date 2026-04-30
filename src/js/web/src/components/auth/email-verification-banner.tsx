@@ -94,7 +94,7 @@ export function EmailVerificationBanner({ className }: EmailVerificationBannerPr
               size="icon"
               className="h-5 w-5 shrink-0 rounded-sm p-0 opacity-70 hover:opacity-100"
               onClick={() => setIsDismissed(true)}
-              aria-label="Dismiss banner"
+              aria-label="Dismiss verification banner"
             >
               <X className="h-3 w-3" />
             </Button>

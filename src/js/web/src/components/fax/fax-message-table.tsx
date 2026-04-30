@@ -140,6 +140,7 @@ export function FaxMessageTable() {
                 className="h-9 w-9"
                 onClick={() => refetch()}
                 disabled={isFetching}
+                aria-label="Refresh fax messages"
               >
                 <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
               </Button>
@@ -241,6 +242,7 @@ export function FaxMessageTable() {
                         size="icon"
                         className="h-6 w-6"
                         onClick={() => handleCopy(msg.id, msg.remoteNumber)}
+                        aria-label="Copy phone number"
                       >
                         {copiedId === msg.id ? (
                           <Check className="h-3 w-3 text-green-500" />

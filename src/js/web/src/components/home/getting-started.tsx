@@ -122,9 +122,9 @@ export function GettingStarted() {
             size="icon"
             className="ml-auto h-6 w-6 text-muted-foreground hover:text-foreground"
             onClick={handleDismiss}
+            aria-label="Dismiss getting started"
           >
             <X className="h-3.5 w-3.5" />
-            <span className="sr-only">Dismiss</span>
           </Button>
         </div>
         <CardDescription>
