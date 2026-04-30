@@ -1,40 +1,113 @@
-import { Activity, Shield, UserPlus } from "lucide-react"
+import { useState } from "react"
+import { Activity, Mail, Pencil, ShieldCheck, UserMinus, UserPlus } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Skeleton, SkeletonAvatar } from "@/components/ui/skeleton"
 import type { Team, TeamMember } from "@/lib/generated/api"
+
+// ---------------------------------------------------------------------------
+// Action type -> icon & color mapping
+// ---------------------------------------------------------------------------
+
+type ActionType = "member_joined" | "member_left" | "member_role_changed" | "team_updated" | "invitation_sent"
+
+const ACTION_CONFIG: Record<
+  ActionType,
+  { icon: typeof Activity; color: string; bg: string }
+> = {
+  member_joined: { icon: UserPlus, color: "text-emerald-500", bg: "bg-emerald-500/10" },
+  member_left: { icon: UserMinus, color: "text-red-500", bg: "bg-red-500/10" },
+  member_role_changed: { icon: ShieldCheck, color: "text-violet-500", bg: "bg-violet-500/10" },
+  team_updated: { icon: Pencil, color: "text-sky-500", bg: "bg-sky-500/10" },
+  invitation_sent: { icon: Mail, color: "text-amber-500", bg: "bg-amber-500/10" },
+}
+
+function getActionConfig(action: string) {
+  return ACTION_CONFIG[action as ActionType] ?? { icon: Activity, color: "text-muted-foreground", bg: "bg-muted" }
+}
+
+// ---------------------------------------------------------------------------
+// Relative time helper
+// ---------------------------------------------------------------------------
+
+function timeAgo(dateStr: string): string {
+  const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000)
+  if (seconds < 60) return "just now"
+  const minutes = Math.floor(seconds / 60)
+  if (minutes < 60) return `${minutes}m ago`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours}h ago`
+  const days = Math.floor(hours / 24)
+  if (days < 7) return `${days}d ago`
+  const weeks = Math.floor(days / 7)
+  if (weeks < 5) return `${weeks}w ago`
+  const months = Math.floor(days / 30)
+  return `${months}mo ago`
+}
+
+// ---------------------------------------------------------------------------
+// Loading skeleton
+// ---------------------------------------------------------------------------
+
+function ActivitySkeleton() {
+  return (
+    <div className="space-y-1">
+      {Array.from({ length: 4 }).map((_, i) => (
+        // biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton rows
+        <div key={`activity-skeleton-${i}`} className="flex items-start gap-3 p-3">
+          <SkeletonAvatar className="h-8 w-8" />
+          <div className="flex-1 space-y-1.5">
+            <Skeleton className="h-4 w-3/5" />
+            <Skeleton className="h-3 w-2/5" />
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
+
+/** Number of derived items to show per "page". */
+const PAGE_SIZE = 5
 
 interface TeamActivityProps {
   team: Team
+  isLoading?: boolean
 }
 
 /**
- * Placeholder activity feed for the team detail page.
+ * Activity feed for the team detail page.
  *
- * This currently renders a static summary derived from the team's member list
- * (who joined, ownership, etc.) and a placeholder for a future audit-log or
- * event-sourced activity feed. When a team-scoped audit log API becomes
- * available, replace the placeholder items with real data.
+ * Renders a summary derived from the team's current membership state (ownership,
+ * admin assignments, member count) with per-action icons, relative timestamps,
+ * loading skeletons, and pagination. When a team-scoped audit log API becomes
+ * available, replace the derived items with real event data.
  */
-export function TeamActivity({ team }: TeamActivityProps) {
+export function TeamActivity({ team, isLoading = false }: TeamActivityProps) {
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+
   const members = team.members ?? []
   const owner = members.find((m) => m.isOwner)
 
-  // Derive a lightweight "recent" list from current membership state.
-  // This is intentionally static -- real events would come from an audit log.
+  // Derive a lightweight activity list from current membership state.
   const derivedItems: Array<{
     id: string
-    icon: typeof Activity
-    iconColor: string
+    action: string
     title: string
     description: string
+    timestamp: string | null
   }> = []
 
   if (owner) {
     derivedItems.push({
       id: "owner",
-      icon: Shield,
-      iconColor: "text-amber-500",
+      action: "member_role_changed",
       title: `${owner.name ?? owner.email} owns this team`,
       description: "Team owner has full management permissions",
+      timestamp: null,
     })
   }
 
@@ -43,21 +116,36 @@ export function TeamActivity({ team }: TeamActivityProps) {
     if (admins.length > 0) {
       derivedItems.push({
         id: "admins",
-        icon: Shield,
-        iconColor: "text-blue-500",
+        action: "member_role_changed",
         title: `${admins.length} admin${admins.length !== 1 ? "s" : ""} assigned`,
         description: admins.map((a: TeamMember) => a.name ?? a.email).join(", "),
+        timestamp: null,
+      })
+    }
+
+    // Individual member entries with join action
+    for (const member of members) {
+      if (member.isOwner) continue // owner already listed
+      derivedItems.push({
+        id: `member-${member.id}`,
+        action: "member_joined",
+        title: `${member.name ?? member.email} joined the team`,
+        description: `Role: ${member.role ?? "MEMBER"}`,
+        timestamp: null,
       })
     }
 
     derivedItems.push({
-      id: "members",
-      icon: UserPlus,
-      iconColor: "text-emerald-500",
+      id: "total-members",
+      action: "team_updated",
       title: `${members.length} total member${members.length !== 1 ? "s" : ""}`,
       description: "Current team membership count",
+      timestamp: null,
     })
   }
+
+  const visibleItems = derivedItems.slice(0, visibleCount)
+  const hasMore = visibleCount < derivedItems.length
 
   return (
     <div className="space-y-6">
@@ -67,28 +155,66 @@ export function TeamActivity({ team }: TeamActivityProps) {
             <Activity className="h-4 w-4 text-muted-foreground" />
             Recent activity
           </CardTitle>
-          <CardDescription>A summary of team membership and roles. A full activity log will be available in a future release.</CardDescription>
+          <CardDescription>
+            A summary of team membership and roles. A full activity log will be available in a future release.
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          {derivedItems.length > 0 ? (
-            <div className="space-y-1">
-              {derivedItems.map((item, index) => (
-                <div key={item.id} className="flex items-start gap-3 rounded-lg p-3 transition-colors hover:bg-muted/30">
-                  <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted ${item.iconColor}`}>
-                    <item.icon className="h-4 w-4" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-foreground">{item.title}</p>
-                    <p className="text-xs text-muted-foreground">{item.description}</p>
-                  </div>
-                  {index === 0 && (
-                    <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">Current</span>
-                  )}
+          {isLoading ? (
+            <ActivitySkeleton />
+          ) : derivedItems.length > 0 ? (
+            <>
+              <div className="space-y-1">
+                {visibleItems.map((item, index) => {
+                  const config = getActionConfig(item.action)
+                  const Icon = config.icon
+                  return (
+                    <div key={item.id} className="flex items-start gap-3 rounded-lg p-3 transition-colors hover:bg-muted/30">
+                      <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${config.bg} ${config.color}`}>
+                        <Icon className="h-4 w-4" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-foreground">{item.title}</p>
+                        <p className="text-xs text-muted-foreground">{item.description}</p>
+                      </div>
+                      <div className="flex shrink-0 items-center gap-2">
+                        {item.timestamp && (
+                          <span className="text-[11px] text-muted-foreground">{timeAgo(item.timestamp)}</span>
+                        )}
+                        {index === 0 && (
+                          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
+                            Current
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+
+              {hasMore && (
+                <div className="mt-4 flex justify-center">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-xs text-muted-foreground hover:text-foreground"
+                    onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+                  >
+                    Load more ({derivedItems.length - visibleCount} remaining)
+                  </Button>
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           ) : (
-            <div className="py-8 text-center text-sm text-muted-foreground">No activity recorded yet.</div>
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                <Activity className="h-6 w-6 text-muted-foreground" />
+              </div>
+              <p className="text-sm font-medium text-foreground">No recent activity</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Activity will appear here as team membership changes.
+              </p>
+            </div>
           )}
         </CardContent>
       </Card>

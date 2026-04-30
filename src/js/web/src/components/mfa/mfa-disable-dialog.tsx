@@ -1,5 +1,8 @@
+import { AlertTriangle, ShieldOff } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
+
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
@@ -66,22 +69,32 @@ export function MfaDisableDialog({ disabled }: MfaDisableDialogProps) {
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Disable multi-factor authentication</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <ShieldOff className="h-5 w-5 text-destructive" />
+            Disable multi-factor authentication
+          </DialogTitle>
           <DialogDescription>{hasPassword ? "Confirm your password to turn off MFA." : "Re-authenticate with your linked account to turn off MFA."}</DialogDescription>
         </DialogHeader>
+
+        <Alert variant="warning">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            Disabling MFA will reduce your account security. Your account will only be protected by your password.
+          </AlertDescription>
+        </Alert>
 
         {hasPassword ? (
           <>
             <Input type="password" placeholder="Password" value={password} onChange={(event) => setPassword(event.target.value)} />
             <DialogFooter>
-              <Button onClick={handlePasswordDisable} disabled={disableMfa.isPending}>
+              <Button variant="destructive" onClick={handlePasswordDisable} disabled={disableMfa.isPending}>
                 Disable MFA
               </Button>
             </DialogFooter>
           </>
         ) : (
           <DialogFooter>
-            <Button onClick={handleOAuthDisable} disabled={initiateOAuth.isPending}>
+            <Button variant="destructive" onClick={handleOAuthDisable} disabled={initiateOAuth.isPending}>
               Verify with {oauthProvider ? formatProviderName(oauthProvider) : "OAuth"}
             </Button>
           </DialogFooter>

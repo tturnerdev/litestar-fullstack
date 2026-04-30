@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.38.0 (2026-04-30)
+
+### Improved
+- **MFA TOTP input** — individual 6-digit boxes with auto-advance, backspace navigation, paste support, and dash separator.
+- **MFA setup dialog** — 3-step progress indicator, ShieldCheck icon, and collapsible "Can't scan?" manual entry toggle.
+- **MFA disable dialog** — amber security warning, ShieldOff icon, and destructive button styling.
+- **Backup codes display** — download-as-text button, amber "won't be shown again" warning, and per-code hover copy.
+- **Team activity** — per-action-type icons and colors, relative timestamps, loading skeletons, empty state, and paginated "Load more" button.
+- **Help dialog** — keyboard shortcuts section (Cmd+K, ?, Esc), quick action links, staggered animations, and version footer.
+
 ## v0.37.0 (2026-04-30)
 
 ### Improved
