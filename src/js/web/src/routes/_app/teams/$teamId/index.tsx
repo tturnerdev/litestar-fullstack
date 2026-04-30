@@ -6,6 +6,7 @@ import {
   Check,
   Copy,
   Crown,
+  Pencil,
   Settings,
   Shield,
   Users,
@@ -202,6 +203,11 @@ function TeamDetail() {
                 {userRole}
               </Badge>
             )}
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/teams/$teamId/edit" params={{ teamId }}>
+                <Pencil className="mr-2 h-4 w-4" /> Edit
+              </Link>
+            </Button>
             <Button variant="outline" size="sm" asChild>
               <Link to="/teams">
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back

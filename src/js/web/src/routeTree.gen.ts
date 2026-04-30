@@ -75,8 +75,10 @@ import { Route as AppAdminTeamsIndexRouteImport } from './routes/_app/admin/team
 import { Route as PublicAuthGoogleCallbackRouteImport } from './routes/_public/auth/google/callback'
 import { Route as PublicAuthGithubCallbackRouteImport } from './routes/_public/auth/github/callback'
 import { Route as AppVoiceExtensionsNewRouteImport } from './routes/_app/voice/extensions/new'
+import { Route as AppTeamsTeamIdEditRouteImport } from './routes/_app/teams/$teamId/edit'
 import { Route as AppTagsTagIdEditRouteImport } from './routes/_app/tags/$tagId/edit'
 import { Route as AppSupportTicketIdEditRouteImport } from './routes/_app/support/$ticketId/edit'
+import { Route as AppLocationsLocationIdEditRouteImport } from './routes/_app/locations/$locationId/edit'
 import { Route as AppFaxNumbersNewRouteImport } from './routes/_app/fax/numbers/new'
 import { Route as AppDevicesDeviceIdEditRouteImport } from './routes/_app/devices/$deviceId/edit'
 import { Route as AppConnectionsConnectionIdEditRouteImport } from './routes/_app/connections/$connectionId/edit'
@@ -425,6 +427,11 @@ const AppVoiceExtensionsNewRoute = AppVoiceExtensionsNewRouteImport.update({
   path: '/voice/extensions/new',
   getParentRoute: () => AppRoute,
 } as any)
+const AppTeamsTeamIdEditRoute = AppTeamsTeamIdEditRouteImport.update({
+  id: '/$teamId/edit',
+  path: '/$teamId/edit',
+  getParentRoute: () => AppTeamsRoute,
+} as any)
 const AppTagsTagIdEditRoute = AppTagsTagIdEditRouteImport.update({
   id: '/tags/$tagId/edit',
   path: '/tags/$tagId/edit',
@@ -435,6 +442,12 @@ const AppSupportTicketIdEditRoute = AppSupportTicketIdEditRouteImport.update({
   path: '/$ticketId/edit',
   getParentRoute: () => AppSupportRoute,
 } as any)
+const AppLocationsLocationIdEditRoute =
+  AppLocationsLocationIdEditRouteImport.update({
+    id: '/edit',
+    path: '/edit',
+    getParentRoute: () => AppLocationsLocationIdRoute,
+  } as any)
 const AppFaxNumbersNewRoute = AppFaxNumbersNewRouteImport.update({
   id: '/fax/numbers/new',
   path: '/fax/numbers/new',
@@ -573,8 +586,10 @@ export interface FileRoutesByFullPath {
   '/connections/$connectionId/edit': typeof AppConnectionsConnectionIdEditRoute
   '/devices/$deviceId/edit': typeof AppDevicesDeviceIdEditRoute
   '/fax/numbers/new': typeof AppFaxNumbersNewRoute
+  '/locations/$locationId/edit': typeof AppLocationsLocationIdEditRoute
   '/support/$ticketId/edit': typeof AppSupportTicketIdEditRoute
   '/tags/$tagId/edit': typeof AppTagsTagIdEditRoute
+  '/teams/$teamId/edit': typeof AppTeamsTeamIdEditRoute
   '/voice/extensions/new': typeof AppVoiceExtensionsNewRoute
   '/auth/github/callback': typeof PublicAuthGithubCallbackRoute
   '/auth/google/callback': typeof PublicAuthGoogleCallbackRoute
@@ -646,8 +661,10 @@ export interface FileRoutesByTo {
   '/connections/$connectionId/edit': typeof AppConnectionsConnectionIdEditRoute
   '/devices/$deviceId/edit': typeof AppDevicesDeviceIdEditRoute
   '/fax/numbers/new': typeof AppFaxNumbersNewRoute
+  '/locations/$locationId/edit': typeof AppLocationsLocationIdEditRoute
   '/support/$ticketId/edit': typeof AppSupportTicketIdEditRoute
   '/tags/$tagId/edit': typeof AppTagsTagIdEditRoute
+  '/teams/$teamId/edit': typeof AppTeamsTeamIdEditRoute
   '/voice/extensions/new': typeof AppVoiceExtensionsNewRoute
   '/auth/github/callback': typeof PublicAuthGithubCallbackRoute
   '/auth/google/callback': typeof PublicAuthGoogleCallbackRoute
@@ -731,8 +748,10 @@ export interface FileRoutesById {
   '/_app/connections/$connectionId/edit': typeof AppConnectionsConnectionIdEditRoute
   '/_app/devices/$deviceId/edit': typeof AppDevicesDeviceIdEditRoute
   '/_app/fax/numbers/new': typeof AppFaxNumbersNewRoute
+  '/_app/locations/$locationId/edit': typeof AppLocationsLocationIdEditRoute
   '/_app/support/$ticketId/edit': typeof AppSupportTicketIdEditRoute
   '/_app/tags/$tagId/edit': typeof AppTagsTagIdEditRoute
+  '/_app/teams/$teamId/edit': typeof AppTeamsTeamIdEditRoute
   '/_app/voice/extensions/new': typeof AppVoiceExtensionsNewRoute
   '/_public/auth/github/callback': typeof PublicAuthGithubCallbackRoute
   '/_public/auth/google/callback': typeof PublicAuthGoogleCallbackRoute
@@ -815,8 +834,10 @@ export interface FileRouteTypes {
     | '/connections/$connectionId/edit'
     | '/devices/$deviceId/edit'
     | '/fax/numbers/new'
+    | '/locations/$locationId/edit'
     | '/support/$ticketId/edit'
     | '/tags/$tagId/edit'
+    | '/teams/$teamId/edit'
     | '/voice/extensions/new'
     | '/auth/github/callback'
     | '/auth/google/callback'
@@ -888,8 +909,10 @@ export interface FileRouteTypes {
     | '/connections/$connectionId/edit'
     | '/devices/$deviceId/edit'
     | '/fax/numbers/new'
+    | '/locations/$locationId/edit'
     | '/support/$ticketId/edit'
     | '/tags/$tagId/edit'
+    | '/teams/$teamId/edit'
     | '/voice/extensions/new'
     | '/auth/github/callback'
     | '/auth/google/callback'
@@ -972,8 +995,10 @@ export interface FileRouteTypes {
     | '/_app/connections/$connectionId/edit'
     | '/_app/devices/$deviceId/edit'
     | '/_app/fax/numbers/new'
+    | '/_app/locations/$locationId/edit'
     | '/_app/support/$ticketId/edit'
     | '/_app/tags/$tagId/edit'
+    | '/_app/teams/$teamId/edit'
     | '/_app/voice/extensions/new'
     | '/_public/auth/github/callback'
     | '/_public/auth/google/callback'
@@ -1469,6 +1494,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppVoiceExtensionsNewRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/teams/$teamId/edit': {
+      id: '/_app/teams/$teamId/edit'
+      path: '/$teamId/edit'
+      fullPath: '/teams/$teamId/edit'
+      preLoaderRoute: typeof AppTeamsTeamIdEditRouteImport
+      parentRoute: typeof AppTeamsRoute
+    }
     '/_app/tags/$tagId/edit': {
       id: '/_app/tags/$tagId/edit'
       path: '/tags/$tagId/edit'
@@ -1482,6 +1514,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/support/$ticketId/edit'
       preLoaderRoute: typeof AppSupportTicketIdEditRouteImport
       parentRoute: typeof AppSupportRoute
+    }
+    '/_app/locations/$locationId/edit': {
+      id: '/_app/locations/$locationId/edit'
+      path: '/edit'
+      fullPath: '/locations/$locationId/edit'
+      preLoaderRoute: typeof AppLocationsLocationIdEditRouteImport
+      parentRoute: typeof AppLocationsLocationIdRoute
     }
     '/_app/fax/numbers/new': {
       id: '/_app/fax/numbers/new'
@@ -1667,11 +1706,13 @@ const AppDevicesRouteWithChildren = AppDevicesRoute._addFileChildren(
 )
 
 interface AppLocationsLocationIdRouteChildren {
+  AppLocationsLocationIdEditRoute: typeof AppLocationsLocationIdEditRoute
   AppLocationsLocationIdIndexRoute: typeof AppLocationsLocationIdIndexRoute
 }
 
 const AppLocationsLocationIdRouteChildren: AppLocationsLocationIdRouteChildren =
   {
+    AppLocationsLocationIdEditRoute: AppLocationsLocationIdEditRoute,
     AppLocationsLocationIdIndexRoute: AppLocationsLocationIdIndexRoute,
   }
 
@@ -1729,6 +1770,7 @@ const AppSupportRouteWithChildren = AppSupportRoute._addFileChildren(
 interface AppTeamsRouteChildren {
   AppTeamsNewRoute: typeof AppTeamsNewRoute
   AppTeamsIndexRoute: typeof AppTeamsIndexRoute
+  AppTeamsTeamIdEditRoute: typeof AppTeamsTeamIdEditRoute
   AppTeamsTeamIdIndexRoute: typeof AppTeamsTeamIdIndexRoute
   AppTeamsTeamIdInvitationsInvitationIdAcceptRoute: typeof AppTeamsTeamIdInvitationsInvitationIdAcceptRoute
 }
@@ -1736,6 +1778,7 @@ interface AppTeamsRouteChildren {
 const AppTeamsRouteChildren: AppTeamsRouteChildren = {
   AppTeamsNewRoute: AppTeamsNewRoute,
   AppTeamsIndexRoute: AppTeamsIndexRoute,
+  AppTeamsTeamIdEditRoute: AppTeamsTeamIdEditRoute,
   AppTeamsTeamIdIndexRoute: AppTeamsTeamIdIndexRoute,
   AppTeamsTeamIdInvitationsInvitationIdAcceptRoute:
     AppTeamsTeamIdInvitationsInvitationIdAcceptRoute,

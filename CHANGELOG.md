@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.36.0 (2026-04-30)
+
+### Added
+- **Team edit page** (`/teams/:id/edit`) — edit name, description, and tags with dirty-field diffing, unsaved changes blocker, and breadcrumbs. New `useTeam` and `useUpdateTeam` hooks.
+- **Location edit page** (`/locations/:id/edit`) — edit name, description, and address fields (for addressed type) with dirty-field diffing and unsaved changes blocker.
+
+### Improved
+- **Landing page** — feature highlight cards (Voice, Fax, Devices, Support), stat counters row, prominent CTA buttons, and staggered framer-motion entrance animations.
+- **Team invitation accept page** — gradient background, framer-motion card entrance, team description and member count display, and animated status icons with spring transitions.
+- **Team detail page** — added Edit button in header linking to edit page.
+- **Location detail page** — added Edit Page link alongside existing inline Quick Edit button.
+
 ## v0.35.0 (2026-04-30)
 
 ### Improved

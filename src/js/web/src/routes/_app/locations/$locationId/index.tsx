@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
 import { useState } from "react"
-import { AlertTriangle, ArrowLeft, Check, Clock, Copy, Loader2, MapPin, Pencil, Trash2 } from "lucide-react"
+import { AlertTriangle, ArrowLeft, Check, Clock, Copy, ExternalLink, Loader2, MapPin, Pencil, Trash2 } from "lucide-react"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -195,9 +195,16 @@ function LocationDetailPage() {
               {isAddressed ? "Addressed" : "Physical"}
             </Badge>
             {!editing && (
-              <Button variant="outline" size="sm" onClick={() => startEditing(data)}>
-                <Pencil className="mr-2 h-4 w-4" /> Edit
-              </Button>
+              <>
+                <Button variant="outline" size="sm" asChild>
+                  <Link to="/locations/$locationId/edit" params={{ locationId }}>
+                    <ExternalLink className="mr-2 h-4 w-4" /> Edit Page
+                  </Link>
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => startEditing(data)}>
+                  <Pencil className="mr-2 h-4 w-4" /> Quick Edit
+                </Button>
+              </>
             )}
             <Button variant="outline" size="sm" asChild>
               <Link to="/locations">

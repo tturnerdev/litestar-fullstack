@@ -1,9 +1,69 @@
 import { Link } from "@tanstack/react-router"
-import { ArrowRight, Moon, Sun } from "lucide-react"
+import { motion } from "framer-motion"
+import { ArrowRight, MessageSquare, Monitor, Moon, Phone, Printer, Shield, Sun, Timer, Users } from "lucide-react"
 import { Icons } from "@/components/icons"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
 import { RetroGrid } from "@/components/ui/retro-grid"
 import { useTheme } from "@/lib/theme-context"
+
+const features = [
+  {
+    icon: Phone,
+    title: "Voice Management",
+    description: "Manage extensions, phone numbers, and call settings",
+    color: "text-blue-500",
+    bg: "bg-blue-500/10",
+  },
+  {
+    icon: Printer,
+    title: "Fax Services",
+    description: "Send and receive faxes with email integration",
+    color: "text-emerald-500",
+    bg: "bg-emerald-500/10",
+  },
+  {
+    icon: Monitor,
+    title: "Device Management",
+    description: "Track and provision phones and SIP devices",
+    color: "text-violet-500",
+    bg: "bg-violet-500/10",
+  },
+  {
+    icon: MessageSquare,
+    title: "Support Tickets",
+    description: "Create and manage support requests",
+    color: "text-amber-500",
+    bg: "bg-amber-500/10",
+  },
+] as const
+
+const stats = [
+  { value: "99.9%", label: "Uptime", icon: Timer },
+  { value: "24/7", label: "Monitoring", icon: Shield },
+  { value: "Enterprise", label: "Security", icon: Shield },
+  { value: "Multi-Team", label: "Support", icon: Users },
+] as const
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.2,
+    },
+  },
+}
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, ease: [0.25, 0.1, 0.25, 1] as const },
+  },
+}
 
 export function LandingPage() {
   const { toggleTheme, theme } = useTheme()
@@ -55,29 +115,79 @@ export function LandingPage() {
           </Button>
         </div>
 
-        {/* Main content - centered */}
-        <main className="flex flex-1 flex-col items-center justify-center px-4 pb-16">
-          <Icons.logoBrand className="h-16 w-16" />
+        {/* Main content - scrollable */}
+        <main className="flex flex-1 flex-col items-center overflow-y-auto px-4 pb-16">
+          {/* Hero section */}
+          <motion.div className="flex flex-col items-center" initial="hidden" animate="visible" variants={staggerContainer}>
+            <motion.div variants={fadeUp}>
+              <Icons.logoBrand className="h-16 w-16" />
+            </motion.div>
 
-          <h1 className="mt-8 font-heading text-4xl font-bold tracking-tight text-foreground sm:text-5xl">Litestar Fullstack</h1>
+            <motion.h1 variants={fadeUp} className="mt-8 font-heading text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+              Litestar Fullstack
+            </motion.h1>
 
-          <p className="mt-4 max-w-md text-center text-lg text-muted-foreground">A production-ready Python + React reference application</p>
+            <motion.p variants={fadeUp} className="mt-4 max-w-md text-center text-lg text-muted-foreground">
+              A production-ready Python + React reference application
+            </motion.p>
 
-          <div className="mt-10 flex gap-4">
-            <Button asChild size="lg">
-              <Link to="/signup">Try the demo</Link>
-            </Button>
-            <Button asChild variant="outline" size="lg">
-              <a href="https://github.com/litestar-org/litestar-fullstack" target="_blank" rel="noopener noreferrer">
-                View source
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </a>
-            </Button>
-          </div>
+            <motion.div variants={fadeUp} className="mt-10 flex gap-4">
+              <Button asChild size="lg" className="shadow-lg shadow-primary/20">
+                <Link to="/signup">
+                  Get Started
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="lg">
+                <a href="https://github.com/litestar-org/litestar-fullstack" target="_blank" rel="noopener noreferrer">
+                  View Source
+                </a>
+              </Button>
+            </motion.div>
+          </motion.div>
+
+          {/* Feature cards */}
+          <motion.div
+            className="mt-20 grid w-full max-w-2xl grid-cols-1 gap-4 sm:grid-cols-2"
+            initial="hidden"
+            animate="visible"
+            variants={staggerContainer}
+          >
+            {features.map((feature) => (
+              <motion.div key={feature.title} variants={fadeUp}>
+                <Card hover className="h-full">
+                  <CardContent className="flex items-start gap-4 py-5">
+                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${feature.bg}`}>
+                      <feature.icon className={`h-5 w-5 ${feature.color}`} />
+                    </div>
+                    <div className="space-y-1">
+                      <h3 className="font-semibold text-sm text-foreground">{feature.title}</h3>
+                      <p className="text-xs leading-relaxed text-muted-foreground">{feature.description}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </motion.div>
+
+          {/* Stats section */}
+          <motion.div
+            className="mt-16 flex w-full max-w-2xl flex-wrap items-center justify-center gap-8 rounded-xl border border-border/40 bg-card/40 px-8 py-6 backdrop-blur-sm sm:gap-12"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.8, ease: [0.25, 0.1, 0.25, 1] as const }}
+          >
+            {stats.map((stat) => (
+              <div key={stat.label} className="flex flex-col items-center gap-1 text-center">
+                <span className="font-heading text-xl font-bold text-foreground">{stat.value}</span>
+                <span className="text-xs text-muted-foreground">{stat.label}</span>
+              </div>
+            ))}
+          </motion.div>
         </main>
 
         {/* Footer */}
-        <footer className="py-6 text-center text-sm text-muted-foreground">© {new Date().getFullYear()} Litestar Organization · MIT License</footer>
+        <footer className="py-6 text-center text-sm text-muted-foreground">&copy; {new Date().getFullYear()} Litestar Organization &middot; MIT License</footer>
       </div>
     </div>
   )

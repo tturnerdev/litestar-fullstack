@@ -2,9 +2,46 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import {
   deleteTeam,
+  getTeam,
   listTeams,
+  updateTeam,
   type Team,
 } from "@/lib/generated/api"
+
+// ── Team Detail ──────────────────────────────────────────────────────
+
+export function useTeam(teamId: string) {
+  return useQuery({
+    queryKey: ["team", teamId],
+    queryFn: async () => {
+      const response = await getTeam({ path: { team_id: teamId } })
+      return response.data
+    },
+    enabled: !!teamId,
+  })
+}
+
+// ── Update Team ─────────────────────────────────────────────────────
+
+export function useUpdateTeam(teamId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (payload: { name?: string | null; description?: string | null; tags?: string[] | null }) => {
+      const response = await updateTeam({ path: { team_id: teamId }, body: payload })
+      return response.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["teams"] })
+      queryClient.invalidateQueries({ queryKey: ["team", teamId] })
+      toast.success("Team updated")
+    },
+    onError: (error) => {
+      toast.error("Unable to update team", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
+    },
+  })
+}
 
 // ── Team List ─────────────────────────────────────────────────────────
 
