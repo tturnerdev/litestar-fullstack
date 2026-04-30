@@ -234,6 +234,15 @@ import type {
   ForgotPasswordData,
   ForgotPasswordErrors,
   ForgotPasswordResponses,
+  GatewayLookupDeviceData,
+  GatewayLookupDeviceErrors,
+  GatewayLookupDeviceResponses,
+  GatewayLookupExtensionData,
+  GatewayLookupExtensionErrors,
+  GatewayLookupExtensionResponses,
+  GatewayLookupNumberData,
+  GatewayLookupNumberErrors,
+  GatewayLookupNumberResponses,
   GetActiveSessionsData,
   GetActiveSessionsErrors,
   GetActiveSessionsResponses,
@@ -1779,6 +1788,54 @@ export const sendFax = <ThrowOnError extends boolean = false>(
       "Content-Type": "application/json",
       ...options.headers,
     },
+  });
+
+/**
+ * GetDeviceData
+ */
+export const gatewayLookupDevice = <ThrowOnError extends boolean = false>(
+  options: Options<GatewayLookupDeviceData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    GatewayLookupDeviceResponses,
+    GatewayLookupDeviceErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/gateway/devices/{mac_address}",
+    ...options,
+  });
+
+/**
+ * GetExtensionData
+ */
+export const gatewayLookupExtension = <ThrowOnError extends boolean = false>(
+  options: Options<GatewayLookupExtensionData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    GatewayLookupExtensionResponses,
+    GatewayLookupExtensionErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/gateway/extensions/{extension_number}",
+    ...options,
+  });
+
+/**
+ * GetNumberData
+ */
+export const gatewayLookupNumber = <ThrowOnError extends boolean = false>(
+  options: Options<GatewayLookupNumberData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    GatewayLookupNumberResponses,
+    GatewayLookupNumberErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/gateway/numbers/{phone_number}",
+    ...options,
   });
 
 /**

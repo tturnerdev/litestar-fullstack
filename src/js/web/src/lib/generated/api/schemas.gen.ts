@@ -1939,6 +1939,34 @@ export const DeviceCreateSchema = {
   type: "object",
 } as const;
 
+export const DeviceGatewayResponseSchema = {
+  properties: {
+    internal: {
+      oneOf: [
+        {
+          additionalProperties: {},
+          type: "object",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    macAddress: {
+      type: "string",
+    },
+    sources: {
+      additionalProperties: {
+        $ref: "#/components/schemas/SourceResult",
+      },
+      type: "object",
+    },
+  },
+  required: ["macAddress"],
+  title: "DeviceGatewayResponse",
+  type: "object",
+} as const;
+
 export const DeviceLineAssignmentSchema = {
   properties: {
     extensionId: {
@@ -2369,6 +2397,34 @@ export const ExtensionCreateSchema = {
   },
   required: ["extensionNumber"],
   title: "ExtensionCreate",
+  type: "object",
+} as const;
+
+export const ExtensionGatewayResponseSchema = {
+  properties: {
+    extensionNumber: {
+      type: "string",
+    },
+    internal: {
+      oneOf: [
+        {
+          additionalProperties: {},
+          type: "object",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    sources: {
+      additionalProperties: {
+        $ref: "#/components/schemas/SourceResult",
+      },
+      type: "object",
+    },
+  },
+  required: ["extensionNumber"],
+  title: "ExtensionGatewayResponse",
   type: "object",
 } as const;
 
@@ -3487,6 +3543,34 @@ export const NotificationPreferenceUpdateSchema = {
   type: "object",
 } as const;
 
+export const NumberGatewayResponseSchema = {
+  properties: {
+    internal: {
+      oneOf: [
+        {
+          additionalProperties: {},
+          type: "object",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    phoneNumber: {
+      type: "string",
+    },
+    sources: {
+      additionalProperties: {
+        $ref: "#/components/schemas/SourceResult",
+      },
+      type: "object",
+    },
+  },
+  required: ["phoneNumber"],
+  title: "NumberGatewayResponse",
+  type: "object",
+} as const;
+
 export const OAuth2LoginSchema = {
   properties: {
     access_token: {
@@ -4388,6 +4472,44 @@ export const SetDeviceLinesRequestSchema = {
   },
   required: ["lines"],
   title: "SetDeviceLinesRequest",
+  type: "object",
+} as const;
+
+export const SourceResultSchema = {
+  properties: {
+    connectionId: {
+      type: "string",
+    },
+    connectionName: {
+      type: "string",
+    },
+    data: {
+      oneOf: [
+        {
+          additionalProperties: {},
+          type: "object",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    error: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    status: {
+      type: "string",
+    },
+  },
+  required: ["connectionId", "connectionName", "status"],
+  title: "SourceResult",
   type: "object",
 } as const;
 

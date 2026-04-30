@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
 import { useState } from "react"
-import { ChevronRight, Globe, Headphones, Loader2, Phone, Plug } from "lucide-react"
+import { ChevronRight, Globe, Headphones, Loader2, Phone, Plug, ShieldCheck } from "lucide-react"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -8,7 +8,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader } from "@/components/ui/page-layout"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
+import { useAuth } from "@/hooks/use-auth"
 import { useCreateConnection, type ConnectionCreate } from "@/lib/api/hooks/connections"
 
 export const Route = createFileRoute("/_app/connections/new")({
@@ -54,7 +56,7 @@ const authTypes = [
 ]
 
 /** Returns credential input fields based on the selected auth type. */
-function getCredentialFields(authType: string): { key: string; label: string; type: string }[] {
+function getCredentialFields(authType: string): { key: string; label: string; type: string; placeholder?: string }[] {
   switch (authType) {
     case "api_key":
       return [{ key: "api_key", label: "API Key", type: "password" }]
@@ -67,6 +69,7 @@ function getCredentialFields(authType: string): { key: string; label: string; ty
       return [
         { key: "client_id", label: "Client ID", type: "text" },
         { key: "client_secret", label: "Client Secret", type: "password" },
+        { key: "scopes", label: "Scopes (comma-separated)", type: "text", placeholder: "e.g. gql:core, gql:ringgroup, gql:findmefollow" },
       ]
     case "token":
       return [{ key: "token", label: "Token", type: "password" }]
@@ -77,6 +80,7 @@ function getCredentialFields(authType: string): { key: string; label: string; ty
 
 function NewConnectionPage() {
   const router = useRouter()
+  const { currentTeam } = useAuth()
   const createConnection = useCreateConnection()
 
   const [name, setName] = useState("")
@@ -87,6 +91,7 @@ function NewConnectionPage() {
   const [authType, setAuthType] = useState("none")
   const [credentials, setCredentials] = useState<Record<string, string>>({})
   const [description, setDescription] = useState("")
+  const [verifySsl, setVerifySsl] = useState(true)
 
   const credentialFields = getCredentialFields(authType)
 
@@ -97,23 +102,34 @@ function NewConnectionPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
+    if (!currentTeam) {
+      return
+    }
+
     const payload: ConnectionCreate = {
       name,
       connectionType,
-      provider,
+      provider: provider.toLowerCase(),
       authType,
+      teamId: currentTeam.id,
     }
 
     if (host) payload.host = host
     if (port) payload.port = parseInt(port, 10)
     if (description) payload.description = description
 
+    payload.settings = { verify_ssl: verifySsl }
+
     // Only include credentials if auth type requires them and values are provided
     if (authType !== "none" && Object.keys(credentials).length > 0) {
       const creds: Record<string, unknown> = {}
       for (const field of credentialFields) {
         if (credentials[field.key]) {
-          creds[field.key] = credentials[field.key]
+          if (field.key === "scopes") {
+            creds[field.key] = credentials[field.key].split(",").map((s) => s.trim()).filter(Boolean)
+          } else {
+            creds[field.key] = credentials[field.key]
+          }
         }
       }
       if (Object.keys(creds).length > 0) {
@@ -128,7 +144,7 @@ function NewConnectionPage() {
     })
   }
 
-  const isValid = name.trim() !== "" && provider.trim() !== ""
+  const isValid = name.trim() !== "" && provider.trim() !== "" && !!currentTeam
 
   return (
     <PageContainer className="flex-1 space-y-8">
@@ -262,20 +278,32 @@ function NewConnectionPage() {
                   <p className="font-medium text-sm">Credentials</p>
                   <div className="grid gap-4 md:grid-cols-2">
                     {credentialFields.map((field) => (
-                      <div key={field.key} className="space-y-2">
+                      <div key={field.key} className={`space-y-2 ${field.key === "scopes" ? "md:col-span-2" : ""}`}>
                         <Label htmlFor={`cred-${field.key}`}>{field.label}</Label>
                         <Input
                           id={`cred-${field.key}`}
                           type={field.type}
                           value={credentials[field.key] ?? ""}
                           onChange={(e) => handleCredentialChange(field.key, e.target.value)}
-                          placeholder={`Enter ${field.label.toLowerCase()}`}
+                          placeholder={field.placeholder ?? `Enter ${field.label.toLowerCase()}`}
                         />
                       </div>
                     ))}
                   </div>
                 </div>
               )}
+
+              {/* SSL Verification */}
+              <div className="flex items-center justify-between rounded-lg border border-border/60 bg-muted/20 p-4">
+                <div className="flex items-center gap-3">
+                  <ShieldCheck className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <p className="font-medium text-sm">Verify SSL Certificate</p>
+                    <p className="text-xs text-muted-foreground">Disable for self-signed certificates</p>
+                  </div>
+                </div>
+                <Switch checked={verifySsl} onCheckedChange={setVerifySsl} />
+              </div>
 
               {/* Submit */}
               <div className="flex items-center justify-end gap-2 pt-2">

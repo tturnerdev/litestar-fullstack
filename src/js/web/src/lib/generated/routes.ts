@@ -66,13 +66,16 @@ export type RouteName =
   | 'get_attachment'
   | 'get_connection'
   | 'get_device'
+  | 'get_device_data'
   | 'get_dnd_settings'
   | 'get_extension'
+  | 'get_extension_data'
   | 'get_fax_message'
   | 'get_fax_number'
   | 'get_location'
   | 'get_log'
   | 'get_mfa_status'
+  | 'get_number_data'
   | 'get_organization'
   | 'get_phone_number'
   | 'get_preferences'
@@ -334,11 +337,17 @@ export interface RoutePathParams {
   'get_device': {
     device_id: UUID;
   };
+  'get_device_data': {
+    mac_address: string;
+  };
   'get_dnd_settings': {
     ext_id: UUID;
   };
   'get_extension': {
     ext_id: UUID;
+  };
+  'get_extension_data': {
+    extension_number: string;
   };
   'get_fax_message': {
     message_id: UUID;
@@ -354,6 +363,9 @@ export interface RoutePathParams {
     log_id: UUID;
   };
   'get_mfa_status': Record<string, never>;
+  'get_number_data': {
+    phone_number: string;
+  };
   'get_organization': Record<string, never>;
   'get_phone_number': {
     phone_number_id: UUID;
@@ -703,13 +715,16 @@ export interface RouteQueryParams {
   'get_attachment': Record<string, never>;
   'get_connection': Record<string, never>;
   'get_device': Record<string, never>;
+  'get_device_data': Record<string, never>;
   'get_dnd_settings': Record<string, never>;
   'get_extension': Record<string, never>;
+  'get_extension_data': Record<string, never>;
   'get_fax_message': Record<string, never>;
   'get_fax_number': Record<string, never>;
   'get_location': Record<string, never>;
   'get_log': Record<string, never>;
   'get_mfa_status': Record<string, never>;
+  'get_number_data': Record<string, never>;
   'get_organization': Record<string, never>;
   'get_phone_number': Record<string, never>;
   'get_preferences': Record<string, never>;
@@ -1539,6 +1554,13 @@ export const routeDefinitions = {
     pathParams: ['device_id'] as const,
     queryParams: [] as const,
   },
+  'get_device_data': {
+    path: '/api/gateway/devices/{mac_address}',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['mac_address'] as const,
+    queryParams: [] as const,
+  },
   'get_dnd_settings': {
     path: '/api/voice/extensions/{ext_id}/dnd',
     methods: ['GET'] as const,
@@ -1551,6 +1573,13 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: ['ext_id'] as const,
+    queryParams: [] as const,
+  },
+  'get_extension_data': {
+    path: '/api/gateway/extensions/{extension_number}',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['extension_number'] as const,
     queryParams: [] as const,
   },
   'get_fax_message': {
@@ -1586,6 +1615,13 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: [] as const,
+    queryParams: [] as const,
+  },
+  'get_number_data': {
+    path: '/api/gateway/numbers/{phone_number}',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['phone_number'] as const,
     queryParams: [] as const,
   },
   'get_organization': {

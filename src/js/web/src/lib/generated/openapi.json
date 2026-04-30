@@ -1998,6 +1998,35 @@
         "title": "DeviceCreate",
         "type": "object"
       },
+      "DeviceGatewayResponse": {
+        "properties": {
+          "internal": {
+            "oneOf": [
+              {
+                "additionalProperties": {},
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "macAddress": {
+            "type": "string"
+          },
+          "sources": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/SourceResult"
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "macAddress"
+        ],
+        "title": "DeviceGatewayResponse",
+        "type": "object"
+      },
       "DeviceLineAssignment": {
         "properties": {
           "extensionId": {
@@ -2447,6 +2476,35 @@
           "extensionNumber"
         ],
         "title": "ExtensionCreate",
+        "type": "object"
+      },
+      "ExtensionGatewayResponse": {
+        "properties": {
+          "extensionNumber": {
+            "type": "string"
+          },
+          "internal": {
+            "oneOf": [
+              {
+                "additionalProperties": {},
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sources": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/SourceResult"
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "extensionNumber"
+        ],
+        "title": "ExtensionGatewayResponse",
         "type": "object"
       },
       "ExtensionUpdate": {
@@ -3615,6 +3673,35 @@
         "title": "NotificationPreferenceUpdate",
         "type": "object"
       },
+      "NumberGatewayResponse": {
+        "properties": {
+          "internal": {
+            "oneOf": [
+              {
+                "additionalProperties": {},
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "phoneNumber": {
+            "type": "string"
+          },
+          "sources": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/SourceResult"
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "phoneNumber"
+        ],
+        "title": "NumberGatewayResponse",
+        "type": "object"
+      },
       "OAuth2Login": {
         "properties": {
           "access_token": {
@@ -4561,6 +4648,47 @@
           "lines"
         ],
         "title": "SetDeviceLinesRequest",
+        "type": "object"
+      },
+      "SourceResult": {
+        "properties": {
+          "connectionId": {
+            "type": "string"
+          },
+          "connectionName": {
+            "type": "string"
+          },
+          "data": {
+            "oneOf": [
+              {
+                "additionalProperties": {},
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "connectionId",
+          "connectionName",
+          "status"
+        ],
+        "title": "SourceResult",
         "type": "object"
       },
       "SyncResponse": {
@@ -6850,48 +6978,6 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetIdIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
-            "name": "actionIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
             "name": "actorIdIn",
             "required": false,
             "schema": {
@@ -6914,6 +7000,48 @@
             "deprecated": false,
             "in": "query",
             "name": "targetTypeIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "targetIdIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -7257,48 +7385,6 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetIdIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
-            "name": "actionIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
             "name": "actorIdIn",
             "required": false,
             "schema": {
@@ -7321,6 +7407,48 @@
             "deprecated": false,
             "in": "query",
             "name": "targetTypeIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "targetIdIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -7638,48 +7766,6 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetIdIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
-            "name": "actionIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
             "name": "actorIdIn",
             "required": false,
             "schema": {
@@ -7702,6 +7788,48 @@
             "deprecated": false,
             "in": "query",
             "name": "targetTypeIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "targetIdIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -14035,6 +14163,231 @@
         "summary": "SendFax",
         "tags": [
           "Fax Messages"
+        ]
+      }
+    },
+    "/api/gateway/devices/{mac_address}": {
+      "get": {
+        "deprecated": false,
+        "operationId": "GatewayLookupDevice",
+        "parameters": [
+          {
+            "deprecated": false,
+            "description": "The MAC address to look up across all sources.",
+            "in": "path",
+            "name": "mac_address",
+            "required": true,
+            "schema": {
+              "description": "The MAC address to look up across all sources.",
+              "title": "MAC Address",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceGatewayResponse"
+                }
+              }
+            },
+            "description": "Request fulfilled, document follows",
+            "headers": {}
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "detail": "Bad Request",
+                      "extra": {},
+                      "status_code": 400
+                    }
+                  ],
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    },
+                    "status_code": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Bad request syntax or unsupported method"
+          }
+        },
+        "summary": "GetDeviceData",
+        "tags": [
+          "Gateway - Devices"
+        ]
+      }
+    },
+    "/api/gateway/extensions/{extension_number}": {
+      "get": {
+        "deprecated": false,
+        "operationId": "GatewayLookupExtension",
+        "parameters": [
+          {
+            "deprecated": false,
+            "description": "The extension to look up across all sources.",
+            "in": "path",
+            "name": "extension_number",
+            "required": true,
+            "schema": {
+              "description": "The extension to look up across all sources.",
+              "title": "Extension Number",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExtensionGatewayResponse"
+                }
+              }
+            },
+            "description": "Request fulfilled, document follows",
+            "headers": {}
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "detail": "Bad Request",
+                      "extra": {},
+                      "status_code": 400
+                    }
+                  ],
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    },
+                    "status_code": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Bad request syntax or unsupported method"
+          }
+        },
+        "summary": "GetExtensionData",
+        "tags": [
+          "Gateway - Extensions"
+        ]
+      }
+    },
+    "/api/gateway/numbers/{phone_number}": {
+      "get": {
+        "deprecated": false,
+        "operationId": "GatewayLookupNumber",
+        "parameters": [
+          {
+            "deprecated": false,
+            "description": "The phone number to look up across all sources.",
+            "in": "path",
+            "name": "phone_number",
+            "required": true,
+            "schema": {
+              "description": "The phone number to look up across all sources.",
+              "title": "Phone Number",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NumberGatewayResponse"
+                }
+              }
+            },
+            "description": "Request fulfilled, document follows",
+            "headers": {}
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "detail": "Bad Request",
+                      "extra": {},
+                      "status_code": 400
+                    }
+                  ],
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    },
+                    "status_code": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Bad request syntax or unsupported method"
+          }
+        },
+        "summary": "GetNumberData",
+        "tags": [
+          "Gateway - Numbers"
         ]
       }
     },

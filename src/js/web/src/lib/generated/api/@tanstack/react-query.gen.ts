@@ -86,6 +86,9 @@ import {
   deleteVoicemailMessage,
   disableMfa,
   forgotPassword,
+  gatewayLookupDevice,
+  gatewayLookupExtension,
+  gatewayLookupNumber,
   getActiveSessions,
   getAdminSystemStatus,
   getAttachment,
@@ -411,6 +414,15 @@ import type {
   ForgotPasswordData,
   ForgotPasswordError,
   ForgotPasswordResponse,
+  GatewayLookupDeviceData,
+  GatewayLookupDeviceError,
+  GatewayLookupDeviceResponse,
+  GatewayLookupExtensionData,
+  GatewayLookupExtensionError,
+  GatewayLookupExtensionResponse,
+  GatewayLookupNumberData,
+  GatewayLookupNumberError,
+  GatewayLookupNumberResponse,
   GetActiveSessionsData,
   GetActiveSessionsError,
   GetActiveSessionsResponse,
@@ -2694,6 +2706,90 @@ export const sendFaxMutation = (
   };
   return mutationOptions;
 };
+
+export const gatewayLookupDeviceQueryKey = (
+  options: Options<GatewayLookupDeviceData>,
+) => createQueryKey("gatewayLookupDevice", options);
+
+/**
+ * GetDeviceData
+ */
+export const gatewayLookupDeviceOptions = (
+  options: Options<GatewayLookupDeviceData>,
+) =>
+  queryOptions<
+    GatewayLookupDeviceResponse,
+    GatewayLookupDeviceError,
+    GatewayLookupDeviceResponse,
+    ReturnType<typeof gatewayLookupDeviceQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await gatewayLookupDevice({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: gatewayLookupDeviceQueryKey(options),
+  });
+
+export const gatewayLookupExtensionQueryKey = (
+  options: Options<GatewayLookupExtensionData>,
+) => createQueryKey("gatewayLookupExtension", options);
+
+/**
+ * GetExtensionData
+ */
+export const gatewayLookupExtensionOptions = (
+  options: Options<GatewayLookupExtensionData>,
+) =>
+  queryOptions<
+    GatewayLookupExtensionResponse,
+    GatewayLookupExtensionError,
+    GatewayLookupExtensionResponse,
+    ReturnType<typeof gatewayLookupExtensionQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await gatewayLookupExtension({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: gatewayLookupExtensionQueryKey(options),
+  });
+
+export const gatewayLookupNumberQueryKey = (
+  options: Options<GatewayLookupNumberData>,
+) => createQueryKey("gatewayLookupNumber", options);
+
+/**
+ * GetNumberData
+ */
+export const gatewayLookupNumberOptions = (
+  options: Options<GatewayLookupNumberData>,
+) =>
+  queryOptions<
+    GatewayLookupNumberResponse,
+    GatewayLookupNumberError,
+    GatewayLookupNumberResponse,
+    ReturnType<typeof gatewayLookupNumberQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await gatewayLookupNumber({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: gatewayLookupNumberQueryKey(options),
+  });
 
 /**
  * RemoveAccount

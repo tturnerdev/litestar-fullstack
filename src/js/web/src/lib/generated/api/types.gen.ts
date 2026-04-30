@@ -486,6 +486,19 @@ export type DeviceCreate = {
 };
 
 /**
+ * DeviceGatewayResponse
+ */
+export type DeviceGatewayResponse = {
+  internal?: {
+    [key: string]: unknown;
+  } | null;
+  macAddress: string;
+  sources?: {
+    [key: string]: SourceResult;
+  };
+};
+
+/**
  * DeviceLineAssignment
  */
 export type DeviceLineAssignment = {
@@ -613,6 +626,19 @@ export type ExtensionCreate = {
   extensionNumber: string;
   isActive?: boolean;
   phoneNumberId?: string | null;
+};
+
+/**
+ * ExtensionGatewayResponse
+ */
+export type ExtensionGatewayResponse = {
+  extensionNumber: string;
+  internal?: {
+    [key: string]: unknown;
+  } | null;
+  sources?: {
+    [key: string]: SourceResult;
+  };
 };
 
 /**
@@ -965,6 +991,19 @@ export type NotificationPreferenceUpdate = {
 };
 
 /**
+ * NumberGatewayResponse
+ */
+export type NumberGatewayResponse = {
+  internal?: {
+    [key: string]: unknown;
+  } | null;
+  phoneNumber: string;
+  sources?: {
+    [key: string]: SourceResult;
+  };
+};
+
+/**
  * OAuth2Login
  */
 export type OAuth2Login = {
@@ -1222,6 +1261,19 @@ export type SendFax = {
  */
 export type SetDeviceLinesRequest = {
   lines: Array<DeviceLineAssignmentInput>;
+};
+
+/**
+ * SourceResult
+ */
+export type SourceResult = {
+  connectionId: string;
+  connectionName: string;
+  data?: {
+    [key: string]: unknown;
+  } | null;
+  error?: string | null;
+  status: string;
 };
 
 /**
@@ -1994,10 +2046,10 @@ export type AdminListAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetIdIn?: Array<string> | null;
-    actionIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -2076,10 +2128,10 @@ export type AdminGetTargetAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetIdIn?: Array<string> | null;
-    actionIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -2156,10 +2208,10 @@ export type AdminGetUserAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetIdIn?: Array<string> | null;
-    actionIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -4676,6 +4728,135 @@ export type SendFaxResponses = {
 };
 
 export type SendFaxResponse = SendFaxResponses[keyof SendFaxResponses];
+
+export type GatewayLookupDeviceData = {
+  body?: never;
+  path: {
+    /**
+     * MAC Address
+     *
+     * The MAC address to look up across all sources.
+     */
+    mac_address: string;
+  };
+  query?: never;
+  url: "/api/gateway/devices/{mac_address}";
+};
+
+export type GatewayLookupDeviceErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type GatewayLookupDeviceError =
+  GatewayLookupDeviceErrors[keyof GatewayLookupDeviceErrors];
+
+export type GatewayLookupDeviceResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: DeviceGatewayResponse;
+};
+
+export type GatewayLookupDeviceResponse =
+  GatewayLookupDeviceResponses[keyof GatewayLookupDeviceResponses];
+
+export type GatewayLookupExtensionData = {
+  body?: never;
+  path: {
+    /**
+     * Extension Number
+     *
+     * The extension to look up across all sources.
+     */
+    extension_number: string;
+  };
+  query?: never;
+  url: "/api/gateway/extensions/{extension_number}";
+};
+
+export type GatewayLookupExtensionErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type GatewayLookupExtensionError =
+  GatewayLookupExtensionErrors[keyof GatewayLookupExtensionErrors];
+
+export type GatewayLookupExtensionResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: ExtensionGatewayResponse;
+};
+
+export type GatewayLookupExtensionResponse =
+  GatewayLookupExtensionResponses[keyof GatewayLookupExtensionResponses];
+
+export type GatewayLookupNumberData = {
+  body?: never;
+  path: {
+    /**
+     * Phone Number
+     *
+     * The phone number to look up across all sources.
+     */
+    phone_number: string;
+  };
+  query?: never;
+  url: "/api/gateway/numbers/{phone_number}";
+};
+
+export type GatewayLookupNumberErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type GatewayLookupNumberError =
+  GatewayLookupNumberErrors[keyof GatewayLookupNumberErrors];
+
+export type GatewayLookupNumberResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: NumberGatewayResponse;
+};
+
+export type GatewayLookupNumberResponse =
+  GatewayLookupNumberResponses[keyof GatewayLookupNumberResponses];
 
 export type AccountDeleteData = {
   body?: never;

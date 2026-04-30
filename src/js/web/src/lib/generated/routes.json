@@ -556,6 +556,19 @@
       ],
       "uri": "/api/devices/{device_id}"
     },
+    "get_device_data": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "mac_address": "string"
+      },
+      "parameters": [
+        "mac_address"
+      ],
+      "uri": "/api/gateway/devices/{mac_address}"
+    },
     "get_dnd_settings": {
       "method": "get",
       "methods": [
@@ -581,6 +594,19 @@
         "ext_id"
       ],
       "uri": "/api/voice/extensions/{ext_id}"
+    },
+    "get_extension_data": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "extension_number": "string"
+      },
+      "parameters": [
+        "extension_number"
+      ],
+      "uri": "/api/gateway/extensions/{extension_number}"
     },
     "get_fax_message": {
       "method": "get",
@@ -642,6 +668,19 @@
         "GET"
       ],
       "uri": "/api/mfa/status"
+    },
+    "get_number_data": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "phone_number": "string"
+      },
+      "parameters": [
+        "phone_number"
+      ],
+      "uri": "/api/gateway/numbers/{phone_number}"
     },
     "get_organization": {
       "method": "get",
