@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.33.0 (2026-04-30)
+
+### Improved
+- **Connection edit page** — ported all create-page improvements: required indicators, field hints, inline validation, auth change warning, credential security note, type icons, sidebar cards, unsaved changes blocker.
+- **Admin system page** — health banner, service status grid with per-service icons, live-ticking uptime, worker queue details with per-queue stats, auto-refresh toggle (30s), and last-refreshed indicator.
+
 ## v0.32.0 (2026-04-30)
 
 ### Improved

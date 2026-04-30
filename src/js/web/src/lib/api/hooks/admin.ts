@@ -91,13 +91,14 @@ export function useAdminTrends() {
   })
 }
 
-export function useAdminSystemStatus() {
+export function useAdminSystemStatus(options?: { refetchInterval?: number | false }) {
   return useQuery({
     queryKey: ["admin", "system", "status"],
     queryFn: async () => {
       const response = await getAdminSystemStatus()
       return response.data as AdminSystemStatus
     },
+    refetchInterval: options?.refetchInterval,
   })
 }
 

@@ -1,9 +1,39 @@
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
-import { useEffect, useState } from "react"
-import { Loader2, ShieldCheck } from "lucide-react"
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
+import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import {
+  AlertTriangle,
+  ChevronRight,
+  Globe,
+  Headphones,
+  Info,
+  KeyRound,
+  Loader2,
+  Lock,
+  Phone,
+  Plug,
+  ShieldCheck,
+} from "lucide-react"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
@@ -17,11 +47,36 @@ export const Route = createFileRoute("/_app/connections/$connectionId/edit")({
   component: EditConnectionPage,
 })
 
+// ── Static data ──────────────────────────────────────────────────────────
+
+const tips = [
+  {
+    icon: Phone,
+    title: "PBX / Phone Server",
+    description: "Connect to FreePBX, Asterisk, 3CX, etc.",
+  },
+  {
+    icon: Headphones,
+    title: "Helpdesk",
+    description: "Connect to Zendesk, Freshdesk, etc.",
+  },
+  {
+    icon: Globe,
+    title: "Carrier / DID Provider",
+    description: "Connect to Twilio, Telnyx, etc.",
+  },
+  {
+    icon: Plug,
+    title: "Other Sources",
+    description: "Any external API or data source",
+  },
+]
+
 const connectionTypes = [
-  { value: "pbx", label: "PBX / Phone Server" },
-  { value: "helpdesk", label: "Helpdesk / Ticketing" },
-  { value: "carrier", label: "Telephone Carrier" },
-  { value: "other", label: "Other" },
+  { value: "pbx", label: "PBX / Phone Server", icon: Phone },
+  { value: "helpdesk", label: "Helpdesk / Ticketing", icon: Headphones },
+  { value: "carrier", label: "Telephone Carrier", icon: Globe },
+  { value: "other", label: "Other", icon: Plug },
 ]
 
 const authTypes = [
@@ -55,12 +110,58 @@ function getCredentialFields(authType: string): { key: string; label: string; ty
   }
 }
 
+// ── Validation helpers ───────────────────────────────────────────────────
+
+interface FieldErrors {
+  name?: string
+  provider?: string
+  host?: string
+  port?: string
+}
+
+function validateHost(value: string): string | undefined {
+  if (!value) return undefined
+  const hostPattern = /^(https?:\/\/)?[\w.-]+(:\d+)?(\/.*)?$/i
+  if (!hostPattern.test(value)) {
+    return "Enter a valid hostname or URL (e.g., pbx.example.com or https://api.example.com)"
+  }
+  return undefined
+}
+
+function validatePort(value: string): string | undefined {
+  if (!value) return undefined
+  const num = Number(value)
+  if (!Number.isInteger(num) || num < 1 || num > 65535) {
+    return "Port must be between 1 and 65535"
+  }
+  return undefined
+}
+
+/** Required-field asterisk. */
+function RequiredMark() {
+  return <span className="text-destructive">*</span>
+}
+
+/** Small helper-text below a field. */
+function FieldHint({ children }: { children: React.ReactNode }) {
+  return <p className="text-xs text-muted-foreground">{children}</p>
+}
+
+/** Inline field error message. */
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null
+  return <p className="text-sm text-destructive">{message}</p>
+}
+
+// ── Page component ───────────────────────────────────────────────────────
+
 function EditConnectionPage() {
   const { connectionId } = Route.useParams()
   const router = useRouter()
   const { data, isLoading, isError } = useConnection(connectionId)
   const updateConnection = useUpdateConnection(connectionId)
 
+  // Form state
   const [name, setName] = useState("")
   const [connectionType, setConnectionType] = useState("pbx")
   const [provider, setProvider] = useState("")
@@ -72,6 +173,18 @@ function EditConnectionPage() {
   const [verifySsl, setVerifySsl] = useState(true)
   const [settingsText, setSettingsText] = useState("")
   const [initialized, setInitialized] = useState(false)
+
+  // Validation state
+  const [errors, setErrors] = useState<FieldErrors>({})
+  const [touched, setTouched] = useState<Record<string, boolean>>({})
+
+  // Auth-type change confirmation
+  const [pendingAuthType, setPendingAuthType] = useState<string | null>(null)
+  const hasCredentials = Object.values(credentials).some((v) => v.trim() !== "")
+  // On the edit page, existing saved credentials also count
+  const hasExistingCredentials = (data?.credentialFields?.length ?? 0) > 0
+
+  const credentialFields = getCredentialFields(authType)
 
   // Pre-populate form fields when connection data loads
   useEffect(() => {
@@ -89,16 +202,118 @@ function EditConnectionPage() {
     }
   }, [data, initialized])
 
-  const credentialFields = getCredentialFields(authType)
+  // Track whether the form has been modified relative to original data
+  const formDirty = useMemo(() => {
+    if (!data || !initialized) return false
+    return (
+      name !== data.name ||
+      connectionType !== data.connectionType ||
+      provider !== data.provider ||
+      host !== (data.host ?? "") ||
+      port !== (data.port != null ? String(data.port) : "") ||
+      authType !== (data.authType ?? "none") ||
+      description !== (data.description ?? "") ||
+      verifySsl !== (data.settings?.verify_ssl !== false) ||
+      settingsText !== (data.settings ? JSON.stringify(data.settings, null, 2) : "") ||
+      Object.values(credentials).some((v) => v !== "")
+    )
+  }, [name, connectionType, provider, host, port, authType, description, verifySsl, settingsText, credentials, data, initialized])
+
+  // Ref to skip blocking after a successful submit
+  const justSubmittedRef = useRef(false)
+
+  // Block navigation when form is dirty
+  useBlocker({
+    shouldBlockFn: () => formDirty && !justSubmittedRef.current,
+    withResolver: true,
+  })
+
+  // ── Field handlers ───────────────────────────────────────────────────
+
+  const markTouched = useCallback((field: string) => {
+    setTouched((prev) => ({ ...prev, [field]: true }))
+  }, [])
+
+  const validateField = useCallback((field: keyof FieldErrors, value: string) => {
+    let error: string | undefined
+    switch (field) {
+      case "name":
+        error = value.trim() === "" ? "Name is required" : undefined
+        break
+      case "provider":
+        error = value.trim() === "" ? "Provider is required" : undefined
+        break
+      case "host":
+        error = validateHost(value)
+        break
+      case "port":
+        error = validatePort(value)
+        break
+    }
+    setErrors((prev) => ({ ...prev, [field]: error }))
+    return error
+  }, [])
+
+  const handleFieldChange = useCallback(
+    (field: keyof FieldErrors, value: string, setter: (v: string) => void) => {
+      setter(value)
+      if (touched[field]) {
+        validateField(field, value)
+      }
+    },
+    [touched, validateField],
+  )
+
+  const handleFieldBlur = useCallback(
+    (field: keyof FieldErrors, value: string) => {
+      markTouched(field)
+      validateField(field, value)
+    },
+    [markTouched, validateField],
+  )
 
   const handleCredentialChange = (key: string, value: string) => {
     setCredentials((prev) => ({ ...prev, [key]: value }))
   }
 
+  // ── Auth type change with confirmation ───────────────────────────────
+
+  const handleAuthTypeChange = (newType: string) => {
+    if ((hasCredentials || hasExistingCredentials) && newType !== authType) {
+      setPendingAuthType(newType)
+    } else {
+      setAuthType(newType)
+      setCredentials({})
+    }
+  }
+
+  const confirmAuthTypeChange = () => {
+    if (pendingAuthType) {
+      setAuthType(pendingAuthType)
+      setCredentials({})
+      setPendingAuthType(null)
+    }
+  }
+
+  const cancelAuthTypeChange = () => {
+    setPendingAuthType(null)
+  }
+
+  // ── Submit ───────────────────────────────────────────────────────────
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!data) return
+
+    // Validate all fields before submit
+    const nameError = validateField("name", name)
+    const providerError = validateField("provider", provider)
+    const hostError = validateField("host", host)
+    const portError = validateField("port", port)
+    setTouched({ name: true, provider: true, host: true, port: true })
+
+    if (nameError || providerError || hostError || portError) return
 
     const payload: ConnectionUpdate = {}
 
@@ -126,7 +341,7 @@ function EditConnectionPage() {
       }
     }
 
-    // Check if verify_ssl changed — merge into settings
+    // Check if verify_ssl changed -- merge into settings
     const originalVerifySsl = data.settings?.verify_ssl !== false
     if (verifySsl !== originalVerifySsl || parsedSettings !== null) {
       const base = parsedSettings ?? data.settings ?? {}
@@ -155,6 +370,7 @@ function EditConnectionPage() {
       payload.credentials = null
     }
 
+    justSubmittedRef.current = true
     updateConnection.mutate(payload, {
       onSuccess: () => {
         router.navigate({
@@ -162,10 +378,20 @@ function EditConnectionPage() {
           params: { connectionId },
         })
       },
+      onError: () => {
+        justSubmittedRef.current = false
+      },
     })
   }
 
-  const isValid = name.trim() !== "" && provider.trim() !== ""
+  const isValid =
+    name.trim() !== "" &&
+    provider.trim() !== "" &&
+    !errors.host &&
+    !errors.port
+
+  // Get the icon for the currently selected connection type
+  const selectedTypeIcon = connectionTypes.find((t) => t.value === connectionType)?.icon
 
   if (isLoading) {
     return (
@@ -211,9 +437,17 @@ function EditConnectionPage() {
         breadcrumbs={
           <Breadcrumb>
             <BreadcrumbList>
-              <BreadcrumbItem><BreadcrumbLink asChild><Link to="/home">Home</Link></BreadcrumbLink></BreadcrumbItem>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/home">Home</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
               <BreadcrumbSeparator />
-              <BreadcrumbItem><BreadcrumbLink asChild><Link to="/connections">Connections</Link></BreadcrumbLink></BreadcrumbItem>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/connections">Connections</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
@@ -221,192 +455,323 @@ function EditConnectionPage() {
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
-              <BreadcrumbItem><BreadcrumbPage>Edit</BreadcrumbPage></BreadcrumbItem>
+              <BreadcrumbItem>
+                <BreadcrumbPage>Edit</BreadcrumbPage>
+              </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         }
       />
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Connection Details</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Basic Info */}
-            <div className="grid gap-4 md:grid-cols-2">
+      <div className="flex gap-6">
+        {/* Main form */}
+        <Card className="min-w-0 flex-1">
+          <CardHeader>
+            <CardTitle className="text-lg">Connection Details</CardTitle>
+            <CardDescription>
+              Fields marked with <span className="text-destructive">*</span> are required.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Basic Info */}
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="conn-name">
+                    Name <RequiredMark />
+                  </Label>
+                  <Input
+                    id="conn-name"
+                    placeholder="e.g., Production PBX"
+                    value={name}
+                    onChange={(e) => handleFieldChange("name", e.target.value, setName)}
+                    onBlur={() => handleFieldBlur("name", name)}
+                    aria-invalid={!!errors.name}
+                    required
+                  />
+                  {errors.name ? (
+                    <FieldError message={errors.name} />
+                  ) : (
+                    <FieldHint>A descriptive name to identify this connection.</FieldHint>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="conn-type">
+                    Type <RequiredMark />
+                  </Label>
+                  <Select value={connectionType} onValueChange={setConnectionType}>
+                    <SelectTrigger id="conn-type">
+                      <span className="flex items-center gap-2">
+                        {selectedTypeIcon &&
+                          (() => {
+                            const Icon = selectedTypeIcon
+                            return <Icon className="h-4 w-4 text-muted-foreground" />
+                          })()}
+                        <SelectValue />
+                      </span>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {connectionTypes.map((t) => (
+                        <SelectItem key={t.value} value={t.value}>
+                          <span className="flex items-center gap-2">
+                            <t.icon className="h-4 w-4 text-muted-foreground" />
+                            {t.label}
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FieldHint>The category of system you are connecting to.</FieldHint>
+                </div>
+              </div>
+
               <div className="space-y-2">
-                <Label htmlFor="conn-name">Name *</Label>
+                <Label htmlFor="conn-provider">
+                  Provider <RequiredMark />
+                </Label>
                 <Input
-                  id="conn-name"
-                  placeholder="e.g., Production PBX"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  id="conn-provider"
+                  placeholder="e.g., FreePBX, Zendesk, Twilio"
+                  value={provider}
+                  onChange={(e) => handleFieldChange("provider", e.target.value, setProvider)}
+                  onBlur={() => handleFieldBlur("provider", provider)}
+                  aria-invalid={!!errors.provider}
                   required
                 />
+                {errors.provider ? (
+                  <FieldError message={errors.provider} />
+                ) : (
+                  <FieldHint>The specific software or service provider (e.g., FreePBX, Zendesk).</FieldHint>
+                )}
               </div>
+
               <div className="space-y-2">
-                <Label htmlFor="conn-type">Type *</Label>
-                <Select value={connectionType} onValueChange={setConnectionType}>
-                  <SelectTrigger id="conn-type">
+                <Label htmlFor="conn-description">Description</Label>
+                <Textarea
+                  id="conn-description"
+                  placeholder="Optional description of this connection"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={2}
+                />
+                <FieldHint>Optional notes about the purpose or configuration of this connection.</FieldHint>
+              </div>
+
+              {/* Host / Port */}
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="conn-host">Host / URL</Label>
+                  <Input
+                    id="conn-host"
+                    placeholder="e.g., pbx.example.com or https://api.example.com"
+                    value={host}
+                    onChange={(e) => handleFieldChange("host", e.target.value, setHost)}
+                    onBlur={() => handleFieldBlur("host", host)}
+                    aria-invalid={!!errors.host}
+                  />
+                  {errors.host ? (
+                    <FieldError message={errors.host} />
+                  ) : (
+                    <FieldHint>The hostname, IP address, or full URL of the remote service.</FieldHint>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="conn-port">Port</Label>
+                  <Input
+                    id="conn-port"
+                    type="number"
+                    placeholder="e.g., 443"
+                    value={port}
+                    onChange={(e) => handleFieldChange("port", e.target.value, setPort)}
+                    onBlur={() => handleFieldBlur("port", port)}
+                    aria-invalid={!!errors.port}
+                    min={1}
+                    max={65535}
+                  />
+                  {errors.port ? (
+                    <FieldError message={errors.port} />
+                  ) : (
+                    <FieldHint>1 - 65535. Leave blank to use the default.</FieldHint>
+                  )}
+                </div>
+              </div>
+
+              {/* Auth Type */}
+              <div className="space-y-2">
+                <Label htmlFor="conn-auth">Authentication Type</Label>
+                <Select value={authType} onValueChange={handleAuthTypeChange}>
+                  <SelectTrigger id="conn-auth">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {connectionTypes.map((t) => (
+                    {authTypes.map((t) => (
                       <SelectItem key={t.value} value={t.value}>
                         {t.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                <FieldHint>How the connection authenticates with the remote service.</FieldHint>
               </div>
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="conn-provider">Provider *</Label>
-              <Input
-                id="conn-provider"
-                placeholder="e.g., FreePBX, Zendesk, Twilio"
-                value={provider}
-                onChange={(e) => setProvider(e.target.value)}
-                required
-              />
-            </div>
+              {/* Credential Fields */}
+              {credentialFields.length > 0 && (
+                <div className="space-y-4 rounded-lg border border-border/60 bg-muted/20 p-4">
+                  <div className="flex items-center gap-2">
+                    <Lock className="h-4 w-4 text-muted-foreground" />
+                    <p className="font-medium text-sm">Credentials</p>
+                  </div>
+                  <div className="flex items-start gap-2 rounded-md bg-muted/40 px-3 py-2">
+                    <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                    <p className="text-xs text-muted-foreground">
+                      Credentials are encrypted at rest and never displayed after saving. Leave fields blank to keep
+                      existing credentials unchanged.
+                    </p>
+                  </div>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {credentialFields.map((field) => (
+                      <div key={field.key} className={`space-y-2 ${field.key === "scopes" ? "md:col-span-2" : ""}`}>
+                        <Label htmlFor={`cred-${field.key}`}>{field.label}</Label>
+                        <Input
+                          id={`cred-${field.key}`}
+                          type={field.type}
+                          value={credentials[field.key] ?? ""}
+                          onChange={(e) => handleCredentialChange(field.key, e.target.value)}
+                          placeholder={
+                            data.credentialFields.includes(field.key)
+                              ? "••••••••"
+                              : field.placeholder ?? `Enter ${field.label.toLowerCase()}`
+                          }
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-            <div className="space-y-2">
-              <Label htmlFor="conn-description">Description</Label>
-              <Textarea
-                id="conn-description"
-                placeholder="Optional description of this connection"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={2}
-              />
-            </div>
-
-            {/* Host / Port */}
-            <div className="grid gap-4 md:grid-cols-3">
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="conn-host">Host / URL</Label>
-                <Input
-                  id="conn-host"
-                  placeholder="e.g., pbx.example.com or https://api.example.com"
-                  value={host}
-                  onChange={(e) => setHost(e.target.value)}
-                />
+              {/* SSL Verification */}
+              <div className="flex items-center justify-between rounded-lg border border-border/60 bg-muted/20 p-4">
+                <div className="flex items-center gap-3">
+                  <ShieldCheck className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <p className="font-medium text-sm">Verify SSL Certificate</p>
+                    <p className="text-xs text-muted-foreground">Disable for self-signed certificates</p>
+                  </div>
+                </div>
+                <Switch checked={verifySsl} onCheckedChange={setVerifySsl} />
               </div>
+
+              {/* Settings JSON */}
               <div className="space-y-2">
-                <Label htmlFor="conn-port">Port</Label>
-                <Input
-                  id="conn-port"
-                  type="number"
-                  placeholder="e.g., 443"
-                  value={port}
-                  onChange={(e) => setPort(e.target.value)}
-                  min={1}
-                  max={65535}
+                <Label htmlFor="conn-settings">Settings JSON</Label>
+                <Textarea
+                  id="conn-settings"
+                  value={settingsText}
+                  onChange={(e) => setSettingsText(e.target.value)}
+                  rows={6}
+                  className="font-mono text-xs"
+                  placeholder='{"key": "value"}'
                 />
+                <FieldHint>Advanced settings as raw JSON. The verify_ssl toggle above is merged automatically.</FieldHint>
               </div>
-            </div>
 
-            {/* Auth Type */}
-            <div className="space-y-2">
-              <Label htmlFor="conn-auth">Authentication Type</Label>
-              <Select
-                value={authType}
-                onValueChange={(v) => {
-                  setAuthType(v)
-                  setCredentials({})
-                }}
-              >
-                <SelectTrigger id="conn-auth">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {authTypes.map((t) => (
-                    <SelectItem key={t.value} value={t.value}>
-                      {t.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Credential Fields */}
-            {credentialFields.length > 0 && (
-              <div className="space-y-4 rounded-lg border border-border/60 bg-muted/20 p-4">
-                <div>
-                  <p className="font-medium text-sm">Credentials</p>
-                  <p className="text-xs text-muted-foreground">Leave fields blank to keep existing credentials unchanged.</p>
-                </div>
-                <div className="grid gap-4 md:grid-cols-2">
-                  {credentialFields.map((field) => (
-                    <div key={field.key} className={`space-y-2 ${field.key === "scopes" ? "md:col-span-2" : ""}`}>
-                      <Label htmlFor={`cred-${field.key}`}>{field.label}</Label>
-                      <Input
-                        id={`cred-${field.key}`}
-                        type={field.type}
-                        value={credentials[field.key] ?? ""}
-                        onChange={(e) => handleCredentialChange(field.key, e.target.value)}
-                        placeholder={
-                          data.credentialFields.includes(field.key)
-                            ? "••••••••"
-                            : field.placeholder ?? `Enter ${field.label.toLowerCase()}`
-                        }
-                      />
-                    </div>
-                  ))}
-                </div>
+              {/* Submit */}
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() =>
+                    router.navigate({
+                      to: "/connections/$connectionId",
+                      params: { connectionId },
+                    })
+                  }
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={!isValid || updateConnection.isPending}>
+                  {updateConnection.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Save Changes
+                </Button>
               </div>
-            )}
+            </form>
+          </CardContent>
+        </Card>
 
-            {/* SSL Verification */}
-            <div className="flex items-center justify-between rounded-lg border border-border/60 bg-muted/20 p-4">
-              <div className="flex items-center gap-3">
-                <ShieldCheck className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="font-medium text-sm">Verify SSL Certificate</p>
-                  <p className="text-xs text-muted-foreground">Disable for self-signed certificates</p>
+        {/* Sidebar */}
+        <div className="flex h-fit w-72 shrink-0 flex-col gap-4">
+          {/* Connection Types tip card */}
+          <Card className="border-border/40 bg-linear-to-br from-muted/30 to-muted/10">
+            <CardHeader className="space-y-1 pb-3">
+              <CardTitle className="text-lg">Connection Types</CardTitle>
+              <CardDescription>Supported integrations</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-1.5">
+              {tips.map((tip) => (
+                <div key={tip.title} className="group flex items-center gap-3 rounded-lg bg-background/60 p-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <tip.icon className="h-4 w-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-sm">{tip.title}</p>
+                    <p className="text-xs text-muted-foreground">{tip.description}</p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground/30" />
                 </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          {/* Security Note */}
+          <Card className="border-border/40">
+            <CardHeader className="space-y-1 pb-3">
+              <div className="flex items-center gap-2">
+                <KeyRound className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-sm">Security Note</CardTitle>
               </div>
-              <Switch checked={verifySsl} onCheckedChange={setVerifySsl} />
-            </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-xs leading-relaxed text-muted-foreground">
+                All credentials are encrypted using AES-256 before being stored. They are never exposed in API
+                responses or logs.
+              </p>
+              <p className="text-xs leading-relaxed text-muted-foreground">
+                Existing credential values can only be replaced -- not viewed. Use the
+                <span className="font-medium text-foreground"> Test Connection </span>
+                feature to verify credentials without revealing them.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
 
-            {/* Settings JSON */}
-            <div className="space-y-2">
-              <Label htmlFor="conn-settings">Settings JSON</Label>
-              <Textarea
-                id="conn-settings"
-                value={settingsText}
-                onChange={(e) => setSettingsText(e.target.value)}
-                rows={6}
-                className="font-mono text-xs"
-                placeholder='{"key": "value"}'
-              />
-            </div>
+      {/* Auth type change confirmation dialog */}
+      <AlertDialog open={pendingAuthType !== null} onOpenChange={(open) => !open && cancelAuthTypeChange()}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-warning" />
+              Change Authentication Type?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Switching the authentication type will discard all saved credentials for this connection. Any new
+              credential values you have entered will also be cleared. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={cancelAuthTypeChange}>Keep Current</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmAuthTypeChange}>Clear &amp; Switch</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
-            {/* Submit */}
-            <div className="flex items-center justify-end gap-2 pt-2">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() =>
-                  router.navigate({
-                    to: "/connections/$connectionId",
-                    params: { connectionId },
-                  })
-                }
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={!isValid || updateConnection.isPending}>
-                {updateConnection.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Save Changes
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+      {/* Unsaved changes alert (shows when form is dirty and user is about to navigate) */}
+      {formDirty && (
+        <Alert variant="warning" className="fixed right-6 bottom-6 z-50 w-auto max-w-sm shadow-lg">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>You have unsaved changes on this form.</AlertDescription>
+        </Alert>
+      )}
     </PageContainer>
   )
 }
