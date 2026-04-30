@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.50.0 (2026-04-30)
+
+### Improved
+- **Profile info card** — gradient banner, role badge (Admin/Member), field descriptions and character counters, Cancel button, email copy button, unsaved changes amber dot, and success animation overlay.
+- **Edit user dialog (admin)** — UserCog icon, user info header with email and verified status, field descriptions, administrator Switch toggle, loading spinner, dirty state tracking, and section separator.
+- **Report issue tab** — category-specific icons in select, required field indicators, description character counter (max 2000), submission preview panel, dashed screenshot container, section separators, and total attachment size indicator.
+- **Delete user dialog (admin)** — AlertTriangle icon, red-tinted header, deletion summary list (account/teams/sessions/OAuth), irreversibility warning with ShieldAlert, type-to-confirm email verification, and loading spinner.
+
 ## v0.49.0 (2026-04-30)
 
 ### Improved
