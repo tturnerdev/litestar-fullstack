@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.39.0 (2026-04-30)
+
+### Improved
+- **NavUser dropdown** — Settings and Notifications links, role badge (Admin/Member), keyboard shortcut hint (Cmd/Ctrl+K), and online status dot on avatar.
+- **Personal info form** — phone number auto-formatting, real-time username validation (alphanumeric + underscores), character counters, success checkmark animation, and Cancel button.
+- **Voicemail settings form** — field descriptions, grouped sections (General/Notifications/Advanced) with separators, unsaved changes banner, "Reset to defaults" button, and Switch components for toggles.
+- **Connected accounts** — provider icons with colored backgrounds, connected/last-login timestamps, disconnect confirmation dialog, and empty state with OAuth link buttons.
+
 ## v0.38.0 (2026-04-30)
 
 ### Improved
