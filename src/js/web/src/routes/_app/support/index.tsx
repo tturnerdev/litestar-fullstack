@@ -5,6 +5,7 @@ import {
   AlertCircle,
   CheckCircle,
   Download,
+  Home,
   LifeBuoy,
   Plus,
   Search,
@@ -14,6 +15,14 @@ import {
 import { toast } from "sonner"
 import { TicketPriorityBadge } from "@/components/support/ticket-priority-badge"
 import { TicketStatusBadge } from "@/components/support/ticket-status-badge"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 import { Badge } from "@/components/ui/badge"
 import { BulkActionBar, type BulkAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
@@ -291,12 +300,31 @@ function SupportPage() {
   const hasAnyTickets = (data?.items.length ?? 0) > 0
   const totalPages = data ? Math.ceil(data.total / PAGE_SIZE) : 0
 
+  const breadcrumbs = (
+    <Breadcrumb>
+      <BreadcrumbList>
+        <BreadcrumbItem>
+          <BreadcrumbLink asChild>
+            <Link to="/">
+              <Home className="h-3.5 w-3.5" />
+            </Link>
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem>
+          <BreadcrumbPage>Support</BreadcrumbPage>
+        </BreadcrumbItem>
+      </BreadcrumbList>
+    </Breadcrumb>
+  )
+
   return (
     <PageContainer className="flex-1 space-y-8">
       <PageHeader
         eyebrow="Helpdesk"
         title="Tickets"
         description="View and manage support tickets."
+        breadcrumbs={breadcrumbs}
         actions={
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={handleExportAll} disabled={!hasData}>

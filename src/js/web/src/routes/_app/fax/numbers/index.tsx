@@ -4,6 +4,7 @@ import {
   AlertCircle,
   CheckCircle2,
   Circle,
+  Home,
   LayoutGrid,
   List,
   Mail,
@@ -13,6 +14,14 @@ import {
   Search,
 } from "lucide-react"
 import { FaxNumberCard } from "@/components/fax/fax-number-card"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 import { BulkActionBar, createBulkDeleteAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -202,12 +211,37 @@ function FaxNumbersPage() {
   const hasData = filteredItems.length > 0
   const hasAnyNumbers = (data?.items.length ?? 0) > 0
 
+  const breadcrumbs = (
+    <Breadcrumb>
+      <BreadcrumbList>
+        <BreadcrumbItem>
+          <BreadcrumbLink asChild>
+            <Link to="/">
+              <Home className="h-3.5 w-3.5" />
+            </Link>
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem>
+          <BreadcrumbLink asChild>
+            <Link to="/fax/numbers">Fax</Link>
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem>
+          <BreadcrumbPage>Numbers</BreadcrumbPage>
+        </BreadcrumbItem>
+      </BreadcrumbList>
+    </Breadcrumb>
+  )
+
   return (
     <PageContainer className="flex-1 space-y-8">
       <PageHeader
         eyebrow="Communications"
         title="Fax Numbers"
         description="Manage your fax numbers and configure email delivery routes."
+        breadcrumbs={breadcrumbs}
         actions={
           <div className="flex items-center gap-3">
             <Button size="sm" asChild>

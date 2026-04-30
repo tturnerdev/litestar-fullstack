@@ -5,6 +5,7 @@ import {
   Cable,
   CheckCircle2,
   Circle,
+  Home,
   Loader2,
   Plus,
   Search,
@@ -13,6 +14,14 @@ import {
   XCircle,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 import { BulkActionBar, createBulkDeleteAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -238,12 +247,31 @@ function ConnectionsPage() {
   const hasData = filteredItems.length > 0
   const hasAnyConnections = (data?.items.length ?? 0) > 0
 
+  const breadcrumbs = (
+    <Breadcrumb>
+      <BreadcrumbList>
+        <BreadcrumbItem>
+          <BreadcrumbLink asChild>
+            <Link to="/">
+              <Home className="h-3.5 w-3.5" />
+            </Link>
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem>
+          <BreadcrumbPage>Connections</BreadcrumbPage>
+        </BreadcrumbItem>
+      </BreadcrumbList>
+    </Breadcrumb>
+  )
+
   return (
     <PageContainer className="flex-1 space-y-8">
       <PageHeader
         eyebrow="Administration"
         title="Connections"
         description="Manage external data source integrations (PBX, helpdesk, carriers, and more)."
+        breadcrumbs={breadcrumbs}
         actions={
           <Button size="sm" asChild>
             <Link to="/connections/new">

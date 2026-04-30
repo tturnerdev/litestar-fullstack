@@ -4,11 +4,20 @@ import {
   AlertCircle,
   Eye,
   FileText,
+  Home,
   Search,
   Send,
   X,
 } from "lucide-react"
 import { DirectionBadge, FaxStatusBadge } from "@/components/fax/fax-status-badge"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 import { Badge } from "@/components/ui/badge"
 import { BulkActionBar, createBulkDeleteAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
@@ -191,12 +200,37 @@ function FaxMessagesPage() {
   const hasData = filteredItems.length > 0
   const hasAnyMessages = (data?.items.length ?? 0) > 0 || !!search || activeFilterCount > 0
 
+  const breadcrumbs = (
+    <Breadcrumb>
+      <BreadcrumbList>
+        <BreadcrumbItem>
+          <BreadcrumbLink asChild>
+            <Link to="/">
+              <Home className="h-3.5 w-3.5" />
+            </Link>
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem>
+          <BreadcrumbLink asChild>
+            <Link to="/fax/messages">Fax</Link>
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem>
+          <BreadcrumbPage>Messages</BreadcrumbPage>
+        </BreadcrumbItem>
+      </BreadcrumbList>
+    </Breadcrumb>
+  )
+
   return (
     <PageContainer className="flex-1 space-y-8">
       <PageHeader
         eyebrow="Communications"
         title="Fax Messages"
         description="View your fax history, filter by direction and status."
+        breadcrumbs={breadcrumbs}
         actions={
           <Button asChild size="sm">
             <Link to="/fax/send">

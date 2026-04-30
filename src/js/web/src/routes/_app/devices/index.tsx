@@ -3,6 +3,7 @@ import { useCallback, useMemo, useState } from "react"
 import {
   AlertCircle,
   Download,
+  Home,
   Loader2,
   Monitor,
   Plus,
@@ -13,6 +14,14 @@ import {
 } from "lucide-react"
 import { DeviceStatusBadge } from "@/components/devices/device-status-badge"
 import { Badge } from "@/components/ui/badge"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -263,12 +272,31 @@ function DevicesPage() {
   const hasData = filteredItems.length > 0
   const hasAnyDevices = (data?.items.length ?? 0) > 0
 
+  const breadcrumbs = (
+    <Breadcrumb>
+      <BreadcrumbList>
+        <BreadcrumbItem>
+          <BreadcrumbLink asChild>
+            <Link to="/">
+              <Home className="h-3.5 w-3.5" />
+            </Link>
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem>
+          <BreadcrumbPage>Devices</BreadcrumbPage>
+        </BreadcrumbItem>
+      </BreadcrumbList>
+    </Breadcrumb>
+  )
+
   return (
     <PageContainer className="flex-1 space-y-8">
       <PageHeader
         eyebrow="Workspace"
         title="Devices"
         description="Manage your phones, softphones, and other SIP devices."
+        breadcrumbs={breadcrumbs}
         actions={
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={handleExportAll} disabled={!hasData}>

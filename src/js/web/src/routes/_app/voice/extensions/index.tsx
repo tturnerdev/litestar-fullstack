@@ -3,12 +3,21 @@ import { useCallback, useMemo, useState } from "react"
 import {
   AlertCircle,
   CheckCircle2,
+  Home,
   Phone,
   Plus,
   Search,
   X,
   XCircle,
 } from "lucide-react"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -236,12 +245,37 @@ function ExtensionsPage() {
   const hasData = filteredItems.length > 0
   const hasAnyExtensions = (data?.items.length ?? 0) > 0
 
+  const breadcrumbs = (
+    <Breadcrumb>
+      <BreadcrumbList>
+        <BreadcrumbItem>
+          <BreadcrumbLink asChild>
+            <Link to="/">
+              <Home className="h-3.5 w-3.5" />
+            </Link>
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem>
+          <BreadcrumbLink asChild>
+            <Link to="/voice/extensions">Voice</Link>
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem>
+          <BreadcrumbPage>Extensions</BreadcrumbPage>
+        </BreadcrumbItem>
+      </BreadcrumbList>
+    </Breadcrumb>
+  )
+
   return (
     <PageContainer className="flex-1 space-y-8">
       <PageHeader
         eyebrow="Voice"
         title="Extensions"
         description="View and manage your extensions."
+        breadcrumbs={breadcrumbs}
         actions={
           <CreateExtensionDialog
             trigger={

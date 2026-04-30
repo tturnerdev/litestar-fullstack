@@ -1,9 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, Link } from "@tanstack/react-router"
 import { useCallback, useMemo, useState } from "react"
 import {
   AlertCircle,
   CheckCircle2,
   Circle,
+  Home,
   Loader2,
   Pencil,
   Phone,
@@ -12,6 +13,14 @@ import {
   X,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 import { BulkActionBar, createBulkDeleteAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -379,12 +388,37 @@ function PhoneNumbersPage() {
   const hasData = filteredItems.length > 0
   const hasAnyNumbers = (data?.items.length ?? 0) > 0
 
+  const breadcrumbs = (
+    <Breadcrumb>
+      <BreadcrumbList>
+        <BreadcrumbItem>
+          <BreadcrumbLink asChild>
+            <Link to="/">
+              <Home className="h-3.5 w-3.5" />
+            </Link>
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem>
+          <BreadcrumbLink asChild>
+            <Link to="/voice/phone-numbers">Voice</Link>
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem>
+          <BreadcrumbPage>Phone Numbers</BreadcrumbPage>
+        </BreadcrumbItem>
+      </BreadcrumbList>
+    </Breadcrumb>
+  )
+
   return (
     <PageContainer className="flex-1 space-y-8">
       <PageHeader
         eyebrow="Voice"
         title="Phone Numbers"
         description="View and manage your assigned phone numbers."
+        breadcrumbs={breadcrumbs}
         actions={
           <CreatePhoneNumberDialog
             trigger={
