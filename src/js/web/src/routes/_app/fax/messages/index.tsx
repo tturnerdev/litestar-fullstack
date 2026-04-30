@@ -39,6 +39,7 @@ import {
 } from "@/lib/api/hooks/fax"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 
 export const Route = createFileRoute("/_app/fax/messages/")({
   component: FaxMessagesPage,
@@ -72,6 +73,7 @@ function formatPages(count: number): string {
 // -- Main page ----------------------------------------------------------------
 
 function FaxMessagesPage() {
+  useDocumentTitle("Fax Messages")
   // Filter & search state
   const [search, setSearch] = useState("")
   const debouncedSearch = useDebouncedValue(search)

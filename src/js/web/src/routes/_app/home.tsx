@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/ui/empty-state"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { useAuthStore } from "@/lib/auth"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import {
   type DashboardStats,
   type RecentActivity,
@@ -27,6 +28,7 @@ export const Route = createFileRoute("/_app/home")({
 })
 
 function HomePage() {
+  useDocumentTitle("Dashboard")
   const user = useAuthStore((state) => state.user)
   const isSuperuser = user?.isSuperuser ?? false
   const greeting = useGreeting()

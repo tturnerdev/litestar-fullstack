@@ -34,6 +34,7 @@ import { useAuthStore } from "@/lib/auth"
 import { useTeams, useDeleteTeam } from "@/lib/api/hooks/teams"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import type { Team } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/teams/")({
@@ -75,6 +76,7 @@ const csvHeaders: CsvHeader<Team>[] = [
 // ── Main page ────────────────────────────────────────────────────────────
 
 function TeamsPage() {
+  useDocumentTitle("Teams")
   const { user, currentTeam, setCurrentTeam, setTeams } = useAuthStore()
 
   // Search state

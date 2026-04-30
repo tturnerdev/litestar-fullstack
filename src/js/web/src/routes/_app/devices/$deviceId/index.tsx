@@ -34,6 +34,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { CopyButton } from "@/components/ui/copy-button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import {
   useDeleteDevice,
@@ -46,6 +47,9 @@ import {
 
 export const Route = createFileRoute("/_app/devices/$deviceId/")({
   component: DeviceDetailPage,
+  validateSearch: (search: Record<string, unknown>): { tab?: string } => ({
+    tab: (search.tab as string) || undefined,
+  }),
 })
 
 // ── Label maps ──────────────────────────────────────────────────────────
@@ -93,8 +97,11 @@ function TimestampField({
 
 function DeviceDetailPage() {
   const { deviceId } = Route.useParams()
+  const { tab = "overview" } = Route.useSearch()
+  const navigate = Route.useNavigate()
   const router = useRouter()
   const { data, isLoading, isError } = useDevice(deviceId)
+  useDocumentTitle(data?.name ?? "Device Details")
   const updateDevice = useUpdateDevice(deviceId)
   const deleteDevice = useDeleteDevice()
   const rebootDevice = useRebootDevice(deviceId)
@@ -274,7 +281,7 @@ function DeviceDetailPage() {
       />
 
       <PageSection>
-        <Tabs defaultValue="overview">
+        <Tabs value={tab} onValueChange={(value) => navigate({ search: () => ({ tab: value }), replace: true })}>
           <TabsList>
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="lines">Lines</TabsTrigger>

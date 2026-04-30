@@ -41,6 +41,7 @@ import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { client } from "@/lib/generated/api/client.gen"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/support/")({
@@ -92,6 +93,7 @@ const csvHeaders: CsvHeader<Ticket>[] = [
 // ── Main page ────────────────────────────────────────────────────────────
 
 function SupportPage() {
+  useDocumentTitle("Support Tickets")
   // Filter & search state
   const [search, setSearch] = useState("")
   const debouncedSearch = useDebouncedValue(search)

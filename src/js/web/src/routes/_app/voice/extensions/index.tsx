@@ -37,6 +37,7 @@ import {
   useExtensions,
   usePhoneNumbers,
 } from "@/lib/api/hooks/voice"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 
@@ -82,6 +83,7 @@ function StatusIndicator({ isActive }: { isActive: boolean }) {
 // -- Main page ----------------------------------------------------------------
 
 function ExtensionsPage() {
+  useDocumentTitle("Extensions")
   const navigate = useNavigate()
 
   // Filter & search state

@@ -30,6 +30,7 @@ import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { CopyButton } from "@/components/ui/copy-button"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useAuthStore } from "@/lib/auth"
 import { getTeam, type TeamMember } from "@/lib/generated/api"
 
@@ -81,6 +82,8 @@ function TeamDetail() {
       return response.data
     },
   })
+
+  useDocumentTitle(team?.name ?? "Team Details")
 
   useEffect(() => {
     if (team && team.id !== currentTeam?.id) {

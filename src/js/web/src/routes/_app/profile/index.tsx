@@ -19,6 +19,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { useProfile } from "@/lib/api/hooks/profile"
 import { profileOAuthAccountsQueryKey } from "@/lib/generated/api/@tanstack/react-query.gen"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useAuthStore } from "@/lib/auth"
 
 const profileSearchSchema = z
@@ -108,6 +109,7 @@ function QuickLinksCard() {
 }
 
 function ProfilePage() {
+  useDocumentTitle("Profile")
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const searchParams = useSearch({ from: "/_app/profile/" })

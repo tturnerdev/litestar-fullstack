@@ -44,6 +44,7 @@ import { deleteDevice, type Device } from "@/lib/generated/api"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 
 export const Route = createFileRoute("/_app/devices/")({
   component: DevicesPage,
@@ -161,6 +162,7 @@ function ReprovisionButton({ deviceId }: { deviceId: string }) {
 // -- Main page ----------------------------------------------------------------
 
 function DevicesPage() {
+  useDocumentTitle("Devices")
   // Filter & search state
   const [search, setSearch] = useState("")
   const debouncedSearch = useDebouncedValue(search)

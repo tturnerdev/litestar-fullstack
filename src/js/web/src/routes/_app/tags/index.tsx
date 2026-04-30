@@ -32,6 +32,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useTags, useDeleteTag } from "@/lib/api/hooks/tags"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import type { Tag } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/tags/")({
@@ -49,6 +50,7 @@ const csvHeaders: CsvHeader<Tag>[] = [
 ]
 
 function TagsPage() {
+  useDocumentTitle("Tags")
   const [search, setSearch] = useState("")
   const debouncedSearch = useDebouncedValue(search)
   const [deleteId, setDeleteId] = useState<string | null>(null)

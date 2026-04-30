@@ -49,6 +49,7 @@ import {
   usePhoneNumbers,
   useUpdatePhoneNumber,
 } from "@/lib/api/hooks/voice"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 
 export const Route = createFileRoute("/_app/voice/phone-numbers")({
@@ -256,6 +257,7 @@ function PhoneNumberRow({
 // -- Main page ----------------------------------------------------------------
 
 function PhoneNumbersPage() {
+  useDocumentTitle("Phone Numbers")
   // Filter & search state
   const [search, setSearch] = useState("")
   const [typeFilter, setTypeFilter] = useState<string[]>([])

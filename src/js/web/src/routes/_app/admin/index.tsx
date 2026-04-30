@@ -8,12 +8,14 @@ import { StatsCards } from "@/components/admin/stats-cards"
 import { SystemHealthCard } from "@/components/admin/system-health-card"
 import { TopUsersCard } from "@/components/admin/top-users-card"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 
 export const Route = createFileRoute("/_app/admin/")({
   component: AdminDashboardPage,
 })
 
 function AdminDashboardPage() {
+  useDocumentTitle("Admin")
   return (
     <PageContainer className="flex-1 space-y-8">
       <PageHeader eyebrow="Administration" title="Admin Console" description="Review activity, manage users, and oversee teams." breadcrumbs={<AdminBreadcrumbs />} />

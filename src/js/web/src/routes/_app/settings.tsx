@@ -26,6 +26,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { cn } from "@/lib/utils"
 import { useSettingsStore } from "@/lib/settings-store"
 import { useTheme } from "@/lib/theme-context"
@@ -44,6 +45,7 @@ const NAV_ITEMS = [
 type SectionId = (typeof NAV_ITEMS)[number]["id"]
 
 function SettingsPage() {
+  useDocumentTitle("Settings")
   const [activeSection, setActiveSection] = useState<SectionId>("appearance")
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({})
   const { resetToDefaults } = useSettingsStore()

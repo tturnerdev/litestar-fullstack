@@ -48,6 +48,7 @@ import {
 } from "@/lib/api/hooks/notifications"
 import { Skeleton, SkeletonCard } from "@/components/ui/skeleton"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/notifications/")({
@@ -274,6 +275,7 @@ function NotificationPreferences() {
 }
 
 function NotificationsPage() {
+  useDocumentTitle("Notifications")
   const [page, setPage] = useState(1)
   const [activeCategory, setActiveCategory] = useState<string>("all")
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)

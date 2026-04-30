@@ -63,6 +63,7 @@ import {
   useTicket,
   useUpdateTicket,
 } from "@/lib/api/hooks/support"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 
 export const Route = createFileRoute("/_app/support/$ticketId/")({
@@ -219,6 +220,7 @@ function TicketDetailPage() {
   const { ticketId } = Route.useParams()
   const router = useRouter()
   const { data: ticket, isLoading, isError } = useTicket(ticketId)
+  useDocumentTitle(ticket?.subject ?? "Ticket Details")
   const closeTicket = useCloseTicket(ticketId)
   const reopenTicket = useReopenTicket(ticketId)
   const updateTicket = useUpdateTicket(ticketId)

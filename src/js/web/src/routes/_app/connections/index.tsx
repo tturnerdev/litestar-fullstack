@@ -43,6 +43,7 @@ import {
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 
 export const Route = createFileRoute("/_app/connections/")({
   component: ConnectionsPage,
@@ -158,6 +159,7 @@ function TestConnectionButton({ connectionId }: { connectionId: string }) {
 // ── Main page ────────────────────────────────────────────────────────────
 
 function ConnectionsPage() {
+  useDocumentTitle("Connections")
   // Filter & search state
   const [search, setSearch] = useState("")
   const debouncedSearch = useDebouncedValue(search)

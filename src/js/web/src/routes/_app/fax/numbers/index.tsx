@@ -35,6 +35,7 @@ import { nextSortDirection, SortableHeader, type SortDirection } from "@/compone
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { type FaxNumber, useDeleteFaxNumber, useFaxNumbers } from "@/lib/api/hooks/fax"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 
@@ -80,6 +81,7 @@ function StatusIndicator({ isActive }: { isActive: boolean }) {
 // -- Main page ----------------------------------------------------------------
 
 function FaxNumbersPage() {
+  useDocumentTitle("Fax Numbers")
   // View mode
   const [viewMode, setViewMode] = useState<"table" | "cards">("table")
 

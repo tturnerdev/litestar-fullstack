@@ -34,10 +34,14 @@ import {
   useGatewayLookupExtension,
   useGatewayLookupNumber,
 } from "@/lib/api/hooks/gateway"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import type { SourceResult } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/gateway/")({
   component: GatewayPage,
+  validateSearch: (search: Record<string, unknown>): { tab?: string } => ({
+    tab: (search.tab as string) || undefined,
+  }),
 })
 
 // -- Status helpers -----------------------------------------------------------
@@ -384,6 +388,10 @@ function DeviceTab() {
 // -- Main page ----------------------------------------------------------------
 
 function GatewayPage() {
+  useDocumentTitle("Gateway")
+  const { tab = "phone" } = Route.useSearch()
+  const navigate = Route.useNavigate()
+
   return (
     <PageContainer className="flex-1 space-y-8">
       <PageHeader
@@ -408,7 +416,7 @@ function GatewayPage() {
       />
 
       <PageSection>
-        <Tabs defaultValue="phone">
+        <Tabs value={tab} onValueChange={(value) => navigate({ search: () => ({ tab: value }), replace: true })}>
           <TabsList>
             <TabsTrigger value="phone" className="gap-1.5">
               <Phone className="h-4 w-4" />
