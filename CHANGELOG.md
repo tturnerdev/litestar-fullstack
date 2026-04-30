@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.69.0 (2026-04-30)
+
+### Improved
+- **Truncation tooltips (comprehensive sweep)** — Added Tooltip wrappers on all truncated text across the app: device-card (MAC, model, IP, last seen), top-users-card (name, email), admin support tables (ticket subjects), ticket-list-item (subject), audit-log (user agent), ticket detail page (creator/assignee names and emails), ticket-detail-header (reporter/assignee), admin teams (team name), edit-user-dialog (email), join-team-dialog (name, email), attachment-list/upload (filenames), ticket-message (author), organization page (logo URL).
+- **Table row hover** — Added `hover:bg-muted/50 transition-colors` to all remaining data TableRows: admin support, fax, devices, voice pages, device-line-config, fax email-routes.
+- **Gateway page** — Replaced bare "No data" text with icon-accompanied descriptive messages.
+- **System admin page** — Changed generic "No data available" to specific labels ("Not detected", "No workers running").
+
 ## v0.66.0 (2026-04-30)
 
 ### Fixed
