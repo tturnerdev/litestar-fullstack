@@ -1,10 +1,13 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useNavigate } from "@tanstack/react-router"
+import { Eye, EyeOff, Lock, Mail } from "lucide-react"
+import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { GitHubSignInButton } from "@/components/auth/github-signin-button"
 import { GoogleSignInButton } from "@/components/auth/google-signin-button"
 import { Icons } from "@/components/icons"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { useOAuthConfig } from "@/hooks/use-oauth-config"
@@ -20,6 +23,7 @@ export function UserLoginForm({ className, redirectUrl, ...props }: UserLoginFor
   const navigate = useNavigate()
   const { login, isLoading } = useAuthStore()
   const { data: oauthConfig } = useOAuthConfig()
+  const [showPassword, setShowPassword] = useState(false)
 
   const googleOAuthEnabled = oauthConfig?.googleEnabled ?? false
   const githubOAuthEnabled = oauthConfig?.githubEnabled ?? false
@@ -54,7 +58,24 @@ export function UserLoginForm({ className, redirectUrl, ...props }: UserLoginFor
 
   return (
     <div className={className} {...props}>
-      <div className="grid gap-6">
+      <div className="grid gap-5">
+        {hasOAuthProviders && (
+          <>
+            <div className="grid gap-2">
+              {googleOAuthEnabled && <GoogleSignInButton variant="signin" className="w-full" authRedirect={finalRedirect} />}
+              {githubOAuthEnabled && <GitHubSignInButton variant="signin" className="w-full" authRedirect={finalRedirect} />}
+            </div>
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-border/60" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-3 text-muted-foreground/70">or</span>
+              </div>
+            </div>
+          </>
+        )}
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
             <FormField
@@ -64,7 +85,10 @@ export function UserLoginForm({ className, redirectUrl, ...props }: UserLoginFor
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="name@example.com" autoCapitalize="none" autoComplete="email" autoCorrect="off" {...field} disabled={isLoading} />
+                    <div className="relative">
+                      <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/60" />
+                      <Input className="pl-9" placeholder="name@example.com" autoCapitalize="none" autoComplete="email" autoCorrect="off" {...field} disabled={isLoading} />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -78,44 +102,48 @@ export function UserLoginForm({ className, redirectUrl, ...props }: UserLoginFor
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="Enter your password"
-                      type="password"
-                      autoCapitalize="none"
-                      autoCorrect="off"
-                      autoComplete="current-password"
-                      {...field}
-                      disabled={isLoading}
-                    />
+                    <div className="relative">
+                      <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/60" />
+                      <Input
+                        className="pl-9 pr-10"
+                        placeholder="Enter your password"
+                        type={showPassword ? "text" : "password"}
+                        autoCapitalize="none"
+                        autoCorrect="off"
+                        autoComplete="current-password"
+                        {...field}
+                        disabled={isLoading}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-0 top-0 h-full px-3 text-muted-foreground/60 hover:text-foreground"
+                        onClick={() => setShowPassword(!showPassword)}
+                        tabIndex={-1}
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <Button type="submit" className="mt-2 w-full" disabled={isLoading}>
-              {isLoading && <Icons.spinner className="mr-2 h-4 w-4" />}
+            <div className="flex items-center">
+              <label htmlFor="remember-me" className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground select-none">
+                <Checkbox id="remember-me" />
+                Remember me
+              </label>
+            </div>
+
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
               Sign In
             </Button>
           </form>
         </Form>
-
-        {hasOAuthProviders && (
-          <>
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
-              </div>
-            </div>
-            <div className="grid gap-2">
-              {githubOAuthEnabled && <GitHubSignInButton variant="signin" className="w-full" authRedirect={finalRedirect} />}
-              {googleOAuthEnabled && <GoogleSignInButton variant="signin" className="w-full" authRedirect={finalRedirect} />}
-            </div>
-          </>
-        )}
       </div>
     </div>
   )

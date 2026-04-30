@@ -1,5 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useNavigate } from "@tanstack/react-router"
+import { Eye, EyeOff, Lock, Mail, User } from "lucide-react"
+import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
@@ -47,6 +49,8 @@ export function UserSignupForm({ className, redirectUrl, ...props }: UserSignupF
   const { isLoading } = useAuthStore()
   const { data: oauthConfig } = useOAuthConfig()
   const finalRedirect = redirectUrl || DEFAULT_AUTH_REDIRECT
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const googleOAuthEnabled = oauthConfig?.googleEnabled ?? false
   const githubOAuthEnabled = oauthConfig?.githubEnabled ?? false
@@ -87,7 +91,24 @@ export function UserSignupForm({ className, redirectUrl, ...props }: UserSignupF
 
   return (
     <div className={className} {...props}>
-      <div className="grid gap-6">
+      <div className="grid gap-5">
+        {hasOAuthProviders && (
+          <>
+            <div className="grid gap-2">
+              {googleOAuthEnabled && <GoogleSignInButton variant="signup" className="w-full" authRedirect={finalRedirect} onSuccess={() => navigate({ to: finalRedirect })} />}
+              {githubOAuthEnabled && <GitHubSignInButton variant="signup" className="w-full" authRedirect={finalRedirect} onSuccess={() => navigate({ to: finalRedirect })} />}
+            </div>
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-border/60" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-3 text-muted-foreground/70">or</span>
+              </div>
+            </div>
+          </>
+        )}
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
             <FormField
@@ -97,7 +118,10 @@ export function UserSignupForm({ className, redirectUrl, ...props }: UserSignupF
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter your name" autoCapitalize="none" autoComplete="name" autoCorrect="off" {...field} disabled={isLoading} />
+                    <div className="relative">
+                      <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/60" />
+                      <Input className="pl-9" placeholder="Enter your name" autoCapitalize="none" autoComplete="name" autoCorrect="off" {...field} disabled={isLoading} />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -111,7 +135,10 @@ export function UserSignupForm({ className, redirectUrl, ...props }: UserSignupF
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="name@example.com" autoCapitalize="none" autoComplete="email" autoCorrect="off" {...field} type="email" disabled={isLoading} />
+                    <div className="relative">
+                      <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/60" />
+                      <Input className="pl-9" placeholder="name@example.com" autoCapitalize="none" autoComplete="email" autoCorrect="off" {...field} type="email" disabled={isLoading} />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -125,7 +152,29 @@ export function UserSignupForm({ className, redirectUrl, ...props }: UserSignupF
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input placeholder="Create a password" autoCapitalize="none" autoComplete="new-password" autoCorrect="off" {...field} type="password" disabled={isLoading} />
+                    <div className="relative">
+                      <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/60" />
+                      <Input
+                        className="pl-9 pr-10"
+                        placeholder="Create a password"
+                        autoCapitalize="none"
+                        autoComplete="new-password"
+                        autoCorrect="off"
+                        {...field}
+                        type={showPassword ? "text" : "password"}
+                        disabled={isLoading}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-0 top-0 h-full px-3 text-muted-foreground/60 hover:text-foreground"
+                        onClick={() => setShowPassword(!showPassword)}
+                        tabIndex={-1}
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
+                    </div>
                   </FormControl>
                   <PasswordStrength password={passwordValue} />
                   <FormMessage />
@@ -140,44 +189,41 @@ export function UserSignupForm({ className, redirectUrl, ...props }: UserSignupF
                 <FormItem>
                   <FormLabel>Confirm Password</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="Confirm your password"
-                      autoCapitalize="none"
-                      autoComplete="new-password"
-                      autoCorrect="off"
-                      {...field}
-                      type="password"
-                      disabled={isLoading}
-                    />
+                    <div className="relative">
+                      <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/60" />
+                      <Input
+                        className="pl-9 pr-10"
+                        placeholder="Confirm your password"
+                        autoCapitalize="none"
+                        autoComplete="new-password"
+                        autoCorrect="off"
+                        {...field}
+                        type={showConfirmPassword ? "text" : "password"}
+                        disabled={isLoading}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-0 top-0 h-full px-3 text-muted-foreground/60 hover:text-foreground"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        tabIndex={-1}
+                      >
+                        {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <Button type="submit" className="mt-2 w-full" disabled={isLoading}>
-              {isLoading && <Icons.spinner className="mr-2 h-4 w-4" />}
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
               Create Account
             </Button>
           </form>
         </Form>
-
-        {hasOAuthProviders && (
-          <>
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
-              </div>
-            </div>
-            <div className="grid gap-2">
-              {githubOAuthEnabled && <GitHubSignInButton variant="signup" className="w-full" authRedirect={finalRedirect} onSuccess={() => navigate({ to: finalRedirect })} />}
-              {googleOAuthEnabled && <GoogleSignInButton variant="signup" className="w-full" authRedirect={finalRedirect} onSuccess={() => navigate({ to: finalRedirect })} />}
-            </div>
-          </>
-        )}
       </div>
     </div>
   )

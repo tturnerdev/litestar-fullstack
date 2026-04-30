@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.34.0 (2026-04-30)
+
+### Improved
+- **Device edit page** — MAC auto-formatting, IP validation, device type icons, required indicators, field descriptions, section separators, and unsaved changes blocker.
+- **Auth pages** — branded icon headers, card layouts with motion animations, input icons (mail/lock/user), password visibility toggles, "Remember me" checkbox on login, OAuth buttons above form with divider, spinners during loading, and consistent styling across login, signup, forgot/reset password, MFA challenge, and email verification.
+
 ## v0.33.0 (2026-04-30)
 
 ### Improved

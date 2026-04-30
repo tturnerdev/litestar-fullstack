@@ -1,6 +1,8 @@
 import { Link, useRouter } from "@tanstack/react-router"
+import { AnimatePresence, motion } from "framer-motion"
 import { Icons } from "@/components/icons"
 import { buttonVariants } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
 import { validateRedirectUrl } from "@/lib/redirect-utils"
 import { cn } from "@/lib/utils"
 
@@ -34,37 +36,77 @@ export function AuthForm() {
         <Link to={togglePath} search={toggleSearch} className={cn(buttonVariants({ variant: "ghost" }), "absolute top-4 right-4 md:top-8 md:right-8")}>
           {isLogin ? "Need an account?" : "Sign in"}
         </Link>
-        <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-87.5">
-          <div className="flex flex-col space-y-2 text-center">
-            <h1 className="flex items-center justify-center gap-2 font-semibold text-2xl tracking-tight">
-              <Icons.sparkle className="h-5 w-5" />
-              {isLogin ? "Welcome back" : "Create account"}
-            </h1>
-            <p className="text-muted-foreground text-sm">{isLogin ? "Enter your credentials to sign in to your account" : "Enter your details to create your account"}</p>
+
+        <motion.div
+          className="mx-auto flex w-full flex-col justify-center sm:w-[400px]"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+        >
+          {/* Branding */}
+          <div className="mb-8 flex flex-col items-center space-y-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 shadow-sm">
+              <Icons.logo className="h-7 w-7 text-primary" />
+            </div>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={isLogin ? "login" : "signup"}
+                className="flex flex-col items-center space-y-1"
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.2 }}
+              >
+                <h1 className="text-2xl font-semibold tracking-tight">
+                  {isLogin ? "Welcome back" : "Create account"}
+                </h1>
+                <p className="text-sm text-muted-foreground">
+                  {isLogin ? "Sign in to your account to continue" : "Enter your details to get started"}
+                </p>
+              </motion.div>
+            </AnimatePresence>
           </div>
 
-          {isLogin ? <UserLoginForm redirectUrl={validatedRedirect} /> : <UserSignupForm redirectUrl={validatedRedirect} />}
+          {/* Form card */}
+          <Card className="border-border/50 bg-card/80 shadow-lg backdrop-blur-sm dark:bg-card/60">
+            <CardContent className="px-6 py-6">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={isLogin ? "login-form" : "signup-form"}
+                  initial={{ opacity: 0, x: isLogin ? -8 : 8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: isLogin ? 8 : -8 }}
+                  transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+                >
+                  {isLogin ? <UserLoginForm redirectUrl={validatedRedirect} /> : <UserSignupForm redirectUrl={validatedRedirect} />}
+                </motion.div>
+              </AnimatePresence>
+            </CardContent>
+          </Card>
 
-          {isLogin && (
-            <div className="text-center">
-              <Link to="/forgot-password" className="text-sm text-muted-foreground underline-offset-4 hover:text-primary hover:underline">
-                Forgot your password?
+          {/* Footer links */}
+          <div className="mt-6 space-y-3">
+            {isLogin && (
+              <div className="text-center">
+                <Link to="/forgot-password" className="text-sm text-muted-foreground underline-offset-4 transition-colors hover:text-primary hover:underline">
+                  Forgot your password?
+                </Link>
+              </div>
+            )}
+
+            <p className="px-4 text-center text-xs text-muted-foreground/80">
+              By continuing, you agree to our{" "}
+              <Link to="/terms" className="underline underline-offset-4 hover:text-primary">
+                Terms of Service
+              </Link>{" "}
+              and{" "}
+              <Link to="/privacy" className="underline underline-offset-4 hover:text-primary">
+                Privacy Policy
               </Link>
-            </div>
-          )}
-
-          <p className="px-8 text-center text-muted-foreground text-sm">
-            By continuing, you agree to our{" "}
-            <Link to="/terms" className="underline underline-offset-4 hover:text-primary">
-              Terms of Service
-            </Link>{" "}
-            and{" "}
-            <Link to="/privacy" className="underline underline-offset-4 hover:text-primary">
-              Privacy Policy
-            </Link>
-            .
-          </p>
-        </div>
+              .
+            </p>
+          </div>
+        </motion.div>
       </div>
     </div>
   )
