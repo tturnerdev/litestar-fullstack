@@ -33,7 +33,7 @@ export function LocationList() {
 
   const teamId = currentTeam?.id ?? ""
 
-  const { data, isLoading, isError } = useLocations({
+  const { data, isLoading, isError, refetch } = useLocations({
     teamId,
     page,
     pageSize: PAGE_SIZE,
@@ -125,10 +125,10 @@ export function LocationList() {
       <EmptyState
         icon={AlertCircle}
         title="Unable to load locations"
-        description="Something went wrong while fetching your locations. Please try refreshing the page."
+        description="Something went wrong while fetching your locations. Please try again."
         action={
-          <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
-            Refresh page
+          <Button variant="outline" size="sm" onClick={() => refetch()}>
+            Try again
           </Button>
         }
       />

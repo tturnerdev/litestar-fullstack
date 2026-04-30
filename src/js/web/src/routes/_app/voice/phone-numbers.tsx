@@ -265,7 +265,7 @@ function PhoneNumbersPage() {
   const [editDialogOpen, setEditDialogOpen] = useState(false)
 
   // Queries & mutations
-  const { data, isLoading, isError } = usePhoneNumbers(page, PAGE_SIZE)
+  const { data, isLoading, isError, refetch } = usePhoneNumbers(page, PAGE_SIZE)
   const deletePhoneNumber = useDeletePhoneNumber()
 
   // Client-side search, filtering, and sorting
@@ -506,10 +506,10 @@ function PhoneNumbersPage() {
           <EmptyState
             icon={AlertCircle}
             title="Unable to load phone numbers"
-            description="Something went wrong while fetching your phone numbers. Please try refreshing the page."
+            description="Something went wrong while fetching your phone numbers. Please try again."
             action={
-              <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
-                Refresh page
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
+                Try again
               </Button>
             }
           />

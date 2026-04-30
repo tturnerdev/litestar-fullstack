@@ -5,6 +5,7 @@ import {
   Cable,
   CheckCircle2,
   Circle,
+  Download,
   Home,
   Loader2,
   Plus,
@@ -39,6 +40,7 @@ import {
   useDeleteConnection,
   useTestAnyConnection,
 } from "@/lib/api/hooks/connections"
+import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 
 export const Route = createFileRoute("/_app/connections/")({
@@ -74,6 +76,13 @@ const statusOptions: FilterOption[] = [
   { value: "connected", label: "Connected" },
   { value: "disconnected", label: "Disconnected" },
   { value: "error", label: "Error" },
+]
+
+const csvHeaders: CsvHeader<ConnectionList>[] = [
+  { label: "Name", accessor: (c) => c.name },
+  { label: "Provider", accessor: (c) => c.provider },
+  { label: "Status", accessor: (c) => c.status },
+  { label: "Type", accessor: (c) => typeLabels[c.connectionType] ?? c.connectionType },
 ]
 
 // ── Helpers ──────────────────────────────────────────────────────────────
@@ -162,7 +171,7 @@ function ConnectionsPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
   // Queries & mutations
-  const { data, isLoading, isError } = useConnections({
+  const { data, isLoading, isError, refetch } = useConnections({
     page,
     pageSize: PAGE_SIZE,
     search: search || undefined,
@@ -180,6 +189,12 @@ function ConnectionsPage() {
       return true
     })
   }, [data?.items, typeFilter, statusFilter])
+
+  // Export all visible
+  const handleExportAll = useCallback(() => {
+    if (!filteredItems.length) return
+    exportToCsv("connections", csvHeaders, filteredItems)
+  }, [filteredItems])
 
   // Selection helpers
   const allVisibleIds = useMemo(() => filteredItems.map((c) => c.id), [filteredItems])
@@ -262,11 +277,17 @@ function ConnectionsPage() {
         description="Manage external data source integrations (PBX, helpdesk, carriers, and more)."
         breadcrumbs={breadcrumbs}
         actions={
-          <Button size="sm" asChild>
-            <Link to="/connections/new">
-              <Plus className="mr-2 h-4 w-4" /> Add connection
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={handleExportAll} disabled={!hasData}>
+              <Download className="mr-2 h-4 w-4" />
+              Export
+            </Button>
+            <Button size="sm" asChild>
+              <Link to="/connections/new">
+                <Plus className="mr-2 h-4 w-4" /> Add connection
+              </Link>
+            </Button>
+          </div>
         }
       />
 
@@ -345,10 +366,10 @@ function ConnectionsPage() {
           <EmptyState
             icon={AlertCircle}
             title="Unable to load connections"
-            description="Something went wrong while fetching your connections. Please try refreshing the page."
+            description="Something went wrong while fetching your connections. Please try again."
             action={
-              <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
-                Refresh page
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
+                Try again
               </Button>
             }
           />

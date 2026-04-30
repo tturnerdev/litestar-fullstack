@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { cn } from "@/lib/utils"
-import { useMemo, useState } from "react"
-import { AlertCircle, ArrowUpDown, Home, Loader2, Pencil, Plus, Search, Tags, Trash2, X } from "lucide-react"
+import { useCallback, useMemo, useState } from "react"
+import { AlertCircle, ArrowUpDown, Download, Home, Loader2, Pencil, Plus, Search, Tags, Trash2, X } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,6 +29,8 @@ import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-lay
 import { Skeleton } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useTags, useDeleteTag } from "@/lib/api/hooks/tags"
+import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
+import type { Tag } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/tags/")({
   component: TagsPage,
@@ -39,6 +41,11 @@ type SortDir = "asc" | "desc"
 
 const PAGE_SIZE = 25
 
+const csvHeaders: CsvHeader<Tag>[] = [
+  { label: "Name", accessor: (t) => t.name },
+  { label: "Slug", accessor: (t) => t.slug },
+]
+
 function TagsPage() {
   const [search, setSearch] = useState("")
   const [deleteId, setDeleteId] = useState<string | null>(null)
@@ -47,7 +54,7 @@ function TagsPage() {
   const [sortField, setSortField] = useState<SortField>("name")
   const [sortDir, setSortDir] = useState<SortDir>("asc")
   const [page, setPage] = useState(1)
-  const { data, isLoading, isError } = useTags({
+  const { data, isLoading, isError, refetch } = useTags({
     search: search || undefined,
     page,
     pageSize: PAGE_SIZE,
@@ -72,6 +79,12 @@ function TagsPage() {
     })
     return copy
   }, [items, sortField, sortDir])
+
+  // Export all visible
+  const handleExportAll = useCallback(() => {
+    if (!sortedItems.length) return
+    exportToCsv("tags", csvHeaders, sortedItems)
+  }, [sortedItems])
 
   const allSelected = sortedItems.length > 0 && selected.size === sortedItems.length
   const someSelected = selected.size > 0 && selected.size < sortedItems.length
@@ -162,11 +175,17 @@ function TagsPage() {
         }
         breadcrumbs={breadcrumbs}
         actions={
-          <Button size="sm" asChild>
-            <Link to="/tags/new">
-              <Plus className="mr-2 h-4 w-4" /> New Tag
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={handleExportAll} disabled={!sortedItems.length}>
+              <Download className="mr-2 h-4 w-4" />
+              Export
+            </Button>
+            <Button size="sm" asChild>
+              <Link to="/tags/new">
+                <Plus className="mr-2 h-4 w-4" /> New Tag
+              </Link>
+            </Button>
+          </div>
         }
       />
 
@@ -218,10 +237,10 @@ function TagsPage() {
           <EmptyState
             icon={AlertCircle}
             title="Unable to load tags"
-            description="Something went wrong while fetching tags. Please try refreshing the page."
+            description="Something went wrong while fetching tags. Please try again."
             action={
-              <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
-                Refresh page
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
+                Try again
               </Button>
             }
           />

@@ -88,7 +88,7 @@ function FaxNumbersPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
   // Queries & mutations
-  const { data, isLoading, isError } = useFaxNumbers(page, PAGE_SIZE)
+  const { data, isLoading, isError, refetch } = useFaxNumbers(page, PAGE_SIZE)
   const deleteFaxNumber = useDeleteFaxNumber()
 
   // Apply client-side search & filters
@@ -323,10 +323,10 @@ function FaxNumbersPage() {
           <EmptyState
             icon={AlertCircle}
             title="Unable to load fax numbers"
-            description="Something went wrong while fetching your fax numbers. Please try refreshing the page."
+            description="Something went wrong while fetching your fax numbers. Please try again."
             action={
-              <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
-                Refresh page
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
+                Try again
               </Button>
             }
           />

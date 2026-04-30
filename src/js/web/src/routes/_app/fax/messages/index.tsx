@@ -85,7 +85,7 @@ function FaxMessagesPage() {
 
   // Queries & mutations
   const { data: faxNumbers } = useFaxNumbers(1, 200)
-  const { data, isLoading, isError } = useFaxMessages({
+  const { data, isLoading, isError, refetch } = useFaxMessages({
     page,
     pageSize: PAGE_SIZE,
     search: search || undefined,
@@ -288,10 +288,10 @@ function FaxMessagesPage() {
           <EmptyState
             icon={AlertCircle}
             title="Unable to load fax messages"
-            description="Something went wrong while fetching your fax history. Please try refreshing the page."
+            description="Something went wrong while fetching your fax history. Please try again."
             action={
-              <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
-                Refresh page
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
+                Try again
               </Button>
             }
           />

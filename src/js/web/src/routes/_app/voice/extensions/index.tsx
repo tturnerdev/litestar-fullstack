@@ -96,7 +96,7 @@ function ExtensionsPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
   // Queries & mutations
-  const { data, isLoading, isError } = useExtensions(page, PAGE_SIZE)
+  const { data, isLoading, isError, refetch } = useExtensions(page, PAGE_SIZE)
   const { data: phoneData } = usePhoneNumbers(1, 100)
   const deleteExtension = useDeleteExtension()
 
@@ -335,10 +335,10 @@ function ExtensionsPage() {
           <EmptyState
             icon={AlertCircle}
             title="Unable to load extensions"
-            description="Something went wrong while fetching your extensions. Please try refreshing the page."
+            description="Something went wrong while fetching your extensions. Please try again."
             action={
-              <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
-                Refresh page
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
+                Try again
               </Button>
             }
           />

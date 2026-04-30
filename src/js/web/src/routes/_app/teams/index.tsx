@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   Check,
   Crown,
+  Download,
   Home,
   Plus,
   Search,
@@ -31,6 +32,7 @@ import { nextSortDirection, SortableHeader, type SortDirection } from "@/compone
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useAuthStore } from "@/lib/auth"
 import { useTeams, useDeleteTeam } from "@/lib/api/hooks/teams"
+import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import type { Team } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/teams/")({
@@ -63,6 +65,12 @@ function getTeamColor(name: string): string {
   return colors[index]
 }
 
+const csvHeaders: CsvHeader<Team>[] = [
+  { label: "Name", accessor: (t) => t.name },
+  { label: "Description", accessor: (t) => t.description ?? "" },
+  { label: "Member Count", accessor: (t) => t.members?.length ?? 0 },
+]
+
 // ── Main page ────────────────────────────────────────────────────────────
 
 function TeamsPage() {
@@ -79,7 +87,7 @@ function TeamsPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
   // Query
-  const { data, isLoading, isError } = useTeams({
+  const { data, isLoading, isError, refetch } = useTeams({
     search: search || undefined,
     orderBy: sortKey ?? undefined,
     sortOrder: sortDir ?? undefined,
@@ -102,6 +110,12 @@ function TeamsPage() {
     }
     return items
   }, [items, sortKey, sortDir])
+
+  // Export all visible
+  const handleExportAll = useCallback(() => {
+    if (!sortedItems.length) return
+    exportToCsv("teams", csvHeaders, sortedItems)
+  }, [sortedItems])
 
   // Keep auth store in sync
   useEffect(() => {
@@ -187,11 +201,17 @@ function TeamsPage() {
         description="Manage your teams and collaborate with members."
         breadcrumbs={breadcrumbs}
         actions={
-          <Button size="sm" asChild>
-            <Link to="/teams/new">
-              <Plus className="mr-2 h-4 w-4" /> New team
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={handleExportAll} disabled={!sortedItems.length}>
+              <Download className="mr-2 h-4 w-4" />
+              Export
+            </Button>
+            <Button size="sm" asChild>
+              <Link to="/teams/new">
+                <Plus className="mr-2 h-4 w-4" /> New team
+              </Link>
+            </Button>
+          </div>
         }
       />
 
@@ -228,10 +248,10 @@ function TeamsPage() {
           <EmptyState
             icon={Users}
             title="Unable to load teams"
-            description="Something went wrong while fetching your teams. Please try refreshing the page."
+            description="Something went wrong while fetching your teams. Please try again."
             action={
-              <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
-                Refresh page
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
+                Try again
               </Button>
             }
           />

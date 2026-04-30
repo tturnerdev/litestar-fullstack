@@ -173,7 +173,7 @@ function DevicesPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
   // Queries & mutations
-  const { data, isLoading, isError } = useDevices({
+  const { data, isLoading, isError, refetch } = useDevices({
     page,
     pageSize: PAGE_SIZE,
     search: search || undefined,
@@ -376,10 +376,10 @@ function DevicesPage() {
           <EmptyState
             icon={AlertCircle}
             title="Unable to load devices"
-            description="Something went wrong while fetching your devices. Please try refreshing the page."
+            description="Something went wrong while fetching your devices. Please try again."
             action={
-              <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
-                Refresh page
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
+                Try again
               </Button>
             }
           />

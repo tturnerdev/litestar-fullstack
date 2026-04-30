@@ -119,7 +119,7 @@ function SupportPage() {
     }
   }, [search, statusFilter, priorityFilter, categoryFilter, sortKey, sortDir])
 
-  const { data, isLoading, isError } = useTickets(page, PAGE_SIZE, serverFilters)
+  const { data, isLoading, isError, refetch } = useTickets(page, PAGE_SIZE, serverFilters)
 
   // Apply client-side multi-value filters
   const filteredItems = useMemo(() => {
@@ -392,10 +392,10 @@ function SupportPage() {
           <EmptyState
             icon={AlertCircle}
             title="Unable to load tickets"
-            description="Something went wrong while fetching your tickets. Please try refreshing the page."
+            description="Something went wrong while fetching your tickets. Please try again."
             action={
-              <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
-                Refresh page
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
+                Try again
               </Button>
             }
           />
