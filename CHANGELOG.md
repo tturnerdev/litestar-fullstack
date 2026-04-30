@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.48.0 (2026-04-30)
+
+### Improved
+- **Ticket priority badge** — priority-specific icons (ArrowDown/Minus/ArrowUp/AlertTriangle), descriptive tooltips, pulse animation on urgent, and compact icon-only size variant.
+- **Ticket status badge** — status-specific icons (Circle/Clock/User/Headphones/CheckCircle/XCircle), colored dot indicator, descriptive tooltips, and entrance animation.
+- **Team permissions** — feature-area icons, Reset button, unsaved changes banner, Select All/Deselect All per role, shadcn Checkbox component, and summary row with enabled counts.
+- **Phone number card** — US phone formatting, copy button, colored type icons (MapPin/Globe/Flag), extension assignment indicator, hover scale, active status left border, relative timestamps, and AlertDialog for delete.
+- **Markdown renderer** — code block copy button, syntax highlighting classes, blockquote styling with left border, responsive striped tables, external link icons, task list checkbox rendering, and heading anchor links.
+
 ## v0.47.0 (2026-04-30)
 
 ### Improved

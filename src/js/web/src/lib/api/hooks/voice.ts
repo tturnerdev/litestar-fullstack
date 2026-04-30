@@ -15,6 +15,9 @@ export interface PhoneNumber {
   callerIdName: string | null
   isActive: boolean
   teamId: string | null
+  extensionId: string | null
+  createdAt: string | null
+  updatedAt: string | null
 }
 
 export interface Extension {

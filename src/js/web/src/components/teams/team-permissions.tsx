@@ -1,10 +1,24 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { Check, Loader2, Save, Shield } from "lucide-react"
-import { useCallback, useEffect, useState } from "react"
+import type { LucideIcon } from "lucide-react"
+import {
+  AlertTriangle,
+  Building2,
+  LifeBuoy,
+  Loader2,
+  Monitor,
+  Phone,
+  Printer,
+  RotateCcw,
+  Save,
+  Shield,
+  Users,
+} from "lucide-react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   type FeatureArea,
   listTeamPermissions,
@@ -12,6 +26,15 @@ import {
   type TeamRolePermissionEntry,
   updateTeamPermissions,
 } from "@/lib/generated/api"
+
+const FEATURE_AREA_ICONS: Record<FeatureArea, LucideIcon> = {
+  DEVICES: Monitor,
+  VOICE: Phone,
+  FAX: Printer,
+  SUPPORT: LifeBuoy,
+  ORGANIZATION: Building2,
+  TEAMS: Users,
+}
 
 const FEATURE_AREAS: { value: FeatureArea; label: string }[] = [
   { value: "DEVICES", label: "Devices" },
@@ -71,6 +94,7 @@ export function TeamPermissions({ teamId, canEdit }: TeamPermissionsProps) {
   const queryClient = useQueryClient()
   const [matrix, setMatrix] = useState<PermMatrix | null>(null)
   const [dirty, setDirty] = useState(false)
+  const savedMatrixRef = useRef<PermMatrix | null>(null)
 
   const { data: permissions, isLoading } = useQuery({
     queryKey: ["teamPermissions", teamId],
@@ -82,10 +106,51 @@ export function TeamPermissions({ teamId, canEdit }: TeamPermissionsProps) {
 
   useEffect(() => {
     if (permissions) {
-      setMatrix(buildMatrix(permissions))
+      const built = buildMatrix(permissions)
+      setMatrix(built)
+      savedMatrixRef.current = structuredClone(built)
       setDirty(false)
     }
   }, [permissions])
+
+  const handleReset = useCallback(() => {
+    if (savedMatrixRef.current) {
+      setMatrix(structuredClone(savedMatrixRef.current))
+      setDirty(false)
+    }
+  }, [])
+
+  const toggleAllForRole = useCallback(
+    (role: Role, setTo: boolean) => {
+      if (!canEdit || !matrix) return
+      setMatrix((prev) => {
+        if (!prev) return prev
+        const next = structuredClone(prev)
+        for (const area of FEATURE_AREAS) {
+          next[role][area.value] = { view: setTo, edit: setTo }
+        }
+        return next
+      })
+      setDirty(true)
+    },
+    [canEdit, matrix],
+  )
+
+  const roleSummary = useMemo(() => {
+    if (!matrix) return {} as Record<Role, { enabled: number; total: number }>
+    const result = {} as Record<Role, { enabled: number; total: number }>
+    for (const role of ROLES) {
+      let enabled = 0
+      const total = FEATURE_AREAS.length * 2
+      for (const area of FEATURE_AREAS) {
+        const cell = matrix[role][area.value]
+        if (cell.view) enabled++
+        if (cell.edit) enabled++
+      }
+      result[role] = { enabled, total }
+    }
+    return result
+  }, [matrix])
 
   const saveMutation = useMutation({
     mutationFn: async (entries: TeamRolePermissionEntry[]) => {
@@ -143,16 +208,30 @@ export function TeamPermissions({ teamId, canEdit }: TeamPermissionsProps) {
 
   return (
     <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Shield className="h-5 w-5 text-muted-foreground" />
-          <CardTitle>Role Permissions</CardTitle>
+      <CardHeader className="flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Shield className="h-5 w-5 text-muted-foreground" />
+            <CardTitle>Role Permissions</CardTitle>
+          </div>
+          {canEdit && dirty && (
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={handleReset} disabled={saveMutation.isPending}>
+                <RotateCcw className="mr-2 h-4 w-4" />
+                Reset
+              </Button>
+              <Button size="sm" onClick={handleSave} disabled={saveMutation.isPending}>
+                {saveMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                Save
+              </Button>
+            </div>
+          )}
         </div>
         {canEdit && dirty && (
-          <Button size="sm" onClick={handleSave} disabled={saveMutation.isPending}>
-            {saveMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-            Save
-          </Button>
+          <div className="flex items-center gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-400">
+            <AlertTriangle className="h-4 w-4 shrink-0" />
+            <span>You have unsaved changes to permissions.</span>
+          </div>
         )}
       </CardHeader>
       <CardContent>
@@ -161,13 +240,27 @@ export function TeamPermissions({ teamId, canEdit }: TeamPermissionsProps) {
             <thead>
               <tr className="border-b border-border/60">
                 <th className="py-2 pr-4 text-left font-medium text-muted-foreground">Feature Area</th>
-                {ROLES.map((role) => (
-                  <th key={role} colSpan={2} className="px-2 py-2 text-center font-medium">
-                    <Badge variant="outline" className="uppercase">
-                      {role}
-                    </Badge>
-                  </th>
-                ))}
+                {ROLES.map((role) => {
+                  const allEnabled = roleSummary[role]?.enabled === roleSummary[role]?.total
+                  return (
+                    <th key={role} colSpan={2} className="px-2 py-2 text-center font-medium">
+                      <div className="flex flex-col items-center gap-1">
+                        <Badge variant="outline" className="uppercase">
+                          {role}
+                        </Badge>
+                        {canEdit && (
+                          <button
+                            type="button"
+                            onClick={() => toggleAllForRole(role, !allEnabled)}
+                            className="text-[10px] text-muted-foreground hover:text-primary transition-colors"
+                          >
+                            {allEnabled ? "Deselect All" : "Select All"}
+                          </button>
+                        )}
+                      </div>
+                    </th>
+                  )
+                })}
               </tr>
               <tr className="border-b border-border/40">
                 <th />
@@ -177,9 +270,16 @@ export function TeamPermissions({ teamId, canEdit }: TeamPermissionsProps) {
               </tr>
             </thead>
             <tbody>
-              {FEATURE_AREAS.map((area) => (
+              {FEATURE_AREAS.map((area) => {
+                const AreaIcon = FEATURE_AREA_ICONS[area.value]
+                return (
                 <tr key={area.value} className="border-b border-border/30 transition-colors hover:bg-muted/30">
-                  <td className="py-2.5 pr-4 font-medium text-foreground">{area.label}</td>
+                  <td className="py-2.5 pr-4 font-medium text-foreground">
+                    <span className="flex items-center gap-2">
+                      <AreaIcon className="h-4 w-4 text-muted-foreground" />
+                      {area.label}
+                    </span>
+                  </td>
                   {ROLES.map((role) => {
                     const cell = matrix[role][area.value]
                     return (
@@ -194,8 +294,22 @@ export function TeamPermissions({ teamId, canEdit }: TeamPermissionsProps) {
                     )
                   })}
                 </tr>
-              ))}
+                )
+              })}
             </tbody>
+            <tfoot>
+              <tr className="border-t border-border/60">
+                <td className="py-2 pr-4 text-xs text-muted-foreground font-medium">Total</td>
+                {ROLES.map((role) => {
+                  const summary = roleSummary[role]
+                  return (
+                    <td key={role} colSpan={2} className="px-2 py-2 text-center text-xs text-muted-foreground">
+                      {summary ? `${summary.enabled} of ${summary.total} enabled` : "--"}
+                    </td>
+                  )
+                })}
+              </tr>
+            </tfoot>
           </table>
         </div>
         {!canEdit && (
@@ -231,38 +345,25 @@ function PermCells({
   return (
     <>
       <td className="px-2 py-2.5 text-center">
-        <PermCheckbox checked={view} disabled={disabled} onChange={onToggleView} />
+        <div className="flex justify-center">
+          <Checkbox
+            checked={view}
+            disabled={disabled}
+            onChange={onToggleView}
+            className="transition-transform duration-150 hover:scale-110"
+          />
+        </div>
       </td>
       <td className="px-2 py-2.5 text-center">
-        <PermCheckbox checked={edit} disabled={disabled} onChange={onToggleEdit} />
+        <div className="flex justify-center">
+          <Checkbox
+            checked={edit}
+            disabled={disabled}
+            onChange={onToggleEdit}
+            className="transition-transform duration-150 hover:scale-110"
+          />
+        </div>
       </td>
     </>
-  )
-}
-
-function PermCheckbox({
-  checked,
-  disabled,
-  onChange,
-}: {
-  checked: boolean
-  disabled: boolean
-  onChange: () => void
-}) {
-  return (
-    <button
-      type="button"
-      role="checkbox"
-      aria-checked={checked}
-      disabled={disabled}
-      onClick={onChange}
-      className={`inline-flex h-5 w-5 items-center justify-center rounded-md border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 ${
-        checked
-          ? "border-primary bg-primary text-primary-foreground"
-          : "border-border bg-background text-transparent hover:border-primary/50"
-      } ${disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
-    >
-      <Check className="h-3.5 w-3.5" strokeWidth={3} />
-    </button>
   )
 }
