@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.37.0 (2026-04-30)
+
+### Improved
+- **Sidebar** — live unread notification count badge on the Notifications nav item, auto-refreshes every 30 seconds.
+- **404 page** — framer-motion entrance animation, floating icon, quick-link buttons (Home/Support/Settings), and gradient background.
+- **Privacy policy page** — table of contents with anchor links, numbered sections, new "Your Rights", "Cookies", and "Updates" sections, last-updated date, cross-link to Terms, and scroll-to-top button with animations.
+- **Terms of service page** — table of contents with anchor links, numbered sections, new "Account Responsibilities", "Intellectual Property", and "Changes" sections, last-updated date, cross-link to Privacy, and scroll-to-top button with animations.
+
 ## v0.36.0 (2026-04-30)
 
 ### Added

@@ -8,6 +8,7 @@ import { NavUser } from "@/components/nav-user"
 import { TeamSwitcher } from "@/components/team-switcher"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail, SidebarSeparator } from "@/components/ui/sidebar"
+import { useUnreadCount } from "@/lib/api/hooks/notifications"
 import { useAuthStore } from "@/lib/auth"
 import { adminListUsers, listTeams, type Team } from "@/lib/generated/api"
 
@@ -43,6 +44,7 @@ function useNavBadges(isAuthenticated: boolean, isSuperuser: boolean) {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { teams, currentTeam, setTeams, setCurrentTeam, user, isAuthenticated } = useAuthStore()
   const badges = useNavBadges(isAuthenticated, user?.isSuperuser ?? false)
+  const { data: unreadData } = useUnreadCount()
 
   const {
     data: teamsData = [],
@@ -164,12 +166,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     return items
   }, [user?.isSuperuser, badges.teams])
 
+  const unreadCount = unreadData?.count || null
   const navSecondary = useMemo<NavMainItem[]>(
     () => [
       {
         title: "Notifications",
         to: "/notifications",
         icon: Bell,
+        badge: unreadCount,
       },
       {
         title: "Settings",
@@ -177,7 +181,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         icon: Settings,
       },
     ],
-    [],
+    [unreadCount],
   )
 
   const navAdmin = useMemo<NavMainItem[]>(() => {
