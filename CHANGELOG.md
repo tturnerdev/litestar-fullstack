@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.73.0 (2026-04-30)
+
+### Fixed
+- **Accessibility: ARIA labels** — Added `aria-label` to all icon-only buttons missing accessible names: fax table copy/refresh, organization copy, notification mark-read/delete, getting-started dismiss, password toggle in login/signup forms, email verification banner. Added `aria-label` to all admin data tables (support, fax, devices, voice, users, teams) for screen reader identification.
+- **Loading states** — Replaced Loader2 spinners with proper Skeleton/SkeletonCard placeholders in team-list, notifications page, and gateway lookup results.
+- **Error states** — Added missing `isError` handling with EmptyState component to home dashboard (5 queries), profile page, and team invitation acceptance page.
+
 ## v0.71.0 (2026-04-30)
 
 ### Improved
