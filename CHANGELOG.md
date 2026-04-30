@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.42.0 (2026-04-30)
+
+### Improved
+- **DND settings form** — visual DND status banner with color coding, Switch toggle replacing checkbox, selectable mode cards (Do Not Disturb/Allow List/Schedule), tag-style allow list chips, and section separators.
+- **Forwarding rule editor** — illustrated empty state, rule type icons (Always/Busy/No Answer/Unreachable), add-rule Dialog with condition-aware fields, card-style rule rows with group-hover transitions, and priority badges.
+- **Home stat cards** — trend indicators (up/down/neutral arrows with colors), hover scale animation, clickable cards navigating to relevant sections, and staggered framer-motion entrance.
+- **Home recent activity card** — action-type icons with semantic colors (create/update/delete/login), resource type badges, "View all activity" link for admins, and enhanced empty state.
+- **Home teams card** — colored team avatars from name hash, member count display, active team check indicator, and hover animation effects.
+
 ## v0.41.0 (2026-04-30)
 
 ### Improved

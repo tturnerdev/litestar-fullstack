@@ -1,10 +1,10 @@
-import { GripVertical, Pencil, Trash2 } from "lucide-react"
+import { Pencil, Trash2 } from "lucide-react"
 import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { TableCell, TableRow } from "@/components/ui/table"
 import type { ForwardingRule } from "@/lib/api/hooks/voice"
 
 const RULE_TYPE_LABELS: Record<string, string> = {
@@ -58,83 +58,86 @@ export function ForwardingRuleRow({ rule, onUpdate, onDelete, isUpdating, isDele
 
   if (isEditing) {
     return (
-      <TableRow>
-        <TableCell>
-          <Input type="number" value={editPriority} onChange={(e) => setEditPriority(e.target.value)} className="h-8 w-16" />
-        </TableCell>
-        <TableCell>
-          <Select value={editRuleType} onValueChange={(v) => setEditRuleType(v as ForwardingRule["ruleType"])}>
-            <SelectTrigger className="h-8">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="always">Always</SelectItem>
-              <SelectItem value="busy">Busy</SelectItem>
-              <SelectItem value="no_answer">No Answer</SelectItem>
-              <SelectItem value="unreachable">Unreachable</SelectItem>
-            </SelectContent>
-          </Select>
-        </TableCell>
-        <TableCell>
-          <Select value={editDestType} onValueChange={(v) => setEditDestType(v as ForwardingRule["destinationType"])}>
-            <SelectTrigger className="h-8">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="extension">Extension</SelectItem>
-              <SelectItem value="external">External</SelectItem>
-              <SelectItem value="voicemail">Voicemail</SelectItem>
-            </SelectContent>
-          </Select>
-        </TableCell>
-        <TableCell>
-          <Input value={editDestValue} onChange={(e) => setEditDestValue(e.target.value)} className="h-8" placeholder="Target" />
-        </TableCell>
-        <TableCell>
-          <Input type="number" value={editTimeout} onChange={(e) => setEditTimeout(e.target.value)} className="h-8 w-20" placeholder="--" />
-        </TableCell>
-        <TableCell />
-        <TableCell className="text-right">
-          <div className="flex items-center justify-end gap-1">
-            <Button size="sm" onClick={handleSave} disabled={isUpdating || !editDestValue}>
-              {isUpdating ? "Saving..." : "Save"}
-            </Button>
-            <Button size="sm" variant="outline" onClick={handleCancel}>
-              Cancel
-            </Button>
+      <div className="flex w-full flex-col gap-3">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="space-y-1">
+            <Label className="text-xs">Condition</Label>
+            <Select value={editRuleType} onValueChange={(v) => setEditRuleType(v as ForwardingRule["ruleType"])}>
+              <SelectTrigger className="h-8">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="always">Always</SelectItem>
+                <SelectItem value="busy">Busy</SelectItem>
+                <SelectItem value="no_answer">No Answer</SelectItem>
+                <SelectItem value="unreachable">Unreachable</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-        </TableCell>
-      </TableRow>
+          <div className="space-y-1">
+            <Label className="text-xs">Destination</Label>
+            <Select value={editDestType} onValueChange={(v) => setEditDestType(v as ForwardingRule["destinationType"])}>
+              <SelectTrigger className="h-8">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="extension">Extension</SelectItem>
+                <SelectItem value="external">External</SelectItem>
+                <SelectItem value="voicemail">Voicemail</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">Target</Label>
+            <Input value={editDestValue} onChange={(e) => setEditDestValue(e.target.value)} className="h-8" placeholder="Target" />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-1">
+              <Label className="text-xs">Timeout</Label>
+              <Input type="number" value={editTimeout} onChange={(e) => setEditTimeout(e.target.value)} className="h-8" placeholder="--" />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Priority</Label>
+              <Input type="number" value={editPriority} onChange={(e) => setEditPriority(e.target.value)} className="h-8" />
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center gap-1">
+          <Button size="sm" onClick={handleSave} disabled={isUpdating || !editDestValue}>
+            {isUpdating ? "Saving..." : "Save"}
+          </Button>
+          <Button size="sm" variant="outline" onClick={handleCancel}>
+            Cancel
+          </Button>
+        </div>
+      </div>
     )
   }
 
   return (
-    <TableRow>
-      <TableCell>
-        <div className="flex items-center gap-2">
-          <GripVertical className="h-4 w-4 text-muted-foreground" />
-          <span>{rule.priority}</span>
-        </div>
-      </TableCell>
-      <TableCell>{RULE_TYPE_LABELS[rule.ruleType] ?? rule.ruleType}</TableCell>
-      <TableCell>{DEST_TYPE_LABELS[rule.destinationType] ?? rule.destinationType}</TableCell>
-      <TableCell className="font-mono">{rule.destinationValue}</TableCell>
-      <TableCell>{rule.ringTimeoutSeconds != null ? `${rule.ringTimeoutSeconds}s` : "--"}</TableCell>
-      <TableCell>
-        <Badge variant={rule.isActive ? "default" : "outline"}>
-          {rule.isActive ? "Active" : "Inactive"}
+    <>
+      <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-4 gap-y-1">
+        <span className="text-sm font-medium">{RULE_TYPE_LABELS[rule.ruleType] ?? rule.ruleType}</span>
+        <span className="text-sm text-muted-foreground">to</span>
+        <Badge variant="secondary" className="text-xs">
+          {DEST_TYPE_LABELS[rule.destinationType] ?? rule.destinationType}
         </Badge>
-      </TableCell>
-      <TableCell className="text-right">
-        <div className="flex items-center justify-end gap-1">
-          <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)}>
-            <Pencil className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="sm" onClick={() => onDelete(rule.id)} disabled={isDeleting}>
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      </TableCell>
-    </TableRow>
+        <span className="font-mono text-sm">{rule.destinationValue}</span>
+        {rule.ringTimeoutSeconds != null && (
+          <span className="text-xs text-muted-foreground">({rule.ringTimeoutSeconds}s timeout)</span>
+        )}
+      </div>
+      <Badge variant={rule.isActive ? "default" : "outline"} className="shrink-0">
+        {rule.isActive ? "Active" : "Inactive"}
+      </Badge>
+      <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+        <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)}>
+          <Pencil className="h-4 w-4" />
+        </Button>
+        <Button variant="ghost" size="sm" onClick={() => onDelete(rule.id)} disabled={isDeleting}>
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </div>
+    </>
   )
 }

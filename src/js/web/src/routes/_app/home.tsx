@@ -100,6 +100,8 @@ function HomePage() {
             icon={Users}
             iconClassName="bg-blue-500/10 text-blue-600 dark:text-blue-400"
             isLoading={teamsLoading}
+            href="/teams"
+            index={0}
           />
           <StatCard
             label="Tags"
@@ -107,6 +109,8 @@ function HomePage() {
             icon={Tag}
             iconClassName="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
             isLoading={tagsLoading}
+            href="/tags"
+            index={1}
           />
           <StatCard
             label="Roles"
@@ -114,6 +118,7 @@ function HomePage() {
             icon={ShieldCheck}
             iconClassName="bg-violet-500/10 text-violet-600 dark:text-violet-400"
             isLoading={rolesLoading}
+            index={2}
           />
           {isSuperuser ? (
             <StatCard
@@ -122,6 +127,8 @@ function HomePage() {
               icon={Users}
               iconClassName="bg-orange-500/10 text-orange-600 dark:text-orange-400"
               isLoading={adminStatsLoading}
+              href="/admin"
+              index={3}
             />
           ) : (
             <StatCard
@@ -130,6 +137,7 @@ function HomePage() {
               icon={Users}
               iconClassName="bg-orange-500/10 text-orange-600 dark:text-orange-400"
               isLoading={teamsLoading}
+              index={3}
             />
           )}
         </div>
@@ -162,6 +170,7 @@ function HomePage() {
           <RecentActivityCard
             activities={activityData?.activities ?? []}
             isLoading={activityLoading}
+            isAdmin={isSuperuser}
           />
         </PageSection>
       )}
