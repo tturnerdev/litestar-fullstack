@@ -1,12 +1,25 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Voicemail } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SkeletonCard } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { VoicemailMessageList } from "@/components/voice/voicemail-message-list"
 import { VoicemailSettingsForm } from "@/components/voice/voicemail-settings-form"
-import { useVoicemailMessages, useVoicemailSettings } from "@/lib/api/hooks/voice"
+import {
+  useExtension,
+  useVoicemailMessages,
+  useVoicemailSettings,
+} from "@/lib/api/hooks/voice"
 
 export const Route = createFileRoute("/_app/voice/extensions/$extensionId/voicemail")({
   component: VoicemailPage,
@@ -14,26 +27,75 @@ export const Route = createFileRoute("/_app/voice/extensions/$extensionId/voicem
 
 function VoicemailPage() {
   const { extensionId } = Route.useParams()
-  const { data: vmMessages } = useVoicemailMessages(extensionId, 1, 100)
-  const { data: vmSettings } = useVoicemailSettings(extensionId)
+  const { data: extension, isLoading: extLoading } = useExtension(extensionId)
+  const { data: vmMessages, isLoading: msgsLoading } = useVoicemailMessages(extensionId, 1, 100)
+  const { data: vmSettings, isLoading: settingsLoading } = useVoicemailSettings(extensionId)
 
+  const isLoading = extLoading || msgsLoading || settingsLoading
   const unreadCount = vmMessages?.items.filter((m) => !m.isRead).length ?? 0
   const totalCount = vmMessages?.total ?? 0
   const isEnabled = vmSettings?.isEnabled ?? false
+  const extensionName = extension?.displayName ?? "Extension"
+
+  if (isLoading) {
+    return (
+      <PageContainer className="flex-1 space-y-8">
+        <PageHeader eyebrow="Voice" title="Voicemail" />
+        <PageSection>
+          <SkeletonCard />
+        </PageSection>
+      </PageContainer>
+    )
+  }
 
   return (
     <PageContainer className="flex-1 space-y-8">
       <PageHeader
         eyebrow="Voice"
         title="Voicemail"
-        description="Manage voicemail settings and listen to messages."
+        description={`Manage voicemail settings and messages for ${extensionName}.`}
+        breadcrumbs={
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/home">Home</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/voice/extensions">Extensions</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/voice/extensions/$extensionId" params={{ extensionId }}>
+                    {extensionName}
+                  </Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Voicemail</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        }
         actions={
           <div className="flex items-center gap-2">
             {!isEnabled && (
-              <Badge variant="outline">Voicemail disabled</Badge>
+              <Badge variant="outline" className="gap-1.5">
+                <Voicemail className="h-3 w-3" />
+                Disabled
+              </Badge>
             )}
-            {unreadCount > 0 && (
+            {isEnabled && unreadCount > 0 && (
               <Badge variant="secondary">{unreadCount} unread</Badge>
+            )}
+            {isEnabled && unreadCount === 0 && totalCount > 0 && (
+              <Badge variant="outline">{totalCount} messages</Badge>
             )}
             <Button variant="outline" size="sm" asChild>
               <Link to="/voice/extensions/$extensionId" params={{ extensionId }}>
@@ -43,6 +105,7 @@ function VoicemailPage() {
           </div>
         }
       />
+
       <PageSection>
         <Tabs defaultValue="messages">
           <TabsList>

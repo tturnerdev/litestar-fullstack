@@ -1,8 +1,9 @@
-import { AlertTriangle, CheckSquare, Mail, MailOpen, Square, Trash2 } from "lucide-react"
+import { AlertTriangle, CheckSquare, Inbox, Mail, MailOpen, Square, Trash2 } from "lucide-react"
 import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/empty-state"
 import { SkeletonTable } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { VoicemailPlayer } from "@/components/voice/voicemail-player"
@@ -134,6 +135,16 @@ export function VoicemailMessageList({ extensionId }: VoicemailMessageListProps)
     }
   }
 
+  if (data.items.length === 0) {
+    return (
+      <EmptyState
+        icon={Inbox}
+        title="No voicemail messages"
+        description="When callers leave a voicemail for this extension, their messages will appear here. You can listen, read transcriptions, and manage messages."
+      />
+    )
+  }
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -190,26 +201,18 @@ export function VoicemailMessageList({ extensionId }: VoicemailMessageListProps)
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.items.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
-                  No voicemail messages.
-                </TableCell>
-              </TableRow>
-            ) : (
-              data.items.map((msg) => (
-                <MessageRow
-                  key={msg.id}
-                  message={msg}
-                  isExpanded={expandedId === msg.id}
-                  isSelected={selectedIds.has(msg.id)}
-                  onExpand={() => handleExpand(msg)}
-                  onDelete={() => handleDelete(msg.id)}
-                  onToggleRead={() => handleToggleRead(msg)}
-                  onToggleSelect={() => toggleSelect(msg.id)}
-                />
-              ))
-            )}
+            {data.items.map((msg) => (
+              <MessageRow
+                key={msg.id}
+                message={msg}
+                isExpanded={expandedId === msg.id}
+                isSelected={selectedIds.has(msg.id)}
+                onExpand={() => handleExpand(msg)}
+                onDelete={() => handleDelete(msg.id)}
+                onToggleRead={() => handleToggleRead(msg)}
+                onToggleSelect={() => toggleSelect(msg.id)}
+              />
+            ))}
           </TableBody>
         </Table>
 

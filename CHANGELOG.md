@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.27.0 (2026-04-30)
+
+### Improved
+- **Voice voicemail page** — breadcrumbs with extension name, dynamic header badges (disabled/unread/total), skeleton loading state, and proper empty state for messages list.
+- **Admin user detail page** — hero section with gradient avatar, security indicators, organized sections (Account Info, Activity, Admin Actions, Teams, OAuth, Danger Zone), inline toggles for active/superuser/verified, copy buttons, relative timestamps, and role badges.
+
 ## v0.26.0 (2026-04-30)
 
 ### Improved
