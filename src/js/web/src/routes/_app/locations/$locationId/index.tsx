@@ -1,10 +1,10 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
 import { useState } from "react"
-import { ArrowLeft, Loader2, MapPin, Trash2 } from "lucide-react"
+import { AlertTriangle, ArrowLeft, Check, Clock, Copy, Loader2, MapPin, Pencil, Trash2 } from "lucide-react"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -18,6 +18,65 @@ import { useDeleteLocation, useLocation, useUpdateLocation, type Location } from
 export const Route = createFileRoute("/_app/locations/$locationId/")({
   component: LocationDetailPage,
 })
+
+// ---------------------------------------------------------------------------
+// Time helpers
+// ---------------------------------------------------------------------------
+
+function formatRelativeTime(value: string | null | undefined): string {
+  if (!value) return "Unknown"
+  const date = new Date(value)
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffSecs = Math.floor(diffMs / 1000)
+  if (diffSecs < 60) return "Just now"
+  const diffMins = Math.floor(diffSecs / 60)
+  if (diffMins < 60) return `${diffMins} minute${diffMins === 1 ? "" : "s"} ago`
+  const diffHours = Math.floor(diffMins / 60)
+  if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? "" : "s"} ago`
+  const diffDays = Math.floor(diffHours / 24)
+  if (diffDays < 30) return `${diffDays} day${diffDays === 1 ? "" : "s"} ago`
+  const diffMonths = Math.floor(diffDays / 30)
+  return `${diffMonths} month${diffMonths === 1 ? "" : "s"} ago`
+}
+
+function formatDateTime(value: string | null | undefined): string {
+  if (!value) return "Unknown"
+  return new Date(value).toLocaleString()
+}
+
+// ---------------------------------------------------------------------------
+// Copy button
+// ---------------------------------------------------------------------------
+
+function CopyButton({ value }: { value: string }) {
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(value)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // Clipboard API may not be available
+    }
+  }
+
+  return (
+    <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={handleCopy}>
+      {copied ? (
+        <Check className="h-3 w-3 text-emerald-500" />
+      ) : (
+        <Copy className="h-3 w-3 text-muted-foreground" />
+      )}
+      <span className="sr-only">Copy ID</span>
+    </Button>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Main page
+// ---------------------------------------------------------------------------
 
 function LocationDetailPage() {
   const { locationId } = Route.useParams()
@@ -135,6 +194,11 @@ function LocationDetailPage() {
             <Badge variant="outline" className="uppercase">
               {isAddressed ? "Addressed" : "Physical"}
             </Badge>
+            {!editing && (
+              <Button variant="outline" size="sm" onClick={() => startEditing(data)}>
+                <Pencil className="mr-2 h-4 w-4" /> Edit
+              </Button>
+            )}
             <Button variant="outline" size="sm" asChild>
               <Link to="/locations">
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back
@@ -147,96 +211,179 @@ function LocationDetailPage() {
       <PageSection>
         <div className="grid gap-6 md:grid-cols-[1.1fr_0.9fr]">
           {/* Main information card */}
-          <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Location Information</CardTitle>
-              {!editing ? (
-                <Button variant="outline" size="sm" onClick={() => startEditing(data)}>
-                  Edit
-                </Button>
-              ) : (
-                <div className="flex gap-2">
-                  <Button variant="ghost" size="sm" onClick={() => setEditing(false)}>
-                    Cancel
-                  </Button>
-                  <Button size="sm" onClick={handleSave} disabled={updateLocation.isPending}>
-                    {updateLocation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Save
-                  </Button>
-                </div>
-              )}
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {editing ? (
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Name</Label>
-                    <Input value={editName} onChange={(e) => setEditName(e.target.value)} />
+          <div className="space-y-6">
+            <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Location Information</CardTitle>
+                {editing && (
+                  <div className="flex gap-2">
+                    <Button variant="ghost" size="sm" onClick={() => setEditing(false)}>
+                      Cancel
+                    </Button>
+                    <Button size="sm" onClick={handleSave} disabled={updateLocation.isPending}>
+                      {updateLocation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Save
+                    </Button>
                   </div>
-                  <div className="space-y-2">
-                    <Label>Description</Label>
-                    <Textarea value={editDescription} onChange={(e) => setEditDescription(e.target.value)} rows={3} />
+                )}
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {editing ? (
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Name</Label>
+                      <Input value={editName} onChange={(e) => setEditName(e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Description</Label>
+                      <Textarea value={editDescription} onChange={(e) => setEditDescription(e.target.value)} rows={3} />
+                    </div>
+                    {isAddressed && (
+                      <>
+                        <Separator />
+                        <h4 className="text-sm font-medium">Address</h4>
+                        <div className="space-y-3">
+                          <div className="space-y-2">
+                            <Label>Address Line 1</Label>
+                            <Input value={editAddress1} onChange={(e) => setEditAddress1(e.target.value)} />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Address Line 2</Label>
+                            <Input value={editAddress2} onChange={(e) => setEditAddress2(e.target.value)} />
+                          </div>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-2">
+                              <Label>City</Label>
+                              <Input value={editCity} onChange={(e) => setEditCity(e.target.value)} />
+                            </div>
+                            <div className="space-y-2">
+                              <Label>State</Label>
+                              <Input value={editState} onChange={(e) => setEditState(e.target.value)} />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-2">
+                              <Label>Postal Code</Label>
+                              <Input value={editPostalCode} onChange={(e) => setEditPostalCode(e.target.value)} />
+                            </div>
+                            <div className="space-y-2">
+                              <Label>Country</Label>
+                              <Input value={editCountry} onChange={(e) => setEditCountry(e.target.value)} />
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </div>
-                  {isAddressed && (
-                    <>
-                      <Separator />
-                      <h4 className="text-sm font-medium">Address</h4>
-                      <div className="space-y-3">
-                        <div className="space-y-2">
-                          <Label>Address Line 1</Label>
-                          <Input value={editAddress1} onChange={(e) => setEditAddress1(e.target.value)} />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Address Line 2</Label>
-                          <Input value={editAddress2} onChange={(e) => setEditAddress2(e.target.value)} />
-                        </div>
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="space-y-2">
-                            <Label>City</Label>
-                            <Input value={editCity} onChange={(e) => setEditCity(e.target.value)} />
+                ) : (
+                  <div className="space-y-6">
+                    {/* General section */}
+                    <div className="space-y-4">
+                      <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">General</h4>
+                      <div className="grid gap-4 text-sm md:grid-cols-2">
+                        <InfoField label="Name" value={data.name} />
+                        <InfoField label="Type" value={isAddressed ? "Addressed" : "Physical"} />
+                        {data.description && (
+                          <div className="md:col-span-2">
+                            <InfoField label="Description" value={data.description} />
                           </div>
-                          <div className="space-y-2">
-                            <Label>State</Label>
-                            <Input value={editState} onChange={(e) => setEditState(e.target.value)} />
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="space-y-2">
-                            <Label>Postal Code</Label>
-                            <Input value={editPostalCode} onChange={(e) => setEditPostalCode(e.target.value)} />
-                          </div>
-                          <div className="space-y-2">
-                            <Label>Country</Label>
-                            <Input value={editCountry} onChange={(e) => setEditCountry(e.target.value)} />
-                          </div>
-                        </div>
+                        )}
+                        {!isAddressed && data.parentId && <InfoField label="Parent ID" value={data.parentId} mono />}
                       </div>
-                    </>
-                  )}
-                </div>
-              ) : (
-                <div className="grid gap-4 text-sm md:grid-cols-2">
-                  <InfoField label="Name" value={data.name} />
-                  <InfoField label="Type" value={isAddressed ? "Addressed" : "Physical"} />
-                  {data.description && <InfoField label="Description" value={data.description} />}
-                  {!isAddressed && data.parentId && <InfoField label="Parent ID" value={data.parentId} mono />}
-                  {isAddressed && (
-                    <>
-                      <InfoField label="Address Line 1" value={data.addressLine1} />
-                      <InfoField label="Address Line 2" value={data.addressLine2} />
-                      <InfoField label="City" value={data.city} />
-                      <InfoField label="State" value={data.state} />
-                      <InfoField label="Postal Code" value={data.postalCode} />
-                      <InfoField label="Country" value={data.country} />
-                    </>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                    </div>
 
-          {/* Sidebar: children or actions */}
+                    {/* Address section */}
+                    {isAddressed && (
+                      <>
+                        <Separator />
+                        <div className="space-y-4">
+                          <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Address</h4>
+                          <div className="grid gap-4 text-sm md:grid-cols-2">
+                            <InfoField label="Address Line 1" value={data.addressLine1} />
+                            <InfoField label="Address Line 2" value={data.addressLine2} />
+                            <InfoField label="City" value={data.city} />
+                            <InfoField label="State" value={data.state} />
+                            <InfoField label="Postal Code" value={data.postalCode} />
+                            <InfoField label="Country" value={data.country} />
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Danger Zone */}
+            <Card className="border-destructive/30 bg-card/80 shadow-md">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-destructive">
+                  <AlertTriangle className="h-4 w-4" />
+                  Danger Zone
+                </CardTitle>
+                <CardDescription>
+                  Irreversible and destructive actions for this location.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between rounded-lg border border-destructive/20 bg-destructive/5 p-4">
+                  <div>
+                    <p className="font-medium text-sm">Delete this location</p>
+                    <p className="text-xs text-muted-foreground">
+                      {children.length > 0
+                        ? "This will also delete all sub-locations. This action cannot be undone."
+                        : "Once deleted, this location cannot be recovered."}
+                    </p>
+                  </div>
+                  <DeleteLocationDialog
+                    locationName={data.name}
+                    hasChildren={children.length > 0}
+                    onDelete={handleDelete}
+                    isPending={deleteLocation.isPending}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Sidebar */}
           <div className="space-y-4">
+            {/* Metadata card */}
+            <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  Metadata
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground">Location ID</p>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-xs break-all">{data.id}</span>
+                    <CopyButton value={data.id} />
+                  </div>
+                </div>
+                {data.createdAt && (
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium text-muted-foreground">Created</p>
+                    <p className="text-sm" title={formatDateTime(data.createdAt)}>
+                      {formatRelativeTime(data.createdAt)}
+                    </p>
+                  </div>
+                )}
+                {data.updatedAt && (
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium text-muted-foreground">Last Updated</p>
+                    <p className="text-sm" title={formatDateTime(data.updatedAt)}>
+                      {formatRelativeTime(data.updatedAt)}
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Sub-locations card */}
             {isAddressed && (
               <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
                 <CardHeader>
@@ -276,20 +423,6 @@ function LocationDetailPage() {
                 </CardContent>
               </Card>
             )}
-
-            <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
-              <CardHeader>
-                <CardTitle>Actions</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <DeleteLocationDialog
-                  locationName={data.name}
-                  hasChildren={children.length > 0}
-                  onDelete={handleDelete}
-                  isPending={deleteLocation.isPending}
-                />
-              </CardContent>
-            </Card>
           </div>
         </div>
       </PageSection>
@@ -315,9 +448,9 @@ function DeleteLocationDialog({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="destructive" size="sm" className="w-full">
+        <Button variant="destructive" size="sm">
           <Trash2 className="mr-2 h-4 w-4" />
-          Delete location
+          Delete
         </Button>
       </DialogTrigger>
       <DialogContent>

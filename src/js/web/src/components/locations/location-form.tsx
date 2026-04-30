@@ -1,9 +1,20 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Link, useRouter } from "@tanstack/react-router"
-import { AlertCircle, Loader2 } from "lucide-react"
+import { Link, useBlocker, useRouter } from "@tanstack/react-router"
+import { AlertCircle, AlertTriangle, Loader2 } from "lucide-react"
+import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
@@ -15,9 +26,15 @@ import { useCreateLocation, useLocations } from "@/lib/api/hooks/locations"
 
 const createLocationSchema = z
   .object({
-    name: z.string().min(1, "Location name is required"),
+    name: z
+      .string()
+      .min(1, "Location name is required")
+      .max(100, "Name must be 100 characters or fewer"),
     locationType: z.enum(["ADDRESSED", "PHYSICAL"], { message: "Location type is required" }),
-    description: z.string().optional(),
+    description: z
+      .string()
+      .max(500, "Description must be 500 characters or fewer")
+      .optional(),
     parentId: z.string().optional(),
     addressLine1: z.string().optional(),
     addressLine2: z.string().optional(),
@@ -46,6 +63,10 @@ const createLocationSchema = z
   )
 
 type CreateLocationFormData = z.infer<typeof createLocationSchema>
+
+function RequiredIndicator() {
+  return <span className="text-destructive ml-0.5">*</span>
+}
 
 export function CreateLocationForm() {
   const router = useRouter()
@@ -81,6 +102,27 @@ export function CreateLocationForm() {
   const isAddressed = locationType === "ADDRESSED"
   const isPhysical = locationType === "PHYSICAL"
 
+  // Unsaved changes detection
+  const isFormDirty = form.formState.isDirty && !form.formState.isSubmitting
+
+  // Browser beforeunload protection
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (isFormDirty) {
+        e.preventDefault()
+      }
+    }
+    window.addEventListener("beforeunload", handler)
+    return () => window.removeEventListener("beforeunload", handler)
+  }, [isFormDirty])
+
+  // Router navigation blocker
+  const blocker = useBlocker({
+    shouldBlockFn: () => isFormDirty,
+    enableBeforeUnload: false,
+    withResolver: true,
+  })
+
   const onSubmit = async (data: CreateLocationFormData) => {
     if (!teamId) {
       form.setError("root", { message: "No team selected" })
@@ -100,6 +142,8 @@ export function CreateLocationForm() {
         postalCode: isAddressed ? data.postalCode || undefined : undefined,
         country: isAddressed ? data.country || undefined : undefined,
       })
+      // Reset dirty state before navigating so blocker doesn't fire
+      form.reset(data)
       router.invalidate()
       router.navigate({ to: "/locations/$locationId", params: { locationId: location.id } })
     } catch (_error) {
@@ -115,204 +159,264 @@ export function CreateLocationForm() {
     )
   }
 
+  const nameLength = (form.watch("name") ?? "").length
+  const descriptionLength = (form.watch("description") ?? "").length
+
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Location Name</FormLabel>
-              <FormControl>
-                <Input placeholder="Main Office" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="locationType"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Location Type</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a location type" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="ADDRESSED">Addressed (has a mailing address)</SelectItem>
-                  <SelectItem value="PHYSICAL">Physical (specific room or area within a location)</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormDescription>
-                {isAddressed
-                  ? "An addressed location is a top-level location with a mailing address, like an office or branch."
-                  : "A physical location is a specific place within an addressed location, like a room or desk."}
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea placeholder="Optional description of this location..." rows={3} {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {isPhysical && (
+    <>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <FormField
             control={form.control}
-            name="parentId"
+            name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Parent Location</FormLabel>
+                <FormLabel>
+                  Location Name
+                  <RequiredIndicator />
+                </FormLabel>
+                <FormControl>
+                  <Input placeholder="Main Office" maxLength={100} {...field} />
+                </FormControl>
+                <div className="flex items-center justify-between">
+                  <FormDescription>A descriptive name for this location.</FormDescription>
+                  <span className={`text-xs ${nameLength > 90 ? "text-amber-500" : "text-muted-foreground"}`}>
+                    {nameLength}/100
+                  </span>
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="locationType"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Location Type
+                  <RequiredIndicator />
+                </FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a parent location" />
+                      <SelectValue placeholder="Select a location type" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {addressedLocations.map((loc) => (
-                      <SelectItem key={loc.id} value={loc.id}>
-                        {loc.name}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="ADDRESSED">Addressed (has a mailing address)</SelectItem>
+                    <SelectItem value="PHYSICAL">Physical (specific room or area within a location)</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormDescription>
-                  The addressed location this physical location belongs to.
+                  {isAddressed
+                    ? "An addressed location is a top-level location with a mailing address, like an office or branch."
+                    : "A physical location is a specific place within an addressed location, like a room or desk."}
                 </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
-        )}
 
-        {isAddressed && (
-          <>
-            <Separator />
-            <div className="space-y-4">
-              <h4 className="text-sm font-medium">Address</h4>
-              <FormField
-                control={form.control}
-                name="addressLine1"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Address Line 1</FormLabel>
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Description</FormLabel>
+                <FormControl>
+                  <Textarea placeholder="Optional description of this location..." rows={3} maxLength={500} {...field} />
+                </FormControl>
+                <div className="flex items-center justify-between">
+                  <FormDescription>A brief summary of this location's purpose or usage.</FormDescription>
+                  <span className={`text-xs ${descriptionLength > 450 ? "text-amber-500" : "text-muted-foreground"}`}>
+                    {descriptionLength}/500
+                  </span>
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {isPhysical && (
+            <FormField
+              control={form.control}
+              name="parentId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Parent Location
+                    <RequiredIndicator />
+                  </FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <Input placeholder="123 Main Street" {...field} />
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a parent location" />
+                      </SelectTrigger>
                     </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="addressLine2"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Address Line 2</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Suite 200" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="grid grid-cols-2 gap-4">
+                    <SelectContent>
+                      {addressedLocations.map((loc) => (
+                        <SelectItem key={loc.id} value={loc.id}>
+                          {loc.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    The addressed location this physical location belongs to.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+
+          {isAddressed && (
+            <>
+              <Separator />
+              <div className="space-y-4">
+                <h4 className="text-sm font-medium">Address</h4>
                 <FormField
                   control={form.control}
-                  name="city"
+                  name="addressLine1"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>City</FormLabel>
+                      <FormLabel>
+                        Address Line 1
+                        <RequiredIndicator />
+                      </FormLabel>
                       <FormControl>
-                        <Input placeholder="Austin" {...field} />
+                        <Input placeholder="123 Main Street" {...field} />
                       </FormControl>
+                      <FormDescription>Street address or P.O. Box number.</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 <FormField
                   control={form.control}
-                  name="state"
+                  name="addressLine2"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>State / Province</FormLabel>
+                      <FormLabel>Address Line 2</FormLabel>
                       <FormControl>
-                        <Input placeholder="TX" {...field} />
+                        <Input placeholder="Suite 200" {...field} />
                       </FormControl>
+                      <FormDescription>Apartment, suite, unit, building, or floor.</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="city"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          City
+                          <RequiredIndicator />
+                        </FormLabel>
+                        <FormControl>
+                          <Input placeholder="Austin" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="state"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          State / Province
+                          <RequiredIndicator />
+                        </FormLabel>
+                        <FormControl>
+                          <Input placeholder="TX" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="postalCode"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Postal Code
+                          <RequiredIndicator />
+                        </FormLabel>
+                        <FormControl>
+                          <Input placeholder="78701" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="country"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Country</FormLabel>
+                        <FormControl>
+                          <Input placeholder="US" {...field} />
+                        </FormControl>
+                        <FormDescription>ISO country code (e.g., US, CA, GB).</FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="postalCode"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Postal Code</FormLabel>
-                      <FormControl>
-                        <Input placeholder="78701" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="country"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Country</FormLabel>
-                      <FormControl>
-                        <Input placeholder="US" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
-          </>
-        )}
+            </>
+          )}
 
-        {form.formState.errors.root && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{form.formState.errors.root.message}</AlertDescription>
-          </Alert>
-        )}
+          {form.formState.errors.root && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{form.formState.errors.root.message}</AlertDescription>
+            </Alert>
+          )}
 
-        <Separator />
+          <Separator />
 
-        <div className="flex items-center justify-between">
-          <Button type="button" variant="ghost" asChild>
-            <Link to="/locations">Cancel</Link>
-          </Button>
-          <Button type="submit" disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {form.formState.isSubmitting ? "Creating..." : "Create Location"}
-          </Button>
-        </div>
-      </form>
-    </Form>
+          <div className="flex items-center justify-between">
+            <Button type="button" variant="ghost" asChild>
+              <Link to="/locations">Cancel</Link>
+            </Button>
+            <Button type="submit" disabled={form.formState.isSubmitting}>
+              {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {form.formState.isSubmitting ? "Creating..." : "Create Location"}
+            </Button>
+          </div>
+        </form>
+      </Form>
+
+      {/* Unsaved changes dialog */}
+      <AlertDialog open={blocker.status === "blocked"} onOpenChange={(open) => !open && blocker.reset?.()}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-500" />
+              Unsaved Changes
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              You have unsaved changes on this form. If you leave now, your progress will be lost.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => blocker.reset?.()}>Stay on Page</AlertDialogCancel>
+            <AlertDialogAction onClick={() => blocker.proceed?.()}>Discard Changes</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }

@@ -51,6 +51,8 @@ export interface Location {
   postalCode?: string | null
   country?: string | null
   children?: LocationChild[]
+  createdAt?: string | null
+  updatedAt?: string | null
 }
 
 export interface LocationCreate {
@@ -193,4 +195,22 @@ export function useDeleteLocation(teamId: string) {
       })
     },
   })
+}
+
+// ---------------------------------------------------------------------------
+// Bulk Delete
+// ---------------------------------------------------------------------------
+
+export function useBulkDeleteLocations(teamId: string) {
+  const queryClient = useQueryClient()
+  return {
+    deleteOne: async (locationId: string) => {
+      await apiFetch<void>(`/api/teams/${teamId}/locations/${locationId}`, {
+        method: "DELETE",
+      })
+    },
+    invalidate: () => {
+      queryClient.invalidateQueries({ queryKey: ["locations", teamId] })
+    },
+  }
 }

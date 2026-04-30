@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.35.0 (2026-04-30)
+
+### Improved
+- **Locations list page** — table layout with sortable Name/Type columns, checkbox bulk delete, address summary column, sub-location count, truncated description, row-click navigation, and result counts.
+- **Locations detail page** — two-column layout with metadata sidebar (ID copy, relative timestamps), sectioned info card with address section, and Danger Zone delete card.
+- **Locations create form** — required field indicators, field description hints, character counters with max-length validation (100/500), and unsaved changes blocker with AlertDialog.
+- **Notifications page** — notification preferences section with email master toggle and per-category toggles (system/team/ticket/device/voice/fax), bulk "Delete all read" button, and improved empty state with BellOff illustration.
+- **Organization page** — copy buttons on email/phone/website fields, page header gradient, Active status badge, and Organization Details metadata card with ID/slug/member/team counts.
+
 ## v0.34.0 (2026-04-30)
 
 ### Improved

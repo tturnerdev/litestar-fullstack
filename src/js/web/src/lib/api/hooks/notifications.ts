@@ -119,6 +119,27 @@ export function useDeleteNotification() {
   })
 }
 
+export function useDeleteAllRead() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async () => {
+      await client.delete({
+        url: "/api/notifications/read",
+        security: [{ scheme: "bearer", type: "http" }],
+      })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] })
+      toast.success("All read notifications deleted")
+    },
+    onError: (error) => {
+      toast.error("Failed to delete read notifications", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
+    },
+  })
+}
+
 // --- Notification Preferences ---
 
 export interface NotificationPreference {

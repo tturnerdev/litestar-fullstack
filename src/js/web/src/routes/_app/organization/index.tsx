@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { Building2, Globe, Mail, MapPin, Pencil, Save, X } from "lucide-react"
+import { Building2, Check, Copy, Globe, Hash, Mail, MapPin, Pencil, Save, Users, X } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
+import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -20,7 +21,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { OrganizationQuickLinks } from "@/components/organization/organization-quick-links"
 import { OrganizationStats } from "@/components/organization/organization-stats"
 import { useAuthStore } from "@/lib/auth"
-import { useOrganization, useUpdateOrganization } from "@/lib/api/hooks/organization"
+import { useOrganization, useOrganizationStats, useUpdateOrganization } from "@/lib/api/hooks/organization"
 
 export const Route = createFileRoute("/_app/organization/")({
   component: OrganizationSettingsPage,
@@ -70,10 +71,38 @@ interface OrgFormData {
   defaultLanguage: string
 }
 
+function CopyButton({ value, label }: { value: string; label: string }) {
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(value)
+      setCopied(true)
+      toast.success(`${label} copied!`)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      toast.error("Failed to copy to clipboard")
+    }
+  }
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      className="h-6 w-6 text-muted-foreground hover:text-foreground"
+      onClick={handleCopy}
+      title={`Copy ${label.toLowerCase()}`}
+    >
+      {copied ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
+    </Button>
+  )
+}
+
 function OrganizationSettingsPage() {
   const user = useAuthStore((s) => s.user)
   const isSuperuser = user?.isSuperuser ?? false
   const { data: org, isLoading } = useOrganization()
+  const { data: stats } = useOrganizationStats()
   const updateOrg = useUpdateOrganization()
   const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState<OrgFormData>({
@@ -169,11 +198,19 @@ function OrganizationSettingsPage() {
 
   return (
     <PageContainer className="flex-1 space-y-8">
-      <PageHeader
-        eyebrow="Settings"
-        title="Organization"
-        description="View and manage your organization profile, contact information, and preferences."
-        actions={
+      <div className="-mx-4 -mt-8 mb-2 rounded-b-xl bg-gradient-to-br from-primary/5 via-primary/3 to-transparent px-4 pb-2 pt-8 md:-mx-6 md:-mt-10 md:px-6 md:pt-10">
+        <PageHeader
+          eyebrow="Settings"
+          title={
+            <span className="flex items-center gap-3">
+              Organization
+              <Badge variant="outline" className="text-xs font-normal text-green-600 border-green-200 bg-green-50 dark:text-green-400 dark:border-green-800 dark:bg-green-950/30">
+                Active
+              </Badge>
+            </span>
+          }
+          description="View and manage your organization profile, contact information, and preferences."
+          actions={
           isSuperuser &&
           (isEditing ? (
             <div className="flex gap-2">
@@ -191,6 +228,7 @@ function OrganizationSettingsPage() {
           ))
         }
       />
+      </div>
 
       {!isSuperuser && (
         <PageSection>
@@ -255,15 +293,18 @@ function OrganizationSettingsPage() {
                 {isEditing ? (
                   <Input id="org-website" value={formData.website} onChange={(e) => updateField("website", e.target.value)} placeholder="https://example.com" type="url" />
                 ) : (
-                  <p className="text-sm">
-                    {org?.website ? (
-                      <a href={org.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                        {org.website}
-                      </a>
-                    ) : (
-                      <span className="text-muted-foreground italic">Not set</span>
-                    )}
-                  </p>
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-sm">
+                      {org?.website ? (
+                        <a href={org.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                          {org.website}
+                        </a>
+                      ) : (
+                        <span className="text-muted-foreground italic">Not set</span>
+                      )}
+                    </p>
+                    {org?.website && <CopyButton value={org.website} label="Website" />}
+                  </div>
                 )}
               </div>
             </CardContent>
@@ -286,13 +327,16 @@ function OrganizationSettingsPage() {
                 {isEditing ? (
                   <Input id="org-email" value={formData.email} onChange={(e) => updateField("email", e.target.value)} placeholder="contact@example.com" type="email" />
                 ) : (
-                  <p className="text-sm">
-                    {org?.email ? (
-                      <a href={`mailto:${org.email}`} className="text-primary hover:underline">{org.email}</a>
-                    ) : (
-                      <span className="text-muted-foreground italic">Not set</span>
-                    )}
-                  </p>
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-sm">
+                      {org?.email ? (
+                        <a href={`mailto:${org.email}`} className="text-primary hover:underline">{org.email}</a>
+                      ) : (
+                        <span className="text-muted-foreground italic">Not set</span>
+                      )}
+                    </p>
+                    {org?.email && <CopyButton value={org.email} label="Email" />}
+                  </div>
                 )}
               </div>
               <div className="space-y-2">
@@ -300,7 +344,10 @@ function OrganizationSettingsPage() {
                 {isEditing ? (
                   <Input id="org-phone" value={formData.phone} onChange={(e) => updateField("phone", e.target.value)} placeholder="+1 (555) 000-0000" type="tel" />
                 ) : (
-                  <p className="text-sm">{org?.phone || <span className="text-muted-foreground italic">Not set</span>}</p>
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-sm">{org?.phone || <span className="text-muted-foreground italic">Not set</span>}</p>
+                    {org?.phone && <CopyButton value={org.phone} label="Phone" />}
+                  </div>
                 )}
               </div>
               <Separator />
@@ -415,6 +462,47 @@ function OrganizationSettingsPage() {
                       </Badge>
                     </div>
                   )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          {/* Metadata */}
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Hash className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <CardTitle className="text-lg">Organization Details</CardTitle>
+                  <CardDescription>System identifiers and membership overview</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground">Organization ID</p>
+                  <div className="flex items-center gap-1.5">
+                    <code className="text-xs font-mono text-foreground bg-muted px-1.5 py-0.5 rounded">{org?.id ? `${org.id.slice(0, 8)}...` : "--"}</code>
+                    {org?.id && <CopyButton value={org.id} label="Organization ID" />}
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground">Slug</p>
+                  <p className="text-sm">{org?.slug || "--"}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground">Total Members</p>
+                  <div className="flex items-center gap-1.5">
+                    <Users className="h-3.5 w-3.5 text-muted-foreground" />
+                    <p className="text-sm font-medium">{stats?.totalUsers?.toLocaleString() ?? "--"}</p>
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground">Total Teams</p>
+                  <div className="flex items-center gap-1.5">
+                    <Users className="h-3.5 w-3.5 text-muted-foreground" />
+                    <p className="text-sm font-medium">{stats?.totalTeams?.toLocaleString() ?? "--"}</p>
+                  </div>
                 </div>
               </div>
             </CardContent>

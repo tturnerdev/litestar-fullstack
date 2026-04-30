@@ -1,10 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router"
 import {
   Bell,
+  BellOff,
   CheckCheck,
   ChevronLeft,
   ChevronRight,
   Laptop,
+  Mail,
   MessageSquare,
   Phone,
   Printer,
@@ -15,15 +17,21 @@ import {
 import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { Separator } from "@/components/ui/separator"
+import { Switch } from "@/components/ui/switch"
 import {
   type NotificationItem,
+  useDeleteAllRead,
   useDeleteNotification,
   useMarkAllRead,
   useMarkRead,
+  useNotificationPreferences,
   useNotifications,
   useUnreadCount,
+  useUpdateNotificationPreferences,
 } from "@/lib/api/hooks/notifications"
 import { cn } from "@/lib/utils"
 
@@ -167,6 +175,106 @@ function NotificationCard({ notification }: { notification: NotificationItem }) 
   )
 }
 
+const PREFERENCE_CATEGORIES = [
+  { key: "system", label: "System", description: "System alerts and maintenance updates", icon: Settings },
+  { key: "team", label: "Team", description: "Team invitations and membership changes", icon: Users },
+  { key: "ticket", label: "Ticket", description: "Support ticket updates and replies", icon: MessageSquare },
+  { key: "device", label: "Device", description: "Device status and provisioning alerts", icon: Laptop },
+  { key: "voice", label: "Voice", description: "Call routing and voicemail notifications", icon: Phone },
+  { key: "fax", label: "Fax", description: "Inbound and outbound fax notifications", icon: Printer },
+] as const
+
+function NotificationPreferences() {
+  const { data: prefs, isLoading } = useNotificationPreferences()
+  const updatePrefs = useUpdateNotificationPreferences()
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Notification Preferences</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center py-8">
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (!prefs) return null
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center gap-2">
+          <Settings className="h-5 w-5 text-muted-foreground" />
+          <div>
+            <CardTitle className="text-lg">Notification Preferences</CardTitle>
+            <CardDescription>Choose how and when you receive notifications</CardDescription>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="flex items-center justify-between rounded-lg border p-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
+              <Mail className="h-4 w-4 text-primary" />
+            </div>
+            <div>
+              <Label htmlFor="email-toggle" className="text-sm font-medium">
+                Email Notifications
+              </Label>
+              <p className="text-xs text-muted-foreground">Receive notification summaries via email</p>
+            </div>
+          </div>
+          <Switch
+            id="email-toggle"
+            checked={prefs.emailEnabled}
+            onCheckedChange={(checked) => updatePrefs.mutate({ emailEnabled: checked })}
+          />
+        </div>
+
+        <Separator />
+
+        <div className="space-y-1">
+          <h4 className="text-sm font-medium">Category Preferences</h4>
+          <p className="text-xs text-muted-foreground">Enable or disable notifications by category</p>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          {PREFERENCE_CATEGORIES.map(({ key, label, description, icon: Icon }) => (
+            <div
+              key={key}
+              className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-accent/50"
+            >
+              <div className="flex items-center gap-3">
+                <div className={cn("flex h-8 w-8 items-center justify-center rounded-full bg-muted", getCategoryColor(key))}>
+                  <Icon className="h-4 w-4" />
+                </div>
+                <div>
+                  <Label htmlFor={`cat-${key}`} className="text-sm font-medium">
+                    {label}
+                  </Label>
+                  <p className="text-xs text-muted-foreground">{description}</p>
+                </div>
+              </div>
+              <Switch
+                id={`cat-${key}`}
+                checked={prefs.categories[key] ?? true}
+                onCheckedChange={(checked) =>
+                  updatePrefs.mutate({ categories: { [key]: checked } })
+                }
+              />
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
 function NotificationsPage() {
   const [page, setPage] = useState(1)
   const [activeCategory, setActiveCategory] = useState<string>("all")
@@ -175,14 +283,20 @@ function NotificationsPage() {
   const { data: unreadData } = useUnreadCount()
   const { data, isLoading } = useNotifications(page, pageSize)
   const markAllRead = useMarkAllRead()
+  const deleteAllRead = useDeleteAllRead()
 
   const unreadCount = unreadData?.count ?? 0
   const notifications = data?.items ?? []
   const total = data?.total ?? 0
   const totalPages = Math.max(1, Math.ceil(total / pageSize))
+  const readCount = notifications.filter((n) => n.isRead).length
 
   const filteredNotifications =
     activeCategory === "all" ? notifications : notifications.filter((n) => n.category === activeCategory)
+
+  const hasAnyNotifications = total > 0
+  const isEmptyUnfiltered = !isLoading && !hasAnyNotifications
+  const isEmptyFiltered = !isLoading && hasAnyNotifications && filteredNotifications.length === 0
 
   return (
     <PageContainer>
@@ -191,68 +305,100 @@ function NotificationsPage() {
         title="Notifications"
         description={unreadCount > 0 ? `You have ${unreadCount} unread notification${unreadCount !== 1 ? "s" : ""}` : "You're all caught up"}
         actions={
-          unreadCount > 0 ? (
-            <Button variant="outline" size="sm" onClick={() => markAllRead.mutate()} disabled={markAllRead.isPending}>
-              <CheckCheck className="mr-2 h-4 w-4" />
-              Mark all as read
-            </Button>
-          ) : undefined
+          <div className="flex gap-2">
+            {readCount > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => deleteAllRead.mutate()}
+                disabled={deleteAllRead.isPending}
+                className="text-destructive hover:text-destructive"
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete all read
+              </Button>
+            )}
+            {unreadCount > 0 && (
+              <Button variant="outline" size="sm" onClick={() => markAllRead.mutate()} disabled={markAllRead.isPending}>
+                <CheckCheck className="mr-2 h-4 w-4" />
+                Mark all as read
+              </Button>
+            )}
+          </div>
         }
       />
 
       <PageSection delay={0.1}>
-        <div className="flex flex-wrap gap-2">
-          {CATEGORIES.map(({ value, label }) => (
-            <Button
-              key={value}
-              variant={activeCategory === value ? "default" : "outline"}
-              size="sm"
-              onClick={() => {
-                setActiveCategory(value)
-                setPage(1)
-              }}
-              className="text-xs"
-            >
-              {label}
-            </Button>
-          ))}
-        </div>
-
-        <div className="mt-4 space-y-3">
-          {isLoading ? (
-            <div className="flex items-center justify-center py-16">
-              <div className="h-6 w-6 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
+        {isEmptyUnfiltered ? (
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-muted">
+              <BellOff className="h-10 w-10 text-muted-foreground/40" />
             </div>
-          ) : filteredNotifications.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <Bell className="mb-3 h-12 w-12 text-muted-foreground/30" />
-              <p className="text-lg font-medium text-muted-foreground">No notifications</p>
-              <p className="text-sm text-muted-foreground/70">
-                {activeCategory !== "all" ? `No ${activeCategory} notifications found` : "You're all caught up"}
-              </p>
-            </div>
-          ) : (
-            filteredNotifications.map((notification) => (
-              <NotificationCard key={notification.id} notification={notification} />
-            ))
-          )}
-        </div>
-
-        {totalPages > 1 && (
-          <div className="mt-6 flex items-center justify-center gap-4">
-            <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
-              <ChevronLeft className="mr-1 h-4 w-4" />
-              Previous
-            </Button>
-            <span className="text-sm text-muted-foreground">
-              Page {page} of {totalPages}
-            </span>
-            <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
-              Next
-              <ChevronRight className="ml-1 h-4 w-4" />
-            </Button>
+            <h3 className="text-lg font-semibold text-foreground">No notifications yet</h3>
+            <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+              You'll be notified when important events happen -- like team updates, device alerts, or support ticket replies.
+            </p>
           </div>
+        ) : (
+          <>
+            <div className="flex flex-wrap gap-2">
+              {CATEGORIES.map(({ value, label }) => (
+                <Button
+                  key={value}
+                  variant={activeCategory === value ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => {
+                    setActiveCategory(value)
+                    setPage(1)
+                  }}
+                  className="text-xs"
+                >
+                  {label}
+                </Button>
+              ))}
+            </div>
+
+            <div className="mt-4 space-y-3">
+              {isLoading ? (
+                <div className="flex items-center justify-center py-16">
+                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
+                </div>
+              ) : isEmptyFiltered ? (
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <Bell className="mb-3 h-12 w-12 text-muted-foreground/30" />
+                  <p className="text-lg font-medium text-muted-foreground">No notifications</p>
+                  <p className="text-sm text-muted-foreground/70">
+                    No {activeCategory} notifications found
+                  </p>
+                </div>
+              ) : (
+                filteredNotifications.map((notification) => (
+                  <NotificationCard key={notification.id} notification={notification} />
+                ))
+              )}
+            </div>
+
+            {totalPages > 1 && (
+              <div className="mt-6 flex items-center justify-center gap-4">
+                <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+                  <ChevronLeft className="mr-1 h-4 w-4" />
+                  Previous
+                </Button>
+                <span className="text-sm text-muted-foreground">
+                  Page {page} of {totalPages}
+                </span>
+                <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
+                  Next
+                  <ChevronRight className="ml-1 h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </>
         )}
+      </PageSection>
+
+      <PageSection delay={0.2}>
+        <NotificationPreferences />
       </PageSection>
     </PageContainer>
   )

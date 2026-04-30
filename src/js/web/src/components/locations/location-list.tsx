@@ -1,19 +1,31 @@
-import { Link } from "@tanstack/react-router"
-import { AlertCircle, Building2, ChevronRight, MapPin, Search } from "lucide-react"
-import { useState } from "react"
+import { Link, useNavigate } from "@tanstack/react-router"
+import { useCallback, useMemo, useState } from "react"
+import { AlertCircle, Building2, MapPin, MoreVertical, Search } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { BulkActionBar, createBulkDeleteAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { SkeletonTable } from "@/components/ui/skeleton"
+import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useAuthStore } from "@/lib/auth"
-import { type Location, useLocations } from "@/lib/api/hooks/locations"
+import { type Location, useBulkDeleteLocations, useLocations } from "@/lib/api/hooks/locations"
+
+const getId = (loc: Location) => loc.id
 
 export function LocationList() {
   const { currentTeam } = useAuthStore()
+  const navigate = useNavigate()
+
   const [search, setSearch] = useState("")
   const [typeFilter, setTypeFilter] = useState<string>("all")
+  const [sortKey, setSortKey] = useState<string | null>(null)
+  const [sortDir, setSortDir] = useState<SortDirection>(null)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
   const teamId = currentTeam?.id ?? ""
 
@@ -21,9 +33,72 @@ export function LocationList() {
     teamId,
     search: search || undefined,
     locationType: typeFilter !== "all" ? typeFilter : undefined,
+    orderBy: sortKey ?? undefined,
+    sortOrder: sortDir ?? undefined,
+    pageSize: 100,
   })
 
   const locations = data?.items ?? []
+  const total = data?.total ?? 0
+
+  const bulk = useBulkDeleteLocations(teamId)
+
+  // Selection helpers
+  const allSelected = locations.length > 0 && locations.every((loc) => selectedIds.has(loc.id))
+  const someSelected = locations.some((loc) => selectedIds.has(loc.id))
+
+  const toggleAll = useCallback(() => {
+    if (allSelected) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(locations.map(getId)))
+    }
+  }, [allSelected, locations])
+
+  const toggleOne = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      return next
+    })
+  }, [])
+
+  // Sort handler
+  const handleSort = useCallback(
+    (key: string) => {
+      const next = nextSortDirection(sortKey, sortDir, key)
+      setSortKey(next.sort)
+      setSortDir(next.direction)
+    },
+    [sortKey, sortDir],
+  )
+
+  // Bulk actions
+  const bulkActions = useMemo(
+    () => [
+      createBulkDeleteAction(
+        (id) => bulk.deleteOne(id),
+        () => {
+          bulk.invalidate()
+          setSelectedIds(new Set())
+        },
+        { label: "Delete Selected" },
+      ),
+    ],
+    [bulk],
+  )
+
+  // Row click handler
+  const handleRowClick = useCallback(
+    (locationId: string) => {
+      navigate({ to: "/locations/$locationId", params: { locationId } })
+    },
+    [navigate],
+  )
 
   if (!currentTeam) {
     return (
@@ -36,14 +111,7 @@ export function LocationList() {
   }
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-16">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-          <p className="text-sm text-muted-foreground">Loading locations...</p>
-        </div>
-      </div>
-    )
+    return <SkeletonTable rows={6} />
   }
 
   if (isError) {
@@ -76,127 +144,254 @@ export function LocationList() {
     )
   }
 
-  const addressedLocations = locations.filter((loc) => loc.locationType === "ADDRESSED")
-  const physicalLocations = locations.filter((loc) => loc.locationType === "PHYSICAL")
+  const hasActiveFilters = search !== "" || typeFilter !== "all"
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <div className="relative max-w-md flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input placeholder="Search locations..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10" />
+    <>
+      <div className="space-y-4">
+        {/* Search & filter bar */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="relative max-w-md flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search locations..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectValue placeholder="All types" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All types</SelectItem>
+              <SelectItem value="ADDRESSED">Addressed</SelectItem>
+              <SelectItem value="PHYSICAL">Physical</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-        <Select value={typeFilter} onValueChange={setTypeFilter}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="All types" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All types</SelectItem>
-            <SelectItem value="ADDRESSED">Addressed</SelectItem>
-            <SelectItem value="PHYSICAL">Physical</SelectItem>
-          </SelectContent>
-        </Select>
+
+        {/* Result count */}
+        {locations.length > 0 && (
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              {hasActiveFilters
+                ? `Showing ${locations.length} of ${total} location${total === 1 ? "" : "s"}`
+                : `${total} location${total === 1 ? "" : "s"}`}
+              {hasActiveFilters && " (filtered)"}
+            </p>
+            {hasActiveFilters && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-xs text-muted-foreground"
+                onClick={() => {
+                  setSearch("")
+                  setTypeFilter("all")
+                }}
+              >
+                Clear filters
+              </Button>
+            )}
+          </div>
+        )}
+
+        {/* Table */}
+        {locations.length > 0 ? (
+          <div className="rounded-md border border-border/60 bg-card/80">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-10">
+                    <Checkbox
+                      checked={allSelected}
+                      indeterminate={someSelected && !allSelected}
+                      onChange={toggleAll}
+                      aria-label="Select all locations"
+                    />
+                  </TableHead>
+                  <SortableHeader
+                    label="Name"
+                    sortKey="name"
+                    currentSort={sortKey}
+                    currentDirection={sortDir}
+                    onSort={handleSort}
+                  />
+                  <SortableHeader
+                    label="Type"
+                    sortKey="location_type"
+                    currentSort={sortKey}
+                    currentDirection={sortDir}
+                    onSort={handleSort}
+                  />
+                  <TableHead>Address</TableHead>
+                  <TableHead>Sub-locations</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead className="w-16 text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {locations.map((location) => (
+                  <LocationRow
+                    key={location.id}
+                    location={location}
+                    selected={selectedIds.has(location.id)}
+                    onToggle={() => toggleOne(location.id)}
+                    onRowClick={() => handleRowClick(location.id)}
+                  />
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        ) : (
+          <EmptyState
+            icon={MapPin}
+            variant="no-results"
+            title="No results found"
+            description={`No locations match ${search ? `"${search}"` : "the selected filter"}. Try adjusting your search or filter criteria.`}
+            action={
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSearch("")
+                  setTypeFilter("all")
+                }}
+              >
+                Clear filters
+              </Button>
+            }
+          />
+        )}
+
+        {/* Bottom count */}
+        {locations.length > 0 && (
+          <p className="text-xs text-muted-foreground text-center">
+            Showing {locations.length} location{locations.length === 1 ? "" : "s"}
+          </p>
+        )}
       </div>
 
-      {(typeFilter === "all" || typeFilter === "ADDRESSED") && addressedLocations.length > 0 && (
-        <div className="space-y-3">
-          <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Addressed Locations</h3>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {addressedLocations.map((location) => (
-              <LocationCard key={location.id} location={location} />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {(typeFilter === "all" || typeFilter === "PHYSICAL") && physicalLocations.length > 0 && (
-        <div className="space-y-3">
-          <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Physical Locations</h3>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {physicalLocations.map((location) => (
-              <LocationCard key={location.id} location={location} />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {locations.length === 0 && (search || typeFilter !== "all") && (
-        <EmptyState
-          icon={MapPin}
-          variant="no-results"
-          title="No results found"
-          description={`No locations match ${search ? `"${search}"` : "the selected filter"}. Try adjusting your search or filter criteria.`}
-          action={
-            <Button variant="outline" size="sm" onClick={() => { setSearch(""); setTypeFilter("all") }}>
-              Clear filters
-            </Button>
-          }
-        />
-      )}
-
-      {locations.length > 0 && (
-        <p className="text-xs text-muted-foreground text-center">
-          Showing {locations.length} location{locations.length === 1 ? "" : "s"}
-        </p>
-      )}
-    </div>
+      {/* Bulk action bar */}
+      <BulkActionBar
+        selectedCount={selectedIds.size}
+        selectedIds={Array.from(selectedIds)}
+        onClearSelection={() => setSelectedIds(new Set())}
+        actions={bulkActions}
+      />
+    </>
   )
 }
 
-function LocationCard({ location }: { location: Location }) {
+// ---------------------------------------------------------------------------
+// Location Row
+// ---------------------------------------------------------------------------
+
+function LocationRow({
+  location,
+  selected,
+  onToggle,
+  onRowClick,
+}: {
+  location: Location
+  selected: boolean
+  onToggle: () => void
+  onRowClick: () => void
+}) {
   const isAddressed = location.locationType === "ADDRESSED"
   const childCount = location.children?.length ?? 0
 
   const addressParts = [location.addressLine1, location.city, location.state, location.postalCode].filter(Boolean)
   const addressSummary = addressParts.join(", ")
 
+  const description = location.description ?? ""
+  const truncatedDescription = description.length > 80 ? `${description.slice(0, 80)}...` : description
+
   return (
-    <Card className="group relative overflow-hidden transition-all hover:shadow-md border-border/60 hover:border-border">
-      <CardHeader className="pb-3">
-        <div className="flex items-start gap-3">
-          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${isAddressed ? "bg-blue-500/15 text-blue-600 dark:text-blue-400" : "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"}`}>
-            {isAddressed ? <Building2 className="h-5 w-5" /> : <MapPin className="h-5 w-5" />}
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
-              <Link to="/locations/$locationId" params={{ locationId: location.id }} className="font-semibold hover:underline truncate text-foreground">
-                {location.name}
-              </Link>
-            </div>
-            <div className="flex items-center gap-2 mt-1">
-              <Badge variant="outline" className="text-[10px]">
-                {isAddressed ? "Addressed" : "Physical"}
-              </Badge>
-              {isAddressed && childCount > 0 && (
-                <span className="text-xs text-muted-foreground">
-                  {childCount} sub-location{childCount !== 1 ? "s" : ""}
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-      </CardHeader>
-
-      <CardContent className="pt-0">
-        {location.description ? (
-          <p className="text-sm text-muted-foreground line-clamp-2 min-h-10">{location.description}</p>
-        ) : isAddressed && addressSummary ? (
-          <p className="text-sm text-muted-foreground line-clamp-2 min-h-10">{addressSummary}</p>
+    <TableRow
+      data-state={selected ? "selected" : undefined}
+      className="cursor-pointer"
+      onClick={(e) => {
+        // Don't navigate when clicking on checkbox or dropdown
+        const target = e.target as HTMLElement
+        if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) {
+          return
+        }
+        onRowClick()
+      }}
+    >
+      <TableCell>
+        <Checkbox
+          checked={selected}
+          onChange={(e) => {
+            e.stopPropagation()
+            onToggle()
+          }}
+          aria-label={`Select ${location.name}`}
+        />
+      </TableCell>
+      <TableCell>
+        <Link
+          to="/locations/$locationId"
+          params={{ locationId: location.id }}
+          className="font-medium hover:underline"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {location.name}
+        </Link>
+      </TableCell>
+      <TableCell>
+        <Badge variant={isAddressed ? "default" : "secondary"} className="text-[10px]">
+          {isAddressed ? "Addressed" : "Physical"}
+        </Badge>
+      </TableCell>
+      <TableCell>
+        {addressSummary ? (
+          <span className="text-sm text-muted-foreground">{addressSummary}</span>
         ) : (
-          <p className="text-sm text-muted-foreground/60 italic min-h-10">No description</p>
+          <span className="text-sm text-muted-foreground/50">--</span>
         )}
-
-        <div className="mt-4 pt-3 border-t border-border/60">
-          <Link
-            to="/locations/$locationId"
-            params={{ locationId: location.id }}
-            className="flex items-center justify-between text-sm font-medium text-muted-foreground hover:text-foreground transition-colors group/link"
-          >
-            <span>View details</span>
-            <ChevronRight className="h-4 w-4 transition-transform group-hover/link:translate-x-0.5" />
-          </Link>
-        </div>
-      </CardContent>
-    </Card>
+      </TableCell>
+      <TableCell>
+        {isAddressed ? (
+          <span className="text-sm text-muted-foreground">
+            {childCount > 0 ? `${childCount} sub-location${childCount !== 1 ? "s" : ""}` : "--"}
+          </span>
+        ) : (
+          <span className="text-sm text-muted-foreground/50">--</span>
+        )}
+      </TableCell>
+      <TableCell>
+        {truncatedDescription ? (
+          <span className="text-sm text-muted-foreground">{truncatedDescription}</span>
+        ) : (
+          <span className="text-sm text-muted-foreground/50">--</span>
+        )}
+      </TableCell>
+      <TableCell className="text-right">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+              data-slot="dropdown"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <MoreVertical className="h-4 w-4" />
+              <span className="sr-only">Actions for {location.name}</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem asChild>
+              <Link to="/locations/$locationId" params={{ locationId: location.id }}>
+                View details
+              </Link>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </TableCell>
+    </TableRow>
   )
 }
