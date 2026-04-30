@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.66.0 (2026-04-30)
+
+### Fixed
+- **Spinner consistency** — Replaced custom CSS spinner divs with Loader2 component in notification-bell, team-list, and ticket-conversation for consistent loading indicators.
+- **Table row hover** — Added `hover:bg-muted/50 transition-colors` to data table rows in admin user-table, connections index, and teams index for consistent interaction feedback.
+
+## v0.65.0 (2026-04-30)
+
+### Improved
+- **Location list table** — Tooltips on truncated descriptions (>80 chars) and long addresses (>50 chars), row hover and alternating stripes, Edit action with Pencil icon linking to edit page, MapPin icons before addresses, Building2/MapPin icons on type badges, Eye icon on View details.
+- **Phone number format** — Standardized phone-number-card to `(XXX) XXX-XXXX` format matching the rest of the app.
+
 ## v0.64.0 (2026-04-30)
 
 ### Fixed
