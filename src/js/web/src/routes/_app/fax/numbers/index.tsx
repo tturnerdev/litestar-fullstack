@@ -4,6 +4,7 @@ import {
   AlertCircle,
   CheckCircle2,
   Circle,
+  Download,
   Home,
   LayoutGrid,
   List,
@@ -34,6 +35,7 @@ import { nextSortDirection, SortableHeader, type SortDirection } from "@/compone
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { type FaxNumber, useDeleteFaxNumber, useFaxNumbers } from "@/lib/api/hooks/fax"
+import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 
 export const Route = createFileRoute("/_app/fax/numbers/")({
@@ -43,6 +45,12 @@ export const Route = createFileRoute("/_app/fax/numbers/")({
 // -- Constants ----------------------------------------------------------------
 
 const PAGE_SIZE = 25
+
+const csvHeaders: CsvHeader<FaxNumber>[] = [
+  { label: "Number", accessor: (f) => f.number },
+  { label: "Label", accessor: (f) => f.label ?? "" },
+  { label: "Status", accessor: (f) => (f.isActive ? "Active" : "Inactive") },
+]
 
 const statusOptions: FilterOption[] = [
   { value: "active", label: "Active" },
@@ -189,6 +197,12 @@ function FaxNumbersPage() {
     [deleteFaxNumber],
   )
 
+  // Export all visible
+  const handleExportAll = useCallback(() => {
+    if (!filteredItems.length) return
+    exportToCsv("fax-numbers", csvHeaders, filteredItems)
+  }, [filteredItems])
+
   // Active filter count
   const activeFilterCount = statusFilter.length
 
@@ -229,6 +243,10 @@ function FaxNumbersPage() {
         breadcrumbs={breadcrumbs}
         actions={
           <div className="flex items-center gap-3">
+            <Button variant="outline" size="sm" onClick={handleExportAll} disabled={!hasData}>
+              <Download className="mr-2 h-4 w-4" />
+              Export
+            </Button>
             <Button size="sm" asChild>
               <Link to="/fax/numbers/new">
                 <Plus className="mr-2 h-4 w-4" /> New Number

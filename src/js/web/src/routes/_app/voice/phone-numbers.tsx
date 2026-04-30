@@ -4,6 +4,7 @@ import {
   AlertCircle,
   CheckCircle2,
   Circle,
+  Download,
   Home,
   Loader2,
   Pencil,
@@ -48,6 +49,7 @@ import {
   usePhoneNumbers,
   useUpdatePhoneNumber,
 } from "@/lib/api/hooks/voice"
+import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 
 export const Route = createFileRoute("/_app/voice/phone-numbers")({
   component: PhoneNumbersPage,
@@ -68,6 +70,13 @@ const typeBadgeVariant: Record<string, "default" | "secondary" | "outline"> = {
 }
 
 const PAGE_SIZE = 25
+
+const csvHeaders: CsvHeader<PhoneNumber>[] = [
+  { label: "Number", accessor: (p) => p.number },
+  { label: "Label", accessor: (p) => p.label ?? "" },
+  { label: "Type", accessor: (p) => typeLabels[p.numberType] ?? p.numberType },
+  { label: "Status", accessor: (p) => (p.isActive ? "Active" : "Inactive") },
+]
 
 const typeFilterOptions: FilterOption[] = [
   { value: "local", label: "Local" },
@@ -385,6 +394,12 @@ function PhoneNumbersPage() {
     [deletePhoneNumber],
   )
 
+  // Export all visible
+  const handleExportAll = useCallback(() => {
+    if (!filteredItems.length) return
+    exportToCsv("phone-numbers", csvHeaders, filteredItems)
+  }, [filteredItems])
+
   // Active filter count
   const activeFilterCount = typeFilter.length + statusFilter.length
 
@@ -424,14 +439,20 @@ function PhoneNumbersPage() {
         description="View and manage your assigned phone numbers."
         breadcrumbs={breadcrumbs}
         actions={
-          <CreatePhoneNumberDialog
-            trigger={
-              <Button size="sm">
-                <Plus className="mr-2 h-4 w-4" />
-                Add Phone Number
-              </Button>
-            }
-          />
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={handleExportAll} disabled={!hasData}>
+              <Download className="mr-2 h-4 w-4" />
+              Export
+            </Button>
+            <CreatePhoneNumberDialog
+              trigger={
+                <Button size="sm">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Phone Number
+                </Button>
+              }
+            />
+          </div>
         }
       />
 

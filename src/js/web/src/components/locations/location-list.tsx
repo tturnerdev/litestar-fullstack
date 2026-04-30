@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router"
 import { useCallback, useMemo, useState } from "react"
-import { AlertCircle, Building2, Eye, MapPin, MoreVertical, Pencil, Search, X } from "lucide-react"
+import { AlertCircle, Building2, Download, Eye, MapPin, MoreVertical, Pencil, Search, X } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { BulkActionBar, createBulkDeleteAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
@@ -15,10 +15,22 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAuthStore } from "@/lib/auth"
 import { type Location, useBulkDeleteLocations, useLocations } from "@/lib/api/hooks/locations"
+import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 
 const getId = (loc: Location) => loc.id
 
 const PAGE_SIZE = 25
+
+const csvHeaders: CsvHeader<Location>[] = [
+  { label: "Name", accessor: (l) => l.name },
+  { label: "Type", accessor: (l) => l.locationType },
+  { label: "Address", accessor: (l) => l.addressLine1 ?? "" },
+  { label: "City", accessor: (l) => l.city ?? "" },
+  { label: "State", accessor: (l) => l.state ?? "" },
+  { label: "Postal Code", accessor: (l) => l.postalCode ?? "" },
+  { label: "Country", accessor: (l) => l.country ?? "" },
+  { label: "Description", accessor: (l) => l.description ?? "" },
+]
 
 export function LocationList() {
   const { currentTeam } = useAuthStore()
@@ -97,6 +109,12 @@ export function LocationList() {
     ],
     [bulk],
   )
+
+  // Export all visible
+  const handleExportAll = useCallback(() => {
+    if (!locations.length) return
+    exportToCsv("locations", csvHeaders, locations)
+  }, [locations])
 
   // Row click handler
   const handleRowClick = useCallback(
@@ -192,6 +210,10 @@ export function LocationList() {
               <SelectItem value="PHYSICAL">Physical</SelectItem>
             </SelectContent>
           </Select>
+          <Button variant="outline" size="sm" onClick={handleExportAll} disabled={locations.length === 0}>
+            <Download className="mr-2 h-4 w-4" />
+            Export
+          </Button>
         </div>
 
         {/* Result count & pagination info */}

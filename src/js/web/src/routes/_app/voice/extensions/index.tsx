@@ -3,6 +3,7 @@ import { useCallback, useMemo, useState } from "react"
 import {
   AlertCircle,
   CheckCircle2,
+  Download,
   Home,
   Phone,
   Plus,
@@ -36,7 +37,7 @@ import {
   useExtensions,
   usePhoneNumbers,
 } from "@/lib/api/hooks/voice"
-import { type CsvHeader } from "@/lib/csv-export"
+import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 
 export const Route = createFileRoute("/_app/voice/extensions/")({
@@ -224,6 +225,12 @@ function ExtensionsPage() {
     [deleteExtension, filteredItems],
   )
 
+  // Export all visible
+  const handleExportAll = useCallback(() => {
+    if (!filteredItems.length) return
+    exportToCsv("extensions", csvHeaders, filteredItems)
+  }, [filteredItems])
+
   // Active filter count for display
   const activeFilterCount = statusFilter.length
 
@@ -263,14 +270,20 @@ function ExtensionsPage() {
         description="View and manage your extensions."
         breadcrumbs={breadcrumbs}
         actions={
-          <CreateExtensionDialog
-            trigger={
-              <Button size="sm">
-                <Plus className="mr-2 h-4 w-4" />
-                Add Extension
-              </Button>
-            }
-          />
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={handleExportAll} disabled={!hasData}>
+              <Download className="mr-2 h-4 w-4" />
+              Export
+            </Button>
+            <CreateExtensionDialog
+              trigger={
+                <Button size="sm">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Extension
+                </Button>
+              }
+            />
+          </div>
         }
       />
 

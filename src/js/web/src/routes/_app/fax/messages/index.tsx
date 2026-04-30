@@ -22,6 +22,7 @@ import { Badge } from "@/components/ui/badge"
 import { BulkActionBar, createBulkDeleteAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { DateRangeFilter, getPresetDates, isDateInRange } from "@/components/ui/date-range-filter"
 import { EmptyState } from "@/components/ui/empty-state"
 import { FilterDropdown, type FilterOption } from "@/components/ui/filter-dropdown"
 import { Input } from "@/components/ui/input"
@@ -74,6 +75,8 @@ function FaxMessagesPage() {
   const [search, setSearch] = useState("")
   const [directionFilter, setDirectionFilter] = useState<string[]>([])
   const [statusFilter, setStatusFilter] = useState<string[]>([])
+  const [startDate, setStartDate] = useState("")
+  const [endDate, setEndDate] = useState("")
   const [page, setPage] = useState(1)
 
   // Sort state
@@ -113,9 +116,11 @@ function FaxMessagesPage() {
     return data.items.filter((msg) => {
       if (directionFilter.length > 1 && !directionFilter.includes(msg.direction)) return false
       if (statusFilter.length > 1 && !statusFilter.includes(msg.status)) return false
+      if ((startDate || endDate) && !isDateInRange(msg.receivedAt ?? msg.createdAt, startDate, endDate))
+        return false
       return true
     })
-  }, [data?.items, directionFilter, statusFilter])
+  }, [data?.items, directionFilter, statusFilter, startDate, endDate])
 
   const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / PAGE_SIZE))
 
@@ -154,11 +159,24 @@ function FaxMessagesPage() {
     [sortKey, sortDir],
   )
 
+  // Date range handler
+  const handleDatePreset = useCallback(
+    (days: number) => {
+      const { start, end } = getPresetDates(days)
+      setStartDate(start)
+      setEndDate(end)
+      setPage(1)
+    },
+    [],
+  )
+
   // Reset filters helper
   const clearAllFilters = useCallback(() => {
     setSearch("")
     setDirectionFilter([])
     setStatusFilter([])
+    setStartDate("")
+    setEndDate("")
     setPage(1)
   }, [])
 
@@ -176,7 +194,7 @@ function FaxMessagesPage() {
   )
 
   // Active filter count for display
-  const activeFilterCount = directionFilter.length + statusFilter.length
+  const activeFilterCount = directionFilter.length + statusFilter.length + (startDate || endDate ? 1 : 0)
 
   const hasData = filteredItems.length > 0
   const hasAnyMessages = (data?.items.length ?? 0) > 0 || !!search || activeFilterCount > 0
@@ -266,6 +284,20 @@ function FaxMessagesPage() {
               setStatusFilter(v)
               setPage(1)
             }}
+          />
+          <DateRangeFilter
+            startDate={startDate}
+            endDate={endDate}
+            onStartDateChange={(v) => {
+              setStartDate(v)
+              setPage(1)
+            }}
+            onEndDateChange={(v) => {
+              setEndDate(v)
+              setPage(1)
+            }}
+            onPreset={handleDatePreset}
+            label="Date"
           />
           {(activeFilterCount > 0 || search) && (
             <Button

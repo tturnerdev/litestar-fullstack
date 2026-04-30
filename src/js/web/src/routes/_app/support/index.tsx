@@ -27,6 +27,7 @@ import { Badge } from "@/components/ui/badge"
 import { BulkActionBar, type BulkAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { DateRangeFilter, getPresetDates, isDateInRange } from "@/components/ui/date-range-filter"
 import { EmptyState } from "@/components/ui/empty-state"
 import { FilterDropdown, type FilterOption } from "@/components/ui/filter-dropdown"
 import { Input } from "@/components/ui/input"
@@ -95,6 +96,8 @@ function SupportPage() {
   const [statusFilter, setStatusFilter] = useState<string[]>([])
   const [priorityFilter, setPriorityFilter] = useState<string[]>([])
   const [categoryFilter, setCategoryFilter] = useState<string[]>([])
+  const [startDate, setStartDate] = useState("")
+  const [endDate, setEndDate] = useState("")
   const [page, setPage] = useState(1)
 
   // Sort state
@@ -129,9 +132,11 @@ function SupportPage() {
       if (priorityFilter.length > 1 && !priorityFilter.includes(ticket.priority)) return false
       if (categoryFilter.length > 1 && ticket.category && !categoryFilter.includes(ticket.category))
         return false
+      if ((startDate || endDate) && !isDateInRange(ticket.createdAt, startDate, endDate))
+        return false
       return true
     })
-  }, [data?.items, statusFilter, priorityFilter, categoryFilter])
+  }, [data?.items, statusFilter, priorityFilter, categoryFilter, startDate, endDate])
 
   // Selection helpers
   const allVisibleIds = useMemo(() => filteredItems.map((t) => t.id), [filteredItems])
@@ -169,8 +174,20 @@ function SupportPage() {
     [sortKey, sortDir],
   )
 
+  // Date range handler
+  const handleDatePreset = useCallback(
+    (days: number) => {
+      const { start, end } = getPresetDates(days)
+      setStartDate(start)
+      setEndDate(end)
+      setPage(1)
+    },
+    [],
+  )
+
   // Filter helpers
-  const activeFilterCount = statusFilter.length + priorityFilter.length + categoryFilter.length
+  const activeFilterCount =
+    statusFilter.length + priorityFilter.length + categoryFilter.length + (startDate || endDate ? 1 : 0)
   const hasAnyFilters = activeFilterCount > 0 || !!search
 
   const clearAllFilters = useCallback(() => {
@@ -178,6 +195,8 @@ function SupportPage() {
     setStatusFilter([])
     setPriorityFilter([])
     setCategoryFilter([])
+    setStartDate("")
+    setEndDate("")
     setPage(1)
   }, [])
 
@@ -370,6 +389,20 @@ function SupportPage() {
               setCategoryFilter(v)
               setPage(1)
             }}
+          />
+          <DateRangeFilter
+            startDate={startDate}
+            endDate={endDate}
+            onStartDateChange={(v) => {
+              setStartDate(v)
+              setPage(1)
+            }}
+            onEndDateChange={(v) => {
+              setEndDate(v)
+              setPage(1)
+            }}
+            onPreset={handleDatePreset}
+            label="Created"
           />
           {hasAnyFilters && (
             <Button

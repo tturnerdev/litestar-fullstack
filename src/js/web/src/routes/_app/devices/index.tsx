@@ -25,6 +25,7 @@ import {
 import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { DateRangeFilter, getPresetDates, isDateInRange } from "@/components/ui/date-range-filter"
 import { EmptyState } from "@/components/ui/empty-state"
 import { FilterDropdown, type FilterOption } from "@/components/ui/filter-dropdown"
 import { Input } from "@/components/ui/input"
@@ -163,6 +164,8 @@ function DevicesPage() {
   const [search, setSearch] = useState("")
   const [typeFilter, setTypeFilter] = useState<string[]>([])
   const [statusFilter, setStatusFilter] = useState<string[]>([])
+  const [startDate, setStartDate] = useState("")
+  const [endDate, setEndDate] = useState("")
   const [page, setPage] = useState(1)
 
   // Sort state
@@ -188,9 +191,11 @@ function DevicesPage() {
     return data.items.filter((device) => {
       if (typeFilter.length > 0 && !typeFilter.includes(device.deviceType)) return false
       if (statusFilter.length > 0 && !statusFilter.includes(device.status)) return false
+      if ((startDate || endDate) && !isDateInRange(device.lastSeenAt, startDate, endDate))
+        return false
       return true
     })
-  }, [data?.items, typeFilter, statusFilter])
+  }, [data?.items, typeFilter, statusFilter, startDate, endDate])
 
   // Selection helpers
   const allVisibleIds = useMemo(() => filteredItems.map((d) => d.id), [filteredItems])
@@ -254,8 +259,19 @@ function DevicesPage() {
     exportToCsv("devices", csvHeaders, filteredItems)
   }, [filteredItems])
 
+  // Date range handler
+  const handleDatePreset = useCallback(
+    (days: number) => {
+      const { start, end } = getPresetDates(days)
+      setStartDate(start)
+      setEndDate(end)
+      setPage(1)
+    },
+    [],
+  )
+
   // Active filter count for display
-  const activeFilterCount = typeFilter.length + statusFilter.length
+  const activeFilterCount = typeFilter.length + statusFilter.length + (startDate || endDate ? 1 : 0)
 
   const hasData = filteredItems.length > 0
   const hasAnyDevices = (data?.items.length ?? 0) > 0
@@ -347,6 +363,20 @@ function DevicesPage() {
               setPage(1)
             }}
           />
+          <DateRangeFilter
+            startDate={startDate}
+            endDate={endDate}
+            onStartDateChange={(v) => {
+              setStartDate(v)
+              setPage(1)
+            }}
+            onEndDateChange={(v) => {
+              setEndDate(v)
+              setPage(1)
+            }}
+            onPreset={handleDatePreset}
+            label="Last seen"
+          />
           {activeFilterCount > 0 && (
             <Button
               variant="ghost"
@@ -355,6 +385,8 @@ function DevicesPage() {
               onClick={() => {
                 setTypeFilter([])
                 setStatusFilter([])
+                setStartDate("")
+                setEndDate("")
                 setPage(1)
               }}
             >
@@ -383,7 +415,7 @@ function DevicesPage() {
               </Button>
             }
           />
-        ) : !hasAnyDevices && !search ? (
+        ) : !hasAnyDevices && !search && activeFilterCount === 0 ? (
           <EmptyState
             icon={Monitor}
             title="No devices yet"
@@ -410,6 +442,8 @@ function DevicesPage() {
                   setSearch("")
                   setTypeFilter([])
                   setStatusFilter([])
+                  setStartDate("")
+                  setEndDate("")
                 }}
               >
                 Clear all filters
