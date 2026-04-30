@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.92.0 (2026-04-30)
+
+### Added
+- **Responsive tables** — Hide secondary columns on mobile (`hidden md:table-cell`) across 8 list pages (support, devices, fax messages, extensions, teams, connections, tags, phone numbers). Essential columns remain visible; `overflow-x-auto` wrapper added as fallback.
+- **Tag form descriptions** — Added/improved field descriptions on tag new and edit forms (name, slug preview, description, color picker).
+
 ## v0.91.0 (2026-04-30)
 
 ### Improved
