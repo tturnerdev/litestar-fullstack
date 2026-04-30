@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.71.0 (2026-04-30)
+
+### Improved
+- **Truncation tooltips (final sweep)** — Completed app-wide tooltip coverage on all truncated text: voicemail transcription previews, recent-activity-card, fax message file paths, profile link descriptions, stat-card labels, send-fax filenames, team-list (grid+list views), profile-info-card, fax-number-card, nav-user (sidebar+dropdown), recent-activity (actor+target), teams-card.
+- **Unsaved changes warnings** — Added `useBlocker()` navigation protection with AlertDialog to tag edit, extension edit, and fax number edit forms. All edit forms now warn before discarding unsaved changes.
+- **Character counters** — Added visible character counters to tag edit name field (50 max) and device form name field (100 max) with amber/red color warnings near limits.
+
 ## v0.69.0 (2026-04-30)
 
 ### Improved
