@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   Circle,
   Loader2,
+  Pencil,
   Plug,
   Trash2,
   XCircle,
@@ -195,6 +196,11 @@ function ConnectionDetailPage() {
                 Disabled
               </Badge>
             )}
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/connections/$connectionId/edit" params={{ connectionId }}>
+                <Pencil className="mr-2 h-4 w-4" /> Edit
+              </Link>
+            </Button>
             <Button variant="outline" size="sm" asChild>
               <Link to="/connections">
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back

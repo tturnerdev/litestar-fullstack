@@ -70,6 +70,8 @@ import { Route as AppAdminUsersIndexRouteImport } from './routes/_app/admin/user
 import { Route as AppAdminTeamsIndexRouteImport } from './routes/_app/admin/teams/index'
 import { Route as PublicAuthGoogleCallbackRouteImport } from './routes/_public/auth/google/callback'
 import { Route as PublicAuthGithubCallbackRouteImport } from './routes/_public/auth/github/callback'
+import { Route as AppDevicesDeviceIdEditRouteImport } from './routes/_app/devices/$deviceId/edit'
+import { Route as AppConnectionsConnectionIdEditRouteImport } from './routes/_app/connections/$connectionId/edit'
 import { Route as AppAdminUsersUserIdRouteImport } from './routes/_app/admin/users/$userId'
 import { Route as AppAdminTeamsTeamIdRouteImport } from './routes/_app/admin/teams/$teamId'
 import { Route as AppVoiceExtensionsExtensionIdIndexRouteImport } from './routes/_app/voice/extensions/$extensionId/index'
@@ -388,6 +390,17 @@ const PublicAuthGithubCallbackRoute =
     path: '/auth/github/callback',
     getParentRoute: () => PublicRoute,
   } as any)
+const AppDevicesDeviceIdEditRoute = AppDevicesDeviceIdEditRouteImport.update({
+  id: '/$deviceId/edit',
+  path: '/$deviceId/edit',
+  getParentRoute: () => AppDevicesRoute,
+} as any)
+const AppConnectionsConnectionIdEditRoute =
+  AppConnectionsConnectionIdEditRouteImport.update({
+    id: '/edit',
+    path: '/edit',
+    getParentRoute: () => AppConnectionsConnectionIdRoute,
+  } as any)
 const AppAdminUsersUserIdRoute = AppAdminUsersUserIdRouteImport.update({
   id: '/users/$userId',
   path: '/users/$userId',
@@ -491,6 +504,8 @@ export interface FileRoutesByFullPath {
   '/voice/': typeof AppVoiceIndexRoute
   '/admin/teams/$teamId': typeof AppAdminTeamsTeamIdRoute
   '/admin/users/$userId': typeof AppAdminUsersUserIdRoute
+  '/connections/$connectionId/edit': typeof AppConnectionsConnectionIdEditRoute
+  '/devices/$deviceId/edit': typeof AppDevicesDeviceIdEditRoute
   '/auth/github/callback': typeof PublicAuthGithubCallbackRoute
   '/auth/google/callback': typeof PublicAuthGoogleCallbackRoute
   '/admin/teams/': typeof AppAdminTeamsIndexRoute
@@ -552,6 +567,8 @@ export interface FileRoutesByTo {
   '/voice': typeof AppVoiceIndexRoute
   '/admin/teams/$teamId': typeof AppAdminTeamsTeamIdRoute
   '/admin/users/$userId': typeof AppAdminUsersUserIdRoute
+  '/connections/$connectionId/edit': typeof AppConnectionsConnectionIdEditRoute
+  '/devices/$deviceId/edit': typeof AppDevicesDeviceIdEditRoute
   '/auth/github/callback': typeof PublicAuthGithubCallbackRoute
   '/auth/google/callback': typeof PublicAuthGoogleCallbackRoute
   '/admin/teams': typeof AppAdminTeamsIndexRoute
@@ -625,6 +642,8 @@ export interface FileRoutesById {
   '/_app/voice/': typeof AppVoiceIndexRoute
   '/_app/admin/teams/$teamId': typeof AppAdminTeamsTeamIdRoute
   '/_app/admin/users/$userId': typeof AppAdminUsersUserIdRoute
+  '/_app/connections/$connectionId/edit': typeof AppConnectionsConnectionIdEditRoute
+  '/_app/devices/$deviceId/edit': typeof AppDevicesDeviceIdEditRoute
   '/_public/auth/github/callback': typeof PublicAuthGithubCallbackRoute
   '/_public/auth/google/callback': typeof PublicAuthGoogleCallbackRoute
   '/_app/admin/teams/': typeof AppAdminTeamsIndexRoute
@@ -697,6 +716,8 @@ export interface FileRouteTypes {
     | '/voice/'
     | '/admin/teams/$teamId'
     | '/admin/users/$userId'
+    | '/connections/$connectionId/edit'
+    | '/devices/$deviceId/edit'
     | '/auth/github/callback'
     | '/auth/google/callback'
     | '/admin/teams/'
@@ -758,6 +779,8 @@ export interface FileRouteTypes {
     | '/voice'
     | '/admin/teams/$teamId'
     | '/admin/users/$userId'
+    | '/connections/$connectionId/edit'
+    | '/devices/$deviceId/edit'
     | '/auth/github/callback'
     | '/auth/google/callback'
     | '/admin/teams'
@@ -830,6 +853,8 @@ export interface FileRouteTypes {
     | '/_app/voice/'
     | '/_app/admin/teams/$teamId'
     | '/_app/admin/users/$userId'
+    | '/_app/connections/$connectionId/edit'
+    | '/_app/devices/$deviceId/edit'
     | '/_public/auth/github/callback'
     | '/_public/auth/google/callback'
     | '/_app/admin/teams/'
@@ -1287,6 +1312,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicAuthGithubCallbackRouteImport
       parentRoute: typeof PublicRoute
     }
+    '/_app/devices/$deviceId/edit': {
+      id: '/_app/devices/$deviceId/edit'
+      path: '/$deviceId/edit'
+      fullPath: '/devices/$deviceId/edit'
+      preLoaderRoute: typeof AppDevicesDeviceIdEditRouteImport
+      parentRoute: typeof AppDevicesRoute
+    }
+    '/_app/connections/$connectionId/edit': {
+      id: '/_app/connections/$connectionId/edit'
+      path: '/edit'
+      fullPath: '/connections/$connectionId/edit'
+      preLoaderRoute: typeof AppConnectionsConnectionIdEditRouteImport
+      parentRoute: typeof AppConnectionsConnectionIdRoute
+    }
     '/_app/admin/users/$userId': {
       id: '/_app/admin/users/$userId'
       path: '/users/$userId'
@@ -1386,11 +1425,13 @@ const AppAdminRouteWithChildren = AppAdminRoute._addFileChildren(
 )
 
 interface AppConnectionsConnectionIdRouteChildren {
+  AppConnectionsConnectionIdEditRoute: typeof AppConnectionsConnectionIdEditRoute
   AppConnectionsConnectionIdIndexRoute: typeof AppConnectionsConnectionIdIndexRoute
 }
 
 const AppConnectionsConnectionIdRouteChildren: AppConnectionsConnectionIdRouteChildren =
   {
+    AppConnectionsConnectionIdEditRoute: AppConnectionsConnectionIdEditRoute,
     AppConnectionsConnectionIdIndexRoute: AppConnectionsConnectionIdIndexRoute,
   }
 
@@ -1418,12 +1459,14 @@ const AppConnectionsRouteWithChildren = AppConnectionsRoute._addFileChildren(
 interface AppDevicesRouteChildren {
   AppDevicesNewRoute: typeof AppDevicesNewRoute
   AppDevicesIndexRoute: typeof AppDevicesIndexRoute
+  AppDevicesDeviceIdEditRoute: typeof AppDevicesDeviceIdEditRoute
   AppDevicesDeviceIdIndexRoute: typeof AppDevicesDeviceIdIndexRoute
 }
 
 const AppDevicesRouteChildren: AppDevicesRouteChildren = {
   AppDevicesNewRoute: AppDevicesNewRoute,
   AppDevicesIndexRoute: AppDevicesIndexRoute,
+  AppDevicesDeviceIdEditRoute: AppDevicesDeviceIdEditRoute,
   AppDevicesDeviceIdIndexRoute: AppDevicesDeviceIdIndexRoute,
 }
 

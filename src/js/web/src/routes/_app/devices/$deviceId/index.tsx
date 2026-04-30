@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
 import { useState } from "react"
-import { ArrowLeft, Loader2 } from "lucide-react"
+import { ArrowLeft, Loader2, Pencil } from "lucide-react"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { DeviceActions } from "@/components/devices/device-actions"
 import { DeviceLineConfig } from "@/components/devices/device-line-config"
@@ -109,6 +109,11 @@ function DeviceDetailPage() {
                 Disabled
               </Badge>
             )}
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/devices/$deviceId/edit" params={{ deviceId }}>
+                <Pencil className="mr-2 h-4 w-4" /> Edit
+              </Link>
+            </Button>
             <Button variant="outline" size="sm" asChild>
               <Link to="/devices">
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back to devices
