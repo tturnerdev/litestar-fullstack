@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.16.0 (2026-04-30)
+
+### Improved
+- **Connections list page** — table view with search, type/status filter dropdowns, sortable columns, checkbox bulk-delete, per-row quick test button, last-tested timestamps, and clear empty states.
+- **Home dashboard** — feature areas grid with quick-access cards for Connections, Devices, Voice, Fax, Support, and Tags. Each card shows entity count and links to the area's list page.
+
+### Added
+- `useTestAnyConnection()` hook for testing connections by ID from list views.
+- `FeatureAreasGrid` component with responsive layout and live counts.
+
 ## v0.15.0 (2026-04-29)
 
 ### Added

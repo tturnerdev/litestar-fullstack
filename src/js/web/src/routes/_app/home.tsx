@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { Plus, ShieldCheck, Tag, Users } from "lucide-react"
+import { FeatureAreasGrid } from "@/components/home/feature-areas-grid"
 import { GettingStarted } from "@/components/home/getting-started"
 import { useGreeting } from "@/components/home/greeting"
 import { QuickActionsCard } from "@/components/home/quick-actions-card"
@@ -134,13 +135,21 @@ function HomePage() {
         </div>
       </PageSection>
 
-      {/* Getting Started Checklist */}
+      {/* Feature Areas */}
       <PageSection delay={0.08}>
+        <div className="space-y-3">
+          <h2 className="text-lg font-semibold tracking-tight">Feature Areas</h2>
+          <FeatureAreasGrid />
+        </div>
+      </PageSection>
+
+      {/* Getting Started Checklist */}
+      <PageSection delay={0.1}>
         <GettingStarted />
       </PageSection>
 
       {/* Main Content Grid */}
-      <PageSection delay={0.1}>
+      <PageSection delay={0.12}>
         <div className="grid gap-6 md:grid-cols-2">
           <TeamsCard teams={teams} isLoading={teamsLoading} />
           <QuickActionsCard isSuperuser={isSuperuser} />
@@ -149,7 +158,7 @@ function HomePage() {
 
       {/* Recent Activity (admin only) */}
       {isSuperuser && (
-        <PageSection delay={0.15}>
+        <PageSection delay={0.18}>
           <RecentActivityCard
             activities={activityData?.activities ?? []}
             isLoading={activityLoading}

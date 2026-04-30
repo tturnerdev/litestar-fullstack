@@ -214,3 +214,29 @@ export function useTestConnection(connectionId: string) {
     },
   })
 }
+
+/**
+ * Test any connection by passing connectionId as a mutation argument.
+ * Useful for list pages where the target connection is not known at hook call time.
+ */
+export function useTestAnyConnection() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (connectionId: string) => {
+      const response = await client.post({
+        url: `/api/connections/${connectionId}/test`,
+        security: [{ scheme: "bearer", type: "http" }],
+      } as never)
+      return (response as { data: unknown }).data as { message: string }
+    },
+    onSuccess: (_data, connectionId) => {
+      queryClient.invalidateQueries({ queryKey: ["connection", connectionId] })
+      queryClient.invalidateQueries({ queryKey: ["connections"] })
+    },
+    onError: (error) => {
+      toast.error("Connection test failed", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
+    },
+  })
+}
