@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.78.0 (2026-04-30)
+
+### Improved
+- **Admin empty states** — Replaced inline empty state divs in admin overview tables with the reusable EmptyState component. Search-filtered tables use `variant="no-results"` with a "Clear search" button; data-absent tables use default variant with contextual icons.
+- **Status badge enrichment** — Added colored dot indicators to all admin overview table badges: ticket priority (gray/amber/orange/red), ticket status (blue/amber/violet/emerald/gray), device status (emerald/red/amber), fax delivery status (emerald/amber/gray/red), and active/inactive badges with emerald/gray dots.
+
 ## v0.77.0 (2026-04-30)
 
 ### Improved
