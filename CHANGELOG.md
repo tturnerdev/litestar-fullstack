@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.80.0 (2026-04-30)
+
+### Refactored
+- **CopyButton extraction** — Extracted duplicated CopyButton component from 11 detail pages into shared `components/ui/copy-button.tsx`, removing ~350 lines of duplication. All detail pages (support tickets, devices, fax numbers/messages, locations, teams, extensions, connections, admin users/teams, organization) now import from the shared component.
+
+### Improved
+- **Keyboard accessibility** — Added Escape key to cancel and autoFocus on Confirm button for inline session revoke confirmation in active-sessions component.
+
 ## v0.79.0 (2026-04-30)
 
 ### Improved
