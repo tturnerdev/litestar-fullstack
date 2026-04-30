@@ -445,7 +445,7 @@ function ConnectionRow({
   onToggle: () => void
 }) {
   return (
-    <TableRow data-state={selected ? "selected" : undefined}>
+    <TableRow className="hover:bg-muted/50 transition-colors" data-state={selected ? "selected" : undefined}>
       <TableCell>
         <Checkbox
           checked={selected}

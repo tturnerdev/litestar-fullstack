@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
-import { Check, ChevronRight, LayoutGrid, List, Plus, Search, Shield, Users } from "lucide-react"
+import { Check, ChevronRight, LayoutGrid, List, Loader2, Plus, Search, Shield, Users } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -109,7 +109,7 @@ export function TeamList() {
     return (
       <div className="flex items-center justify-center py-16">
         <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <p className="text-sm text-muted-foreground">Loading teams…</p>
         </div>
       </div>

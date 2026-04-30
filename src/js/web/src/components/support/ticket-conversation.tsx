@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUp, Filter, MessageSquare } from "lucide-react"
+import { ArrowDown, ArrowUp, Filter, Loader2, MessageSquare } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { TicketMessage } from "@/components/support/ticket-message"
 import { Badge } from "@/components/ui/badge"
@@ -101,7 +101,7 @@ export function TicketConversation({
     return (
       <div className="flex items-center justify-center py-12">
         <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <p className="text-sm text-muted-foreground">Loading messages...</p>
         </div>
       </div>

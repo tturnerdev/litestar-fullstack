@@ -128,7 +128,7 @@ export function UserTable() {
               </TableRow>
             )}
             {sortedItems.map((user) => (
-              <TableRow key={user.id} data-state={selection.isSelected(user.id) ? "selected" : undefined}>
+              <TableRow key={user.id} className="hover:bg-muted/50 transition-colors" data-state={selection.isSelected(user.id) ? "selected" : undefined}>
                 <TableCell>
                   <Checkbox checked={selection.isSelected(user.id)} onChange={() => selection.toggle(user.id)} />
                 </TableCell>
