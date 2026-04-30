@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.21.0 (2026-04-30)
+
+### Improved
+- **Teams list page** — table layout with search, sortable columns, bulk delete, member counts, role badges, and result counts. New `useTeams` and `useDeleteTeam` hooks.
+- **Team detail page** — breadcrumbs, team ID copy button, member count on tab, status/role badges in header, skeleton loading state.
+- **Voice phone numbers page** — search, type/status filters, sortable columns, bulk delete, edit dialog for label/caller ID, and improved empty states.
+
 ## v0.20.0 (2026-04-30)
 
 ### Improved

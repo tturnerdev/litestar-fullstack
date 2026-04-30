@@ -1,23 +1,44 @@
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, Link, useParams } from "@tanstack/react-router"
-import { Activity, ArrowLeft, Crown, Settings, Shield, Users } from "lucide-react"
-import { useEffect, useState } from "react"
+import {
+  Activity,
+  ArrowLeft,
+  Check,
+  Copy,
+  Crown,
+  Settings,
+  Shield,
+  Users,
+} from "lucide-react"
+import { useCallback, useEffect, useState } from "react"
 import { TeamActivity } from "@/components/teams/team-activity"
 import { TeamMembers } from "@/components/teams/team-members"
 import { TeamSettings } from "@/components/teams/team-settings"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Separator } from "@/components/ui/separator"
+import { SkeletonCard } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAuthStore } from "@/lib/auth"
 import { getTeam, type TeamMember } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/teams/$teamId/")({
   component: TeamDetail,
 })
+
+// ── Helpers ──────────────────────────────────────────────────────────────
 
 function getTeamInitials(name: string): string {
   return name
@@ -42,6 +63,37 @@ function getTeamColor(name: string): string {
   const index = name.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length
   return colors[index]
 }
+
+// ── Copy button ─────────────────────────────────────────────────────────
+
+function CopyButton({ value, label }: { value: string; label: string }) {
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = useCallback(async () => {
+    await navigator.clipboard.writeText(value)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }, [value])
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-6 w-6 text-muted-foreground hover:text-foreground"
+          onClick={handleCopy}
+        >
+          {copied ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
+          <span className="sr-only">Copy {label}</span>
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>{copied ? "Copied!" : `Copy ${label}`}</TooltipContent>
+    </Tooltip>
+  )
+}
+
+// ── Main component ──────────────────────────────────────────────────────
 
 function TeamDetail() {
   const { teamId } = useParams({ from: "/_app/teams/$teamId/" as const })
@@ -68,11 +120,11 @@ function TeamDetail() {
 
   if (isTeamLoading) {
     return (
-      <PageContainer className="flex-1">
-        <div className="flex flex-col items-center justify-center py-20">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-          <p className="mt-3 text-sm text-muted-foreground">Loading team...</p>
-        </div>
+      <PageContainer className="flex-1 space-y-8">
+        <PageHeader eyebrow="Teams" title="Team Details" />
+        <PageSection>
+          <SkeletonCard />
+        </PageSection>
       </PageContainer>
     )
   }
@@ -111,15 +163,55 @@ function TeamDetail() {
         eyebrow="Teams"
         title={team.name}
         description={team.description || "No description provided."}
+        breadcrumbs={
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/home">Home</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/teams">Teams</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>{team.name}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        }
         actions={
-          <Button variant="outline" size="sm" asChild>
-            <Link to="/teams">
-              <ArrowLeft className="mr-2 h-4 w-4" /> Back
-            </Link>
-          </Button>
+          <div className="flex items-center gap-3">
+            {team.isActive === false ? (
+              <Badge variant="destructive" className="text-[10px]">
+                Inactive
+              </Badge>
+            ) : (
+              <Badge className="gap-1 bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400">
+                Active
+              </Badge>
+            )}
+            {userRole && (
+              <Badge variant="outline" className="gap-1 text-[10px]">
+                {userRole === "Owner" && <Crown className="h-2.5 w-2.5" />}
+                {userRole === "Admin" && <Shield className="h-2.5 w-2.5" />}
+                {userRole}
+              </Badge>
+            )}
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/teams">
+                <ArrowLeft className="mr-2 h-4 w-4" /> Back
+              </Link>
+            </Button>
+          </div>
         }
       />
 
+      {/* Team Info Card */}
       <PageSection>
         <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
           <CardContent className="p-6">
@@ -133,18 +225,6 @@ function TeamDetail() {
               <div className="flex-1 space-y-2">
                 <div className="flex flex-wrap items-center gap-2">
                   <h2 className="text-xl font-semibold">{team.name}</h2>
-                  {team.isActive === false && (
-                    <Badge variant="destructive" className="text-[10px]">
-                      Inactive
-                    </Badge>
-                  )}
-                  {userRole && (
-                    <Badge variant="outline" className="gap-1 text-[10px]">
-                      {userRole === "Owner" && <Crown className="h-2.5 w-2.5" />}
-                      {userRole === "Admin" && <Shield className="h-2.5 w-2.5" />}
-                      {userRole}
-                    </Badge>
-                  )}
                 </div>
                 {team.description && <p className="text-sm text-muted-foreground">{team.description}</p>}
                 {tags.length > 0 && (
@@ -156,6 +236,12 @@ function TeamDetail() {
                     ))}
                   </div>
                 )}
+                {/* Team ID with copy */}
+                <div className="flex items-center gap-1 pt-1">
+                  <span className="text-xs text-muted-foreground">ID:</span>
+                  <span className="font-mono text-xs text-muted-foreground">{teamId}</span>
+                  <CopyButton value={teamId} label="team ID" />
+                </div>
               </div>
 
               <div className="flex gap-6 sm:gap-8">
@@ -176,12 +262,16 @@ function TeamDetail() {
         </Card>
       </PageSection>
 
+      {/* Tabs Section */}
       <PageSection delay={0.1}>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
             <TabsTrigger value="members" className="gap-1.5">
               <Users className="h-4 w-4" />
               Members
+              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-[10px]">
+                {members.length}
+              </Badge>
             </TabsTrigger>
             {canManageMembers && (
               <TabsTrigger value="settings" className="gap-1.5">
