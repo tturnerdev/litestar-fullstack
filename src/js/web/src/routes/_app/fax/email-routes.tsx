@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
+import { cn } from "@/lib/utils"
 import {
   AlertCircle,
   AlertTriangle,
@@ -486,8 +487,8 @@ function FaxEmailRoutesPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {routes.map((route) => (
-                    <TableRow key={route.id} className="hover:bg-muted/50 transition-colors">
+                  {routes.map((route, index) => (
+                    <TableRow key={route.id} className={cn("hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")}>
                       <TableCell className="font-mono text-sm">
                         {route.emailAddress}
                       </TableCell>

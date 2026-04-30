@@ -231,7 +231,10 @@ function LocationDetailPage() {
           <div className="space-y-6">
             <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Location Information</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <MapPin className="h-5 w-5 text-muted-foreground" />
+                  Location Information
+                </CardTitle>
                 {editing && (
                   <div className="flex gap-2">
                     <Button variant="ghost" size="sm" onClick={() => setEditing(false)}>

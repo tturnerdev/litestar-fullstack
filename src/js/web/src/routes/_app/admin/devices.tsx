@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { createFileRoute, Link } from "@tanstack/react-router"
+import { cn } from "@/lib/utils"
 import {
   AlertCircle,
   ArrowRight,
@@ -203,8 +204,8 @@ function AdminDevicesPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {recentDevices.map((device) => (
-                    <TableRow key={device.id} className="hover:bg-muted/50 transition-colors">
+                  {recentDevices.map((device, index) => (
+                    <TableRow key={device.id} className={cn("hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")}>
                       <TableCell className="font-medium">{device.name}</TableCell>
                       <TableCell className="font-mono text-muted-foreground text-sm">{device.macAddress ?? "—"}</TableCell>
                       <TableCell className="text-muted-foreground">{device.model ?? "—"}</TableCell>
@@ -280,8 +281,8 @@ function AdminDevicesPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {devices.map((device) => (
-                      <TableRow key={device.id} className="hover:bg-muted/50 transition-colors">
+                    {devices.map((device, index) => (
+                      <TableRow key={device.id} className={cn("hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")}>
                         <TableCell className="font-medium">{device.name}</TableCell>
                         <TableCell className="font-mono text-muted-foreground text-sm">{device.macAddress ?? "—"}</TableCell>
                         <TableCell className="text-muted-foreground">{device.model ?? "—"}</TableCell>

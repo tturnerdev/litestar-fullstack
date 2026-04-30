@@ -441,7 +441,7 @@ function TeamRow({
   onToggle: () => void
 }) {
   return (
-    <TableRow data-state={selected ? "selected" : undefined}>
+    <TableRow data-state={selected ? "selected" : undefined} className="hover:bg-muted/50 transition-colors even:bg-muted/20">
       <TableCell>
         <Checkbox
           checked={selected}

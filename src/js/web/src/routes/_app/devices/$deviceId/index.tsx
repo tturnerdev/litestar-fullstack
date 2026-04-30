@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
 import { useCallback, useState } from "react"
 import {
+  AlertTriangle,
   ArrowLeft,
   Check,
   Copy,
@@ -10,6 +11,8 @@ import {
   Network,
   Pencil,
   Phone,
+  Settings,
+  Wrench,
 } from "lucide-react"
 import { RebootButton, ReprovisionButton, ToggleActiveButton, DeleteButton } from "@/components/devices/device-actions"
 import { DeviceLineConfig } from "@/components/devices/device-line-config"
@@ -443,6 +446,35 @@ function DeviceDetailPage() {
           </TabsContent>
         </Tabs>
       </PageSection>
+
+      {/* Danger Zone */}
+      <PageSection delay={0.25}>
+        <Card className="border-destructive/30">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="h-4 w-4" />
+              Danger Zone
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium text-sm">Delete this device</p>
+                <p className="text-sm text-muted-foreground">
+                  This action cannot be undone. All line assignments and configuration will be
+                  permanently removed.
+                </p>
+              </div>
+              <DeleteButton
+                deviceName={data.name}
+                onDelete={handleDelete}
+                isPending={deleteDevice.isPending}
+                size="sm"
+              />
+            </div>
+          </CardContent>
+        </Card>
+      </PageSection>
     </PageContainer>
   )
 }
@@ -496,7 +528,10 @@ function SettingsTab({ deviceId, data }: SettingsTabProps) {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>SIP Configuration</CardTitle>
+          <div className="flex items-center gap-2">
+            <Settings className="h-5 w-5 text-muted-foreground" />
+            <CardTitle>SIP Configuration</CardTitle>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -523,7 +558,10 @@ function SettingsTab({ deviceId, data }: SettingsTabProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Advanced Configuration</CardTitle>
+          <div className="flex items-center gap-2">
+            <Wrench className="h-5 w-5 text-muted-foreground" />
+            <CardTitle>Advanced Configuration</CardTitle>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">

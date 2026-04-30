@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { createFileRoute, Link } from "@tanstack/react-router"
+import { cn } from "@/lib/utils"
 import {
   AlertCircle,
   ArrowRight,
@@ -235,8 +236,8 @@ function AdminSupportPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {recentTickets.map((ticket) => (
-                    <TableRow key={ticket.id} className="hover:bg-muted/50 transition-colors">
+                  {recentTickets.map((ticket, index) => (
+                    <TableRow key={ticket.id} className={cn("hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")}>
                       <TableCell className="font-mono text-sm">{ticket.ticketNumber}</TableCell>
                       <TableCell className="font-medium max-w-[300px] truncate">
                         <Tooltip>
@@ -319,8 +320,8 @@ function AdminSupportPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {tickets.map((ticket) => (
-                      <TableRow key={ticket.id} className="hover:bg-muted/50 transition-colors">
+                    {tickets.map((ticket, index) => (
+                      <TableRow key={ticket.id} className={cn("hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")}>
                         <TableCell className="font-mono text-sm">{ticket.ticketNumber}</TableCell>
                         <TableCell className="font-medium max-w-[250px] truncate">
                           <Tooltip>

@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { createFileRoute, Link } from "@tanstack/react-router"
+import { cn } from "@/lib/utils"
 import {
   AlertCircle,
   ArrowRight,
@@ -213,8 +214,8 @@ function AdminVoicePage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {phoneNumbers.map((pn) => (
-                      <TableRow key={pn.id} className="hover:bg-muted/50 transition-colors">
+                    {phoneNumbers.map((pn, index) => (
+                      <TableRow key={pn.id} className={cn("hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")}>
                         <TableCell className="font-mono font-medium">{pn.number}</TableCell>
                         <TableCell className="text-muted-foreground">{pn.label ?? "—"}</TableCell>
                         <TableCell className="text-muted-foreground capitalize">{pn.numberType}</TableCell>
@@ -296,8 +297,8 @@ function AdminVoicePage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {recentExtensions.map((ext) => (
-                    <TableRow key={ext.id} className="hover:bg-muted/50 transition-colors">
+                  {recentExtensions.map((ext, index) => (
+                    <TableRow key={ext.id} className={cn("hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")}>
                       <TableCell className="font-mono font-medium">{ext.extensionNumber}</TableCell>
                       <TableCell className="text-muted-foreground">{ext.displayName}</TableCell>
                       <TableCell className="text-muted-foreground">{ext.ownerEmail ?? "—"}</TableCell>

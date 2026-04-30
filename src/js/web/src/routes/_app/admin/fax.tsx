@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { createFileRoute, Link } from "@tanstack/react-router"
+import { cn } from "@/lib/utils"
 import {
   AlertCircle,
   ArrowRight,
@@ -206,8 +207,8 @@ function AdminFaxPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {recentMessages.map((msg) => (
-                    <TableRow key={msg.id} className="hover:bg-muted/50 transition-colors">
+                  {recentMessages.map((msg, index) => (
+                    <TableRow key={msg.id} className={cn("hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")}>
                       <TableCell>
                         <Badge variant={msg.direction === "inbound" ? "outline" : "secondary"}>
                           <span className="flex items-center gap-1">
@@ -295,8 +296,8 @@ function AdminFaxPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {faxNumbers.map((fn) => (
-                      <TableRow key={fn.id} className="hover:bg-muted/50 transition-colors">
+                    {faxNumbers.map((fn, index) => (
+                      <TableRow key={fn.id} className={cn("hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")}>
                         <TableCell className="font-mono font-medium">{fn.number}</TableCell>
                         <TableCell className="text-muted-foreground">{fn.label ?? "—"}</TableCell>
                         <TableCell className="text-muted-foreground">{fn.teamName ?? "—"}</TableCell>

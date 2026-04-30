@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
+import { cn } from "@/lib/utils"
 import { useMemo, useState } from "react"
 import { AlertCircle, ArrowUpDown, Home, Loader2, Pencil, Plus, Search, Tags, Trash2 } from "lucide-react"
 import {
@@ -265,10 +266,10 @@ function TagsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {sortedItems.map((tag) => (
+                {sortedItems.map((tag, index) => (
                   <TableRow
                     key={tag.id}
-                    className="transition-colors hover:bg-muted/50"
+                    className={cn("transition-colors hover:bg-muted/50", index % 2 === 1 && "bg-muted/20")}
                     data-selected={selected.has(tag.id) || undefined}
                   >
                     <TableCell>

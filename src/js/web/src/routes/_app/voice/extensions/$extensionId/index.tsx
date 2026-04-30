@@ -342,6 +342,36 @@ function ExtensionDetailPage() {
         </Card>
       </PageSection>
 
+      {/* Danger Zone */}
+      <PageSection delay={0.25}>
+        <Card className="border-destructive/30">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="h-4 w-4" />
+              Danger Zone
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium text-sm">Delete this extension</p>
+                <p className="text-sm text-muted-foreground">
+                  This action cannot be undone. All forwarding rules, voicemail settings, and DND
+                  configuration will be permanently removed.
+                </p>
+              </div>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => setShowDeleteDialog(true)}
+              >
+                <Trash2 className="mr-2 h-4 w-4" /> Delete
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </PageSection>
+
       {/* Delete confirmation dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
