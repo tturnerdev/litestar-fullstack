@@ -1,14 +1,22 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
-import { useState } from "react"
+import { useCallback, useState } from "react"
 import {
   AlertCircle,
   AlertTriangle,
   ArrowLeft,
+  Check,
   CheckCircle2,
   Circle,
+  Copy,
+  Globe,
+  Key,
   Loader2,
+  Lock,
   Pencil,
   Plug,
+  Server,
+  Settings,
+  ShieldCheck,
   Trash2,
   XCircle,
 } from "lucide-react"
@@ -20,14 +28,24 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { Separator } from "@/components/ui/separator"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import {
   useConnection,
   useDeleteConnection,
@@ -38,6 +56,8 @@ import {
 export const Route = createFileRoute("/_app/connections/$connectionId/")({
   component: ConnectionDetailPage,
 })
+
+// ── Label maps ──────────────────────────────────────────────────────────
 
 const typeLabels: Record<string, string> = {
   pbx: "PBX",
@@ -53,6 +73,29 @@ const authTypeLabels: Record<string, string> = {
   token: "Token",
   none: "None",
 }
+
+// ── Formatting helpers ──────────────────────────────────────────────────
+
+function formatDateTime(value: string | null | undefined): string {
+  if (!value) return "---"
+  return new Date(value).toLocaleString()
+}
+
+function formatRelativeTime(value: string | null | undefined): string {
+  if (!value) return "Never"
+  const date = new Date(value)
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffMins = Math.floor(diffMs / 60_000)
+  if (diffMins < 1) return "Just now"
+  if (diffMins < 60) return `${diffMins}m ago`
+  const diffHours = Math.floor(diffMins / 60)
+  if (diffHours < 24) return `${diffHours}h ago`
+  const diffDays = Math.floor(diffHours / 24)
+  return `${diffDays}d ago`
+}
+
+// ── Status badge ────────────────────────────────────────────────────────
 
 function StatusBadge({ status }: { status: string }) {
   switch (status) {
@@ -87,10 +130,67 @@ function StatusBadge({ status }: { status: string }) {
   }
 }
 
-function formatDateTime(value: string | null | undefined): string {
-  if (!value) return "---"
-  return new Date(value).toLocaleString()
+// ── Copy button ─────────────────────────────────────────────────────────
+
+function CopyButton({ value, label }: { value: string; label: string }) {
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = useCallback(async () => {
+    await navigator.clipboard.writeText(value)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }, [value])
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-6 w-6 text-muted-foreground hover:text-foreground"
+          onClick={handleCopy}
+        >
+          {copied ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
+          <span className="sr-only">Copy {label}</span>
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>{copied ? "Copied!" : `Copy ${label}`}</TooltipContent>
+    </Tooltip>
+  )
 }
+
+// ── Timestamp with tooltip ──────────────────────────────────────────────
+
+function TimestampField({
+  label,
+  value,
+}: {
+  label: string
+  value: string | null | undefined
+}) {
+  if (!value) {
+    return (
+      <div>
+        <p className="text-muted-foreground text-sm">{label}</p>
+        <p className="text-sm">---</p>
+      </div>
+    )
+  }
+
+  return (
+    <div>
+      <p className="text-muted-foreground text-sm">{label}</p>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <p className="cursor-default text-sm">{formatRelativeTime(value)}</p>
+        </TooltipTrigger>
+        <TooltipContent>{formatDateTime(value)}</TooltipContent>
+      </Tooltip>
+    </div>
+  )
+}
+
+// ── Main page ───────────────────────────────────────────────────────────
 
 function ConnectionDetailPage() {
   const { connectionId } = Route.useParams()
@@ -135,7 +235,9 @@ function ConnectionDetailPage() {
             <CardHeader>
               <CardTitle>Connection detail</CardTitle>
             </CardHeader>
-            <CardContent className="text-muted-foreground">We could not load this connection.</CardContent>
+            <CardContent className="text-muted-foreground">
+              We could not load this connection.
+            </CardContent>
           </Card>
         </PageSection>
       </PageContainer>
@@ -147,7 +249,8 @@ function ConnectionDetailPage() {
     router.navigate({ to: "/connections" })
   }
 
-  const currentSettingsText = settingsText ?? (data.settings ? JSON.stringify(data.settings, null, 2) : "")
+  const currentSettingsText =
+    settingsText ?? (data.settings ? JSON.stringify(data.settings, null, 2) : "")
 
   const handleSaveSettings = () => {
     const text = currentSettingsText.trim()
@@ -171,6 +274,8 @@ function ConnectionDetailPage() {
     }
   }
 
+  const settingsEntries = data.settings ? Object.entries(data.settings) : []
+
   return (
     <PageContainer className="flex-1 space-y-8">
       <PageHeader
@@ -180,11 +285,21 @@ function ConnectionDetailPage() {
         breadcrumbs={
           <Breadcrumb>
             <BreadcrumbList>
-              <BreadcrumbItem><BreadcrumbLink asChild><Link to="/home">Home</Link></BreadcrumbLink></BreadcrumbItem>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/home">Home</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
               <BreadcrumbSeparator />
-              <BreadcrumbItem><BreadcrumbLink asChild><Link to="/connections">Connections</Link></BreadcrumbLink></BreadcrumbItem>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/connections">Connections</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
               <BreadcrumbSeparator />
-              <BreadcrumbItem><BreadcrumbPage>{data.name}</BreadcrumbPage></BreadcrumbItem>
+              <BreadcrumbItem>
+                <BreadcrumbPage>{data.name}</BreadcrumbPage>
+              </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         }
@@ -192,10 +307,26 @@ function ConnectionDetailPage() {
           <div className="flex items-center gap-3">
             <StatusBadge status={data.status} />
             {!data.isEnabled && (
-              <Badge variant="outline" className="border-muted-foreground/30 text-muted-foreground">
+              <Badge
+                variant="outline"
+                className="border-muted-foreground/30 text-muted-foreground"
+              >
                 Disabled
               </Badge>
             )}
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => testConnection.mutate()}
+              disabled={testConnection.isPending}
+            >
+              {testConnection.isPending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Plug className="mr-2 h-4 w-4" />
+              )}
+              Test
+            </Button>
             <Button variant="outline" size="sm" asChild>
               <Link to="/connections/$connectionId/edit" params={{ connectionId }}>
                 <Pencil className="mr-2 h-4 w-4" /> Edit
@@ -210,43 +341,142 @@ function ConnectionDetailPage() {
         }
       />
 
+      {/* Test result inline feedback */}
+      {testConnection.isSuccess && (
+        <Alert variant="success">
+          <CheckCircle2 className="h-4 w-4" />
+          <AlertTitle>Connection test passed</AlertTitle>
+          <AlertDescription>{testConnection.data.message}</AlertDescription>
+        </Alert>
+      )}
+      {testConnection.isError && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Connection test failed</AlertTitle>
+          <AlertDescription>
+            {testConnection.error instanceof Error
+              ? testConnection.error.message
+              : "An unexpected error occurred"}
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Connection Info */}
       <PageSection>
         <Card>
           <CardHeader>
-            <CardTitle>Connection Information</CardTitle>
+            <div className="flex items-center gap-2">
+              <Globe className="h-5 w-5 text-muted-foreground" />
+              <CardTitle>Connection Info</CardTitle>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
-              <InfoField label="Name" value={data.name} />
-              <InfoField label="Type" value={typeLabels[data.connectionType] ?? data.connectionType} />
-              <InfoField label="Provider" value={data.provider} />
-              <InfoField label="Description" value={data.description} />
-              <InfoField label="Enabled" value={data.isEnabled ? "Yes" : "No"} />
-              <InfoField label="Created" value={formatDateTime(data.createdAt)} />
+              <div>
+                <p className="text-muted-foreground">Name</p>
+                <p className="font-medium">{data.name}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Type</p>
+                <p>{typeLabels[data.connectionType] ?? data.connectionType}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Provider</p>
+                <p>{data.provider}</p>
+              </div>
+              <div className="md:col-span-2 lg:col-span-3">
+                <p className="text-muted-foreground">Description</p>
+                <p>{data.description || "---"}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Status</p>
+                <div className="mt-0.5">
+                  <StatusBadge status={data.status} />
+                </div>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Enabled</p>
+                <p>{data.isEnabled ? "Yes" : "No"}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Connection ID</p>
+                <div className="flex items-center gap-1">
+                  <p className="font-mono text-xs">{connectionId}</p>
+                  <CopyButton value={connectionId} label="connection ID" />
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
       </PageSection>
 
-      {/* Configuration */}
+      {/* Server Configuration */}
       <PageSection delay={0.1}>
         <Card>
           <CardHeader>
-            <CardTitle>Configuration</CardTitle>
+            <div className="flex items-center gap-2">
+              <Server className="h-5 w-5 text-muted-foreground" />
+              <CardTitle>Server Configuration</CardTitle>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
-              <InfoField label="Host" value={data.host} mono />
-              <InfoField label="Port" value={data.port != null ? String(data.port) : null} mono />
-              <InfoField label="Auth Type" value={authTypeLabels[data.authType] ?? data.authType} />
+              <div>
+                <p className="text-muted-foreground">Host</p>
+                <div className="flex items-center gap-1">
+                  <p className="font-mono text-xs">{data.host || "---"}</p>
+                  {data.host && <CopyButton value={data.host} label="host" />}
+                </div>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Port</p>
+                <p className="font-mono text-xs">{data.port != null ? String(data.port) : "---"}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">SSL / TLS</p>
+                <div className="flex items-center gap-1.5">
+                  {data.port === 443 ? (
+                    <>
+                      <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
+                      <span>Likely (port 443)</span>
+                    </>
+                  ) : (
+                    <span className="text-muted-foreground">Not determined</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </PageSection>
+
+      {/* Authentication */}
+      <PageSection delay={0.15}>
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Key className="h-5 w-5 text-muted-foreground" />
+              <CardTitle>Authentication</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
+              <div>
+                <p className="text-muted-foreground">Auth Type</p>
+                <p>{authTypeLabels[data.authType] ?? data.authType}</p>
+              </div>
               {data.credentialFields.length > 0 && (
                 <div className="md:col-span-2 lg:col-span-3">
                   <p className="text-muted-foreground">Credentials</p>
-                  <div className="mt-1 flex flex-wrap gap-2">
+                  <div className="mt-1.5 flex flex-wrap gap-2">
                     {data.credentialFields.map((field) => (
-                      <Badge key={field} variant="outline" className="font-mono text-xs">
-                        {field}: ••••••••
+                      <Badge
+                        key={field}
+                        variant="outline"
+                        className="gap-1.5 font-mono text-xs"
+                      >
+                        <Lock className="h-3 w-3 text-muted-foreground" />
+                        {field}
                       </Badge>
                     ))}
                   </div>
@@ -257,46 +487,44 @@ function ConnectionDetailPage() {
         </Card>
       </PageSection>
 
-      {/* Status */}
+      {/* Settings */}
       <PageSection delay={0.2}>
         <Card>
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>Status</CardTitle>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => testConnection.mutate()}
-                disabled={testConnection.isPending}
-              >
-                {testConnection.isPending ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Plug className="mr-2 h-4 w-4" />
-                )}
-                Test Connection
-              </Button>
+            <div className="flex items-center gap-2">
+              <Settings className="h-5 w-5 text-muted-foreground" />
+              <CardTitle>Settings</CardTitle>
             </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
-              <InfoField label="Status">
-                <StatusBadge status={data.status} />
-              </InfoField>
-              <InfoField label="Last Health Check" value={formatDateTime(data.lastHealthCheck)} />
-              <InfoField label="Last Error" value={data.lastError} />
-            </div>
-          </CardContent>
-        </Card>
-      </PageSection>
-
-      {/* Settings JSON */}
-      <PageSection delay={0.3}>
-        <Card>
-          <CardHeader>
-            <CardTitle>Settings</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Key-value display */}
+            {settingsEntries.length > 0 && (
+              <div className="rounded-md border">
+                <div className="grid grid-cols-[minmax(120px,1fr)_2fr] text-sm">
+                  {settingsEntries.map(([key, value], idx) => (
+                    <div key={key} className="contents">
+                      <div
+                        className={`px-3 py-2 font-mono text-xs text-muted-foreground ${idx !== settingsEntries.length - 1 ? "border-b" : ""}`}
+                      >
+                        {key}
+                      </div>
+                      <div
+                        className={`border-l px-3 py-2 font-mono text-xs ${idx !== settingsEntries.length - 1 ? "border-b" : ""}`}
+                      >
+                        {typeof value === "object" ? JSON.stringify(value) : String(value ?? "---")}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {settingsEntries.length === 0 && !settingsDirty && (
+              <p className="text-sm text-muted-foreground">No settings configured.</p>
+            )}
+
+            <Separator />
+
+            {/* Raw JSON editor */}
             <div className="space-y-2">
               <Label htmlFor="settings-json">Configuration JSON</Label>
               <Textarea
@@ -311,7 +539,9 @@ function ConnectionDetailPage() {
                 className="font-mono text-xs"
                 placeholder='{"key": "value"}'
               />
-              {settingsError && <p className="text-destructive text-sm">{settingsError}</p>}
+              {settingsError && (
+                <p className="text-destructive text-sm">{settingsError}</p>
+              )}
             </div>
             <div className="flex items-center justify-end gap-2">
               <Button
@@ -329,7 +559,9 @@ function ConnectionDetailPage() {
                 onClick={handleSaveSettings}
                 disabled={!settingsDirty || updateConnection.isPending}
               >
-                {updateConnection.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {updateConnection.isPending && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
                 Save Settings
               </Button>
             </div>
@@ -337,8 +569,42 @@ function ConnectionDetailPage() {
         </Card>
       </PageSection>
 
+      {/* Metadata */}
+      <PageSection delay={0.25}>
+        <Card>
+          <CardHeader>
+            <CardTitle>Metadata</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-4">
+              <TimestampField label="Created" value={data.createdAt} />
+              <TimestampField label="Updated" value={data.updatedAt} />
+              <TimestampField label="Last Health Check" value={data.lastHealthCheck} />
+              <div>
+                <p className="text-muted-foreground text-sm">Team ID</p>
+                <div className="flex items-center gap-1">
+                  <p className="font-mono text-xs">{data.teamId}</p>
+                  <CopyButton value={data.teamId} label="team ID" />
+                </div>
+              </div>
+            </div>
+            {data.lastError && (
+              <div className="mt-4">
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Last Error</AlertTitle>
+                  <AlertDescription className="font-mono text-xs">
+                    {data.lastError}
+                  </AlertDescription>
+                </Alert>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </PageSection>
+
       {/* Danger Zone */}
-      <PageSection delay={0.4}>
+      <PageSection delay={0.3}>
         <Card className="border-destructive/30">
           <CardHeader>
             <CardTitle className="text-destructive">Danger Zone</CardTitle>
@@ -348,67 +614,59 @@ function ConnectionDetailPage() {
               <div>
                 <p className="font-medium text-sm">Delete this connection</p>
                 <p className="text-sm text-muted-foreground">
-                  This action cannot be undone. All configuration and credentials will be permanently removed.
+                  This action cannot be undone. All configuration and credentials will be
+                  permanently removed.
                 </p>
               </div>
-              <Button variant="destructive" size="sm" onClick={() => setDeleteOpen(true)}>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => setDeleteOpen(true)}
+              >
                 <Trash2 className="mr-2 h-4 w-4" /> Delete
               </Button>
-              <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2">
-                      <AlertTriangle className="h-5 w-5 text-destructive" />
-                      Delete connection?
-                    </DialogTitle>
-                    <DialogDescription>
-                      This will permanently delete <strong>{data.name}</strong> and all associated configuration. This
-                      action cannot be undone.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <DialogFooter>
-                    <Button variant="outline" onClick={() => setDeleteOpen(false)} disabled={deleteConnection.isPending}>
-                      Cancel
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      onClick={() => {
-                        handleDelete()
-                        setDeleteOpen(false)
-                      }}
-                      disabled={deleteConnection.isPending}
-                    >
-                      {deleteConnection.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      Delete
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
             </div>
           </CardContent>
         </Card>
       </PageSection>
+
+      {/* Delete confirmation dialog */}
+      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Delete connection?
+            </DialogTitle>
+            <DialogDescription>
+              This will permanently delete <strong>{data.name}</strong> and all associated
+              configuration. This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteOpen(false)}
+              disabled={deleteConnection.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                handleDelete()
+                setDeleteOpen(false)
+              }}
+              disabled={deleteConnection.isPending}
+            >
+              {deleteConnection.isPending && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PageContainer>
-  )
-}
-
-// ── Info Field helper ─────────────────────────────────────────────────
-
-function InfoField({
-  label,
-  value,
-  mono,
-  children,
-}: {
-  label: string
-  value?: string | null
-  mono?: boolean
-  children?: React.ReactNode
-}) {
-  return (
-    <div>
-      <p className="text-muted-foreground">{label}</p>
-      {children ?? <p className={mono ? "font-mono text-xs" : ""}>{value ?? "---"}</p>}
-    </div>
   )
 }

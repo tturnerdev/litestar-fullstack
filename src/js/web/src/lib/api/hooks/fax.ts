@@ -239,16 +239,22 @@ export function useFaxMessages(params: {
   pageSize?: number
   direction?: string
   status?: string
+  search?: string
+  orderBy?: string
+  sortOrder?: string
 }) {
-  const { page = 1, pageSize = 25, direction, status } = params
+  const { page = 1, pageSize = 25, direction, status, search, orderBy, sortOrder } = params
   return useQuery({
-    queryKey: ["fax", "messages", page, pageSize, direction, status],
+    queryKey: ["fax", "messages", page, pageSize, direction, status, search, orderBy, sortOrder],
     queryFn: async () => {
       const searchParams = new URLSearchParams()
       searchParams.set("currentPage", String(page))
       searchParams.set("pageSize", String(pageSize))
       if (direction) searchParams.set("direction", direction)
       if (status) searchParams.set("status", status)
+      if (search) searchParams.set("search", search)
+      if (orderBy) searchParams.set("orderBy", orderBy)
+      if (sortOrder) searchParams.set("sortOrder", sortOrder)
       return apiFetch<PaginatedResponse<FaxMessage>>(
         `/api/fax/messages?${searchParams.toString()}`,
       )

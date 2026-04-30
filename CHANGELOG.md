@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.18.0 (2026-04-30)
+
+### Improved
+- **Connection detail page** — reorganized into sections (Info, Server, Auth, Settings, Metadata) with icons, test-connection button with inline results, copy buttons for host/ID, relative timestamps with tooltips, and delete confirmation dialog.
+- **Fax messages list page** — search, direction/status filters, sortable columns, bulk delete, relative timestamps, error message tooltips, page count badges, and fax line name lookup.
+
 ## v0.17.0 (2026-04-30)
 
 ### Improved
