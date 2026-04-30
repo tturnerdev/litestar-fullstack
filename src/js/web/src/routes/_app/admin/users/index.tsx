@@ -1,21 +1,706 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, Link } from "@tanstack/react-router"
+import { useCallback, useMemo, useState } from "react"
+import {
+  AlertCircle,
+  CheckCircle2,
+  Loader2,
+  Search,
+  Shield,
+  ShieldCheck,
+  ShieldOff,
+  Trash2,
+  UserCheck,
+  Users,
+  UserX,
+  XCircle,
+} from "lucide-react"
+import { toast } from "sonner"
+import { useQueryClient } from "@tanstack/react-query"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
-import { UserTable } from "@/components/admin/user-table"
+import { UserRowActions } from "@/components/admin/user-row-actions"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
+import { type BulkAction, BulkActionBar } from "@/components/ui/bulk-action-bar"
+import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
+import { EmptyState } from "@/components/ui/empty-state"
+import { ExportButton } from "@/components/ui/export-button"
+import { FilterDropdown, type FilterOption } from "@/components/ui/filter-dropdown"
+import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SkeletonTable } from "@/components/ui/skeleton"
+import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { useAdminUsers, useAdminUpdateUser } from "@/lib/api/hooks/admin"
+import { adminDeleteUser, adminUpdateUser } from "@/lib/generated/api"
+import type { AdminUserSummary } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/admin/users/")({
   component: AdminUsersPage,
 })
 
+// -- Constants ----------------------------------------------------------------
+
+const PAGE_SIZE = 25
+
+const USER_EXPORT_COLUMNS = [
+  { key: "name", header: "Name" },
+  { key: "email", header: "Email" },
+  { key: "username", header: "Username" },
+  { key: "isActive", header: "Active" },
+  { key: "isSuperuser", header: "Superuser" },
+  { key: "isVerified", header: "Verified" },
+  { key: "loginCount", header: "Login Count" },
+  { key: "createdAt", header: "Created At" },
+]
+
+const roleOptions: FilterOption[] = [
+  { value: "superuser", label: "Superuser" },
+  { value: "member", label: "Member" },
+]
+
+const statusOptions: FilterOption[] = [
+  { value: "active", label: "Active" },
+  { value: "inactive", label: "Inactive" },
+  { value: "verified", label: "Verified" },
+  { value: "unverified", label: "Unverified" },
+]
+
+// -- Helpers ------------------------------------------------------------------
+
+function getInitials(name: string | null | undefined, email: string): string {
+  if (name) {
+    const parts = name.trim().split(/\s+/)
+    if (parts.length >= 2) {
+      return `${parts[0][0]}${parts[1][0]}`.toUpperCase()
+    }
+    return name.slice(0, 2).toUpperCase()
+  }
+  return email.slice(0, 2).toUpperCase()
+}
+
+function formatDateTime(value: string | null | undefined): string {
+  if (!value) return "Never"
+  return new Date(value).toLocaleString()
+}
+
+function formatRelativeTime(value: string | null | undefined): string {
+  if (!value) return "Never"
+  const date = new Date(value)
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffMins = Math.floor(diffMs / 60_000)
+  if (diffMins < 1) return "Just now"
+  if (diffMins < 60) return `${diffMins}m ago`
+  const diffHours = Math.floor(diffMins / 60)
+  if (diffHours < 24) return `${diffHours}h ago`
+  const diffDays = Math.floor(diffHours / 24)
+  if (diffDays < 30) return `${diffDays}d ago`
+  const diffMonths = Math.floor(diffDays / 30)
+  return `${diffMonths}mo ago`
+}
+
+function ActiveStatusIndicator({ isActive }: { isActive: boolean | undefined }) {
+  if (isActive) {
+    return (
+      <span className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400">
+        <CheckCircle2 className="h-3.5 w-3.5" />
+        Active
+      </span>
+    )
+  }
+  return (
+    <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+      <XCircle className="h-3.5 w-3.5" />
+      Inactive
+    </span>
+  )
+}
+
+function matchesRoleFilter(user: AdminUserSummary, filters: string[]): boolean {
+  if (filters.length === 0) return true
+  const isSuperuser = user.isSuperuser === true
+  if (filters.includes("superuser") && isSuperuser) return true
+  if (filters.includes("member") && !isSuperuser) return true
+  return false
+}
+
+function matchesStatusFilter(user: AdminUserSummary, filters: string[]): boolean {
+  if (filters.length === 0) return true
+  for (const f of filters) {
+    if (f === "active" && user.isActive === true) return true
+    if (f === "inactive" && !user.isActive) return true
+    if (f === "verified" && user.isVerified === true) return true
+    if (f === "unverified" && !user.isVerified) return true
+  }
+  return false
+}
+
+// -- Quick action buttons -----------------------------------------------------
+
+function ToggleActiveButton({ user }: { user: AdminUserSummary }) {
+  const updateUser = useAdminUpdateUser(user.id)
+  const isPending = updateUser.isPending
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 gap-1.5 px-2 text-xs"
+          disabled={isPending}
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            updateUser.mutate({ isActive: !user.isActive })
+          }}
+        >
+          {isPending ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : user.isActive ? (
+            <UserX className="h-3.5 w-3.5" />
+          ) : (
+            <UserCheck className="h-3.5 w-3.5" />
+          )}
+          {user.isActive ? "Deactivate" : "Activate"}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>{user.isActive ? "Deactivate this user" : "Activate this user"}</TooltipContent>
+    </Tooltip>
+  )
+}
+
+function ToggleRoleButton({ user }: { user: AdminUserSummary }) {
+  const updateUser = useAdminUpdateUser(user.id)
+  const isPending = updateUser.isPending
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 gap-1.5 px-2 text-xs"
+          disabled={isPending}
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            updateUser.mutate({ isSuperuser: !user.isSuperuser })
+          }}
+        >
+          {isPending ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : user.isSuperuser ? (
+            <ShieldOff className="h-3.5 w-3.5" />
+          ) : (
+            <Shield className="h-3.5 w-3.5" />
+          )}
+          {user.isSuperuser ? "Demote" : "Promote"}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>
+        {user.isSuperuser ? "Remove superuser role" : "Promote to superuser"}
+      </TooltipContent>
+    </Tooltip>
+  )
+}
+
+// -- Main page ----------------------------------------------------------------
+
 function AdminUsersPage() {
+  // Filter & search state
+  const [search, setSearch] = useState("")
+  const [roleFilter, setRoleFilter] = useState<string[]>([])
+  const [statusFilter, setStatusFilter] = useState<string[]>([])
+  const [page, setPage] = useState(1)
+
+  // Sort state
+  const [sortKey, setSortKey] = useState<string | null>(null)
+  const [sortDir, setSortDir] = useState<SortDirection>(null)
+
+  // Selection state
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+
+  // Queries & mutations
+  const queryClient = useQueryClient()
+  const { data, isLoading, isError, refetch } = useAdminUsers({
+    page,
+    pageSize: PAGE_SIZE,
+    search: search || undefined,
+    orderBy: sortKey ?? undefined,
+    sortOrder: sortDir ?? undefined,
+  })
+  // Apply client-side role & status filters
+  const filteredItems = useMemo(() => {
+    if (!data?.items) return []
+    return data.items.filter((user) => {
+      if (!matchesRoleFilter(user, roleFilter)) return false
+      if (!matchesStatusFilter(user, statusFilter)) return false
+      return true
+    })
+  }, [data?.items, roleFilter, statusFilter])
+
+  // Selection helpers
+  const allVisibleIds = useMemo(() => filteredItems.map((u) => u.id), [filteredItems])
+  const allSelected = filteredItems.length > 0 && filteredItems.every((u) => selectedIds.has(u.id))
+  const someSelected = filteredItems.some((u) => selectedIds.has(u.id))
+
+  const toggleAll = useCallback(() => {
+    if (allSelected) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(allVisibleIds))
+    }
+  }, [allSelected, allVisibleIds])
+
+  const toggleOne = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      return next
+    })
+  }, [])
+
+  // Sort handler
+  const handleSort = useCallback(
+    (key: string) => {
+      const next = nextSortDirection(sortKey, sortDir, key)
+      setSortKey(next.sort)
+      setSortDir(next.direction)
+    },
+    [sortKey, sortDir],
+  )
+
+  // Bulk actions
+  const bulkActions = useMemo<BulkAction[]>(
+    () => [
+      {
+        key: "activate",
+        label: "Activate",
+        icon: <ShieldCheck className="h-4 w-4" />,
+        variant: "outline",
+        confirm: {
+          title: "Activate selected users?",
+          description: "This will activate all selected users, allowing them to sign in and access the system.",
+        },
+        onExecute: async (ids) => {
+          let succeeded = 0
+          let failed = 0
+          for (const id of ids) {
+            try {
+              await adminUpdateUser({ path: { user_id: id }, body: { isActive: true } })
+              succeeded++
+            } catch {
+              failed++
+            }
+          }
+          await queryClient.invalidateQueries({ queryKey: ["admin", "users"] })
+          setSelectedIds(new Set())
+          if (failed === 0) {
+            toast.success(`Activated ${succeeded} user${succeeded !== 1 ? "s" : ""}`)
+          } else {
+            toast.warning(`${succeeded} activated, ${failed} failed`)
+          }
+        },
+      },
+      {
+        key: "deactivate",
+        label: "Deactivate",
+        icon: <ShieldOff className="h-4 w-4" />,
+        variant: "outline",
+        confirm: {
+          title: "Deactivate selected users?",
+          description: "This will deactivate all selected users. They will no longer be able to sign in.",
+        },
+        onExecute: async (ids) => {
+          let succeeded = 0
+          let failed = 0
+          for (const id of ids) {
+            try {
+              await adminUpdateUser({ path: { user_id: id }, body: { isActive: false } })
+              succeeded++
+            } catch {
+              failed++
+            }
+          }
+          await queryClient.invalidateQueries({ queryKey: ["admin", "users"] })
+          setSelectedIds(new Set())
+          if (failed === 0) {
+            toast.success(`Deactivated ${succeeded} user${succeeded !== 1 ? "s" : ""}`)
+          } else {
+            toast.warning(`${succeeded} deactivated, ${failed} failed`)
+          }
+        },
+      },
+      {
+        key: "delete",
+        label: "Delete",
+        icon: <Trash2 className="h-4 w-4" />,
+        variant: "destructive",
+        confirm: {
+          title: "Delete selected users?",
+          description: "This action cannot be undone. All selected users will be permanently deleted.",
+        },
+        onExecute: async (ids) => {
+          let succeeded = 0
+          let failed = 0
+          for (const id of ids) {
+            try {
+              await adminDeleteUser({ path: { user_id: id } })
+              succeeded++
+            } catch {
+              failed++
+            }
+          }
+          await queryClient.invalidateQueries({ queryKey: ["admin", "users"] })
+          setSelectedIds(new Set())
+          if (failed === 0) {
+            toast.success(`Deleted ${succeeded} user${succeeded !== 1 ? "s" : ""}`)
+          } else {
+            toast.warning(`${succeeded} deleted, ${failed} failed`)
+          }
+        },
+      },
+    ],
+    [queryClient],
+  )
+
+  // Computed
+  const activeFilterCount = roleFilter.length + statusFilter.length
+  const hasData = filteredItems.length > 0
+  const hasAnyUsers = (data?.items.length ?? 0) > 0
+  const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / PAGE_SIZE))
+
   return (
     <PageContainer className="flex-1 space-y-8">
-      <PageHeader eyebrow="Administration" title="Users" description="View and manage all users in the system." breadcrumbs={<AdminBreadcrumbs />} />
+      <PageHeader
+        eyebrow="Administration"
+        title="Users"
+        description="View and manage all users in the system."
+        breadcrumbs={<AdminBreadcrumbs />}
+        actions={
+          <ExportButton
+            data={(data?.items ?? []) as Record<string, unknown>[]}
+            filename="users"
+            columns={USER_EXPORT_COLUMNS}
+          />
+        }
+      />
       <AdminNav />
+
+      {/* Search & filters */}
       <PageSection>
-        <UserTable />
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative max-w-sm flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search by name, email, or username..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value)
+                setPage(1)
+              }}
+              className="pl-9"
+            />
+          </div>
+          <FilterDropdown
+            label="Role"
+            options={roleOptions}
+            selected={roleFilter}
+            onChange={setRoleFilter}
+          />
+          <FilterDropdown
+            label="Status"
+            options={statusOptions}
+            selected={statusFilter}
+            onChange={setStatusFilter}
+          />
+          {activeFilterCount > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-xs text-muted-foreground"
+              onClick={() => {
+                setRoleFilter([])
+                setStatusFilter([])
+              }}
+            >
+              Clear all filters
+            </Button>
+          )}
+        </div>
       </PageSection>
+
+      {/* Content */}
+      <PageSection delay={0.1}>
+        {isLoading ? (
+          <SkeletonTable rows={6} />
+        ) : isError ? (
+          <EmptyState
+            icon={AlertCircle}
+            title="Unable to load users"
+            description="Something went wrong while fetching user data. Please try refreshing the page."
+            action={
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
+                Refresh
+              </Button>
+            }
+          />
+        ) : !hasAnyUsers && !search ? (
+          <EmptyState
+            icon={Users}
+            title="No users yet"
+            description="Users will appear here once they register or are added to the system."
+          />
+        ) : !hasData ? (
+          <EmptyState
+            icon={Users}
+            variant="no-results"
+            title="No results found"
+            description="No users match your current filters. Try adjusting your search or filters."
+            action={
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSearch("")
+                  setRoleFilter([])
+                  setStatusFilter([])
+                }}
+              >
+                Clear all filters
+              </Button>
+            }
+          />
+        ) : (
+          <div className="space-y-3">
+            {/* Result count & pagination info */}
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
+                {filteredItems.length} user{filteredItems.length === 1 ? "" : "s"}
+                {(roleFilter.length > 0 || statusFilter.length > 0) && " (filtered)"}
+                {data && data.total > PAGE_SIZE && (
+                  <span>
+                    {" "}
+                    &middot; Page {page} of {totalPages}
+                  </span>
+                )}
+              </p>
+            </div>
+
+            {/* Table */}
+            <div className="rounded-md border border-border/60 bg-card/80">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-10">
+                      <Checkbox
+                        checked={allSelected}
+                        indeterminate={someSelected && !allSelected}
+                        onChange={toggleAll}
+                        aria-label="Select all users"
+                      />
+                    </TableHead>
+                    <SortableHeader
+                      label="User"
+                      sortKey="name"
+                      currentSort={sortKey}
+                      currentDirection={sortDir}
+                      onSort={handleSort}
+                    />
+                    <SortableHeader
+                      label="Email"
+                      sortKey="email"
+                      currentSort={sortKey}
+                      currentDirection={sortDir}
+                      onSort={handleSort}
+                    />
+                    <SortableHeader
+                      label="Role"
+                      sortKey="is_superuser"
+                      currentSort={sortKey}
+                      currentDirection={sortDir}
+                      onSort={handleSort}
+                    />
+                    <SortableHeader
+                      label="Status"
+                      sortKey="is_active"
+                      currentSort={sortKey}
+                      currentDirection={sortDir}
+                      onSort={handleSort}
+                    />
+                    <SortableHeader
+                      label="Logins"
+                      sortKey="login_count"
+                      currentSort={sortKey}
+                      currentDirection={sortDir}
+                      onSort={handleSort}
+                    />
+                    <SortableHeader
+                      label="Created"
+                      sortKey="created_at"
+                      currentSort={sortKey}
+                      currentDirection={sortDir}
+                      onSort={handleSort}
+                    />
+                    <TableHead className="w-44 text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredItems.map((user) => (
+                    <UserRow
+                      key={user.id}
+                      user={user}
+                      selected={selectedIds.has(user.id)}
+                      onToggle={() => toggleOne(user.id)}
+                    />
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-end gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setPage((p) => Math.max(1, p - 1))
+                    setSelectedIds(new Set())
+                  }}
+                  disabled={page <= 1}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setPage((p) => Math.min(totalPages, p + 1))
+                    setSelectedIds(new Set())
+                  }}
+                  disabled={page >= totalPages}
+                >
+                  Next
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
+      </PageSection>
+
+      {/* Bulk action bar */}
+      <BulkActionBar
+        selectedCount={selectedIds.size}
+        selectedIds={Array.from(selectedIds)}
+        onClearSelection={() => setSelectedIds(new Set())}
+        actions={bulkActions}
+      />
     </PageContainer>
+  )
+}
+
+// -- Table row ----------------------------------------------------------------
+
+function UserRow({
+  user,
+  selected,
+  onToggle,
+}: {
+  user: AdminUserSummary
+  selected: boolean
+  onToggle: () => void
+}) {
+  return (
+    <TableRow data-state={selected ? "selected" : undefined}>
+      <TableCell>
+        <Checkbox
+          checked={selected}
+          onChange={(e) => {
+            e.stopPropagation()
+            onToggle()
+          }}
+          aria-label={`Select ${user.name ?? user.email}`}
+        />
+      </TableCell>
+      <TableCell>
+        <Link
+          to="/admin/users/$userId"
+          params={{ userId: user.id }}
+          className="group flex items-center gap-3"
+        >
+          <Avatar className="size-8 text-xs">
+            <AvatarFallback>{getInitials(user.name, user.email)}</AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col gap-0.5 min-w-0">
+            <span className="font-medium truncate group-hover:underline">
+              {user.name ?? user.email}
+            </span>
+            {user.username && (
+              <span className="text-xs text-muted-foreground truncate">
+                @{user.username}
+              </span>
+            )}
+          </div>
+        </Link>
+      </TableCell>
+      <TableCell>
+        <span className="text-sm text-muted-foreground">{user.email}</span>
+      </TableCell>
+      <TableCell>
+        {user.isSuperuser ? (
+          <Badge variant="destructive" className="gap-1">
+            <Shield className="h-3 w-3" />
+            Superuser
+          </Badge>
+        ) : (
+          <span className="text-sm text-muted-foreground">Member</span>
+        )}
+      </TableCell>
+      <TableCell>
+        <div className="flex items-center gap-2">
+          <ActiveStatusIndicator isActive={user.isActive} />
+          {user.isVerified ? (
+            <Badge variant="outline" className="border-emerald-200 text-emerald-700 dark:border-emerald-800 dark:text-emerald-400 text-[10px]">
+              Verified
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="border-muted-foreground/30 text-muted-foreground text-[10px]">
+              Unverified
+            </Badge>
+          )}
+        </div>
+      </TableCell>
+      <TableCell>
+        <span className="text-sm tabular-nums text-muted-foreground">
+          {user.loginCount ?? 0}
+        </span>
+      </TableCell>
+      <TableCell>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="cursor-default text-xs text-muted-foreground">
+              {formatRelativeTime(user.createdAt)}
+            </span>
+          </TooltipTrigger>
+          <TooltipContent>{formatDateTime(user.createdAt)}</TooltipContent>
+        </Tooltip>
+      </TableCell>
+      <TableCell className="text-right">
+        <div className="flex items-center justify-end gap-1">
+          <ToggleActiveButton user={user} />
+          <ToggleRoleButton user={user} />
+          <UserRowActions user={user} />
+        </div>
+      </TableCell>
+    </TableRow>
   )
 }

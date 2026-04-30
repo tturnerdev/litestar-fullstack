@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.22.0 (2026-04-30)
+
+### Improved
+- **Admin users page** — search, role/status filters, sortable columns, bulk activate/deactivate/delete, inline toggle buttons for role and active status, user avatars, relative timestamps, and export. `useAdminUsers` hook now supports named params with sort.
+- **Profile page** — gradient banner with larger avatar, role badges, security status indicators with tooltips, connected accounts + sessions in two-column grid, quick links card to settings sections.
+
 ## v0.21.0 (2026-04-30)
 
 ### Improved

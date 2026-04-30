@@ -45,7 +45,7 @@ export function UserTable() {
   const [search, setSearch] = useState("")
   const [sortKey, setSortKey] = useState<string | null>(null)
   const [sortDirection, setSortDirection] = useState<SortDirection>(null)
-  const { data, isLoading, isError, refetch } = useAdminUsers(page, PAGE_SIZE, search || undefined)
+  const { data, isLoading, isError, refetch } = useAdminUsers({ page, pageSize: PAGE_SIZE, search: search || undefined })
   const selection = useRowSelection(page)
 
   const sortedItems = useMemo(() => {

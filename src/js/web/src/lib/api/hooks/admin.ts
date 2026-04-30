@@ -101,15 +101,24 @@ export function useAdminSystemStatus() {
   })
 }
 
-export function useAdminUsers(page = 1, pageSize = 25, search?: string) {
+export function useAdminUsers(params?: {
+  page?: number
+  pageSize?: number
+  search?: string
+  orderBy?: string
+  sortOrder?: "asc" | "desc"
+}) {
+  const { page = 1, pageSize = 25, search, orderBy, sortOrder } = params ?? {}
   return useQuery({
-    queryKey: ["admin", "users", page, pageSize, search],
+    queryKey: ["admin", "users", page, pageSize, search, orderBy, sortOrder],
     queryFn: async () => {
       const query = {
         currentPage: page,
         pageSize,
         searchString: search,
         searchIgnoreCase: search ? true : undefined,
+        orderBy: orderBy ?? undefined,
+        sortOrder: sortOrder ?? undefined,
       } as unknown as AdminListUsersData["query"]
       const response = await adminListUsers({ query })
       return response.data as { items: AdminUserSummary[]; total: number }

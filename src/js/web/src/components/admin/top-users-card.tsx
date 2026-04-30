@@ -15,7 +15,7 @@ function getInitials(name: string | null | undefined, email: string): string {
 }
 
 export function TopUsersCard() {
-  const { data, isLoading, isError } = useAdminUsers(1, 100)
+  const { data, isLoading, isError } = useAdminUsers({ page: 1, pageSize: 100 })
 
   if (isLoading) {
     return (
