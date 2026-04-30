@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import {
   AlertCircle,
+  AlertTriangle,
   Bell,
   BellOff,
   Mail,
@@ -9,6 +10,16 @@ import {
   Trash2,
 } from "lucide-react"
 import { useState } from "react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
 import {
   Breadcrumb,
@@ -18,7 +29,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Dialog,
@@ -343,11 +354,14 @@ function DeleteEmailRouteDialog({
   const deleteMutation = useDeleteFaxEmailRoute(route?.faxNumberId ?? "")
 
   return (
-    <Dialog open={!!route} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Delete Email Route</DialogTitle>
-          <DialogDescription>
+    <AlertDialog open={!!route} onOpenChange={onOpenChange}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle className="flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5 text-destructive" />
+            Delete Email Route
+          </AlertDialogTitle>
+          <AlertDialogDescription>
             Are you sure you want to remove the route for{" "}
             <span className="font-medium text-foreground">
               {route?.emailAddress}
@@ -357,18 +371,17 @@ function DeleteEmailRouteDialog({
               {route?.faxNumber}
             </span>
             ? This action cannot be undone.
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <Button
-            variant="outline"
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel
             onClick={() => onOpenChange(false)}
             disabled={deleteMutation.isPending}
           >
             Cancel
-          </Button>
-          <Button
-            variant="destructive"
+          </AlertDialogCancel>
+          <AlertDialogAction
+            className={buttonVariants({ variant: "destructive" })}
             disabled={deleteMutation.isPending}
             onClick={() => {
               if (!route) return
@@ -378,10 +391,10 @@ function DeleteEmailRouteDialog({
             }}
           >
             {deleteMutation.isPending ? "Deleting..." : "Delete Route"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }
 
