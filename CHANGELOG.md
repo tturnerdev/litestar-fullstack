@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.81.0 (2026-04-30)
+
+### Refactored
+- **Shared date utilities** — Extracted duplicated `formatRelativeTime` functions into `lib/date-utils.ts` with three variants (long, short, full datetime). Replaced local implementations in 6 detail/admin pages.
+
+### Improved
+- **Bulk delete confirmation** — Shows selected item count in both the dialog description and action button text instead of generic "selected items".
+- **Extension detail back button** — Added "Back to Extensions" navigation button to voice extension detail page header.
+
 ## v0.80.0 (2026-04-30)
 
 ### Refactored
