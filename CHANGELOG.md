@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.93.0 (2026-04-30)
+
+### Added
+- **Date range filters** — Extracted `DateRangeFilter` into shared component from audit-log-table. Added date range filtering to support tickets (by created date), fax messages (by received date), and devices (by last seen date). Includes presets (Today, Last 7/30/90 days, All time) and custom date input.
+- **CSV export** — Added export buttons to locations (Name, Type, Address, City, State, Postal Code, Country), phone numbers (Number, Label, Type, Status), fax numbers (Number, Label, Status), and extensions (Extension, Display Name, Status). All list pages now have CSV export.
+
+### Refactored
+- **DateRangeFilter extraction** — Moved inline DateRangeFilter component from audit-log-table.tsx into shared `components/ui/date-range-filter.tsx`, removing ~120 lines of duplication.
+
 ## v0.92.0 (2026-04-30)
 
 ### Added
