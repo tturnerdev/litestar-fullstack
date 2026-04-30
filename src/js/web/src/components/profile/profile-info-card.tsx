@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAuthStore } from "@/lib/auth"
 import { accountProfileUpdate } from "@/lib/generated/api"
 import { accountProfileQueryKey } from "@/lib/generated/api/@tanstack/react-query.gen"
@@ -137,7 +138,12 @@ export function ProfileInfoCard() {
               </Avatar>
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <p className="truncate font-medium text-lg">{user.name || user.email}</p>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <p className="truncate font-medium text-lg">{user.name || user.email}</p>
+                    </TooltipTrigger>
+                    <TooltipContent>{user.name || user.email}</TooltipContent>
+                  </Tooltip>
                   <Badge variant={user.isSuperuser ? "default" : "secondary"} className="shrink-0">
                     {user.isSuperuser ? (
                       <><Crown className="mr-1 h-3 w-3" /> Admin</>
@@ -146,7 +152,12 @@ export function ProfileInfoCard() {
                     )}
                   </Badge>
                 </div>
-                <p className="truncate text-muted-foreground text-sm">{user.email}</p>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <p className="truncate text-muted-foreground text-sm">{user.email}</p>
+                  </TooltipTrigger>
+                  <TooltipContent>{user.email}</TooltipContent>
+                </Tooltip>
               </div>
             </div>
           </div>

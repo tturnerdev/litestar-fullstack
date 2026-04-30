@@ -50,9 +50,14 @@ export function FaxNumberCard({ faxNumber }: FaxNumberCardProps) {
             <Hash className="h-4 w-4" />
           </div>
           <div className="min-w-0">
-            <CardTitle className="text-sm truncate">
-              {faxNumber.label ?? formatPhoneNumber(faxNumber.number)}
-            </CardTitle>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <CardTitle className="text-sm truncate">
+                  {faxNumber.label ?? formatPhoneNumber(faxNumber.number)}
+                </CardTitle>
+              </TooltipTrigger>
+              <TooltipContent>{faxNumber.label ?? formatPhoneNumber(faxNumber.number)}</TooltipContent>
+            </Tooltip>
             {faxNumber.label && (
               <p className="text-xs text-muted-foreground font-mono">
                 {formatPhoneNumber(faxNumber.number)}

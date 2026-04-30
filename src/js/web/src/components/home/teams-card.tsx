@@ -4,6 +4,7 @@ import { Check, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAuthStore } from "@/lib/auth"
 import type { Team } from "@/lib/generated/api"
 
@@ -93,7 +94,12 @@ export function TeamsCard({ teams, isLoading }: TeamsCardProps) {
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <p className="truncate text-sm font-medium">{team.name}</p>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <p className="truncate text-sm font-medium">{team.name}</p>
+                          </TooltipTrigger>
+                          <TooltipContent>{team.name}</TooltipContent>
+                        </Tooltip>
                         {isActive && (
                           <div className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary">
                             <Check className="h-2.5 w-2.5 text-primary-foreground" />
@@ -101,7 +107,12 @@ export function TeamsCard({ teams, isLoading }: TeamsCardProps) {
                         )}
                       </div>
                       {team.description && (
-                        <p className="truncate text-xs text-muted-foreground">{team.description}</p>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <p className="truncate text-xs text-muted-foreground">{team.description}</p>
+                          </TooltipTrigger>
+                          <TooltipContent>{team.description}</TooltipContent>
+                        </Tooltip>
                       )}
                     </div>
                     {memberCount != null && (

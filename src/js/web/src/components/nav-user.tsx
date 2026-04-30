@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAuthStore } from "@/lib/auth"
 
 function useIsMac() {
@@ -49,8 +50,18 @@ export function NavUser() {
                 <span className="absolute -bottom-0.5 -right-0.5 block h-2 w-2 rounded-full bg-green-500 ring-2 ring-sidebar" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
-                <span className="truncate font-medium">{displayName}</span>
-                <span className="truncate text-xs">{user.email}</span>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="truncate font-medium">{displayName}</span>
+                  </TooltipTrigger>
+                  <TooltipContent>{displayName}</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="truncate text-xs">{user.email}</span>
+                  </TooltipTrigger>
+                  <TooltipContent>{user.email}</TooltipContent>
+                </Tooltip>
               </div>
               <ChevronsUpDown className="ml-auto size-4 group-data-[collapsible=icon]:hidden" />
             </SidebarMenuButton>
@@ -67,12 +78,22 @@ export function NavUser() {
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <div className="flex items-center gap-1.5">
-                    <span className="truncate font-medium">{displayName}</span>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="truncate font-medium">{displayName}</span>
+                      </TooltipTrigger>
+                      <TooltipContent>{displayName}</TooltipContent>
+                    </Tooltip>
                     <Badge variant={user.isSuperuser ? "destructive" : "secondary"} className="text-[10px] px-1.5 py-0">
                       {user.isSuperuser ? "Admin" : "Member"}
                     </Badge>
                   </div>
-                  <span className="truncate text-xs">{user.email}</span>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="truncate text-xs">{user.email}</span>
+                    </TooltipTrigger>
+                    <TooltipContent>{user.email}</TooltipContent>
+                  </Tooltip>
                 </div>
               </div>
               <p className="px-1 pb-1 text-[11px] text-muted-foreground">{isMac ? "⌘K" : "Ctrl+K"} to search</p>

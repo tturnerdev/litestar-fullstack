@@ -219,13 +219,23 @@ export function RecentActivity() {
                     {/* Content */}
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                        <span className="text-sm font-medium truncate">{actorDisplay}</span>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="text-sm font-medium truncate">{actorDisplay}</span>
+                          </TooltipTrigger>
+                          <TooltipContent>{actorDisplay}</TooltipContent>
+                        </Tooltip>
                         <span className="text-xs text-muted-foreground">{formatAction(activity.action)}</span>
                       </div>
                       {activity.targetLabel && (
-                        <p className="mt-0.5 text-xs text-muted-foreground truncate">
-                          {activity.targetLabel}
-                        </p>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <p className="mt-0.5 text-xs text-muted-foreground truncate">
+                              {activity.targetLabel}
+                            </p>
+                          </TooltipTrigger>
+                          <TooltipContent>{activity.targetLabel}</TooltipContent>
+                        </Tooltip>
                       )}
                     </div>
 

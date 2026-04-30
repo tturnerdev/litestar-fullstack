@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAuthStore } from "@/lib/auth"
 import { listTeams, type Team } from "@/lib/generated/api"
 
@@ -228,9 +229,14 @@ export function TeamList() {
                     </button>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <Link to="/teams/$teamId" params={{ teamId: team.id }} className="font-semibold hover:underline truncate text-foreground">
-                          {team.name}
-                        </Link>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Link to="/teams/$teamId" params={{ teamId: team.id }} className="font-semibold hover:underline truncate text-foreground">
+                              {team.name}
+                            </Link>
+                          </TooltipTrigger>
+                          <TooltipContent>{team.name}</TooltipContent>
+                        </Tooltip>
                         {team.isActive === false && (
                           <Badge variant="destructive" className="h-5 px-1.5 text-[10px] font-medium">
                             Inactive
@@ -342,9 +348,14 @@ export function TeamList() {
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <Link to="/teams/$teamId" params={{ teamId: team.id }} className="font-semibold hover:underline truncate text-foreground text-sm">
-                        {team.name}
-                      </Link>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Link to="/teams/$teamId" params={{ teamId: team.id }} className="font-semibold hover:underline truncate text-foreground text-sm">
+                            {team.name}
+                          </Link>
+                        </TooltipTrigger>
+                        <TooltipContent>{team.name}</TooltipContent>
+                      </Tooltip>
                       {team.isActive === false && (
                         <Badge variant="destructive" className="h-5 px-1.5 text-[10px] font-medium">
                           Inactive
@@ -364,7 +375,12 @@ export function TeamList() {
                       )}
                     </div>
                     {team.description && (
-                      <p className="text-xs text-muted-foreground truncate mt-0.5">{team.description}</p>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <p className="text-xs text-muted-foreground truncate mt-0.5">{team.description}</p>
+                        </TooltipTrigger>
+                        <TooltipContent>{team.description}</TooltipContent>
+                      </Tooltip>
                     )}
                   </div>
 

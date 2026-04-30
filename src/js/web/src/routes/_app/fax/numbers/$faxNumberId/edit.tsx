@@ -1,6 +1,16 @@
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
-import { useEffect, useState } from "react"
+import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
+import { useEffect, useRef, useState } from "react"
 import { Loader2 } from "lucide-react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -24,6 +34,7 @@ function EditFaxNumberPage() {
   const [label, setLabel] = useState("")
   const [isActive, setIsActive] = useState(true)
   const [initialized, setInitialized] = useState(false)
+  const justSubmittedRef = useRef(false)
 
   // Pre-populate form fields when fax number data loads
   useEffect(() => {
@@ -33,6 +44,14 @@ function EditFaxNumberPage() {
       setInitialized(true)
     }
   }, [data, initialized])
+
+  const isDirty = initialized && data != null && (label !== (data.label ?? "") || isActive !== data.isActive)
+
+  // Block navigation when form has unsaved changes
+  const blocker = useBlocker({
+    shouldBlockFn: () => isDirty && !justSubmittedRef.current,
+    withResolver: true,
+  })
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -47,13 +66,18 @@ function EditFaxNumberPage() {
     if (isActive !== data.isActive) payload.isActive = isActive
 
     if (Object.keys(payload).length === 0) {
+      justSubmittedRef.current = true
       router.navigate({ to: "/fax/numbers/$faxNumberId", params: { faxNumberId } })
       return
     }
 
+    justSubmittedRef.current = true
     updateFaxNumber.mutate(payload, {
       onSuccess: () => {
         router.navigate({ to: "/fax/numbers/$faxNumberId", params: { faxNumberId } })
+      },
+      onError: () => {
+        justSubmittedRef.current = false
       },
     })
   }
@@ -94,6 +118,7 @@ function EditFaxNumberPage() {
   }
 
   return (
+    <>
     <PageContainer className="flex-1 space-y-8">
       <PageHeader
         eyebrow="Fax"
@@ -171,5 +196,22 @@ function EditFaxNumberPage() {
         </CardContent>
       </Card>
     </PageContainer>
+
+    {/* -- Unsaved changes dialog ---------------------------------------- */}
+    <AlertDialog open={blocker.status === "blocked"} onOpenChange={() => blocker.reset?.()}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
+          <AlertDialogDescription>
+            You have unsaved changes to this fax number. Are you sure you want to leave? Your changes will be lost.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={() => blocker.reset?.()}>Stay on page</AlertDialogCancel>
+          <AlertDialogAction onClick={() => blocker.proceed?.()}>Discard changes</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   )
 }

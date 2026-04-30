@@ -1,9 +1,20 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
+import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
 import { AlertCircle, Loader2 } from "lucide-react"
+import { useRef } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -84,6 +95,7 @@ function EditExtensionForm({ extensionId, initialData }: EditExtensionFormProps)
   const router = useRouter()
   const updateExtension = useUpdateExtension(extensionId)
   const { data: phoneNumbers } = usePhoneNumbers(1, 100)
+  const justSubmittedRef = useRef(false)
 
   const form = useForm<EditExtensionFormData>({
     resolver: zodResolver(editExtensionSchema),
@@ -94,6 +106,14 @@ function EditExtensionForm({ extensionId, initialData }: EditExtensionFormProps)
     },
   })
 
+  const { isDirty } = form.formState
+
+  // Block navigation when form has unsaved changes
+  const blocker = useBlocker({
+    shouldBlockFn: () => isDirty && !justSubmittedRef.current,
+    withResolver: true,
+  })
+
   const onSubmit = async (data: EditExtensionFormData) => {
     // Only send fields that actually changed
     const payload: Record<string, unknown> = {}
@@ -102,15 +122,18 @@ function EditExtensionForm({ extensionId, initialData }: EditExtensionFormProps)
     if ((data.phoneNumberId || null) !== (initialData.phoneNumberId || null)) payload.phoneNumberId = data.phoneNumberId || null
 
     if (Object.keys(payload).length === 0) {
+      justSubmittedRef.current = true
       router.navigate({ to: "/voice/extensions/$extensionId", params: { extensionId } })
       return
     }
 
     try {
+      justSubmittedRef.current = true
       await updateExtension.mutateAsync(payload)
       router.invalidate()
       router.navigate({ to: "/voice/extensions/$extensionId", params: { extensionId } })
     } catch (_error) {
+      justSubmittedRef.current = false
       form.setError("root", {
         message: "Failed to update extension",
       })
@@ -118,6 +141,7 @@ function EditExtensionForm({ extensionId, initialData }: EditExtensionFormProps)
   }
 
   return (
+    <>
     <PageContainer className="flex-1 space-y-8">
       <PageHeader
         eyebrow="Voice"
@@ -230,5 +254,22 @@ function EditExtensionForm({ extensionId, initialData }: EditExtensionFormProps)
         </CardContent>
       </Card>
     </PageContainer>
+
+    {/* -- Unsaved changes dialog ---------------------------------------- */}
+    <AlertDialog open={blocker.status === "blocked"} onOpenChange={() => blocker.reset?.()}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
+          <AlertDialogDescription>
+            You have unsaved changes to this extension. Are you sure you want to leave? Your changes will be lost.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={() => blocker.reset?.()}>Stay on page</AlertDialogCancel>
+          <AlertDialogAction onClick={() => blocker.proceed?.()}>Discard changes</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   )
 }
