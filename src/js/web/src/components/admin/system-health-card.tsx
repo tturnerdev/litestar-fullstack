@@ -6,6 +6,7 @@ import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAdminSystemStatus } from "@/lib/api/hooks/admin"
+import { formatUptime } from "@/lib/format-utils"
 
 function StatusIndicator({ ok, label }: { ok: boolean; label?: string }) {
   const statusLabel = label ?? (ok ? "Healthy" : "Unhealthy")
@@ -24,15 +25,6 @@ function StatusIndicator({ ok, label }: { ok: boolean; label?: string }) {
       </TooltipContent>
     </Tooltip>
   )
-}
-
-function formatUptime(seconds: number): string {
-  const days = Math.floor(seconds / 86400)
-  const hours = Math.floor((seconds % 86400) / 3600)
-  if (days > 0) return `${days}d ${hours}h`
-  const minutes = Math.floor((seconds % 3600) / 60)
-  if (hours > 0) return `${hours}h ${minutes}m`
-  return `${minutes}m`
 }
 
 export function SystemHealthCard() {

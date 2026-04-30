@@ -24,6 +24,7 @@ import { SkeletonCard } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAdminSystemStatus } from "@/lib/api/hooks/admin"
+import { formatUptime } from "@/lib/format-utils"
 
 export const Route = createFileRoute("/_app/admin/system")({
   component: AdminSystemPage,
@@ -32,20 +33,6 @@ export const Route = createFileRoute("/_app/admin/system")({
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-
-function formatUptime(seconds: number): string {
-  const days = Math.floor(seconds / 86400)
-  const hours = Math.floor((seconds % 86400) / 3600)
-  const minutes = Math.floor((seconds % 3600) / 60)
-  const secs = Math.floor(seconds % 60)
-
-  const parts: string[] = []
-  if (days > 0) parts.push(`${days}d`)
-  if (hours > 0) parts.push(`${hours}h`)
-  if (minutes > 0) parts.push(`${minutes}m`)
-  parts.push(`${secs}s`)
-  return parts.join(" ")
-}
 
 function useTimeSince(timestamp: string | undefined) {
   const [, setTick] = useState(0)
@@ -57,7 +44,7 @@ function useTimeSince(timestamp: string | undefined) {
 
   if (!timestamp) return null
   const elapsed = Math.floor((Date.now() - new Date(timestamp).getTime()) / 1000)
-  return formatUptime(Math.max(0, elapsed))
+  return formatUptime(Math.max(0, elapsed), true)
 }
 
 // ---------------------------------------------------------------------------
@@ -220,7 +207,7 @@ function SystemInfoCard({
     { label: "Python Version", value: pythonVersion, icon: HardDrive, mono: true },
     {
       label: "Uptime",
-      value: liveUptime ?? formatUptime(uptimeSeconds),
+      value: liveUptime ?? formatUptime(uptimeSeconds, true),
       icon: Clock,
     },
     {

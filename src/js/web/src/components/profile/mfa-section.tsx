@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useMfaStatus, useRegenerateBackupCodes } from "@/lib/api/hooks/auth"
+import { formatDateLong } from "@/lib/date-utils"
 
 const TOTAL_BACKUP_CODES = 10
 
@@ -54,18 +55,6 @@ function BackupCodesProgress({ remaining }: { remaining: number }) {
       </div>
     </div>
   )
-}
-
-function formatDate(dateString: string): string {
-  try {
-    return new Date(dateString).toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    })
-  } catch {
-    return dateString
-  }
 }
 
 export function MfaSection() {
@@ -126,7 +115,7 @@ export function MfaSection() {
               <p className="text-xs text-green-600 dark:text-green-400">
                 Your account is secured with multi-factor authentication.
                 {data.confirmedAt && (
-                  <span> Enabled on {formatDate(data.confirmedAt)}.</span>
+                  <span> Enabled on {formatDateLong(data.confirmedAt)}.</span>
                 )}
               </p>
             </div>

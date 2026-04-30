@@ -275,8 +275,7 @@ export function FaxMessageDetail({ message, onDelete, onResend, isDeleting }: Fa
                 <iframe
                   src={pdfUrl}
                   title="Fax document preview"
-                  className="h-[600px] w-full"
-                  style={{ border: "none" }}
+                  className="h-[600px] w-full border-none"
                 />
               </div>
             </>

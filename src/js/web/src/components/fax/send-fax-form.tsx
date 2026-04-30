@@ -596,8 +596,7 @@ export function SendFaxForm() {
                   <iframe
                     src={previewUrl}
                     title="PDF preview"
-                    className="h-[500px] w-full"
-                    style={{ border: "none" }}
+                    className="h-[500px] w-full border-none"
                   />
                 </div>
               ) : file && file.type !== "application/pdf" ? (

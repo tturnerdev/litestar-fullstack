@@ -101,21 +101,6 @@ export function ReportIssueTab({ formData, onFormDataChange, onCaptureScreenshot
       return
     }
 
-    // Debug logging
-    console.log("[Help] Issue report submitted:", {
-      title: formData.title.trim(),
-      category: formData.category,
-      description: formData.description.trim(),
-      screenshotAttached: !!formData.screenshot,
-      fileCount: formData.files.length,
-    })
-    if (formData.screenshot) {
-      console.log("[Help] Screenshot data URL length:", formData.screenshot.length)
-    }
-    for (const file of formData.files) {
-      console.log("[Help] Attached file:", file.name, formatBytes(file.size))
-    }
-
     setIsSubmitting(true)
 
     try {
@@ -170,7 +155,6 @@ export function ReportIssueTab({ formData, onFormDataChange, onCaptureScreenshot
         files: [],
       })
     } catch (err) {
-      console.error("[Help] Failed to submit issue report:", err)
       toast.error("Failed to submit report", {
         description: err instanceof Error ? err.message : "Please try again later.",
       })

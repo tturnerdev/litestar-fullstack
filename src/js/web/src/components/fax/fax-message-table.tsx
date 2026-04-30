@@ -22,19 +22,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDeleteFaxMessage, useFaxMessages } from "@/lib/api/hooks/fax"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
+import { formatPhoneNumber } from "@/lib/format-utils"
 
 const PAGE_SIZE = 25
-
-function formatUSPhone(phone: string): string {
-  const cleaned = phone.replace(/\D/g, "")
-  if (cleaned.length === 11 && cleaned.startsWith("1")) {
-    const area = cleaned.slice(1, 4)
-    const prefix = cleaned.slice(4, 7)
-    const line = cleaned.slice(7)
-    return `(${area}) ${prefix}-${line}`
-  }
-  return phone
-}
 
 export function FaxMessageTable() {
   const [page, setPage] = useState(1)
@@ -211,7 +201,7 @@ export function FaxMessageTable() {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">
-                      <span className="font-mono">{formatUSPhone(msg.remoteNumber)}</span>
+                      <span className="font-mono">{formatPhoneNumber(msg.remoteNumber)}</span>
                       <Button
                         variant="ghost"
                         size="icon"
@@ -277,7 +267,7 @@ export function FaxMessageTable() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete fax message?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete the fax message {deleteTarget ? `to/from ${formatUSPhone(deleteTarget.remoteNumber)}` : ""}. This action cannot be undone.
+              This will permanently delete the fax message {deleteTarget ? `to/from ${formatPhoneNumber(deleteTarget.remoteNumber)}` : ""}. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

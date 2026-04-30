@@ -18,7 +18,7 @@ import { useTableSelection } from "@/hooks/use-table-selection"
 import { useDevices, useRebootDevice, useUpdateDevice } from "@/lib/api/hooks/devices"
 import { deleteDevice } from "@/lib/generated/api"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
-import { formatRelativeTimeShort } from "@/lib/date-utils"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 
 const PAGE_SIZE = 20
 
@@ -90,12 +90,6 @@ const columnLabels: Record<ColumnKey, string> = {
   macAddress: "MAC Address",
   lastSeen: "Last Seen",
   actions: "Actions",
-}
-
-function formatLastSeen(value: string | null | undefined): string {
-  if (!value) return "Never"
-  const date = new Date(value)
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })
 }
 
 function SortableHeader({
@@ -530,7 +524,7 @@ function DeviceRow({
               <TooltipTrigger asChild>
                 <span className="cursor-default">{formatRelativeTimeShort(device.lastSeenAt)}</span>
               </TooltipTrigger>
-              <TooltipContent>{formatLastSeen(device.lastSeenAt)}</TooltipContent>
+              <TooltipContent>{formatDateTime(device.lastSeenAt)}</TooltipContent>
             </Tooltip>
           ) : (
             "Never"

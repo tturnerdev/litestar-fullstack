@@ -62,5 +62,21 @@ export function formatDateTime(dateStr: string | null | undefined, fallback = "-
   return new Date(dateStr).toLocaleString()
 }
 
+/**
+ * Format a date string as a long-form date (e.g. "January 15, 2026").
+ * Returns the raw string on parse failure.
+ */
+export function formatDateLong(dateStr: string): string {
+  try {
+    return new Date(dateStr).toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })
+  } catch {
+    return dateStr
+  }
+}
+
 /** @deprecated Use {@link formatDateTime} instead. */
 export const formatFullDate = formatDateTime

@@ -51,6 +51,32 @@ export function formatDurationHuman(seconds: number): string {
 }
 
 /**
+ * Format an uptime duration in seconds as a compact human-readable string.
+ *
+ * Compact (default): "3d 2h", "5h 30m", "12m"
+ * Detailed (`detailed: true`): "3d 2h 30m 45s" (includes all non-zero parts plus seconds)
+ */
+export function formatUptime(seconds: number, detailed = false): string {
+  const days = Math.floor(seconds / 86400)
+  const hours = Math.floor((seconds % 86400) / 3600)
+  const minutes = Math.floor((seconds % 3600) / 60)
+  const secs = Math.floor(seconds % 60)
+
+  if (detailed) {
+    const parts: string[] = []
+    if (days > 0) parts.push(`${days}d`)
+    if (hours > 0) parts.push(`${hours}h`)
+    if (minutes > 0) parts.push(`${minutes}m`)
+    parts.push(`${secs}s`)
+    return parts.join(" ")
+  }
+
+  if (days > 0) return `${days}d ${hours}h`
+  if (hours > 0) return `${hours}h ${minutes}m`
+  return `${minutes}m`
+}
+
+/**
  * Auto-format a raw MAC string into XX:XX:XX:XX:XX:XX as the user types.
  * Strips non-hex characters, uppercases, and inserts colons every 2 chars.
  */

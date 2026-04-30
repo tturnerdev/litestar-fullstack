@@ -16,48 +16,26 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useActiveSessions, useRevokeAllSessions, useRevokeSession } from "@/lib/api/hooks/profile"
-import { formatFullDateTime } from "@/lib/date-utils"
+import { formatFullDateTime, formatRelativeTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import type { ActiveSession } from "@/lib/generated/api/types.gen"
 
 type DeviceCategory = "Desktop" | "Mobile" | "Tablet"
 
+/** Wrap formatRelativeTime to handle future dates (e.g. session expiry). */
 function formatTimeAgo(dateStr: string): string {
-  const date = new Date(dateStr)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const absDiffMs = Math.abs(diffMs)
-  const isFuture = diffMs < 0
-
-  const minutes = Math.floor(absDiffMs / 60000)
-  const hours = Math.floor(absDiffMs / 3600000)
-  const days = Math.floor(absDiffMs / 86400000)
-
-  let relative: string
-  if (minutes < 1) relative = "less than a minute"
-  else if (minutes === 1) relative = "1 minute"
-  else if (minutes < 60) relative = `${minutes} minutes`
-  else if (hours === 1) relative = "1 hour"
-  else if (hours < 24) relative = `${hours} hours`
-  else if (days === 1) relative = "1 day"
-  else if (days < 30) relative = `${days} days`
-  else relative = `${Math.floor(days / 30)} month${Math.floor(days / 30) !== 1 ? "s" : ""}`
-
-  return isFuture ? `in ${relative}` : `${relative} ago`
+  const diffMs = Date.now() - new Date(dateStr).getTime()
+  if (diffMs >= 0) return formatRelativeTime(dateStr)
+  // Future date: rewrite "X ago" → "in X"
+  const agoStr = formatRelativeTime(
+    new Date(Date.now() + Math.abs(diffMs)).toISOString(),
+  )
+  return `in ${agoStr.replace(/ ago$/, "")}`
 }
 
 function formatLastActive(dateStr: string): string {
-  const date = new Date(dateStr)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const minutes = Math.floor(diffMs / 60000)
-  const hours = Math.floor(diffMs / 3600000)
-  const days = Math.floor(diffMs / 86400000)
-
-  if (minutes < 2) return "Active now"
-  if (minutes < 60) return `${minutes}m ago`
-  if (hours < 24) return `${hours}h ago`
-  if (days === 1) return "1 day ago"
-  return `${days} days ago`
+  const diffMs = Date.now() - new Date(dateStr).getTime()
+  if (diffMs < 120_000) return "Active now"
+  return formatRelativeTimeShort(dateStr)
 }
 
 function parseDeviceInfo(deviceInfo: string | null | undefined): {
