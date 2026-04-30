@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router"
 import { useCallback, useMemo, useState } from "react"
-import { Download, MoreVertical, Power, RefreshCw, Search, X } from "lucide-react"
+import { ArrowDown, ArrowUp, ArrowUpDown, Columns3, Download, Monitor, MoreVertical, Power, RefreshCw, Search, X } from "lucide-react"
 import { useQueryClient } from "@tanstack/react-query"
 import { DeviceStatusBadge } from "@/components/devices/device-status-badge"
 import { Badge } from "@/components/ui/badge"
@@ -8,11 +8,12 @@ import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/com
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { SkeletonTable } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useTableSelection } from "@/hooks/use-table-selection"
 import { useDevices, useRebootDevice, useUpdateDevice } from "@/lib/api/hooks/devices"
 import { deleteDevice } from "@/lib/generated/api"
@@ -67,10 +68,82 @@ const csvHeaders: CsvHeader<DeviceItem>[] = [
 
 const getId = (d: DeviceItem) => d.id
 
+type SortField = "name" | "deviceType" | "status" | "macAddress" | "lastSeenAt"
+type SortDir = "asc" | "desc"
+
+type ColumnKey = "name" | "type" | "status" | "macAddress" | "lastSeen" | "actions"
+
+const defaultColumnVisibility: Record<ColumnKey, boolean> = {
+  name: true,
+  type: true,
+  status: true,
+  macAddress: true,
+  lastSeen: true,
+  actions: true,
+}
+
+const columnLabels: Record<ColumnKey, string> = {
+  name: "Name",
+  type: "Type",
+  status: "Status",
+  macAddress: "MAC Address",
+  lastSeen: "Last Seen",
+  actions: "Actions",
+}
+
 function formatLastSeen(value: string | null | undefined): string {
   if (!value) return "Never"
   const date = new Date(value)
   return date.toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })
+}
+
+function timeAgo(dateStr: string): string {
+  const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000)
+  if (seconds < 60) return "just now"
+  const minutes = Math.floor(seconds / 60)
+  if (minutes < 60) return `${minutes}m ago`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours}h ago`
+  const days = Math.floor(hours / 24)
+  if (days < 7) return `${days}d ago`
+  const weeks = Math.floor(days / 7)
+  if (weeks < 5) return `${weeks}w ago`
+  const months = Math.floor(days / 30)
+  return `${months}mo ago`
+}
+
+function SortableHeader({
+  label,
+  field,
+  currentField,
+  currentDir,
+  onSort,
+}: {
+  label: string
+  field: SortField
+  currentField: SortField | null
+  currentDir: SortDir
+  onSort: (field: SortField) => void
+}) {
+  const isActive = currentField === field
+  return (
+    <button
+      type="button"
+      className="inline-flex items-center gap-1 hover:text-foreground transition-colors -ml-2 px-2 py-1 rounded-md hover:bg-accent"
+      onClick={() => onSort(field)}
+    >
+      {label}
+      {isActive ? (
+        currentDir === "asc" ? (
+          <ArrowUp className="h-3.5 w-3.5" />
+        ) : (
+          <ArrowDown className="h-3.5 w-3.5" />
+        )
+      ) : (
+        <ArrowUpDown className="h-3.5 w-3.5 opacity-40" />
+      )}
+    </button>
+  )
 }
 
 export function DeviceTable() {
@@ -79,6 +152,9 @@ export function DeviceTable() {
   const [searchInput, setSearchInput] = useState("")
   const [typeFilter, setTypeFilter] = useState("all")
   const [statusFilter, setStatusFilter] = useState("all")
+  const [sortField, setSortField] = useState<SortField | null>(null)
+  const [sortDir, setSortDir] = useState<SortDir>("asc")
+  const [columnVisibility, setColumnVisibility] = useState(defaultColumnVisibility)
   const queryClient = useQueryClient()
 
   const { data, isLoading, isError } = useDevices({
@@ -87,15 +163,66 @@ export function DeviceTable() {
     search: search || undefined,
   })
 
+  const handleSort = useCallback((field: SortField) => {
+    setSortField((prev) => {
+      if (prev === field) {
+        setSortDir((d) => (d === "asc" ? "desc" : "asc"))
+        return field
+      }
+      setSortDir("asc")
+      return field
+    })
+  }, [])
+
+  const toggleColumn = useCallback((key: ColumnKey) => {
+    setColumnVisibility((prev) => ({ ...prev, [key]: !prev[key] }))
+  }, [])
+
   // Client-side filtering for type and status (server search handles name)
   const filteredItems: DeviceItem[] = useMemo(() => {
     if (!data) return []
-    return data.items.filter((device) => {
+    let items = data.items.filter((device) => {
       if (typeFilter !== "all" && device.deviceType !== typeFilter) return false
       if (statusFilter !== "all" && device.status !== statusFilter) return false
       return true
     })
-  }, [data, typeFilter, statusFilter])
+
+    // Apply sorting
+    if (sortField) {
+      items = [...items].sort((a, b) => {
+        let aVal: string | null | undefined
+        let bVal: string | null | undefined
+        switch (sortField) {
+          case "name":
+            aVal = a.name
+            bVal = b.name
+            break
+          case "deviceType":
+            aVal = a.deviceType
+            bVal = b.deviceType
+            break
+          case "status":
+            aVal = a.status
+            bVal = b.status
+            break
+          case "macAddress":
+            aVal = a.macAddress
+            bVal = b.macAddress
+            break
+          case "lastSeenAt":
+            aVal = a.lastSeenAt
+            bVal = b.lastSeenAt
+            break
+        }
+        const aStr = aVal ?? ""
+        const bStr = bVal ?? ""
+        const cmp = aStr.localeCompare(bStr)
+        return sortDir === "asc" ? cmp : -cmp
+      })
+    }
+
+    return items
+  }, [data, typeFilter, statusFilter, sortField, sortDir])
 
   const selection = useTableSelection(filteredItems, getId)
 
@@ -162,6 +289,7 @@ export function DeviceTable() {
 
   const totalPages = Math.max(1, Math.ceil(data.total / PAGE_SIZE))
   const hasActiveFilters = typeFilter !== "all" || statusFilter !== "all" || search !== ""
+  const visibleColumnCount = Object.values(columnVisibility).filter(Boolean).length
 
   return (
     <>
@@ -176,6 +304,27 @@ export function DeviceTable() {
                   Clear filters
                 </Button>
               )}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <Columns3 className="mr-1 h-3.5 w-3.5" />
+                    Columns
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-40">
+                  <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {(Object.keys(columnLabels) as ColumnKey[]).map((key) => (
+                    <DropdownMenuCheckboxItem
+                      key={key}
+                      checked={columnVisibility[key]}
+                      onCheckedChange={() => toggleColumn(key)}
+                    >
+                      {columnLabels[key]}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
               <Button variant="outline" size="sm" onClick={handleExportAll} disabled={filteredItems.length === 0}>
                 <Download className="mr-1 h-3.5 w-3.5" />
                 Export All
@@ -242,28 +391,65 @@ export function DeviceTable() {
                     aria-label="Select all devices"
                   />
                 </TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>MAC Address</TableHead>
-                <TableHead>Last Seen</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                {columnVisibility.name && (
+                  <TableHead>
+                    <SortableHeader label="Name" field="name" currentField={sortField} currentDir={sortDir} onSort={handleSort} />
+                  </TableHead>
+                )}
+                {columnVisibility.type && (
+                  <TableHead>
+                    <SortableHeader label="Type" field="deviceType" currentField={sortField} currentDir={sortDir} onSort={handleSort} />
+                  </TableHead>
+                )}
+                {columnVisibility.status && (
+                  <TableHead>
+                    <SortableHeader label="Status" field="status" currentField={sortField} currentDir={sortDir} onSort={handleSort} />
+                  </TableHead>
+                )}
+                {columnVisibility.macAddress && (
+                  <TableHead>
+                    <SortableHeader label="MAC Address" field="macAddress" currentField={sortField} currentDir={sortDir} onSort={handleSort} />
+                  </TableHead>
+                )}
+                {columnVisibility.lastSeen && (
+                  <TableHead>
+                    <SortableHeader label="Last Seen" field="lastSeenAt" currentField={sortField} currentDir={sortDir} onSort={handleSort} />
+                  </TableHead>
+                )}
+                {columnVisibility.actions && <TableHead className="text-right">Actions</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredItems.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-muted-foreground">
-                    {hasActiveFilters ? "No devices match your filters." : "No devices found."}
+                  <TableCell colSpan={visibleColumnCount + 1} className="h-48">
+                    <div className="flex flex-col items-center justify-center text-center">
+                      <Monitor className="mb-3 h-10 w-10 text-muted-foreground/30" />
+                      <p className="text-sm font-medium text-muted-foreground">
+                        {hasActiveFilters ? "No devices match your filters" : "No devices found"}
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground/70">
+                        {hasActiveFilters
+                          ? "Try adjusting your search or filter criteria."
+                          : "Devices will appear here once they are registered."}
+                      </p>
+                      {hasActiveFilters && (
+                        <Button variant="outline" size="sm" onClick={clearFilters} className="mt-3">
+                          Clear all filters
+                        </Button>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               )}
-              {filteredItems.map((device) => (
+              {filteredItems.map((device, index) => (
                 <DeviceRow
                   key={device.id}
                   device={device}
                   isSelected={selection.isSelected(device.id)}
                   onToggleSelect={() => selection.toggle(device.id)}
+                  striped={index % 2 === 1}
+                  columnVisibility={columnVisibility}
                 />
               ))}
             </TableBody>
@@ -304,16 +490,23 @@ function DeviceRow({
   device,
   isSelected,
   onToggleSelect,
+  striped,
+  columnVisibility,
 }: {
   device: DeviceItem
   isSelected: boolean
   onToggleSelect: () => void
+  striped: boolean
+  columnVisibility: Record<ColumnKey, boolean>
 }) {
   const rebootMutation = useRebootDevice(device.id)
   const updateMutation = useUpdateDevice(device.id)
 
   return (
-    <TableRow data-state={isSelected ? "selected" : undefined}>
+    <TableRow
+      data-state={isSelected ? "selected" : undefined}
+      className={`transition-colors hover:bg-muted/50 ${striped && !isSelected ? "bg-muted/20" : ""}`}
+    >
       <TableCell>
         <Checkbox
           checked={isSelected}
@@ -321,56 +514,79 @@ function DeviceRow({
           aria-label={`Select ${device.name}`}
         />
       </TableCell>
-      <TableCell>
-        <Link to="/devices/$deviceId" params={{ deviceId: device.id }} className="font-medium hover:underline">
-          {device.name}
-        </Link>
-        {device.isActive === false && (
-          <Badge variant="outline" className="ml-2 border-muted-foreground/30 text-muted-foreground text-[10px]">
-            Disabled
-          </Badge>
-        )}
-      </TableCell>
-      <TableCell>{deviceTypeLabels[device.deviceType] ?? device.deviceType}</TableCell>
-      <TableCell>
-        <DeviceStatusBadge status={device.status} />
-      </TableCell>
-      <TableCell className="font-mono text-muted-foreground text-xs">{device.macAddress ?? "—"}</TableCell>
-      <TableCell className="text-muted-foreground">{formatLastSeen(device.lastSeenAt)}</TableCell>
-      <TableCell className="text-right">
-        <div className="flex items-center justify-end gap-1">
-          <Button asChild variant="outline" size="sm">
-            <Link to="/devices/$deviceId" params={{ deviceId: device.id }}>
-              View
-            </Link>
-          </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <MoreVertical className="h-4 w-4" />
-                <span className="sr-only">Quick actions</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                onClick={() => rebootMutation.mutate()}
-                disabled={rebootMutation.isPending}
-              >
-                <RefreshCw className="mr-2 h-4 w-4" />
-                Reboot
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => updateMutation.mutate({ isActive: !device.isActive })}
-                disabled={updateMutation.isPending}
-              >
-                <Power className="mr-2 h-4 w-4" />
-                {device.isActive ? "Disable" : "Enable"}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </TableCell>
+      {columnVisibility.name && (
+        <TableCell>
+          <Link to="/devices/$deviceId" params={{ deviceId: device.id }} className="font-medium hover:underline">
+            {device.name}
+          </Link>
+          {device.isActive === false && (
+            <Badge variant="outline" className="ml-2 border-muted-foreground/30 text-muted-foreground text-[10px]">
+              Disabled
+            </Badge>
+          )}
+        </TableCell>
+      )}
+      {columnVisibility.type && (
+        <TableCell>{deviceTypeLabels[device.deviceType] ?? device.deviceType}</TableCell>
+      )}
+      {columnVisibility.status && (
+        <TableCell>
+          <DeviceStatusBadge status={device.status} />
+        </TableCell>
+      )}
+      {columnVisibility.macAddress && (
+        <TableCell className="font-mono text-muted-foreground text-xs">{device.macAddress ?? "—"}</TableCell>
+      )}
+      {columnVisibility.lastSeen && (
+        <TableCell className="text-muted-foreground">
+          {device.lastSeenAt ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="cursor-default">{timeAgo(device.lastSeenAt)}</span>
+              </TooltipTrigger>
+              <TooltipContent>{formatLastSeen(device.lastSeenAt)}</TooltipContent>
+            </Tooltip>
+          ) : (
+            "Never"
+          )}
+        </TableCell>
+      )}
+      {columnVisibility.actions && (
+        <TableCell className="text-right">
+          <div className="flex items-center justify-end gap-1">
+            <Button asChild variant="outline" size="sm">
+              <Link to="/devices/$deviceId" params={{ deviceId: device.id }}>
+                View
+              </Link>
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <MoreVertical className="h-4 w-4" />
+                  <span className="sr-only">Quick actions</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={() => rebootMutation.mutate()}
+                  disabled={rebootMutation.isPending}
+                >
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Reboot
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => updateMutation.mutate({ isActive: !device.isActive })}
+                  disabled={updateMutation.isPending}
+                >
+                  <Power className="mr-2 h-4 w-4" />
+                  {device.isActive ? "Disable" : "Enable"}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </TableCell>
+      )}
     </TableRow>
   )
 }

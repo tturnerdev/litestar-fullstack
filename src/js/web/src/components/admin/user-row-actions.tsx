@@ -90,7 +90,7 @@ export function UserRowActions({ user }: UserRowActionsProps) {
       <ManageRolesDialog userId={user.id} userEmail={user.email} open={rolesOpen} onOpenChange={setRolesOpen} />
       <JoinTeamDialog userId={user.id} userName={user.name ?? user.email} open={joinTeamOpen} onOpenChange={setJoinTeamOpen} />
       <ManagePermissionsDialog userId={user.id} open={permissionsOpen} onOpenChange={setPermissionsOpen} />
-      <ToggleUserStatusDialog userId={user.id} userEmail={user.email} isActive={user.isActive ?? true} open={statusOpen} onOpenChange={setStatusOpen} />
+      <ToggleUserStatusDialog userId={user.id} userEmail={user.email} userName={user.name ?? undefined} isActive={user.isActive ?? true} open={statusOpen} onOpenChange={setStatusOpen} />
       <DeleteUserDialog userId={user.id} userEmail={user.email} open={deleteOpen} onOpenChange={setDeleteOpen} />
     </>
   )

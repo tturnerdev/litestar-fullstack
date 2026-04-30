@@ -10,7 +10,7 @@ import {
   Users,
   X,
 } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -29,6 +29,39 @@ import {
   useUnreadCount,
 } from "@/lib/api/hooks/notifications"
 import { cn } from "@/lib/utils"
+
+const bellAnimationStyles = `
+@keyframes bell-ring {
+  0% { transform: rotate(0deg); }
+  10% { transform: rotate(14deg); }
+  20% { transform: rotate(-12deg); }
+  30% { transform: rotate(10deg); }
+  40% { transform: rotate(-8deg); }
+  50% { transform: rotate(6deg); }
+  60% { transform: rotate(-4deg); }
+  70% { transform: rotate(2deg); }
+  80% { transform: rotate(-1deg); }
+  90% { transform: rotate(0.5deg); }
+  100% { transform: rotate(0deg); }
+}
+@keyframes badge-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.85; }
+}
+.bell-ring {
+  animation: bell-ring 0.8s ease-in-out;
+  transform-origin: top center;
+}
+.bell-has-unread {
+  animation: bell-ring 1s ease-in-out infinite;
+  animation-delay: 3s;
+  animation-iteration-count: 1;
+  transform-origin: top center;
+}
+.badge-pulse-new {
+  animation: badge-pulse 1.5s ease-in-out 3;
+}
+` as const
 
 function timeAgo(dateStr: string): string {
   const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000)
@@ -159,17 +192,37 @@ export function NotificationBell() {
   const unreadCount = unreadData?.count ?? 0
   const notifications = notificationsData?.items ?? []
 
+  // Track previous unread count to trigger pulse animation on new arrivals
+  const prevUnreadRef = useRef(unreadCount)
+  const [pulseKey, setPulseKey] = useState(0)
+
+  useEffect(() => {
+    if (unreadCount > prevUnreadRef.current) {
+      setPulseKey((k) => k + 1)
+    }
+    prevUnreadRef.current = unreadCount
+  }, [unreadCount])
+
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
+      {/* Inject animation keyframes */}
+      <style dangerouslySetInnerHTML={{ __html: bellAnimationStyles }} />
+
       <DropdownMenuTrigger asChild>
         <button
           type="button"
           className="relative flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ""}`}
         >
-          <Bell className="h-5 w-5" />
+          <Bell className={cn("h-5 w-5", unreadCount > 0 && "bell-has-unread")} />
           {unreadCount > 0 && (
-            <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[0.6rem] font-bold leading-none text-destructive-foreground">
+            <span
+              key={pulseKey}
+              className={cn(
+                "absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[0.6rem] font-bold leading-none text-destructive-foreground",
+                pulseKey > 0 && "badge-pulse-new",
+              )}
+            >
               {unreadCount > 99 ? "99+" : unreadCount}
             </span>
           )}

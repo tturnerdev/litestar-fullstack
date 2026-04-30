@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.51.0 (2026-04-30)
+
+### Improved
+- **Global search** — recent searches history (localStorage), quick actions (Create Team/Device/Ticket), result count, colored type icons, clear input button, keyboard navigation hints footer, and match text highlighting.
+- **Toggle user status dialog** — UserCheck/UserX icons, visual status transition indicator (Active → Inactive), impact summary bullet lists, loading spinner, tinted header background, and optional user name display.
+- **Notification bell** — bell ring animation when unread, badge pulse animation on new notifications arrival, using CSS keyframes and ref-tracked previous count.
+- **Device table** — sortable column headers with direction arrows, column visibility dropdown toggle, relative timestamps with full-date tooltips, row striping, hover highlight, and improved empty state with contextual messaging.
+
 ## v0.50.0 (2026-04-30)
 
 ### Improved

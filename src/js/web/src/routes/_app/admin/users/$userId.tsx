@@ -792,7 +792,7 @@ function AdminUserDetailPage() {
       {/* Dialogs */}
       <EditUserDialog user={data} open={editOpen} onOpenChange={setEditOpen} />
       <ManageRolesDialog userId={userId} userEmail={data.email} open={rolesOpen} onOpenChange={setRolesOpen} />
-      <ToggleUserStatusDialog userId={userId} userEmail={data.email} isActive={data.isActive ?? true} open={statusOpen} onOpenChange={setStatusOpen} />
+      <ToggleUserStatusDialog userId={userId} userEmail={data.email} userName={data.name ?? undefined} isActive={data.isActive ?? true} open={statusOpen} onOpenChange={setStatusOpen} />
       <DeleteUserDialog userId={userId} userEmail={data.email} open={deleteOpen} onOpenChange={setDeleteOpen} navigateOnDelete />
     </PageContainer>
   )
