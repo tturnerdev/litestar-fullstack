@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.31.0 (2026-04-30)
+
+### Added
+- **Gateway lookup page** (`/gateway`) — tabbed UI for phone number, extension, and device lookups across all connections. Results grouped by source with status badges and recursive data rendering. New React Query hooks and sidebar nav item.
+
+### Improved
+- **Connections create page** — required field indicators, field descriptions, inline validation (host URL, port range), auth type change warning dialog, credential security note with lock icon, unsaved changes blocker, connection type icons in dropdown, and security sidebar card.
+
 ## v0.30.0 (2026-04-30)
 
 ### Improved
