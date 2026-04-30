@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.86.0 (2026-04-30)
+
+### Fixed
+- **Dead code removal** — Removed unused `ExampleRegistrationForm` component with `console.log` from validated-form.tsx. Removed debug logging from report-issue-tab.tsx.
+- **Inline styles** — Replaced `style={{ border: "none" }}` with Tailwind `border-none` in 3 fax iframe components.
+
+### Refactored
+- **Final format consolidation** — Added `formatUptime(seconds, detailed?)` and `formatDateLong` to shared utilities. Replaced 6 local format functions: formatTimeAgo/formatLastActive (active-sessions), formatUptime (system-health-card, admin/system), formatLastSeen (device-table), formatUSPhone (fax-message-table), formatDate (mfa-section). Net -108 lines.
+
 ## v0.85.0 (2026-04-30)
 
 ### Improved
