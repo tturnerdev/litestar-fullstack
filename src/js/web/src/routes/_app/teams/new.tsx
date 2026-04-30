@@ -13,42 +13,70 @@ const tips = [
   {
     icon: Users,
     title: "Collaborate together",
-    description: "Group members and share resources",
+    description: "Group members to share resources, connections, and phone numbers across the organization.",
   },
   {
     icon: Shield,
     title: "Role-based access",
-    description: "Control what members can do",
+    description: "Assign roles to control what each member can view, edit, or manage within the team.",
   },
   {
     icon: UserPlus,
     title: "Invite members",
-    description: "Add people by email",
+    description: "Send email invitations to add colleagues. They can accept and join instantly.",
   },
   {
     icon: Tag,
     title: "Organize with tags",
-    description: "Categorize for easy discovery",
+    description: "Add tags during creation or later to categorize teams for filtering and discovery.",
   },
 ]
 
 function NewTeamPage() {
   return (
     <PageContainer className="flex-1 space-y-8">
-      <PageHeader eyebrow="Teams" title="Create New Team" description="Set up a new team to organize members and manage access." breadcrumbs={<Breadcrumb><BreadcrumbList><BreadcrumbItem><BreadcrumbLink asChild><Link to="/home">Home</Link></BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbLink asChild><Link to="/teams">Teams</Link></BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbPage>New Team</BreadcrumbPage></BreadcrumbItem></BreadcrumbList></Breadcrumb>} />
+      <PageHeader
+        eyebrow="Teams"
+        title="Create New Team"
+        description="Set up a new team to organize members and manage access."
+        breadcrumbs={
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/home">Home</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/teams">Teams</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>New Team</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        }
+      />
 
       <div className="flex gap-6">
         {/* Main form */}
         <Card className="min-w-0 flex-1">
           <CardHeader>
             <CardTitle className="text-lg">Team Details</CardTitle>
+            <CardDescription>
+              Provide a name and optional description for your team. You can also add tags to help organize and find it later.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <CreateTeamForm />
           </CardContent>
         </Card>
 
-        {/* Sidebar tips - styled like Quick Actions */}
+        {/* Sidebar tips */}
         <Card className="h-fit w-72 shrink-0 border-border/40 bg-linear-to-br from-muted/30 to-muted/10">
           <CardHeader className="space-y-1 pb-3">
             <CardTitle className="text-lg">Getting Started</CardTitle>

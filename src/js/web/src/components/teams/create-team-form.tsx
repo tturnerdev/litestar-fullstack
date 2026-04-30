@@ -15,8 +15,11 @@ import { Textarea } from "@/components/ui/textarea"
 import { createTeam, listTags } from "@/lib/generated/api"
 
 const createTeamSchema = z.object({
-  name: z.string().min(1, "Team name is required"),
-  description: z.string().optional(),
+  name: z
+    .string()
+    .min(1, "Team name is required")
+    .max(100, "Team name must be 100 characters or less"),
+  description: z.string().max(500, "Description must be 500 characters or less").optional(),
 })
 
 type CreateTeamFormData = z.infer<typeof createTeamSchema>
@@ -74,30 +77,44 @@ export function CreateTeamForm() {
       router.navigate({ to: "/teams" })
     } catch (_error) {
       form.setError("root", {
-        message: "Failed to create team",
+        message: "Failed to create team. Please check your input and try again.",
       })
     }
   }
 
   // Filter suggestions based on input
-  const tagSuggestions = existingTags.filter((tag) => tag.name.toLowerCase().includes(tagInput.toLowerCase()) && !selectedTags.includes(tag.name.toLowerCase()))
+  const tagSuggestions = existingTags.filter(
+    (tag) =>
+      tag.name.toLowerCase().includes(tagInput.toLowerCase()) &&
+      !selectedTags.includes(tag.name.toLowerCase()),
+  )
+
+  const nameValue = form.watch("name")
+  const isValid = nameValue.trim() !== ""
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        {/* Basic Info */}
         <FormField
           control={form.control}
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Team Name</FormLabel>
+              <FormLabel>
+                Team Name <span className="text-destructive">*</span>
+              </FormLabel>
               <FormControl>
-                <Input placeholder="Engineering" {...field} />
+                <Input placeholder="e.g., Engineering, Sales, Support" {...field} />
               </FormControl>
+              <FormDescription>
+                A unique, descriptive name for your team.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="description"
@@ -105,66 +122,89 @@ export function CreateTeamForm() {
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
-                <Textarea placeholder="What does this team do?" className="resize-none" rows={3} {...field} />
+                <Textarea
+                  placeholder="Briefly describe this team's purpose and responsibilities..."
+                  className="resize-none"
+                  rows={3}
+                  {...field}
+                />
               </FormControl>
+              <FormDescription>
+                Help others understand what this team does. This is optional.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        <FormItem>
-          <FormLabel>Tags</FormLabel>
-          <FormDescription className="mb-2">Categorize your team for easier discovery</FormDescription>
-          <FormControl>
-            <div className="space-y-3">
-              <div className="relative">
-                <Input
-                  placeholder="Type a tag and press Enter..."
-                  value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
-                  onKeyDown={handleTagKeyDown}
-                  onBlur={() => tagInput && addTag(tagInput)}
-                  className="pr-10"
-                />
-                {tagInput && (
-                  <Button type="button" variant="ghost" size="sm" className="absolute top-1/2 right-1 h-7 w-7 -translate-y-1/2 p-0" onClick={() => addTag(tagInput)}>
-                    <Plus className="h-4 w-4" />
-                    <span className="sr-only">Add tag</span>
-                  </Button>
-                )}
-                {tagInput && tagSuggestions.length > 0 && (
-                  <div className="absolute z-10 mt-1 w-full rounded-md border border-border bg-popover p-1 shadow-lg">
-                    {tagSuggestions.slice(0, 5).map((tag) => (
-                      <button
-                        key={tag.id}
-                        type="button"
-                        className="flex w-full items-center gap-2 rounded px-3 py-2 text-left text-sm hover:bg-accent"
-                        onClick={() => addTag(tag.name)}
-                      >
+        {/* Tags Section */}
+        <div className="space-y-4 rounded-lg border border-border/60 bg-muted/20 p-4">
+          <FormItem className="space-y-2">
+            <FormLabel>Tags</FormLabel>
+            <FormDescription>
+              Categorize your team for easier filtering and discovery. Type a tag name and press Enter to add it.
+            </FormDescription>
+            <FormControl>
+              <div className="space-y-3">
+                <div className="relative">
+                  <Input
+                    placeholder="Type a tag and press Enter..."
+                    value={tagInput}
+                    onChange={(e) => setTagInput(e.target.value)}
+                    onKeyDown={handleTagKeyDown}
+                    onBlur={() => tagInput && addTag(tagInput)}
+                    className="bg-background pr-10"
+                  />
+                  {tagInput && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute top-1/2 right-1 h-7 w-7 -translate-y-1/2 p-0"
+                      onClick={() => addTag(tagInput)}
+                    >
+                      <Plus className="h-4 w-4" />
+                      <span className="sr-only">Add tag</span>
+                    </Button>
+                  )}
+                  {tagInput && tagSuggestions.length > 0 && (
+                    <div className="absolute z-10 mt-1 w-full rounded-md border border-border bg-popover p-1 shadow-lg">
+                      {tagSuggestions.slice(0, 5).map((tag) => (
+                        <button
+                          key={tag.id}
+                          type="button"
+                          className="flex w-full items-center gap-2 rounded px-3 py-2 text-left text-sm hover:bg-accent"
+                          onClick={() => addTag(tag.name)}
+                        >
+                          <span className="text-muted-foreground">#</span>
+                          {tag.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                {selectedTags.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {selectedTags.map((tag) => (
+                      <Badge key={tag} variant="secondary" className="gap-1.5 py-1 pr-1 pl-2.5">
                         <span className="text-muted-foreground">#</span>
-                        {tag.name}
-                      </button>
+                        {tag}
+                        <button
+                          type="button"
+                          onClick={() => removeTag(tag)}
+                          className="ml-0.5 rounded-full p-0.5 transition-colors hover:bg-muted-foreground/20"
+                        >
+                          <X className="h-3 w-3" />
+                          <span className="sr-only">Remove {tag}</span>
+                        </button>
+                      </Badge>
                     ))}
                   </div>
                 )}
               </div>
-              {selectedTags.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {selectedTags.map((tag) => (
-                    <Badge key={tag} variant="secondary" className="gap-1.5 py-1 pr-1 pl-2.5">
-                      <span className="text-muted-foreground">#</span>
-                      {tag}
-                      <button type="button" onClick={() => removeTag(tag)} className="ml-0.5 rounded-full p-0.5 transition-colors hover:bg-muted-foreground/20">
-                        <X className="h-3 w-3" />
-                        <span className="sr-only">Remove {tag}</span>
-                      </button>
-                    </Badge>
-                  ))}
-                </div>
-              )}
-            </div>
-          </FormControl>
-        </FormItem>
+            </FormControl>
+          </FormItem>
+        </div>
 
         {form.formState.errors.root && (
           <Alert variant="destructive">
@@ -175,11 +215,12 @@ export function CreateTeamForm() {
 
         <Separator />
 
-        <div className="flex items-center justify-between">
+        {/* Submit */}
+        <div className="flex items-center justify-end gap-2 pt-2">
           <Button type="button" variant="ghost" asChild>
             <Link to="/teams">Cancel</Link>
           </Button>
-          <Button type="submit" disabled={form.formState.isSubmitting}>
+          <Button type="submit" disabled={!isValid || form.formState.isSubmitting}>
             {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {form.formState.isSubmitting ? "Creating..." : "Create Team"}
           </Button>

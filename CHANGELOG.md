@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.30.0 (2026-04-30)
+
+### Improved
+- **Voice index page** — breadcrumbs, status overview with active/inactive breakdown and progress bars, colored quick action icons, stat card refinements showing "X active of Y", staggered section animations.
+- **Teams create page** — required field indicators, form field descriptions with max-length validation, styled tags section, improved sidebar tips, and disabled submit when name is empty.
+
 ## v0.29.0 (2026-04-30)
 
 ### Improved

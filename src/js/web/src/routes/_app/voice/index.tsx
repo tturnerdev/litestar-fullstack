@@ -1,9 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { ArrowRight, BellOff, Mail, Phone, PhoneForwarded, Voicemail } from "lucide-react"
+import { ArrowRight, BellOff, Home, Mail, Phone, PhoneForwarded, PhoneOff, Voicemail } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { Separator } from "@/components/ui/separator"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import {
   useDndSettings,
@@ -22,22 +31,57 @@ function VoiceOverviewPage() {
     <PageContainer className="flex-1 space-y-8">
       <PageHeader
         eyebrow="Voice"
-        title="Voice Settings"
-        description="Manage your phone numbers, extensions, voicemail, forwarding, and DND."
+        title="Voice Overview"
+        description="Manage your phone numbers, extensions, voicemail, forwarding, and DND settings."
+        breadcrumbs={<VoiceBreadcrumbs />}
       />
       <PageSection>
         <SummaryCards />
       </PageSection>
       <PageSection delay={0.1}>
-        <h2 className="text-lg font-semibold">Quick Access</h2>
-        <QuickLinks />
+        <StatusOverview />
       </PageSection>
       <PageSection delay={0.2}>
+        <div className="space-y-2">
+          <h2 className="text-lg font-semibold tracking-tight">Quick Actions</h2>
+          <p className="text-sm text-muted-foreground">Jump to the section you need</p>
+        </div>
+        <QuickLinks />
+      </PageSection>
+      <PageSection delay={0.3}>
         <RecentExtensions />
       </PageSection>
     </PageContainer>
   )
 }
+
+// ---------------------------------------------------------------------------
+// Breadcrumbs
+// ---------------------------------------------------------------------------
+
+function VoiceBreadcrumbs() {
+  return (
+    <Breadcrumb>
+      <BreadcrumbList>
+        <BreadcrumbItem>
+          <BreadcrumbLink asChild>
+            <Link to="/home">
+              <Home className="h-3.5 w-3.5" />
+            </Link>
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem>
+          <BreadcrumbPage>Voice</BreadcrumbPage>
+        </BreadcrumbItem>
+      </BreadcrumbList>
+    </Breadcrumb>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Summary Stat Cards
+// ---------------------------------------------------------------------------
 
 function SummaryCards() {
   const { data: phoneData, isLoading: phonesLoading } = usePhoneNumbers(1, 100)
@@ -70,7 +114,9 @@ function SummaryCards() {
         </CardHeader>
         <CardContent>
           <div className="text-3xl font-semibold">{phoneCount}</div>
-          <p className="text-xs text-muted-foreground">{activePhones} active</p>
+          <p className="text-xs text-muted-foreground">
+            {activePhones} active{phoneCount > 0 && ` of ${phoneCount}`}
+          </p>
         </CardContent>
       </Card>
 
@@ -83,7 +129,9 @@ function SummaryCards() {
         </CardHeader>
         <CardContent>
           <div className="text-3xl font-semibold">{extCount}</div>
-          <p className="text-xs text-muted-foreground">{activeExts} active</p>
+          <p className="text-xs text-muted-foreground">
+            {activeExts} active{extCount > 0 && ` of ${extCount}`}
+          </p>
         </CardContent>
       </Card>
 
@@ -183,6 +231,98 @@ function DndSummaryCard({ extensionId }: { extensionId: string }) {
   )
 }
 
+// ---------------------------------------------------------------------------
+// Status Overview
+// ---------------------------------------------------------------------------
+
+function StatusOverview() {
+  const { data: phoneData, isLoading: phonesLoading } = usePhoneNumbers(1, 100)
+  const { data: extData, isLoading: extsLoading } = useExtensions(1, 100)
+
+  if (phonesLoading || extsLoading) {
+    return null
+  }
+
+  const activePhones = phoneData?.items.filter((p) => p.isActive).length ?? 0
+  const inactivePhones = (phoneData?.total ?? 0) - activePhones
+  const activeExts = extData?.items.filter((e) => e.isActive).length ?? 0
+  const inactiveExts = (extData?.total ?? 0) - activeExts
+  const totalPhones = phoneData?.total ?? 0
+  const totalExts = extData?.total ?? 0
+
+  if (totalPhones === 0 && totalExts === 0) return null
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">Status Overview</CardTitle>
+        <CardDescription>Active vs. inactive breakdown across your voice resources</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="grid gap-6 sm:grid-cols-2">
+          {totalPhones > 0 && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Phone className="h-4 w-4 text-blue-500" />
+                <span className="text-sm font-medium">Phone Numbers</span>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Active</span>
+                  <span className="font-medium text-green-600">{activePhones}</span>
+                </div>
+                <div className="h-2 overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="h-full rounded-full bg-green-500 transition-all duration-500"
+                    style={{ width: totalPhones > 0 ? `${(activePhones / totalPhones) * 100}%` : "0%" }}
+                  />
+                </div>
+                {inactivePhones > 0 && (
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <PhoneOff className="h-3 w-3" />
+                    {inactivePhones} inactive
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+          {totalPhones > 0 && totalExts > 0 && <Separator className="sm:hidden" />}
+          {totalExts > 0 && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <PhoneForwarded className="h-4 w-4 text-green-500" />
+                <span className="text-sm font-medium">Extensions</span>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Active</span>
+                  <span className="font-medium text-green-600">{activeExts}</span>
+                </div>
+                <div className="h-2 overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="h-full rounded-full bg-green-500 transition-all duration-500"
+                    style={{ width: totalExts > 0 ? `${(activeExts / totalExts) * 100}%` : "0%" }}
+                  />
+                </div>
+                {inactiveExts > 0 && (
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <PhoneOff className="h-3 w-3" />
+                    {inactiveExts} inactive
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Quick Action Cards
+// ---------------------------------------------------------------------------
+
 function QuickLinks() {
   const links = [
     {
@@ -190,12 +330,16 @@ function QuickLinks() {
       description: "View and manage your assigned phone numbers, labels, and caller ID settings.",
       to: "/voice/phone-numbers" as const,
       icon: Phone,
+      color: "text-blue-500",
+      bg: "bg-blue-500/10",
     },
     {
       label: "Extensions",
       description: "Configure extensions, voicemail, forwarding rules, and DND schedules.",
       to: "/voice/extensions" as const,
       icon: PhoneForwarded,
+      color: "text-green-500",
+      bg: "bg-green-500/10",
     },
   ]
 
@@ -204,10 +348,10 @@ function QuickLinks() {
       {links.map((link) => (
         <Card key={link.to} hover>
           <CardHeader className="flex flex-row items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-              <link.icon className="h-5 w-5 text-primary" />
+            <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${link.bg}`}>
+              <link.icon className={`h-5 w-5 ${link.color}`} />
             </div>
-            <div>
+            <div className="min-w-0">
               <CardTitle className="text-base">{link.label}</CardTitle>
               <CardDescription>{link.description}</CardDescription>
             </div>
@@ -225,13 +369,20 @@ function QuickLinks() {
   )
 }
 
+// ---------------------------------------------------------------------------
+// Recent Extensions
+// ---------------------------------------------------------------------------
+
 function RecentExtensions() {
   const { data, isLoading } = useExtensions(1, 5)
 
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold">Your Extensions</h2>
+        <div className="space-y-2">
+          <h2 className="text-lg font-semibold tracking-tight">Recent Extensions</h2>
+          <p className="text-sm text-muted-foreground">Your most recent extension configurations</p>
+        </div>
         <div className="grid gap-3">
           {Array.from({ length: 3 }).map((_, index) => (
             // biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton placeholders
@@ -247,9 +398,14 @@ function RecentExtensions() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Your Extensions</h2>
+        <div className="space-y-1">
+          <h2 className="text-lg font-semibold tracking-tight">Recent Extensions</h2>
+          <p className="text-sm text-muted-foreground">Your most recent extension configurations</p>
+        </div>
         <Button variant="ghost" size="sm" asChild>
-          <Link to="/voice/extensions">View all</Link>
+          <Link to="/voice/extensions">
+            View all <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+          </Link>
         </Button>
       </div>
       <div className="grid gap-3">
@@ -282,8 +438,8 @@ function ExtensionRow({
     <Card>
       <CardContent className="flex items-center justify-between py-4">
         <div className="flex items-center gap-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
-            <PhoneForwarded className="h-5 w-5 text-muted-foreground" />
+          <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${isActive ? "bg-green-500/10" : "bg-muted"}`}>
+            <PhoneForwarded className={`h-5 w-5 ${isActive ? "text-green-500" : "text-muted-foreground"}`} />
           </div>
           <div>
             <p className="font-medium">{displayName}</p>
