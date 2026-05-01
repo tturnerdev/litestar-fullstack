@@ -16,6 +16,7 @@ import {
 } from "lucide-react"
 import { DirectionBadge, FaxStatusBadge } from "@/components/fax/fax-status-badge"
 import { EmailRouteEditor } from "@/components/fax/email-route-editor"
+import { FaxNumberEditDialog } from "@/components/fax/fax-number-edit-dialog"
 import { Badge } from "@/components/ui/badge"
 import {
   Breadcrumb,
@@ -323,11 +324,14 @@ function FaxNumberDetailPage() {
                 <Send className="mr-2 h-4 w-4" /> Send Fax
               </Link>
             </Button>
-            <Button variant="outline" size="sm" asChild>
-              <Link to="/fax/numbers/$faxNumberId/edit" params={{ faxNumberId }}>
-                <Pencil className="mr-2 h-4 w-4" /> Edit
-              </Link>
-            </Button>
+            <FaxNumberEditDialog
+              faxNumber={data}
+              trigger={
+                <Button variant="outline" size="sm">
+                  <Pencil className="mr-2 h-4 w-4" /> Edit
+                </Button>
+              }
+            />
             <Button
               variant="outline"
               size="sm"

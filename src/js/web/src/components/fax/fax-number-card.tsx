@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router"
-import { AlertTriangle, Clock, Hash, Mail, MessageSquare, Send, Settings } from "lucide-react"
+import { AlertTriangle, Clock, Hash, Mail, MessageSquare, Pencil, Send, Settings } from "lucide-react"
+import { FaxNumberEditDialog } from "@/components/fax/fax-number-edit-dialog"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
@@ -85,12 +86,22 @@ export function FaxNumberCard({ faxNumber }: FaxNumberCardProps) {
           </div>
         </div>
         <div className="flex items-center justify-between gap-2">
-          <Button asChild variant="outline" size="sm">
-            <Link to="/fax/numbers/$faxNumberId" params={{ faxNumberId: faxNumber.id }}>
-              <Settings className="mr-2 h-3.5 w-3.5" />
-              Manage
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <FaxNumberEditDialog
+              faxNumber={faxNumber}
+              trigger={
+                <Button variant="ghost" size="sm">
+                  <Pencil className="mr-2 h-3.5 w-3.5" /> Edit
+                </Button>
+              }
+            />
+            <Button asChild variant="outline" size="sm">
+              <Link to="/fax/numbers/$faxNumberId" params={{ faxNumberId: faxNumber.id }}>
+                <Settings className="mr-2 h-3.5 w-3.5" />
+                Manage
+              </Link>
+            </Button>
+          </div>
           <Button asChild variant="outline" size="sm">
             <Link to="/fax/send">
               <Send className="mr-2 h-3.5 w-3.5" />

@@ -494,7 +494,7 @@ function LocationRow({
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link to="/locations/$locationId/edit" params={{ locationId: location.id }}>
+              <Link to="/locations/$locationId" params={{ locationId: location.id }} search={{ edit: true }}>
                 <Pencil className="mr-2 h-4 w-4" />
                 Edit
               </Link>

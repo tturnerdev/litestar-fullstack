@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
   AlertTriangle,
   ArrowLeft,
@@ -44,11 +44,13 @@ import {
   useReprovisionDevice,
   useUpdateDevice,
 } from "@/lib/api/hooks/devices"
+import type { Device } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/devices/$deviceId/")({
   component: DeviceDetailPage,
-  validateSearch: (search: Record<string, unknown>): { tab?: string } => ({
+  validateSearch: (search: Record<string, unknown>): { tab?: string; edit?: boolean } => ({
     tab: (search.tab as string) || undefined,
+    edit: search.edit === true || search.edit === "true" || undefined,
   }),
 })
 
@@ -97,7 +99,7 @@ function TimestampField({
 
 function DeviceDetailPage() {
   const { deviceId } = Route.useParams()
-  const { tab = "overview" } = Route.useSearch()
+  const { tab = "overview", edit: editParam } = Route.useSearch()
   const navigate = Route.useNavigate()
   const router = useRouter()
   const { data, isLoading, isError } = useDevice(deviceId)
@@ -107,6 +109,41 @@ function DeviceDetailPage() {
   const rebootDevice = useRebootDevice(deviceId)
   const reprovisionDevice = useReprovisionDevice(deviceId)
   const linesQuery = useDeviceLines(deviceId)
+
+  const [editing, setEditing] = useState(false)
+  const [editName, setEditName] = useState("")
+  const [editManufacturer, setEditManufacturer] = useState("")
+  const [editModel, setEditModel] = useState("")
+  const [editMacAddress, setEditMacAddress] = useState("")
+  const [editIpAddress, setEditIpAddress] = useState("")
+
+  useEffect(() => {
+    if (editParam && data && !editing) {
+      startEditing(data)
+      navigate({ search: (prev: Record<string, unknown>) => ({ ...prev, edit: undefined }), replace: true })
+    }
+  }, [editParam, data])
+
+  function startEditing(device: Device) {
+    setEditName(device.name)
+    setEditManufacturer(device.manufacturer ?? "")
+    setEditModel(device.deviceModel ?? "")
+    setEditMacAddress(device.macAddress ?? "")
+    setEditIpAddress(device.ipAddress ?? "")
+    setEditing(true)
+  }
+
+  function handleInfoSave() {
+    const payload: Record<string, unknown> = {}
+    if (editName !== data?.name) payload.name = editName
+    if (editManufacturer !== (data?.manufacturer ?? "")) payload.manufacturer = editManufacturer || null
+    if (editModel !== (data?.deviceModel ?? "")) payload.deviceModel = editModel || null
+    if (editMacAddress !== (data?.macAddress ?? "")) payload.macAddress = editMacAddress || null
+    if (editIpAddress !== (data?.ipAddress ?? "")) payload.ipAddress = editIpAddress || null
+    updateDevice.mutate(payload, {
+      onSuccess: () => setEditing(false),
+    })
+  }
 
   if (isLoading) {
     return (
@@ -255,11 +292,11 @@ function DeviceDetailPage() {
                 Disabled
               </Badge>
             )}
-            <Button variant="outline" size="sm" asChild>
-              <Link to="/devices/$deviceId/edit" params={{ deviceId }}>
+            {!editing && (
+              <Button variant="outline" size="sm" onClick={() => startEditing(data)}>
                 <Pencil className="mr-2 h-4 w-4" /> Edit
-              </Link>
-            </Button>
+              </Button>
+            )}
             <RebootButton
               onReboot={() => rebootDevice.mutate()}
               isPending={rebootDevice.isPending}
@@ -291,49 +328,87 @@ function DeviceDetailPage() {
           <TabsContent value="overview" className="mt-6 space-y-6">
             {/* Device Info */}
             <Card>
-              <CardHeader>
-                <div className="flex items-center gap-2">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
                   <Cpu className="h-5 w-5 text-muted-foreground" />
-                  <CardTitle>Device Info</CardTitle>
-                </div>
+                  Device Info
+                </CardTitle>
+                {editing && (
+                  <div className="flex gap-2">
+                    <Button variant="ghost" size="sm" onClick={() => setEditing(false)}>
+                      Cancel
+                    </Button>
+                    <Button size="sm" onClick={handleInfoSave} disabled={updateDevice.isPending}>
+                      {updateDevice.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Save
+                    </Button>
+                  </div>
+                )}
               </CardHeader>
               <CardContent>
-                <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
-                  <div>
-                    <p className="text-muted-foreground">Name</p>
-                    <p className="font-medium">{data.name}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Type</p>
-                    <p>{deviceTypeLabels[data.deviceType] ?? data.deviceType}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Status</p>
-                    <div className="mt-0.5">
-                      <DeviceStatusBadge status={data.status} />
+                {editing ? (
+                  <div className="space-y-4">
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                      <div className="space-y-2">
+                        <Label>Name</Label>
+                        <Input value={editName} onChange={(e) => setEditName(e.target.value)} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Manufacturer</Label>
+                        <Input value={editManufacturer} onChange={(e) => setEditManufacturer(e.target.value)} placeholder="e.g. Polycom" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Model</Label>
+                        <Input value={editModel} onChange={(e) => setEditModel(e.target.value)} placeholder="e.g. VVX 450" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>MAC Address</Label>
+                        <Input value={editMacAddress} onChange={(e) => setEditMacAddress(e.target.value)} placeholder="AA:BB:CC:DD:EE:FF" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>IP Address</Label>
+                        <Input value={editIpAddress} onChange={(e) => setEditIpAddress(e.target.value)} placeholder="192.168.1.100" />
+                      </div>
                     </div>
                   </div>
-                  <div>
-                    <p className="text-muted-foreground">Model</p>
-                    <p>{data.deviceModel || "---"}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Manufacturer</p>
-                    <p>{data.manufacturer || "---"}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Active</p>
-                    <div className="mt-0.5 flex items-center gap-2">
-                      <p>{data.isActive ? "Yes" : "No"}</p>
-                      <ToggleActiveButton
-                        isActive={data.isActive ?? true}
-                        onToggle={() => updateDevice.mutate({ isActive: !data.isActive })}
-                        isPending={updateDevice.isPending}
-                        size="sm"
-                      />
+                ) : (
+                  <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
+                    <div>
+                      <p className="text-muted-foreground">Name</p>
+                      <p className="font-medium">{data.name}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Type</p>
+                      <p>{deviceTypeLabels[data.deviceType] ?? data.deviceType}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Status</p>
+                      <div className="mt-0.5">
+                        <DeviceStatusBadge status={data.status} />
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Model</p>
+                      <p>{data.deviceModel || "---"}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Manufacturer</p>
+                      <p>{data.manufacturer || "---"}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Active</p>
+                      <div className="mt-0.5 flex items-center gap-2">
+                        <p>{data.isActive ? "Yes" : "No"}</p>
+                        <ToggleActiveButton
+                          isActive={data.isActive ?? true}
+                          onToggle={() => updateDevice.mutate({ isActive: !data.isActive })}
+                          isPending={updateDevice.isPending}
+                          size="sm"
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
               </CardContent>
             </Card>
 
@@ -497,6 +572,7 @@ function DeviceDetailPage() {
           </CardContent>
         </Card>
       </PageSection>
+
     </PageContainer>
   )
 }

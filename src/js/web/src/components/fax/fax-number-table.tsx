@@ -1,6 +1,7 @@
-import { Link } from "@tanstack/react-router"
+import { Link, useNavigate } from "@tanstack/react-router"
 import { AlertCircle, ArrowRight, Check, Copy, Printer } from "lucide-react"
 import { useState } from "react"
+import { FaxNumberEditDialog } from "@/components/fax/fax-number-edit-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -39,6 +40,7 @@ function CopyNumberButton({ number }: { number: string }) {
 }
 
 export function FaxNumberTable() {
+  const navigate = useNavigate()
   const [page, setPage] = useState(1)
   const { data, isLoading, isError } = useFaxNumbers(page, PAGE_SIZE)
 
@@ -93,7 +95,17 @@ export function FaxNumberTable() {
               </TableRow>
             )}
             {data.items.map((faxNumber, index) => (
-              <TableRow key={faxNumber.id} className={`hover:bg-muted/50 ${index % 2 === 0 ? "bg-muted/20" : ""}`}>
+              <TableRow
+                key={faxNumber.id}
+                className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 0 ? "bg-muted/20" : ""}`}
+                onClick={(e) => {
+                  const target = e.target as HTMLElement
+                  if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) {
+                    return
+                  }
+                  navigate({ to: "/fax/numbers/$faxNumberId", params: { faxNumberId: faxNumber.id } })
+                }}
+              >
                 <TableCell>
                   <div className="flex items-center gap-1.5">
                     <span className="font-mono">{formatPhoneNumber(faxNumber.number)}</span>
@@ -111,12 +123,15 @@ export function FaxNumberTable() {
                 </TableCell>
                 <TableCell className="text-muted-foreground">{"—"}</TableCell>
                 <TableCell className="text-right">
-                  <Button asChild variant="outline" size="sm">
-                    <Link to="/fax/numbers/$faxNumberId" params={{ faxNumberId: faxNumber.id }}>
-                      Manage
-                      <ArrowRight className="ml-1.5 h-4 w-4" />
-                    </Link>
-                  </Button>
+                  <div className="flex items-center justify-end gap-2">
+                    <FaxNumberEditDialog faxNumber={faxNumber} />
+                    <Button asChild variant="outline" size="sm">
+                      <Link to="/fax/numbers/$faxNumberId" params={{ faxNumberId: faxNumber.id }}>
+                        Manage
+                        <ArrowRight className="ml-1.5 h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}

@@ -2334,6 +2334,17 @@ export const EmailVerificationStatusSchema = {
 
 export const ExtensionSchema = {
   properties: {
+    createdAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     displayName: {
       default: "",
       type: "string",
@@ -2353,6 +2364,17 @@ export const ExtensionSchema = {
       oneOf: [
         {
           format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    updatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
           type: "string",
         },
         {

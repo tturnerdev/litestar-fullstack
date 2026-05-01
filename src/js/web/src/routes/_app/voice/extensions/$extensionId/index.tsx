@@ -1,12 +1,12 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { z } from "zod"
 import {
   AlertTriangle,
   ArrowLeft,
   ArrowRight,
   BellOff,
   Fingerprint,
-  Loader2,
   Mail,
   Pencil,
   Phone,
@@ -24,27 +24,18 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { Button, buttonVariants } from "@/components/ui/button"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { CopyButton } from "@/components/ui/copy-button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { DeleteExtensionDialog } from "@/components/voice/delete-extension-dialog"
 import { DndQuickToggle } from "@/components/voice/dnd-quick-toggle"
+import { EditExtensionDialog } from "@/components/voice/edit-extension-dialog"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import {
-  useDeleteExtension,
   useDndSettings,
   useExtension,
   useForwardingRules,
@@ -53,8 +44,13 @@ import {
   useVoicemailSettings,
 } from "@/lib/api/hooks/voice"
 
+const searchSchema = z.object({
+  edit: z.boolean().optional(),
+})
+
 export const Route = createFileRoute("/_app/voice/extensions/$extensionId/")({
   component: ExtensionDetailPage,
+  validateSearch: searchSchema,
 })
 
 
@@ -93,11 +89,22 @@ function TimestampField({
 
 function ExtensionDetailPage() {
   const { extensionId } = Route.useParams()
+  const { edit } = Route.useSearch()
   const router = useRouter()
+  const navigate = Route.useNavigate()
   const { data, isLoading, isError } = useExtension(extensionId)
   const updateExtension = useUpdateExtension(extensionId)
-  const deleteExtension = useDeleteExtension()
+  const [showEditDialog, setShowEditDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+
+  // Open edit dialog when ?edit=true is in the URL
+  useEffect(() => {
+    if (edit && data) {
+      setShowEditDialog(true)
+      // Clear the search param so refreshing doesn't re-open the dialog
+      navigate({ search: {}, replace: true })
+    }
+  }, [edit, data, navigate])
 
   if (isLoading) {
     return (
@@ -207,11 +214,6 @@ function ExtensionDetailPage() {
 
   const title = `${data.displayName} (Ext. ${data.extensionNumber})`
 
-  const handleDelete = async () => {
-    await deleteExtension.mutateAsync(extensionId)
-    router.navigate({ to: "/voice/extensions" })
-  }
-
   return (
     <PageContainer className="flex-1 space-y-8">
       <PageHeader
@@ -256,10 +258,8 @@ function ExtensionDetailPage() {
                 Disabled
               </Badge>
             )}
-            <Button variant="outline" size="sm" asChild>
-              <Link to="/voice/extensions/$extensionId/edit" params={{ extensionId }}>
-                <Pencil className="mr-2 h-4 w-4" /> Edit
-              </Link>
+            <Button variant="outline" size="sm" onClick={() => setShowEditDialog(true)}>
+              <Pencil className="mr-2 h-4 w-4" /> Edit
             </Button>
             <Button
               variant="outline"
@@ -399,53 +399,22 @@ function ExtensionDetailPage() {
         </Card>
       </PageSection>
 
+      {/* Edit extension dialog */}
+      <EditExtensionDialog
+        extension={data}
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+      />
+
       {/* Delete confirmation dialog */}
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-destructive" />
-              Delete Extension
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete{" "}
-              <span className="font-medium text-foreground">{data.displayName}</span>
-              {data.extensionNumber && (
-                <> (Ext. <span className="font-mono text-foreground">{data.extensionNumber}</span>)</>
-              )}
-              ? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="rounded-md border border-destructive/20 bg-destructive/5 px-4 py-3">
-            <p className="mb-2 text-sm font-medium text-destructive">The following will be permanently removed:</p>
-            <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
-              <li>All call forwarding rules</li>
-              <li>Voicemail settings and messages</li>
-              <li>Do Not Disturb configuration</li>
-            </ul>
-          </div>
-          <AlertDialogFooter>
-            <AlertDialogCancel
-              onClick={() => setShowDeleteDialog(false)}
-              disabled={deleteExtension.isPending}
-            >
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              className={buttonVariants({ variant: "destructive" })}
-              onClick={handleDelete}
-              disabled={deleteExtension.isPending}
-            >
-              {deleteExtension.isPending ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Trash2 className="mr-2 h-4 w-4" />
-              )}
-              Delete Extension
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteExtensionDialog
+        extensionId={extensionId}
+        extensionName={data.displayName}
+        extensionNumber={data.extensionNumber}
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        onDeleted={() => router.navigate({ to: "/voice/extensions" })}
+      />
     </PageContainer>
   )
 }

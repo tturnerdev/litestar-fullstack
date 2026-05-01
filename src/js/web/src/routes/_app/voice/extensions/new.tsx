@@ -25,6 +25,8 @@ import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
 import { useCreateExtension, usePhoneNumbers } from "@/lib/api/hooks/voice"
 
+const PHONE_NONE = "__none__"
+
 export const Route = createFileRoute("/_app/voice/extensions/new")({
   component: NewExtensionPage,
 })
@@ -49,7 +51,7 @@ function NewExtensionPage() {
       extensionNumber: "",
       displayName: "",
       isActive: true,
-      phoneNumberId: "",
+      phoneNumberId: PHONE_NONE,
     },
   })
 
@@ -67,7 +69,7 @@ function NewExtensionPage() {
       extensionNumber: data.extensionNumber,
     }
     if (data.displayName) payload.displayName = data.displayName
-    if (data.phoneNumberId) payload.phoneNumberId = data.phoneNumberId
+    if (data.phoneNumberId && data.phoneNumberId !== PHONE_NONE) payload.phoneNumberId = data.phoneNumberId
     payload.isActive = data.isActive
 
     try {
@@ -150,7 +152,7 @@ function NewExtensionPage() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">None</SelectItem>
+                        <SelectItem value={PHONE_NONE}>None</SelectItem>
                         {phoneNumbers?.items.map((pn) => (
                           <SelectItem key={pn.id} value={pn.id}>
                             {pn.number}{pn.label ? ` - ${pn.label}` : ""}

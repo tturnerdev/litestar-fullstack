@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.96.0 (2026-04-30)
+
+### Added
+- **In-place editing** — Device, extension, fax number, and phone number detail pages now use inline field editing (edit-in-place) instead of separate edit pages or dialogs, matching the Locations pattern. Cancel/Save buttons appear in card headers during editing.
+- **Phone number detail page** — New detail view for voice phone numbers with breadcrumbs, info card, metadata, and in-place editing via slide-in sheet.
+- **Clickable table rows** — Device, phone number, fax number, and extension tables now support click-to-navigate on rows, with guards for interactive elements (checkboxes, buttons, links, dropdowns).
+- **Row action menus** — Added dropdown action menus to extension and device table rows with View, Edit, Delete, Reboot, and Enable/Disable options.
+- **Edit dialog components** — New reusable edit/delete dialog components for devices, extensions, fax numbers, and phone numbers.
+
+### Fixed
+- **Select.Item empty value bug** — Fixed crash in extension creation form where `<SelectItem value="">` is invalid. Uses `__none__` sentinel value instead.
+- **Dark mode destructive contrast** — Improved visibility of destructive/danger elements in dark mode by increasing saturation and lightness.
+
+### Changed
+- **Removed standalone edit routes** — Deleted `/devices/$id/edit`, `/extensions/$id/edit`, and `/fax/numbers/$id/edit` routes in favor of in-place editing on detail pages.
+- **Phone numbers routing** — Converted from single-file route to directory-based layout route (`phone-numbers/index.tsx` + `phone-numbers/$phoneNumberId.tsx`).
+
 ## v0.95.0 (2026-04-30)
 
 ### Added

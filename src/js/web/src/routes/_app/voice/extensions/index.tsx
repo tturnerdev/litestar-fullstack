@@ -31,6 +31,7 @@ import { nextSortDirection, SortableHeader, type SortDirection } from "@/compone
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { CreateExtensionDialog } from "@/components/voice/create-extension-dialog"
+import { ExtensionRowActions } from "@/components/voice/extension-row-actions"
 import {
   type Extension,
   useDeleteExtension,
@@ -450,6 +451,9 @@ function ExtensionsPage() {
                       onSort={handleSort}
                     />
                     <TableHead className="hidden md:table-cell">Created</TableHead>
+                    <TableHead className="w-10">
+                      <span className="sr-only">Actions</span>
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -525,9 +529,15 @@ function ExtensionRow({
 }) {
   return (
     <TableRow
-      className="cursor-pointer"
+      className="cursor-pointer hover:bg-muted/50 transition-colors"
       data-state={selected ? "selected" : undefined}
-      onClick={onNavigate}
+      onClick={(e) => {
+        const target = e.target as HTMLElement
+        if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) {
+          return
+        }
+        onNavigate()
+      }}
     >
       <TableCell>
         <Checkbox
@@ -576,6 +586,11 @@ function ExtensionRow({
             )}
           </TooltipContent>
         </Tooltip>
+      </TableCell>
+      <TableCell>
+        <div onClick={(e) => e.stopPropagation()}>
+          <ExtensionRowActions extension={ext} />
+        </div>
       </TableCell>
     </TableRow>
   )

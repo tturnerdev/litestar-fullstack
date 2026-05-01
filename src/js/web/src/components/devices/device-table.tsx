@@ -1,6 +1,6 @@
-import { Link } from "@tanstack/react-router"
+import { Link, useNavigate } from "@tanstack/react-router"
 import { useCallback, useMemo, useState } from "react"
-import { ArrowDown, ArrowUp, ArrowUpDown, Columns3, Download, Monitor, MoreVertical, Power, RefreshCw, Search, X } from "lucide-react"
+import { ArrowDown, ArrowUp, ArrowUpDown, Columns3, Download, Monitor, MoreVertical, Pencil, Power, RefreshCw, Search, Trash2, X } from "lucide-react"
 import { useQueryClient } from "@tanstack/react-query"
 import { DeviceStatusBadge } from "@/components/devices/device-status-badge"
 import { Badge } from "@/components/ui/badge"
@@ -127,6 +127,7 @@ function SortableHeader({
 }
 
 export function DeviceTable() {
+  const navigate = useNavigate()
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState("")
   const [searchInput, setSearchInput] = useState("")
@@ -430,6 +431,7 @@ export function DeviceTable() {
                   onToggleSelect={() => selection.toggle(device.id)}
                   striped={index % 2 === 1}
                   columnVisibility={columnVisibility}
+                  onRowClick={() => navigate({ to: "/devices/$deviceId", params: { deviceId: device.id } })}
                 />
               ))}
             </TableBody>
@@ -472,12 +474,14 @@ function DeviceRow({
   onToggleSelect,
   striped,
   columnVisibility,
+  onRowClick,
 }: {
   device: DeviceItem
   isSelected: boolean
   onToggleSelect: () => void
   striped: boolean
   columnVisibility: Record<ColumnKey, boolean>
+  onRowClick: () => void
 }) {
   const rebootMutation = useRebootDevice(device.id)
   const updateMutation = useUpdateDevice(device.id)
@@ -485,7 +489,14 @@ function DeviceRow({
   return (
     <TableRow
       data-state={isSelected ? "selected" : undefined}
-      className={`transition-colors hover:bg-muted/50 ${striped && !isSelected ? "bg-muted/20" : ""}`}
+      className={`cursor-pointer hover:bg-muted/50 transition-colors ${striped && !isSelected ? "bg-muted/20" : ""}`}
+      onClick={(e) => {
+        const target = e.target as HTMLElement
+        if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) {
+          return
+        }
+        onRowClick()
+      }}
     >
       <TableCell>
         <Checkbox
@@ -547,6 +558,13 @@ function DeviceRow({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <Link to="/devices/$deviceId" params={{ deviceId: device.id }} search={{ edit: true }}>
+                    <Pencil className="mr-2 h-4 w-4" />
+                    Edit
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => rebootMutation.mutate()}
                   disabled={rebootMutation.isPending}
@@ -554,13 +572,24 @@ function DeviceRow({
                   <RefreshCw className="mr-2 h-4 w-4" />
                   Reboot
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => updateMutation.mutate({ isActive: !device.isActive })}
                   disabled={updateMutation.isPending}
                 >
                   <Power className="mr-2 h-4 w-4" />
                   {device.isActive ? "Disable" : "Enable"}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-destructive focus:text-destructive"
+                  onClick={() => {
+                    if (confirm(`Delete ${device.name}?`)) {
+                      deleteDevice({ path: { device_id: device.id } })
+                    }
+                  }}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

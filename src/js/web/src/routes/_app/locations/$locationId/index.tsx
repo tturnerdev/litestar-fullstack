@@ -1,6 +1,6 @@
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
-import { useState } from "react"
-import { AlertTriangle, ArrowLeft, Clock, ExternalLink, Loader2, MapPin, Pencil, Trash2 } from "lucide-react"
+import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router"
+import { useEffect, useState } from "react"
+import { AlertTriangle, ArrowLeft, Clock, Loader2, MapPin, Pencil, Trash2 } from "lucide-react"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -29,6 +29,9 @@ import { useDeleteLocation, useLocation, useUpdateLocation, type Location } from
 
 export const Route = createFileRoute("/_app/locations/$locationId/")({
   component: LocationDetailPage,
+  validateSearch: (search: Record<string, unknown>): { edit?: boolean } => ({
+    edit: search.edit === true || search.edit === "true" || undefined,
+  }),
 })
 
 // ---------------------------------------------------------------------------
@@ -37,7 +40,9 @@ export const Route = createFileRoute("/_app/locations/$locationId/")({
 
 function LocationDetailPage() {
   const { locationId } = Route.useParams()
+  const { edit: editParam } = Route.useSearch()
   const router = useRouter()
+  const navigate = useNavigate()
   const { currentTeam } = useAuthStore()
   const teamId = currentTeam?.id ?? ""
 
@@ -54,6 +59,18 @@ function LocationDetailPage() {
   const [editState, setEditState] = useState("")
   const [editPostalCode, setEditPostalCode] = useState("")
   const [editCountry, setEditCountry] = useState("")
+
+  useEffect(() => {
+    if (editParam && data && !editing) {
+      startEditing(data)
+      navigate({
+        to: "/locations/$locationId",
+        params: { locationId },
+        search: {},
+        replace: true,
+      })
+    }
+  }, [editParam, data])
 
   function startEditing(location: Location) {
     setEditName(location.name)
@@ -221,16 +238,9 @@ function LocationDetailPage() {
               {isAddressed ? "Addressed" : "Physical"}
             </Badge>
             {!editing && (
-              <>
-                <Button variant="outline" size="sm" asChild>
-                  <Link to="/locations/$locationId/edit" params={{ locationId }}>
-                    <ExternalLink className="mr-2 h-4 w-4" /> Edit Page
-                  </Link>
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => startEditing(data)}>
-                  <Pencil className="mr-2 h-4 w-4" /> Quick Edit
-                </Button>
-              </>
+              <Button variant="outline" size="sm" onClick={() => startEditing(data)}>
+                <Pencil className="mr-2 h-4 w-4" /> Edit
+              </Button>
             )}
             <Button variant="outline" size="sm" asChild>
               <Link to="/locations">
