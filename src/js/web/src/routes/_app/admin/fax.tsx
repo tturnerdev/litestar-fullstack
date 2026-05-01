@@ -24,9 +24,10 @@ import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-lay
 import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { EmptyState } from "@/components/ui/empty-state"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAdminFaxMessages, useAdminFaxNumbers, useAdminFaxStats } from "@/lib/api/hooks/admin"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
-import { formatDateTime } from "@/lib/date-utils"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import type { AdminFaxNumberSummary } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/admin/fax")({
@@ -268,7 +269,14 @@ function AdminFaxPage() {
                             {msg.status}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-muted-foreground">{formatDateTime(msg.receivedAt)}</TableCell>
+                        <TableCell className="text-muted-foreground">
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span>{formatRelativeTimeShort(msg.receivedAt)}</span>
+                            </TooltipTrigger>
+                            <TooltipContent>{formatDateTime(msg.receivedAt)}</TooltipContent>
+                          </Tooltip>
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

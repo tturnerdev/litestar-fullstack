@@ -425,7 +425,14 @@ function AdminSupportPage() {
                             {statusLabel[ticket.status] ?? ticket.status}
                           </Badge>
                           </TableCell>
-                          <TableCell className="text-muted-foreground">{formatDateTime(ticket.createdAt)}</TableCell>
+                          <TableCell className="text-muted-foreground">
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span>{formatRelativeTimeShort(ticket.createdAt)}</span>
+                              </TooltipTrigger>
+                              <TooltipContent>{formatDateTime(ticket.createdAt)}</TooltipContent>
+                            </Tooltip>
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
