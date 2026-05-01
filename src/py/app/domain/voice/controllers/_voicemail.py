@@ -5,6 +5,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Annotated, Any
 from uuid import UUID
 
+import msgspec
+from structlog import get_logger
 from litestar import Controller, delete, get, patch
 from litestar.di import Provide
 from litestar.params import Dependency, Parameter
@@ -13,6 +15,8 @@ from sqlalchemy.orm import selectinload
 
 from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
+from app.domain.gateway.deps import provide_gateway_connections
+from app.domain.gateway.providers import FreePBXProvider
 from app.domain.voice.deps import provide_extensions_service
 from app.domain.voice.guards import requires_extension_ownership
 from app.domain.voice.schemas import (
@@ -24,6 +28,8 @@ from app.domain.voice.schemas import (
 from app.domain.voice.services import ExtensionService, VoicemailBoxService, VoicemailMessageService
 from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
+
+logger = get_logger()
 
 if TYPE_CHECKING:
     from advanced_alchemy.filters import FilterTypes
@@ -67,6 +73,7 @@ class VoicemailController(Controller):
     ) | {
         "extensions_service": Provide(provide_extensions_service),
         "audit_service": Provide(provide_audit_log_service),
+        "gateway_connections": Provide(provide_gateway_connections),
     }
 
     @get(operation_id="GetVoicemailSettings", path="/api/voice/extensions/{ext_id:uuid}/voicemail")
@@ -92,9 +99,10 @@ class VoicemailController(Controller):
         current_user: m.User,
         data: VoicemailSettingsUpdate,
         ext_id: Annotated[UUID, Parameter(title="Extension ID", description="The extension.")],
+        gateway_connections: list[m.Connection],
     ) -> VoicemailSettings:
         """Update voicemail settings."""
-        await extensions_service.get_one(id=ext_id, user_id=current_user.id)
+        extension = await extensions_service.get_one(id=ext_id, user_id=current_user.id)
         db_obj = await voicemail_boxes_service.get_or_create_for_extension(ext_id)
         before = capture_snapshot(db_obj)
         db_obj = await voicemail_boxes_service.update(item_id=db_obj.id, data=data.to_dict())
@@ -112,6 +120,39 @@ class VoicemailController(Controller):
             after=after,
             request=request,
         )
+
+        pbx_fields = ("is_enabled", "pin", "email_address", "email_attach_audio")
+        has_pbx_change = any(
+            not isinstance(getattr(data, f), type(msgspec.UNSET)) for f in pbx_fields
+        )
+        pbx_connections = [c for c in gateway_connections if c.provider == "freepbx" and c.is_enabled]
+        await logger.ainfo(
+            "voicemail_pbx_check",
+            ext=extension.extension_number,
+            has_pbx_change=has_pbx_change,
+            total_connections=len(gateway_connections),
+            pbx_connections=len(pbx_connections),
+            data_fields={f: repr(getattr(data, f)) for f in pbx_fields},
+        )
+        if has_pbx_change and pbx_connections:
+            conn = pbx_connections[0]
+            provider = FreePBXProvider()
+            ext_num = extension.extension_number
+            try:
+                if db_obj.is_enabled:
+                    await provider.enable_voicemail_on_pbx(
+                        ext_num,
+                        conn,
+                        password=db_obj.pin or ext_num,
+                        name=extension.display_name,
+                        email=db_obj.email_address or current_user.email or "",
+                        attach=db_obj.email_attach_audio,
+                    )
+                else:
+                    await provider.disable_voicemail_on_pbx(ext_num, conn)
+            except Exception as exc:
+                await logger.awarning("pbx_voicemail_update_failed", ext=ext_num, error=str(exc))
+
         return voicemail_boxes_service.to_schema(db_obj, schema_type=VoicemailSettings)
 
     @get(operation_id="ListVoicemailMessages", path="/api/voice/extensions/{ext_id:uuid}/voicemail/messages")

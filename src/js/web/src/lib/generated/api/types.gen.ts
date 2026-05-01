@@ -356,6 +356,38 @@ export type AuditLogEntry = {
 };
 
 /**
+ * BulkImportPreview
+ */
+export type BulkImportPreview = {
+  errorRows: number;
+  rows: Array<BulkImportPreviewRow>;
+  totalRows: number;
+  validRows: number;
+};
+
+/**
+ * BulkImportPreviewRow
+ */
+export type BulkImportPreviewRow = {
+  action: string;
+  data: {
+    [key: string]: unknown;
+  };
+  errors?: Array<string>;
+  rowNumber: number;
+};
+
+/**
+ * BulkImportResult
+ */
+export type BulkImportResult = {
+  created: number;
+  errors: Array<string>;
+  skipped: number;
+  updated: number;
+};
+
+/**
  * CallAnalyticsSummary
  */
 export type CallAnalyticsSummary = {
@@ -2962,8 +2994,8 @@ export type AdminListAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetTypeIn?: Array<string> | null;
     actionIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     action?: string | null;
@@ -3044,8 +3076,8 @@ export type AdminGetTargetAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetTypeIn?: Array<string> | null;
     actionIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     action?: string | null;
@@ -3124,8 +3156,8 @@ export type AdminGetUserAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetTypeIn?: Array<string> | null;
     actionIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     action?: string | null;
@@ -3214,6 +3246,158 @@ export type AdminGetAuditLogResponses = {
 
 export type AdminGetAuditLogResponse =
   AdminGetAuditLogResponses[keyof AdminGetAuditLogResponses];
+
+export type AdminImportDevicesData = {
+  body: {
+    [key: string]: unknown;
+  };
+  path?: never;
+  query?: never;
+  url: "/api/admin/bulk-import/devices";
+};
+
+export type AdminImportDevicesErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type AdminImportDevicesError =
+  AdminImportDevicesErrors[keyof AdminImportDevicesErrors];
+
+export type AdminImportDevicesResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: BulkImportResult;
+};
+
+export type AdminImportDevicesResponse =
+  AdminImportDevicesResponses[keyof AdminImportDevicesResponses];
+
+export type AdminImportExtensionsData = {
+  body: {
+    [key: string]: unknown;
+  };
+  path?: never;
+  query?: never;
+  url: "/api/admin/bulk-import/extensions";
+};
+
+export type AdminImportExtensionsErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type AdminImportExtensionsError =
+  AdminImportExtensionsErrors[keyof AdminImportExtensionsErrors];
+
+export type AdminImportExtensionsResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: BulkImportResult;
+};
+
+export type AdminImportExtensionsResponse =
+  AdminImportExtensionsResponses[keyof AdminImportExtensionsResponses];
+
+export type AdminPreviewDeviceImportData = {
+  body: {
+    [key: string]: unknown;
+  };
+  path?: never;
+  query?: never;
+  url: "/api/admin/bulk-import/preview/devices";
+};
+
+export type AdminPreviewDeviceImportErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type AdminPreviewDeviceImportError =
+  AdminPreviewDeviceImportErrors[keyof AdminPreviewDeviceImportErrors];
+
+export type AdminPreviewDeviceImportResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: BulkImportPreview;
+};
+
+export type AdminPreviewDeviceImportResponse =
+  AdminPreviewDeviceImportResponses[keyof AdminPreviewDeviceImportResponses];
+
+export type AdminPreviewExtensionImportData = {
+  body: {
+    [key: string]: unknown;
+  };
+  path?: never;
+  query?: never;
+  url: "/api/admin/bulk-import/preview/extensions";
+};
+
+export type AdminPreviewExtensionImportErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type AdminPreviewExtensionImportError =
+  AdminPreviewExtensionImportErrors[keyof AdminPreviewExtensionImportErrors];
+
+export type AdminPreviewExtensionImportResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: BulkImportPreview;
+};
+
+export type AdminPreviewExtensionImportResponse =
+  AdminPreviewExtensionImportResponses[keyof AdminPreviewExtensionImportResponses];
 
 export type GetRecentActivityData = {
   body?: never;

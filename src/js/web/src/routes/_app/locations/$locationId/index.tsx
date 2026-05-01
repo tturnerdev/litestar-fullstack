@@ -23,6 +23,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { CopyButton } from "@/components/ui/copy-button"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
+import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useAuthStore } from "@/lib/auth"
 import { formatDateTime, formatRelativeTime } from "@/lib/date-utils"
@@ -428,6 +429,19 @@ function LocationDetailPage() {
                     </p>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+
+            {/* Activity */}
+            <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  Activity
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <EntityActivityPanel targetType="location" targetId={locationId} />
               </CardContent>
             </Card>
 

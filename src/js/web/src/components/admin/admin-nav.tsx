@@ -12,6 +12,8 @@ const navItems = [
   { label: "Fax", to: "/admin/fax" },
   { label: "Support", to: "/admin/support" },
   { label: "Gateway", to: "/admin/gateway" },
+  { label: "Bulk Import", to: "/admin/bulk-import" },
+  { label: "Roles & Permissions", to: "/admin/roles" },
   { label: "Audit log", to: "/admin/audit" },
   { label: "System", to: "/admin/system" },
 ] as const

@@ -582,7 +582,7 @@ const PHONE_ICON_PATH = "M 0 1 Q 0 -1 2 -1 L 4 -1 Q 5 -1 5 0 L 5 2 Q 5 3 4 3 L 3
 // V1 Wireframe Renderer
 // ---------------------------------------------------------------------------
 
-function WireframeRendererV1({ data }: { data: V1WireframeData }) {
+function WireframeRendererV1({ data, screenshotUrl }: { data: V1WireframeData; screenshotUrl?: string | null }) {
   const [hoveredId, setHoveredId] = useState<string | null>(null)
 
   const vb = data.canvas.viewBox
@@ -653,11 +653,36 @@ function WireframeRendererV1({ data }: { data: V1WireframeData }) {
       </text>
 
       {/* LCD Display */}
-      <V1DisplayRenderer
-        display={data.display}
-        hoveredId={hoveredId}
-        setHoveredId={setHoveredId}
-      />
+      {screenshotUrl ? (
+        <g>
+          <defs>
+            <clipPath id="lcd-clip">
+              <rect
+                x={data.display.bounds.x}
+                y={data.display.bounds.y}
+                width={data.display.bounds.width}
+                height={data.display.bounds.height}
+                rx={data.display.cornerRadius}
+              />
+            </clipPath>
+          </defs>
+          <image
+            href={screenshotUrl}
+            x={data.display.bounds.x}
+            y={data.display.bounds.y}
+            width={data.display.bounds.width}
+            height={data.display.bounds.height}
+            clipPath="url(#lcd-clip)"
+            preserveAspectRatio="xMidYMid slice"
+          />
+        </g>
+      ) : (
+        <V1DisplayRenderer
+          display={data.display}
+          hoveredId={hoveredId}
+          setHoveredId={setHoveredId}
+        />
+      )}
 
       {/* Line Keys */}
       {data.lineKeys.map((lk) => {
@@ -1532,34 +1557,21 @@ export function DeviceDiagnosticTab({
           </div>
         </CardHeader>
         <CardContent>
-          {liveView && ipAddress ? (
-            <div className="flex flex-col items-center gap-3">
-              {screenshotQuery.isFetching && !screenshotUrl && (
-                <div className="flex items-center gap-2 py-12 text-muted-foreground">
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                  <span className="text-sm">Capturing display...</span>
-                </div>
-              )}
-              {screenshotQuery.isError && (
-                <div className="py-8 text-center text-sm text-destructive">
-                  <AlertCircle className="mx-auto mb-2 h-8 w-8" />
-                  <p>{screenshotQuery.error instanceof Error ? screenshotQuery.error.message : "Failed to capture screenshot"}</p>
-                </div>
-              )}
-              {screenshotUrl && (
-                <img
-                  src={screenshotUrl}
-                  alt="Device LCD screenshot"
-                  className="max-w-lg w-full rounded border border-border"
-                />
-              )}
-              <p className="text-xs text-muted-foreground">
-                Live capture from {ipAddress}
-              </p>
+          {liveView && screenshotQuery.isFetching && !screenshotUrl && (
+            <div className="flex items-center justify-center gap-2 py-2 text-muted-foreground text-sm mb-3">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Capturing display...
             </div>
-          ) : wireframe ? (
+          )}
+          {liveView && screenshotQuery.isError && (
+            <div className="flex items-center justify-center gap-2 py-2 text-destructive text-sm mb-3">
+              <AlertCircle className="h-4 w-4" />
+              {screenshotQuery.error instanceof Error ? screenshotQuery.error.message : "Failed to capture screenshot"}
+            </div>
+          )}
+          {wireframe ? (
             wireframe.version === "v1" ? (
-              <WireframeRendererV1 data={wireframe.data} />
+              <WireframeRendererV1 data={wireframe.data} screenshotUrl={liveView ? screenshotUrl : null} />
             ) : (
               <WireframeRenderer data={wireframe.data} />
             )
@@ -1573,20 +1585,18 @@ export function DeviceDiagnosticTab({
             </div>
           )}
 
-          {/* Legend (only when showing wireframe) */}
-          {!liveView && (
-            <div className="mt-6 flex flex-wrap gap-4 justify-center text-xs text-muted-foreground">
-              {(wireframe?.version === "v1" ? v1LegendItems : v0LegendItems).map((item) => (
-                <div key={item.label} className="flex items-center gap-1.5">
-                  <span
-                    className="inline-block h-2.5 w-2.5 rounded-sm border"
-                    style={{ backgroundColor: item.color, borderColor: item.color }}
-                  />
-                  {item.label}
-                </div>
-              ))}
-            </div>
-          )}
+          {/* Legend */}
+          <div className="mt-6 flex flex-wrap gap-4 justify-center text-xs text-muted-foreground">
+            {(wireframe?.version === "v1" ? v1LegendItems : v0LegendItems).map((item) => (
+              <div key={item.label} className="flex items-center gap-1.5">
+                <span
+                  className="inline-block h-2.5 w-2.5 rounded-sm border"
+                  style={{ backgroundColor: item.color, borderColor: item.color }}
+                />
+                {item.label}
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
 

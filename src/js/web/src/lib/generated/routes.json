@@ -1577,6 +1577,20 @@
       ],
       "uri": "/api/webhooks/{webhook_id}"
     },
+    "import_devices": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "uri": "/api/admin/bulk-import/devices"
+    },
+    "import_extensions": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "uri": "/api/admin/bulk-import/extensions"
+    },
     "initiate_disable_mfa_oauth": {
       "method": "get",
       "methods": [
@@ -2627,6 +2641,20 @@
         "member_id"
       ],
       "uri": "/api/call-queues/{call_queue_id}/members/{member_id}/pause"
+    },
+    "preview_device_import": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "uri": "/api/admin/bulk-import/preview/devices"
+    },
+    "preview_extension_import": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "uri": "/api/admin/bulk-import/preview/extensions"
     },
     "reboot_device": {
       "method": "post",

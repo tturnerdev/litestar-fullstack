@@ -73,11 +73,13 @@ import { Route as AppConnectionsConnectionIdRouteImport } from './routes/_app/co
 import { Route as AppAdminVoiceRouteImport } from './routes/_app/admin/voice'
 import { Route as AppAdminSystemRouteImport } from './routes/_app/admin/system'
 import { Route as AppAdminSupportRouteImport } from './routes/_app/admin/support'
+import { Route as AppAdminRolesRouteImport } from './routes/_app/admin/roles'
 import { Route as AppAdminMusicOnHoldRouteImport } from './routes/_app/admin/music-on-hold'
 import { Route as AppAdminGatewayRouteImport } from './routes/_app/admin/gateway'
 import { Route as AppAdminFaxRouteImport } from './routes/_app/admin/fax'
 import { Route as AppAdminDevicesRouteImport } from './routes/_app/admin/devices'
 import { Route as AppAdminDeviceTemplatesRouteImport } from './routes/_app/admin/device-templates'
+import { Route as AppAdminBulkImportRouteImport } from './routes/_app/admin/bulk-import'
 import { Route as AppAdminAuditRouteImport } from './routes/_app/admin/audit'
 import { Route as AppVoicePhoneNumbersIndexRouteImport } from './routes/_app/voice/phone-numbers/index'
 import { Route as AppVoiceExtensionsIndexRouteImport } from './routes/_app/voice/extensions/index'
@@ -434,6 +436,11 @@ const AppAdminSupportRoute = AppAdminSupportRouteImport.update({
   path: '/support',
   getParentRoute: () => AppAdminRoute,
 } as any)
+const AppAdminRolesRoute = AppAdminRolesRouteImport.update({
+  id: '/roles',
+  path: '/roles',
+  getParentRoute: () => AppAdminRoute,
+} as any)
 const AppAdminMusicOnHoldRoute = AppAdminMusicOnHoldRouteImport.update({
   id: '/music-on-hold',
   path: '/music-on-hold',
@@ -457,6 +464,11 @@ const AppAdminDevicesRoute = AppAdminDevicesRouteImport.update({
 const AppAdminDeviceTemplatesRoute = AppAdminDeviceTemplatesRouteImport.update({
   id: '/device-templates',
   path: '/device-templates',
+  getParentRoute: () => AppAdminRoute,
+} as any)
+const AppAdminBulkImportRoute = AppAdminBulkImportRouteImport.update({
+  id: '/bulk-import',
+  path: '/bulk-import',
   getParentRoute: () => AppAdminRoute,
 } as any)
 const AppAdminAuditRoute = AppAdminAuditRouteImport.update({
@@ -688,11 +700,13 @@ export interface FileRoutesByFullPath {
   '/terms': typeof PublicTermsRoute
   '/verify-email': typeof PublicVerifyEmailRoute
   '/admin/audit': typeof AppAdminAuditRoute
+  '/admin/bulk-import': typeof AppAdminBulkImportRoute
   '/admin/device-templates': typeof AppAdminDeviceTemplatesRoute
   '/admin/devices': typeof AppAdminDevicesRoute
   '/admin/fax': typeof AppAdminFaxRoute
   '/admin/gateway': typeof AppAdminGatewayRoute
   '/admin/music-on-hold': typeof AppAdminMusicOnHoldRoute
+  '/admin/roles': typeof AppAdminRolesRoute
   '/admin/support': typeof AppAdminSupportRoute
   '/admin/system': typeof AppAdminSystemRoute
   '/admin/voice': typeof AppAdminVoiceRoute
@@ -781,11 +795,13 @@ export interface FileRoutesByTo {
   '/terms': typeof PublicTermsRoute
   '/verify-email': typeof PublicVerifyEmailRoute
   '/admin/audit': typeof AppAdminAuditRoute
+  '/admin/bulk-import': typeof AppAdminBulkImportRoute
   '/admin/device-templates': typeof AppAdminDeviceTemplatesRoute
   '/admin/devices': typeof AppAdminDevicesRoute
   '/admin/fax': typeof AppAdminFaxRoute
   '/admin/gateway': typeof AppAdminGatewayRoute
   '/admin/music-on-hold': typeof AppAdminMusicOnHoldRoute
+  '/admin/roles': typeof AppAdminRolesRoute
   '/admin/support': typeof AppAdminSupportRoute
   '/admin/system': typeof AppAdminSystemRoute
   '/admin/voice': typeof AppAdminVoiceRoute
@@ -885,11 +901,13 @@ export interface FileRoutesById {
   '/_public/terms': typeof PublicTermsRoute
   '/_public/verify-email': typeof PublicVerifyEmailRoute
   '/_app/admin/audit': typeof AppAdminAuditRoute
+  '/_app/admin/bulk-import': typeof AppAdminBulkImportRoute
   '/_app/admin/device-templates': typeof AppAdminDeviceTemplatesRoute
   '/_app/admin/devices': typeof AppAdminDevicesRoute
   '/_app/admin/fax': typeof AppAdminFaxRoute
   '/_app/admin/gateway': typeof AppAdminGatewayRoute
   '/_app/admin/music-on-hold': typeof AppAdminMusicOnHoldRoute
+  '/_app/admin/roles': typeof AppAdminRolesRoute
   '/_app/admin/support': typeof AppAdminSupportRoute
   '/_app/admin/system': typeof AppAdminSystemRoute
   '/_app/admin/voice': typeof AppAdminVoiceRoute
@@ -992,11 +1010,13 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verify-email'
     | '/admin/audit'
+    | '/admin/bulk-import'
     | '/admin/device-templates'
     | '/admin/devices'
     | '/admin/fax'
     | '/admin/gateway'
     | '/admin/music-on-hold'
+    | '/admin/roles'
     | '/admin/support'
     | '/admin/system'
     | '/admin/voice'
@@ -1085,11 +1105,13 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verify-email'
     | '/admin/audit'
+    | '/admin/bulk-import'
     | '/admin/device-templates'
     | '/admin/devices'
     | '/admin/fax'
     | '/admin/gateway'
     | '/admin/music-on-hold'
+    | '/admin/roles'
     | '/admin/support'
     | '/admin/system'
     | '/admin/voice'
@@ -1188,11 +1210,13 @@ export interface FileRouteTypes {
     | '/_public/terms'
     | '/_public/verify-email'
     | '/_app/admin/audit'
+    | '/_app/admin/bulk-import'
     | '/_app/admin/device-templates'
     | '/_app/admin/devices'
     | '/_app/admin/fax'
     | '/_app/admin/gateway'
     | '/_app/admin/music-on-hold'
+    | '/_app/admin/roles'
     | '/_app/admin/support'
     | '/_app/admin/system'
     | '/_app/admin/voice'
@@ -1723,6 +1747,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminSupportRouteImport
       parentRoute: typeof AppAdminRoute
     }
+    '/_app/admin/roles': {
+      id: '/_app/admin/roles'
+      path: '/roles'
+      fullPath: '/admin/roles'
+      preLoaderRoute: typeof AppAdminRolesRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
     '/_app/admin/music-on-hold': {
       id: '/_app/admin/music-on-hold'
       path: '/music-on-hold'
@@ -1756,6 +1787,13 @@ declare module '@tanstack/react-router' {
       path: '/device-templates'
       fullPath: '/admin/device-templates'
       preLoaderRoute: typeof AppAdminDeviceTemplatesRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
+    '/_app/admin/bulk-import': {
+      id: '/_app/admin/bulk-import'
+      path: '/bulk-import'
+      fullPath: '/admin/bulk-import'
+      preLoaderRoute: typeof AppAdminBulkImportRouteImport
       parentRoute: typeof AppAdminRoute
     }
     '/_app/admin/audit': {
@@ -2015,11 +2053,13 @@ declare module '@tanstack/react-router' {
 
 interface AppAdminRouteChildren {
   AppAdminAuditRoute: typeof AppAdminAuditRoute
+  AppAdminBulkImportRoute: typeof AppAdminBulkImportRoute
   AppAdminDeviceTemplatesRoute: typeof AppAdminDeviceTemplatesRoute
   AppAdminDevicesRoute: typeof AppAdminDevicesRoute
   AppAdminFaxRoute: typeof AppAdminFaxRoute
   AppAdminGatewayRoute: typeof AppAdminGatewayRoute
   AppAdminMusicOnHoldRoute: typeof AppAdminMusicOnHoldRoute
+  AppAdminRolesRoute: typeof AppAdminRolesRoute
   AppAdminSupportRoute: typeof AppAdminSupportRoute
   AppAdminSystemRoute: typeof AppAdminSystemRoute
   AppAdminVoiceRoute: typeof AppAdminVoiceRoute
@@ -2032,11 +2072,13 @@ interface AppAdminRouteChildren {
 
 const AppAdminRouteChildren: AppAdminRouteChildren = {
   AppAdminAuditRoute: AppAdminAuditRoute,
+  AppAdminBulkImportRoute: AppAdminBulkImportRoute,
   AppAdminDeviceTemplatesRoute: AppAdminDeviceTemplatesRoute,
   AppAdminDevicesRoute: AppAdminDevicesRoute,
   AppAdminFaxRoute: AppAdminFaxRoute,
   AppAdminGatewayRoute: AppAdminGatewayRoute,
   AppAdminMusicOnHoldRoute: AppAdminMusicOnHoldRoute,
+  AppAdminRolesRoute: AppAdminRolesRoute,
   AppAdminSupportRoute: AppAdminSupportRoute,
   AppAdminSystemRoute: AppAdminSystemRoute,
   AppAdminVoiceRoute: AppAdminVoiceRoute,

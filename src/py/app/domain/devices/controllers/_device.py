@@ -14,6 +14,7 @@ from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.devices.guards import requires_device_ownership
 from app.domain.devices.schemas import Device, DeviceCreate, DeviceUpdate
+from app.domain.teams.guards import requires_feature_permission
 from app.domain.devices.services import DeviceService
 from app.domain.notifications.deps import provide_notifications_service
 from app.lib.audit import capture_snapshot, log_audit
@@ -52,7 +53,11 @@ class DeviceController(Controller):
         "notifications_service": Provide(provide_notifications_service),
     }
 
-    @get(operation_id="ListDevices", path="/api/devices")
+    @get(
+        operation_id="ListDevices",
+        path="/api/devices",
+        guards=[requires_feature_permission("devices", "view")],
+    )
     async def list_devices(
         self,
         devices_service: DeviceService,
@@ -78,7 +83,11 @@ class DeviceController(Controller):
             )
         return devices_service.to_schema(results, total, filters, schema_type=Device)
 
-    @post(operation_id="CreateDevice", path="/api/devices")
+    @post(
+        operation_id="CreateDevice",
+        path="/api/devices",
+        guards=[requires_feature_permission("devices", "edit")],
+    )
     async def create_device(
         self,
         request: Request[m.User, Token, Any],
@@ -132,7 +141,7 @@ class DeviceController(Controller):
     @get(
         operation_id="GetDevice",
         path="/api/devices/{device_id:uuid}",
-        guards=[requires_device_ownership],
+        guards=[requires_feature_permission("devices", "view"), requires_device_ownership],
     )
     async def get_device(
         self,
@@ -154,7 +163,7 @@ class DeviceController(Controller):
     @patch(
         operation_id="UpdateDevice",
         path="/api/devices/{device_id:uuid}",
-        guards=[requires_device_ownership],
+        guards=[requires_feature_permission("devices", "edit"), requires_device_ownership],
     )
     async def update_device(
         self,
@@ -203,7 +212,7 @@ class DeviceController(Controller):
     @delete(
         operation_id="DeleteDevice",
         path="/api/devices/{device_id:uuid}",
-        guards=[requires_device_ownership],
+        guards=[requires_feature_permission("devices", "edit"), requires_device_ownership],
     )
     async def delete_device(
         self,

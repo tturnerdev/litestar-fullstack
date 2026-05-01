@@ -1,5 +1,10 @@
 """Admin domain schemas."""
 
+from app.domain.admin.schemas._admin_bulk_import import (
+    BulkImportPreview,
+    BulkImportPreviewRow,
+    BulkImportResult,
+)
 from app.domain.admin.schemas._admin_device_templates import (
     DeviceTemplateCreate,
     DeviceTemplateDetail,
@@ -27,6 +32,9 @@ from app.domain.admin.schemas._users import AdminUserDetail, AdminUserSummary, A
 __all__ = (
     "ActivityLogEntry",
     "AdminDeviceStats",
+    "BulkImportPreview",
+    "BulkImportPreviewRow",
+    "BulkImportResult",
     "AdminDeviceSummary",
     "AdminExtensionSummary",
     "AdminFaxMessageSummary",

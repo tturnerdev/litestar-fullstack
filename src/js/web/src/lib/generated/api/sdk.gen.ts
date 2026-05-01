@@ -80,6 +80,12 @@ import type {
   AdminGetUserResponses,
   AdminGetVoiceStatsData,
   AdminGetVoiceStatsResponses,
+  AdminImportDevicesData,
+  AdminImportDevicesErrors,
+  AdminImportDevicesResponses,
+  AdminImportExtensionsData,
+  AdminImportExtensionsErrors,
+  AdminImportExtensionsResponses,
   AdminListAuditLogsData,
   AdminListAuditLogsErrors,
   AdminListAuditLogsResponses,
@@ -111,6 +117,12 @@ import type {
   AdminListUsersData,
   AdminListUsersErrors,
   AdminListUsersResponses,
+  AdminPreviewDeviceImportData,
+  AdminPreviewDeviceImportErrors,
+  AdminPreviewDeviceImportResponses,
+  AdminPreviewExtensionImportData,
+  AdminPreviewExtensionImportErrors,
+  AdminPreviewExtensionImportResponses,
   AdminUpdateDeviceTemplateData,
   AdminUpdateDeviceTemplateErrors,
   AdminUpdateDeviceTemplateResponses,
@@ -1053,6 +1065,92 @@ export const adminGetAuditLog = <ThrowOnError extends boolean = false>(
     security: [{ scheme: "bearer", type: "http" }],
     url: "/api/admin/audit/{log_id}",
     ...options,
+  });
+
+/**
+ * ImportDevices
+ */
+export const adminImportDevices = <ThrowOnError extends boolean = false>(
+  options: Options<AdminImportDevicesData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    AdminImportDevicesResponses,
+    AdminImportDevicesErrors,
+    ThrowOnError
+  >({
+    ...formDataBodySerializer,
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/admin/bulk-import/devices",
+    ...options,
+    headers: {
+      "Content-Type": null,
+      ...options.headers,
+    },
+  });
+
+/**
+ * ImportExtensions
+ */
+export const adminImportExtensions = <ThrowOnError extends boolean = false>(
+  options: Options<AdminImportExtensionsData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    AdminImportExtensionsResponses,
+    AdminImportExtensionsErrors,
+    ThrowOnError
+  >({
+    ...formDataBodySerializer,
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/admin/bulk-import/extensions",
+    ...options,
+    headers: {
+      "Content-Type": null,
+      ...options.headers,
+    },
+  });
+
+/**
+ * PreviewDeviceImport
+ */
+export const adminPreviewDeviceImport = <ThrowOnError extends boolean = false>(
+  options: Options<AdminPreviewDeviceImportData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    AdminPreviewDeviceImportResponses,
+    AdminPreviewDeviceImportErrors,
+    ThrowOnError
+  >({
+    ...formDataBodySerializer,
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/admin/bulk-import/preview/devices",
+    ...options,
+    headers: {
+      "Content-Type": null,
+      ...options.headers,
+    },
+  });
+
+/**
+ * PreviewExtensionImport
+ */
+export const adminPreviewExtensionImport = <
+  ThrowOnError extends boolean = false,
+>(
+  options: Options<AdminPreviewExtensionImportData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    AdminPreviewExtensionImportResponses,
+    AdminPreviewExtensionImportErrors,
+    ThrowOnError
+  >({
+    ...formDataBodySerializer,
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/admin/bulk-import/preview/extensions",
+    ...options,
+    headers: {
+      "Content-Type": null,
+      ...options.headers,
+    },
   });
 
 /**

@@ -151,6 +151,8 @@ export type RouteName =
   | 'get_voicemail_settings'
   | 'get_volume'
   | 'get_webhook'
+  | 'import_devices'
+  | 'import_extensions'
   | 'initiate_disable_mfa_oauth'
   | 'initiate_setup'
   | 'list_accounts'
@@ -213,6 +215,8 @@ export type RouteName =
   | 'openapi.json'
   | 'paste_image'
   | 'pause_member'
+  | 'preview_device_import'
+  | 'preview_extension_import'
   | 'reboot_device'
   | 'refresh_token'
   | 'regenerate_backup_codes'
@@ -631,6 +635,8 @@ export interface RoutePathParams {
   'get_webhook': {
     webhook_id: UUID;
   };
+  'import_devices': Record<string, never>;
+  'import_extensions': Record<string, never>;
   'initiate_disable_mfa_oauth': {
     provider: string;
   };
@@ -728,6 +734,8 @@ export interface RoutePathParams {
     call_queue_id: UUID;
     member_id: UUID;
   };
+  'preview_device_import': Record<string, never>;
+  'preview_extension_import': Record<string, never>;
   'reboot_device': {
     device_id: UUID;
   };
@@ -1170,6 +1178,8 @@ export interface RouteQueryParams {
     teamId: UUID;
   };
   'get_webhook': Record<string, never>;
+  'import_devices': Record<string, never>;
+  'import_extensions': Record<string, never>;
   'initiate_disable_mfa_oauth': Record<string, never>;
   'initiate_setup': Record<string, never>;
   'list_accounts': {
@@ -1697,6 +1707,8 @@ export interface RouteQueryParams {
   'openapi.json': Record<string, never>;
   'paste_image': Record<string, never>;
   'pause_member': Record<string, never>;
+  'preview_device_import': Record<string, never>;
+  'preview_extension_import': Record<string, never>;
   'reboot_device': Record<string, never>;
   'refresh_token': Record<string, never>;
   'regenerate_backup_codes': Record<string, never>;
@@ -2740,6 +2752,20 @@ export const routeDefinitions = {
     pathParams: ['webhook_id'] as const,
     queryParams: [] as const,
   },
+  'import_devices': {
+    path: '/api/admin/bulk-import/devices',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
+  'import_extensions': {
+    path: '/api/admin/bulk-import/extensions',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
   'initiate_disable_mfa_oauth': {
     path: '/api/mfa/disable/oauth/{provider}',
     methods: ['GET'] as const,
@@ -3175,6 +3201,20 @@ export const routeDefinitions = {
     methods: ['PUT'] as const,
     method: 'put',
     pathParams: ['call_queue_id', 'member_id'] as const,
+    queryParams: [] as const,
+  },
+  'preview_device_import': {
+    path: '/api/admin/bulk-import/preview/devices',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
+  'preview_extension_import': {
+    path: '/api/admin/bulk-import/preview/extensions',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: [] as const,
     queryParams: [] as const,
   },
   'reboot_device': {

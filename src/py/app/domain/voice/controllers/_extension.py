@@ -17,6 +17,7 @@ from app.domain.admin.deps import provide_audit_log_service
 from app.domain.gateway.deps import provide_gateway_connections
 from app.domain.gateway.providers import FreePBXProvider
 from app.domain.gateway.providers._freepbx import _GQL_ALL_EXTENSIONS, _GQL_EXTENSION, _to_bool, _to_int
+from app.domain.teams.guards import requires_feature_permission
 from app.domain.voice.guards import requires_extension_ownership
 from app.domain.voice.schemas import Extension, ExtensionCreate, ExtensionSyncResult, ExtensionUpdate
 from app.domain.voice.services import ExtensionService
@@ -56,7 +57,10 @@ class ExtensionController(Controller):
         "gateway_connections": Provide(provide_gateway_connections),
     }
 
-    @get(operation_id="ListExtensions")
+    @get(
+        operation_id="ListExtensions",
+        guards=[requires_feature_permission("voice", "view")],
+    )
     async def list_extensions(
         self,
         extensions_service: ExtensionService,
@@ -70,7 +74,10 @@ class ExtensionController(Controller):
         )
         return extensions_service.to_schema(results, total, filters, schema_type=Extension)
 
-    @post(operation_id="CreateExtension")
+    @post(
+        operation_id="CreateExtension",
+        guards=[requires_feature_permission("voice", "edit")],
+    )
     async def create_extension(
         self,
         request: Request[m.User, Token, Any],
@@ -141,7 +148,11 @@ class ExtensionController(Controller):
 
         return extensions_service.to_schema(db_obj, schema_type=Extension)
 
-    @get(operation_id="GetExtension", path="/{ext_id:uuid}", guards=[requires_extension_ownership])
+    @get(
+        operation_id="GetExtension",
+        path="/{ext_id:uuid}",
+        guards=[requires_feature_permission("voice", "view"), requires_extension_ownership],
+    )
     async def get_extension(
         self,
         extensions_service: ExtensionService,
@@ -152,7 +163,11 @@ class ExtensionController(Controller):
         db_obj = await extensions_service.get_one(id=ext_id, user_id=current_user.id)
         return extensions_service.to_schema(db_obj, schema_type=Extension)
 
-    @patch(operation_id="UpdateExtension", path="/{ext_id:uuid}", guards=[requires_extension_ownership])
+    @patch(
+        operation_id="UpdateExtension",
+        path="/{ext_id:uuid}",
+        guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],
+    )
     async def update_extension(
         self,
         request: Request[m.User, Token, Any],
@@ -221,7 +236,7 @@ class ExtensionController(Controller):
     @delete(
         operation_id="DeleteExtension",
         path="/{ext_id:uuid}",
-        guards=[requires_extension_ownership],
+        guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],
         return_dto=None,
     )
     async def delete_extension(
@@ -251,7 +266,11 @@ class ExtensionController(Controller):
             request=request,
         )
 
-    @post(operation_id="SyncExtensions", path="/sync")
+    @post(
+        operation_id="SyncExtensions",
+        path="/sync",
+        guards=[requires_feature_permission("voice", "edit")],
+    )
     async def sync_extensions(
         self,
         request: Request[m.User, Token, Any],

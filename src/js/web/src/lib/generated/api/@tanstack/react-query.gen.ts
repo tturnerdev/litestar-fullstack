@@ -34,6 +34,8 @@ import {
   adminGetUser,
   adminGetUserAuditLogs,
   adminGetVoiceStats,
+  adminImportDevices,
+  adminImportExtensions,
   adminListAuditLogs,
   adminListDevices,
   adminListDeviceTemplates,
@@ -45,6 +47,8 @@ import {
   adminListTeams,
   adminListTickets,
   adminListUsers,
+  adminPreviewDeviceImport,
+  adminPreviewExtensionImport,
   adminUpdateDeviceTemplate,
   adminUpdateMusicOnHold,
   adminUpdateTeam,
@@ -351,6 +355,12 @@ import type {
   AdminGetUserResponse,
   AdminGetVoiceStatsData,
   AdminGetVoiceStatsResponse,
+  AdminImportDevicesData,
+  AdminImportDevicesError,
+  AdminImportDevicesResponse,
+  AdminImportExtensionsData,
+  AdminImportExtensionsError,
+  AdminImportExtensionsResponse,
   AdminListAuditLogsData,
   AdminListAuditLogsError,
   AdminListAuditLogsResponse,
@@ -382,6 +392,12 @@ import type {
   AdminListUsersData,
   AdminListUsersError,
   AdminListUsersResponse,
+  AdminPreviewDeviceImportData,
+  AdminPreviewDeviceImportError,
+  AdminPreviewDeviceImportResponse,
+  AdminPreviewExtensionImportData,
+  AdminPreviewExtensionImportError,
+  AdminPreviewExtensionImportResponse,
   AdminUpdateDeviceTemplateData,
   AdminUpdateDeviceTemplateError,
   AdminUpdateDeviceTemplateResponse,
@@ -1489,6 +1505,114 @@ export const adminGetAuditLogOptions = (
     },
     queryKey: adminGetAuditLogQueryKey(options),
   });
+
+/**
+ * ImportDevices
+ */
+export const adminImportDevicesMutation = (
+  options?: Partial<Options<AdminImportDevicesData>>,
+): UseMutationOptions<
+  AdminImportDevicesResponse,
+  AdminImportDevicesError,
+  Options<AdminImportDevicesData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    AdminImportDevicesResponse,
+    AdminImportDevicesError,
+    Options<AdminImportDevicesData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await adminImportDevices({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * ImportExtensions
+ */
+export const adminImportExtensionsMutation = (
+  options?: Partial<Options<AdminImportExtensionsData>>,
+): UseMutationOptions<
+  AdminImportExtensionsResponse,
+  AdminImportExtensionsError,
+  Options<AdminImportExtensionsData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    AdminImportExtensionsResponse,
+    AdminImportExtensionsError,
+    Options<AdminImportExtensionsData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await adminImportExtensions({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * PreviewDeviceImport
+ */
+export const adminPreviewDeviceImportMutation = (
+  options?: Partial<Options<AdminPreviewDeviceImportData>>,
+): UseMutationOptions<
+  AdminPreviewDeviceImportResponse,
+  AdminPreviewDeviceImportError,
+  Options<AdminPreviewDeviceImportData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    AdminPreviewDeviceImportResponse,
+    AdminPreviewDeviceImportError,
+    Options<AdminPreviewDeviceImportData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await adminPreviewDeviceImport({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * PreviewExtensionImport
+ */
+export const adminPreviewExtensionImportMutation = (
+  options?: Partial<Options<AdminPreviewExtensionImportData>>,
+): UseMutationOptions<
+  AdminPreviewExtensionImportResponse,
+  AdminPreviewExtensionImportError,
+  Options<AdminPreviewExtensionImportData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    AdminPreviewExtensionImportResponse,
+    AdminPreviewExtensionImportError,
+    Options<AdminPreviewExtensionImportData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await adminPreviewExtensionImport({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
 
 export const getRecentActivityQueryKey = (
   options?: Options<GetRecentActivityData>,

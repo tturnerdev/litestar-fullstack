@@ -1294,6 +1294,76 @@ export const AuditLogEntrySchema = {
   type: "object",
 } as const;
 
+export const BulkImportPreviewSchema = {
+  properties: {
+    errorRows: {
+      type: "integer",
+    },
+    rows: {
+      items: {
+        $ref: "#/components/schemas/BulkImportPreviewRow",
+      },
+      type: "array",
+    },
+    totalRows: {
+      type: "integer",
+    },
+    validRows: {
+      type: "integer",
+    },
+  },
+  required: ["errorRows", "rows", "totalRows", "validRows"],
+  title: "BulkImportPreview",
+  type: "object",
+} as const;
+
+export const BulkImportPreviewRowSchema = {
+  properties: {
+    action: {
+      type: "string",
+    },
+    data: {
+      additionalProperties: {},
+      type: "object",
+    },
+    errors: {
+      items: {
+        type: "string",
+      },
+      type: "array",
+    },
+    rowNumber: {
+      type: "integer",
+    },
+  },
+  required: ["action", "data", "rowNumber"],
+  title: "BulkImportPreviewRow",
+  type: "object",
+} as const;
+
+export const BulkImportResultSchema = {
+  properties: {
+    created: {
+      type: "integer",
+    },
+    errors: {
+      items: {
+        type: "string",
+      },
+      type: "array",
+    },
+    skipped: {
+      type: "integer",
+    },
+    updated: {
+      type: "integer",
+    },
+  },
+  required: ["created", "errors", "skipped", "updated"],
+  title: "BulkImportResult",
+  type: "object",
+} as const;
+
 export const CallAnalyticsSummarySchema = {
   properties: {
     answered: {
