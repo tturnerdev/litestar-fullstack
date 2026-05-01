@@ -39,6 +39,8 @@ function NewFaxNumberPage() {
   const [number, setNumber] = useState("")
   const [label, setLabel] = useState("")
   const [isActive, setIsActive] = useState(true)
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [touched, setTouched] = useState<Record<string, boolean>>({})
 
   const formDirty = number.trim() !== "" || label.trim() !== "" || !isActive
 
@@ -47,8 +49,33 @@ function NewFaxNumberPage() {
     withResolver: true,
   })
 
+  const validateNumber = (value: string): string | undefined => {
+    if (!value.trim()) return "This field is required"
+    return undefined
+  }
+
+  const handleNumberBlur = () => {
+    setTouched((prev) => ({ ...prev, number: true }))
+    const err = validateNumber(number)
+    setErrors((prev) => ({ ...prev, number: err ?? "" }))
+  }
+
+  const handleNumberChange = (value: string) => {
+    setNumber(value)
+    if (touched.number) {
+      const err = validateNumber(value)
+      setErrors((prev) => ({ ...prev, number: err ?? "" }))
+    }
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+
+    const numberError = validateNumber(number)
+    setTouched({ number: true })
+    setErrors({ number: numberError ?? "" })
+    if (numberError) return
+
     justSubmittedRef.current = true
 
     const payload: { number: string; label?: string; isActive?: boolean; teamId?: string } = {
@@ -103,13 +130,19 @@ function NewFaxNumberPage() {
                 id="fax-number"
                 placeholder="e.g., +15551234567"
                 value={number}
-                onChange={(e) => setNumber(e.target.value)}
+                onChange={(e) => handleNumberChange(e.target.value)}
+                onBlur={handleNumberBlur}
+                aria-invalid={!!errors.number}
                 required
                 autoFocus
               />
-              <p className="text-xs text-muted-foreground">
-                Enter the full phone number including country code.
-              </p>
+              {errors.number ? (
+                <p className="text-xs text-destructive">{errors.number}</p>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  Enter the full phone number including country code.
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">

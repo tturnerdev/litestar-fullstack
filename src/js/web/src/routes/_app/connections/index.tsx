@@ -18,6 +18,16 @@ import {
   Zap,
   XCircle,
 } from "lucide-react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
 import {
   Breadcrumb,
@@ -172,6 +182,14 @@ function ConnectionsPage() {
   })
   const deleteConnection = useDeleteConnection()
   const testConnection = useTestAnyConnection()
+  const [itemToDelete, setItemToDelete] = useState<{ id: string; name: string } | null>(null)
+
+  const handleConfirmDelete = () => {
+    if (itemToDelete) {
+      deleteConnection.mutate(itemToDelete.id)
+      setItemToDelete(null)
+    }
+  }
 
   // Row click handler
   const handleRowClick = useCallback(
@@ -480,7 +498,7 @@ function ConnectionsPage() {
                       selected={selectedIds.has(conn.id)}
                       onToggle={() => toggleOne(conn.id)}
                       onRowClick={() => handleRowClick(conn.id)}
-                      onDelete={() => deleteConnection.mutate(conn.id)}
+                      onDelete={() => setItemToDelete({ id: conn.id, name: conn.name })}
                       onTest={() => testConnection.mutate(conn.id)}
                       isTestPending={testConnection.isPending && testConnection.variables === conn.id}
                     />
@@ -521,6 +539,23 @@ function ConnectionsPage() {
         onClearSelection={() => setSelectedIds(new Set())}
         actions={bulkActions}
       />
+
+      <AlertDialog open={!!itemToDelete} onOpenChange={(open) => !open && setItemToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete connection?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete <span className="font-medium text-foreground">{itemToDelete?.name}</span>. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PageContainer>
   )
 }

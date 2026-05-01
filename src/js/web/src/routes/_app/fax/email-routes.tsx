@@ -123,7 +123,7 @@ function CreateEmailRouteDialog({
   const [emailAddress, setEmailAddress] = useState("")
   const [isActive, setIsActive] = useState(true)
   const [notifyOnFailure, setNotifyOnFailure] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [errors, setErrors] = useState<Record<string, string>>({})
 
   const createMutation = useCreateFaxEmailRoute(faxNumberId)
 
@@ -132,24 +132,22 @@ function CreateEmailRouteDialog({
     setEmailAddress("")
     setIsActive(true)
     setNotifyOnFailure(true)
-    setError(null)
+    setErrors({})
   }
 
   function handleSubmit() {
+    const fieldErrors: Record<string, string> = {}
     if (!faxNumberId) {
-      setError("Please select a fax number")
-      return
+      fieldErrors.faxNumberId = "Please select a fax number"
     }
     const trimmed = emailAddress.trim()
     if (!trimmed) {
-      setError("Email address is required")
-      return
+      fieldErrors.emailAddress = "This field is required"
+    } else if (!EMAIL_REGEX.test(trimmed)) {
+      fieldErrors.emailAddress = "Please enter a valid email address"
     }
-    if (!EMAIL_REGEX.test(trimmed)) {
-      setError("Please enter a valid email address")
-      return
-    }
-    setError(null)
+    setErrors(fieldErrors)
+    if (Object.keys(fieldErrors).length > 0) return
     createMutation.mutate(
       { emailAddress: trimmed, isActive, notifyOnFailure },
       {
@@ -185,8 +183,14 @@ function CreateEmailRouteDialog({
         <div className="space-y-4 py-2">
           <div className="space-y-2">
             <Label htmlFor="create-fax-number">Fax Number</Label>
-            <Select value={faxNumberId} onValueChange={setFaxNumberId}>
-              <SelectTrigger id="create-fax-number">
+            <Select
+              value={faxNumberId}
+              onValueChange={(v) => {
+                setFaxNumberId(v)
+                if (errors.faxNumberId) setErrors((prev) => ({ ...prev, faxNumberId: "" }))
+              }}
+            >
+              <SelectTrigger id="create-fax-number" aria-invalid={!!errors.faxNumberId}>
                 <SelectValue placeholder="Select a fax number" />
               </SelectTrigger>
               <SelectContent>
@@ -197,6 +201,7 @@ function CreateEmailRouteDialog({
                 ))}
               </SelectContent>
             </Select>
+            {errors.faxNumberId && <p className="text-xs text-destructive">{errors.faxNumberId}</p>}
           </div>
           <div className="space-y-2">
             <Label htmlFor="create-email">Email Address</Label>
@@ -207,11 +212,20 @@ function CreateEmailRouteDialog({
               value={emailAddress}
               onChange={(e) => {
                 setEmailAddress(e.target.value)
-                if (error) setError(null)
+                if (errors.emailAddress) setErrors((prev) => ({ ...prev, emailAddress: "" }))
+              }}
+              onBlur={() => {
+                const trimmed = emailAddress.trim()
+                if (!trimmed) {
+                  setErrors((prev) => ({ ...prev, emailAddress: "This field is required" }))
+                } else if (!EMAIL_REGEX.test(trimmed)) {
+                  setErrors((prev) => ({ ...prev, emailAddress: "Please enter a valid email address" }))
+                }
               }}
               onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-              aria-invalid={!!error}
+              aria-invalid={!!errors.emailAddress}
             />
+            {errors.emailAddress && <p className="text-xs text-destructive">{errors.emailAddress}</p>}
           </div>
           <div className="flex items-center justify-between">
             <Label htmlFor="create-active">Active</Label>
@@ -229,7 +243,6 @@ function CreateEmailRouteDialog({
               onCheckedChange={setNotifyOnFailure}
             />
           </div>
-          {error && <p className="text-sm text-destructive">{error}</p>}
         </div>
         <DialogFooter>
           <Button
@@ -268,7 +281,7 @@ function EditEmailRouteDialog({
   const [emailAddress, setEmailAddress] = useState(route?.emailAddress ?? "")
   const [isActive, setIsActive] = useState(route?.isActive ?? true)
   const [notifyOnFailure, setNotifyOnFailure] = useState(route?.notifyOnFailure ?? true)
-  const [error, setError] = useState<string | null>(null)
+  const [errors, setErrors] = useState<Record<string, string>>({})
 
   const updateMutation = useUpdateFaxEmailRoute(
     route?.faxNumberId ?? "",
@@ -277,16 +290,15 @@ function EditEmailRouteDialog({
 
   function handleSubmit() {
     const trimmed = emailAddress.trim()
+    const fieldErrors: Record<string, string> = {}
     if (!trimmed) {
-      setError("Email address is required")
-      return
+      fieldErrors.emailAddress = "This field is required"
+    } else if (!EMAIL_REGEX.test(trimmed)) {
+      fieldErrors.emailAddress = "Please enter a valid email address"
     }
-    if (!EMAIL_REGEX.test(trimmed)) {
-      setError("Please enter a valid email address")
-      return
-    }
+    setErrors(fieldErrors)
+    if (Object.keys(fieldErrors).length > 0) return
     if (!route) return
-    setError(null)
 
     const payload: Record<string, unknown> = {}
     if (trimmed !== route.emailAddress) payload.emailAddress = trimmed
@@ -341,11 +353,20 @@ function EditEmailRouteDialog({
               value={emailAddress}
               onChange={(e) => {
                 setEmailAddress(e.target.value)
-                if (error) setError(null)
+                if (errors.emailAddress) setErrors((prev) => ({ ...prev, emailAddress: "" }))
+              }}
+              onBlur={() => {
+                const trimmed = emailAddress.trim()
+                if (!trimmed) {
+                  setErrors((prev) => ({ ...prev, emailAddress: "This field is required" }))
+                } else if (!EMAIL_REGEX.test(trimmed)) {
+                  setErrors((prev) => ({ ...prev, emailAddress: "Please enter a valid email address" }))
+                }
               }}
               onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-              aria-invalid={!!error}
+              aria-invalid={!!errors.emailAddress}
             />
+            {errors.emailAddress && <p className="text-xs text-destructive">{errors.emailAddress}</p>}
           </div>
           <div className="flex items-center justify-between">
             <Label htmlFor="edit-active">Active</Label>
@@ -363,7 +384,6 @@ function EditEmailRouteDialog({
               onCheckedChange={setNotifyOnFailure}
             />
           </div>
-          {error && <p className="text-sm text-destructive">{error}</p>}
         </div>
         <DialogFooter>
           <Button

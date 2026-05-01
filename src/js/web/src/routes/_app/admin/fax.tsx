@@ -245,7 +245,7 @@ function AdminFaxPage() {
                   </TableHeader>
                   <TableBody>
                     {recentMessages.map((msg, index) => (
-                      <TableRow key={msg.id} className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")} onClick={() => navigate({ to: "/fax/messages/$messageId", params: { messageId: msg.id } })}>
+                      <TableRow key={msg.id} className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")} onClick={() => navigate({ to: "/fax/messages/$messageId", params: { messageId: msg.id } })} tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter") navigate({ to: "/fax/messages/$messageId", params: { messageId: msg.id } }) }}>
                         <TableCell>
                           <Badge variant={msg.direction === "inbound" ? "outline" : "secondary"}>
                             <span className="flex items-center gap-1">
@@ -365,7 +365,7 @@ function AdminFaxPage() {
                     </TableHeader>
                     <TableBody>
                       {faxNumbers.map((fn, index) => (
-                        <TableRow key={fn.id} className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")} onClick={() => navigate({ to: "/fax/numbers/$faxNumberId", params: { faxNumberId: fn.id } })}>
+                        <TableRow key={fn.id} className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")} onClick={() => navigate({ to: "/fax/numbers/$faxNumberId", params: { faxNumberId: fn.id } })} tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter") navigate({ to: "/fax/numbers/$faxNumberId", params: { faxNumberId: fn.id } }) }}>
                           <TableCell className="font-mono font-medium">{fn.number}</TableCell>
                           <TableCell className="text-muted-foreground">{fn.label ?? "—"}</TableCell>
                           <TableCell className="text-muted-foreground">{fn.teamName ?? "—"}</TableCell>

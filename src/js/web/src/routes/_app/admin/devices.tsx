@@ -256,7 +256,7 @@ function AdminDevicesPage() {
                   </TableHeader>
                   <TableBody>
                     {recentDevices.map((device, index) => (
-                      <TableRow key={device.id} className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")} onClick={() => navigate({ to: "/devices/$deviceId", params: { deviceId: device.id } })}>
+                      <TableRow key={device.id} className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")} onClick={() => navigate({ to: "/devices/$deviceId", params: { deviceId: device.id } })} tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter") navigate({ to: "/devices/$deviceId", params: { deviceId: device.id } }) }}>
                         <TableCell className="font-medium">{device.name}</TableCell>
                         <TableCell className="font-mono text-muted-foreground text-sm">{device.macAddress ?? "—"}</TableCell>
                         <TableCell className="text-muted-foreground">{device.model ?? "—"}</TableCell>
@@ -357,7 +357,7 @@ function AdminDevicesPage() {
                     </TableHeader>
                     <TableBody>
                       {devices.map((device, index) => (
-                        <TableRow key={device.id} className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")} onClick={() => navigate({ to: "/devices/$deviceId", params: { deviceId: device.id } })}>
+                        <TableRow key={device.id} className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")} onClick={() => navigate({ to: "/devices/$deviceId", params: { deviceId: device.id } })} tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter") navigate({ to: "/devices/$deviceId", params: { deviceId: device.id } }) }}>
                           <TableCell className="font-medium">{device.name}</TableCell>
                           <TableCell className="font-mono text-muted-foreground text-sm">{device.macAddress ?? "—"}</TableCell>
                           <TableCell className="text-muted-foreground">{device.model ?? "—"}</TableCell>

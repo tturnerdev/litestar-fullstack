@@ -272,7 +272,7 @@ function AdminSupportPage() {
                   </TableHeader>
                   <TableBody>
                     {recentTickets.map((ticket, index) => (
-                      <TableRow key={ticket.id} className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")} onClick={() => navigate({ to: "/support/$ticketId", params: { ticketId: ticket.id } })}>
+                      <TableRow key={ticket.id} className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")} onClick={() => navigate({ to: "/support/$ticketId", params: { ticketId: ticket.id } })} tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter") navigate({ to: "/support/$ticketId", params: { ticketId: ticket.id } }) }}>
                         <TableCell className="font-mono text-sm">{ticket.ticketNumber}</TableCell>
                         <TableCell className="font-medium max-w-[300px] truncate">
                           <Tooltip>
@@ -390,7 +390,7 @@ function AdminSupportPage() {
                     </TableHeader>
                     <TableBody>
                       {tickets.map((ticket, index) => (
-                        <TableRow key={ticket.id} className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")} onClick={() => navigate({ to: "/support/$ticketId", params: { ticketId: ticket.id } })}>
+                        <TableRow key={ticket.id} className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")} onClick={() => navigate({ to: "/support/$ticketId", params: { ticketId: ticket.id } })} tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter") navigate({ to: "/support/$ticketId", params: { ticketId: ticket.id } }) }}>
                           <TableCell className="font-mono text-sm">{ticket.ticketNumber}</TableCell>
                           <TableCell className="font-medium max-w-[250px] truncate">
                             <Tooltip>

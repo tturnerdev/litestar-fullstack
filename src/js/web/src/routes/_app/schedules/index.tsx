@@ -17,6 +17,16 @@ import {
   X,
   XCircle,
 } from "lucide-react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
 import {
   Breadcrumb,
@@ -566,6 +576,14 @@ function ScheduleRow({
   onRowClick: () => void
 }) {
   const deleteSchedule = useDeleteSchedule()
+  const [itemToDelete, setItemToDelete] = useState<{ id: string; name: string } | null>(null)
+
+  const handleConfirmDelete = () => {
+    if (itemToDelete) {
+      deleteSchedule.mutate(itemToDelete.id)
+      setItemToDelete(null)
+    }
+  }
 
   return (
     <TableRow
@@ -648,7 +666,7 @@ function ScheduleRow({
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="text-destructive focus:text-destructive"
-              onClick={() => deleteSchedule.mutate(schedule.id)}
+              onClick={() => setItemToDelete({ id: schedule.id, name: schedule.name })}
             >
               <Trash2 className="mr-2 h-4 w-4" />
               Delete
@@ -656,6 +674,23 @@ function ScheduleRow({
           </DropdownMenuContent>
         </DropdownMenu>
       </TableCell>
+
+      <AlertDialog open={!!itemToDelete} onOpenChange={(open) => !open && setItemToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete schedule?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete <span className="font-medium text-foreground">{itemToDelete?.name}</span>. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </TableRow>
   )
 }

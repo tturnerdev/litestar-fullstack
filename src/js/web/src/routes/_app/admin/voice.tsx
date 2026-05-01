@@ -373,7 +373,7 @@ function AdminVoicePage() {
                   </TableHeader>
                   <TableBody>
                     {recentExtensions.map((ext, index) => (
-                      <TableRow key={ext.id} className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")} onClick={() => navigate({ to: "/voice/extensions/$extensionId", params: { extensionId: ext.id } })}>
+                      <TableRow key={ext.id} className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")} onClick={() => navigate({ to: "/voice/extensions/$extensionId", params: { extensionId: ext.id } })} tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter") navigate({ to: "/voice/extensions/$extensionId", params: { extensionId: ext.id } }) }}>
                         <TableCell className="font-mono font-medium">{ext.extensionNumber}</TableCell>
                         <TableCell className="text-muted-foreground">{ext.displayName}</TableCell>
                         <TableCell className="text-muted-foreground">{ext.ownerEmail ?? "—"}</TableCell>

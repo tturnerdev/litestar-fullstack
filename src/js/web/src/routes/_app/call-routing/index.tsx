@@ -37,6 +37,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -392,6 +402,7 @@ function TimeConditionsTab() {
   const [page, setPage] = useState(1)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [timeConditionToDelete, setTimeConditionToDelete] = useState<{ id: string; name: string } | null>(null)
 
   useEffect(() => { setPage(1) }, [debouncedSearch])
 
@@ -503,7 +514,7 @@ function TimeConditionsTab() {
               </TableHeader>
               <TableBody>
                 {items.map((tc: TimeCondition, index: number) => (
-                  <TableRow key={tc.id} data-state={selectedIds.has(tc.id) ? "selected" : undefined} className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`} onClick={(e) => { const target = e.target as HTMLElement; if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) return; navigate({ to: "/call-routing/time-conditions/$timeConditionId", params: { timeConditionId: tc.id } }); }}>
+                  <TableRow key={tc.id} data-state={selectedIds.has(tc.id) ? "selected" : undefined} className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`} onClick={(e) => { const target = e.target as HTMLElement; if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) return; navigate({ to: "/call-routing/time-conditions/$timeConditionId", params: { timeConditionId: tc.id } }); }} tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter") navigate({ to: "/call-routing/time-conditions/$timeConditionId", params: { timeConditionId: tc.id } }) }}>
                     <TableCell>
                       <Checkbox
                         checked={selectedIds.has(tc.id)}
@@ -540,7 +551,7 @@ function TimeConditionsTab() {
                             <Pencil className="mr-2 h-4 w-4" /> Edit
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => deleteTimeCondition.mutate(tc.id)}>
+                          <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setTimeConditionToDelete({ id: tc.id, name: tc.name })}>
                             <Trash2 className="mr-2 h-4 w-4" /> Delete
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -568,6 +579,31 @@ function TimeConditionsTab() {
         onClearSelection={() => setSelectedIds(new Set())}
         actions={bulkActions}
       />
+
+      <AlertDialog open={!!timeConditionToDelete} onOpenChange={(open) => !open && setTimeConditionToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete time condition?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete <span className="font-medium text-foreground">{timeConditionToDelete?.name}</span>. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (timeConditionToDelete) {
+                  deleteTimeCondition.mutate(timeConditionToDelete.id)
+                  setTimeConditionToDelete(null)
+                }
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
@@ -579,6 +615,7 @@ function IvrMenusTab() {
   const [page, setPage] = useState(1)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [ivrMenuToDelete, setIvrMenuToDelete] = useState<{ id: string; name: string } | null>(null)
 
   useEffect(() => { setPage(1) }, [debouncedSearch])
 
@@ -690,7 +727,7 @@ function IvrMenusTab() {
               </TableHeader>
               <TableBody>
                 {items.map((ivr: IvrMenu, index: number) => (
-                  <TableRow key={ivr.id} data-state={selectedIds.has(ivr.id) ? "selected" : undefined} className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`} onClick={(e) => { const target = e.target as HTMLElement; if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) return; navigate({ to: "/call-routing/ivr-menus/$ivrMenuId", params: { ivrMenuId: ivr.id } }); }}>
+                  <TableRow key={ivr.id} data-state={selectedIds.has(ivr.id) ? "selected" : undefined} className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`} onClick={(e) => { const target = e.target as HTMLElement; if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) return; navigate({ to: "/call-routing/ivr-menus/$ivrMenuId", params: { ivrMenuId: ivr.id } }); }} tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter") navigate({ to: "/call-routing/ivr-menus/$ivrMenuId", params: { ivrMenuId: ivr.id } }) }}>
                     <TableCell>
                       <Checkbox
                         checked={selectedIds.has(ivr.id)}
@@ -723,7 +760,7 @@ function IvrMenusTab() {
                             <Pencil className="mr-2 h-4 w-4" /> Edit
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => deleteIvrMenu.mutate(ivr.id)}>
+                          <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setIvrMenuToDelete({ id: ivr.id, name: ivr.name })}>
                             <Trash2 className="mr-2 h-4 w-4" /> Delete
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -751,6 +788,31 @@ function IvrMenusTab() {
         onClearSelection={() => setSelectedIds(new Set())}
         actions={bulkActions}
       />
+
+      <AlertDialog open={!!ivrMenuToDelete} onOpenChange={(open) => !open && setIvrMenuToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete IVR menu?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete <span className="font-medium text-foreground">{ivrMenuToDelete?.name}</span>. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (ivrMenuToDelete) {
+                  deleteIvrMenu.mutate(ivrMenuToDelete.id)
+                  setIvrMenuToDelete(null)
+                }
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
@@ -762,6 +824,7 @@ function CallQueuesTab() {
   const [page, setPage] = useState(1)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [callQueueToDelete, setCallQueueToDelete] = useState<{ id: string; name: string } | null>(null)
 
   useEffect(() => { setPage(1) }, [debouncedSearch])
 
@@ -874,7 +937,7 @@ function CallQueuesTab() {
               </TableHeader>
               <TableBody>
                 {items.map((q: CallQueue, index: number) => (
-                  <TableRow key={q.id} data-state={selectedIds.has(q.id) ? "selected" : undefined} className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`} onClick={(e) => { const target = e.target as HTMLElement; if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) return; navigate({ to: "/call-routing/call-queues/$callQueueId", params: { callQueueId: q.id } }); }}>
+                  <TableRow key={q.id} data-state={selectedIds.has(q.id) ? "selected" : undefined} className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`} onClick={(e) => { const target = e.target as HTMLElement; if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) return; navigate({ to: "/call-routing/call-queues/$callQueueId", params: { callQueueId: q.id } }); }} tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter") navigate({ to: "/call-routing/call-queues/$callQueueId", params: { callQueueId: q.id } }) }}>
                     <TableCell>
                       <Checkbox
                         checked={selectedIds.has(q.id)}
@@ -908,7 +971,7 @@ function CallQueuesTab() {
                             <Pencil className="mr-2 h-4 w-4" /> Edit
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => deleteCallQueue.mutate(q.id)}>
+                          <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setCallQueueToDelete({ id: q.id, name: q.name })}>
                             <Trash2 className="mr-2 h-4 w-4" /> Delete
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -936,6 +999,31 @@ function CallQueuesTab() {
         onClearSelection={() => setSelectedIds(new Set())}
         actions={bulkActions}
       />
+
+      <AlertDialog open={!!callQueueToDelete} onOpenChange={(open) => !open && setCallQueueToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete call queue?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete <span className="font-medium text-foreground">{callQueueToDelete?.name}</span>. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (callQueueToDelete) {
+                  deleteCallQueue.mutate(callQueueToDelete.id)
+                  setCallQueueToDelete(null)
+                }
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
@@ -947,6 +1035,7 @@ function RingGroupsTab() {
   const [page, setPage] = useState(1)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [ringGroupToDelete, setRingGroupToDelete] = useState<{ id: string; name: string } | null>(null)
 
   useEffect(() => { setPage(1) }, [debouncedSearch])
 
@@ -1059,7 +1148,7 @@ function RingGroupsTab() {
               </TableHeader>
               <TableBody>
                 {items.map((rg: RingGroup, index: number) => (
-                  <TableRow key={rg.id} data-state={selectedIds.has(rg.id) ? "selected" : undefined} className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`} onClick={(e) => { const target = e.target as HTMLElement; if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) return; navigate({ to: "/call-routing/ring-groups/$ringGroupId", params: { ringGroupId: rg.id } }); }}>
+                  <TableRow key={rg.id} data-state={selectedIds.has(rg.id) ? "selected" : undefined} className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`} onClick={(e) => { const target = e.target as HTMLElement; if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) return; navigate({ to: "/call-routing/ring-groups/$ringGroupId", params: { ringGroupId: rg.id } }); }} tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter") navigate({ to: "/call-routing/ring-groups/$ringGroupId", params: { ringGroupId: rg.id } }) }}>
                     <TableCell>
                       <Checkbox
                         checked={selectedIds.has(rg.id)}
@@ -1093,7 +1182,7 @@ function RingGroupsTab() {
                             <Pencil className="mr-2 h-4 w-4" /> Edit
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => deleteRingGroup.mutate(rg.id)}>
+                          <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setRingGroupToDelete({ id: rg.id, name: rg.name })}>
                             <Trash2 className="mr-2 h-4 w-4" /> Delete
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -1121,6 +1210,31 @@ function RingGroupsTab() {
         onClearSelection={() => setSelectedIds(new Set())}
         actions={bulkActions}
       />
+
+      <AlertDialog open={!!ringGroupToDelete} onOpenChange={(open) => !open && setRingGroupToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete ring group?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete <span className="font-medium text-foreground">{ringGroupToDelete?.name}</span>. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (ringGroupToDelete) {
+                  deleteRingGroup.mutate(ringGroupToDelete.id)
+                  setRingGroupToDelete(null)
+                }
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

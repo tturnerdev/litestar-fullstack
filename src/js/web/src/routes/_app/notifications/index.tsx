@@ -141,6 +141,9 @@ function NotificationCard({
         notification.actionUrl && "cursor-pointer",
       )}
       onClick={handleClick}
+      role={notification.actionUrl ? "button" : undefined}
+      tabIndex={notification.actionUrl ? 0 : undefined}
+      onKeyDown={notification.actionUrl ? (e: React.KeyboardEvent) => { if (e.key === "Enter") handleClick() } : undefined}
     >
       <CardContent className="flex items-start gap-4 py-4">
         <div className="flex shrink-0 items-center pt-1">
