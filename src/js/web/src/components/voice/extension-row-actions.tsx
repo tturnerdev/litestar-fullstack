@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router"
-import { Eye, MoreHorizontal, Pencil, Trash2 } from "lucide-react"
+import { Eye, MoreVertical, Pencil, Trash2 } from "lucide-react"
 import { useState } from "react"
 import { DeleteExtensionDialog } from "@/components/voice/delete-extension-dialog"
 import { EditExtensionDialog } from "@/components/voice/edit-extension-dialog"
@@ -26,8 +26,8 @@ export function ExtensionRowActions({ extension }: ExtensionRowActionsProps) {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-            <MoreHorizontal className="h-4 w-4" />
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0" data-slot="dropdown" onClick={(e) => e.stopPropagation()}>
+            <MoreVertical className="h-4 w-4" />
             <span className="sr-only">Open menu</span>
           </Button>
         </DropdownMenuTrigger>

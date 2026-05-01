@@ -1,12 +1,15 @@
-import { createFileRoute, Link } from "@tanstack/react-router"
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   AlertCircle,
+  Download,
   Eye,
   FileText,
   Home,
+  MoreVertical,
   Search,
   Send,
+  Trash2,
   X,
 } from "lucide-react"
 import { DirectionBadge, FaxStatusBadge } from "@/components/fax/fax-status-badge"
@@ -23,6 +26,7 @@ import { BulkActionBar, createBulkDeleteAction } from "@/components/ui/bulk-acti
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { DateRangeFilter, getPresetDates, isDateInRange } from "@/components/ui/date-range-filter"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { FilterDropdown, type FilterOption } from "@/components/ui/filter-dropdown"
 import { Input } from "@/components/ui/input"
@@ -74,6 +78,8 @@ function formatPages(count: number): string {
 
 function FaxMessagesPage() {
   useDocumentTitle("Fax Messages")
+  const navigate = useNavigate()
+
   // Filter & search state
   const [search, setSearch] = useState("")
   const debouncedSearch = useDebouncedValue(search)
@@ -200,6 +206,14 @@ function FaxMessagesPage() {
       ),
     ],
     [deleteMessage],
+  )
+
+  // Row click handler
+  const handleRowClick = useCallback(
+    (messageId: string) => {
+      navigate({ to: "/fax/messages/$messageId", params: { messageId } })
+    },
+    [navigate],
   )
 
   // Active filter count for display
@@ -415,17 +429,20 @@ function FaxMessagesPage() {
                       currentDirection={sortDir}
                       onSort={handleSort}
                     />
-                    <TableHead className="w-20 text-right">Actions</TableHead>
+                    <TableHead className="w-16 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredItems.map((msg) => (
+                  {filteredItems.map((msg, index) => (
                     <FaxMessageRow
                       key={msg.id}
                       msg={msg}
+                      index={index}
                       faxLineName={faxNumberMap.get(msg.faxNumberId) ?? ""}
                       selected={selectedIds.has(msg.id)}
                       onToggle={() => toggleOne(msg.id)}
+                      onRowClick={() => handleRowClick(msg.id)}
+                      onDelete={() => deleteMessage.mutate(msg.id)}
                     />
                   ))}
                 </TableBody>
@@ -472,17 +489,33 @@ function FaxMessagesPage() {
 
 function FaxMessageRow({
   msg,
+  index,
   faxLineName,
   selected,
   onToggle,
+  onRowClick,
+  onDelete,
 }: {
   msg: FaxMessage
+  index: number
   faxLineName: string
   selected: boolean
   onToggle: () => void
+  onRowClick: () => void
+  onDelete: () => void
 }) {
   return (
-    <TableRow data-state={selected ? "selected" : undefined}>
+    <TableRow
+      data-state={selected ? "selected" : undefined}
+      className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`}
+      onClick={(e) => {
+        const target = e.target as HTMLElement
+        if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) {
+          return
+        }
+        onRowClick()
+      }}
+    >
       <TableCell>
         <Checkbox
           checked={selected}
@@ -508,7 +541,14 @@ function FaxMessageRow({
       </TableCell>
       <TableCell>
         <div className="flex flex-col gap-0.5">
-          <span className="font-mono text-sm">{msg.remoteNumber}</span>
+          <Link
+            to="/fax/messages/$messageId"
+            params={{ messageId: msg.id }}
+            className="font-mono text-sm hover:underline"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {msg.remoteNumber}
+          </Link>
           {msg.remoteName && (
             <span className="text-xs text-muted-foreground">{msg.remoteName}</span>
           )}
@@ -536,17 +576,42 @@ function FaxMessageRow({
         </div>
       </TableCell>
       <TableCell className="text-right">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button asChild variant="ghost" size="sm" className="h-7 gap-1.5 px-2 text-xs">
-              <Link to="/fax/messages/$messageId" params={{ messageId: msg.id }}>
-                <Eye className="h-3.5 w-3.5" />
-                View
-              </Link>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+              data-slot="dropdown"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <MoreVertical className="h-4 w-4" />
+              <span className="sr-only">Actions for message from {msg.remoteNumber}</span>
             </Button>
-          </TooltipTrigger>
-          <TooltipContent>View fax details</TooltipContent>
-        </Tooltip>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem asChild>
+              <Link to="/fax/messages/$messageId" params={{ messageId: msg.id }}>
+                <Eye className="mr-2 h-4 w-4" />
+                View details
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <a href={`/api/fax/messages/${msg.id}/download`} target="_blank" rel="noopener noreferrer">
+                <Download className="mr-2 h-4 w-4" />
+                Download
+              </a>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="text-destructive focus:text-destructive"
+              onClick={onDelete}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </TableCell>
     </TableRow>
   )

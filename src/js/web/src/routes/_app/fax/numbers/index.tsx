@@ -1,20 +1,25 @@
-import { createFileRoute, Link } from "@tanstack/react-router"
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { useCallback, useMemo, useState } from "react"
 import {
   AlertCircle,
   CheckCircle2,
   Circle,
   Download,
+  Eye,
   Home,
   LayoutGrid,
   List,
   Mail,
   MessageSquare,
+  MoreVertical,
+  Pencil,
   Plus,
   Printer,
   Search,
+  Trash2,
 } from "lucide-react"
 import { FaxNumberCard } from "@/components/fax/fax-number-card"
+import { FaxNumberEditDialog } from "@/components/fax/fax-number-edit-dialog"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -26,6 +31,7 @@ import {
 import { BulkActionBar, createBulkDeleteAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { FilterDropdown, type FilterOption } from "@/components/ui/filter-dropdown"
 import { Input } from "@/components/ui/input"
@@ -82,6 +88,8 @@ function StatusIndicator({ isActive }: { isActive: boolean }) {
 
 function FaxNumbersPage() {
   useDocumentTitle("Fax Numbers")
+  const navigate = useNavigate()
+
   // View mode
   const [viewMode, setViewMode] = useState<"table" | "cards">("table")
 
@@ -204,6 +212,14 @@ function FaxNumbersPage() {
     if (!filteredItems.length) return
     exportToCsv("fax-numbers", csvHeaders, filteredItems)
   }, [filteredItems])
+
+  // Row click handler
+  const handleRowClick = useCallback(
+    (faxNumberId: string) => {
+      navigate({ to: "/fax/numbers/$faxNumberId", params: { faxNumberId } })
+    },
+    [navigate],
+  )
 
   // Active filter count
   const activeFilterCount = statusFilter.length
@@ -439,16 +455,19 @@ function FaxNumbersPage() {
                       currentDirection={sortDir}
                       onSort={handleSort}
                     />
-                    <TableHead className="w-28 text-right">Actions</TableHead>
+                    <TableHead className="w-16 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredItems.map((faxNumber) => (
+                  {filteredItems.map((faxNumber, index) => (
                     <FaxNumberRow
                       key={faxNumber.id}
                       faxNumber={faxNumber}
+                      index={index}
                       selected={selectedIds.has(faxNumber.id)}
                       onToggle={() => toggleOne(faxNumber.id)}
+                      onRowClick={() => handleRowClick(faxNumber.id)}
+                      onDelete={() => deleteFaxNumber.mutate(faxNumber.id)}
                     />
                   ))}
                 </TableBody>
@@ -529,15 +548,33 @@ function FaxNumbersPage() {
 
 function FaxNumberRow({
   faxNumber,
+  index,
   selected,
   onToggle,
+  onRowClick,
+  onDelete,
 }: {
   faxNumber: FaxNumber
+  index: number
   selected: boolean
   onToggle: () => void
+  onRowClick: () => void
+  onDelete: () => void
 }) {
+  const [editOpen, setEditOpen] = useState(false)
+
   return (
-    <TableRow data-state={selected ? "selected" : undefined}>
+    <TableRow
+      data-state={selected ? "selected" : undefined}
+      className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`}
+      onClick={(e) => {
+        const target = e.target as HTMLElement
+        if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) {
+          return
+        }
+        onRowClick()
+      }}
+    >
       <TableCell>
         <Checkbox
           checked={selected}
@@ -553,6 +590,7 @@ function FaxNumberRow({
           to="/fax/numbers/$faxNumberId"
           params={{ faxNumberId: faxNumber.id }}
           className="group flex flex-col gap-0.5"
+          onClick={(e) => e.stopPropagation()}
         >
           <span className="font-mono font-medium group-hover:underline">
             {faxNumber.number}
@@ -574,7 +612,7 @@ function FaxNumberRow({
       <TableCell>
         <Tooltip>
           <TooltipTrigger asChild>
-            <span className="cursor-default text-xs text-muted-foreground">
+            <span className="text-xs text-muted-foreground">
               {formatRelativeTimeShort(faxNumber.createdAt)}
             </span>
           </TooltipTrigger>
@@ -582,27 +620,48 @@ function FaxNumberRow({
         </Tooltip>
       </TableCell>
       <TableCell className="text-right">
-        <div className="flex items-center justify-end gap-1">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-7 gap-1.5 px-2 text-xs" asChild>
-                <Link
-                  to="/fax/messages"
-                  search={{ number: faxNumber.number }}
-                >
-                  <MessageSquare className="h-3.5 w-3.5" />
-                  Messages
-                </Link>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>View messages for this number</TooltipContent>
-          </Tooltip>
-          <Button asChild variant="outline" size="sm" className="h-7 px-2 text-xs">
-            <Link to="/fax/numbers/$faxNumberId" params={{ faxNumberId: faxNumber.id }}>
-              Manage
-            </Link>
-          </Button>
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+              data-slot="dropdown"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <MoreVertical className="h-4 w-4" />
+              <span className="sr-only">Actions for {faxNumber.number}</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem asChild>
+              <Link to="/fax/numbers/$faxNumberId" params={{ faxNumberId: faxNumber.id }}>
+                <Eye className="mr-2 h-4 w-4" />
+                View details
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setEditOpen(true)}>
+              <Pencil className="mr-2 h-4 w-4" />
+              Edit
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link to="/fax/messages" search={{ number: faxNumber.number }}>
+                <MessageSquare className="mr-2 h-4 w-4" />
+                Messages
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="text-destructive focus:text-destructive"
+              onClick={onDelete}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <FaxNumberEditDialog faxNumber={faxNumber} open={editOpen} onOpenChange={setEditOpen} />
       </TableCell>
     </TableRow>
   )

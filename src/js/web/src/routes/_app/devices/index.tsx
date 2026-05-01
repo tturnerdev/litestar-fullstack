@@ -1,15 +1,19 @@
-import { createFileRoute, Link } from "@tanstack/react-router"
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   AlertCircle,
   Download,
+  Eye,
   Home,
-  Loader2,
   Monitor,
+  MoreVertical,
+  Pencil,
   Plus,
+  Power,
   RefreshCw,
   RotateCcw,
   Search,
+  Trash2,
   X,
 } from "lucide-react"
 import { DeviceStatusBadge } from "@/components/devices/device-status-badge"
@@ -26,6 +30,7 @@ import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/com
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { DateRangeFilter, getPresetDates, isDateInRange } from "@/components/ui/date-range-filter"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { FilterDropdown, type FilterOption } from "@/components/ui/filter-dropdown"
 import { Input } from "@/components/ui/input"
@@ -39,6 +44,7 @@ import {
   useDeleteDevice,
   useRebootDevice,
   useReprovisionDevice,
+  useUpdateDevice,
 } from "@/lib/api/hooks/devices"
 import { deleteDevice, type Device } from "@/lib/generated/api"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
@@ -95,74 +101,12 @@ const csvHeaders: CsvHeader<Device>[] = [
 // -- Helpers ------------------------------------------------------------------
 
 
-// -- Per-row action buttons ---------------------------------------------------
-
-function RebootButton({ deviceId }: { deviceId: string }) {
-  const rebootMutation = useRebootDevice(deviceId)
-  const isPending = rebootMutation.isPending
-
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-7 gap-1.5 px-2 text-xs"
-          disabled={isPending}
-          onClick={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-            rebootMutation.mutate()
-          }}
-        >
-          {isPending ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-          ) : (
-            <RefreshCw className="h-3.5 w-3.5" />
-          )}
-          Reboot
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>Send reboot command to this device</TooltipContent>
-    </Tooltip>
-  )
-}
-
-function ReprovisionButton({ deviceId }: { deviceId: string }) {
-  const reprovisionMutation = useReprovisionDevice(deviceId)
-  const isPending = reprovisionMutation.isPending
-
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-7 gap-1.5 px-2 text-xs"
-          disabled={isPending}
-          onClick={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-            reprovisionMutation.mutate()
-          }}
-        >
-          {isPending ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-          ) : (
-            <RotateCcw className="h-3.5 w-3.5" />
-          )}
-          Reprovision
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>Regenerate config and push to device</TooltipContent>
-    </Tooltip>
-  )
-}
-
 // -- Main page ----------------------------------------------------------------
 
 function DevicesPage() {
   useDocumentTitle("Devices")
+  const navigate = useNavigate()
+
   // Filter & search state
   const [search, setSearch] = useState("")
   const debouncedSearch = useDebouncedValue(search)
@@ -277,6 +221,14 @@ function DevicesPage() {
       setPage(1)
     },
     [],
+  )
+
+  // Row click handler
+  const handleRowClick = useCallback(
+    (deviceId: string) => {
+      navigate({ to: "/devices/$deviceId", params: { deviceId } })
+    },
+    [navigate],
   )
 
   // Active filter count for display
@@ -520,16 +472,19 @@ function DevicesPage() {
                       onSort={handleSort}
                       className="hidden md:table-cell"
                     />
-                    <TableHead className="w-40 text-right">Actions</TableHead>
+                    <TableHead className="w-16 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredItems.map((device) => (
+                  {filteredItems.map((device, index) => (
                     <DeviceRow
                       key={device.id}
                       device={device}
+                      index={index}
                       selected={selectedIds.has(device.id)}
                       onToggle={() => toggleOne(device.id)}
+                      onRowClick={() => handleRowClick(device.id)}
+                      onDelete={() => deleteMutation.mutate(device.id)}
                     />
                   ))}
                 </TableBody>
@@ -576,15 +531,35 @@ function DevicesPage() {
 
 function DeviceRow({
   device,
+  index,
   selected,
   onToggle,
+  onRowClick,
+  onDelete,
 }: {
   device: Device
+  index: number
   selected: boolean
   onToggle: () => void
+  onRowClick: () => void
+  onDelete: () => void
 }) {
+  const rebootMutation = useRebootDevice(device.id)
+  const reprovisionMutation = useReprovisionDevice(device.id)
+  const updateMutation = useUpdateDevice(device.id)
+
   return (
-    <TableRow data-state={selected ? "selected" : undefined}>
+    <TableRow
+      data-state={selected ? "selected" : undefined}
+      className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`}
+      onClick={(e) => {
+        const target = e.target as HTMLElement
+        if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) {
+          return
+        }
+        onRowClick()
+      }}
+    >
       <TableCell>
         <Checkbox
           checked={selected}
@@ -600,6 +575,7 @@ function DeviceRow({
           to="/devices/$deviceId"
           params={{ deviceId: device.id }}
           className="group flex flex-col gap-0.5"
+          onClick={(e) => e.stopPropagation()}
         >
           <span className="font-medium group-hover:underline">{device.name}</span>
           {device.deviceModel && (
@@ -640,7 +616,7 @@ function DeviceRow({
       <TableCell className="hidden md:table-cell">
         <Tooltip>
           <TooltipTrigger asChild>
-            <span className="cursor-default text-xs text-muted-foreground">
+            <span className="text-xs text-muted-foreground">
               {formatRelativeTimeShort(device.lastSeenAt)}
             </span>
           </TooltipTrigger>
@@ -648,10 +624,64 @@ function DeviceRow({
         </Tooltip>
       </TableCell>
       <TableCell className="text-right">
-        <div className="flex items-center justify-end gap-0.5">
-          <RebootButton deviceId={device.id} />
-          <ReprovisionButton deviceId={device.id} />
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+              data-slot="dropdown"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <MoreVertical className="h-4 w-4" />
+              <span className="sr-only">Actions for {device.name}</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem asChild>
+              <Link to="/devices/$deviceId" params={{ deviceId: device.id }}>
+                <Eye className="mr-2 h-4 w-4" />
+                View details
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/devices/$deviceId" params={{ deviceId: device.id }} search={{ edit: true }}>
+                <Pencil className="mr-2 h-4 w-4" />
+                Edit
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={() => rebootMutation.mutate()}
+              disabled={rebootMutation.isPending}
+            >
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Reboot
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => reprovisionMutation.mutate()}
+              disabled={reprovisionMutation.isPending}
+            >
+              <RotateCcw className="mr-2 h-4 w-4" />
+              Reprovision
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => updateMutation.mutate({ isActive: !device.isActive })}
+              disabled={updateMutation.isPending}
+            >
+              <Power className="mr-2 h-4 w-4" />
+              {device.isActive ? "Disable" : "Enable"}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="text-destructive focus:text-destructive"
+              onClick={onDelete}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </TableCell>
     </TableRow>
   )

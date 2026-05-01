@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router"
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   AlertCircle,
@@ -6,10 +6,14 @@ import {
   CheckCircle2,
   Circle,
   Download,
+  Eye,
   Home,
   Loader2,
+  MoreVertical,
+  Pencil,
   Plus,
   Search,
+  Trash2,
   X,
   Zap,
   XCircle,
@@ -26,6 +30,13 @@ import {
 import { BulkActionBar, createBulkDeleteAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { FilterDropdown, type FilterOption } from "@/components/ui/filter-dropdown"
 import { Input } from "@/components/ui/input"
@@ -123,43 +134,12 @@ function StatusIndicator({ status }: { status: string }) {
 }
 
 
-// ── Per-row test button ──────────────────────────────────────────────────
-
-function TestConnectionButton({ connectionId }: { connectionId: string }) {
-  const testMutation = useTestAnyConnection()
-  const isPending = testMutation.isPending && testMutation.variables === connectionId
-
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-7 gap-1.5 px-2 text-xs"
-          disabled={isPending}
-          onClick={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-            testMutation.mutate(connectionId)
-          }}
-        >
-          {isPending ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-          ) : (
-            <Zap className="h-3.5 w-3.5" />
-          )}
-          Test
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>Test this connection</TooltipContent>
-    </Tooltip>
-  )
-}
-
 // ── Main page ────────────────────────────────────────────────────────────
 
 function ConnectionsPage() {
   useDocumentTitle("Connections")
+  const navigate = useNavigate()
+
   // Filter & search state
   const [search, setSearch] = useState("")
   const debouncedSearch = useDebouncedValue(search)
@@ -188,6 +168,15 @@ function ConnectionsPage() {
     sortOrder: sortDir ?? undefined,
   })
   const deleteConnection = useDeleteConnection()
+  const testConnection = useTestAnyConnection()
+
+  // Row click handler
+  const handleRowClick = useCallback(
+    (connectionId: string) => {
+      navigate({ to: "/connections/$connectionId", params: { connectionId } })
+    },
+    [navigate],
+  )
 
   // Apply client-side type & status filters
   const filteredItems = useMemo(() => {
@@ -476,16 +465,21 @@ function ConnectionsPage() {
                       onSort={handleSort}
                       className="hidden md:table-cell"
                     />
-                    <TableHead className="w-20 text-right">Actions</TableHead>
+                    <TableHead className="w-16 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredItems.map((conn) => (
+                  {filteredItems.map((conn, index) => (
                     <ConnectionRow
                       key={conn.id}
                       conn={conn}
+                      index={index}
                       selected={selectedIds.has(conn.id)}
                       onToggle={() => toggleOne(conn.id)}
+                      onRowClick={() => handleRowClick(conn.id)}
+                      onDelete={() => deleteConnection.mutate(conn.id)}
+                      onTest={() => testConnection.mutate(conn.id)}
+                      isTestPending={testConnection.isPending && testConnection.variables === conn.id}
                     />
                   ))}
                 </TableBody>
@@ -532,15 +526,35 @@ function ConnectionsPage() {
 
 function ConnectionRow({
   conn,
+  index,
   selected,
   onToggle,
+  onRowClick,
+  onDelete,
+  onTest,
+  isTestPending,
 }: {
   conn: ConnectionList
+  index: number
   selected: boolean
   onToggle: () => void
+  onRowClick: () => void
+  onDelete: () => void
+  onTest: () => void
+  isTestPending: boolean
 }) {
   return (
-    <TableRow className="hover:bg-muted/50 transition-colors" data-state={selected ? "selected" : undefined}>
+    <TableRow
+      data-state={selected ? "selected" : undefined}
+      className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`}
+      onClick={(e) => {
+        const target = e.target as HTMLElement
+        if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) {
+          return
+        }
+        onRowClick()
+      }}
+    >
       <TableCell>
         <Checkbox
           checked={selected}
@@ -553,8 +567,10 @@ function ConnectionRow({
       </TableCell>
       <TableCell>
         <Link
-          to={`/connections/${conn.id}` as string}
+          to="/connections/$connectionId"
+          params={{ connectionId: conn.id }}
           className="group flex flex-col gap-0.5"
+          onClick={(e) => e.stopPropagation()}
         >
           <span className="font-medium group-hover:underline">{conn.name}</span>
           <span className="text-xs text-muted-foreground">{conn.provider}</span>
@@ -606,7 +622,47 @@ function ConnectionRow({
         </Tooltip>
       </TableCell>
       <TableCell className="text-right">
-        <TestConnectionButton connectionId={conn.id} />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+              data-slot="dropdown"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <MoreVertical className="h-4 w-4" />
+              <span className="sr-only">Actions for {conn.name}</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem asChild>
+              <Link to="/connections/$connectionId" params={{ connectionId: conn.id }}>
+                <Eye className="mr-2 h-4 w-4" />
+                View details
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/connections/$connectionId/edit" params={{ connectionId: conn.id }}>
+                <Pencil className="mr-2 h-4 w-4" />
+                Edit
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onTest} disabled={isTestPending}>
+              {isTestPending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Zap className="mr-2 h-4 w-4" />
+              )}
+              Test connection
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={onDelete} className="text-destructive focus:text-destructive">
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </TableCell>
     </TableRow>
   )

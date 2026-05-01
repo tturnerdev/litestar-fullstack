@@ -1,12 +1,15 @@
-import { createFileRoute, Link } from "@tanstack/react-router"
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { useQueryClient } from "@tanstack/react-query"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   AlertCircle,
   CheckCircle,
   Download,
+  Eye,
   Home,
   LifeBuoy,
+  MoreVertical,
+  Pencil,
   Plus,
   Search,
   Trash2,
@@ -27,6 +30,7 @@ import { Badge } from "@/components/ui/badge"
 import { BulkActionBar, type BulkAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { DateRangeFilter, getPresetDates, isDateInRange } from "@/components/ui/date-range-filter"
 import { EmptyState } from "@/components/ui/empty-state"
 import { FilterDropdown, type FilterOption } from "@/components/ui/filter-dropdown"
@@ -116,6 +120,7 @@ function SupportPage() {
   // Selection state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
+  const navigate = useNavigate()
   const queryClient = useQueryClient()
 
   // Build server-side filters (status/priority/category are single-value on backend,
@@ -222,6 +227,31 @@ function SupportPage() {
     exportToCsv("tickets", csvHeaders, filteredItems)
     toast.success(`Exported ${filteredItems.length} ticket${filteredItems.length === 1 ? "" : "s"}`)
   }, [filteredItems])
+
+  // Row click handler
+  const handleRowClick = useCallback(
+    (ticketId: string) => {
+      navigate({ to: "/support/$ticketId", params: { ticketId } })
+    },
+    [navigate],
+  )
+
+  // Single-ticket delete handler
+  const handleDeleteTicket = useCallback(
+    async (ticketId: string) => {
+      try {
+        await client.delete({
+          url: `/api/support/tickets/${ticketId}`,
+          security: [{ scheme: "bearer", type: "http" }],
+        } as never)
+        queryClient.invalidateQueries({ queryKey: ["support", "tickets"] })
+        toast.success("Ticket deleted")
+      } catch {
+        toast.error("Unable to delete ticket")
+      }
+    },
+    [queryClient],
+  )
 
   // Bulk actions
   const bulkActions: BulkAction[] = useMemo(
@@ -534,16 +564,19 @@ function SupportPage() {
                       onSort={handleSort}
                       className="hidden md:table-cell"
                     />
-                    <TableHead className="w-20 text-right">Actions</TableHead>
+                    <TableHead className="w-16 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredItems.map((ticket) => (
+                  {filteredItems.map((ticket, index) => (
                     <TicketRow
                       key={ticket.id}
                       ticket={ticket}
+                      index={index}
                       selected={selectedIds.has(ticket.id)}
                       onToggle={() => toggleOne(ticket.id)}
+                      onRowClick={() => handleRowClick(ticket.id)}
+                      onDelete={() => handleDeleteTicket(ticket.id)}
                     />
                   ))}
                 </TableBody>
@@ -595,17 +628,34 @@ function SupportPage() {
 
 function TicketRow({
   ticket,
+  index,
   selected,
   onToggle,
+  onRowClick,
+  onDelete,
 }: {
   ticket: Ticket
+  index: number
   selected: boolean
   onToggle: () => void
+  onRowClick: () => void
+  onDelete: () => void
 }) {
   return (
     <TableRow
-      className={cn(!ticket.isReadByUser && "bg-primary/[0.02]")}
+      className={cn(
+        "cursor-pointer hover:bg-muted/50 transition-colors",
+        index % 2 === 1 ? "bg-muted/20" : "",
+        !ticket.isReadByUser && "bg-primary/[0.02]",
+      )}
       data-state={selected ? "selected" : undefined}
+      onClick={(e) => {
+        const target = e.target as HTMLElement
+        if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) {
+          return
+        }
+        onRowClick()
+      }}
     >
       <TableCell>
         <Checkbox
@@ -632,6 +682,7 @@ function TicketRow({
           className={cn(
             "group flex flex-col gap-0.5",
           )}
+          onClick={(e) => e.stopPropagation()}
         >
           <span className={cn(
             "group-hover:underline",
@@ -682,11 +733,42 @@ function TicketRow({
         </Tooltip>
       </TableCell>
       <TableCell className="text-right">
-        <Button asChild variant="ghost" size="sm" className="h-7 px-2 text-xs">
-          <Link to="/support/$ticketId" params={{ ticketId: ticket.id }}>
-            View
-          </Link>
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+              data-slot="dropdown"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <MoreVertical className="h-4 w-4" />
+              <span className="sr-only">Actions for {ticket.ticketNumber}</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem asChild>
+              <Link to="/support/$ticketId" params={{ ticketId: ticket.id }}>
+                <Eye className="mr-2 h-4 w-4" />
+                View details
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/support/$ticketId/edit" params={{ ticketId: ticket.id }}>
+                <Pencil className="mr-2 h-4 w-4" />
+                Edit
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="text-destructive focus:text-destructive"
+              onClick={onDelete}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </TableCell>
     </TableRow>
   )

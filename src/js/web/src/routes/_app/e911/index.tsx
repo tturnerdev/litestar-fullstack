@@ -1,14 +1,18 @@
-import { createFileRoute, Link } from "@tanstack/react-router"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
+import { useCallback, useEffect, useState } from "react"
 import {
   AlertCircle,
   AlertTriangle,
   CheckCircle2,
+  Eye,
   Home,
   Loader2,
+  MoreVertical,
+  Pencil,
   Plus,
   Search,
   ShieldAlert,
+  Trash2,
   X,
   XCircle,
 } from "lucide-react"
@@ -31,6 +35,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -44,10 +55,10 @@ import {
 } from "@/components/ui/select"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import {
   useE911Registrations,
   useCreateE911Registration,
+  useDeleteE911Registration,
   useValidateE911Registration,
   useUnregisteredPhoneNumbers,
   type E911Registration,
@@ -67,34 +78,133 @@ export const Route = createFileRoute("/_app/e911/")({
 
 const PAGE_SIZE = 20
 
-// -- Validate button ----------------------------------------------------------
+// -- E911 Row -----------------------------------------------------------------
 
-function ValidateButton({ registrationId }: { registrationId: string }) {
-  const validateMutation = useValidateE911Registration(registrationId)
+function E911Row({
+  reg,
+  index,
+  onRowClick,
+}: {
+  reg: E911Registration
+  index: number
+  onRowClick: () => void
+}) {
+  const validateMutation = useValidateE911Registration(reg.id)
+  const deleteMutation = useDeleteE911Registration()
+
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          className="h-7 gap-1.5 px-2 text-xs"
-          disabled={validateMutation.isPending}
-          onClick={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-            validateMutation.mutate()
-          }}
+    <TableRow
+      className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`}
+      onClick={(e) => {
+        const target = e.target as HTMLElement
+        if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) {
+          return
+        }
+        onRowClick()
+      }}
+    >
+      <TableCell>
+        <Link
+          to="/e911/$registrationId"
+          params={{ registrationId: reg.id }}
+          className="group flex flex-col gap-0.5"
+          onClick={(e) => e.stopPropagation()}
         >
-          {validateMutation.isPending ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-          ) : (
-            <CheckCircle2 className="h-3.5 w-3.5" />
+          <span className="font-medium group-hover:underline font-mono text-sm">
+            {reg.phoneNumberDisplay ?? "No number"}
+          </span>
+          {reg.phoneNumberLabel && (
+            <span className="text-xs text-muted-foreground">{reg.phoneNumberLabel}</span>
           )}
-          Validate
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>Validate E911 address with carrier</TooltipContent>
-    </Tooltip>
+        </Link>
+      </TableCell>
+      <TableCell>
+        <Link
+          to="/e911/$registrationId"
+          params={{ registrationId: reg.id }}
+          className="group-hover:underline text-sm"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {reg.addressLine1}
+          {reg.addressLine2 ? `, ${reg.addressLine2}` : ""}
+        </Link>
+      </TableCell>
+      <TableCell className="hidden md:table-cell">
+        <span className="text-sm">{reg.city}, {reg.state} {reg.postalCode}</span>
+      </TableCell>
+      <TableCell>
+        {reg.validated ? (
+          <Badge className="bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/30">
+            <CheckCircle2 className="mr-1 h-3 w-3" />
+            Validated
+          </Badge>
+        ) : (
+          <Badge variant="outline" className="border-red-500/30 text-red-600 dark:text-red-400">
+            <XCircle className="mr-1 h-3 w-3" />
+            Pending
+          </Badge>
+        )}
+      </TableCell>
+      <TableCell className="hidden md:table-cell">
+        {reg.carrierRegistrationId ? (
+          <span className="font-mono text-xs text-muted-foreground">{reg.carrierRegistrationId}</span>
+        ) : (
+          <span className="text-xs text-muted-foreground">--</span>
+        )}
+      </TableCell>
+      <TableCell className="text-right">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+              data-slot="dropdown"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <MoreVertical className="h-4 w-4" />
+              <span className="sr-only">Actions for {reg.phoneNumberDisplay ?? reg.id}</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem asChild>
+              <Link to="/e911/$registrationId" params={{ registrationId: reg.id }}>
+                <Eye className="mr-2 h-4 w-4" />
+                View details
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/e911/$registrationId" params={{ registrationId: reg.id }} search={{ edit: true }}>
+                <Pencil className="mr-2 h-4 w-4" />
+                Edit
+              </Link>
+            </DropdownMenuItem>
+            {!reg.validated && (
+              <DropdownMenuItem
+                disabled={validateMutation.isPending}
+                onClick={() => validateMutation.mutate()}
+              >
+                {validateMutation.isPending ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <CheckCircle2 className="mr-2 h-4 w-4" />
+                )}
+                Validate
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              variant="destructive"
+              disabled={deleteMutation.isPending}
+              onClick={() => deleteMutation.mutate(reg.id)}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </TableCell>
+    </TableRow>
   )
 }
 
@@ -270,6 +380,7 @@ function E911Page() {
   useDocumentTitle("E911 Addresses")
 
   const { currentTeam } = useAuthStore()
+  const navigate = useNavigate()
   const teamId = currentTeam?.id ?? ""
 
   const [search, setSearch] = useState("")
@@ -293,6 +404,13 @@ function E911Page() {
   const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / PAGE_SIZE))
   const hasData = items.length > 0
   const unregisteredCount = unregistered?.length ?? 0
+
+  const handleRowClick = useCallback(
+    (registrationId: string) => {
+      navigate({ to: "/e911/$registrationId", params: { registrationId } })
+    },
+    [navigate],
+  )
 
   const breadcrumbs = (
     <Breadcrumb>
@@ -436,63 +554,17 @@ function E911Page() {
                     <TableHead className="hidden md:table-cell">City / State</TableHead>
                     <TableHead>Validated</TableHead>
                     <TableHead className="hidden md:table-cell">Carrier Reg ID</TableHead>
-                    <TableHead className="w-28 text-right">Actions</TableHead>
+                    <TableHead className="w-16 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {items.map((reg: E911Registration) => (
-                    <TableRow key={reg.id}>
-                      <TableCell>
-                        <Link
-                          to="/e911/$registrationId"
-                          params={{ registrationId: reg.id }}
-                          className="group flex flex-col gap-0.5"
-                        >
-                          <span className="font-medium group-hover:underline font-mono text-sm">
-                            {reg.phoneNumberDisplay ?? "No number"}
-                          </span>
-                          {reg.phoneNumberLabel && (
-                            <span className="text-xs text-muted-foreground">{reg.phoneNumberLabel}</span>
-                          )}
-                        </Link>
-                      </TableCell>
-                      <TableCell>
-                        <Link
-                          to="/e911/$registrationId"
-                          params={{ registrationId: reg.id }}
-                          className="group-hover:underline text-sm"
-                        >
-                          {reg.addressLine1}
-                          {reg.addressLine2 ? `, ${reg.addressLine2}` : ""}
-                        </Link>
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        <span className="text-sm">{reg.city}, {reg.state} {reg.postalCode}</span>
-                      </TableCell>
-                      <TableCell>
-                        {reg.validated ? (
-                          <Badge className="bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/30">
-                            <CheckCircle2 className="mr-1 h-3 w-3" />
-                            Validated
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline" className="border-red-500/30 text-red-600 dark:text-red-400">
-                            <XCircle className="mr-1 h-3 w-3" />
-                            Pending
-                          </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        {reg.carrierRegistrationId ? (
-                          <span className="font-mono text-xs text-muted-foreground">{reg.carrierRegistrationId}</span>
-                        ) : (
-                          <span className="text-xs text-muted-foreground">--</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {!reg.validated && <ValidateButton registrationId={reg.id} />}
-                      </TableCell>
-                    </TableRow>
+                  {items.map((reg: E911Registration, index: number) => (
+                    <E911Row
+                      key={reg.id}
+                      reg={reg}
+                      index={index}
+                      onRowClick={() => handleRowClick(reg.id)}
+                    />
                   ))}
                 </TableBody>
               </Table>

@@ -10,6 +10,8 @@ import {
   Loader2,
   Mail,
   MailOpen,
+  MoreVertical,
+  Play,
   Search,
   Square,
   Trash2,
@@ -36,6 +38,13 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import {
   Dialog,
   DialogContent,
@@ -426,7 +435,7 @@ function MessagesTab() {
                   <TableHead>Duration</TableHead>
                   <TableHead>Date/Time</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="w-16 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -507,36 +516,56 @@ function MessagesTab() {
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            toggleReadMutation.mutate({
-                              messageId: msg.id,
-                              isRead: !msg.isRead,
-                            })
-                          }}
-                          title={msg.isRead ? "Mark as unread" : "Mark as read"}
-                        >
-                          {msg.isRead ? (
-                            <MailOpen className="h-4 w-4" />
-                          ) : (
-                            <Mail className="h-4 w-4" />
-                          )}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            setSingleDeleteId(msg.id)
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                            data-slot="dropdown"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <MoreVertical className="h-4 w-4" />
+                            <span className="sr-only">Actions for message from {msg.callerName ?? msg.callerNumber}</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() => handleOpenDetail(msg)}
+                          >
+                            <Play className="mr-2 h-4 w-4" />
+                            Play message
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() =>
+                              toggleReadMutation.mutate({
+                                messageId: msg.id,
+                                isRead: !msg.isRead,
+                              })
+                            }
+                          >
+                            {msg.isRead ? (
+                              <>
+                                <Mail className="mr-2 h-4 w-4" />
+                                Mark as unread
+                              </>
+                            ) : (
+                              <>
+                                <MailOpen className="mr-2 h-4 w-4" />
+                                Mark as read
+                              </>
+                            )}
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            variant="destructive"
+                            onClick={() => setSingleDeleteId(msg.id)}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 ))}

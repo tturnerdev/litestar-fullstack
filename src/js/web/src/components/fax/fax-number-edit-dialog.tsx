@@ -42,10 +42,14 @@ type EditFaxNumberFormData = z.infer<typeof editFaxNumberSchema>
 interface FaxNumberEditDialogProps {
   faxNumber: FaxNumber
   trigger?: React.ReactNode
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
-export function FaxNumberEditDialog({ faxNumber, trigger }: FaxNumberEditDialogProps) {
-  const [open, setOpen] = useState(false)
+export function FaxNumberEditDialog({ faxNumber, trigger, open: controlledOpen, onOpenChange }: FaxNumberEditDialogProps) {
+  const [internalOpen, setInternalOpen] = useState(false)
+  const open = controlledOpen ?? internalOpen
+  const setOpen = onOpenChange ?? setInternalOpen
   const updateFaxNumber = useUpdateFaxNumber(faxNumber.id)
 
   const form = useForm<EditFaxNumberFormData>({
@@ -90,14 +94,16 @@ export function FaxNumberEditDialog({ faxNumber, trigger }: FaxNumberEditDialogP
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {trigger ?? (
-          <Button variant="outline" size="sm">
-            <Pencil className="mr-2 h-4 w-4" />
-            Edit
-          </Button>
-        )}
-      </DialogTrigger>
+      {controlledOpen === undefined && (
+        <DialogTrigger asChild>
+          {trigger ?? (
+            <Button variant="outline" size="sm">
+              <Pencil className="mr-2 h-4 w-4" />
+              Edit
+            </Button>
+          )}
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Edit Fax Number</DialogTitle>

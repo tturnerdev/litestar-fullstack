@@ -1,15 +1,16 @@
 import { Link, useNavigate } from "@tanstack/react-router"
-import { AlertCircle, ArrowRight, Check, Copy, Printer } from "lucide-react"
-import { useState } from "react"
+import { AlertCircle, Check, Copy, Eye, MoreVertical, Pencil, Printer, Trash2 } from "lucide-react"
+import { useCallback, useState } from "react"
 import { FaxNumberEditDialog } from "@/components/fax/fax-number-edit-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { SkeletonTable } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { useFaxNumbers } from "@/lib/api/hooks/fax"
+import { type FaxNumber, useDeleteFaxNumber, useFaxNumbers } from "@/lib/api/hooks/fax"
 import { formatPhoneNumber } from "@/lib/format-utils"
 
 const PAGE_SIZE = 25
@@ -43,6 +44,14 @@ export function FaxNumberTable() {
   const navigate = useNavigate()
   const [page, setPage] = useState(1)
   const { data, isLoading, isError } = useFaxNumbers(page, PAGE_SIZE)
+  const deleteMutation = useDeleteFaxNumber()
+
+  const handleRowClick = useCallback(
+    (faxNumberId: string) => {
+      navigate({ to: "/fax/numbers/$faxNumberId", params: { faxNumberId } })
+    },
+    [navigate],
+  )
 
   if (isLoading) {
     return <SkeletonTable rows={6} />
@@ -78,7 +87,7 @@ export function FaxNumberTable() {
               <TableHead>Label</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Email Routes</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead className="w-16 text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -95,45 +104,13 @@ export function FaxNumberTable() {
               </TableRow>
             )}
             {data.items.map((faxNumber, index) => (
-              <TableRow
+              <FaxNumberRow
                 key={faxNumber.id}
-                className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 0 ? "bg-muted/20" : ""}`}
-                onClick={(e) => {
-                  const target = e.target as HTMLElement
-                  if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) {
-                    return
-                  }
-                  navigate({ to: "/fax/numbers/$faxNumberId", params: { faxNumberId: faxNumber.id } })
-                }}
-              >
-                <TableCell>
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-mono">{formatPhoneNumber(faxNumber.number)}</span>
-                    <CopyNumberButton number={faxNumber.number} />
-                  </div>
-                </TableCell>
-                <TableCell className="text-muted-foreground">{faxNumber.label ?? "—"}</TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <span className={`inline-block h-2 w-2 rounded-full ${faxNumber.isActive ? "bg-green-500" : "bg-gray-400"}`} />
-                    <Badge variant={faxNumber.isActive ? "default" : "secondary"}>
-                      {faxNumber.isActive ? "Active" : "Inactive"}
-                    </Badge>
-                  </div>
-                </TableCell>
-                <TableCell className="text-muted-foreground">{"—"}</TableCell>
-                <TableCell className="text-right">
-                  <div className="flex items-center justify-end gap-2">
-                    <FaxNumberEditDialog faxNumber={faxNumber} />
-                    <Button asChild variant="outline" size="sm">
-                      <Link to="/fax/numbers/$faxNumberId" params={{ faxNumberId: faxNumber.id }}>
-                        Manage
-                        <ArrowRight className="ml-1.5 h-4 w-4" />
-                      </Link>
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
+                faxNumber={faxNumber}
+                index={index}
+                onRowClick={() => handleRowClick(faxNumber.id)}
+                onDelete={() => deleteMutation.mutate(faxNumber.id)}
+              />
             ))}
           </TableBody>
         </Table>
@@ -157,5 +134,90 @@ export function FaxNumberTable() {
         </div>
       </CardContent>
     </Card>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Fax Number Row
+// ---------------------------------------------------------------------------
+
+function FaxNumberRow({
+  faxNumber,
+  index,
+  onRowClick,
+  onDelete,
+}: {
+  faxNumber: FaxNumber
+  index: number
+  onRowClick: () => void
+  onDelete: () => void
+}) {
+  const [editOpen, setEditOpen] = useState(false)
+
+  return (
+    <TableRow
+      className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`}
+      onClick={(e) => {
+        const target = e.target as HTMLElement
+        if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) {
+          return
+        }
+        onRowClick()
+      }}
+    >
+      <TableCell>
+        <div className="flex items-center gap-1.5">
+          <span className="font-mono">{formatPhoneNumber(faxNumber.number)}</span>
+          <CopyNumberButton number={faxNumber.number} />
+        </div>
+      </TableCell>
+      <TableCell className="text-muted-foreground">{faxNumber.label ?? "—"}</TableCell>
+      <TableCell>
+        <div className="flex items-center gap-2">
+          <span className={`inline-block h-2 w-2 rounded-full ${faxNumber.isActive ? "bg-green-500" : "bg-gray-400"}`} />
+          <Badge variant={faxNumber.isActive ? "default" : "secondary"}>
+            {faxNumber.isActive ? "Active" : "Inactive"}
+          </Badge>
+        </div>
+      </TableCell>
+      <TableCell className="text-muted-foreground">{"—"}</TableCell>
+      <TableCell className="text-right">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+              data-slot="dropdown"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <MoreVertical className="h-4 w-4" />
+              <span className="sr-only">Actions for {faxNumber.number}</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem asChild>
+              <Link to="/fax/numbers/$faxNumberId" params={{ faxNumberId: faxNumber.id }}>
+                <Eye className="mr-2 h-4 w-4" />
+                View details
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setEditOpen(true)}>
+              <Pencil className="mr-2 h-4 w-4" />
+              Edit
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="text-destructive focus:text-destructive"
+              onClick={onDelete}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <FaxNumberEditDialog faxNumber={faxNumber} open={editOpen} onOpenChange={setEditOpen} />
+      </TableCell>
+    </TableRow>
   )
 }

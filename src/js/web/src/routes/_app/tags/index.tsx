@@ -1,7 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router"
-import { cn } from "@/lib/utils"
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { AlertCircle, ArrowUpDown, Download, Home, Loader2, Pencil, Plus, Search, Tags, Trash2, X } from "lucide-react"
+import { AlertCircle, ArrowUpDown, Download, Eye, Home, Loader2, MoreVertical, Pencil, Plus, Search, Tags, Trash2, X } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,6 +23,13 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
@@ -51,6 +57,7 @@ const csvHeaders: CsvHeader<Tag>[] = [
 
 function TagsPage() {
   useDocumentTitle("Tags")
+  const navigate = useNavigate()
   const [search, setSearch] = useState("")
   const debouncedSearch = useDebouncedValue(search)
   const [deleteId, setDeleteId] = useState<string | null>(null)
@@ -138,6 +145,13 @@ function TagsPage() {
       },
     })
   }
+
+  const handleRowClick = useCallback(
+    (tagId: string) => {
+      navigate({ to: "/tags/$tagId/edit", params: { tagId } })
+    },
+    [navigate],
+  )
 
   const bulkActions = useMemo(
     () => [
@@ -317,47 +331,20 @@ function TagsPage() {
                       <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />
                     </button>
                   </TableHead>
-                  <TableHead className="w-[100px] text-right">Actions</TableHead>
+                  <TableHead className="w-16 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {sortedItems.map((tag, index) => (
-                  <TableRow
+                  <TagRow
                     key={tag.id}
-                    className={cn("transition-colors hover:bg-muted/50", index % 2 === 1 && "bg-muted/20")}
-                    data-selected={selected.has(tag.id) || undefined}
-                  >
-                    <TableCell>
-                      <Checkbox
-                        checked={selected.has(tag.id)}
-                        onChange={() => toggleOne(tag.id)}
-                        aria-label={`Select ${tag.name}`}
-                      />
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      <Badge variant="secondary">{tag.name}</Badge>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell font-mono text-xs text-muted-foreground">{tag.slug}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
-                          <Link to="/tags/$tagId/edit" params={{ tagId: tag.id }}>
-                            <Pencil className="h-3.5 w-3.5" />
-                            <span className="sr-only">Edit {tag.name}</span>
-                          </Link>
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-destructive hover:text-destructive"
-                          onClick={() => setDeleteId(tag.id)}
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                          <span className="sr-only">Delete {tag.name}</span>
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
+                    tag={tag}
+                    index={index}
+                    selected={selected.has(tag.id)}
+                    onToggle={() => toggleOne(tag.id)}
+                    onRowClick={() => handleRowClick(tag.id)}
+                    onDelete={() => setDeleteId(tag.id)}
+                  />
                 ))}
               </TableBody>
             </Table>
@@ -420,5 +407,98 @@ function TagsPage() {
         actions={bulkActions}
       />
     </PageContainer>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Tag Row
+// ---------------------------------------------------------------------------
+
+function TagRow({
+  tag,
+  index,
+  selected,
+  onToggle,
+  onRowClick,
+  onDelete,
+}: {
+  tag: Tag
+  index: number
+  selected: boolean
+  onToggle: () => void
+  onRowClick: () => void
+  onDelete: () => void
+}) {
+  return (
+    <TableRow
+      data-state={selected ? "selected" : undefined}
+      className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`}
+      onClick={(e) => {
+        const target = e.target as HTMLElement
+        if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) {
+          return
+        }
+        onRowClick()
+      }}
+    >
+      <TableCell>
+        <Checkbox
+          checked={selected}
+          onChange={(e) => {
+            e.stopPropagation()
+            onToggle()
+          }}
+          aria-label={`Select ${tag.name}`}
+        />
+      </TableCell>
+      <TableCell className="font-medium">
+        <Link
+          to="/tags/$tagId/edit"
+          params={{ tagId: tag.id }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <Badge variant="secondary">{tag.name}</Badge>
+        </Link>
+      </TableCell>
+      <TableCell className="hidden md:table-cell font-mono text-xs text-muted-foreground">{tag.slug}</TableCell>
+      <TableCell className="text-right">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+              data-slot="dropdown"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <MoreVertical className="h-4 w-4" />
+              <span className="sr-only">Actions for {tag.name}</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem asChild>
+              <Link to="/tags/$tagId/edit" params={{ tagId: tag.id }}>
+                <Eye className="mr-2 h-4 w-4" />
+                View details
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/tags/$tagId/edit" params={{ tagId: tag.id }}>
+                <Pencil className="mr-2 h-4 w-4" />
+                Edit
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="text-destructive focus:text-destructive"
+              onClick={onDelete}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </TableCell>
+    </TableRow>
   )
 }
