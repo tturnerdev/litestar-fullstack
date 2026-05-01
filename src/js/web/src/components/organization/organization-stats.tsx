@@ -1,9 +1,10 @@
-import { Activity, ArrowRight, MonitorSmartphone, RefreshCw, Users, UsersRound } from "lucide-react"
+import { Activity, AlertCircle, ArrowRight, MonitorSmartphone, RefreshCw, Users, UsersRound } from "lucide-react"
 import { useEffect, useState } from "react"
 import { Link } from "@tanstack/react-router"
 import { useQueryClient } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/empty-state"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useOrganizationStats } from "@/lib/api/hooks/organization"
@@ -22,7 +23,7 @@ function formatLastUpdated(date: Date): string {
 }
 
 export function OrganizationStats() {
-  const { data, isLoading, isError, dataUpdatedAt } = useOrganizationStats()
+  const { data, isLoading, isError, dataUpdatedAt, refetch: refetchStats } = useOrganizationStats()
   const queryClient = useQueryClient()
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [lastUpdatedLabel, setLastUpdatedLabel] = useState("")
@@ -79,11 +80,12 @@ export function OrganizationStats() {
     return (
       <div className="space-y-3">
         <h2 className="text-lg font-semibold">Platform Overview</h2>
-        <Card>
-          <CardContent className="py-6 text-center text-muted-foreground">
-            Unable to load platform statistics.
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={AlertCircle}
+          title="Unable to load platform statistics"
+          description="The server may be unreachable. Please try again."
+          action={<Button variant="outline" size="sm" onClick={() => refetchStats()}>Try again</Button>}
+        />
       </div>
     )
   }

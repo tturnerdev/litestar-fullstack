@@ -1,5 +1,7 @@
-import { Clock, History, Minus, Plus, RefreshCw } from "lucide-react"
+import { AlertCircle, History, Minus, Plus, RefreshCw } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { EmptyState } from "@/components/ui/empty-state"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
@@ -187,7 +189,7 @@ export function EntityActivityPanel({
   targetId,
   enabled = true,
 }: EntityActivityPanelProps) {
-  const { data, isLoading, isError } = useTargetAuditLogs(targetType, targetId, {
+  const { data, isLoading, isError, refetch } = useTargetAuditLogs(targetType, targetId, {
     enabled,
   })
 
@@ -197,13 +199,12 @@ export function EntityActivityPanel({
 
   if (isError) {
     return (
-      <div className="flex flex-col items-center justify-center py-8 text-center">
-        <Clock className="mb-2 h-8 w-8 text-muted-foreground/40" />
-        <p className="text-sm font-medium text-muted-foreground">Unable to load activity</p>
-        <p className="text-xs text-muted-foreground/60">
-          Something went wrong while fetching the audit trail.
-        </p>
-      </div>
+      <EmptyState
+        icon={AlertCircle}
+        title="Unable to load activity"
+        description="Something went wrong while fetching the audit trail."
+        action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+      />
     )
   }
 

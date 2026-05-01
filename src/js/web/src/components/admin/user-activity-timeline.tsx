@@ -1,4 +1,4 @@
-import { Activity, ChevronDown, Globe, LogIn, Pencil, Plus, Shield, Trash2 } from "lucide-react"
+import { Activity, AlertCircle, ChevronDown, Globe, LogIn, Pencil, Plus, Shield, Trash2 } from "lucide-react"
 import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -88,7 +88,7 @@ function TimelineSkeleton() {
 }
 
 export function UserActivityTimeline({ userId }: { userId: string }) {
-  const { data, isLoading, isError } = useAdminUserAuditLogs(userId)
+  const { data, isLoading, isError, refetch } = useAdminUserAuditLogs(userId)
   const [filter, setFilter] = useState<FilterType>("all")
   const [showAll, setShowAll] = useState(false)
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
@@ -99,12 +99,12 @@ export function UserActivityTimeline({ userId }: { userId: string }) {
 
   if (isError || !data) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Activity</CardTitle>
-        </CardHeader>
-        <CardContent className="text-muted-foreground text-sm">Unable to load activity.</CardContent>
-      </Card>
+      <EmptyState
+        icon={AlertCircle}
+        title="Unable to load activity"
+        description="Something went wrong while fetching the audit trail."
+        action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+      />
     )
   }
 

@@ -1,6 +1,8 @@
 import { Link } from "@tanstack/react-router"
-import { Activity, ArrowDownRight, ArrowRight, ArrowUpRight, CalendarPlus, Monitor, Phone, TicketCheck, Users, UsersRound } from "lucide-react"
+import { Activity, AlertCircle, ArrowDownRight, ArrowRight, ArrowUpRight, CalendarPlus, Monitor, Phone, TicketCheck, Users, UsersRound } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/empty-state"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAdminDashboardStats, useAdminTrends } from "@/lib/api/hooks/admin"
@@ -163,7 +165,7 @@ function StatsCardSkeleton() {
 }
 
 export function StatsCards() {
-  const { data, isLoading, isError } = useAdminDashboardStats()
+  const { data, isLoading, isError, refetch } = useAdminDashboardStats()
   const { data: trends } = useAdminTrends()
 
   if (isLoading) {
@@ -179,12 +181,12 @@ export function StatsCards() {
 
   if (isError || !data) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Admin stats</CardTitle>
-        </CardHeader>
-        <CardContent className="text-muted-foreground">We could not load dashboard stats.</CardContent>
-      </Card>
+      <EmptyState
+        icon={AlertCircle}
+        title="Unable to load dashboard stats"
+        description="Something went wrong. Please try again."
+        action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+      />
     )
   }
 

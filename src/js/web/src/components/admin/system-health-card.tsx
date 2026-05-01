@@ -1,7 +1,9 @@
 import { Link } from "@tanstack/react-router"
-import { Activity, Cable, CheckCircle2, Clock, Database, Server, XCircle } from "lucide-react"
+import { Activity, AlertCircle, Cable, CheckCircle2, Clock, Database, Server, XCircle } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/empty-state"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
@@ -29,7 +31,7 @@ function StatusIndicator({ ok, label }: { ok: boolean; label?: string }) {
 }
 
 export function SystemHealthCard() {
-  const { data, isLoading, isError } = useAdminSystemStatus()
+  const { data, isLoading, isError, refetch } = useAdminSystemStatus()
   const { data: connectionsData, isLoading: connectionsLoading } = useConnections({ page: 1, pageSize: 50 })
 
   const connections = connectionsData?.items ?? []
@@ -58,12 +60,12 @@ export function SystemHealthCard() {
 
   if (isError || !data) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm font-semibold">System Health</CardTitle>
-        </CardHeader>
-        <CardContent className="text-muted-foreground text-sm">Unable to load system status.</CardContent>
-      </Card>
+      <EmptyState
+        icon={AlertCircle}
+        title="Unable to load system status"
+        description="The server may be unreachable. Please try again."
+        action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+      />
     )
   }
 

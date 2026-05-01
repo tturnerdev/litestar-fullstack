@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router"
 import {
+  AlertCircle,
   ArrowRight,
   KeyRound,
   LogIn,
@@ -12,7 +13,9 @@ import {
   UserPlus,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/empty-state"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAdminRecentActivity } from "@/lib/api/hooks/admin"
@@ -136,7 +139,7 @@ function TimelineSkeleton() {
 }
 
 export function RecentActivity() {
-  const { data, isLoading, isError } = useAdminRecentActivity()
+  const { data, isLoading, isError, refetch } = useAdminRecentActivity()
 
   if (isLoading) {
     return <TimelineSkeleton />
@@ -144,12 +147,12 @@ export function RecentActivity() {
 
   if (isError || !data) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Activity</CardTitle>
-        </CardHeader>
-        <CardContent className="text-muted-foreground">We could not load recent activity.</CardContent>
-      </Card>
+      <EmptyState
+        icon={AlertCircle}
+        title="Unable to load recent activity"
+        description="Something went wrong. Please try again."
+        action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+      />
     )
   }
 

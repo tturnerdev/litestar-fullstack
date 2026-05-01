@@ -1,4 +1,4 @@
-import { AlertTriangle, Globe, Loader2, MapPin, Monitor, RefreshCw, ShieldCheck, Smartphone, Tablet, Trash2 } from "lucide-react"
+import { AlertCircle, AlertTriangle, Globe, Loader2, MapPin, Monitor, RefreshCw, ShieldCheck, Smartphone, Tablet, Trash2 } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   AlertDialog,
@@ -13,6 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/empty-state"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useActiveSessions, useRevokeAllSessions, useRevokeSession } from "@/lib/api/hooks/profile"
@@ -324,12 +325,12 @@ export function ActiveSessions() {
 
   if (isError) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Active sessions</CardTitle>
-          <CardDescription>Unable to load your active sessions.</CardDescription>
-        </CardHeader>
-      </Card>
+      <EmptyState
+        icon={AlertCircle}
+        title="Unable to load sessions"
+        description="Something went wrong loading your active sessions."
+        action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+      />
     )
   }
 

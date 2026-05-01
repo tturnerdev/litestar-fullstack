@@ -1,8 +1,10 @@
 import { AnimatePresence, motion } from "framer-motion"
-import { Bell, Headphones, Mail, Monitor, Phone, Printer, Server, Users } from "lucide-react"
+import { AlertCircle, Bell, Headphones, Mail, Monitor, Phone, Printer, Server, Users } from "lucide-react"
 import { useCallback } from "react"
 import { toast } from "sonner"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/empty-state"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -62,7 +64,7 @@ const CATEGORY_CONFIG = [
 ] as const
 
 export function NotificationPreferences() {
-  const { data: preferences, isLoading, isError } = useNotificationPreferences()
+  const { data: preferences, isLoading, isError, refetch } = useNotificationPreferences()
   const { mutate: updatePreferences } = useUpdateNotificationPreferences()
 
   const handleMasterToggle = useCallback(
@@ -113,22 +115,12 @@ export function NotificationPreferences() {
 
   if (isError || !preferences) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-destructive/10">
-              <Bell className="h-4 w-4 text-destructive" />
-            </div>
-            Notification Preferences
-          </CardTitle>
-          <CardDescription>Configure which notifications you receive</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-4">
-            <p className="text-sm text-muted-foreground">Unable to load notification preferences. Please try again later.</p>
-          </div>
-        </CardContent>
-      </Card>
+      <EmptyState
+        icon={AlertCircle}
+        title="Unable to load notification preferences"
+        description="Something went wrong. Please try again."
+        action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+      />
     )
   }
 

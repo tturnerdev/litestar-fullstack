@@ -1,4 +1,4 @@
-import { AlertTriangle, CheckSquare, Inbox, Loader2, Mail, MailOpen, Square, Trash2 } from "lucide-react"
+import { AlertCircle, AlertTriangle, CheckSquare, Inbox, Loader2, Mail, MailOpen, Square, Trash2 } from "lucide-react"
 import { useState } from "react"
 import {
   AlertDialog,
@@ -41,7 +41,7 @@ export function VoicemailMessageList({ extensionId }: VoicemailMessageListProps)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false)
   const [singleDeleteId, setSingleDeleteId] = useState<string | null>(null)
-  const { data, isLoading, isError } = useVoicemailMessages(extensionId, page, PAGE_SIZE)
+  const { data, isLoading, isError, refetch } = useVoicemailMessages(extensionId, page, PAGE_SIZE)
   const deleteMutation = useDeleteVoicemailMessage(extensionId)
   const markReadMutation = useMarkVoicemailRead(extensionId)
   const bulkMarkReadMutation = useBulkMarkVoicemailRead(extensionId)
@@ -51,12 +51,12 @@ export function VoicemailMessageList({ extensionId }: VoicemailMessageListProps)
 
   if (isError || !data) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Voicemail Messages</CardTitle>
-        </CardHeader>
-        <CardContent className="text-muted-foreground">Unable to load voicemail messages.</CardContent>
-      </Card>
+      <EmptyState
+        icon={AlertCircle}
+        title="Unable to load voicemail messages"
+        description="Something went wrong. Please try again."
+        action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+      />
     )
   }
 

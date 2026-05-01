@@ -1,7 +1,8 @@
-import { Info, Loader2, RefreshCw } from "lucide-react"
+import { AlertCircle, Info, Loader2, RefreshCw } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/empty-state"
 import { Skeleton } from "@/components/ui/skeleton"
 import type { SourceResult } from "@/lib/generated/api"
 
@@ -217,13 +218,12 @@ export function ExternalDataTab({
       {isLoading ? (
         <ExternalDataSkeleton />
       ) : isError ? (
-        <Card>
-          <CardContent className="py-8">
-            <p className="text-sm text-destructive">
-              Failed to load external data. Please try again.
-            </p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={AlertCircle}
+          title="Failed to load external data"
+          description="Something went wrong. Please try again."
+          action={<Button variant="outline" size="sm" onClick={() => onRefresh()}>Try again</Button>}
+        />
       ) : sources && Object.keys(sources).length > 0 ? (
         Object.entries(sources).map(([name, source]) => (
           <SourceCard key={name} source={source} />

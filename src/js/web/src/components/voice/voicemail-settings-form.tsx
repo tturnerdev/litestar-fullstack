@@ -1,4 +1,4 @@
-import { BellRing, CheckCircle2, Mic, RotateCcw, Settings2, Upload, User, Volume2, Wrench } from "lucide-react"
+import { AlertCircle, BellRing, CheckCircle2, Mic, RotateCcw, Settings2, Upload, User, Volume2, Wrench } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
+import { EmptyState } from "@/components/ui/empty-state"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { useUpdateVoicemailSettings, useUploadVoicemailGreeting, useVoicemailSettings } from "@/lib/api/hooks/voice"
@@ -39,7 +40,7 @@ function formatRetention(days: number): string {
 }
 
 export function VoicemailSettingsForm({ extensionId }: { extensionId: string }) {
-  const { data, isLoading, isError } = useVoicemailSettings(extensionId)
+  const { data, isLoading, isError, refetch } = useVoicemailSettings(extensionId)
   const updateMutation = useUpdateVoicemailSettings(extensionId)
   const uploadMutation = useUploadVoicemailGreeting(extensionId)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -66,12 +67,12 @@ export function VoicemailSettingsForm({ extensionId }: { extensionId: string }) 
 
   if (isError || !data) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Voicemail</CardTitle>
-        </CardHeader>
-        <CardContent className="text-muted-foreground">Unable to load voicemail settings.</CardContent>
-      </Card>
+      <EmptyState
+        icon={AlertCircle}
+        title="Unable to load voicemail settings"
+        description="Something went wrong. Please try again."
+        action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+      />
     )
   }
 

@@ -1,6 +1,8 @@
 import { Link } from "@tanstack/react-router"
-import { TrendingUp } from "lucide-react"
+import { AlertCircle, TrendingUp } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/empty-state"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
@@ -36,7 +38,7 @@ function getInitials(name: string | null | undefined, email: string): string {
 }
 
 export function TopUsersCard() {
-  const { data, isLoading, isError } = useAdminUsers({ page: 1, pageSize: 100 })
+  const { data, isLoading, isError, refetch } = useAdminUsers({ page: 1, pageSize: 100 })
 
   if (isLoading) {
     return (
@@ -64,13 +66,12 @@ export function TopUsersCard() {
 
   if (isError || !data) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm font-semibold">Most active users</CardTitle>
-          <CardDescription>By login count</CardDescription>
-        </CardHeader>
-        <CardContent className="text-muted-foreground text-sm">Unable to load user activity.</CardContent>
-      </Card>
+      <EmptyState
+        icon={AlertCircle}
+        title="Unable to load user activity"
+        description="Something went wrong. Please try again."
+        action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+      />
     )
   }
 

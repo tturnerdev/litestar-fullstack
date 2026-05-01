@@ -1,4 +1,4 @@
-import { BellOff, BellRing, Calendar, Clock, Moon, Sun, X } from "lucide-react"
+import { AlertCircle, BellOff, BellRing, Calendar, Clock, Moon, Sun, X } from "lucide-react"
 import { useRef, useState, type KeyboardEvent } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
+import { EmptyState } from "@/components/ui/empty-state"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { DndSchedulePicker } from "@/components/voice/dnd-schedule-picker"
@@ -37,7 +38,7 @@ const MODE_OPTIONS = [
 ] as const
 
 export function DndSettingsForm({ extensionId }: { extensionId: string }) {
-  const { data, isLoading, isError } = useDndSettings(extensionId)
+  const { data, isLoading, isError, refetch } = useDndSettings(extensionId)
   const updateMutation = useUpdateDndSettings(extensionId)
   const toggleMutation = useToggleDnd(extensionId)
   const [dirty, setDirty] = useState(false)
@@ -54,12 +55,12 @@ export function DndSettingsForm({ extensionId }: { extensionId: string }) {
 
   if (isError || !data) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Do Not Disturb</CardTitle>
-        </CardHeader>
-        <CardContent className="text-muted-foreground">Unable to load DND settings.</CardContent>
-      </Card>
+      <EmptyState
+        icon={AlertCircle}
+        title="Unable to load DND settings"
+        description="Something went wrong. Please try again."
+        action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+      />
     )
   }
 

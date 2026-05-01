@@ -1,4 +1,5 @@
 import {
+  AlertCircle,
   Globe,
   KeyRound,
   LogIn,
@@ -11,7 +12,9 @@ import {
   UserPen,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/empty-state"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useSecurityActivity, type SecurityActivityEntry } from "@/lib/api/hooks/profile"
@@ -109,12 +112,12 @@ export function RecentSecurityActivity() {
 
   if (isError) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Recent Security Activity</CardTitle>
-          <CardDescription>Unable to load security activity.</CardDescription>
-        </CardHeader>
-      </Card>
+      <EmptyState
+        icon={AlertCircle}
+        title="Unable to load security activity"
+        description="Something went wrong. Please try again."
+        action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+      />
     )
   }
 

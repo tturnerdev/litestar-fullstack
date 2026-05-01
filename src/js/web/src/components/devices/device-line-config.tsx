@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { AlertTriangle, Cable, GripVertical, Loader2, Plus, Save, Trash2 } from "lucide-react"
+import { AlertCircle, AlertTriangle, Cable, GripVertical, Loader2, Plus, Save, Trash2 } from "lucide-react"
 import type { DeviceLineAssignment } from "@/lib/generated/api"
 import {
   AlertDialog,
@@ -18,6 +18,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
+import { EmptyState } from "@/components/ui/empty-state"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -68,7 +69,7 @@ interface DeviceLineConfigProps {
 }
 
 export function DeviceLineConfig({ deviceId }: DeviceLineConfigProps) {
-  const { data, isLoading, isError } = useDeviceLines(deviceId)
+  const { data, isLoading, isError, refetch } = useDeviceLines(deviceId)
   const setLinesMutation = useSetDeviceLines(deviceId)
   const [lines, setLines] = useState<LineRow[] | null>(null)
   const [dirty, setDirty] = useState(false)
@@ -77,12 +78,12 @@ export function DeviceLineConfig({ deviceId }: DeviceLineConfigProps) {
 
   if (isError) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Line Assignments</CardTitle>
-        </CardHeader>
-        <CardContent className="text-muted-foreground">Unable to load line assignments.</CardContent>
-      </Card>
+      <EmptyState
+        icon={AlertCircle}
+        title="Unable to load line assignments"
+        description="Something went wrong. Please try again."
+        action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+      />
     )
   }
 
