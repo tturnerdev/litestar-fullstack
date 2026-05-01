@@ -1,6 +1,5 @@
 import { useState } from "react"
 import { Phone, Loader2 } from "lucide-react"
-import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
@@ -51,7 +50,6 @@ export function CreateExtensionDialog({ trigger }: { trigger: React.ReactNode })
       },
       {
         onSuccess: () => {
-          toast.success("Extension created successfully")
           resetForm()
           setOpen(false)
         },

@@ -20,6 +20,9 @@ import type {
   AccountRegisterData,
   AccountRegisterErrors,
   AccountRegisterResponses,
+  AdminCreateDeviceTemplateData,
+  AdminCreateDeviceTemplateErrors,
+  AdminCreateDeviceTemplateResponses,
   AdminGetDeviceStatsData,
   AdminGetDeviceStatsResponses,
   AdminGetFaxStatsData,
@@ -128,6 +131,8 @@ import type {
   SendFaxData,
   SendFaxErrors,
   SendFaxResponses,
+  SyncExtensionsData,
+  SyncExtensionsResponses,
   SystemHealthData,
   SystemHealthResponses,
   TokenRefreshData,
@@ -174,6 +179,7 @@ export type OperationName =
   | 'create_schedule'
   | 'create_tag'
   | 'create_team'
+  | 'create_template'
   | 'create_ticket'
   | 'create_time_condition'
   | 'create_user'
@@ -211,6 +217,7 @@ export type OperationName =
   | 'list_schedules'
   | 'list_tags'
   | 'list_teams_api_teams'
+  | 'list_templates'
   | 'list_tickets_api_support_tickets'
   | 'list_time_conditions'
   | 'list_users_api_users'
@@ -226,6 +233,7 @@ export type OperationName =
   | 'revoke_all_sessions'
   | 'send_fax'
   | 'signup'
+  | 'sync_extensions'
   | 'system:health'
   | 'system:oauth-config'
   | 'update_gateway_settings'
@@ -257,6 +265,7 @@ export interface OperationDataTypes {
   'create_schedule': CreateScheduleData
   'create_tag': CreateTagData
   'create_team': CreateTeamData
+  'create_template': AdminCreateDeviceTemplateData
   'create_ticket': CreateTicketData
   'create_time_condition': CreateTimeConditionData
   'create_user': CreateUserData
@@ -294,6 +303,7 @@ export interface OperationDataTypes {
   'list_schedules': CreateScheduleData
   'list_tags': CreateTagData
   'list_teams_api_teams': CreateTeamData
+  'list_templates': AdminCreateDeviceTemplateData
   'list_tickets_api_support_tickets': CreateTicketData
   'list_time_conditions': CreateTimeConditionData
   'list_users_api_users': CreateUserData
@@ -309,6 +319,7 @@ export interface OperationDataTypes {
   'revoke_all_sessions': RevokeAllSessionsData
   'send_fax': SendFaxData
   'signup': AccountRegisterData
+  'sync_extensions': SyncExtensionsData
   'system:health': SystemHealthData
   'system:oauth-config': OAuthConfigData
   'update_gateway_settings': UpdateAdminGatewaySettingsData
@@ -341,6 +352,7 @@ export interface OperationResponseTypes {
   'create_schedule': CreateScheduleResponses
   'create_tag': CreateTagResponses
   'create_team': CreateTeamResponses
+  'create_template': AdminCreateDeviceTemplateResponses
   'create_ticket': CreateTicketResponses
   'create_time_condition': CreateTimeConditionResponses
   'create_user': CreateUserResponses
@@ -378,6 +390,7 @@ export interface OperationResponseTypes {
   'list_schedules': CreateScheduleResponses
   'list_tags': CreateTagResponses
   'list_teams_api_teams': CreateTeamResponses
+  'list_templates': AdminCreateDeviceTemplateResponses
   'list_tickets_api_support_tickets': CreateTicketResponses
   'list_time_conditions': CreateTimeConditionResponses
   'list_users_api_users': CreateUserResponses
@@ -393,6 +406,7 @@ export interface OperationResponseTypes {
   'revoke_all_sessions': RevokeAllSessionsResponses
   'send_fax': SendFaxResponses
   'signup': AccountRegisterResponses
+  'sync_extensions': SyncExtensionsResponses
   'system:health': SystemHealthResponses
   'system:oauth-config': OAuthConfigResponses
   'update_gateway_settings': UpdateAdminGatewaySettingsResponses
@@ -425,6 +439,7 @@ export interface OperationErrorTypes {
   'create_schedule': CreateScheduleErrors
   'create_tag': CreateTagErrors
   'create_team': CreateTeamErrors
+  'create_template': AdminCreateDeviceTemplateErrors
   'create_ticket': CreateTicketErrors
   'create_time_condition': CreateTimeConditionErrors
   'create_user': CreateUserErrors
@@ -462,6 +477,7 @@ export interface OperationErrorTypes {
   'list_schedules': CreateScheduleErrors
   'list_tags': CreateTagErrors
   'list_teams_api_teams': CreateTeamErrors
+  'list_templates': AdminCreateDeviceTemplateErrors
   'list_tickets_api_support_tickets': CreateTicketErrors
   'list_time_conditions': CreateTimeConditionErrors
   'list_users_api_users': CreateUserErrors
@@ -477,6 +493,7 @@ export interface OperationErrorTypes {
   'revoke_all_sessions': never
   'send_fax': SendFaxErrors
   'signup': AccountRegisterErrors
+  'sync_extensions': never
   'system:health': never
   'system:oauth-config': never
   'update_gateway_settings': UpdateAdminGatewaySettingsErrors

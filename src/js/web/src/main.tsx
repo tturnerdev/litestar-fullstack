@@ -156,7 +156,7 @@ const router = createRouter({
   defaultPreload: "intent",
   scrollRestoration: true,
   defaultStructuralSharing: true,
-  defaultPreloadStaleTime: 0,
+  defaultPreloadStaleTime: 30_000,
   defaultErrorComponent: ErrorBoundary,
   defaultNotFoundComponent: NotFoundPage,
 })

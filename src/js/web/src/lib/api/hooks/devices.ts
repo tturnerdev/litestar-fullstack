@@ -18,13 +18,17 @@ import { client } from "@/lib/generated/api/client.gen"
 // Helpers (for endpoints not yet in generated SDK)
 // ---------------------------------------------------------------------------
 
+function getAuthHeaders(): Record<string, string> {
+  const token = typeof window !== "undefined" ? window.localStorage.getItem("access_token") : null
+  return token ? { Authorization: `Bearer ${token}` } : {}
+}
+
 async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
   const config = client.getConfig()
   const baseUrl = config.baseUrl ?? ""
-  const token = typeof window !== "undefined" ? window.localStorage.getItem("access_token") : null
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...getAuthHeaders(),
   }
   const response = await fetch(`${baseUrl}${url}`, {
     credentials: "include",
@@ -37,6 +41,22 @@ async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
   }
   if (response.status === 204) return undefined as unknown as T
   return response.json()
+}
+
+async function apiFetchBlob(url: string): Promise<Blob> {
+  const config = client.getConfig()
+  const baseUrl = config.baseUrl ?? ""
+  const response = await fetch(`${baseUrl}${url}`, {
+    credentials: "include",
+    headers: getAuthHeaders(),
+  })
+  if (!response.ok) {
+    if (response.status === 504) throw new Error("Device timed out — is it reachable?")
+    if (response.status === 401 || response.status === 403) throw new Error("Device rejected credentials")
+    if (response.status === 502) throw new Error("Could not connect to device")
+    throw new Error(`Screenshot failed (${response.status})`)
+  }
+  return response.blob()
 }
 
 // ---------------------------------------------------------------------------
@@ -229,5 +249,20 @@ export function useSetDeviceLines(deviceId: string) {
         description: error instanceof Error ? error.message : "Try again later",
       })
     },
+  })
+}
+
+// ---------------------------------------------------------------------------
+// Device Screenshot (LCD live view)
+// ---------------------------------------------------------------------------
+
+export function useDeviceScreenshot(deviceId: string, enabled: boolean) {
+  return useQuery({
+    queryKey: ["device", deviceId, "screenshot"],
+    queryFn: () => apiFetchBlob(`/api/devices/${deviceId}/screenshot`),
+    enabled: !!deviceId && enabled,
+    refetchOnWindowFocus: false,
+    staleTime: 0,
+    retry: false,
   })
 }

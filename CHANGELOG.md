@@ -1,5 +1,93 @@
 # Changelog
 
+## v0.110.0 (2026-05-01)
+
+### Added
+- **PBX extension sync** — New "Sync from PBX" button on extensions list page imports all extensions from a connected FreePBX server, creating new portal extensions or updating existing ones to match PBX data. Confirmation dialog with connection status.
+- **PBX push-back on edit/create** — Editing an extension (display name, DND, forwarding) now pushes changes to the PBX server via GraphQL mutations. Creating an extension that doesn't exist on the PBX creates it there too. Automatic `doreload` after every mutation.
+- **PBX duplicate check** — Create extension endpoint checks FreePBX for existing extensions with the same number, returning a 409 with guidance to use Sync instead.
+
+### Fixed
+- **Unifi MAC address case** — Unifi provider now normalizes MAC addresses to lowercase for device lookups.
+- **Connection provider preset bug** — Create and edit forms now use `preset.value` (e.g., "unifi") instead of lowercased label (e.g., "unifi network") when setting the provider field.
+- **Duplicate create-extension toast** — Removed redundant backend notification that caused two success toasts when creating an extension.
+- **FreePBX addExtension schema** — Fixed GraphQL mutation to send only valid `addExtensionInput` fields (`name`, `email`), then follows up with `updateExtension` for DND/forwarding settings. Fixed `ringtimer` type from Int to String.
+
+## v0.109.0 (2026-04-30)
+
+### Added
+- **Keyboard shortcuts** — Expanded shortcut palette with section-based navigation, quick actions, and help overlay.
+- **Home dashboard widget** — Dashboard overview card on the home page with key metrics.
+- **Activity panels** — Added audit trail activity panels to teams, schedules, fax, and voice detail pages.
+
+## v0.108.0 (2026-04-30)
+
+### Added
+- **Activity panels across detail pages** — EntityActivityPanel added to device detail (Activity tab), team detail, admin user detail, and support ticket sidebar with real audit trail data.
+- **Enhanced global search** — 30+ navigation shortcuts, recent pages, admin-gated entries.
+
+## v0.107.0 (2026-04-30)
+
+### Added
+- **Document titles** — Added `useDocumentTitle` to 13 pages missing it (edit pages, hub pages, sub-pages).
+- **EntityActivityPanel component** — Reusable audit trail timeline component with lazy loading.
+- **Connection activity tab** — Activity tab on connection detail page with audit history.
+- **Ticket assignment** — Assignee dropdown on support ticket edit form (superuser-only).
+- **Locations polish** — Breadcrumbs and layout improvements on locations list page.
+
+## v0.106.0 (2026-04-30)
+
+### Added
+- **Provider presets** — Known provider presets (FreePBX, Telnyx, Unifi) auto-fill connection create/edit forms.
+- **CDR bulk export** — Row selection and selective CSV export on analytics CDR table.
+- **Internal notes** — Toggle for superuser-only internal notes in support ticket conversations.
+- **Connection health dashboard** — External connections health overview card on admin system page.
+
+## v0.105.0 (2026-04-30)
+
+### Added
+- **Unifi provider** — Network gateway device lookups by MAC address via Unifi Network API.
+- **Network connection type** — New "network" ConnectionType enum with frontend support across all connection pages.
+- **Call-routing bulk actions** — Row selection with bulk delete and CSV export on all 4 call-routing tabs.
+- **Audit diff viewer** — Before/after diff detail sheet on audit log table rows.
+
+### Fixed
+- **Voicemail controller DI** — Switched to `create_service_dependencies` pattern.
+- **React DOM nesting warning** — Changed `p` to `span` in quick-actions-card.
+
+## v0.104.0 (2026-04-30)
+
+### Added
+- **E911 bulk actions** — Row selection with bulk delete and CSV export on E911 registrations page.
+- **Fax email routes polish** — Dropdown actions, clickable rows, CSV export, and bulk actions.
+- **Call-routing CSV export** — Export for all 4 call-routing entity types.
+
+### Changed
+- **Dead code cleanup** — Deleted 23 unused component files (~5,200 lines).
+
+## v0.103.0 (2026-04-30)
+
+### Added
+- **CSV export** — Export buttons for E911, Schedules, Fax Messages, and Voicemail pages.
+- **Schedules bulk export** — Row selection and bulk export on schedules page.
+- **Document titles** — Added to 7 more pages (organization, location detail, fax number detail, extension detail, fax message detail, admin users, admin teams).
+- **Admin table dropdown actions** — Replaced inline buttons with dropdown menus on admin users and teams tables. Added clickable rows with hover/striped styling.
+
+## v0.102.0 (2026-04-30)
+
+### Added
+- **Call-routing table actions** — Dropdown action menus (View, Edit, Delete) with striped rows on all four call-routing tables and the schedules table.
+- **Connections document title** — Added `useDocumentTitle` to connections detail page.
+
+### Changed
+- **Removed unused table components** — Deleted four component-level table files superseded by route-level implementations.
+
+## v0.101.0 (2026-04-30)
+
+### Fixed
+- **Standardized table row actions** — Replaced inline action buttons with consistent dropdown menus across all entity tables (devices, fax numbers, fax messages, support tickets, connections, E911, tags, voicemail, extensions). Added clickable rows with striped backgrounds and event propagation guards.
+- **Database migration errors** — Fixed Redis type resolution in gateway controllers. Fixed duplicate migration revision ID collision. Fixed E911 schema field ordering.
+
 ## v0.100.0 (2026-04-30)
 
 ### Added

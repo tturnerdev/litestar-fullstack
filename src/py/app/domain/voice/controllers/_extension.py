@@ -5,6 +5,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Annotated, Any
 from uuid import UUID
 
+import msgspec
+from structlog import get_logger
 from litestar import Controller, delete, get, patch, post
 from litestar.di import Provide
 from litestar.exceptions import ClientException
@@ -15,12 +17,13 @@ from app.domain.admin.deps import provide_audit_log_service
 from app.domain.gateway.deps import provide_gateway_connections
 from app.domain.gateway.providers import FreePBXProvider
 from app.domain.gateway.providers._freepbx import _GQL_ALL_EXTENSIONS, _GQL_EXTENSION, _to_bool, _to_int
-from app.domain.notifications.deps import provide_notifications_service
 from app.domain.voice.guards import requires_extension_ownership
 from app.domain.voice.schemas import Extension, ExtensionCreate, ExtensionSyncResult, ExtensionUpdate
 from app.domain.voice.services import ExtensionService
 from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
+
+logger = get_logger()
 
 if TYPE_CHECKING:
     from advanced_alchemy.filters import FilterTypes
@@ -29,7 +32,6 @@ if TYPE_CHECKING:
     from litestar.security.jwt import Token
 
     from app.domain.admin.services import AuditLogService
-    from app.domain.notifications.services import NotificationService
 
 
 class ExtensionController(Controller):
@@ -51,7 +53,6 @@ class ExtensionController(Controller):
         },
     ) | {
         "audit_service": Provide(provide_audit_log_service),
-        "notifications_service": Provide(provide_notifications_service),
         "gateway_connections": Provide(provide_gateway_connections),
     }
 
@@ -75,13 +76,13 @@ class ExtensionController(Controller):
         request: Request[m.User, Token, Any],
         extensions_service: ExtensionService,
         audit_service: AuditLogService,
-        notifications_service: NotificationService,
         current_user: m.User,
         data: ExtensionCreate,
         gateway_connections: list[m.Connection],
     ) -> Extension:
         """Create a new extension."""
         # Check if extension already exists on PBX
+        ext_exists_on_pbx = False
         pbx_connections = [c for c in gateway_connections if c.provider == "freepbx" and c.is_enabled]
         if pbx_connections:
             conn = pbx_connections[0]
@@ -92,6 +93,7 @@ class ExtensionController(Controller):
                 ext_data = resp.get("data", {}).get("fetchExtension", {})
                 ext_status = ext_data.get("status", "")
                 if str(ext_status).lower() in ("true", "ok", "success", "1"):
+                    ext_exists_on_pbx = True
                     user_data = ext_data.get("user") or {}
                     if user_data.get("name"):
                         raise ClientException(
@@ -103,7 +105,6 @@ class ExtensionController(Controller):
             except ClientException:
                 raise
             except Exception:
-                # If PBX check fails, allow creation to proceed
                 pass
 
         obj = data.to_dict()
@@ -123,16 +124,21 @@ class ExtensionController(Controller):
             after=after,
             request=request,
         )
-        try:
-            await notifications_service.notify(
-                user_id=current_user.id,
-                title="Extension Created",
-                message=f"Your extension '{db_obj.extension_number}' has been created.",
-                category="voice",
-                action_url=f"/voice/extensions/{db_obj.id}",
-            )
-        except Exception:
-            pass
+
+        if pbx_connections and not ext_exists_on_pbx:
+            try:
+                await provider.add_extension_on_pbx(
+                    db_obj.extension_number,
+                    conn,
+                    display_name=db_obj.display_name,
+                    email=current_user.email or "",
+                    dnd_enabled=db_obj.dnd_enabled,
+                    no_answer_dest=db_obj.forward_no_answer_destination or "",
+                    ring_timer=db_obj.forward_no_answer_ring_count,
+                )
+            except Exception as exc:
+                await logger.awarning("pbx_add_extension_failed", ext=db_obj.extension_number, error=str(exc))
+
         return extensions_service.to_schema(db_obj, schema_type=Extension)
 
     @get(operation_id="GetExtension", path="/{ext_id:uuid}", guards=[requires_extension_ownership])
@@ -155,6 +161,7 @@ class ExtensionController(Controller):
         current_user: m.User,
         data: ExtensionUpdate,
         ext_id: Annotated[UUID, Parameter(title="Extension ID", description="The extension to update.")],
+        gateway_connections: list[m.Connection],
     ) -> Extension:
         """Update display name, settings."""
         db_obj = await extensions_service.get_one(id=ext_id, user_id=current_user.id)
@@ -174,6 +181,41 @@ class ExtensionController(Controller):
             after=after,
             request=request,
         )
+
+        pbx_connections = [c for c in gateway_connections if c.provider == "freepbx" and c.is_enabled]
+        if pbx_connections:
+            conn = pbx_connections[0]
+            provider = FreePBXProvider()
+            pbx_kwargs: dict[str, Any] = {}
+            if not isinstance(data.display_name, type(msgspec.UNSET)):
+                pbx_kwargs["display_name"] = db_obj.display_name
+            if not isinstance(data.dnd_enabled, type(msgspec.UNSET)):
+                pbx_kwargs["dnd_enabled"] = db_obj.dnd_enabled
+            if not isinstance(data.forward_no_answer_destination, type(msgspec.UNSET)):
+                pbx_kwargs["no_answer_dest"] = db_obj.forward_no_answer_destination or ""
+            if not isinstance(data.forward_no_answer_ring_count, type(msgspec.UNSET)):
+                pbx_kwargs["ring_timer"] = db_obj.forward_no_answer_ring_count
+            if pbx_kwargs:
+                try:
+                    ext_query = _GQL_EXTENSION.format(ext=db_obj.extension_number)
+                    resp = await provider._execute_graphql(ext_query, conn)
+                    ext_data = resp.get("data", {}).get("fetchExtension", {})
+                    ext_status = ext_data.get("status", "")
+                    if str(ext_status).lower() in ("true", "ok", "success", "1"):
+                        await provider.update_extension_on_pbx(db_obj.extension_number, conn, **pbx_kwargs)
+                    else:
+                        await provider.add_extension_on_pbx(
+                            db_obj.extension_number,
+                            conn,
+                            display_name=db_obj.display_name,
+                            email=current_user.email or "",
+                            dnd_enabled=db_obj.dnd_enabled,
+                            no_answer_dest=db_obj.forward_no_answer_destination or "",
+                            ring_timer=db_obj.forward_no_answer_ring_count,
+                        )
+                except Exception as exc:
+                    await logger.awarning("pbx_push_extension_failed", ext=db_obj.extension_number, error=str(exc))
+
         return extensions_service.to_schema(db_obj, schema_type=Extension)
 
     @delete(

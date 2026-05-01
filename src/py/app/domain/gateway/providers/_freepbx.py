@@ -168,6 +168,40 @@ query {
 }
 """
 
+_GQL_UPDATE_EXTENSION = """\
+mutation {{
+  updateExtension(input: {{
+    extensionId: "{ext}"
+    {fields}
+  }}) {{
+    status
+    message
+  }}
+}}
+"""
+
+_GQL_ADD_EXTENSION = """\
+mutation {{
+  addExtension(input: {{
+    extensionId: "{ext}"
+    {fields}
+  }}) {{
+    status
+    message
+  }}
+}}
+"""
+
+_GQL_DO_RELOAD = """\
+mutation {
+  doreload(input: {}) {
+    status
+    message
+    transaction_id
+  }
+}
+"""
+
 _GQL_ALL_CORE_DEVICES = """\
 query {
   fetchAllCoreDevices {
@@ -501,6 +535,78 @@ class FreePBXProvider(GatewayProvider):
             return True, None
         except Exception as exc:  # noqa: BLE001
             return False, str(exc)
+
+    # -- Extension mutation helpers ----------------------------------------
+
+    @staticmethod
+    def _build_update_fields(
+        display_name: str | None = None,
+        dnd_enabled: bool | None = None,
+        no_answer_dest: str | None = None,
+        ring_timer: int | None = None,
+    ) -> str:
+        parts: list[str] = []
+        if display_name is not None:
+            escaped = display_name.replace("\\", "\\\\").replace('"', '\\"')
+            parts.append(f'name: "{escaped}"')
+        if dnd_enabled is not None:
+            parts.append(f'donotdisturb: "{"yes" if dnd_enabled else "no"}"')
+        if no_answer_dest is not None:
+            parts.append(f'noanswerDestination: "{no_answer_dest}"')
+        if ring_timer is not None:
+            parts.append(f'ringtimer: "{ring_timer}"')
+        return "\n    ".join(parts)
+
+    async def _do_reload(self, connection: m.Connection) -> dict[str, Any]:
+        result = await self._execute_graphql(_GQL_DO_RELOAD, connection)
+        await logger.ainfo("freepbx_do_reload", result=result)
+        return result
+
+    async def update_extension_on_pbx(
+        self,
+        ext_number: str,
+        connection: m.Connection,
+        *,
+        display_name: str | None = None,
+        dnd_enabled: bool | None = None,
+        no_answer_dest: str | None = None,
+        ring_timer: int | None = None,
+    ) -> dict[str, Any]:
+        fields = self._build_update_fields(display_name, dnd_enabled, no_answer_dest, ring_timer)
+        query = _GQL_UPDATE_EXTENSION.format(ext=ext_number, fields=fields)
+        result = await self._execute_graphql(query, connection)
+        await logger.ainfo("freepbx_update_extension", ext=ext_number, result=result)
+        await self._do_reload(connection)
+        return result
+
+    async def add_extension_on_pbx(
+        self,
+        ext_number: str,
+        connection: m.Connection,
+        *,
+        display_name: str | None = None,
+        email: str = "",
+        dnd_enabled: bool | None = None,
+        no_answer_dest: str | None = None,
+        ring_timer: int | None = None,
+    ) -> dict[str, Any]:
+        escaped_name = (display_name or f"Extension {ext_number}").replace("\\", "\\\\").replace('"', '\\"')
+        add_fields = f'name: "{escaped_name}"\n    email: "{email}"'
+        query = _GQL_ADD_EXTENSION.format(ext=ext_number, fields=add_fields)
+        result = await self._execute_graphql(query, connection)
+        await logger.ainfo("freepbx_add_extension", ext=ext_number, result=result)
+
+        update_fields = self._build_update_fields(
+            dnd_enabled=dnd_enabled,
+            no_answer_dest=no_answer_dest,
+            ring_timer=ring_timer,
+        )
+        if update_fields:
+            update_query = _GQL_UPDATE_EXTENSION.format(ext=ext_number, fields=update_fields)
+            await self._execute_graphql(update_query, connection)
+
+        await self._do_reload(connection)
+        return result
 
     # -- Internal query implementations ------------------------------------
 

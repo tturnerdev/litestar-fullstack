@@ -1,5 +1,12 @@
 """Admin domain schemas."""
 
+from app.domain.admin.schemas._admin_device_templates import (
+    DeviceTemplateCreate,
+    DeviceTemplateDetail,
+    DeviceTemplateList,
+    DeviceTemplateLookup,
+    DeviceTemplateUpdate,
+)
 from app.domain.admin.schemas._admin_devices import AdminDeviceStats, AdminDeviceSummary
 from app.domain.admin.schemas._admin_fax import AdminFaxMessageSummary, AdminFaxNumberSummary, AdminFaxStats
 from app.domain.admin.schemas._admin_gateway import AdminGatewaySettings, AdminGatewaySettingsUpdate
@@ -35,6 +42,11 @@ __all__ = (
     "AdminVoiceStats",
     "AuditLogEntry",
     "DashboardStats",
+    "DeviceTemplateCreate",
+    "DeviceTemplateDetail",
+    "DeviceTemplateList",
+    "DeviceTemplateLookup",
+    "DeviceTemplateUpdate",
     "RecentActivity",
     "TrendPoint",
     "WorkerQueueInfo",

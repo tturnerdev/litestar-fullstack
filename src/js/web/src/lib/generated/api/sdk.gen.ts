@@ -33,6 +33,12 @@ import type {
   AddMemberToTeamData,
   AddMemberToTeamErrors,
   AddMemberToTeamResponses,
+  AdminCreateDeviceTemplateData,
+  AdminCreateDeviceTemplateErrors,
+  AdminCreateDeviceTemplateResponses,
+  AdminDeleteDeviceTemplateData,
+  AdminDeleteDeviceTemplateErrors,
+  AdminDeleteDeviceTemplateResponses,
   AdminDeleteTeamData,
   AdminDeleteTeamErrors,
   AdminDeleteTeamResponses,
@@ -44,6 +50,9 @@ import type {
   AdminGetAuditLogResponses,
   AdminGetDeviceStatsData,
   AdminGetDeviceStatsResponses,
+  AdminGetDeviceTemplateData,
+  AdminGetDeviceTemplateErrors,
+  AdminGetDeviceTemplateResponses,
   AdminGetFaxStatsData,
   AdminGetFaxStatsResponses,
   AdminGetSupportStatsData,
@@ -68,6 +77,9 @@ import type {
   AdminListDevicesData,
   AdminListDevicesErrors,
   AdminListDevicesResponses,
+  AdminListDeviceTemplatesData,
+  AdminListDeviceTemplatesErrors,
+  AdminListDeviceTemplatesResponses,
   AdminListExtensionsData,
   AdminListExtensionsResponses,
   AdminListFaxMessagesData,
@@ -87,6 +99,9 @@ import type {
   AdminListUsersData,
   AdminListUsersErrors,
   AdminListUsersResponses,
+  AdminUpdateDeviceTemplateData,
+  AdminUpdateDeviceTemplateErrors,
+  AdminUpdateDeviceTemplateResponses,
   AdminUpdateTeamData,
   AdminUpdateTeamErrors,
   AdminUpdateTeamResponses,
@@ -543,6 +558,9 @@ import type {
   ListVoicemailMessagesData,
   ListVoicemailMessagesErrors,
   ListVoicemailMessagesResponses,
+  LookupDeviceTemplateData,
+  LookupDeviceTemplateErrors,
+  LookupDeviceTemplateResponses,
   MarkAllNotificationsReadData,
   MarkAllNotificationsReadResponses,
   MarkNotificationReadData,
@@ -618,6 +636,8 @@ import type {
   SyncEntityData,
   SyncEntityErrors,
   SyncEntityResponses,
+  SyncExtensionsData,
+  SyncExtensionsResponses,
   SystemHealthData,
   SystemHealthResponses,
   TestConnectionData,
@@ -1048,6 +1068,94 @@ export const getDashboardTrends = <ThrowOnError extends boolean = false>(
     security: [{ scheme: "bearer", type: "http" }],
     url: "/api/admin/dashboard/trends",
     ...options,
+  });
+
+/**
+ * ListTemplates
+ */
+export const adminListDeviceTemplates = <ThrowOnError extends boolean = false>(
+  options?: Options<AdminListDeviceTemplatesData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    AdminListDeviceTemplatesResponses,
+    AdminListDeviceTemplatesErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/admin/device-templates",
+    ...options,
+  });
+
+/**
+ * CreateTemplate
+ */
+export const adminCreateDeviceTemplate = <ThrowOnError extends boolean = false>(
+  options: Options<AdminCreateDeviceTemplateData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    AdminCreateDeviceTemplateResponses,
+    AdminCreateDeviceTemplateErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/admin/device-templates",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * DeleteTemplate
+ */
+export const adminDeleteDeviceTemplate = <ThrowOnError extends boolean = false>(
+  options: Options<AdminDeleteDeviceTemplateData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    AdminDeleteDeviceTemplateResponses,
+    AdminDeleteDeviceTemplateErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/admin/device-templates/{template_id}",
+    ...options,
+  });
+
+/**
+ * GetTemplate
+ */
+export const adminGetDeviceTemplate = <ThrowOnError extends boolean = false>(
+  options: Options<AdminGetDeviceTemplateData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    AdminGetDeviceTemplateResponses,
+    AdminGetDeviceTemplateErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/admin/device-templates/{template_id}",
+    ...options,
+  });
+
+/**
+ * UpdateTemplate
+ */
+export const adminUpdateDeviceTemplate = <ThrowOnError extends boolean = false>(
+  options: Options<AdminUpdateDeviceTemplateData, ThrowOnError>,
+) =>
+  (options.client ?? client).patch<
+    AdminUpdateDeviceTemplateResponses,
+    AdminUpdateDeviceTemplateErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/admin/device-templates/{template_id}",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
   });
 
 /**
@@ -1918,6 +2026,22 @@ export const createDevice = <ThrowOnError extends boolean = false>(
       "Content-Type": "application/json",
       ...options.headers,
     },
+  });
+
+/**
+ * LookupTemplate
+ */
+export const lookupDeviceTemplate = <ThrowOnError extends boolean = false>(
+  options: Options<LookupDeviceTemplateData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    LookupDeviceTemplateResponses,
+    LookupDeviceTemplateErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/devices/templates/lookup",
+    ...options,
   });
 
 /**
@@ -4569,6 +4693,22 @@ export const createExtension = <ThrowOnError extends boolean = false>(
       "Content-Type": "application/json",
       ...options.headers,
     },
+  });
+
+/**
+ * SyncExtensions
+ */
+export const syncExtensions = <ThrowOnError extends boolean = false>(
+  options?: Options<SyncExtensionsData, ThrowOnError>,
+) =>
+  (options?.client ?? client).post<
+    SyncExtensionsResponses,
+    unknown,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/voice/extensions/sync",
+    ...options,
   });
 
 /**

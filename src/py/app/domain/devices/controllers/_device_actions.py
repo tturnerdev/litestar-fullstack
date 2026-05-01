@@ -1,12 +1,16 @@
-"""Device Actions Controller — reboot, reprovision, and line management."""
+"""Device Actions Controller — reboot, reprovision, line management, and screenshot proxy."""
 
 from __future__ import annotations
 
+import ipaddress
+import logging
 from typing import TYPE_CHECKING, Annotated, Any
 from uuid import UUID
 
-from litestar import Controller, get, post, put
+import httpx
+from litestar import Controller, Response, get, post, put
 from litestar.di import Provide
+from litestar.exceptions import NotFoundException, ValidationException
 from litestar.params import Parameter
 
 from app.db import models as m
@@ -26,6 +30,8 @@ if TYPE_CHECKING:
 
     from app.domain.admin.services import AuditLogService
     from app.domain.devices.services import DeviceService
+
+logger = logging.getLogger(__name__)
 
 
 class DeviceActionsController(Controller):
@@ -134,3 +140,47 @@ class DeviceActionsController(Controller):
             request=request,
         )
         return devices_service.to_schema(device, schema_type=Device)
+
+    @get(
+        operation_id="GetDeviceScreenshot",
+        path="/api/devices/{device_id:uuid}/screenshot",
+        media_type="image/bmp",
+        include_in_schema=False,
+    )
+    async def get_device_screenshot(
+        self,
+        devices_service: DeviceService,
+        device_id: Annotated[UUID, Parameter(title="Device ID", description="The device to capture.")],
+        username: str = "admin",
+        password: str = "admin",
+    ) -> Response[bytes]:
+        device = await devices_service.get(device_id)
+        if not device.ip_address:
+            raise NotFoundException(detail="Device has no IP address configured.")
+        try:
+            addr = ipaddress.ip_address(device.ip_address)
+            if not addr.is_private:
+                raise ValidationException(detail="Only private/LAN IP addresses are allowed.")
+        except ValueError as exc:
+            raise ValidationException(detail="Invalid device IP address.") from exc
+
+        url = f"https://{device.ip_address}/servlet?m=mod_action&command=screenshot"
+        try:
+            async with httpx.AsyncClient(verify=False, timeout=httpx.Timeout(10.0)) as http:
+                resp = await http.get(url, auth=(username, password))
+                resp.raise_for_status()
+        except httpx.TimeoutException:
+            return Response(content=b"", status_code=504, media_type="text/plain")
+        except httpx.HTTPStatusError as exc:
+            status = exc.response.status_code
+            return Response(content=b"", status_code=status if status in (401, 403) else 502, media_type="text/plain")
+        except httpx.HTTPError:
+            return Response(content=b"", status_code=502, media_type="text/plain")
+
+        content_type = resp.headers.get("content-type", "image/bmp")
+        return Response(
+            content=resp.content,
+            status_code=200,
+            media_type=content_type,
+            headers={"Cache-Control": "no-store"},
+        )

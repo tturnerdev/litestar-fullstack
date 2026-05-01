@@ -75,6 +75,7 @@ import { Route as AppAdminSupportRouteImport } from './routes/_app/admin/support
 import { Route as AppAdminGatewayRouteImport } from './routes/_app/admin/gateway'
 import { Route as AppAdminFaxRouteImport } from './routes/_app/admin/fax'
 import { Route as AppAdminDevicesRouteImport } from './routes/_app/admin/devices'
+import { Route as AppAdminDeviceTemplatesRouteImport } from './routes/_app/admin/device-templates'
 import { Route as AppAdminAuditRouteImport } from './routes/_app/admin/audit'
 import { Route as AppVoicePhoneNumbersIndexRouteImport } from './routes/_app/voice/phone-numbers/index'
 import { Route as AppVoiceExtensionsIndexRouteImport } from './routes/_app/voice/extensions/index'
@@ -441,6 +442,11 @@ const AppAdminDevicesRoute = AppAdminDevicesRouteImport.update({
   path: '/devices',
   getParentRoute: () => AppAdminRoute,
 } as any)
+const AppAdminDeviceTemplatesRoute = AppAdminDeviceTemplatesRouteImport.update({
+  id: '/device-templates',
+  path: '/device-templates',
+  getParentRoute: () => AppAdminRoute,
+} as any)
 const AppAdminAuditRoute = AppAdminAuditRouteImport.update({
   id: '/audit',
   path: '/audit',
@@ -670,6 +676,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof PublicTermsRoute
   '/verify-email': typeof PublicVerifyEmailRoute
   '/admin/audit': typeof AppAdminAuditRoute
+  '/admin/device-templates': typeof AppAdminDeviceTemplatesRoute
   '/admin/devices': typeof AppAdminDevicesRoute
   '/admin/fax': typeof AppAdminFaxRoute
   '/admin/gateway': typeof AppAdminGatewayRoute
@@ -760,6 +767,7 @@ export interface FileRoutesByTo {
   '/terms': typeof PublicTermsRoute
   '/verify-email': typeof PublicVerifyEmailRoute
   '/admin/audit': typeof AppAdminAuditRoute
+  '/admin/device-templates': typeof AppAdminDeviceTemplatesRoute
   '/admin/devices': typeof AppAdminDevicesRoute
   '/admin/fax': typeof AppAdminFaxRoute
   '/admin/gateway': typeof AppAdminGatewayRoute
@@ -861,6 +869,7 @@ export interface FileRoutesById {
   '/_public/terms': typeof PublicTermsRoute
   '/_public/verify-email': typeof PublicVerifyEmailRoute
   '/_app/admin/audit': typeof AppAdminAuditRoute
+  '/_app/admin/device-templates': typeof AppAdminDeviceTemplatesRoute
   '/_app/admin/devices': typeof AppAdminDevicesRoute
   '/_app/admin/fax': typeof AppAdminFaxRoute
   '/_app/admin/gateway': typeof AppAdminGatewayRoute
@@ -965,6 +974,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verify-email'
     | '/admin/audit'
+    | '/admin/device-templates'
     | '/admin/devices'
     | '/admin/fax'
     | '/admin/gateway'
@@ -1055,6 +1065,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verify-email'
     | '/admin/audit'
+    | '/admin/device-templates'
     | '/admin/devices'
     | '/admin/fax'
     | '/admin/gateway'
@@ -1155,6 +1166,7 @@ export interface FileRouteTypes {
     | '/_public/terms'
     | '/_public/verify-email'
     | '/_app/admin/audit'
+    | '/_app/admin/device-templates'
     | '/_app/admin/devices'
     | '/_app/admin/fax'
     | '/_app/admin/gateway'
@@ -1701,6 +1713,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminDevicesRouteImport
       parentRoute: typeof AppAdminRoute
     }
+    '/_app/admin/device-templates': {
+      id: '/_app/admin/device-templates'
+      path: '/device-templates'
+      fullPath: '/admin/device-templates'
+      preLoaderRoute: typeof AppAdminDeviceTemplatesRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
     '/_app/admin/audit': {
       id: '/_app/admin/audit'
       path: '/audit'
@@ -1958,6 +1977,7 @@ declare module '@tanstack/react-router' {
 
 interface AppAdminRouteChildren {
   AppAdminAuditRoute: typeof AppAdminAuditRoute
+  AppAdminDeviceTemplatesRoute: typeof AppAdminDeviceTemplatesRoute
   AppAdminDevicesRoute: typeof AppAdminDevicesRoute
   AppAdminFaxRoute: typeof AppAdminFaxRoute
   AppAdminGatewayRoute: typeof AppAdminGatewayRoute
@@ -1973,6 +1993,7 @@ interface AppAdminRouteChildren {
 
 const AppAdminRouteChildren: AppAdminRouteChildren = {
   AppAdminAuditRoute: AppAdminAuditRoute,
+  AppAdminDeviceTemplatesRoute: AppAdminDeviceTemplatesRoute,
   AppAdminDevicesRoute: AppAdminDevicesRoute,
   AppAdminFaxRoute: AppAdminFaxRoute,
   AppAdminGatewayRoute: AppAdminGatewayRoute,

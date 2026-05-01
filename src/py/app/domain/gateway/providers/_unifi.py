@@ -89,10 +89,10 @@ class UnifiProvider(GatewayProvider):
 
     @staticmethod
     def _normalize_mac(mac: str) -> str:
-        """Normalize MAC to uppercase colon-separated format (AA:BB:CC:DD:EE:FF)."""
-        cleaned = mac.upper().replace("-", "").replace(":", "").replace(".", "")
+        """Normalize MAC to lowercase colon-separated format (aa:bb:cc:dd:ee:ff)."""
+        cleaned = mac.lower().replace("-", "").replace(":", "").replace(".", "")
         if len(cleaned) != 12:
-            return mac.upper()
+            return mac.lower()
         return ":".join(cleaned[i : i + 2] for i in range(0, 12, 2))
 
     async def query_device(self, mac_address: str, connection: m.Connection) -> ProviderResult:

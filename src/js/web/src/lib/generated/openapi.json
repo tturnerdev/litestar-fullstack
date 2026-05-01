@@ -2952,6 +2952,348 @@
         "title": "DeviceLineAssignmentInput",
         "type": "object"
       },
+      "DeviceTemplateCreate": {
+        "properties": {
+          "deviceType": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "imageUrl": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "isActive": {
+            "default": true,
+            "type": "boolean"
+          },
+          "manufacturer": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "provisioningTemplate": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "templateVariables": {
+            "oneOf": [
+              {
+                "additionalProperties": {},
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "wireframeData": {
+            "additionalProperties": {},
+            "type": "object"
+          }
+        },
+        "required": [
+          "deviceType",
+          "displayName",
+          "manufacturer",
+          "model",
+          "wireframeData"
+        ],
+        "title": "DeviceTemplateCreate",
+        "type": "object"
+      },
+      "DeviceTemplateDetail": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "deviceType": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "imageUrl": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "manufacturer": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "provisioningTemplate": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "templateVariables": {
+            "oneOf": [
+              {
+                "additionalProperties": {},
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "wireframeData": {
+            "additionalProperties": {},
+            "type": "object"
+          }
+        },
+        "required": [
+          "createdAt",
+          "deviceType",
+          "displayName",
+          "id",
+          "isActive",
+          "manufacturer",
+          "model",
+          "updatedAt",
+          "wireframeData"
+        ],
+        "title": "DeviceTemplateDetail",
+        "type": "object"
+      },
+      "DeviceTemplateList": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "deviceType": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "imageUrl": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "manufacturer": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "createdAt",
+          "deviceType",
+          "displayName",
+          "id",
+          "isActive",
+          "manufacturer",
+          "model",
+          "updatedAt"
+        ],
+        "title": "DeviceTemplateList",
+        "type": "object"
+      },
+      "DeviceTemplateLookup": {
+        "properties": {
+          "deviceType": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "imageUrl": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "manufacturer": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "provisioningTemplate": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "templateVariables": {
+            "oneOf": [
+              {
+                "additionalProperties": {},
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "wireframeData": {
+            "additionalProperties": {},
+            "type": "object"
+          }
+        },
+        "required": [
+          "deviceType",
+          "displayName",
+          "id",
+          "manufacturer",
+          "model",
+          "wireframeData"
+        ],
+        "title": "DeviceTemplateLookup",
+        "type": "object"
+      },
+      "DeviceTemplateUpdate": {
+        "properties": {
+          "deviceType": {
+            "oneOf": [
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "displayName": {
+            "oneOf": [
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "imageUrl": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "isActive": {
+            "oneOf": [
+              {
+                "type": "boolean"
+              }
+            ]
+          },
+          "manufacturer": {
+            "oneOf": [
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "model": {
+            "oneOf": [
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "provisioningTemplate": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "templateVariables": {
+            "oneOf": [
+              {
+                "additionalProperties": {},
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "wireframeData": {
+            "oneOf": [
+              {
+                "additionalProperties": {},
+                "type": "object"
+              }
+            ]
+          }
+        },
+        "required": [],
+        "title": "DeviceTemplateUpdate",
+        "type": "object"
+      },
       "DeviceUpdate": {
         "properties": {
           "configJson": {
@@ -3755,6 +4097,37 @@
           "extension"
         ],
         "title": "ExtensionStats",
+        "type": "object"
+      },
+      "ExtensionSyncResult": {
+        "properties": {
+          "connectionName": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "created": {
+            "default": 0,
+            "type": "integer"
+          },
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "updated": {
+            "default": 0,
+            "type": "integer"
+          }
+        },
+        "required": [],
+        "title": "ExtensionSyncResult",
         "type": "object"
       },
       "ExtensionUpdate": {
@@ -8603,120 +8976,12 @@
         "title": "VoicemailBoxUpdate",
         "type": "object"
       },
-      "VoicemailMessage": {
-        "properties": {
-          "audioFilePath": {
-            "default": "",
-            "type": "string"
-          },
-          "callerName": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "callerNumber": {
-            "type": "string"
-          },
-          "createdAt": {
-            "oneOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "durationSeconds": {
-            "default": 0,
-            "type": "integer"
-          },
-          "id": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "isRead": {
-            "default": false,
-            "type": "boolean"
-          },
-          "isUrgent": {
-            "default": false,
-            "type": "boolean"
-          },
-          "receivedAt": {
-            "oneOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "transcription": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "updatedAt": {
-            "oneOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "voicemailBoxId": {
-            "format": "uuid",
-            "type": "string"
-          }
-        },
-        "required": [
-          "callerNumber",
-          "id",
-          "voicemailBoxId"
-        ],
-        "title": "VoicemailMessage",
-        "type": "object"
-      },
       "VoicemailMessageUpdate": {
         "properties": {
           "isRead": {
             "oneOf": [
               {
                 "type": "boolean"
-              }
-            ]
-          },
-          "isUrgent": {
-            "oneOf": [
-              {
-                "type": "boolean"
-              }
-            ]
-          },
-          "transcription": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
               }
             ]
           }
@@ -8926,6 +9191,166 @@
           "name"
         ],
         "title": "WorkerQueueInfo",
+        "type": "object"
+      },
+      "voice_schemas__voicemail_VoicemailMessage": {
+        "properties": {
+          "audioFilePath": {
+            "default": "",
+            "type": "string"
+          },
+          "callerName": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "callerNumber": {
+            "type": "string"
+          },
+          "durationSeconds": {
+            "default": 0,
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isRead": {
+            "default": false,
+            "type": "boolean"
+          },
+          "isUrgent": {
+            "default": false,
+            "type": "boolean"
+          },
+          "receivedAt": {
+            "oneOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "transcription": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "voicemailBoxId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "callerNumber",
+          "id",
+          "voicemailBoxId"
+        ],
+        "title": "VoicemailMessage",
+        "type": "object"
+      },
+      "voicemail_schemas__voicemail_message_VoicemailMessage": {
+        "properties": {
+          "audioFilePath": {
+            "default": "",
+            "type": "string"
+          },
+          "callerName": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "callerNumber": {
+            "type": "string"
+          },
+          "createdAt": {
+            "oneOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "durationSeconds": {
+            "default": 0,
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isRead": {
+            "default": false,
+            "type": "boolean"
+          },
+          "isUrgent": {
+            "default": false,
+            "type": "boolean"
+          },
+          "receivedAt": {
+            "oneOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "transcription": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "updatedAt": {
+            "oneOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "voicemailBoxId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "callerNumber",
+          "id",
+          "voicemailBoxId"
+        ],
+        "title": "VoicemailMessage",
         "type": "object"
       }
     },
@@ -9813,6 +10238,27 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
+            "name": "targetTypeIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
             "name": "actionIn",
             "required": false,
             "schema": {
@@ -9856,27 +10302,6 @@
             "deprecated": false,
             "in": "query",
             "name": "actorIdIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
-            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -10220,6 +10645,27 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
+            "name": "targetTypeIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
             "name": "actionIn",
             "required": false,
             "schema": {
@@ -10263,27 +10709,6 @@
             "deprecated": false,
             "in": "query",
             "name": "actorIdIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
-            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -10601,6 +11026,27 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
+            "name": "targetTypeIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
             "name": "actionIn",
             "required": false,
             "schema": {
@@ -10644,27 +11090,6 @@
             "deprecated": false,
             "in": "query",
             "name": "actorIdIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
-            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -10996,6 +11421,590 @@
           }
         },
         "summary": "Get 7-day trend data for dashboard charts",
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/api/admin/device-templates": {
+      "get": {
+        "deprecated": false,
+        "operationId": "AdminListDeviceTemplates",
+        "parameters": [
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "ids",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "createdBefore",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "createdAfter",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "updatedBefore",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "updatedAfter",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "searchString",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Field to search"
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "searchIgnoreCase",
+            "required": false,
+            "schema": {
+              "default": false,
+              "oneOf": [
+                {
+                  "default": false,
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search should be case sensitive"
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "currentPage",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1.0,
+              "type": "integer"
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "pageSize",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "minimum": 1.0,
+              "type": "integer"
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "orderBy",
+            "required": false,
+            "schema": {
+              "default": "created_at",
+              "oneOf": [
+                {
+                  "default": "created_at",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Order by field"
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "sortOrder",
+            "required": false,
+            "schema": {
+              "default": "desc",
+              "enum": [
+                "asc",
+                "desc",
+                null
+              ],
+              "title": "Field to search",
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "items": {
+                      "items": {
+                        "$ref": "#/components/schemas/DeviceTemplateList"
+                      },
+                      "type": "array"
+                    },
+                    "limit": {
+                      "description": "Maximal number of items to send.",
+                      "type": "integer"
+                    },
+                    "offset": {
+                      "description": "Offset from the beginning of the query.",
+                      "type": "integer"
+                    },
+                    "total": {
+                      "description": "Total number of items.",
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Request fulfilled, document follows",
+            "headers": {}
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "detail": "Bad Request",
+                      "extra": {},
+                      "status_code": 400
+                    }
+                  ],
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    },
+                    "status_code": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Bad request syntax or unsupported method"
+          }
+        },
+        "summary": "ListTemplates",
+        "tags": [
+          "Admin"
+        ]
+      },
+      "post": {
+        "deprecated": false,
+        "operationId": "AdminCreateDeviceTemplate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceTemplateCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceTemplateDetail"
+                }
+              }
+            },
+            "description": "Document created, URL follows",
+            "headers": {}
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "detail": "Bad Request",
+                      "extra": {},
+                      "status_code": 400
+                    }
+                  ],
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    },
+                    "status_code": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Bad request syntax or unsupported method"
+          }
+        },
+        "summary": "CreateTemplate",
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/api/admin/device-templates/{template_id}": {
+      "delete": {
+        "deprecated": false,
+        "operationId": "AdminDeleteDeviceTemplate",
+        "parameters": [
+          {
+            "deprecated": false,
+            "description": "The device template to delete.",
+            "in": "path",
+            "name": "template_id",
+            "required": true,
+            "schema": {
+              "description": "The device template to delete.",
+              "format": "uuid",
+              "title": "Template ID",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Request fulfilled, nothing follows",
+            "headers": {}
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "detail": "Bad Request",
+                      "extra": {},
+                      "status_code": 400
+                    }
+                  ],
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    },
+                    "status_code": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Bad request syntax or unsupported method"
+          }
+        },
+        "summary": "DeleteTemplate",
+        "tags": [
+          "Admin"
+        ]
+      },
+      "get": {
+        "deprecated": false,
+        "operationId": "AdminGetDeviceTemplate",
+        "parameters": [
+          {
+            "deprecated": false,
+            "description": "The device template to retrieve.",
+            "in": "path",
+            "name": "template_id",
+            "required": true,
+            "schema": {
+              "description": "The device template to retrieve.",
+              "format": "uuid",
+              "title": "Template ID",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceTemplateDetail"
+                }
+              }
+            },
+            "description": "Request fulfilled, document follows",
+            "headers": {}
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "detail": "Bad Request",
+                      "extra": {},
+                      "status_code": 400
+                    }
+                  ],
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    },
+                    "status_code": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Bad request syntax or unsupported method"
+          }
+        },
+        "summary": "GetTemplate",
+        "tags": [
+          "Admin"
+        ]
+      },
+      "patch": {
+        "deprecated": false,
+        "operationId": "AdminUpdateDeviceTemplate",
+        "parameters": [
+          {
+            "deprecated": false,
+            "description": "The device template to update.",
+            "in": "path",
+            "name": "template_id",
+            "required": true,
+            "schema": {
+              "description": "The device template to update.",
+              "format": "uuid",
+              "title": "Template ID",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceTemplateUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceTemplateDetail"
+                }
+              }
+            },
+            "description": "Request fulfilled, document follows",
+            "headers": {}
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "detail": "Bad Request",
+                      "extra": {},
+                      "status_code": 400
+                    }
+                  ],
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    },
+                    "status_code": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Bad request syntax or unsupported method"
+          }
+        },
+        "summary": "UpdateTemplate",
         "tags": [
           "Admin"
         ]
@@ -16890,6 +17899,91 @@
           }
         },
         "summary": "CreateDevice",
+        "tags": [
+          "Devices"
+        ]
+      }
+    },
+    "/api/devices/templates/lookup": {
+      "get": {
+        "deprecated": false,
+        "operationId": "LookupDeviceTemplate",
+        "parameters": [
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "manufacturer",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "model",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceTemplateLookup"
+                }
+              }
+            },
+            "description": "Request fulfilled, document follows",
+            "headers": {}
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "detail": "Bad Request",
+                      "extra": {},
+                      "status_code": 400
+                    }
+                  ],
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    },
+                    "status_code": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Bad request syntax or unsupported method"
+          }
+        },
+        "summary": "LookupTemplate",
         "tags": [
           "Devices"
         ]
@@ -31754,6 +32848,29 @@
         ]
       }
     },
+    "/api/voice/extensions/sync": {
+      "post": {
+        "deprecated": false,
+        "operationId": "SyncExtensions",
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExtensionSyncResult"
+                }
+              }
+            },
+            "description": "Document created, URL follows",
+            "headers": {}
+          }
+        },
+        "summary": "SyncExtensions",
+        "tags": [
+          "Voice - Extensions"
+        ]
+      }
+    },
     "/api/voice/extensions/{ext_id}": {
       "delete": {
         "deprecated": false,
@@ -33183,7 +34300,7 @@
                   "properties": {
                     "items": {
                       "items": {
-                        "$ref": "#/components/schemas/VoicemailMessage"
+                        "$ref": "#/components/schemas/voice_schemas__voicemail_VoicemailMessage"
                       },
                       "type": "array"
                     },
@@ -33369,7 +34486,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/VoicemailMessage"
+                  "$ref": "#/components/schemas/voice_schemas__voicemail_VoicemailMessage"
                 }
               }
             },
@@ -33466,7 +34583,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/VoicemailMessage"
+                  "$ref": "#/components/schemas/voice_schemas__voicemail_VoicemailMessage"
                 }
               }
             },
@@ -34834,7 +35951,7 @@
                   "properties": {
                     "items": {
                       "items": {
-                        "$ref": "#/components/schemas/VoicemailMessage"
+                        "$ref": "#/components/schemas/voicemail_schemas__voicemail_message_VoicemailMessage"
                       },
                       "type": "array"
                     },
@@ -35194,7 +36311,7 @@
                   "properties": {
                     "items": {
                       "items": {
-                        "$ref": "#/components/schemas/VoicemailMessage"
+                        "$ref": "#/components/schemas/voicemail_schemas__voicemail_message_VoicemailMessage"
                       },
                       "type": "array"
                     },
@@ -35354,7 +36471,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/VoicemailMessage"
+                  "$ref": "#/components/schemas/voicemail_schemas__voicemail_message_VoicemailMessage"
                 }
               }
             },
@@ -35440,7 +36557,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/VoicemailMessage"
+                  "$ref": "#/components/schemas/voicemail_schemas__voicemail_message_VoicemailMessage"
                 }
               }
             },

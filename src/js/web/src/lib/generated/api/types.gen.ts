@@ -725,6 +725,100 @@ export type DeviceLineAssignmentInput = {
 };
 
 /**
+ * DeviceTemplateCreate
+ */
+export type DeviceTemplateCreate = {
+  deviceType: string;
+  displayName: string;
+  imageUrl?: string | null;
+  isActive?: boolean;
+  manufacturer: string;
+  model: string;
+  provisioningTemplate?: string | null;
+  templateVariables?: {
+    [key: string]: unknown;
+  } | null;
+  wireframeData: {
+    [key: string]: unknown;
+  };
+};
+
+/**
+ * DeviceTemplateDetail
+ */
+export type DeviceTemplateDetail = {
+  createdAt: string;
+  deviceType: string;
+  displayName: string;
+  id: string;
+  imageUrl?: string | null;
+  isActive: boolean;
+  manufacturer: string;
+  model: string;
+  provisioningTemplate?: string | null;
+  templateVariables?: {
+    [key: string]: unknown;
+  } | null;
+  updatedAt: string;
+  wireframeData: {
+    [key: string]: unknown;
+  };
+};
+
+/**
+ * DeviceTemplateList
+ */
+export type DeviceTemplateList = {
+  createdAt: string;
+  deviceType: string;
+  displayName: string;
+  id: string;
+  imageUrl?: string | null;
+  isActive: boolean;
+  manufacturer: string;
+  model: string;
+  updatedAt: string;
+};
+
+/**
+ * DeviceTemplateLookup
+ */
+export type DeviceTemplateLookup = {
+  deviceType: string;
+  displayName: string;
+  id: string;
+  imageUrl?: string | null;
+  manufacturer: string;
+  model: string;
+  provisioningTemplate?: string | null;
+  templateVariables?: {
+    [key: string]: unknown;
+  } | null;
+  wireframeData: {
+    [key: string]: unknown;
+  };
+};
+
+/**
+ * DeviceTemplateUpdate
+ */
+export type DeviceTemplateUpdate = {
+  deviceType?: string;
+  displayName?: string;
+  imageUrl?: string | null;
+  isActive?: boolean;
+  manufacturer?: string;
+  model?: string;
+  provisioningTemplate?: string | null;
+  templateVariables?: {
+    [key: string]: unknown;
+  } | null;
+  wireframeData?: {
+    [key: string]: unknown;
+  };
+};
+
+/**
  * DeviceUpdate
  */
 export type DeviceUpdate = {
@@ -918,6 +1012,16 @@ export type ExtensionStats = {
   extension: string;
   missed?: number;
   totalCalls?: number;
+};
+
+/**
+ * ExtensionSyncResult
+ */
+export type ExtensionSyncResult = {
+  connectionName?: string | null;
+  created?: number;
+  errors?: Array<string>;
+  updated?: number;
 };
 
 /**
@@ -2276,30 +2380,10 @@ export type VoicemailBoxUpdate = {
 };
 
 /**
- * VoicemailMessage
- */
-export type VoicemailMessage = {
-  audioFilePath?: string;
-  callerName?: string | null;
-  callerNumber: string;
-  createdAt?: string | null;
-  durationSeconds?: number;
-  id: string;
-  isRead?: boolean;
-  isUrgent?: boolean;
-  receivedAt?: string | null;
-  transcription?: string | null;
-  updatedAt?: string | null;
-  voicemailBoxId: string;
-};
-
-/**
  * VoicemailMessageUpdate
  */
 export type VoicemailMessageUpdate = {
   isRead?: boolean;
-  isUrgent?: boolean;
-  transcription?: string | null;
 };
 
 /**
@@ -2357,6 +2441,40 @@ export type WorkerQueueInfo = {
   name: string;
   queued?: number;
   scheduled?: number;
+};
+
+/**
+ * VoicemailMessage
+ */
+export type VoiceSchemasVoicemailVoicemailMessage = {
+  audioFilePath?: string;
+  callerName?: string | null;
+  callerNumber: string;
+  durationSeconds?: number;
+  id: string;
+  isRead?: boolean;
+  isUrgent?: boolean;
+  receivedAt?: string | null;
+  transcription?: string | null;
+  voicemailBoxId: string;
+};
+
+/**
+ * VoicemailMessage
+ */
+export type VoicemailSchemasVoicemailMessageVoicemailMessage = {
+  audioFilePath?: string;
+  callerName?: string | null;
+  callerNumber: string;
+  createdAt?: string | null;
+  durationSeconds?: number;
+  id: string;
+  isRead?: boolean;
+  isUrgent?: boolean;
+  receivedAt?: string | null;
+  transcription?: string | null;
+  updatedAt?: string | null;
+  voicemailBoxId: string;
 };
 
 export type ForgotPasswordData = {
@@ -2712,10 +2830,10 @@ export type AdminListAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
+    targetTypeIn?: Array<string> | null;
     actionIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -2794,10 +2912,10 @@ export type AdminGetTargetAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
+    targetTypeIn?: Array<string> | null;
     actionIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -2874,10 +2992,10 @@ export type AdminGetUserAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
+    targetTypeIn?: Array<string> | null;
     actionIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -3037,6 +3155,245 @@ export type GetDashboardTrendsResponses = {
 
 export type GetDashboardTrendsResponse =
   GetDashboardTrendsResponses[keyof GetDashboardTrendsResponses];
+
+export type AdminListDeviceTemplatesData = {
+  body?: never;
+  path?: never;
+  query?: {
+    ids?: Array<string> | null;
+    createdBefore?: string | null;
+    createdAfter?: string | null;
+    updatedBefore?: string | null;
+    updatedAfter?: string | null;
+    /**
+     * Field to search
+     */
+    searchString?: string | null;
+    /**
+     * Search should be case sensitive
+     */
+    searchIgnoreCase?: boolean | null;
+    currentPage?: number;
+    pageSize?: number;
+    /**
+     * Order by field
+     */
+    orderBy?: string | null;
+    /**
+     * Field to search
+     */
+    sortOrder?: "asc" | "desc" | null;
+  };
+  url: "/api/admin/device-templates";
+};
+
+export type AdminListDeviceTemplatesErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type AdminListDeviceTemplatesError =
+  AdminListDeviceTemplatesErrors[keyof AdminListDeviceTemplatesErrors];
+
+export type AdminListDeviceTemplatesResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: {
+    items?: Array<DeviceTemplateList>;
+    /**
+     * Maximal number of items to send.
+     */
+    limit?: number;
+    /**
+     * Offset from the beginning of the query.
+     */
+    offset?: number;
+    /**
+     * Total number of items.
+     */
+    total?: number;
+  };
+};
+
+export type AdminListDeviceTemplatesResponse =
+  AdminListDeviceTemplatesResponses[keyof AdminListDeviceTemplatesResponses];
+
+export type AdminCreateDeviceTemplateData = {
+  body: DeviceTemplateCreate;
+  path?: never;
+  query?: never;
+  url: "/api/admin/device-templates";
+};
+
+export type AdminCreateDeviceTemplateErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type AdminCreateDeviceTemplateError =
+  AdminCreateDeviceTemplateErrors[keyof AdminCreateDeviceTemplateErrors];
+
+export type AdminCreateDeviceTemplateResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: DeviceTemplateDetail;
+};
+
+export type AdminCreateDeviceTemplateResponse =
+  AdminCreateDeviceTemplateResponses[keyof AdminCreateDeviceTemplateResponses];
+
+export type AdminDeleteDeviceTemplateData = {
+  body?: never;
+  path: {
+    /**
+     * Template ID
+     *
+     * The device template to delete.
+     */
+    template_id: string;
+  };
+  query?: never;
+  url: "/api/admin/device-templates/{template_id}";
+};
+
+export type AdminDeleteDeviceTemplateErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type AdminDeleteDeviceTemplateError =
+  AdminDeleteDeviceTemplateErrors[keyof AdminDeleteDeviceTemplateErrors];
+
+export type AdminDeleteDeviceTemplateResponses = {
+  /**
+   * Request fulfilled, nothing follows
+   */
+  204: void;
+};
+
+export type AdminDeleteDeviceTemplateResponse =
+  AdminDeleteDeviceTemplateResponses[keyof AdminDeleteDeviceTemplateResponses];
+
+export type AdminGetDeviceTemplateData = {
+  body?: never;
+  path: {
+    /**
+     * Template ID
+     *
+     * The device template to retrieve.
+     */
+    template_id: string;
+  };
+  query?: never;
+  url: "/api/admin/device-templates/{template_id}";
+};
+
+export type AdminGetDeviceTemplateErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type AdminGetDeviceTemplateError =
+  AdminGetDeviceTemplateErrors[keyof AdminGetDeviceTemplateErrors];
+
+export type AdminGetDeviceTemplateResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: DeviceTemplateDetail;
+};
+
+export type AdminGetDeviceTemplateResponse =
+  AdminGetDeviceTemplateResponses[keyof AdminGetDeviceTemplateResponses];
+
+export type AdminUpdateDeviceTemplateData = {
+  body: DeviceTemplateUpdate;
+  path: {
+    /**
+     * Template ID
+     *
+     * The device template to update.
+     */
+    template_id: string;
+  };
+  query?: never;
+  url: "/api/admin/device-templates/{template_id}";
+};
+
+export type AdminUpdateDeviceTemplateErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type AdminUpdateDeviceTemplateError =
+  AdminUpdateDeviceTemplateErrors[keyof AdminUpdateDeviceTemplateErrors];
+
+export type AdminUpdateDeviceTemplateResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: DeviceTemplateDetail;
+};
+
+export type AdminUpdateDeviceTemplateResponse =
+  AdminUpdateDeviceTemplateResponses[keyof AdminUpdateDeviceTemplateResponses];
 
 export type AdminListDevicesData = {
   body?: never;
@@ -5225,6 +5582,45 @@ export type CreateDeviceResponses = {
 
 export type CreateDeviceResponse =
   CreateDeviceResponses[keyof CreateDeviceResponses];
+
+export type LookupDeviceTemplateData = {
+  body?: never;
+  path?: never;
+  query: {
+    manufacturer: string;
+    model: string;
+  };
+  url: "/api/devices/templates/lookup";
+};
+
+export type LookupDeviceTemplateErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type LookupDeviceTemplateError =
+  LookupDeviceTemplateErrors[keyof LookupDeviceTemplateErrors];
+
+export type LookupDeviceTemplateResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: DeviceTemplateLookup;
+};
+
+export type LookupDeviceTemplateResponse =
+  LookupDeviceTemplateResponses[keyof LookupDeviceTemplateResponses];
 
 export type DeleteDeviceData = {
   body?: never;
@@ -11811,6 +12207,23 @@ export type CreateExtensionResponses = {
 export type CreateExtensionResponse =
   CreateExtensionResponses[keyof CreateExtensionResponses];
 
+export type SyncExtensionsData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/api/voice/extensions/sync";
+};
+
+export type SyncExtensionsResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: ExtensionSyncResult;
+};
+
+export type SyncExtensionsResponse =
+  SyncExtensionsResponses[keyof SyncExtensionsResponses];
+
 export type DeleteExtensionData = {
   body?: never;
   path: {
@@ -12463,7 +12876,7 @@ export type ListVoicemailMessagesResponses = {
    * Request fulfilled, document follows
    */
   200: {
-    items?: Array<VoicemailMessage>;
+    items?: Array<VoiceSchemasVoicemailVoicemailMessage>;
     /**
      * Maximal number of items to send.
      */
@@ -12574,7 +12987,7 @@ export type GetVoicemailMessageResponses = {
   /**
    * Request fulfilled, document follows
    */
-  200: VoicemailMessage;
+  200: VoiceSchemasVoicemailVoicemailMessage;
 };
 
 export type GetVoicemailMessageResponse =
@@ -12623,7 +13036,7 @@ export type UpdateVoicemailMessageResponses = {
   /**
    * Request fulfilled, document follows
    */
-  200: VoicemailMessage;
+  200: VoiceSchemasVoicemailVoicemailMessage;
 };
 
 export type UpdateVoicemailMessageResponse =
@@ -13147,7 +13560,7 @@ export type ListVoicemailBoxMessagesResponses = {
    * Request fulfilled, document follows
    */
   200: {
-    items?: Array<VoicemailMessage>;
+    items?: Array<VoicemailSchemasVoicemailMessageVoicemailMessage>;
     /**
      * Maximal number of items to send.
      */
@@ -13258,7 +13671,7 @@ export type ListAllVoicemailMessagesResponses = {
    * Request fulfilled, document follows
    */
   200: {
-    items?: Array<VoicemailMessage>;
+    items?: Array<VoicemailSchemasVoicemailMessageVoicemailMessage>;
     /**
      * Maximal number of items to send.
      */
@@ -13357,7 +13770,7 @@ export type GetVoicemailMessageByIdResponses = {
   /**
    * Request fulfilled, document follows
    */
-  200: VoicemailMessage;
+  200: VoicemailSchemasVoicemailMessageVoicemailMessage;
 };
 
 export type GetVoicemailMessageByIdResponse =
@@ -13400,7 +13813,7 @@ export type ToggleVoicemailMessageReadResponses = {
   /**
    * Request fulfilled, document follows
    */
-  200: VoicemailMessage;
+  200: VoicemailSchemasVoicemailMessageVoicemailMessage;
 };
 
 export type ToggleVoicemailMessageReadResponse =

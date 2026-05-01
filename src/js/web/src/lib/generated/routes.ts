@@ -48,6 +48,7 @@ export type RouteName =
   | 'create_tag'
   | 'create_team'
   | 'create_team_invitation'
+  | 'create_template'
   | 'create_ticket'
   | 'create_time_condition'
   | 'create_user'
@@ -78,6 +79,7 @@ export type RouteName =
   | 'delete_team'
   | 'delete_team_api_teams_team_id:uuid'
   | 'delete_team_invitation'
+  | 'delete_template'
   | 'delete_ticket'
   | 'delete_time_condition'
   | 'delete_user'
@@ -96,6 +98,7 @@ export type RouteName =
   | 'get_connection'
   | 'get_device'
   | 'get_device_data'
+  | 'get_device_screenshot'
   | 'get_dnd_settings'
   | 'get_extension'
   | 'get_extension_data'
@@ -127,6 +130,7 @@ export type RouteName =
   | 'get_target_logs'
   | 'get_team'
   | 'get_team_api_teams_team_id:uuid'
+  | 'get_template'
   | 'get_ticket'
   | 'get_time_condition'
   | 'get_trends'
@@ -179,6 +183,7 @@ export type RouteName =
   | 'list_team_permissions'
   | 'list_teams'
   | 'list_teams_api_teams'
+  | 'list_templates'
   | 'list_tickets'
   | 'list_tickets_api_support_tickets'
   | 'list_time_conditions'
@@ -190,6 +195,7 @@ export type RouteName =
   | 'list_voicemail_messages_api_voicemail_messages'
   | 'login'
   | 'logout'
+  | 'lookup_template'
   | 'mark_all_read'
   | 'mark_read'
   | 'oauth:github:authorize'
@@ -221,6 +227,7 @@ export type RouteName =
   | 'signup'
   | 'start_link'
   | 'submit_feedback'
+  | 'sync_extensions'
   | 'system:global-search'
   | 'system:health'
   | 'system:oauth-config'
@@ -259,6 +266,7 @@ export type RouteName =
   | 'update_team_api_teams_team_id:uuid'
   | 'update_team_member'
   | 'update_team_permissions'
+  | 'update_template'
   | 'update_ticket'
   | 'update_time_condition'
   | 'update_user'
@@ -346,6 +354,7 @@ export interface RoutePathParams {
   'create_team_invitation': {
     team_id: UUID;
   };
+  'create_template': Record<string, never>;
   'create_ticket': Record<string, never>;
   'create_time_condition': Record<string, never>;
   'create_user': Record<string, never>;
@@ -437,6 +446,9 @@ export interface RoutePathParams {
     invitation_id: UUID;
     team_id: UUID;
   };
+  'delete_template': {
+    template_id: UUID;
+  };
   'delete_ticket': {
     ticket_id: UUID;
   };
@@ -481,6 +493,9 @@ export interface RoutePathParams {
   };
   'get_device_data': {
     mac_address: string;
+  };
+  'get_device_screenshot': {
+    device_id: UUID;
   };
   'get_dnd_settings': {
     ext_id: UUID;
@@ -550,6 +565,9 @@ export interface RoutePathParams {
   };
   'get_team_api_teams_team_id:uuid': {
     team_id: UUID;
+  };
+  'get_template': {
+    template_id: UUID;
   };
   'get_ticket': {
     ticket_id: UUID;
@@ -652,6 +670,7 @@ export interface RoutePathParams {
   };
   'list_teams': Record<string, never>;
   'list_teams_api_teams': Record<string, never>;
+  'list_templates': Record<string, never>;
   'list_tickets': Record<string, never>;
   'list_tickets_api_support_tickets': Record<string, never>;
   'list_time_conditions': Record<string, never>;
@@ -665,6 +684,7 @@ export interface RoutePathParams {
   'list_voicemail_messages_api_voicemail_messages': Record<string, never>;
   'login': Record<string, never>;
   'logout': Record<string, never>;
+  'lookup_template': Record<string, never>;
   'mark_all_read': Record<string, never>;
   'mark_read': {
     notification_id: UUID;
@@ -728,6 +748,7 @@ export interface RoutePathParams {
     provider: string;
   };
   'submit_feedback': Record<string, never>;
+  'sync_extensions': Record<string, never>;
   'system:global-search': Record<string, never>;
   'system:health': Record<string, never>;
   'system:oauth-config': Record<string, never>;
@@ -837,6 +858,9 @@ export interface RoutePathParams {
   'update_team_permissions': {
     team_id: UUID;
   };
+  'update_template': {
+    template_id: UUID;
+  };
   'update_ticket': {
     ticket_id: UUID;
   };
@@ -941,6 +965,7 @@ export interface RouteQueryParams {
   'create_tag': Record<string, never>;
   'create_team': Record<string, never>;
   'create_team_invitation': Record<string, never>;
+  'create_template': Record<string, never>;
   'create_ticket': Record<string, never>;
   'create_time_condition': Record<string, never>;
   'create_user': Record<string, never>;
@@ -971,6 +996,7 @@ export interface RouteQueryParams {
   'delete_team': Record<string, never>;
   'delete_team_api_teams_team_id:uuid': Record<string, never>;
   'delete_team_invitation': Record<string, never>;
+  'delete_template': Record<string, never>;
   'delete_ticket': Record<string, never>;
   'delete_time_condition': Record<string, never>;
   'delete_user': Record<string, never>;
@@ -1002,6 +1028,10 @@ export interface RouteQueryParams {
   'get_device': Record<string, never>;
   'get_device_data': {
     refresh?: boolean;
+  };
+  'get_device_screenshot': {
+    password?: string;
+    username?: string;
   };
   'get_dnd_settings': Record<string, never>;
   'get_extension': Record<string, never>;
@@ -1065,6 +1095,7 @@ export interface RouteQueryParams {
   };
   'get_team': Record<string, never>;
   'get_team_api_teams_team_id:uuid': Record<string, never>;
+  'get_template': Record<string, never>;
   'get_ticket': Record<string, never>;
   'get_time_condition': Record<string, never>;
   'get_trends': Record<string, never>;
@@ -1457,6 +1488,19 @@ export interface RouteQueryParams {
     updatedAfter?: DateTime;
     updatedBefore?: DateTime;
   };
+  'list_templates': {
+    createdAfter?: DateTime;
+    createdBefore?: DateTime;
+    currentPage?: number;
+    ids?: string[];
+    orderBy?: string;
+    pageSize?: number;
+    searchIgnoreCase?: boolean;
+    searchString?: string;
+    sortOrder?: "asc" | "desc";
+    updatedAfter?: DateTime;
+    updatedBefore?: DateTime;
+  };
   'list_tickets': {
     createdAfter?: DateTime;
     createdBefore?: DateTime;
@@ -1562,6 +1606,10 @@ export interface RouteQueryParams {
   };
   'login': Record<string, never>;
   'logout': Record<string, never>;
+  'lookup_template': {
+    manufacturer: string;
+    model: string;
+  };
   'mark_all_read': Record<string, never>;
   'mark_read': Record<string, never>;
   'oauth:github:authorize': {
@@ -1610,6 +1658,7 @@ export interface RouteQueryParams {
     redirect_url?: string;
   };
   'submit_feedback': Record<string, never>;
+  'sync_extensions': Record<string, never>;
   'system:global-search': {
     limit?: number;
     q?: string;
@@ -1651,6 +1700,7 @@ export interface RouteQueryParams {
   'update_team_api_teams_team_id:uuid': Record<string, never>;
   'update_team_member': Record<string, never>;
   'update_team_permissions': Record<string, never>;
+  'update_template': Record<string, never>;
   'update_ticket': Record<string, never>;
   'update_time_condition': Record<string, never>;
   'update_user': Record<string, never>;
@@ -1901,6 +1951,13 @@ export const routeDefinitions = {
     pathParams: ['team_id'] as const,
     queryParams: [] as const,
   },
+  'create_template': {
+    path: '/api/admin/device-templates',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
   'create_ticket': {
     path: '/api/support/tickets',
     methods: ['POST'] as const,
@@ -2111,6 +2168,13 @@ export const routeDefinitions = {
     pathParams: ['invitation_id', 'team_id'] as const,
     queryParams: [] as const,
   },
+  'delete_template': {
+    path: '/api/admin/device-templates/{template_id}',
+    methods: ['DELETE'] as const,
+    method: 'delete',
+    pathParams: ['template_id'] as const,
+    queryParams: [] as const,
+  },
   'delete_ticket': {
     path: '/api/support/tickets/{ticket_id}',
     methods: ['DELETE'] as const,
@@ -2236,6 +2300,13 @@ export const routeDefinitions = {
     method: 'get',
     pathParams: ['mac_address'] as const,
     queryParams: ['refresh'] as const,
+  },
+  'get_device_screenshot': {
+    path: '/api/devices/{device_id}/screenshot',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['device_id'] as const,
+    queryParams: ['password', 'username'] as const,
   },
   'get_dnd_settings': {
     path: '/api/voice/extensions/{ext_id}/dnd',
@@ -2452,6 +2523,13 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: ['team_id'] as const,
+    queryParams: [] as const,
+  },
+  'get_template': {
+    path: '/api/admin/device-templates/{template_id}',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['template_id'] as const,
     queryParams: [] as const,
   },
   'get_ticket': {
@@ -2821,6 +2899,13 @@ export const routeDefinitions = {
     queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
     component: 'team/list',
   },
+  'list_templates': {
+    path: '/api/admin/device-templates',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
+  },
   'list_tickets': {
     path: '/api/admin/support/tickets',
     methods: ['GET'] as const,
@@ -2897,6 +2982,13 @@ export const routeDefinitions = {
     method: 'post',
     pathParams: [] as const,
     queryParams: [] as const,
+  },
+  'lookup_template': {
+    path: '/api/devices/templates/lookup',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: ['manufacturer', 'model'] as const,
   },
   'mark_all_read': {
     path: '/api/notifications/mark-all-read',
@@ -3110,6 +3202,13 @@ export const routeDefinitions = {
   },
   'submit_feedback': {
     path: '/api/support/feedback',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
+  'sync_extensions': {
+    path: '/api/voice/extensions/sync',
     methods: ['POST'] as const,
     method: 'post',
     pathParams: [] as const,
@@ -3379,6 +3478,13 @@ export const routeDefinitions = {
     methods: ['PUT'] as const,
     method: 'put',
     pathParams: ['team_id'] as const,
+    queryParams: [] as const,
+  },
+  'update_template': {
+    path: '/api/admin/device-templates/{template_id}',
+    methods: ['PATCH'] as const,
+    method: 'patch',
+    pathParams: ['template_id'] as const,
     queryParams: [] as const,
   },
   'update_ticket': {

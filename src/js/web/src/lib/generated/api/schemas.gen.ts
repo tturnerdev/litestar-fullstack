@@ -2876,6 +2876,353 @@ export const DeviceLineAssignmentInputSchema = {
   type: "object",
 } as const;
 
+export const DeviceTemplateCreateSchema = {
+  properties: {
+    deviceType: {
+      type: "string",
+    },
+    displayName: {
+      type: "string",
+    },
+    imageUrl: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    isActive: {
+      default: true,
+      type: "boolean",
+    },
+    manufacturer: {
+      type: "string",
+    },
+    model: {
+      type: "string",
+    },
+    provisioningTemplate: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    templateVariables: {
+      oneOf: [
+        {
+          additionalProperties: {},
+          type: "object",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    wireframeData: {
+      additionalProperties: {},
+      type: "object",
+    },
+  },
+  required: [
+    "deviceType",
+    "displayName",
+    "manufacturer",
+    "model",
+    "wireframeData",
+  ],
+  title: "DeviceTemplateCreate",
+  type: "object",
+} as const;
+
+export const DeviceTemplateDetailSchema = {
+  properties: {
+    createdAt: {
+      format: "date-time",
+      type: "string",
+    },
+    deviceType: {
+      type: "string",
+    },
+    displayName: {
+      type: "string",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    imageUrl: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    isActive: {
+      type: "boolean",
+    },
+    manufacturer: {
+      type: "string",
+    },
+    model: {
+      type: "string",
+    },
+    provisioningTemplate: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    templateVariables: {
+      oneOf: [
+        {
+          additionalProperties: {},
+          type: "object",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    updatedAt: {
+      format: "date-time",
+      type: "string",
+    },
+    wireframeData: {
+      additionalProperties: {},
+      type: "object",
+    },
+  },
+  required: [
+    "createdAt",
+    "deviceType",
+    "displayName",
+    "id",
+    "isActive",
+    "manufacturer",
+    "model",
+    "updatedAt",
+    "wireframeData",
+  ],
+  title: "DeviceTemplateDetail",
+  type: "object",
+} as const;
+
+export const DeviceTemplateListSchema = {
+  properties: {
+    createdAt: {
+      format: "date-time",
+      type: "string",
+    },
+    deviceType: {
+      type: "string",
+    },
+    displayName: {
+      type: "string",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    imageUrl: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    isActive: {
+      type: "boolean",
+    },
+    manufacturer: {
+      type: "string",
+    },
+    model: {
+      type: "string",
+    },
+    updatedAt: {
+      format: "date-time",
+      type: "string",
+    },
+  },
+  required: [
+    "createdAt",
+    "deviceType",
+    "displayName",
+    "id",
+    "isActive",
+    "manufacturer",
+    "model",
+    "updatedAt",
+  ],
+  title: "DeviceTemplateList",
+  type: "object",
+} as const;
+
+export const DeviceTemplateLookupSchema = {
+  properties: {
+    deviceType: {
+      type: "string",
+    },
+    displayName: {
+      type: "string",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    imageUrl: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    manufacturer: {
+      type: "string",
+    },
+    model: {
+      type: "string",
+    },
+    provisioningTemplate: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    templateVariables: {
+      oneOf: [
+        {
+          additionalProperties: {},
+          type: "object",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    wireframeData: {
+      additionalProperties: {},
+      type: "object",
+    },
+  },
+  required: [
+    "deviceType",
+    "displayName",
+    "id",
+    "manufacturer",
+    "model",
+    "wireframeData",
+  ],
+  title: "DeviceTemplateLookup",
+  type: "object",
+} as const;
+
+export const DeviceTemplateUpdateSchema = {
+  properties: {
+    deviceType: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+    displayName: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+    imageUrl: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    isActive: {
+      oneOf: [
+        {
+          type: "boolean",
+        },
+      ],
+    },
+    manufacturer: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+    model: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+    provisioningTemplate: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    templateVariables: {
+      oneOf: [
+        {
+          additionalProperties: {},
+          type: "object",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    wireframeData: {
+      oneOf: [
+        {
+          additionalProperties: {},
+          type: "object",
+        },
+      ],
+    },
+  },
+  required: [],
+  title: "DeviceTemplateUpdate",
+  type: "object",
+} as const;
+
 export const DeviceUpdateSchema = {
   properties: {
     configJson: {
@@ -3654,6 +4001,38 @@ export const ExtensionStatsSchema = {
   },
   required: ["extension"],
   title: "ExtensionStats",
+  type: "object",
+} as const;
+
+export const ExtensionSyncResultSchema = {
+  properties: {
+    connectionName: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    created: {
+      default: 0,
+      type: "integer",
+    },
+    errors: {
+      items: {
+        type: "string",
+      },
+      type: "array",
+    },
+    updated: {
+      default: 0,
+      type: "integer",
+    },
+  },
+  required: [],
+  title: "ExtensionSyncResult",
   type: "object",
 } as const;
 
@@ -8286,117 +8665,12 @@ export const VoicemailBoxUpdateSchema = {
   type: "object",
 } as const;
 
-export const VoicemailMessageSchema = {
-  properties: {
-    audioFilePath: {
-      default: "",
-      type: "string",
-    },
-    callerName: {
-      oneOf: [
-        {
-          type: "string",
-        },
-        {
-          type: "null",
-        },
-      ],
-    },
-    callerNumber: {
-      type: "string",
-    },
-    createdAt: {
-      oneOf: [
-        {
-          format: "date-time",
-          type: "string",
-        },
-        {
-          type: "null",
-        },
-      ],
-    },
-    durationSeconds: {
-      default: 0,
-      type: "integer",
-    },
-    id: {
-      format: "uuid",
-      type: "string",
-    },
-    isRead: {
-      default: false,
-      type: "boolean",
-    },
-    isUrgent: {
-      default: false,
-      type: "boolean",
-    },
-    receivedAt: {
-      oneOf: [
-        {
-          format: "date-time",
-          type: "string",
-        },
-        {
-          type: "null",
-        },
-      ],
-    },
-    transcription: {
-      oneOf: [
-        {
-          type: "string",
-        },
-        {
-          type: "null",
-        },
-      ],
-    },
-    updatedAt: {
-      oneOf: [
-        {
-          format: "date-time",
-          type: "string",
-        },
-        {
-          type: "null",
-        },
-      ],
-    },
-    voicemailBoxId: {
-      format: "uuid",
-      type: "string",
-    },
-  },
-  required: ["callerNumber", "id", "voicemailBoxId"],
-  title: "VoicemailMessage",
-  type: "object",
-} as const;
-
 export const VoicemailMessageUpdateSchema = {
   properties: {
     isRead: {
       oneOf: [
         {
           type: "boolean",
-        },
-      ],
-    },
-    isUrgent: {
-      oneOf: [
-        {
-          type: "boolean",
-        },
-      ],
-    },
-    transcription: {
-      oneOf: [
-        {
-          type: "string",
-        },
-        {
-          type: "null",
         },
       ],
     },
@@ -8601,5 +8875,159 @@ export const WorkerQueueInfoSchema = {
   },
   required: ["name"],
   title: "WorkerQueueInfo",
+  type: "object",
+} as const;
+
+export const voice_schemas__voicemail_VoicemailMessageSchema = {
+  properties: {
+    audioFilePath: {
+      default: "",
+      type: "string",
+    },
+    callerName: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    callerNumber: {
+      type: "string",
+    },
+    durationSeconds: {
+      default: 0,
+      type: "integer",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    isRead: {
+      default: false,
+      type: "boolean",
+    },
+    isUrgent: {
+      default: false,
+      type: "boolean",
+    },
+    receivedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    transcription: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    voicemailBoxId: {
+      format: "uuid",
+      type: "string",
+    },
+  },
+  required: ["callerNumber", "id", "voicemailBoxId"],
+  title: "VoicemailMessage",
+  type: "object",
+} as const;
+
+export const voicemail_schemas__voicemail_message_VoicemailMessageSchema = {
+  properties: {
+    audioFilePath: {
+      default: "",
+      type: "string",
+    },
+    callerName: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    callerNumber: {
+      type: "string",
+    },
+    createdAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    durationSeconds: {
+      default: 0,
+      type: "integer",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    isRead: {
+      default: false,
+      type: "boolean",
+    },
+    isUrgent: {
+      default: false,
+      type: "boolean",
+    },
+    receivedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    transcription: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    updatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    voicemailBoxId: {
+      format: "uuid",
+      type: "string",
+    },
+  },
+  required: ["callerNumber", "id", "voicemailBoxId"],
+  title: "VoicemailMessage",
   type: "object",
 } as const;

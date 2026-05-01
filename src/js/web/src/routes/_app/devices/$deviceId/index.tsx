@@ -48,6 +48,7 @@ import {
 } from "@/lib/api/hooks/devices"
 import { useGatewayLookupDevice } from "@/lib/api/hooks/gateway"
 import { ExternalDataTab } from "@/components/gateway/external-data-tab"
+import { DeviceDiagnosticTab } from "@/components/devices/device-diagnostic-tab"
 import type { Device } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/devices/$deviceId/")({
@@ -329,6 +330,10 @@ function DeviceDetailPage() {
             <TabsTrigger value="lines">Lines</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
             <TabsTrigger value="external">External Data</TabsTrigger>
+            <TabsTrigger value="diagnostic" className="gap-1.5">
+              <Wrench className="h-4 w-4" />
+              Diagnostic
+            </TabsTrigger>
             <TabsTrigger value="activity" className="gap-1.5">
               <Activity className="h-4 w-4" />
               Activity
@@ -561,6 +566,19 @@ function DeviceDetailPage() {
               isRefetching={gatewayQuery.isRefetching}
               isError={gatewayQuery.isError}
               onRefresh={() => gatewayQuery.refetch()}
+            />
+          </TabsContent>
+
+          <TabsContent value="diagnostic" className="mt-6">
+            <DeviceDiagnosticTab
+              deviceId={deviceId}
+              manufacturer={data.manufacturer}
+              deviceModel={data.deviceModel}
+              macAddress={data.macAddress}
+              sipUsername={data.sipUsername}
+              sipServer={data.sipServer}
+              ipAddress={data.ipAddress}
+              deviceName={data.name}
             />
           </TabsContent>
 

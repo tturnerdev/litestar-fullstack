@@ -17,10 +17,13 @@ import {
   accountProfileUpdate,
   accountRegister,
   addMemberToTeam,
+  adminCreateDeviceTemplate,
+  adminDeleteDeviceTemplate,
   adminDeleteTeam,
   adminDeleteUser,
   adminGetAuditLog,
   adminGetDeviceStats,
+  adminGetDeviceTemplate,
   adminGetFaxStats,
   adminGetSupportStats,
   adminGetTargetAuditLogs,
@@ -30,6 +33,7 @@ import {
   adminGetVoiceStats,
   adminListAuditLogs,
   adminListDevices,
+  adminListDeviceTemplates,
   adminListExtensions,
   adminListFaxMessages,
   adminListFaxNumbers,
@@ -37,6 +41,7 @@ import {
   adminListTeams,
   adminListTickets,
   adminListUsers,
+  adminUpdateDeviceTemplate,
   adminUpdateTeam,
   adminUpdateUser,
   apiAuthOauthGithubCallbackGithubCallback,
@@ -192,6 +197,7 @@ import {
   listVoicemailBoxes,
   listVoicemailBoxMessages,
   listVoicemailMessages,
+  lookupDeviceTemplate,
   markAllNotificationsRead,
   markNotificationRead,
   oAuthConfig,
@@ -219,6 +225,7 @@ import {
   setTimeConditionOverride,
   submitFeedback,
   syncEntity,
+  syncExtensions,
   systemHealth,
   testConnection,
   toggleDnd,
@@ -286,6 +293,12 @@ import type {
   AddMemberToTeamData,
   AddMemberToTeamError,
   AddMemberToTeamResponse,
+  AdminCreateDeviceTemplateData,
+  AdminCreateDeviceTemplateError,
+  AdminCreateDeviceTemplateResponse,
+  AdminDeleteDeviceTemplateData,
+  AdminDeleteDeviceTemplateError,
+  AdminDeleteDeviceTemplateResponse,
   AdminDeleteTeamData,
   AdminDeleteTeamError,
   AdminDeleteTeamResponse,
@@ -297,6 +310,9 @@ import type {
   AdminGetAuditLogResponse,
   AdminGetDeviceStatsData,
   AdminGetDeviceStatsResponse,
+  AdminGetDeviceTemplateData,
+  AdminGetDeviceTemplateError,
+  AdminGetDeviceTemplateResponse,
   AdminGetFaxStatsData,
   AdminGetFaxStatsResponse,
   AdminGetSupportStatsData,
@@ -321,6 +337,9 @@ import type {
   AdminListDevicesData,
   AdminListDevicesError,
   AdminListDevicesResponse,
+  AdminListDeviceTemplatesData,
+  AdminListDeviceTemplatesError,
+  AdminListDeviceTemplatesResponse,
   AdminListExtensionsData,
   AdminListExtensionsResponse,
   AdminListFaxMessagesData,
@@ -340,6 +359,9 @@ import type {
   AdminListUsersData,
   AdminListUsersError,
   AdminListUsersResponse,
+  AdminUpdateDeviceTemplateData,
+  AdminUpdateDeviceTemplateError,
+  AdminUpdateDeviceTemplateResponse,
   AdminUpdateTeamData,
   AdminUpdateTeamError,
   AdminUpdateTeamResponse,
@@ -794,6 +816,9 @@ import type {
   ListVoicemailMessagesData,
   ListVoicemailMessagesError,
   ListVoicemailMessagesResponse,
+  LookupDeviceTemplateData,
+  LookupDeviceTemplateError,
+  LookupDeviceTemplateResponse,
   MarkAllNotificationsReadData,
   MarkAllNotificationsReadResponse,
   MarkNotificationReadData,
@@ -869,6 +894,8 @@ import type {
   SyncEntityData,
   SyncEntityError,
   SyncEntityResponse,
+  SyncExtensionsData,
+  SyncExtensionsResponse,
   SystemHealthData,
   SystemHealthResponse,
   TestConnectionData,
@@ -1502,6 +1529,143 @@ export const getDashboardTrendsOptions = (
     },
     queryKey: getDashboardTrendsQueryKey(options),
   });
+
+export const adminListDeviceTemplatesQueryKey = (
+  options?: Options<AdminListDeviceTemplatesData>,
+) => createQueryKey("adminListDeviceTemplates", options);
+
+/**
+ * ListTemplates
+ */
+export const adminListDeviceTemplatesOptions = (
+  options?: Options<AdminListDeviceTemplatesData>,
+) =>
+  queryOptions<
+    AdminListDeviceTemplatesResponse,
+    AdminListDeviceTemplatesError,
+    AdminListDeviceTemplatesResponse,
+    ReturnType<typeof adminListDeviceTemplatesQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await adminListDeviceTemplates({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: adminListDeviceTemplatesQueryKey(options),
+  });
+
+/**
+ * CreateTemplate
+ */
+export const adminCreateDeviceTemplateMutation = (
+  options?: Partial<Options<AdminCreateDeviceTemplateData>>,
+): UseMutationOptions<
+  AdminCreateDeviceTemplateResponse,
+  AdminCreateDeviceTemplateError,
+  Options<AdminCreateDeviceTemplateData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    AdminCreateDeviceTemplateResponse,
+    AdminCreateDeviceTemplateError,
+    Options<AdminCreateDeviceTemplateData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await adminCreateDeviceTemplate({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * DeleteTemplate
+ */
+export const adminDeleteDeviceTemplateMutation = (
+  options?: Partial<Options<AdminDeleteDeviceTemplateData>>,
+): UseMutationOptions<
+  AdminDeleteDeviceTemplateResponse,
+  AdminDeleteDeviceTemplateError,
+  Options<AdminDeleteDeviceTemplateData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    AdminDeleteDeviceTemplateResponse,
+    AdminDeleteDeviceTemplateError,
+    Options<AdminDeleteDeviceTemplateData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await adminDeleteDeviceTemplate({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const adminGetDeviceTemplateQueryKey = (
+  options: Options<AdminGetDeviceTemplateData>,
+) => createQueryKey("adminGetDeviceTemplate", options);
+
+/**
+ * GetTemplate
+ */
+export const adminGetDeviceTemplateOptions = (
+  options: Options<AdminGetDeviceTemplateData>,
+) =>
+  queryOptions<
+    AdminGetDeviceTemplateResponse,
+    AdminGetDeviceTemplateError,
+    AdminGetDeviceTemplateResponse,
+    ReturnType<typeof adminGetDeviceTemplateQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await adminGetDeviceTemplate({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: adminGetDeviceTemplateQueryKey(options),
+  });
+
+/**
+ * UpdateTemplate
+ */
+export const adminUpdateDeviceTemplateMutation = (
+  options?: Partial<Options<AdminUpdateDeviceTemplateData>>,
+): UseMutationOptions<
+  AdminUpdateDeviceTemplateResponse,
+  AdminUpdateDeviceTemplateError,
+  Options<AdminUpdateDeviceTemplateData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    AdminUpdateDeviceTemplateResponse,
+    AdminUpdateDeviceTemplateError,
+    Options<AdminUpdateDeviceTemplateData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await adminUpdateDeviceTemplate({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
 
 export const adminListDevicesQueryKey = (
   options?: Options<AdminListDevicesData>,
@@ -2876,6 +3040,34 @@ export const createDeviceMutation = (
   };
   return mutationOptions;
 };
+
+export const lookupDeviceTemplateQueryKey = (
+  options: Options<LookupDeviceTemplateData>,
+) => createQueryKey("lookupDeviceTemplate", options);
+
+/**
+ * LookupTemplate
+ */
+export const lookupDeviceTemplateOptions = (
+  options: Options<LookupDeviceTemplateData>,
+) =>
+  queryOptions<
+    LookupDeviceTemplateResponse,
+    LookupDeviceTemplateError,
+    LookupDeviceTemplateResponse,
+    ReturnType<typeof lookupDeviceTemplateQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await lookupDeviceTemplate({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: lookupDeviceTemplateQueryKey(options),
+  });
 
 /**
  * DeleteDevice
@@ -6893,6 +7085,33 @@ export const createExtensionMutation = (
   > = {
     mutationFn: async (fnOptions) => {
       const { data } = await createExtension({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * SyncExtensions
+ */
+export const syncExtensionsMutation = (
+  options?: Partial<Options<SyncExtensionsData>>,
+): UseMutationOptions<
+  SyncExtensionsResponse,
+  DefaultError,
+  Options<SyncExtensionsData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    SyncExtensionsResponse,
+    DefaultError,
+    Options<SyncExtensionsData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await syncExtensions({
         ...options,
         ...fnOptions,
         throwOnError: true,

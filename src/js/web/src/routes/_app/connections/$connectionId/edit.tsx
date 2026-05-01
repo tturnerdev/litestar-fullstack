@@ -266,9 +266,10 @@ function EditConnectionPage() {
       setGatewayTimeout(data.settings?.timeout != null ? String(data.settings.timeout) : "")
       setGatewayCacheTtl(data.settings?.cache_ttl != null ? String(data.settings.cache_ttl) : "")
       setSettingsText(data.settings ? JSON.stringify(data.settings, null, 2) : "")
-      // Detect if the existing provider matches a known preset
+      // Detect if the existing provider matches a known preset (by value or label)
+      const normalizedProvider = data.provider.toLowerCase()
       const matchedPreset = providerPresets.find(
-        (p) => p.value === data.provider.toLowerCase(),
+        (p) => p.value === normalizedProvider || p.label.toLowerCase() === normalizedProvider,
       )
       setSelectedPreset(matchedPreset ? matchedPreset.value : "_custom")
       setInitialized(true)
@@ -427,9 +428,12 @@ function EditConnectionPage() {
     const payload: ConnectionUpdate = {}
 
     // Only include fields that changed
+    const resolvedProvider = selectedPreset && selectedPreset !== "_custom"
+      ? selectedPreset
+      : provider.toLowerCase()
     if (name !== data.name) payload.name = name
     if (connectionType !== data.connectionType) payload.connectionType = connectionType
-    if (provider !== data.provider) payload.provider = provider
+    if (resolvedProvider !== data.provider) payload.provider = resolvedProvider
     if ((host || null) !== (data.host || null)) payload.host = host || null
     if (description !== (data.description ?? "")) payload.description = description || null
 

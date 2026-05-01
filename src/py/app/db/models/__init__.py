@@ -9,6 +9,7 @@ from app.db.models._connection_enums import ConnectionAuthType, ConnectionStatus
 from app.db.models._device import Device
 from app.db.models._device_line_assignment import DeviceLineAssignment
 from app.db.models._device_line_type import DeviceLineType
+from app.db.models._device_template import DeviceTemplate
 from app.db.models._device_status import DeviceStatus
 from app.db.models._device_type import DeviceType
 from app.db.models._do_not_disturb import DoNotDisturb
@@ -77,6 +78,7 @@ __all__ = (
     "DeviceLineAssignment",
     "DeviceLineType",
     "DeviceStatus",
+    "DeviceTemplate",
     "DeviceType",
     "DndMode",
     "DoNotDisturb",

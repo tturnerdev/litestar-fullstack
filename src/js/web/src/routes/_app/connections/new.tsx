@@ -383,10 +383,14 @@ function NewConnectionPage() {
 
     if (nameError || providerError || hostError || portError) return
 
+    const activePresetValue = selectedPreset && selectedPreset !== "_custom"
+      ? selectedPreset
+      : provider.toLowerCase()
+
     const payload: ConnectionCreate = {
       name,
       connectionType,
-      provider: provider.toLowerCase(),
+      provider: activePresetValue,
       authType,
       teamId: currentTeam.id,
     }
