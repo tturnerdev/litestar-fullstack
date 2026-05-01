@@ -26,6 +26,7 @@ import { Route as PublicAboutRouteImport } from './routes/_public/about'
 import { Route as AppTeamsRouteImport } from './routes/_app/teams'
 import { Route as AppSupportRouteImport } from './routes/_app/support'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
+import { Route as AppSchedulesRouteImport } from './routes/_app/schedules'
 import { Route as AppOrganizationRouteImport } from './routes/_app/organization'
 import { Route as AppLocationsRouteImport } from './routes/_app/locations'
 import { Route as AppHomeRouteImport } from './routes/_app/home'
@@ -36,6 +37,7 @@ import { Route as AppVoiceIndexRouteImport } from './routes/_app/voice/index'
 import { Route as AppTeamsIndexRouteImport } from './routes/_app/teams/index'
 import { Route as AppTagsIndexRouteImport } from './routes/_app/tags/index'
 import { Route as AppSupportIndexRouteImport } from './routes/_app/support/index'
+import { Route as AppSchedulesIndexRouteImport } from './routes/_app/schedules/index'
 import { Route as AppProfileIndexRouteImport } from './routes/_app/profile/index'
 import { Route as AppOrganizationIndexRouteImport } from './routes/_app/organization/index'
 import { Route as AppNotificationsIndexRouteImport } from './routes/_app/notifications/index'
@@ -49,6 +51,7 @@ import { Route as AppVoicePhoneNumbersRouteImport } from './routes/_app/voice/ph
 import { Route as AppTeamsNewRouteImport } from './routes/_app/teams/new'
 import { Route as AppTagsNewRouteImport } from './routes/_app/tags/new'
 import { Route as AppSupportNewRouteImport } from './routes/_app/support/new'
+import { Route as AppSchedulesScheduleIdRouteImport } from './routes/_app/schedules/$scheduleId'
 import { Route as AppLocationsNewRouteImport } from './routes/_app/locations/new'
 import { Route as AppLocationsLocationIdRouteImport } from './routes/_app/locations/$locationId'
 import { Route as AppFaxSendRouteImport } from './routes/_app/fax/send'
@@ -67,6 +70,7 @@ import { Route as AppVoicePhoneNumbersIndexRouteImport } from './routes/_app/voi
 import { Route as AppVoiceExtensionsIndexRouteImport } from './routes/_app/voice/extensions/index'
 import { Route as AppTeamsTeamIdIndexRouteImport } from './routes/_app/teams/$teamId/index'
 import { Route as AppSupportTicketIdIndexRouteImport } from './routes/_app/support/$ticketId/index'
+import { Route as AppSchedulesScheduleIdIndexRouteImport } from './routes/_app/schedules/$scheduleId/index'
 import { Route as AppLocationsLocationIdIndexRouteImport } from './routes/_app/locations/$locationId/index'
 import { Route as AppFaxNumbersIndexRouteImport } from './routes/_app/fax/numbers/index'
 import { Route as AppFaxMessagesIndexRouteImport } from './routes/_app/fax/messages/index'
@@ -177,6 +181,11 @@ const AppSettingsRoute = AppSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AppRoute,
 } as any)
+const AppSchedulesRoute = AppSchedulesRouteImport.update({
+  id: '/schedules',
+  path: '/schedules',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppOrganizationRoute = AppOrganizationRouteImport.update({
   id: '/organization',
   path: '/organization',
@@ -226,6 +235,11 @@ const AppSupportIndexRoute = AppSupportIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppSupportRoute,
+} as any)
+const AppSchedulesIndexRoute = AppSchedulesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppSchedulesRoute,
 } as any)
 const AppProfileIndexRoute = AppProfileIndexRouteImport.update({
   id: '/profile/',
@@ -291,6 +305,11 @@ const AppSupportNewRoute = AppSupportNewRouteImport.update({
   id: '/new',
   path: '/new',
   getParentRoute: () => AppSupportRoute,
+} as any)
+const AppSchedulesScheduleIdRoute = AppSchedulesScheduleIdRouteImport.update({
+  id: '/$scheduleId',
+  path: '/$scheduleId',
+  getParentRoute: () => AppSchedulesRoute,
 } as any)
 const AppLocationsNewRoute = AppLocationsNewRouteImport.update({
   id: '/new',
@@ -384,6 +403,12 @@ const AppSupportTicketIdIndexRoute = AppSupportTicketIdIndexRouteImport.update({
   path: '/$ticketId/',
   getParentRoute: () => AppSupportRoute,
 } as any)
+const AppSchedulesScheduleIdIndexRoute =
+  AppSchedulesScheduleIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AppSchedulesScheduleIdRoute,
+  } as any)
 const AppLocationsLocationIdIndexRoute =
   AppLocationsLocationIdIndexRouteImport.update({
     id: '/',
@@ -538,6 +563,7 @@ export interface FileRoutesByFullPath {
   '/home': typeof AppHomeRoute
   '/locations': typeof AppLocationsRouteWithChildren
   '/organization': typeof AppOrganizationRouteWithChildren
+  '/schedules': typeof AppSchedulesRouteWithChildren
   '/settings': typeof AppSettingsRoute
   '/support': typeof AppSupportRouteWithChildren
   '/teams': typeof AppTeamsRouteWithChildren
@@ -565,6 +591,7 @@ export interface FileRoutesByFullPath {
   '/fax/send': typeof AppFaxSendRoute
   '/locations/$locationId': typeof AppLocationsLocationIdRouteWithChildren
   '/locations/new': typeof AppLocationsNewRoute
+  '/schedules/$scheduleId': typeof AppSchedulesScheduleIdRouteWithChildren
   '/support/new': typeof AppSupportNewRoute
   '/tags/new': typeof AppTagsNewRoute
   '/teams/new': typeof AppTeamsNewRoute
@@ -578,6 +605,7 @@ export interface FileRoutesByFullPath {
   '/notifications/': typeof AppNotificationsIndexRoute
   '/organization/': typeof AppOrganizationIndexRoute
   '/profile/': typeof AppProfileIndexRoute
+  '/schedules/': typeof AppSchedulesIndexRoute
   '/support/': typeof AppSupportIndexRoute
   '/tags/': typeof AppTagsIndexRoute
   '/teams/': typeof AppTeamsIndexRoute
@@ -601,6 +629,7 @@ export interface FileRoutesByFullPath {
   '/fax/messages/': typeof AppFaxMessagesIndexRoute
   '/fax/numbers/': typeof AppFaxNumbersIndexRoute
   '/locations/$locationId/': typeof AppLocationsLocationIdIndexRoute
+  '/schedules/$scheduleId/': typeof AppSchedulesScheduleIdIndexRoute
   '/support/$ticketId/': typeof AppSupportTicketIdIndexRoute
   '/teams/$teamId/': typeof AppTeamsTeamIdIndexRoute
   '/voice/extensions/': typeof AppVoiceExtensionsIndexRoute
@@ -652,6 +681,7 @@ export interface FileRoutesByTo {
   '/notifications': typeof AppNotificationsIndexRoute
   '/organization': typeof AppOrganizationIndexRoute
   '/profile': typeof AppProfileIndexRoute
+  '/schedules': typeof AppSchedulesIndexRoute
   '/support': typeof AppSupportIndexRoute
   '/tags': typeof AppTagsIndexRoute
   '/teams': typeof AppTeamsIndexRoute
@@ -675,6 +705,7 @@ export interface FileRoutesByTo {
   '/fax/messages': typeof AppFaxMessagesIndexRoute
   '/fax/numbers': typeof AppFaxNumbersIndexRoute
   '/locations/$locationId': typeof AppLocationsLocationIdIndexRoute
+  '/schedules/$scheduleId': typeof AppSchedulesScheduleIdIndexRoute
   '/support/$ticketId': typeof AppSupportTicketIdIndexRoute
   '/teams/$teamId': typeof AppTeamsTeamIdIndexRoute
   '/voice/extensions': typeof AppVoiceExtensionsIndexRoute
@@ -699,6 +730,7 @@ export interface FileRoutesById {
   '/_app/home': typeof AppHomeRoute
   '/_app/locations': typeof AppLocationsRouteWithChildren
   '/_app/organization': typeof AppOrganizationRouteWithChildren
+  '/_app/schedules': typeof AppSchedulesRouteWithChildren
   '/_app/settings': typeof AppSettingsRoute
   '/_app/support': typeof AppSupportRouteWithChildren
   '/_app/teams': typeof AppTeamsRouteWithChildren
@@ -726,6 +758,7 @@ export interface FileRoutesById {
   '/_app/fax/send': typeof AppFaxSendRoute
   '/_app/locations/$locationId': typeof AppLocationsLocationIdRouteWithChildren
   '/_app/locations/new': typeof AppLocationsNewRoute
+  '/_app/schedules/$scheduleId': typeof AppSchedulesScheduleIdRouteWithChildren
   '/_app/support/new': typeof AppSupportNewRoute
   '/_app/tags/new': typeof AppTagsNewRoute
   '/_app/teams/new': typeof AppTeamsNewRoute
@@ -739,6 +772,7 @@ export interface FileRoutesById {
   '/_app/notifications/': typeof AppNotificationsIndexRoute
   '/_app/organization/': typeof AppOrganizationIndexRoute
   '/_app/profile/': typeof AppProfileIndexRoute
+  '/_app/schedules/': typeof AppSchedulesIndexRoute
   '/_app/support/': typeof AppSupportIndexRoute
   '/_app/tags/': typeof AppTagsIndexRoute
   '/_app/teams/': typeof AppTeamsIndexRoute
@@ -762,6 +796,7 @@ export interface FileRoutesById {
   '/_app/fax/messages/': typeof AppFaxMessagesIndexRoute
   '/_app/fax/numbers/': typeof AppFaxNumbersIndexRoute
   '/_app/locations/$locationId/': typeof AppLocationsLocationIdIndexRoute
+  '/_app/schedules/$scheduleId/': typeof AppSchedulesScheduleIdIndexRoute
   '/_app/support/$ticketId/': typeof AppSupportTicketIdIndexRoute
   '/_app/teams/$teamId/': typeof AppTeamsTeamIdIndexRoute
   '/_app/voice/extensions/': typeof AppVoiceExtensionsIndexRoute
@@ -785,6 +820,7 @@ export interface FileRouteTypes {
     | '/home'
     | '/locations'
     | '/organization'
+    | '/schedules'
     | '/settings'
     | '/support'
     | '/teams'
@@ -812,6 +848,7 @@ export interface FileRouteTypes {
     | '/fax/send'
     | '/locations/$locationId'
     | '/locations/new'
+    | '/schedules/$scheduleId'
     | '/support/new'
     | '/tags/new'
     | '/teams/new'
@@ -825,6 +862,7 @@ export interface FileRouteTypes {
     | '/notifications/'
     | '/organization/'
     | '/profile/'
+    | '/schedules/'
     | '/support/'
     | '/tags/'
     | '/teams/'
@@ -848,6 +886,7 @@ export interface FileRouteTypes {
     | '/fax/messages/'
     | '/fax/numbers/'
     | '/locations/$locationId/'
+    | '/schedules/$scheduleId/'
     | '/support/$ticketId/'
     | '/teams/$teamId/'
     | '/voice/extensions/'
@@ -899,6 +938,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/organization'
     | '/profile'
+    | '/schedules'
     | '/support'
     | '/tags'
     | '/teams'
@@ -922,6 +962,7 @@ export interface FileRouteTypes {
     | '/fax/messages'
     | '/fax/numbers'
     | '/locations/$locationId'
+    | '/schedules/$scheduleId'
     | '/support/$ticketId'
     | '/teams/$teamId'
     | '/voice/extensions'
@@ -945,6 +986,7 @@ export interface FileRouteTypes {
     | '/_app/home'
     | '/_app/locations'
     | '/_app/organization'
+    | '/_app/schedules'
     | '/_app/settings'
     | '/_app/support'
     | '/_app/teams'
@@ -972,6 +1014,7 @@ export interface FileRouteTypes {
     | '/_app/fax/send'
     | '/_app/locations/$locationId'
     | '/_app/locations/new'
+    | '/_app/schedules/$scheduleId'
     | '/_app/support/new'
     | '/_app/tags/new'
     | '/_app/teams/new'
@@ -985,6 +1028,7 @@ export interface FileRouteTypes {
     | '/_app/notifications/'
     | '/_app/organization/'
     | '/_app/profile/'
+    | '/_app/schedules/'
     | '/_app/support/'
     | '/_app/tags/'
     | '/_app/teams/'
@@ -1008,6 +1052,7 @@ export interface FileRouteTypes {
     | '/_app/fax/messages/'
     | '/_app/fax/numbers/'
     | '/_app/locations/$locationId/'
+    | '/_app/schedules/$scheduleId/'
     | '/_app/support/$ticketId/'
     | '/_app/teams/$teamId/'
     | '/_app/voice/extensions/'
@@ -1149,6 +1194,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSettingsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/schedules': {
+      id: '/_app/schedules'
+      path: '/schedules'
+      fullPath: '/schedules'
+      preLoaderRoute: typeof AppSchedulesRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/organization': {
       id: '/_app/organization'
       path: '/organization'
@@ -1218,6 +1270,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/support/'
       preLoaderRoute: typeof AppSupportIndexRouteImport
       parentRoute: typeof AppSupportRoute
+    }
+    '/_app/schedules/': {
+      id: '/_app/schedules/'
+      path: '/'
+      fullPath: '/schedules/'
+      preLoaderRoute: typeof AppSchedulesIndexRouteImport
+      parentRoute: typeof AppSchedulesRoute
     }
     '/_app/profile/': {
       id: '/_app/profile/'
@@ -1309,6 +1368,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/support/new'
       preLoaderRoute: typeof AppSupportNewRouteImport
       parentRoute: typeof AppSupportRoute
+    }
+    '/_app/schedules/$scheduleId': {
+      id: '/_app/schedules/$scheduleId'
+      path: '/$scheduleId'
+      fullPath: '/schedules/$scheduleId'
+      preLoaderRoute: typeof AppSchedulesScheduleIdRouteImport
+      parentRoute: typeof AppSchedulesRoute
     }
     '/_app/locations/new': {
       id: '/_app/locations/new'
@@ -1435,6 +1501,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/support/$ticketId/'
       preLoaderRoute: typeof AppSupportTicketIdIndexRouteImport
       parentRoute: typeof AppSupportRoute
+    }
+    '/_app/schedules/$scheduleId/': {
+      id: '/_app/schedules/$scheduleId/'
+      path: '/'
+      fullPath: '/schedules/$scheduleId/'
+      preLoaderRoute: typeof AppSchedulesScheduleIdIndexRouteImport
+      parentRoute: typeof AppSchedulesScheduleIdRoute
     }
     '/_app/locations/$locationId/': {
       id: '/_app/locations/$locationId/'
@@ -1747,6 +1820,34 @@ const AppOrganizationRouteWithChildren = AppOrganizationRoute._addFileChildren(
   AppOrganizationRouteChildren,
 )
 
+interface AppSchedulesScheduleIdRouteChildren {
+  AppSchedulesScheduleIdIndexRoute: typeof AppSchedulesScheduleIdIndexRoute
+}
+
+const AppSchedulesScheduleIdRouteChildren: AppSchedulesScheduleIdRouteChildren =
+  {
+    AppSchedulesScheduleIdIndexRoute: AppSchedulesScheduleIdIndexRoute,
+  }
+
+const AppSchedulesScheduleIdRouteWithChildren =
+  AppSchedulesScheduleIdRoute._addFileChildren(
+    AppSchedulesScheduleIdRouteChildren,
+  )
+
+interface AppSchedulesRouteChildren {
+  AppSchedulesScheduleIdRoute: typeof AppSchedulesScheduleIdRouteWithChildren
+  AppSchedulesIndexRoute: typeof AppSchedulesIndexRoute
+}
+
+const AppSchedulesRouteChildren: AppSchedulesRouteChildren = {
+  AppSchedulesScheduleIdRoute: AppSchedulesScheduleIdRouteWithChildren,
+  AppSchedulesIndexRoute: AppSchedulesIndexRoute,
+}
+
+const AppSchedulesRouteWithChildren = AppSchedulesRoute._addFileChildren(
+  AppSchedulesRouteChildren,
+)
+
 interface AppSupportRouteChildren {
   AppSupportNewRoute: typeof AppSupportNewRoute
   AppSupportIndexRoute: typeof AppSupportIndexRoute
@@ -1807,6 +1908,7 @@ interface AppRouteChildren {
   AppHomeRoute: typeof AppHomeRoute
   AppLocationsRoute: typeof AppLocationsRouteWithChildren
   AppOrganizationRoute: typeof AppOrganizationRouteWithChildren
+  AppSchedulesRoute: typeof AppSchedulesRouteWithChildren
   AppSettingsRoute: typeof AppSettingsRoute
   AppSupportRoute: typeof AppSupportRouteWithChildren
   AppTeamsRoute: typeof AppTeamsRouteWithChildren
@@ -1841,6 +1943,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppHomeRoute: AppHomeRoute,
   AppLocationsRoute: AppLocationsRouteWithChildren,
   AppOrganizationRoute: AppOrganizationRouteWithChildren,
+  AppSchedulesRoute: AppSchedulesRouteWithChildren,
   AppSettingsRoute: AppSettingsRoute,
   AppSupportRoute: AppSupportRouteWithChildren,
   AppTeamsRoute: AppTeamsRouteWithChildren,

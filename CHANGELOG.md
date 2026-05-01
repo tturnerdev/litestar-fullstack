@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.98.0 (2026-04-30)
+
+### Added
+- **Schedules domain** — New domain for managing business hours, holiday calendars, and custom schedules. Models: `Schedule` and `ScheduleEntry` with timezone-aware open/closed checking. Full CRUD API at `/api/schedules` with nested entry management and `/check` endpoint for real-time status. Frontend: schedule list page, detail page with weekly hours editor and holiday table, in-place editing, sidebar navigation.
+- **Call routing domain** — New domain for call routing entities. Models: `TimeCondition`, `IvrMenu`/`IvrMenuOption`, `CallQueue`/`CallQueueMember`, `RingGroup`/`RingGroupMember`. Full CRUD APIs with nested child endpoints, night mode override for time conditions, agent pause/unpause for call queues. Database migrations for all 9 new tables.
+
 ## v0.97.0 (2026-04-30)
 
 ### Added
