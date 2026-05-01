@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Annotated
+from typing import TYPE_CHECKING, Annotated, Any
 
 from advanced_alchemy.exceptions import IntegrityError
 from litestar import Controller, delete, post
@@ -10,13 +10,20 @@ from litestar.di import Provide
 from litestar.params import Parameter
 from litestar.status_codes import HTTP_202_ACCEPTED
 
+from app.db import models as m
 from app.domain.accounts.deps import provide_roles_service, provide_user_roles_service, provide_users_service
 from app.domain.accounts.guards import requires_superuser
+from app.domain.admin.deps import provide_audit_log_service
+from app.lib.audit import capture_snapshot, log_audit
 from app.lib.schema import Message
 
 if TYPE_CHECKING:
+    from litestar import Request
+    from litestar.security.jwt import Token
+
     from app.domain.accounts.schemas import UserRoleAdd, UserRoleRevoke
     from app.domain.accounts.services import RoleService, UserRoleService, UserService
+    from app.domain.admin.services import AuditLogService
 
 
 class UserRoleController(Controller):
@@ -29,49 +36,72 @@ class UserRoleController(Controller):
         "users_service": Provide(provide_users_service),
         "roles_service": Provide(provide_roles_service),
         "user_roles_service": Provide(provide_user_roles_service),
+        "audit_service": Provide(provide_audit_log_service),
     }
 
     @post(operation_id="AssignUserRole")
     async def assign_role(
         self,
+        request: Request[m.User, Token, Any],
         roles_service: RoleService,
         users_service: UserService,
         user_roles_service: UserRoleService,
+        audit_service: AuditLogService,
         data: UserRoleAdd,
         role_slug: str = Parameter(title="Role Slug", description="The role to grant."),
     ) -> Message:
         """Assign a role to a user.
 
         Args:
+            request: The incoming request.
             roles_service: Role Service
             users_service: User Service
             user_roles_service: User Role Service
+            audit_service: Audit Log Service
             data: User Role Add
             role_slug: Role Slug
 
         Returns:
             Message
         """
-        role_id = (await roles_service.get_one(slug=role_slug)).id
+        role = await roles_service.get_one(slug=role_slug)
         user_obj = await users_service.get_one(email=data.user_name)
-        obj, created = await user_roles_service.get_or_upsert(role_id=role_id, user_id=user_obj.id)
+        obj, created = await user_roles_service.get_or_upsert(role_id=role.id, user_id=user_obj.id)
         if created:
+            await log_audit(
+                audit_service,
+                action="account.user_role.assigned",
+                actor_id=request.user.id,
+                actor_email=request.user.email,
+                actor_name=request.user.name,
+                target_type="UserRole",
+                target_id=obj.id,
+                target_label=f"{user_obj.email} -> {role.name}",
+                before=None,
+                after=capture_snapshot(obj),
+                request=request,
+                metadata={"user_email": user_obj.email, "role_slug": role_slug},
+            )
             return Message(message=f"Successfully assigned the '{obj.role_slug}' role to {obj.user_email}.")
         return Message(message=f"User {obj.user_email} already has the '{obj.role_slug}' role.")
 
     @delete(operation_id="RevokeUserRole", status_code=HTTP_202_ACCEPTED)
     async def revoke_role(
         self,
+        request: Request[m.User, Token, Any],
         users_service: UserService,
         user_roles_service: UserRoleService,
+        audit_service: AuditLogService,
         data: UserRoleRevoke,
         role_slug: Annotated[str, Parameter(title="Role Slug", description="The role to revoke.")],
     ) -> Message:
         """Delete a role from the system.
 
         Args:
+            request: The incoming request.
             users_service: User Service
             user_roles_service: User Role Service
+            audit_service: Audit Log Service
             data: User Role Revoke
             role_slug: Role Slug
 
@@ -85,7 +115,22 @@ class UserRoleController(Controller):
         removed_role: bool = False
         for user_role in user_obj.roles:
             if user_role.role_slug == role_slug:
+                before = capture_snapshot(user_role)
                 _ = await user_roles_service.delete(user_role.id)
+                await log_audit(
+                    audit_service,
+                    action="account.user_role.removed",
+                    actor_id=request.user.id,
+                    actor_email=request.user.email,
+                    actor_name=request.user.name,
+                    target_type="UserRole",
+                    target_id=user_role.id,
+                    target_label=f"{user_obj.email} -> {role_slug}",
+                    before=before,
+                    after=None,
+                    request=request,
+                    metadata={"user_email": user_obj.email, "role_slug": role_slug},
+                )
                 removed_role = True
         if not removed_role:
             msg = "User did not have role assigned."

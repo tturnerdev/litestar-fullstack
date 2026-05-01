@@ -21,6 +21,7 @@ from app.domain.admin.deps import provide_audit_log_service
 from app.domain.admin.schemas import BulkImportPreview, BulkImportPreviewRow, BulkImportResult
 from app.domain.devices.services import DeviceService
 from app.domain.voice.services import ExtensionService
+from app.lib.audit import log_audit
 from app.lib.deps import create_service_dependencies
 
 if TYPE_CHECKING:
@@ -336,20 +337,21 @@ class AdminBulkImportController(Controller):
                 errors.append(f"Row {idx}: {exc!s}")
                 skipped += 1
 
-        await audit_service.log_action(
+        await log_audit(
+            audit_service,
             action="admin.bulk_import.devices",
             actor_id=request.user.id,
             actor_email=request.user.email,
             actor_name=request.user.name,
             target_type="device",
-            details={
+            request=request,
+            metadata={
                 "total_rows": len(rows),
                 "created": created,
                 "updated": updated,
                 "skipped": skipped,
                 "error_count": len(errors),
             },
-            request=request,
         )
 
         return BulkImportResult(
@@ -506,20 +508,21 @@ class AdminBulkImportController(Controller):
                 errors.append(f"Row {idx}: {exc!s}")
                 skipped += 1
 
-        await audit_service.log_action(
+        await log_audit(
+            audit_service,
             action="admin.bulk_import.extensions",
             actor_id=request.user.id,
             actor_email=request.user.email,
             actor_name=request.user.name,
             target_type="extension",
-            details={
+            request=request,
+            metadata={
                 "total_rows": len(rows),
                 "created": created,
                 "updated": updated,
                 "skipped": skipped,
                 "error_count": len(errors),
             },
-            request=request,
         )
 
         return BulkImportResult(

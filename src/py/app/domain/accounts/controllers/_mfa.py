@@ -257,6 +257,7 @@ class MfaController(Controller):
         self,
         request: Request[m.User, Token, Any],
         users_service: UserService,
+        audit_service: AuditLogService,
         data: MfaDisable,
     ) -> Message:
         """Disable MFA for the authenticated user.
@@ -288,7 +289,16 @@ class MfaController(Controller):
             },
             item_id=user.id,
         )
-        logger.info("MFA disabled for user %s", user.email)
+        await audit_service.log_action(
+            action="mfa.disabled",
+            actor_id=user.id,
+            actor_email=user.email,
+            actor_name=user.name,
+            target_type="user",
+            target_id=str(user.id),
+            target_label=user.email,
+            request=request,
+        )
         return Message(message="MFA has been disabled")
 
     @post(operation_id="RegenerateMfaBackupCodes", path="/regenerate-codes")
@@ -296,6 +306,7 @@ class MfaController(Controller):
         self,
         request: Request[m.User, Token, Any],
         users_service: UserService,
+        audit_service: AuditLogService,
         data: MfaDisable,
     ) -> MfaBackupCodes:
         """Generate new backup codes (invalidates old ones).
@@ -321,5 +332,14 @@ class MfaController(Controller):
             raise ClientException(detail="Invalid password", status_code=400)
         plaintext_codes = generate_backup_codes(count=8)
         await users_service.update({"backup_codes": plaintext_codes}, item_id=user.id)
-        logger.info("Backup codes regenerated for user %s", user.email)
+        await audit_service.log_action(
+            action="mfa.backup_codes.regenerated",
+            actor_id=user.id,
+            actor_email=user.email,
+            actor_name=user.name,
+            target_type="user",
+            target_id=str(user.id),
+            target_label=user.email,
+            request=request,
+        )
         return MfaBackupCodes(codes=plaintext_codes)

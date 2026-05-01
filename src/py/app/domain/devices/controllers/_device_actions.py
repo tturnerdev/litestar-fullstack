@@ -34,6 +34,23 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+def _validate_device_ip(device: m.Device) -> str:
+    if not device.ip_address:
+        raise NotFoundException(detail="Device has no IP address configured.")
+    try:
+        addr = ipaddress.ip_address(device.ip_address)
+        if not addr.is_private:
+            raise ValidationException(detail="Only private/LAN IP addresses are allowed.")
+    except ValueError as exc:
+        raise ValidationException(detail="Invalid device IP address.") from exc
+    return device.ip_address
+
+
+def _get_phone_auth(device: m.Device) -> tuple[str, str]:
+    phone_auth = (device.config_json or {}).get("phoneAuth", {})
+    return phone_auth.get("username", "admin"), phone_auth.get("password", "admin")
+
+
 class DeviceActionsController(Controller):
     """Device action and line assignment endpoints."""
 
@@ -153,20 +170,10 @@ class DeviceActionsController(Controller):
         device_id: Annotated[UUID, Parameter(title="Device ID", description="The device to capture.")],
     ) -> Response[bytes]:
         device = await devices_service.get(device_id)
-        if not device.ip_address:
-            raise NotFoundException(detail="Device has no IP address configured.")
-        try:
-            addr = ipaddress.ip_address(device.ip_address)
-            if not addr.is_private:
-                raise ValidationException(detail="Only private/LAN IP addresses are allowed.")
-        except ValueError as exc:
-            raise ValidationException(detail="Invalid device IP address.") from exc
+        ip = _validate_device_ip(device)
+        username, password = _get_phone_auth(device)
 
-        phone_auth = (device.config_json or {}).get("phoneAuth", {})
-        username = phone_auth.get("username", "admin")
-        password = phone_auth.get("password", "admin")
-
-        url = f"https://{device.ip_address}/servlet?m=mod_action&command=screenshot"
+        url = f"https://{ip}/servlet?m=mod_action&command=screenshot"
         try:
             async with httpx.AsyncClient(verify=False, timeout=httpx.Timeout(10.0)) as http:
                 resp = await http.get(url, auth=(username, password))
@@ -185,4 +192,45 @@ class DeviceActionsController(Controller):
             status_code=200,
             media_type=content_type,
             headers={"Cache-Control": "no-store"},
+        )
+
+    @post(
+        operation_id="SendDeviceAction",
+        path="/api/devices/{device_id:uuid}/action",
+        include_in_schema=False,
+    )
+    async def send_device_action(
+        self,
+        devices_service: DeviceService,
+        device_id: Annotated[UUID, Parameter(title="Device ID", description="The device to send an action to.")],
+        key: Annotated[str, Parameter(query="key", title="Action Key", description="Yealink Action URI key value (e.g. F1, L1, SPEAKER).")],
+    ) -> DeviceActionResponse:
+        device = await devices_service.get(device_id)
+        ip = _validate_device_ip(device)
+        username, password = _get_phone_auth(device)
+
+        url = f"https://{ip}/servlet"
+        try:
+            async with httpx.AsyncClient(verify=False, timeout=httpx.Timeout(10.0)) as http:
+                resp = await http.get(url, params={"key": key}, auth=(username, password))
+                resp.raise_for_status()
+        except httpx.TimeoutException:
+            return DeviceActionResponse(
+                device_id=device.id, action="key_press", status="error",
+                message="Device timed out.",
+            )
+        except httpx.HTTPStatusError as exc:
+            return DeviceActionResponse(
+                device_id=device.id, action="key_press", status="error",
+                message=f"Device returned {exc.response.status_code}.",
+            )
+        except httpx.HTTPError:
+            return DeviceActionResponse(
+                device_id=device.id, action="key_press", status="error",
+                message="Could not connect to device.",
+            )
+
+        return DeviceActionResponse(
+            device_id=device.id, action="key_press", status="ok",
+            message=f"Sent key={key} to device.",
         )

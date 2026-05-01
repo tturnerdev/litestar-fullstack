@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.115.0 (2026-05-01)
+
+### Added
+- **Audit logging expansion** — Added `log_audit` with before/after snapshots to admin user/team controllers, bulk import controllers, account role/user/user-role controllers, and MFA disable/backup-code-regeneration endpoints
+- **Notifications bulk actions** — Added BulkActionBar to notifications page with "Mark as Read" and "Delete Selected" actions using checkbox selection
+- **Device key-press action** — New `POST /api/devices/{id}/action` endpoint sends Action URI key presses to Yealink phones; interactive wireframe keys on device diagnostic tab
+
 ## v0.114.0 (2026-05-01)
 
 ### Added

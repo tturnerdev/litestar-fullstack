@@ -16,7 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDeviceTemplateLookup } from "@/lib/api/hooks/device-templates"
-import { useDeviceScreenshot } from "@/lib/api/hooks/devices"
+import { useDeviceAction, useDeviceScreenshot } from "@/lib/api/hooks/devices"
 
 // ---------------------------------------------------------------------------
 // Types
@@ -156,6 +156,7 @@ interface V1LineKey {
   shape: string
   bounds: V1Bounds
   cornerRadius: number
+  actionKey?: string
 }
 
 interface V1SoftKey {
@@ -163,6 +164,7 @@ interface V1SoftKey {
   slot: number
   bounds: V1Bounds
   cornerRadius: number
+  actionKey?: string
 }
 
 interface V1DialPadKey {
@@ -171,6 +173,7 @@ interface V1DialPadKey {
   col: number
   digit: string
   letters: string
+  actionKey?: string
 }
 
 interface V1DialPad {
@@ -189,6 +192,7 @@ interface V1FunctionKey {
   col: number
   icon: string
   function: string
+  actionKey?: string
 }
 
 interface V1FunctionKeys {
@@ -205,6 +209,7 @@ interface V1VolumeControl {
   side: string
   label: string
   function: string
+  actionKey?: string
 }
 
 interface V1VolumeRocker {
@@ -582,7 +587,9 @@ const PHONE_ICON_PATH = "M 0 1 Q 0 -1 2 -1 L 4 -1 Q 5 -1 5 0 L 5 2 Q 5 3 4 3 L 3
 // V1 Wireframe Renderer
 // ---------------------------------------------------------------------------
 
-function WireframeRendererV1({ data, screenshotUrl }: { data: V1WireframeData; screenshotUrl?: string | null }) {
+type ActionHandler = (key: string) => void
+
+function WireframeRendererV1({ data, screenshotUrl, onAction }: { data: V1WireframeData; screenshotUrl?: string | null; onAction?: ActionHandler }) {
   const [hoveredId, setHoveredId] = useState<string | null>(null)
 
   const vb = data.canvas.viewBox
@@ -688,6 +695,7 @@ function WireframeRendererV1({ data, screenshotUrl }: { data: V1WireframeData; s
       {data.lineKeys.map((lk) => {
         const colors = getV1KeyColor(lk.color)
         const isHovered = hoveredId === lk.id
+        const ak = lk.actionKey
         return (
           <Tooltip key={lk.id}>
             <TooltipTrigger asChild>
@@ -703,11 +711,12 @@ function WireframeRendererV1({ data, screenshotUrl }: { data: V1WireframeData; s
                 opacity={isHovered ? 0.8 : 1}
                 onMouseEnter={() => setHoveredId(lk.id)}
                 onMouseLeave={() => setHoveredId(null)}
-                className="cursor-pointer"
+                onClick={ak && onAction ? () => onAction(ak) : undefined}
+                className={ak && onAction ? "cursor-pointer" : "cursor-default"}
                 style={{ transition: "opacity 0.15s ease" }}
               />
             </TooltipTrigger>
-            <TooltipContent>Line {lk.slot} ({lk.color})</TooltipContent>
+            <TooltipContent>Line {lk.slot} ({lk.color}){ak ? ` — ${ak}` : ""}</TooltipContent>
           </Tooltip>
         )
       })}
@@ -715,6 +724,7 @@ function WireframeRendererV1({ data, screenshotUrl }: { data: V1WireframeData; s
       {/* Soft Keys */}
       {data.softKeys.map((sk) => {
         const isHovered = hoveredId === sk.id
+        const ak = sk.actionKey
         return (
           <Tooltip key={sk.id}>
             <TooltipTrigger asChild>
@@ -729,11 +739,12 @@ function WireframeRendererV1({ data, screenshotUrl }: { data: V1WireframeData; s
                 strokeWidth={V1_COLORS.keyStrokeWidth}
                 onMouseEnter={() => setHoveredId(sk.id)}
                 onMouseLeave={() => setHoveredId(null)}
-                className="cursor-pointer"
+                onClick={ak && onAction ? () => onAction(ak) : undefined}
+                className={ak && onAction ? "cursor-pointer" : "cursor-default"}
                 style={{ transition: "fill 0.15s ease" }}
               />
             </TooltipTrigger>
-            <TooltipContent>Soft Key {sk.slot}</TooltipContent>
+            <TooltipContent>Soft Key {sk.slot}{ak ? ` — ${ak}` : ""}</TooltipContent>
           </Tooltip>
         )
       })}
@@ -743,6 +754,7 @@ function WireframeRendererV1({ data, screenshotUrl }: { data: V1WireframeData; s
         dialPad={data.dialPad}
         hoveredId={hoveredId}
         setHoveredId={setHoveredId}
+        onAction={onAction}
       />
 
       {/* Function Keys */}
@@ -750,6 +762,7 @@ function WireframeRendererV1({ data, screenshotUrl }: { data: V1WireframeData; s
         functionKeys={data.functionKeys}
         hoveredId={hoveredId}
         setHoveredId={setHoveredId}
+        onAction={onAction}
       />
 
       {/* Volume Rocker */}
@@ -757,6 +770,7 @@ function WireframeRendererV1({ data, screenshotUrl }: { data: V1WireframeData; s
         rocker={data.volumeRocker}
         hoveredId={hoveredId}
         setHoveredId={setHoveredId}
+        onAction={onAction}
       />
     </svg>
   )
@@ -1103,10 +1117,12 @@ function V1DialPadRenderer({
   dialPad,
   hoveredId,
   setHoveredId,
+  onAction,
 }: {
   dialPad: V1DialPad
   hoveredId: string | null
   setHoveredId: (id: string | null) => void
+  onAction?: ActionHandler
 }) {
   const { origin, keySize, gap, cornerRadius } = dialPad
 
@@ -1118,9 +1134,8 @@ function V1DialPadRenderer({
         const isHovered = hoveredId === key.id
         const hasLetters = key.letters.length > 0
         const isSend = key.letters === "SEND"
+        const ak = key.actionKey ?? key.digit
 
-        // Compute digit text position: shift left when letters are present
-        // Reference SVG positions digit at left-of-center, letters after it
         const digitX = hasLetters ? kx + keySize.width / 2 - 14 : kx + keySize.width / 2
         const digitY = ky + keySize.height / 2
 
@@ -1133,6 +1148,7 @@ function V1DialPadRenderer({
               <g
                 onMouseEnter={() => setHoveredId(key.id)}
                 onMouseLeave={() => setHoveredId(null)}
+                onClick={onAction ? () => onAction(ak) : undefined}
                 className="cursor-pointer"
               >
                 <rect
@@ -1250,10 +1266,12 @@ function V1FunctionKeysRenderer({
   functionKeys,
   hoveredId,
   setHoveredId,
+  onAction,
 }: {
   functionKeys: V1FunctionKeys
   hoveredId: string | null
   setHoveredId: (id: string | null) => void
+  onAction?: ActionHandler
 }) {
   const { origin, keySize, gap, cornerRadius } = functionKeys
 
@@ -1263,6 +1281,7 @@ function V1FunctionKeysRenderer({
         const kx = origin.x + key.col * (keySize.width + gap)
         const ky = origin.y + key.row * (keySize.height + gap)
         const isHovered = hoveredId === key.id
+        const ak = key.actionKey
 
         return (
           <Tooltip key={key.id}>
@@ -1270,7 +1289,8 @@ function V1FunctionKeysRenderer({
               <g
                 onMouseEnter={() => setHoveredId(key.id)}
                 onMouseLeave={() => setHoveredId(null)}
-                className="cursor-pointer"
+                onClick={ak && onAction ? () => onAction(ak) : undefined}
+                className={ak && onAction ? "cursor-pointer" : "cursor-default"}
               >
                 <rect
                   x={kx}
@@ -1306,71 +1326,91 @@ function V1VolumeRockerRenderer({
   rocker,
   hoveredId,
   setHoveredId,
+  onAction,
 }: {
   rocker: V1VolumeRocker
   hoveredId: string | null
   setHoveredId: (id: string | null) => void
+  onAction?: ActionHandler
 }) {
   const b = rocker.bounds
   const isHovered = hoveredId === rocker.id
+  const halfW = b.width / 2
+  const downCtrl = rocker.controls.find((c) => c.side === "left" || c.side === "minus")
+  const upCtrl = rocker.controls.find((c) => c.side === "right" || c.side === "plus")
 
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <g
-          onMouseEnter={() => setHoveredId(rocker.id)}
-          onMouseLeave={() => setHoveredId(null)}
-          className="cursor-pointer"
-        >
-          <rect
-            x={b.x}
-            y={b.y}
-            width={b.width}
-            height={b.height}
-            rx={rocker.cornerRadius}
-            fill={isHovered ? V1_COLORS.hoverKeyFill : V1_COLORS.keyFill}
-            stroke={V1_COLORS.keyStroke}
-            strokeWidth={V1_COLORS.keyStrokeWidth}
-            style={{ transition: "fill 0.15s ease" }}
-          />
-          {/* Minus label */}
-          <text
-            x={b.x + 10}
-            y={b.y + b.height / 2}
-            textAnchor="middle"
-            dominantBaseline="middle"
-            fill={V1_COLORS.textSecondary}
-            fontSize={11}
-            fontWeight={400}
+    <g
+      onMouseEnter={() => setHoveredId(rocker.id)}
+      onMouseLeave={() => setHoveredId(null)}
+    >
+      <rect
+        x={b.x}
+        y={b.y}
+        width={b.width}
+        height={b.height}
+        rx={rocker.cornerRadius}
+        fill={isHovered ? V1_COLORS.hoverKeyFill : V1_COLORS.keyFill}
+        stroke={V1_COLORS.keyStroke}
+        strokeWidth={V1_COLORS.keyStrokeWidth}
+        style={{ transition: "fill 0.15s ease" }}
+      />
+      <line
+        x1={b.x + 25}
+        y1={b.y + b.height - 5}
+        x2={b.x + b.width - 25}
+        y2={b.y + 5}
+        stroke={V1_COLORS.grilleStroke}
+        strokeWidth={0.75}
+        strokeLinecap="round"
+      />
+      {/* Volume down (left half) */}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <g
+            onClick={downCtrl?.actionKey && onAction ? () => onAction(downCtrl.actionKey!) : undefined}
+            className={downCtrl?.actionKey && onAction ? "cursor-pointer" : "cursor-default"}
           >
-            {"−"}
-          </text>
-          {/* Plus label */}
-          <text
-            x={b.x + b.width - 10}
-            y={b.y + b.height / 2}
-            textAnchor="middle"
-            dominantBaseline="middle"
-            fill={V1_COLORS.textSecondary}
-            fontSize={11}
-            fontWeight={400}
+            <rect x={b.x} y={b.y} width={halfW} height={b.height} fill="transparent" />
+            <text
+              x={b.x + 10}
+              y={b.y + b.height / 2}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              fill={V1_COLORS.textSecondary}
+              fontSize={11}
+              fontWeight={400}
+            >
+              {"−"}
+            </text>
+          </g>
+        </TooltipTrigger>
+        <TooltipContent>Volume Down{downCtrl?.actionKey ? ` — ${downCtrl.actionKey}` : ""}</TooltipContent>
+      </Tooltip>
+      {/* Volume up (right half) */}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <g
+            onClick={upCtrl?.actionKey && onAction ? () => onAction(upCtrl.actionKey!) : undefined}
+            className={upCtrl?.actionKey && onAction ? "cursor-pointer" : "cursor-default"}
           >
-            +
-          </text>
-          {/* Subtle diagonal line across surface */}
-          <line
-            x1={b.x + 25}
-            y1={b.y + b.height - 5}
-            x2={b.x + b.width - 25}
-            y2={b.y + 5}
-            stroke={V1_COLORS.grilleStroke}
-            strokeWidth={0.75}
-            strokeLinecap="round"
-          />
-        </g>
-      </TooltipTrigger>
-      <TooltipContent>Volume Rocker</TooltipContent>
-    </Tooltip>
+            <rect x={b.x + halfW} y={b.y} width={halfW} height={b.height} fill="transparent" />
+            <text
+              x={b.x + b.width - 10}
+              y={b.y + b.height / 2}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              fill={V1_COLORS.textSecondary}
+              fontSize={11}
+              fontWeight={400}
+            >
+              +
+            </text>
+          </g>
+        </TooltipTrigger>
+        <TooltipContent>Volume Up{upCtrl?.actionKey ? ` — ${upCtrl.actionKey}` : ""}</TooltipContent>
+      </Tooltip>
+    </g>
   )
 }
 
@@ -1415,6 +1455,7 @@ export function DeviceDiagnosticTab({
   deviceName,
 }: DeviceDiagnosticTabProps) {
   const { data: template, isLoading, isError } = useDeviceTemplateLookup(manufacturer, deviceModel)
+  const actionMutation = useDeviceAction(deviceId)
   const [generatedConfig, setGeneratedConfig] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
   const [liveView, setLiveView] = useState(false)
@@ -1571,7 +1612,11 @@ export function DeviceDiagnosticTab({
           )}
           {wireframe ? (
             wireframe.version === "v1" ? (
-              <WireframeRendererV1 data={wireframe.data} screenshotUrl={liveView ? screenshotUrl : null} />
+              <WireframeRendererV1
+                data={wireframe.data}
+                screenshotUrl={liveView ? screenshotUrl : null}
+                onAction={ipAddress ? (key) => actionMutation.mutate(key) : undefined}
+              />
             ) : (
               <WireframeRenderer data={wireframe.data} />
             )

@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router"
-import { Activity, ArrowDownRight, ArrowRight, ArrowUpRight, CalendarPlus, Users, UsersRound } from "lucide-react"
+import { Activity, ArrowDownRight, ArrowRight, ArrowUpRight, CalendarPlus, Monitor, Phone, TicketCheck, Users, UsersRound } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
@@ -7,12 +7,17 @@ import { useAdminDashboardStats, useAdminTrends } from "@/lib/api/hooks/admin"
 
 type StatsData = {
   activeUsers: number
-  newUsersWeek: number
-  verifiedUsers: number
-  totalUsers: number
-  totalTeams: number
+  devicesOnline: number
   eventsToday: number
   newUsersToday: number
+  newUsersWeek: number
+  openTickets: number
+  totalDevices: number
+  totalExtensions: number
+  totalTeams: number
+  totalUsers: number
+  unreadVoicemails: number
+  verifiedUsers: number
 }
 
 const statConfig = [
@@ -36,6 +41,39 @@ const statConfig = [
     bg: "bg-violet-500/10",
     hoverBg: "group-hover:bg-violet-500",
     to: "/admin/teams",
+    trendKey: null,
+  },
+  {
+    key: "totalDevices" as const,
+    label: "Devices",
+    subtitle: (data: StatsData) => `${data.devicesOnline} online`,
+    icon: Monitor,
+    color: "text-cyan-600 dark:text-cyan-400",
+    bg: "bg-cyan-500/10",
+    hoverBg: "group-hover:bg-cyan-500",
+    to: "/admin/devices",
+    trendKey: null,
+  },
+  {
+    key: "totalExtensions" as const,
+    label: "Extensions",
+    subtitle: () => "Phone extensions",
+    icon: Phone,
+    color: "text-teal-600 dark:text-teal-400",
+    bg: "bg-teal-500/10",
+    hoverBg: "group-hover:bg-teal-500",
+    to: "/admin/voice",
+    trendKey: null,
+  },
+  {
+    key: "openTickets" as const,
+    label: "Open Tickets",
+    subtitle: (data: StatsData) => `${data.unreadVoicemails} unread voicemail${data.unreadVoicemails === 1 ? "" : "s"}`,
+    icon: TicketCheck,
+    color: "text-rose-600 dark:text-rose-400",
+    bg: "bg-rose-500/10",
+    hoverBg: "group-hover:bg-rose-500",
+    to: "/admin/support",
     trendKey: null,
   },
   {
@@ -130,8 +168,8 @@ export function StatsCards() {
 
   if (isLoading) {
     return (
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, index) => (
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {Array.from({ length: 7 }).map((_, index) => (
           // biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton placeholders
           <StatsCardSkeleton key={`stats-skeleton-${index}`} />
         ))}
@@ -152,7 +190,7 @@ export function StatsCards() {
 
   return (
     <TooltipProvider>
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {statConfig.map((stat) => {
           const Icon = stat.icon
           const trend = stat.trendKey && trends?.points ? computeTrend(trends.points, stat.trendKey) : null

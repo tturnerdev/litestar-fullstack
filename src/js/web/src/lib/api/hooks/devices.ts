@@ -253,6 +253,25 @@ export function useSetDeviceLines(deviceId: string) {
 }
 
 // ---------------------------------------------------------------------------
+// Device Action (Action URI key press)
+// ---------------------------------------------------------------------------
+
+export function useDeviceAction(deviceId: string) {
+  return useMutation({
+    mutationFn: (key: string) =>
+      apiFetch<{ deviceId: string; action: string; status: string; message: string }>(
+        `/api/devices/${deviceId}/action?key=${encodeURIComponent(key)}`,
+        { method: "POST" },
+      ),
+    onError: (error) => {
+      toast.error("Action failed", {
+        description: error instanceof Error ? error.message : "Could not reach device",
+      })
+    },
+  })
+}
+
+// ---------------------------------------------------------------------------
 // Device Screenshot (LCD live view)
 // ---------------------------------------------------------------------------
 

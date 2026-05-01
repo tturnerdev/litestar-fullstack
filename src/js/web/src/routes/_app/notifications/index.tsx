@@ -16,7 +16,7 @@ import {
   Trash2,
   Users,
 } from "lucide-react"
-import { useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,7 +28,9 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
+import { BulkActionBar, createBulkDeleteAction, type BulkAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
@@ -46,6 +48,7 @@ import {
   useUnreadCount,
   useUpdateNotificationPreferences,
 } from "@/lib/api/hooks/notifications"
+import { useQueryClient } from "@tanstack/react-query"
 import { Skeleton, SkeletonCard } from "@/components/ui/skeleton"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { useDocumentTitle } from "@/hooks/use-document-title"
@@ -100,7 +103,17 @@ function getCategoryColor(category: string) {
   }
 }
 
-function NotificationCard({ notification, onRequestDelete }: { notification: NotificationItem; onRequestDelete: (id: string) => void }) {
+function NotificationCard({
+  notification,
+  onRequestDelete,
+  selected,
+  onToggleSelect,
+}: {
+  notification: NotificationItem
+  onRequestDelete: (id: string) => void
+  selected: boolean
+  onToggleSelect: () => void
+}) {
   const markRead = useMarkRead()
   const navigate = Route.useNavigate()
 
@@ -129,6 +142,16 @@ function NotificationCard({ notification, onRequestDelete }: { notification: Not
       onClick={handleClick}
     >
       <CardContent className="flex items-start gap-4 py-4">
+        <div className="flex shrink-0 items-center pt-1">
+          <Checkbox
+            checked={selected}
+            onChange={(e) => {
+              e.stopPropagation()
+              onToggleSelect()
+            }}
+            aria-label={`Select notification: ${notification.title}`}
+          />
+        </div>
         <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted", colorClass)}>
           <Icon className="h-5 w-5" />
         </div>
@@ -279,15 +302,20 @@ function NotificationPreferences() {
 
 function NotificationsPage() {
   useDocumentTitle("Notifications")
+  const queryClient = useQueryClient()
   const [page, setPage] = useState(1)
   const [activeCategory, setActiveCategory] = useState<string>("all")
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const pageSize = 20
 
+  // Selection state
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+
   const { data: unreadData } = useUnreadCount()
   const { data, isLoading } = useNotifications(page, pageSize)
   const markAllRead = useMarkAllRead()
+  const markRead = useMarkRead()
   const deleteAllRead = useDeleteAllRead()
   const deleteNotification = useDeleteNotification()
 
@@ -304,6 +332,70 @@ function NotificationsPage() {
     acc[n.category] = (acc[n.category] ?? 0) + 1
     return acc
   }, {})
+
+  // Selection helpers
+  const allVisibleIds = useMemo(() => filteredNotifications.map((n) => n.id), [filteredNotifications])
+  const allSelected = filteredNotifications.length > 0 && filteredNotifications.every((n) => selectedIds.has(n.id))
+  const someSelected = filteredNotifications.some((n) => selectedIds.has(n.id))
+
+  const toggleAll = useCallback(() => {
+    if (allSelected) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(allVisibleIds))
+    }
+  }, [allSelected, allVisibleIds])
+
+  const toggleOne = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      return next
+    })
+  }, [])
+
+  // Bulk actions
+  const bulkActions = useMemo<BulkAction[]>(
+    () => [
+      {
+        key: "mark-read",
+        label: "Mark as Read",
+        icon: <CheckCheck className="h-4 w-4" />,
+        variant: "outline",
+        onExecute: async (ids) => {
+          const errors: string[] = []
+          for (const id of ids) {
+            try {
+              await markRead.mutateAsync(id)
+            } catch {
+              errors.push(id)
+            }
+          }
+          queryClient.invalidateQueries({ queryKey: ["notifications"] })
+          if (errors.length > 0) {
+            const { toast } = await import("sonner")
+            toast.error(`Failed to mark ${errors.length} of ${ids.length} as read`)
+          } else {
+            const { toast } = await import("sonner")
+            toast.success(`Marked ${ids.length} notification${ids.length === 1 ? "" : "s"} as read`)
+          }
+        },
+      },
+      createBulkDeleteAction(
+        async (id) => {
+          await deleteNotification.mutateAsync(id)
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["notifications"] })
+        },
+      ),
+    ],
+    [markRead, deleteNotification, queryClient],
+  )
 
   const hasAnyNotifications = total > 0
   const isEmptyUnfiltered = !isLoading && !hasAnyNotifications
@@ -352,7 +444,13 @@ function NotificationsPage() {
           </div>
         ) : (
           <>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <Checkbox
+                checked={allSelected}
+                indeterminate={someSelected && !allSelected}
+                onChange={toggleAll}
+                aria-label="Select all notifications"
+              />
               {CATEGORIES.map(({ value, label }) => {
                 const count = value === "all" ? notifications.length : (categoryCounts[value] ?? 0)
                 const isActive = activeCategory === value
@@ -401,7 +499,13 @@ function NotificationsPage() {
                 </div>
               ) : (
                 filteredNotifications.map((notification) => (
-                  <NotificationCard key={notification.id} notification={notification} onRequestDelete={setDeleteId} />
+                  <NotificationCard
+                    key={notification.id}
+                    notification={notification}
+                    onRequestDelete={setDeleteId}
+                    selected={selectedIds.has(notification.id)}
+                    onToggleSelect={() => toggleOne(notification.id)}
+                  />
                 ))
               )}
             </div>
@@ -491,6 +595,14 @@ function NotificationsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Bulk action bar */}
+      <BulkActionBar
+        selectedCount={selectedIds.size}
+        selectedIds={Array.from(selectedIds)}
+        onClearSelection={() => setSelectedIds(new Set())}
+        actions={bulkActions}
+      />
     </PageContainer>
   )
 }
