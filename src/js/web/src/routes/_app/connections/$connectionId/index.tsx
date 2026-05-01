@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
 import { useState } from "react"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import {
   AlertCircle,
   AlertTriangle,
@@ -148,6 +149,7 @@ function ConnectionDetailPage() {
   const { connectionId } = Route.useParams()
   const router = useRouter()
   const { data, isLoading, isError } = useConnection(connectionId)
+  useDocumentTitle(data ? `Connections - ${data.name}` : "Connection Details")
   const deleteConnection = useDeleteConnection()
   const testConnection = useTestConnection(connectionId)
   const updateConnection = useUpdateConnection(connectionId)

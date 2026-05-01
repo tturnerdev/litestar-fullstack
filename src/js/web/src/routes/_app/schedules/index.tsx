@@ -5,10 +5,14 @@ import {
   Calendar,
   CheckCircle2,
   Clock,
+  Eye,
   Home,
   Loader2,
+  MoreVertical,
+  Pencil,
   Plus,
   Search,
+  Trash2,
   X,
   XCircle,
 } from "lucide-react"
@@ -22,6 +26,13 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import {
   Dialog,
   DialogContent,
@@ -41,6 +52,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import {
   useSchedules,
   useCreateSchedule,
+  useDeleteSchedule,
   useCheckSchedule,
   type Schedule,
   type ScheduleCreate,
@@ -403,13 +415,15 @@ function SchedulesPage() {
                     />
                     <TableHead>Default</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead className="w-16 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {schedules.map((schedule) => (
+                  {schedules.map((schedule, index) => (
                     <ScheduleRow
                       key={schedule.id}
                       schedule={schedule}
+                      index={index}
                       onRowClick={() => handleRowClick(schedule.id)}
                     />
                   ))}
@@ -452,17 +466,21 @@ function SchedulesPage() {
 
 function ScheduleRow({
   schedule,
+  index,
   onRowClick,
 }: {
   schedule: Schedule
+  index: number
   onRowClick: () => void
 }) {
+  const deleteSchedule = useDeleteSchedule()
+
   return (
     <TableRow
-      className="cursor-pointer hover:bg-muted/50 transition-colors"
+      className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`}
       onClick={(e) => {
         const target = e.target as HTMLElement
-        if (target.closest("a") || target.closest("button")) return
+        if (target.closest("a") || target.closest("button") || target.closest("[data-slot=dropdown]")) return
         onRowClick()
       }}
     >
@@ -496,6 +514,44 @@ function ScheduleRow({
       </TableCell>
       <TableCell>
         <ScheduleStatusBadge scheduleId={schedule.id} />
+      </TableCell>
+      <TableCell className="text-right">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              data-slot="dropdown"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <MoreVertical className="h-4 w-4" />
+              <span className="sr-only">Actions</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem asChild>
+              <Link to="/schedules/$scheduleId" params={{ scheduleId: schedule.id }}>
+                <Eye className="mr-2 h-4 w-4" />
+                View details
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/schedules/$scheduleId" params={{ scheduleId: schedule.id }} search={{ edit: true }}>
+                <Pencil className="mr-2 h-4 w-4" />
+                Edit
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="text-destructive focus:text-destructive"
+              onClick={() => deleteSchedule.mutate(schedule.id)}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </TableCell>
     </TableRow>
   )

@@ -3,12 +3,16 @@ import { useCallback, useEffect, useState } from "react"
 import {
   AlertCircle,
   Clock,
+  Eye,
   Home,
   Loader2,
   Menu,
+  MoreVertical,
+  Pencil,
   Phone,
   Plus,
   Search,
+  Trash2,
   Users,
   X,
 } from "lucide-react"
@@ -22,6 +26,13 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import {
   Dialog,
   DialogContent,
@@ -41,12 +52,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import {
   useTimeConditions,
   useCreateTimeCondition,
+  useDeleteTimeCondition,
   useIvrMenus,
   useCreateIvrMenu,
+  useDeleteIvrMenu,
   useCallQueues,
   useCreateCallQueue,
+  useDeleteCallQueue,
   useRingGroups,
   useCreateRingGroup,
+  useDeleteRingGroup,
   type TimeCondition,
   type IvrMenu,
   type CallQueue,
@@ -340,6 +355,7 @@ function TimeConditionsTab() {
   const { data, isLoading, isError, refetch } = useTimeConditions({
     page, pageSize: 25, search: debouncedSearch || undefined,
   })
+  const deleteTimeCondition = useDeleteTimeCondition()
 
   const items = data?.items ?? []
   const total = data?.total ?? 0
@@ -382,11 +398,12 @@ function TimeConditionsTab() {
                   <TableHead>Match Destination</TableHead>
                   <TableHead>No Match Destination</TableHead>
                   <TableHead>Override</TableHead>
+                  <TableHead className="w-16 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {items.map((tc: TimeCondition) => (
-                  <TableRow key={tc.id} className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => navigate({ to: "/call-routing/time-conditions/$timeConditionId", params: { timeConditionId: tc.id } })}>
+                {items.map((tc: TimeCondition, index: number) => (
+                  <TableRow key={tc.id} className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`} onClick={(e) => { const target = e.target as HTMLElement; if (target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) return; navigate({ to: "/call-routing/time-conditions/$timeConditionId", params: { timeConditionId: tc.id } }); }}>
                     <TableCell>
                       <Link to="/call-routing/time-conditions/$timeConditionId" params={{ timeConditionId: tc.id }} className="group flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                         <Clock className="h-4 w-4 text-muted-foreground" />
@@ -399,6 +416,28 @@ function TimeConditionsTab() {
                       <Badge variant={tc.overrideMode === "none" ? "outline" : "default"}>
                         {overrideModeLabels[tc.overrideMode] ?? tc.overrideMode}
                       </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" data-slot="dropdown" onClick={(e) => e.stopPropagation()}>
+                            <MoreVertical className="h-4 w-4" />
+                            <span className="sr-only">Actions</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => navigate({ to: "/call-routing/time-conditions/$timeConditionId", params: { timeConditionId: tc.id } })}>
+                            <Eye className="mr-2 h-4 w-4" /> View details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => navigate({ to: "/call-routing/time-conditions/$timeConditionId", params: { timeConditionId: tc.id }, search: { edit: true } })}>
+                            <Pencil className="mr-2 h-4 w-4" /> Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => deleteTimeCondition.mutate(tc.id)}>
+                            <Trash2 className="mr-2 h-4 w-4" /> Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -431,6 +470,7 @@ function IvrMenusTab() {
   const { data, isLoading, isError, refetch } = useIvrMenus({
     page, pageSize: 25, search: debouncedSearch || undefined,
   })
+  const deleteIvrMenu = useDeleteIvrMenu()
 
   const items = data?.items ?? []
   const total = data?.total ?? 0
@@ -473,11 +513,12 @@ function IvrMenusTab() {
                   <TableHead>Greeting</TableHead>
                   <TableHead>Options</TableHead>
                   <TableHead>Timeout</TableHead>
+                  <TableHead className="w-16 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {items.map((ivr: IvrMenu) => (
-                  <TableRow key={ivr.id} className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => navigate({ to: "/call-routing/ivr-menus/$ivrMenuId", params: { ivrMenuId: ivr.id } })}>
+                {items.map((ivr: IvrMenu, index: number) => (
+                  <TableRow key={ivr.id} className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`} onClick={(e) => { const target = e.target as HTMLElement; if (target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) return; navigate({ to: "/call-routing/ivr-menus/$ivrMenuId", params: { ivrMenuId: ivr.id } }); }}>
                     <TableCell>
                       <Link to="/call-routing/ivr-menus/$ivrMenuId" params={{ ivrMenuId: ivr.id }} className="group flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                         <Menu className="h-4 w-4 text-muted-foreground" />
@@ -487,6 +528,28 @@ function IvrMenusTab() {
                     <TableCell><Badge variant="outline">{ivr.greetingType}</Badge></TableCell>
                     <TableCell><span className="text-sm text-muted-foreground">{ivr.options?.length ?? 0} option{(ivr.options?.length ?? 0) === 1 ? "" : "s"}</span></TableCell>
                     <TableCell><span className="text-sm text-muted-foreground">{ivr.timeoutSeconds}s</span></TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" data-slot="dropdown" onClick={(e) => e.stopPropagation()}>
+                            <MoreVertical className="h-4 w-4" />
+                            <span className="sr-only">Actions</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => navigate({ to: "/call-routing/ivr-menus/$ivrMenuId", params: { ivrMenuId: ivr.id } })}>
+                            <Eye className="mr-2 h-4 w-4" /> View details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => navigate({ to: "/call-routing/ivr-menus/$ivrMenuId", params: { ivrMenuId: ivr.id }, search: { edit: true } })}>
+                            <Pencil className="mr-2 h-4 w-4" /> Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => deleteIvrMenu.mutate(ivr.id)}>
+                            <Trash2 className="mr-2 h-4 w-4" /> Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -518,6 +581,7 @@ function CallQueuesTab() {
   const { data, isLoading, isError, refetch } = useCallQueues({
     page, pageSize: 25, search: debouncedSearch || undefined,
   })
+  const deleteCallQueue = useDeleteCallQueue()
 
   const items = data?.items ?? []
   const total = data?.total ?? 0
@@ -561,11 +625,12 @@ function CallQueuesTab() {
                   <TableHead>Strategy</TableHead>
                   <TableHead>Members</TableHead>
                   <TableHead>Ring Time</TableHead>
+                  <TableHead className="w-16 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {items.map((q: CallQueue) => (
-                  <TableRow key={q.id} className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => navigate({ to: "/call-routing/call-queues/$callQueueId", params: { callQueueId: q.id } })}>
+                {items.map((q: CallQueue, index: number) => (
+                  <TableRow key={q.id} className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`} onClick={(e) => { const target = e.target as HTMLElement; if (target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) return; navigate({ to: "/call-routing/call-queues/$callQueueId", params: { callQueueId: q.id } }); }}>
                     <TableCell>
                       <Link to="/call-routing/call-queues/$callQueueId" params={{ callQueueId: q.id }} className="group flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                         <Phone className="h-4 w-4 text-muted-foreground" />
@@ -576,6 +641,28 @@ function CallQueuesTab() {
                     <TableCell><Badge variant="outline">{strategyLabels[q.strategy] ?? q.strategy}</Badge></TableCell>
                     <TableCell><span className="text-sm text-muted-foreground">{q.members?.length ?? 0}</span></TableCell>
                     <TableCell><span className="text-sm text-muted-foreground">{q.ringTime}s</span></TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" data-slot="dropdown" onClick={(e) => e.stopPropagation()}>
+                            <MoreVertical className="h-4 w-4" />
+                            <span className="sr-only">Actions</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => navigate({ to: "/call-routing/call-queues/$callQueueId", params: { callQueueId: q.id } })}>
+                            <Eye className="mr-2 h-4 w-4" /> View details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => navigate({ to: "/call-routing/call-queues/$callQueueId", params: { callQueueId: q.id }, search: { edit: true } })}>
+                            <Pencil className="mr-2 h-4 w-4" /> Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => deleteCallQueue.mutate(q.id)}>
+                            <Trash2 className="mr-2 h-4 w-4" /> Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -607,6 +694,7 @@ function RingGroupsTab() {
   const { data, isLoading, isError, refetch } = useRingGroups({
     page, pageSize: 25, search: debouncedSearch || undefined,
   })
+  const deleteRingGroup = useDeleteRingGroup()
 
   const items = data?.items ?? []
   const total = data?.total ?? 0
@@ -650,11 +738,12 @@ function RingGroupsTab() {
                   <TableHead>Strategy</TableHead>
                   <TableHead>Members</TableHead>
                   <TableHead>Ring Time</TableHead>
+                  <TableHead className="w-16 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {items.map((rg: RingGroup) => (
-                  <TableRow key={rg.id} className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => navigate({ to: "/call-routing/ring-groups/$ringGroupId", params: { ringGroupId: rg.id } })}>
+                {items.map((rg: RingGroup, index: number) => (
+                  <TableRow key={rg.id} className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`} onClick={(e) => { const target = e.target as HTMLElement; if (target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) return; navigate({ to: "/call-routing/ring-groups/$ringGroupId", params: { ringGroupId: rg.id } }); }}>
                     <TableCell>
                       <Link to="/call-routing/ring-groups/$ringGroupId" params={{ ringGroupId: rg.id }} className="group flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                         <Users className="h-4 w-4 text-muted-foreground" />
@@ -665,6 +754,28 @@ function RingGroupsTab() {
                     <TableCell><Badge variant="outline">{strategyLabels[rg.strategy] ?? rg.strategy}</Badge></TableCell>
                     <TableCell><span className="text-sm text-muted-foreground">{rg.members?.length ?? 0}</span></TableCell>
                     <TableCell><span className="text-sm text-muted-foreground">{rg.ringTime}s</span></TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" data-slot="dropdown" onClick={(e) => e.stopPropagation()}>
+                            <MoreVertical className="h-4 w-4" />
+                            <span className="sr-only">Actions</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => navigate({ to: "/call-routing/ring-groups/$ringGroupId", params: { ringGroupId: rg.id } })}>
+                            <Eye className="mr-2 h-4 w-4" /> View details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => navigate({ to: "/call-routing/ring-groups/$ringGroupId", params: { ringGroupId: rg.id }, search: { edit: true } })}>
+                            <Pencil className="mr-2 h-4 w-4" /> Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => deleteRingGroup.mutate(rg.id)}>
+                            <Trash2 className="mr-2 h-4 w-4" /> Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
