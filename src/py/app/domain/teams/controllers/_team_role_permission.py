@@ -82,7 +82,7 @@ class TeamRolePermissionController(Controller):
             after_permissions.append(capture_snapshot(obj))
         await log_audit(
             audit_service,
-            action="team.permissions_update",
+            action="team.permissions.updated",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,

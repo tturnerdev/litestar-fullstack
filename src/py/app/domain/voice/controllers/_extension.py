@@ -120,7 +120,7 @@ class ExtensionController(Controller):
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
-            action="voice.extension_create",
+            action="voice.extension.created",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -185,7 +185,7 @@ class ExtensionController(Controller):
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
-            action="voice.extension_update",
+            action="voice.extension.updated",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -254,7 +254,7 @@ class ExtensionController(Controller):
         await extensions_service.delete(ext_id)
         await log_audit(
             audit_service,
-            action="voice.extension_delete",
+            action="voice.extension.deleted",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -341,7 +341,7 @@ class ExtensionController(Controller):
 
         await log_audit(
             audit_service,
-            action="voice.extensions_sync",
+            action="voice.extensions.synced",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,

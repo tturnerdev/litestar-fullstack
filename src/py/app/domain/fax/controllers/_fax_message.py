@@ -164,7 +164,7 @@ class FaxMessageController(Controller):
         await fax_messages_service.delete(message_id)
         await log_audit(
             audit_service,
-            action="fax.message_delete",
+            action="fax.message.deleted",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -210,7 +210,7 @@ class FaxMessageController(Controller):
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
-            action="fax.send",
+            action="fax.message.sent",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,

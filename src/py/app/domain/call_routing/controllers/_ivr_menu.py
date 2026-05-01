@@ -114,7 +114,7 @@ class IvrMenuController(Controller):
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
-            action="call_routing.ivr_menu.create",
+            action="call_routing.ivr_menu.created",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -182,7 +182,7 @@ class IvrMenuController(Controller):
         after = capture_snapshot(fresh_obj)
         await log_audit(
             audit_service,
-            action="call_routing.ivr_menu.update",
+            action="call_routing.ivr_menu.updated",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -224,7 +224,7 @@ class IvrMenuController(Controller):
         await ivr_menus_service.delete(ivr_menu_id)
         await log_audit(
             audit_service,
-            action="call_routing.ivr_menu.delete",
+            action="call_routing.ivr_menu.deleted",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -299,7 +299,7 @@ class IvrMenuController(Controller):
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
-            action="call_routing.ivr_menu_option.create",
+            action="call_routing.ivr_menu_option.created",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -350,7 +350,7 @@ class IvrMenuController(Controller):
         after = capture_snapshot(fresh_obj)
         await log_audit(
             audit_service,
-            action="call_routing.ivr_menu_option.update",
+            action="call_routing.ivr_menu_option.updated",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -397,7 +397,7 @@ class IvrMenuController(Controller):
         await ivr_menu_options_service.delete(option_id)
         await log_audit(
             audit_service,
-            action="call_routing.ivr_menu_option.delete",
+            action="call_routing.ivr_menu_option.deleted",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,

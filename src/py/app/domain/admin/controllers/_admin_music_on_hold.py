@@ -95,7 +95,7 @@ class AdminMusicOnHoldController(Controller):
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
-            action="admin.music_on_hold_create",
+            action="admin.music_on_hold.created",
             actor_id=request.user.id,
             actor_email=request.user.email,
             actor_name=request.user.name,
@@ -159,7 +159,7 @@ class AdminMusicOnHoldController(Controller):
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
-            action="admin.music_on_hold_update",
+            action="admin.music_on_hold.updated",
             actor_id=request.user.id,
             actor_email=request.user.email,
             actor_name=request.user.name,
@@ -198,7 +198,7 @@ class AdminMusicOnHoldController(Controller):
         await moh_service.delete(moh_id)
         await log_audit(
             audit_service,
-            action="admin.music_on_hold_delete",
+            action="admin.music_on_hold.deleted",
             actor_id=request.user.id,
             actor_email=request.user.email,
             actor_name=request.user.name,

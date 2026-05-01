@@ -108,7 +108,7 @@ class TimeConditionController(Controller):
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
-            action="call_routing.time_condition.create",
+            action="call_routing.time_condition.created",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -180,7 +180,7 @@ class TimeConditionController(Controller):
         after = capture_snapshot(fresh_obj)
         await log_audit(
             audit_service,
-            action="call_routing.time_condition.update",
+            action="call_routing.time_condition.updated",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -224,7 +224,7 @@ class TimeConditionController(Controller):
         await time_conditions_service.delete(time_condition_id)
         await log_audit(
             audit_service,
-            action="call_routing.time_condition.delete",
+            action="call_routing.time_condition.deleted",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -274,7 +274,7 @@ class TimeConditionController(Controller):
         after = capture_snapshot(fresh_obj)
         await log_audit(
             audit_service,
-            action="call_routing.time_condition.override",
+            action="call_routing.time_condition.overridden",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,

@@ -138,7 +138,7 @@ class WebhookController(Controller):
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
-            action="webhook.create",
+            action="webhook.created",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -214,7 +214,7 @@ class WebhookController(Controller):
         after = capture_snapshot(fresh_obj)
         await log_audit(
             audit_service,
-            action="webhook.update",
+            action="webhook.updated",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -256,7 +256,7 @@ class WebhookController(Controller):
         await webhooks_service.delete(webhook_id)
         await log_audit(
             audit_service,
-            action="webhook.delete",
+            action="webhook.deleted",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,

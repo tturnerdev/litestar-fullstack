@@ -92,7 +92,7 @@ class AdminGatewayController(Controller):
 
         await log_audit(
             audit_service,
-            action="admin.gateway_settings_update",
+            action="admin.gateway_settings.updated",
             actor_id=request.user.id,
             actor_email=request.user.email,
             actor_name=request.user.name,

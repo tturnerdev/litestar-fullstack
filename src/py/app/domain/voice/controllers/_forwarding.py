@@ -95,7 +95,7 @@ class ForwardingController(Controller):
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
-            action="voice.forwarding_rule_create",
+            action="voice.forwarding_rule.created",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -144,7 +144,7 @@ class ForwardingController(Controller):
             results.append(forwarding_rules_service.to_schema(db_obj, schema_type=ForwardingRule))
         await log_audit(
             audit_service,
-            action="voice.forwarding_rule_bulk_replace",
+            action="voice.forwarding_rule.bulk_replaced",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -181,7 +181,7 @@ class ForwardingController(Controller):
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
-            action="voice.forwarding_rule_update",
+            action="voice.forwarding_rule.updated",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -218,7 +218,7 @@ class ForwardingController(Controller):
         await forwarding_rules_service.delete(rule_id)
         await log_audit(
             audit_service,
-            action="voice.forwarding_rule_delete",
+            action="voice.forwarding_rule.deleted",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,

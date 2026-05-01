@@ -146,7 +146,7 @@ class FaxEmailRouteController(Controller):
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
-            action="fax.email_route_create",
+            action="fax.email_route.created",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -202,7 +202,7 @@ class FaxEmailRouteController(Controller):
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
-            action="fax.email_route_update",
+            action="fax.email_route.updated",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -253,7 +253,7 @@ class FaxEmailRouteController(Controller):
         await fax_email_routes_service.delete(item_id=route_id)
         await log_audit(
             audit_service,
-            action="fax.email_route_delete",
+            action="fax.email_route.deleted",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,

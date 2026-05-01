@@ -89,7 +89,7 @@ class TeamMemberController(Controller):
 
         await log_audit(
             audit_service,
-            action="team.member_add",
+            action="team.member.added",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -147,7 +147,7 @@ class TeamMemberController(Controller):
 
         await log_audit(
             audit_service,
-            action="team.member_remove",
+            action="team.member.removed",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -201,7 +201,7 @@ class TeamMemberController(Controller):
 
         await log_audit(
             audit_service,
-            action="team.member_update",
+            action="team.member.updated",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,

@@ -339,7 +339,7 @@ class AdminBulkImportController(Controller):
 
         await log_audit(
             audit_service,
-            action="admin.bulk_import.devices",
+            action="admin.bulk_import.devices_imported",
             actor_id=request.user.id,
             actor_email=request.user.email,
             actor_name=request.user.name,
@@ -510,7 +510,7 @@ class AdminBulkImportController(Controller):
 
         await log_audit(
             audit_service,
-            action="admin.bulk_import.extensions",
+            action="admin.bulk_import.extensions_imported",
             actor_id=request.user.id,
             actor_email=request.user.email,
             actor_name=request.user.name,

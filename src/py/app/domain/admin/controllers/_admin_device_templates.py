@@ -97,7 +97,7 @@ class AdminDeviceTemplatesController(Controller):
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
-            action="admin.device_template_create",
+            action="admin.device_template.created",
             actor_id=request.user.id,
             actor_email=request.user.email,
             actor_name=request.user.name,
@@ -165,7 +165,7 @@ class AdminDeviceTemplatesController(Controller):
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
-            action="admin.device_template_update",
+            action="admin.device_template.updated",
             actor_id=request.user.id,
             actor_email=request.user.email,
             actor_name=request.user.name,
@@ -206,7 +206,7 @@ class AdminDeviceTemplatesController(Controller):
         await template_service.delete(template_id)
         await log_audit(
             audit_service,
-            action="admin.device_template_delete",
+            action="admin.device_template.deleted",
             actor_id=request.user.id,
             actor_email=request.user.email,
             actor_name=request.user.name,

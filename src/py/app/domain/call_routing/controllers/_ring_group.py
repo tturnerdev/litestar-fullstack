@@ -114,7 +114,7 @@ class RingGroupController(Controller):
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
-            action="call_routing.ring_group.create",
+            action="call_routing.ring_group.created",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -182,7 +182,7 @@ class RingGroupController(Controller):
         after = capture_snapshot(fresh_obj)
         await log_audit(
             audit_service,
-            action="call_routing.ring_group.update",
+            action="call_routing.ring_group.updated",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -224,7 +224,7 @@ class RingGroupController(Controller):
         await ring_groups_service.delete(ring_group_id)
         await log_audit(
             audit_service,
-            action="call_routing.ring_group.delete",
+            action="call_routing.ring_group.deleted",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -299,7 +299,7 @@ class RingGroupController(Controller):
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
-            action="call_routing.ring_group_member.create",
+            action="call_routing.ring_group_member.created",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -352,7 +352,7 @@ class RingGroupController(Controller):
         after = capture_snapshot(fresh_obj)
         await log_audit(
             audit_service,
-            action="call_routing.ring_group_member.update",
+            action="call_routing.ring_group_member.updated",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -398,7 +398,7 @@ class RingGroupController(Controller):
         await ring_group_members_service.delete(member_id)
         await log_audit(
             audit_service,
-            action="call_routing.ring_group_member.delete",
+            action="call_routing.ring_group_member.deleted",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,

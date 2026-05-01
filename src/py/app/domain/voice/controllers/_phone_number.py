@@ -84,7 +84,7 @@ class PhoneNumberController(Controller):
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
-            action="voice.phone_number_create",
+            action="voice.phone_number.created",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -125,7 +125,7 @@ class PhoneNumberController(Controller):
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
-            action="voice.phone_number_update",
+            action="voice.phone_number.updated",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -159,7 +159,7 @@ class PhoneNumberController(Controller):
         await phone_numbers_service.delete(phone_number_id)
         await log_audit(
             audit_service,
-            action="voice.phone_number_delete",
+            action="voice.phone_number.deleted",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,

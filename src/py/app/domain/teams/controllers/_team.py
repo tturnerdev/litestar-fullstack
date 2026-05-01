@@ -105,7 +105,7 @@ class TeamController(Controller):
 
         await log_audit(
             audit_service,
-            action="team.create",
+            action="team.created",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -173,7 +173,7 @@ class TeamController(Controller):
 
         await log_audit(
             audit_service,
-            action="team.update",
+            action="team.updated",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -212,7 +212,7 @@ class TeamController(Controller):
 
         await log_audit(
             audit_service,
-            action="team.delete",
+            action="team.deleted",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,

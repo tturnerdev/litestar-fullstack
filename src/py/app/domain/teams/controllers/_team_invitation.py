@@ -108,7 +108,7 @@ class TeamInvitationController(Controller):
 
         await log_audit(
             audit_service,
-            action="team.invitation_create",
+            action="team.invitation.created",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -186,7 +186,7 @@ class TeamInvitationController(Controller):
 
         await log_audit(
             audit_service,
-            action="team.invitation_delete",
+            action="team.invitation.deleted",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -253,7 +253,7 @@ class TeamInvitationController(Controller):
 
         await log_audit(
             audit_service,
-            action="team.invitation_accept",
+            action="team.invitation.accepted",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -307,7 +307,7 @@ class TeamInvitationController(Controller):
 
         await log_audit(
             audit_service,
-            action="team.invitation_reject",
+            action="team.invitation.rejected",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,

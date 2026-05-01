@@ -113,7 +113,7 @@ class VoicemailBoxController(Controller):
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
-            action="voicemail.box_create",
+            action="voicemail.box.created",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -190,7 +190,7 @@ class VoicemailBoxController(Controller):
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
-            action="voicemail.box_update",
+            action="voicemail.box.updated",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -233,7 +233,7 @@ class VoicemailBoxController(Controller):
         await voicemail_boxes_service.delete(box_id)
         await log_audit(
             audit_service,
-            action="voicemail.box_delete",
+            action="voicemail.box.deleted",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,

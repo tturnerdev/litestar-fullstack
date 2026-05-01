@@ -117,7 +117,7 @@ class VoicemailController(Controller):
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
-            action="voice.voicemail_update",
+            action="voice.voicemail.updated",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -254,7 +254,7 @@ class VoicemailController(Controller):
         await voicemail_messages_service.delete(msg_id)
         await log_audit(
             audit_service,
-            action="voice.voicemail_delete",
+            action="voice.voicemail.deleted",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,

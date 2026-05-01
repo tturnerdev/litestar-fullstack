@@ -217,7 +217,7 @@ class VoicemailMessageController(Controller):
         await voicemail_messages_service.delete(message_id)
         await log_audit(
             audit_service,
-            action="voicemail.message_delete",
+            action="voicemail.message.deleted",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,

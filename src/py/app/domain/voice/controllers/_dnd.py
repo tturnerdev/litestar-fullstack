@@ -94,7 +94,7 @@ class DndController(Controller):
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
-            action="voice.dnd_toggle",
+            action="voice.dnd.toggled",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,

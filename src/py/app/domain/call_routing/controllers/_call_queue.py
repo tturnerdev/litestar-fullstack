@@ -115,7 +115,7 @@ class CallQueueController(Controller):
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
-            action="call_routing.call_queue.create",
+            action="call_routing.call_queue.created",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -183,7 +183,7 @@ class CallQueueController(Controller):
         after = capture_snapshot(fresh_obj)
         await log_audit(
             audit_service,
-            action="call_routing.call_queue.update",
+            action="call_routing.call_queue.updated",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -225,7 +225,7 @@ class CallQueueController(Controller):
         await call_queues_service.delete(call_queue_id)
         await log_audit(
             audit_service,
-            action="call_routing.call_queue.delete",
+            action="call_routing.call_queue.deleted",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -300,7 +300,7 @@ class CallQueueController(Controller):
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
-            action="call_routing.call_queue_member.create",
+            action="call_routing.call_queue_member.created",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -353,7 +353,7 @@ class CallQueueController(Controller):
         after = capture_snapshot(fresh_obj)
         await log_audit(
             audit_service,
-            action="call_routing.call_queue_member.update",
+            action="call_routing.call_queue_member.updated",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -399,7 +399,7 @@ class CallQueueController(Controller):
         await call_queue_members_service.delete(member_id)
         await log_audit(
             audit_service,
-            action="call_routing.call_queue_member.delete",
+            action="call_routing.call_queue_member.deleted",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -454,7 +454,7 @@ class CallQueueController(Controller):
         after = capture_snapshot(fresh_obj)
         await log_audit(
             audit_service,
-            action="call_routing.call_queue_member.pause",
+            action="call_routing.call_queue_member.paused",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,

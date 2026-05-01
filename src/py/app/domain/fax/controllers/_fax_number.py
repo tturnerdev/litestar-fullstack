@@ -117,7 +117,7 @@ class FaxNumberController(Controller):
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
-            action="fax.number_create",
+            action="fax.number.created",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -207,7 +207,7 @@ class FaxNumberController(Controller):
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
-            action="fax.number_update",
+            action="fax.number.updated",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -244,7 +244,7 @@ class FaxNumberController(Controller):
         await fax_numbers_service.delete(fax_number_id)
         await log_audit(
             audit_service,
-            action="fax.number_delete",
+            action="fax.number.deleted",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
