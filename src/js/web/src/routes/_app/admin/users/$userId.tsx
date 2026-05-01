@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import {
+  AlertCircle,
   ArrowLeft,
   BadgeCheck,
   Calendar,
@@ -39,6 +40,7 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/empty-state"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Separator } from "@/components/ui/separator"
 import { SkeletonCard } from "@/components/ui/skeleton"
@@ -132,7 +134,7 @@ function SectionHeading({
 
 function AdminUserDetailPage() {
   const { userId } = Route.useParams()
-  const { data, isLoading, isError } = useAdminUser(userId)
+  const { data, isLoading, isError, refetch } = useAdminUser(userId)
   useDocumentTitle(data?.name || data?.email ? `Admin - ${data.name || data.email}` : "Admin - User Details")
   const updateUser = useAdminUpdateUser(userId)
   const [editOpen, setEditOpen] = useState(false)
@@ -169,14 +171,12 @@ function AdminUserDetailPage() {
         />
         <AdminNav />
         <PageSection>
-          <Card>
-            <CardHeader>
-              <CardTitle>User not found</CardTitle>
-            </CardHeader>
-            <CardContent className="text-muted-foreground">
-              We could not load this user. They may have been deleted or you may not have permission to view them.
-            </CardContent>
-          </Card>
+          <EmptyState
+            icon={AlertCircle}
+            title="Unable to load user"
+            description="The user may have been deleted or you may not have permission to view them."
+            action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+          />
         </PageSection>
       </PageContainer>
     )

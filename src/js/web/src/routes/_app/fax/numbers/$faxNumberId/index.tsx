@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { useMemo, useState } from "react"
 import {
+  AlertCircle,
   AlertTriangle,
   ArrowLeft,
   ArrowUpRight,
@@ -38,6 +39,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -110,7 +112,7 @@ function ActiveStatusBadge({ isActive }: { isActive: boolean }) {
 function FaxNumberDetailPage() {
   const { faxNumberId } = Route.useParams()
   const navigate = useNavigate()
-  const { data, isLoading, isError } = useFaxNumber(faxNumberId)
+  const { data, isLoading, isError, refetch } = useFaxNumber(faxNumberId)
   useDocumentTitle(data?.number ?? "Fax Number")
   const updateFaxNumber = useUpdateFaxNumber(faxNumberId)
   const deleteFaxNumber = useDeleteFaxNumber()
@@ -258,11 +260,12 @@ function FaxNumberDetailPage() {
           }
         />
         <PageSection>
-          <Card>
-            <CardContent className="py-8 text-center text-muted-foreground">
-              We could not load this fax number.
-            </CardContent>
-          </Card>
+          <EmptyState
+            icon={AlertCircle}
+            title="Unable to load fax number"
+            description="Something went wrong. Please try again."
+            action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+          />
         </PageSection>
       </PageContainer>
     )

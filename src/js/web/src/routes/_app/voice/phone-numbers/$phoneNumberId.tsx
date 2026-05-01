@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
-import { ArrowLeft, Fingerprint, Home, Pencil, Phone, Trash2 } from "lucide-react"
+import { AlertCircle, ArrowLeft, Fingerprint, Home, Pencil, Phone, Trash2 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { ExternalDataTab } from "@/components/gateway/external-data-tab"
@@ -17,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CopyButton } from "@/components/ui/copy-button"
+import { EmptyState } from "@/components/ui/empty-state"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -57,7 +58,7 @@ function PhoneNumberDetailPage() {
   const { tab = "details", edit } = Route.useSearch()
   const navigate = useNavigate()
 
-  const { data, isLoading, isError } = usePhoneNumber(phoneNumberId)
+  const { data, isLoading, isError, refetch } = usePhoneNumber(phoneNumberId)
   useDocumentTitle(data ? formatPhoneNumber(data.number) : "Phone Number Details")
   const gatewayQuery = useGatewayLookupNumber(data?.number ?? "", tab === "external")
   const [editOpen, setEditOpen] = useState(false)
@@ -113,14 +114,12 @@ function PhoneNumberDetailPage() {
           }
         />
         <PageSection>
-          <Card>
-            <CardHeader>
-              <CardTitle>Phone Number</CardTitle>
-            </CardHeader>
-            <CardContent className="text-muted-foreground">
-              We could not load this phone number. It may have been deleted.
-            </CardContent>
-          </Card>
+          <EmptyState
+            icon={AlertCircle}
+            title="Unable to load phone number"
+            description="The phone number may have been deleted."
+            action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+          />
         </PageSection>
       </PageContainer>
     )

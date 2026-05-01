@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
 import { useState } from "react"
 import {
+  AlertCircle,
   AlertTriangle,
   ArrowLeft,
   CheckCircle2,
@@ -23,6 +24,7 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/empty-state"
 import {
   Dialog,
   DialogContent,
@@ -134,7 +136,7 @@ function DeleteConfirmDialog({
 function E911DetailPage() {
   const { registrationId } = Route.useParams()
   const router = useRouter()
-  const { data, isLoading, isError } = useE911Registration(registrationId)
+  const { data, isLoading, isError, refetch } = useE911Registration(registrationId)
   useDocumentTitle(data ? `E911 - ${data.addressLine1}` : "E911 Details")
 
   const updateMutation = useUpdateE911Registration(registrationId)
@@ -222,12 +224,12 @@ function E911DetailPage() {
           }
         />
         <PageSection>
-          <Card>
-            <CardHeader>
-              <CardTitle>Registration detail</CardTitle>
-            </CardHeader>
-            <CardContent className="text-muted-foreground">We could not load this E911 registration.</CardContent>
-          </Card>
+          <EmptyState
+            icon={AlertCircle}
+            title="Unable to load E911 registration"
+            description="Something went wrong. Please try again."
+            action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+          />
         </PageSection>
       </PageContainer>
     )

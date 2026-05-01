@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
 import { useEffect, useRef, useState } from "react"
-import { Loader2 } from "lucide-react"
+import { AlertCircle, Loader2 } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,6 +14,7 @@ import {
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
@@ -29,7 +30,7 @@ function EditTagPage() {
   useDocumentTitle("Edit Tag")
   const { tagId } = Route.useParams()
   const router = useRouter()
-  const { data, isLoading, isError } = useTag(tagId)
+  const { data, isLoading, isError, refetch } = useTag(tagId)
   const updateTag = useUpdateTag(tagId)
 
   const [name, setName] = useState("")
@@ -104,12 +105,12 @@ function EditTagPage() {
           }
         />
         <PageSection>
-          <Card>
-            <CardHeader>
-              <CardTitle>Error</CardTitle>
-            </CardHeader>
-            <CardContent className="text-muted-foreground">We could not load this tag.</CardContent>
-          </Card>
+          <EmptyState
+            icon={AlertCircle}
+            title="Unable to load tag"
+            description="Something went wrong. Please try again."
+            action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+          />
         </PageSection>
       </PageContainer>
     )

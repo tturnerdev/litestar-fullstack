@@ -2,6 +2,7 @@ import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
 import { useEffect, useState, useCallback } from "react"
 import { z } from "zod"
 import {
+  AlertCircle,
   AlertTriangle,
   ArrowLeft,
   ArrowRight,
@@ -33,6 +34,7 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/empty-state"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
@@ -106,7 +108,7 @@ function ExtensionDetailPage() {
   const { tab = "details", edit } = Route.useSearch()
   const router = useRouter()
   const navigate = Route.useNavigate()
-  const { data, isLoading, isError } = useExtension(extensionId)
+  const { data, isLoading, isError, refetch } = useExtension(extensionId)
   useDocumentTitle(data ? `${data.displayName} (Ext. ${data.extensionNumber})` : "Extension")
   const updateExtension = useUpdateExtension(extensionId)
   const gatewayQuery = useGatewayLookupExtension(data?.extensionNumber ?? "", tab === "external")
@@ -215,14 +217,12 @@ function ExtensionDetailPage() {
           }
         />
         <PageSection>
-          <Card>
-            <CardHeader>
-              <CardTitle>Extension detail</CardTitle>
-            </CardHeader>
-            <CardContent className="text-muted-foreground">
-              We could not load this extension.
-            </CardContent>
-          </Card>
+          <EmptyState
+            icon={AlertCircle}
+            title="Unable to load extension"
+            description="Something went wrong. Please try again."
+            action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+          />
         </PageSection>
       </PageContainer>
     )

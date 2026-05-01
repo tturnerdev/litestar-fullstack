@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
 import { useEffect, useMemo, useRef, useState } from "react"
-import { AlertTriangle, Loader2 } from "lucide-react"
+import { AlertCircle, AlertTriangle, Loader2 } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
   Breadcrumb,
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
@@ -56,7 +57,7 @@ function EditLocationPage() {
   const { currentTeam } = useAuthStore()
   const teamId = currentTeam?.id ?? ""
 
-  const { data, isLoading, isError } = useLocation(teamId, locationId)
+  const { data, isLoading, isError, refetch } = useLocation(teamId, locationId)
   const updateLocation = useUpdateLocation(teamId, locationId)
 
   // Form state
@@ -217,12 +218,12 @@ function EditLocationPage() {
           }
         />
         <PageSection>
-          <Card>
-            <CardHeader>
-              <CardTitle>Error</CardTitle>
-            </CardHeader>
-            <CardContent className="text-muted-foreground">We could not load this location.</CardContent>
-          </Card>
+          <EmptyState
+            icon={AlertCircle}
+            title="Unable to load location"
+            description="Something went wrong. Please try again."
+            action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+          />
         </PageSection>
       </PageContainer>
     )

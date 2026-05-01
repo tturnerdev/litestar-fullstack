@@ -41,6 +41,7 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/empty-state"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Separator } from "@/components/ui/separator"
@@ -156,7 +157,7 @@ function ConnectionDetailPage() {
   const { tab = "overview" } = Route.useSearch()
   const navigate = Route.useNavigate()
   const router = useRouter()
-  const { data, isLoading, isError } = useConnection(connectionId)
+  const { data, isLoading, isError, refetch } = useConnection(connectionId)
   useDocumentTitle(data ? `Connections - ${data.name}` : "Connection Details")
   const deleteConnection = useDeleteConnection()
   const testConnection = useTestConnection(connectionId)
@@ -261,14 +262,12 @@ function ConnectionDetailPage() {
           }
         />
         <PageSection>
-          <Card>
-            <CardHeader>
-              <CardTitle>Connection detail</CardTitle>
-            </CardHeader>
-            <CardContent className="text-muted-foreground">
-              We could not load this connection.
-            </CardContent>
-          </Card>
+          <EmptyState
+            icon={AlertCircle}
+            title="Unable to load connection"
+            description="Something went wrong. Please try again."
+            action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+          />
         </PageSection>
       </PageContainer>
     )

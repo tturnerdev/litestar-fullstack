@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
 import { useState } from "react"
 import {
+  AlertCircle,
   AlertTriangle,
   ArrowLeft,
   Loader2,
@@ -31,6 +32,7 @@ import {
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { CopyButton } from "@/components/ui/copy-button"
+import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
@@ -198,7 +200,7 @@ function IvrMenuDetailPage() {
   const { ivrMenuId } = Route.useParams()
   const router = useRouter()
 
-  const { data, isLoading, isError } = useIvrMenu(ivrMenuId)
+  const { data, isLoading, isError, refetch } = useIvrMenu(ivrMenuId)
   const updateMutation = useUpdateIvrMenu(ivrMenuId)
   const deleteMutation = useDeleteIvrMenu()
 
@@ -290,7 +292,12 @@ function IvrMenuDetailPage() {
       <PageContainer className="flex-1 space-y-8">
         <PageHeader eyebrow="Call Routing" title="IVR Menu" actions={<Button variant="outline" size="sm" asChild><Link to="/call-routing" search={{ tab: "ivr-menus" }}><ArrowLeft className="mr-2 h-4 w-4" /> Back</Link></Button>} />
         <PageSection>
-          <Card><CardHeader><CardTitle>IVR menu detail</CardTitle></CardHeader><CardContent className="text-muted-foreground">We could not load this IVR menu.</CardContent></Card>
+          <EmptyState
+            icon={AlertCircle}
+            title="Unable to load IVR menu"
+            description="Something went wrong. Please try again."
+            action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+          />
         </PageSection>
       </PageContainer>
     )

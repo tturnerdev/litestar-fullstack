@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
+  AlertCircle,
   ArrowLeft,
   Calendar,
   Clock,
@@ -30,6 +31,7 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/empty-state"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Separator } from "@/components/ui/separator"
 import { SkeletonCard } from "@/components/ui/skeleton"
@@ -130,7 +132,7 @@ function SectionHeading({
 function AdminTeamDetailPage() {
   const { teamId } = Route.useParams()
   const navigate = useNavigate()
-  const { data, isLoading, isError } = useAdminTeam(teamId)
+  const { data, isLoading, isError, refetch } = useAdminTeam(teamId)
   useDocumentTitle(data?.name ? `Admin - ${data.name}` : "Admin - Team Details")
   const updateTeam = useAdminUpdateTeam(teamId)
   const [editOpen, setEditOpen] = useState(false)
@@ -165,14 +167,12 @@ function AdminTeamDetailPage() {
         />
         <AdminNav />
         <PageSection>
-          <Card>
-            <CardHeader>
-              <CardTitle>Team not found</CardTitle>
-            </CardHeader>
-            <CardContent className="text-muted-foreground">
-              We could not load this team. It may have been deleted or you may not have permission to view it.
-            </CardContent>
-          </Card>
+          <EmptyState
+            icon={AlertCircle}
+            title="Unable to load team"
+            description="The team may have been deleted or you may not have permission to view it."
+            action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+          />
         </PageSection>
       </PageContainer>
     )
@@ -607,7 +607,7 @@ function MembersCard({ members }: MembersCardProps) {
 function InvitationsCard({ teamId }: { teamId: string }) {
   const queryClient = useQueryClient()
 
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, refetch: refetchInvitations } = useQuery({
     queryKey: ["admin", "team", teamId, "invitations"],
     queryFn: async () => {
       const query = { pageSize: 50 } as unknown as ListTeamInvitationsData["query"]
@@ -639,11 +639,12 @@ function InvitationsCard({ teamId }: { teamId: string }) {
 
   if (isError || !data) {
     return (
-      <Card>
-        <CardContent className="py-8 text-center text-sm text-muted-foreground">
-          Could not load invitations.
-        </CardContent>
-      </Card>
+      <EmptyState
+        icon={AlertCircle}
+        title="Unable to load invitations"
+        description="Something went wrong. Please try again."
+        action={<Button variant="outline" size="sm" onClick={() => refetchInvitations()}>Try again</Button>}
+      />
     )
   }
 

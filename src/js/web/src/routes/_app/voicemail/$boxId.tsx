@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import {
+  AlertCircle,
   AlertTriangle,
   ArrowLeft,
   BellRing,
@@ -104,7 +105,7 @@ function formatRetention(days: number): string {
 
 function VoicemailBoxDetailPage() {
   const { boxId } = Route.useParams()
-  const { data: box, isLoading, isError } = useVoicemailBox(boxId)
+  const { data: box, isLoading, isError, refetch } = useVoicemailBox(boxId)
 
   const boxLabel = box?.extensionNumber
     ? `Ext. ${box.extensionNumber}`
@@ -142,14 +143,12 @@ function VoicemailBoxDetailPage() {
           }
         />
         <PageSection>
-          <Card>
-            <CardHeader>
-              <CardTitle>Voicemail Box</CardTitle>
-            </CardHeader>
-            <CardContent className="text-muted-foreground">
-              We could not load this voicemail box.
-            </CardContent>
-          </Card>
+          <EmptyState
+            icon={AlertCircle}
+            title="Unable to load voicemail box"
+            description="Something went wrong. Please try again."
+            action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+          />
         </PageSection>
       </PageContainer>
     )
@@ -226,7 +225,7 @@ function VoicemailBoxDetailPage() {
 // -- Box Settings Form --------------------------------------------------------
 
 function BoxSettingsForm({ boxId }: { boxId: string }) {
-  const { data, isLoading, isError } = useVoicemailBox(boxId)
+  const { data, isLoading, isError, refetch: refetchSettings } = useVoicemailBox(boxId)
   const updateMutation = useUpdateVoicemailBox(boxId)
   const [dirty, setDirty] = useState(false)
   const [showSaveSuccess, setShowSaveSuccess] = useState(false)
@@ -252,14 +251,12 @@ function BoxSettingsForm({ boxId }: { boxId: string }) {
 
   if (isError || !data) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Settings</CardTitle>
-        </CardHeader>
-        <CardContent className="text-muted-foreground">
-          Unable to load voicemail box settings.
-        </CardContent>
-      </Card>
+      <EmptyState
+        icon={AlertCircle}
+        title="Unable to load voicemail box settings"
+        description="Something went wrong. Please try again."
+        action={<Button variant="outline" size="sm" onClick={() => refetchSettings()}>Try again</Button>}
+      />
     )
   }
 
@@ -634,7 +631,7 @@ function BoxMessageList({ boxId }: { boxId: string }) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [singleDeleteId, setSingleDeleteId] = useState<string | null>(null)
 
-  const { data, isLoading, isError } = useVoicemailMessages({
+  const { data, isLoading, isError, refetch: refetchMessages } = useVoicemailMessages({
     boxId,
     page,
     pageSize: PAGE_SIZE,
@@ -648,14 +645,12 @@ function BoxMessageList({ boxId }: { boxId: string }) {
 
   if (isError || !data) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Messages</CardTitle>
-        </CardHeader>
-        <CardContent className="text-muted-foreground">
-          Unable to load voicemail messages.
-        </CardContent>
-      </Card>
+      <EmptyState
+        icon={AlertCircle}
+        title="Unable to load voicemail messages"
+        description="Something went wrong. Please try again."
+        action={<Button variant="outline" size="sm" onClick={() => refetchMessages()}>Try again</Button>}
+      />
     )
   }
 

@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
+  AlertCircle,
   AlertTriangle,
   ChevronRight,
   Globe,
@@ -34,6 +35,7 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
@@ -211,7 +213,7 @@ function EditConnectionPage() {
   useDocumentTitle("Edit Connection")
   const { connectionId } = Route.useParams()
   const router = useRouter()
-  const { data, isLoading, isError } = useConnection(connectionId)
+  const { data, isLoading, isError, refetch } = useConnection(connectionId)
   const updateConnection = useUpdateConnection(connectionId)
 
   // Form state
@@ -545,12 +547,12 @@ function EditConnectionPage() {
           }
         />
         <PageSection>
-          <Card>
-            <CardHeader>
-              <CardTitle>Error</CardTitle>
-            </CardHeader>
-            <CardContent className="text-muted-foreground">We could not load this connection.</CardContent>
-          </Card>
+          <EmptyState
+            icon={AlertCircle}
+            title="Unable to load connection"
+            description="Something went wrong. Please try again."
+            action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+          />
         </PageSection>
       </PageContainer>
     )

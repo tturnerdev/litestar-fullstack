@@ -2,6 +2,7 @@ import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
 import {
   Activity,
+  AlertCircle,
   AlertTriangle,
   ArrowLeft,
   Cpu,
@@ -31,6 +32,7 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
@@ -110,7 +112,7 @@ function DeviceDetailPage() {
   const { tab = "overview", edit: editParam } = Route.useSearch()
   const navigate = Route.useNavigate()
   const router = useRouter()
-  const { data, isLoading, isError } = useDevice(deviceId)
+  const { data, isLoading, isError, refetch } = useDevice(deviceId)
   useDocumentTitle(data?.name ?? "Device Details")
   const updateDevice = useUpdateDevice(deviceId)
   const deleteDevice = useDeleteDevice()
@@ -245,12 +247,12 @@ function DeviceDetailPage() {
           }
         />
         <PageSection>
-          <Card>
-            <CardHeader>
-              <CardTitle>Device detail</CardTitle>
-            </CardHeader>
-            <CardContent className="text-muted-foreground">We could not load this device.</CardContent>
-          </Card>
+          <EmptyState
+            icon={AlertCircle}
+            title="Unable to load device"
+            description="Something went wrong. Please try again."
+            action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+          />
         </PageSection>
       </PageContainer>
     )
