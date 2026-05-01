@@ -126,8 +126,8 @@ function AdminDevicesPage() {
     setPage(1)
   }, [debouncedSearch])
 
-  const { data: stats, isLoading: statsLoading, isError: statsError } = useAdminDeviceStats()
-  const { data, isLoading, isError } = useAdminDevices(page, PAGE_SIZE, debouncedSearch || undefined)
+  const { data: stats, isLoading: statsLoading, isError: statsError, refetch: refetchStats } = useAdminDeviceStats()
+  const { data, isLoading, isError, refetch } = useAdminDevices(page, PAGE_SIZE, debouncedSearch || undefined)
 
   const devices = data?.items ?? []
   const total = data?.total ?? 0
@@ -166,9 +166,13 @@ function AdminDevicesPage() {
           </div>
         ) : statsError ? (
           <Card>
-            <CardContent className="flex items-center gap-3 py-6 text-muted-foreground">
-              <AlertCircle className="h-5 w-5 text-destructive" />
-              <span>Unable to load device statistics. Please try again later.</span>
+            <CardContent className="py-6">
+              <EmptyState
+                icon={AlertCircle}
+                title="Unable to load device statistics"
+                description="Something went wrong. Please try again."
+                action={<Button variant="outline" size="sm" onClick={() => refetchStats()}>Try again</Button>}
+              />
             </CardContent>
           </Card>
         ) : (
@@ -225,10 +229,12 @@ function AdminDevicesPage() {
             {isLoading ? (
               <SkeletonTable rows={5} />
             ) : isError ? (
-              <div className="flex items-center gap-3 py-8 justify-center text-muted-foreground">
-                <AlertCircle className="h-5 w-5 text-destructive" />
-                <span>Unable to load devices.</span>
-              </div>
+              <EmptyState
+                icon={AlertCircle}
+                title="Unable to load devices"
+                description="Something went wrong. Please try again."
+                action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+              />
             ) : recentDevices.length === 0 ? (
               <EmptyState
                 icon={HardDrive}
@@ -315,10 +321,12 @@ function AdminDevicesPage() {
             {isLoading ? (
               <SkeletonTable rows={8} />
             ) : isError ? (
-              <div className="flex items-center gap-3 py-8 justify-center text-muted-foreground">
-                <AlertCircle className="h-5 w-5 text-destructive" />
-                <span>Unable to load devices.</span>
-              </div>
+              <EmptyState
+                icon={AlertCircle}
+                title="Unable to load devices"
+                description="Something went wrong. Please try again."
+                action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+              />
             ) : devices.length === 0 ? (
               <EmptyState
                 icon={Search}

@@ -26,6 +26,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Separator } from "@/components/ui/separator"
+import { EmptyState } from "@/components/ui/empty-state"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
@@ -579,14 +580,12 @@ function AdminSystemPage() {
               </div>
             </div>
           ) : isError || !data ? (
-            <Card>
-              <CardHeader>
-                <CardTitle>System Status</CardTitle>
-              </CardHeader>
-              <CardContent className="text-muted-foreground">
-                Unable to load system status. The server may be unreachable.
-              </CardContent>
-            </Card>
+            <EmptyState
+              icon={AlertCircle}
+              title="Unable to load system status"
+              description="The server may be unreachable. Please try again."
+              action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+            />
           ) : (
             <div className="space-y-6">
               {/* Overall health banner + last refreshed */}

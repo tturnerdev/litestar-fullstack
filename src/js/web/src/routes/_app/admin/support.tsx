@@ -146,8 +146,8 @@ function AdminSupportPage() {
     setPage(1)
   }, [debouncedSearch])
 
-  const { data: stats, isLoading: statsLoading, isError: statsError } = useAdminSupportStats()
-  const { data, isLoading, isError } = useAdminTickets(page, PAGE_SIZE, debouncedSearch || undefined)
+  const { data: stats, isLoading: statsLoading, isError: statsError, refetch: refetchStats } = useAdminSupportStats()
+  const { data, isLoading, isError, refetch: refetchTickets } = useAdminTickets(page, PAGE_SIZE, debouncedSearch || undefined)
 
   const tickets = data?.items ?? []
   const total = data?.total ?? 0
@@ -186,12 +186,12 @@ function AdminSupportPage() {
             ))}
           </div>
         ) : statsError ? (
-          <Card>
-            <CardContent className="flex items-center gap-3 py-6 text-muted-foreground">
-              <AlertCircle className="h-5 w-5 text-destructive" />
-              <span>Unable to load support statistics. Please try again later.</span>
-            </CardContent>
-          </Card>
+          <EmptyState
+            icon={AlertCircle}
+            title="Unable to load support statistics"
+            description="Something went wrong. Please try again."
+            action={<Button variant="outline" size="sm" onClick={() => refetchStats()}>Try again</Button>}
+          />
         ) : (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {statConfig.map((stat) => {
@@ -246,10 +246,12 @@ function AdminSupportPage() {
             {isLoading ? (
               <SkeletonTable rows={5} />
             ) : isError ? (
-              <div className="flex items-center gap-3 py-8 justify-center text-muted-foreground">
-                <AlertCircle className="h-5 w-5 text-destructive" />
-                <span>Unable to load tickets.</span>
-              </div>
+              <EmptyState
+                icon={AlertCircle}
+                title="Unable to load tickets"
+                description="Something went wrong. Please try again."
+                action={<Button variant="outline" size="sm" onClick={() => refetchTickets()}>Try again</Button>}
+              />
             ) : recentTickets.length === 0 ? (
               <EmptyState
                 icon={TicketCheck}
@@ -351,10 +353,12 @@ function AdminSupportPage() {
             {isLoading ? (
               <SkeletonTable rows={8} />
             ) : isError ? (
-              <div className="flex items-center gap-3 py-8 justify-center text-muted-foreground">
-                <AlertCircle className="h-5 w-5 text-destructive" />
-                <span>Unable to load tickets.</span>
-              </div>
+              <EmptyState
+                icon={AlertCircle}
+                title="Unable to load tickets"
+                description="Something went wrong. Please try again."
+                action={<Button variant="outline" size="sm" onClick={() => refetchTickets()}>Try again</Button>}
+              />
             ) : tickets.length === 0 ? (
               <EmptyState
                 icon={Search}

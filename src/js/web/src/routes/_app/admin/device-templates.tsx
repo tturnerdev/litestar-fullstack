@@ -396,7 +396,7 @@ function AdminDeviceTemplatesPage() {
     setPage(1)
   }, [debouncedSearch])
 
-  const { data, isLoading, isError } = useAdminDeviceTemplates(page, PAGE_SIZE, debouncedSearch || undefined)
+  const { data, isLoading, isError, refetch } = useAdminDeviceTemplates(page, PAGE_SIZE, debouncedSearch || undefined)
   const deleteMutation = useDeleteDeviceTemplate()
 
   const templates = data?.items ?? []
@@ -470,10 +470,12 @@ function AdminDeviceTemplatesPage() {
             {isLoading ? (
               <SkeletonTable rows={5} />
             ) : isError ? (
-              <div className="flex items-center gap-3 py-8 justify-center text-muted-foreground">
-                <AlertCircle className="h-5 w-5 text-destructive" />
-                <span>Unable to load device templates.</span>
-              </div>
+              <EmptyState
+                icon={AlertCircle}
+                title="Unable to load device templates"
+                description="Something went wrong. Please try again."
+                action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+              />
             ) : templates.length === 0 ? (
               <EmptyState
                 icon={Cpu}

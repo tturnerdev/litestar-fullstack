@@ -338,7 +338,7 @@ function AdminMusicOnHoldPage() {
     setPage(1)
   }, [debouncedSearch])
 
-  const { data, isLoading, isError } = useAdminMusicOnHold(page, PAGE_SIZE, debouncedSearch || undefined)
+  const { data, isLoading, isError, refetch } = useAdminMusicOnHold(page, PAGE_SIZE, debouncedSearch || undefined)
   const deleteMutation = useDeleteMusicOnHold()
 
   const items = data?.items ?? []
@@ -409,10 +409,12 @@ function AdminMusicOnHoldPage() {
             {isLoading ? (
               <SkeletonTable rows={5} />
             ) : isError ? (
-              <div className="flex items-center gap-3 py-8 justify-center text-muted-foreground">
-                <AlertCircle className="h-5 w-5 text-destructive" />
-                <span>Unable to load Music on Hold classes.</span>
-              </div>
+              <EmptyState
+                icon={AlertCircle}
+                title="Unable to load Music on Hold classes"
+                description="Something went wrong. Please try again."
+                action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+              />
             ) : items.length === 0 ? (
               <EmptyState
                 icon={Music}

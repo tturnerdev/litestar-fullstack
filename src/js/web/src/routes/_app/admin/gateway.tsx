@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Separator } from "@/components/ui/separator"
+import { EmptyState } from "@/components/ui/empty-state"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { useAdminGatewaySettings, useUpdateAdminGatewaySettings } from "@/lib/api/hooks/gateway"
 
@@ -54,7 +55,7 @@ function validateCacheTtl(value: string): string | undefined {
 
 function AdminGatewayPage() {
   useDocumentTitle("Gateway Settings")
-  const { data, isLoading, isError } = useAdminGatewaySettings()
+  const { data, isLoading, isError, refetch } = useAdminGatewaySettings()
   const updateSettings = useUpdateAdminGatewaySettings()
 
   const [timeout, setTimeout] = useState("")
@@ -153,12 +154,12 @@ function AdminGatewayPage() {
             <SkeletonCard />
           </div>
         ) : isError || !data ? (
-          <Card>
-            <CardContent className="flex items-center gap-3 py-6 text-muted-foreground">
-              <AlertCircle className="h-5 w-5 text-destructive" />
-              <span>Unable to load gateway settings. The server may be unreachable.</span>
-            </CardContent>
-          </Card>
+          <EmptyState
+            icon={AlertCircle}
+            title="Unable to load gateway settings"
+            description="The server may be unreachable. Please try again."
+            action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+          />
         ) : (
           <div className="grid gap-6 lg:grid-cols-3">
             {/* Settings form */}

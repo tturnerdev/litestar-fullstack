@@ -116,9 +116,9 @@ function AdminFaxPage() {
   const [numberPage, setNumberPage] = useState(1)
   const [numberSearch, setNumberSearch] = useState("")
 
-  const { data: stats, isLoading: statsLoading, isError: statsError } = useAdminFaxStats()
-  const { data: numberData, isLoading: numbersLoading, isError: numbersError } = useAdminFaxNumbers(numberPage, PAGE_SIZE, numberSearch || undefined)
-  const { data: messages, isLoading: messagesLoading, isError: messagesError } = useAdminFaxMessages()
+  const { data: stats, isLoading: statsLoading, isError: statsError, refetch: refetchStats } = useAdminFaxStats()
+  const { data: numberData, isLoading: numbersLoading, isError: numbersError, refetch: refetchNumbers } = useAdminFaxNumbers(numberPage, PAGE_SIZE, numberSearch || undefined)
+  const { data: messages, isLoading: messagesLoading, isError: messagesError, refetch: refetchMessages } = useAdminFaxMessages()
 
   const faxNumbers = numberData?.items ?? []
   const numberTotal = numberData?.total ?? 0
@@ -158,12 +158,12 @@ function AdminFaxPage() {
             ))}
           </div>
         ) : statsError ? (
-          <Card>
-            <CardContent className="flex items-center gap-3 py-6 text-muted-foreground">
-              <AlertCircle className="h-5 w-5 text-destructive" />
-              <span>Unable to load fax statistics. Please try again later.</span>
-            </CardContent>
-          </Card>
+          <EmptyState
+            icon={AlertCircle}
+            title="Unable to load fax statistics"
+            description="Something went wrong. Please try again."
+            action={<Button variant="outline" size="sm" onClick={() => refetchStats()}>Try again</Button>}
+          />
         ) : (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {statConfig.map((stat) => {
@@ -218,10 +218,12 @@ function AdminFaxPage() {
             {messagesLoading ? (
               <SkeletonTable rows={5} />
             ) : messagesError ? (
-              <div className="flex items-center gap-3 py-8 justify-center text-muted-foreground">
-                <AlertCircle className="h-5 w-5 text-destructive" />
-                <span>Unable to load fax messages.</span>
-              </div>
+              <EmptyState
+                icon={AlertCircle}
+                title="Unable to load fax messages"
+                description="Something went wrong. Please try again."
+                action={<Button variant="outline" size="sm" onClick={() => refetchMessages()}>Try again</Button>}
+              />
             ) : recentMessages.length === 0 ? (
               <EmptyState
                 icon={FileText}
@@ -328,10 +330,12 @@ function AdminFaxPage() {
             {numbersLoading ? (
               <SkeletonTable rows={5} />
             ) : numbersError ? (
-              <div className="flex items-center gap-3 py-8 justify-center text-muted-foreground">
-                <AlertCircle className="h-5 w-5 text-destructive" />
-                <span>Unable to load fax numbers.</span>
-              </div>
+              <EmptyState
+                icon={AlertCircle}
+                title="Unable to load fax numbers"
+                description="Something went wrong. Please try again."
+                action={<Button variant="outline" size="sm" onClick={() => refetchNumbers()}>Try again</Button>}
+              />
             ) : faxNumbers.length === 0 ? (
               <EmptyState
                 icon={Search}
