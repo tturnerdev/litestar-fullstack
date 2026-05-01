@@ -2599,6 +2599,9 @@ export const DashboardStatsSchema = {
     activeUsers: {
       type: "integer",
     },
+    devicesOnline: {
+      type: "integer",
+    },
     eventsToday: {
       type: "integer",
     },
@@ -2608,10 +2611,22 @@ export const DashboardStatsSchema = {
     newUsersWeek: {
       type: "integer",
     },
+    openTickets: {
+      type: "integer",
+    },
+    totalDevices: {
+      type: "integer",
+    },
+    totalExtensions: {
+      type: "integer",
+    },
     totalTeams: {
       type: "integer",
     },
     totalUsers: {
+      type: "integer",
+    },
+    unreadVoicemails: {
       type: "integer",
     },
     verifiedUsers: {
@@ -2620,11 +2635,16 @@ export const DashboardStatsSchema = {
   },
   required: [
     "activeUsers",
+    "devicesOnline",
     "eventsToday",
     "newUsersToday",
     "newUsersWeek",
+    "openTickets",
+    "totalDevices",
+    "totalExtensions",
     "totalTeams",
     "totalUsers",
+    "unreadVoicemails",
     "verifiedUsers",
   ],
   title: "DashboardStats",
@@ -4565,7 +4585,19 @@ export const FaxStatusSchema = {
 
 export const FeatureAreaSchema = {
   description: "Feature areas available for team role permissions.",
-  enum: ["DEVICES", "VOICE", "FAX", "SUPPORT", "ORGANIZATION", "TEAMS"],
+  enum: [
+    "CALL_ROUTING",
+    "CONNECTIONS",
+    "DEVICES",
+    "E911",
+    "FAX",
+    "LOCATIONS",
+    "ORGANIZATION",
+    "SCHEDULES",
+    "SUPPORT",
+    "TEAMS",
+    "VOICE",
+  ],
   title: "FeatureArea",
   type: "string",
 } as const;

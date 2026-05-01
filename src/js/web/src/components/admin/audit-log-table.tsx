@@ -174,36 +174,6 @@ function escapeCsvField(value: string): string {
   return value
 }
 
-function generateBasicCsv(items: AuditLogEntry[]): string {
-  const headers = [
-    "timestamp",
-    "action",
-    "actor_name",
-    "actor_email",
-    "target_type",
-    "target_id",
-    "target_label",
-    "ip_address",
-    "user_agent",
-  ]
-  const rows = items.map((entry) =>
-    [
-      new Date(entry.createdAt).toISOString(),
-      entry.action,
-      entry.actorName ?? "",
-      entry.actorEmail ?? "",
-      entry.targetType ?? "",
-      entry.targetId ?? "",
-      entry.targetLabel ?? "",
-      entry.ipAddress ?? "",
-      entry.userAgent ?? "",
-    ]
-      .map(escapeCsvField)
-      .join(","),
-  )
-  return [headers.join(","), ...rows].join("\n")
-}
-
 function flattenDetails(
   details: Record<string, unknown> | null | undefined,
 ): Record<string, string> {
@@ -804,19 +774,26 @@ export function AuditLogTable() {
     async (mode: "basic" | "extended") => {
       setIsExporting(true)
       try {
-        const result = await fetchExport()
-        if (result.data?.items) {
-          const csv =
-            mode === "extended"
-              ? generateExtendedCsv(result.data.items)
-              : generateBasicCsv(result.data.items)
-          downloadCsv(csv, mode)
+        if (mode === "basic") {
+          // Use server-side CSV export endpoint
+          const result = await fetchExport()
+          if (result.data?.csv) {
+            downloadCsv(result.data.csv, mode)
+          }
+        } else {
+          // Extended export: build client-side from current page data
+          // (includes flattened detail columns)
+          const allItems = data?.items ?? []
+          if (allItems.length > 0) {
+            const csv = generateExtendedCsv(allItems)
+            downloadCsv(csv, mode)
+          }
         }
       } finally {
         setIsExporting(false)
       }
     },
-    [fetchExport],
+    [fetchExport, data?.items],
   )
 
   const handleDatePreset = useCallback(

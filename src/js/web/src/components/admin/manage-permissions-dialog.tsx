@@ -3,16 +3,21 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import {
   BarChart3,
+  Cable,
   CheckCircle2,
+  Clock,
   CreditCard,
+  GitBranch,
   Info,
   LifeBuoy,
   Loader2,
   Lock,
+  MapPin,
   Monitor,
   Phone,
   Printer,
   Save,
+  ShieldAlert,
   Users,
   XCircle,
 } from "lucide-react"
@@ -44,6 +49,11 @@ const FEATURE_AREAS: readonly { key: FeatureArea; label: string; icon: LucideIco
   { key: "VOICE", label: "Voice", icon: Phone },
   { key: "FAX", label: "Fax", icon: Printer },
   { key: "SUPPORT", label: "Support", icon: LifeBuoy },
+  { key: "CALL_ROUTING", label: "Call Routing", icon: GitBranch },
+  { key: "CONNECTIONS", label: "Connections", icon: Cable },
+  { key: "E911", label: "E911", icon: ShieldAlert },
+  { key: "LOCATIONS", label: "Locations", icon: MapPin },
+  { key: "SCHEDULES", label: "Schedules", icon: Clock },
   { key: "ORGANIZATION", label: "Organization", icon: CreditCard },
   { key: "TEAMS", label: "Teams", icon: BarChart3 },
 ]

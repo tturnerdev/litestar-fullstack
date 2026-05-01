@@ -16,6 +16,11 @@ class DashboardStats(CamelizedBaseStruct):
     new_users_today: int
     new_users_week: int
     events_today: int
+    total_devices: int
+    devices_online: int
+    total_extensions: int
+    open_tickets: int
+    unread_voicemails: int
 
 
 class ActivityLogEntry(CamelizedBaseStruct, kw_only=True):

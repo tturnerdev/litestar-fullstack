@@ -2675,6 +2675,9 @@
           "activeUsers": {
             "type": "integer"
           },
+          "devicesOnline": {
+            "type": "integer"
+          },
           "eventsToday": {
             "type": "integer"
           },
@@ -2684,10 +2687,22 @@
           "newUsersWeek": {
             "type": "integer"
           },
+          "openTickets": {
+            "type": "integer"
+          },
+          "totalDevices": {
+            "type": "integer"
+          },
+          "totalExtensions": {
+            "type": "integer"
+          },
           "totalTeams": {
             "type": "integer"
           },
           "totalUsers": {
+            "type": "integer"
+          },
+          "unreadVoicemails": {
             "type": "integer"
           },
           "verifiedUsers": {
@@ -2696,11 +2711,16 @@
         },
         "required": [
           "activeUsers",
+          "devicesOnline",
           "eventsToday",
           "newUsersToday",
           "newUsersWeek",
+          "openTickets",
+          "totalDevices",
+          "totalExtensions",
           "totalTeams",
           "totalUsers",
+          "unreadVoicemails",
           "verifiedUsers"
         ],
         "title": "DashboardStats",
@@ -4688,12 +4708,17 @@
       "FeatureArea": {
         "description": "Feature areas available for team role permissions.",
         "enum": [
+          "CALL_ROUTING",
+          "CONNECTIONS",
           "DEVICES",
-          "VOICE",
+          "E911",
           "FAX",
-          "SUPPORT",
+          "LOCATIONS",
           "ORGANIZATION",
-          "TEAMS"
+          "SCHEDULES",
+          "SUPPORT",
+          "TEAMS",
+          "VOICE"
         ],
         "title": "FeatureArea",
         "type": "string"

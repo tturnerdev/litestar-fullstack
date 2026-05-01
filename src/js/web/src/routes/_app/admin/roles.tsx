@@ -5,16 +5,21 @@ import { toast } from "sonner"
 import {
   AlertCircle,
   BarChart3,
+  Cable,
   CheckCircle2,
+  Clock,
   CreditCard,
+  GitBranch,
   Info,
   LifeBuoy,
   Loader2,
+  MapPin,
   Monitor,
   Phone,
   Printer,
   Save,
   Shield,
+  ShieldAlert,
   XCircle,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
@@ -50,6 +55,11 @@ const FEATURE_AREAS: readonly { key: FeatureArea; label: string; icon: LucideIco
   { key: "VOICE", label: "Voice", icon: Phone },
   { key: "FAX", label: "Fax", icon: Printer },
   { key: "SUPPORT", label: "Support", icon: LifeBuoy },
+  { key: "CALL_ROUTING", label: "Call Routing", icon: GitBranch },
+  { key: "CONNECTIONS", label: "Connections", icon: Cable },
+  { key: "E911", label: "E911", icon: ShieldAlert },
+  { key: "LOCATIONS", label: "Locations", icon: MapPin },
+  { key: "SCHEDULES", label: "Schedules", icon: Clock },
   { key: "ORGANIZATION", label: "Organization", icon: CreditCard },
   { key: "TEAMS", label: "Teams", icon: BarChart3 },
 ]

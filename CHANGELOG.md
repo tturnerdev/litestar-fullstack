@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.114.0 (2026-05-01)
+
+### Added
+- **Audit log CSV export** — New `GET /api/admin/audit/export` endpoint returns filtered audit logs as a downloadable CSV file (up to 10k rows). Frontend "Basic CSV" export now uses server-side generation for full dataset export
+- **Dashboard stats expansion** — Admin dashboard now shows device count (with online count), extension count, open support tickets, and unread voicemails alongside existing user/team/event stats
+- **RBAC feature areas synced** — Updated roles page and permissions dialog to display all 11 feature areas (added Call Routing, Connections, E911, Locations, Schedules)
+
+## v0.113.0 (2026-05-01)
+
+### Added
+- **RBAC on all controllers** — Expanded `requires_feature_permission` guards to all 18 user-facing controllers across 8 domains (fax, support, call routing, connections, E911, locations, schedules, voice sub-controllers)
+- **FeatureArea expansion** — Added CALL_ROUTING, CONNECTIONS, E911, LOCATIONS, SCHEDULES to the FeatureArea enum and synced to frontend RBAC UIs
+- **Notification fixes** — Added missing `DELETE /api/notifications/read` endpoint for bulk-deleting read notifications; fixed category key mismatches between frontend and backend
+
+### Changed
+- Moved class-level guards to handler-level across all controllers for granular view/edit enforcement
+
 ## v0.112.0 (2026-05-01)
 
 ### Added

@@ -227,20 +227,29 @@ export function useAdminAuditLogsExport(params: {
   return useQuery({
     queryKey: ["admin", "audit", "export", search, actions, actorEmail, targetTypes, startDate, endDate],
     queryFn: async () => {
-      const query = {
-        currentPage: 1,
-        pageSize: 1000,
-        searchString: actorEmail || search || undefined,
-        searchIgnoreCase: actorEmail || search ? true : undefined,
-        actionIn: actions && actions.length > 0 ? actions : undefined,
-        targetTypeIn: targetTypes && targetTypes.length > 0 ? targetTypes : undefined,
-        createdAfter: startDate,
-        createdBefore: endDate,
-      } as unknown as AdminListAuditLogsData["query"]
-      const response = await adminListAuditLogs({
-        query,
-      })
-      return response.data as { items: AuditLogEntry[]; total: number }
+      const queryParams = new URLSearchParams()
+      const searchValue = actorEmail || search
+      if (searchValue) {
+        queryParams.set("searchString", searchValue)
+        queryParams.set("searchIgnoreCase", "true")
+      }
+      if (actions && actions.length > 0) {
+        for (const a of actions) queryParams.append("actionIn", a)
+      }
+      if (targetTypes && targetTypes.length > 0) {
+        for (const t of targetTypes) queryParams.append("targetTypeIn", t)
+      }
+      if (startDate) queryParams.set("createdAfter", startDate)
+      if (endDate) queryParams.set("createdBefore", endDate)
+
+      const qs = queryParams.toString()
+      const url = `/api/admin/audit/export${qs ? `?${qs}` : ""}`
+      const response = await fetch(url, { credentials: "same-origin" })
+      if (!response.ok) {
+        throw new Error(`Export failed: ${response.status}`)
+      }
+      const csvText = await response.text()
+      return { csv: csvText }
     },
     enabled,
   })

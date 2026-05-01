@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import csv
+import io
 from typing import TYPE_CHECKING, Annotated, Any, cast
 from uuid import UUID
 
-from litestar import Controller, get
+from litestar import Controller, Response, get
 from litestar.params import Dependency, Parameter
 
 from app.db import models as m
@@ -81,6 +83,82 @@ class AuditController(Controller):
             conditions.append(m.AuditLog.created_at <= end_date)
         results, total = await audit_service.list_and_count(*filters, *conditions)
         return audit_service.to_schema(results, total, filters, schema_type=AuditLogEntry)
+
+    @get(operation_id="AdminExportAuditLog", path="/export", media_type="text/csv")
+    async def export_logs(
+        self,
+        audit_service: AuditLogService,
+        filters: Annotated[list[FilterTypes], Dependency(skip_validation=True)],
+        action: str | None = Parameter(query="action", required=False),
+        domain: str | None = Parameter(query="domain", required=False),
+        end_date: datetime | None = Parameter(query="end_date", required=False),  # noqa: B008
+    ) -> Response[bytes]:
+        """Export audit logs as a downloadable CSV file.
+
+        Accepts the same filter parameters as the list endpoint. Returns up to
+        10 000 rows with no pagination applied.
+
+        Args:
+            audit_service: Audit log service
+            filters: Filter and pagination parameters (pagination is stripped)
+            action: Optional exact action filter
+            domain: Optional domain prefix filter (e.g. 'account', 'team')
+            end_date: Optional upper bound for created_at
+
+        Returns:
+            CSV file download response
+        """
+        from advanced_alchemy.filters import LimitOffset
+
+        conditions: list[Any] = []
+        if action:
+            conditions.append(m.AuditLog.action == action)
+        if domain:
+            conditions.append(m.AuditLog.action.startswith(domain + "."))
+        if end_date:
+            conditions.append(m.AuditLog.created_at <= end_date)
+
+        # Replace any pagination filter with a large limit so export
+        # returns all matching rows (capped at 10 000 for safety).
+        export_filters: list[Any] = [
+            f for f in filters if not isinstance(f, LimitOffset)
+        ]
+        export_filters.append(LimitOffset(limit=10_000, offset=0))
+
+        results, _ = await audit_service.list_and_count(*export_filters, *conditions)
+
+        buf = io.StringIO()
+        writer = csv.writer(buf)
+        writer.writerow([
+            "Date",
+            "Action",
+            "Actor Email",
+            "Actor Name",
+            "Target Type",
+            "Target ID",
+            "Target Label",
+            "IP Address",
+            "User Agent",
+        ])
+        for log in results:
+            writer.writerow([
+                log.created_at.isoformat() if log.created_at else "",
+                log.action,
+                log.actor_email or "",
+                log.actor_name or "",
+                log.target_type or "",
+                log.target_id or "",
+                log.target_label or "",
+                log.ip_address or "",
+                log.user_agent or "",
+            ])
+
+        csv_content = buf.getvalue()
+        return Response(
+            content=csv_content.encode("utf-8"),
+            media_type="text/csv",
+            headers={"Content-Disposition": "attachment; filename=audit-log-export.csv"},
+        )
 
     @get(operation_id="AdminGetAuditLog", path="/{log_id:uuid}")
     async def get_log(

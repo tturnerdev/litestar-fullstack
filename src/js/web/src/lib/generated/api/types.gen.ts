@@ -666,11 +666,16 @@ export type ConnectionUpdate = {
  */
 export type DashboardStats = {
   activeUsers: number;
+  devicesOnline: number;
   eventsToday: number;
   newUsersToday: number;
   newUsersWeek: number;
+  openTickets: number;
+  totalDevices: number;
+  totalExtensions: number;
   totalTeams: number;
   totalUsers: number;
+  unreadVoicemails: number;
   verifiedUsers: number;
 };
 
@@ -1184,12 +1189,17 @@ export type FaxStatus =
  * Feature areas available for team role permissions.
  */
 export type FeatureArea =
+  | "CALL_ROUTING"
+  | "CONNECTIONS"
   | "DEVICES"
-  | "VOICE"
+  | "E911"
   | "FAX"
-  | "SUPPORT"
+  | "LOCATIONS"
   | "ORGANIZATION"
-  | "TEAMS";
+  | "SCHEDULES"
+  | "SUPPORT"
+  | "TEAMS"
+  | "VOICE";
 
 /**
  * ForgotPasswordRequest

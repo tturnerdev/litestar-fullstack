@@ -14,7 +14,11 @@ from app.domain.accounts.deps import provide_users_service
 from app.domain.accounts.guards import requires_superuser
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.admin.schemas import ActivityLogEntry, AdminTrends, DashboardStats, RecentActivity, TrendPoint
+from app.domain.devices.deps import provide_devices_service
+from app.domain.support.deps import provide_tickets_service
 from app.domain.teams.deps import provide_teams_service
+from app.domain.voice.deps import provide_extensions_service
+from app.domain.voicemail.deps import provide_voicemail_messages_service
 
 if TYPE_CHECKING:
     from litestar import Request
@@ -22,7 +26,11 @@ if TYPE_CHECKING:
 
     from app.domain.accounts.services import UserService
     from app.domain.admin.services import AuditLogService
+    from app.domain.devices.services import DeviceService
+    from app.domain.support.services import TicketService
     from app.domain.teams.services import TeamService
+    from app.domain.voice.services import ExtensionService
+    from app.domain.voicemail.services import VoicemailMessageService
 
 
 class DashboardController(Controller):
@@ -35,6 +43,10 @@ class DashboardController(Controller):
         "users_service": Provide(provide_users_service),
         "teams_service": Provide(provide_teams_service),
         "audit_service": Provide(provide_audit_log_service),
+        "device_service": Provide(provide_devices_service),
+        "extension_service": Provide(provide_extensions_service),
+        "ticket_service": Provide(provide_tickets_service),
+        "voicemail_message_service": Provide(provide_voicemail_messages_service),
     }
 
     @get(operation_id="GetDashboardStats", path="/stats")
@@ -44,6 +56,10 @@ class DashboardController(Controller):
         users_service: UserService,
         teams_service: TeamService,
         audit_service: AuditLogService,
+        device_service: DeviceService,
+        extension_service: ExtensionService,
+        ticket_service: TicketService,
+        voicemail_message_service: VoicemailMessageService,
     ) -> DashboardStats:
         """Get system statistics for admin dashboard.
 
@@ -52,6 +68,10 @@ class DashboardController(Controller):
             users_service: User service
             teams_service: Team service
             audit_service: Audit log service
+            device_service: Device service
+            extension_service: Extension service
+            ticket_service: Ticket service
+            voicemail_message_service: Voicemail message service
 
         Returns:
             Dashboard statistics
@@ -71,6 +91,19 @@ class DashboardController(Controller):
         audit_stats = await audit_service.get_stats(hours=24)
         events_today = audit_stats["total_events"]
 
+        total_devices = await device_service.count()
+        devices_online = await device_service.count(m.Device.status == "online")
+
+        total_extensions = await extension_service.count()
+
+        open_tickets = await ticket_service.count(
+            m.Ticket.status.in_(["open", "in_progress", "waiting_on_support"]),
+        )
+
+        unread_voicemails = await voicemail_message_service.count(
+            m.VoicemailMessage.is_read.is_(False),
+        )
+
         return DashboardStats(
             total_users=total_users,
             active_users=active_users,
@@ -79,6 +112,11 @@ class DashboardController(Controller):
             new_users_today=new_users_today,
             new_users_week=new_users_week,
             events_today=events_today,
+            total_devices=total_devices,
+            devices_online=devices_online,
+            total_extensions=total_extensions,
+            open_tickets=open_tickets,
+            unread_voicemails=unread_voicemails,
         )
 
     @get(operation_id="GetRecentActivity", path="/activity")
