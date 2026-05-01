@@ -19,6 +19,7 @@ import { Separator } from "@/components/ui/separator"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
 import { useAuthStore } from "@/lib/auth"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useLocation, useUpdateLocation, type LocationUpdate } from "@/lib/api/hooks/locations"
 import { cn } from "@/lib/utils"
 
@@ -49,6 +50,7 @@ function FieldError({ message }: { message?: string }) {
 // ── Page component ──────────────────────────────────────────────────────
 
 function EditLocationPage() {
+  useDocumentTitle("Edit Location")
   const { locationId } = Route.useParams()
   const router = useRouter()
   const { currentTeam } = useAuthStore()

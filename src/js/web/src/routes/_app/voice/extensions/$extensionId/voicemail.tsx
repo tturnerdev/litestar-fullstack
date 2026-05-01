@@ -15,6 +15,7 @@ import { SkeletonCard } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { VoicemailMessageList } from "@/components/voice/voicemail-message-list"
 import { VoicemailSettingsForm } from "@/components/voice/voicemail-settings-form"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import {
   useExtension,
   useVoicemailMessages,
@@ -26,6 +27,7 @@ export const Route = createFileRoute("/_app/voice/extensions/$extensionId/voicem
 })
 
 function VoicemailPage() {
+  useDocumentTitle("Voicemail Settings")
   const { extensionId } = Route.useParams()
   const { data: extension, isLoading: extLoading } = useExtension(extensionId)
   const { data: vmMessages, isLoading: msgsLoading } = useVoicemailMessages(extensionId, 1, 100)

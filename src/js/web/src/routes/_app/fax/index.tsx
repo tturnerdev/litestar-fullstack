@@ -11,6 +11,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { SkeletonCard } from "@/components/ui/skeleton"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useFaxMessages, useFaxNumbers } from "@/lib/api/hooks/fax"
 
 export const Route = createFileRoute("/_app/fax/")({
@@ -18,6 +19,7 @@ export const Route = createFileRoute("/_app/fax/")({
 })
 
 function FaxOverviewPage() {
+  useDocumentTitle("Fax")
   const { data: numbers, isLoading: numbersLoading } = useFaxNumbers(1, 100)
   const { data: messages, isLoading: messagesLoading } = useFaxMessages({
     page: 1,

@@ -38,6 +38,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { CopyButton } from "@/components/ui/copy-button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAdminTeam, useAdminUpdateTeam } from "@/lib/api/hooks/admin"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import {
   deleteTeamInvitation,
@@ -129,6 +130,7 @@ function AdminTeamDetailPage() {
   const { teamId } = Route.useParams()
   const navigate = useNavigate()
   const { data, isLoading, isError } = useAdminTeam(teamId)
+  useDocumentTitle(data?.name ? `Admin - ${data.name}` : "Admin - Team Details")
   const updateTeam = useAdminUpdateTeam(teamId)
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)

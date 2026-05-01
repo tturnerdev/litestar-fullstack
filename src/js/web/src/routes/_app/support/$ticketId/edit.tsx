@@ -23,7 +23,10 @@ import { PageContainer, PageHeader } from "@/components/ui/page-layout"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useAdminUsers } from "@/lib/api/hooks/admin"
 import { useTicket, useUpdateTicket } from "@/lib/api/hooks/support"
+import { useAuthStore } from "@/lib/auth"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { cn } from "@/lib/utils"
 
 // ── Field limits ──────────────────────────────────────────────────────
@@ -34,10 +37,13 @@ export const Route = createFileRoute("/_app/support/$ticketId/edit")({
   component: EditTicketPage,
 })
 
+const UNASSIGNED_VALUE = "__unassigned__"
+
 const editTicketSchema = z.object({
   subject: z.string().min(1, "Subject is required").max(200, "Subject must be under 200 characters"),
   priority: z.string().min(1),
   status: z.string().min(1),
+  assignedToId: z.string().optional(),
   category: z.string().optional(),
 })
 
@@ -104,6 +110,9 @@ function EditTicketForm({ ticketId }: { ticketId: string }) {
   const router = useRouter()
   const { data: ticket, isLoading, isError } = useTicket(ticketId)
   const updateTicket = useUpdateTicket(ticketId)
+  const user = useAuthStore((state) => state.user)
+  const isSuperuser = user?.isSuperuser ?? false
+  const { data: usersData } = useAdminUsers({ pageSize: 100 })
 
   const form = useForm<EditTicketFormData>({
     resolver: zodResolver(editTicketSchema),
@@ -112,6 +121,7 @@ function EditTicketForm({ ticketId }: { ticketId: string }) {
           subject: ticket.subject,
           priority: ticket.priority,
           status: ticket.status,
+          assignedToId: ticket.assignedTo?.id ?? UNASSIGNED_VALUE,
           category: ticket.category ?? "",
         }
       : undefined,
@@ -144,6 +154,9 @@ function EditTicketForm({ ticketId }: { ticketId: string }) {
     if (data.subject !== ticket.subject) changes.subject = data.subject
     if (data.priority !== ticket.priority) changes.priority = data.priority
     if (data.status !== ticket.status) changes.status = data.status
+    const newAssignedToId = data.assignedToId === UNASSIGNED_VALUE ? null : (data.assignedToId ?? null)
+    const currentAssignedToId = ticket.assignedTo?.id ?? null
+    if (newAssignedToId !== currentAssignedToId) changes.assignedToId = newAssignedToId
     const newCategory = data.category || null
     if (newCategory !== (ticket.category ?? null)) changes.category = newCategory
 
@@ -286,6 +299,38 @@ function EditTicketForm({ ticketId }: { ticketId: string }) {
                 />
               </div>
 
+              {isSuperuser && (
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <FormField
+                    control={form.control}
+                    name="assignedToId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Assigned To</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select assignee" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value={UNASSIGNED_VALUE}>Unassigned</SelectItem>
+                            {usersData?.items
+                              ?.filter((u) => u.isSuperuser || u.isActive)
+                              .map((u) => (
+                                <SelectItem key={u.id} value={u.id}>
+                                  {u.name ?? u.email}{u.name ? ` (${u.email})` : ""}
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
+
               <div className="grid gap-6 sm:grid-cols-2">
                 <FormField
                   control={form.control}
@@ -366,6 +411,7 @@ function EditTicketForm({ ticketId }: { ticketId: string }) {
 // ── Main Page ────────────────────────────────────────────────────────────
 
 function EditTicketPage() {
+  useDocumentTitle("Edit Ticket")
   const { ticketId } = useParams({ from: "/_app/support/$ticketId/edit" as const })
   return <EditTicketForm ticketId={ticketId} />
 }

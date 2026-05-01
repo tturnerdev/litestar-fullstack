@@ -22,6 +22,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { DndSettingsForm } from "@/components/voice/dnd-settings-form"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useDndSettings, useExtension, useToggleDnd } from "@/lib/api/hooks/voice"
 
 export const Route = createFileRoute("/_app/voice/extensions/$extensionId/dnd")({
@@ -77,6 +78,7 @@ function formatScheduleDays(days: number[] | null): string {
 // -- Main page ----------------------------------------------------------------
 
 function DndPage() {
+  useDocumentTitle("Do Not Disturb")
   const { extensionId } = Route.useParams()
   const { data: extension, isLoading: extLoading } = useExtension(extensionId)
   const { data: dnd, isLoading: dndLoading, isError } = useDndSettings(extensionId)

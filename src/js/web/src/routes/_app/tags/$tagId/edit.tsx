@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { SkeletonCard } from "@/components/ui/skeleton"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useTag, useUpdateTag, type TagUpdate } from "@/lib/api/hooks/tags"
 
 export const Route = createFileRoute("/_app/tags/$tagId/edit")({
@@ -25,6 +26,7 @@ export const Route = createFileRoute("/_app/tags/$tagId/edit")({
 })
 
 function EditTagPage() {
+  useDocumentTitle("Edit Tag")
   const { tagId } = Route.useParams()
   const router = useRouter()
   const { data, isLoading, isError } = useTag(tagId)

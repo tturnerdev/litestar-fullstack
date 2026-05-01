@@ -59,6 +59,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import {
   type ForwardingRule,
   useCreateForwardingRule,
@@ -110,6 +111,7 @@ const CONDITION_VARIANTS: Record<string, "default" | "secondary" | "outline"> = 
 // ---------------------------------------------------------------------------
 
 function ForwardingPage() {
+  useDocumentTitle("Call Forwarding")
   const { extensionId } = Route.useParams()
   const {
     data: extension,

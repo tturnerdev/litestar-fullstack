@@ -18,6 +18,7 @@ import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-lay
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
 import { useTeam, useUpdateTeam } from "@/lib/api/hooks/teams"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { cn } from "@/lib/utils"
 
 // ── Field limits ──────────────────────────────────────────────────────
@@ -47,6 +48,7 @@ function FieldError({ message }: { message?: string }) {
 // ── Page component ──────────────────────────────────────────────────────
 
 function EditTeamPage() {
+  useDocumentTitle("Edit Team")
   const { teamId } = Route.useParams()
   const router = useRouter()
   const { data, isLoading, isError } = useTeam(teamId)

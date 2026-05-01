@@ -7,6 +7,7 @@ import {
   type AdminFaxMessageSummary,
   type AdminFaxNumberSummary,
   type AdminFaxStats,
+  type AdminGetTargetAuditLogsData,
   type AdminGetUserAuditLogsData,
   type AdminListAuditLogsData,
   type AdminListDevicesData,
@@ -31,6 +32,7 @@ import {
   adminGetDeviceStats,
   adminGetFaxStats,
   adminGetSupportStats,
+  adminGetTargetAuditLogs,
   adminGetTeam,
   adminGetUser,
   adminGetUserAuditLogs,
@@ -571,5 +573,29 @@ export function useAdminSupportStats() {
       const response = await adminGetSupportStats()
       return response.data as AdminSupportStats
     },
+  })
+}
+
+export function useTargetAuditLogs(
+  targetType: string,
+  targetId: string,
+  options?: { enabled?: boolean; page?: number; pageSize?: number },
+) {
+  const { enabled = true, page = 1, pageSize = 25 } = options ?? {}
+  return useQuery({
+    queryKey: ["admin", "audit", "target", targetType, targetId, page, pageSize],
+    queryFn: async () => {
+      const query = {
+        currentPage: page,
+        pageSize,
+      } as unknown as AdminGetTargetAuditLogsData["query"]
+      const response = await adminGetTargetAuditLogs({
+        path: { target_type: targetType, target_id: targetId },
+        query,
+      })
+      return response.data as { items: AuditLogEntry[]; total: number }
+    },
+    enabled: enabled && !!targetType && !!targetId,
+    staleTime: 60_000,
   })
 }

@@ -14,6 +14,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Separator } from "@/components/ui/separator"
 import { SkeletonCard } from "@/components/ui/skeleton"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import {
   useDndSettings,
   useExtensions,
@@ -27,6 +28,7 @@ export const Route = createFileRoute("/_app/voice/")({
 })
 
 function VoiceOverviewPage() {
+  useDocumentTitle("Voice")
   return (
     <PageContainer className="flex-1 space-y-8">
       <PageHeader

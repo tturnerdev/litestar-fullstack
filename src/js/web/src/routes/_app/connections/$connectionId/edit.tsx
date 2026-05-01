@@ -42,6 +42,7 @@ import { SkeletonCard } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { useConnection, useUpdateConnection, type ConnectionUpdate } from "@/lib/api/hooks/connections"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/connections/$connectionId/edit")({
@@ -207,6 +208,7 @@ function FieldError({ message }: { message?: string }) {
 // ── Page component ───────────────────────────────────────────────────────
 
 function EditConnectionPage() {
+  useDocumentTitle("Edit Connection")
   const { connectionId } = Route.useParams()
   const router = useRouter()
   const { data, isLoading, isError } = useConnection(connectionId)

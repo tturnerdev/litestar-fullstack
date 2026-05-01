@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { EmptyState } from "@/components/ui/empty-state"
 import { PageContainer } from "@/components/ui/page-layout"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { acceptTeamInvitation, getTeam, rejectTeamInvitation } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/teams/$teamId/invitations/$invitationId/accept")({
@@ -17,6 +18,7 @@ export const Route = createFileRoute("/_app/teams/$teamId/invitations/$invitatio
 })
 
 function AcceptInvitationPage() {
+  useDocumentTitle("Accept Invitation")
   const navigate = useNavigate()
   const { teamId, invitationId } = useParams({
     from: "/_app/teams/$teamId/invitations/$invitationId/accept",

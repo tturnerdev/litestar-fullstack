@@ -46,6 +46,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { CopyButton } from "@/components/ui/copy-button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAdminUpdateUser, useAdminUser } from "@/lib/api/hooks/admin"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 
 export const Route = createFileRoute("/_app/admin/users/$userId")({
@@ -131,6 +132,7 @@ function SectionHeading({
 function AdminUserDetailPage() {
   const { userId } = Route.useParams()
   const { data, isLoading, isError } = useAdminUser(userId)
+  useDocumentTitle(data?.name || data?.email ? `Admin - ${data.name || data.email}` : "Admin - User Details")
   const updateUser = useAdminUpdateUser(userId)
   const [editOpen, setEditOpen] = useState(false)
   const [rolesOpen, setRolesOpen] = useState(false)

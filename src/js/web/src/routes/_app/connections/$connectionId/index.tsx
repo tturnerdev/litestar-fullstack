@@ -47,6 +47,7 @@ import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
 import { CopyButton } from "@/components/ui/copy-button"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import {
@@ -55,9 +56,13 @@ import {
   useTestConnection,
   useUpdateConnection,
 } from "@/lib/api/hooks/connections"
+import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 
 export const Route = createFileRoute("/_app/connections/$connectionId/")({
   component: ConnectionDetailPage,
+  validateSearch: (search: Record<string, unknown>): { tab?: string } => ({
+    tab: (search.tab as string) || undefined,
+  }),
 })
 
 // ── Label maps ──────────────────────────────────────────────────────────
@@ -148,6 +153,8 @@ function TimestampField({
 
 function ConnectionDetailPage() {
   const { connectionId } = Route.useParams()
+  const { tab = "overview" } = Route.useSearch()
+  const navigate = Route.useNavigate()
   const router = useRouter()
   const { data, isLoading, isError } = useConnection(connectionId)
   useDocumentTitle(data ? `Connections - ${data.name}` : "Connection Details")
@@ -384,246 +391,262 @@ function ConnectionDetailPage() {
         </Alert>
       )}
 
-      {/* Connection Info */}
       <PageSection>
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Globe className="h-5 w-5 text-muted-foreground" />
-              <CardTitle>Connection Info</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
-              <div>
-                <p className="text-muted-foreground">Name</p>
-                <p className="font-medium">{data.name}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Type</p>
-                <p>{typeLabels[data.connectionType] ?? data.connectionType}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Provider</p>
-                <p>{data.provider}</p>
-              </div>
-              <div className="md:col-span-2 lg:col-span-3">
-                <p className="text-muted-foreground">Description</p>
-                <p>{data.description || "---"}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Status</p>
-                <div className="mt-0.5">
-                  <StatusBadge status={data.status} />
-                </div>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Enabled</p>
-                <p>{data.isEnabled ? "Yes" : "No"}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Connection ID</p>
-                <div className="flex items-center gap-1">
-                  <p className="font-mono text-xs">{connectionId}</p>
-                  <CopyButton value={connectionId} label="connection ID" />
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </PageSection>
+        <Tabs value={tab} onValueChange={(value) => navigate({ search: () => ({ tab: value }), replace: true })}>
+          <TabsList>
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="activity">Activity</TabsTrigger>
+          </TabsList>
 
-      {/* Server Configuration */}
-      <PageSection delay={0.1}>
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Server className="h-5 w-5 text-muted-foreground" />
-              <CardTitle>Server Configuration</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
-              <div>
-                <p className="text-muted-foreground">Host</p>
-                <div className="flex items-center gap-1">
-                  <p className="font-mono text-xs">{data.host || "---"}</p>
-                  {data.host && <CopyButton value={data.host} label="host" />}
+          <TabsContent value="overview" className="mt-6 space-y-6">
+            {/* Connection Info */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Globe className="h-5 w-5 text-muted-foreground" />
+                  <CardTitle>Connection Info</CardTitle>
                 </div>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Port</p>
-                <p className="font-mono text-xs">{data.port != null ? String(data.port) : "---"}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">SSL / TLS</p>
-                <div className="flex items-center gap-1.5">
-                  {data.port === 443 ? (
-                    <>
-                      <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
-                      <span>Likely (port 443)</span>
-                    </>
-                  ) : (
-                    <span className="text-muted-foreground">Not determined</span>
-                  )}
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </PageSection>
-
-      {/* Authentication */}
-      <PageSection delay={0.15}>
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Key className="h-5 w-5 text-muted-foreground" />
-              <CardTitle>Authentication</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
-              <div>
-                <p className="text-muted-foreground">Auth Type</p>
-                <p>{authTypeLabels[data.authType] ?? data.authType}</p>
-              </div>
-              {data.credentialFields.length > 0 && (
-                <div className="md:col-span-2 lg:col-span-3">
-                  <p className="text-muted-foreground">Credentials</p>
-                  <div className="mt-1.5 flex flex-wrap gap-2">
-                    {data.credentialFields.map((field) => (
-                      <Badge
-                        key={field}
-                        variant="outline"
-                        className="gap-1.5 font-mono text-xs"
-                      >
-                        <Lock className="h-3 w-3 text-muted-foreground" />
-                        {field}
-                      </Badge>
-                    ))}
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
+                  <div>
+                    <p className="text-muted-foreground">Name</p>
+                    <p className="font-medium">{data.name}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Type</p>
+                    <p>{typeLabels[data.connectionType] ?? data.connectionType}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Provider</p>
+                    <p>{data.provider}</p>
+                  </div>
+                  <div className="md:col-span-2 lg:col-span-3">
+                    <p className="text-muted-foreground">Description</p>
+                    <p>{data.description || "---"}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Status</p>
+                    <div className="mt-0.5">
+                      <StatusBadge status={data.status} />
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Enabled</p>
+                    <p>{data.isEnabled ? "Yes" : "No"}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Connection ID</p>
+                    <div className="flex items-center gap-1">
+                      <p className="font-mono text-xs">{connectionId}</p>
+                      <CopyButton value={connectionId} label="connection ID" />
+                    </div>
                   </div>
                 </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </PageSection>
+              </CardContent>
+            </Card>
 
-      {/* Settings */}
-      <PageSection delay={0.2}>
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Settings className="h-5 w-5 text-muted-foreground" />
-              <CardTitle>Settings</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Key-value display */}
-            {settingsEntries.length > 0 && (
-              <div className="rounded-md border">
-                <div className="grid grid-cols-[minmax(120px,1fr)_2fr] text-sm">
-                  {settingsEntries.map(([key, value], idx) => (
-                    <div key={key} className="contents">
-                      <div
-                        className={`px-3 py-2 font-mono text-xs text-muted-foreground ${idx !== settingsEntries.length - 1 ? "border-b" : ""}`}
-                      >
-                        {key}
-                      </div>
-                      <div
-                        className={`border-l px-3 py-2 font-mono text-xs ${idx !== settingsEntries.length - 1 ? "border-b" : ""}`}
-                      >
-                        {typeof value === "object" ? JSON.stringify(value) : String(value ?? "---")}
+            {/* Server Configuration */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Server className="h-5 w-5 text-muted-foreground" />
+                  <CardTitle>Server Configuration</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
+                  <div>
+                    <p className="text-muted-foreground">Host</p>
+                    <div className="flex items-center gap-1">
+                      <p className="font-mono text-xs">{data.host || "---"}</p>
+                      {data.host && <CopyButton value={data.host} label="host" />}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Port</p>
+                    <p className="font-mono text-xs">{data.port != null ? String(data.port) : "---"}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">SSL / TLS</p>
+                    <div className="flex items-center gap-1.5">
+                      {data.port === 443 ? (
+                        <>
+                          <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
+                          <span>Likely (port 443)</span>
+                        </>
+                      ) : (
+                        <span className="text-muted-foreground">Not determined</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Authentication */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Key className="h-5 w-5 text-muted-foreground" />
+                  <CardTitle>Authentication</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
+                  <div>
+                    <p className="text-muted-foreground">Auth Type</p>
+                    <p>{authTypeLabels[data.authType] ?? data.authType}</p>
+                  </div>
+                  {data.credentialFields.length > 0 && (
+                    <div className="md:col-span-2 lg:col-span-3">
+                      <p className="text-muted-foreground">Credentials</p>
+                      <div className="mt-1.5 flex flex-wrap gap-2">
+                        {data.credentialFields.map((field) => (
+                          <Badge
+                            key={field}
+                            variant="outline"
+                            className="gap-1.5 font-mono text-xs"
+                          >
+                            <Lock className="h-3 w-3 text-muted-foreground" />
+                            {field}
+                          </Badge>
+                        ))}
                       </div>
                     </div>
-                  ))}
+                  )}
                 </div>
-              </div>
-            )}
-            {settingsEntries.length === 0 && !settingsDirty && (
-              <p className="text-sm text-muted-foreground">No settings configured.</p>
-            )}
+              </CardContent>
+            </Card>
 
-            <Separator />
-
-            {/* Raw JSON editor */}
-            <div className="space-y-2">
-              <Label htmlFor="settings-json">Configuration JSON</Label>
-              <Textarea
-                id="settings-json"
-                value={currentSettingsText}
-                onChange={(e) => {
-                  setSettingsText(e.target.value)
-                  setSettingsError(null)
-                  setSettingsDirty(true)
-                }}
-                rows={8}
-                className="font-mono text-xs"
-                placeholder='{"key": "value"}'
-              />
-              {settingsError && (
-                <p className="text-destructive text-sm">{settingsError}</p>
-              )}
-            </div>
-            <div className="flex items-center justify-end gap-2">
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  setSettingsText(null)
-                  setSettingsError(null)
-                  setSettingsDirty(false)
-                }}
-                disabled={!settingsDirty || updateConnection.isPending}
-              >
-                Reset
-              </Button>
-              <Button
-                onClick={handleSaveSettings}
-                disabled={!settingsDirty || updateConnection.isPending}
-              >
-                {updateConnection.isPending && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            {/* Settings */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Settings className="h-5 w-5 text-muted-foreground" />
+                  <CardTitle>Settings</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Key-value display */}
+                {settingsEntries.length > 0 && (
+                  <div className="rounded-md border">
+                    <div className="grid grid-cols-[minmax(120px,1fr)_2fr] text-sm">
+                      {settingsEntries.map(([key, value], idx) => (
+                        <div key={key} className="contents">
+                          <div
+                            className={`px-3 py-2 font-mono text-xs text-muted-foreground ${idx !== settingsEntries.length - 1 ? "border-b" : ""}`}
+                          >
+                            {key}
+                          </div>
+                          <div
+                            className={`border-l px-3 py-2 font-mono text-xs ${idx !== settingsEntries.length - 1 ? "border-b" : ""}`}
+                          >
+                            {typeof value === "object" ? JSON.stringify(value) : String(value ?? "---")}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 )}
-                Save Settings
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </PageSection>
+                {settingsEntries.length === 0 && !settingsDirty && (
+                  <p className="text-sm text-muted-foreground">No settings configured.</p>
+                )}
 
-      {/* Metadata */}
-      <PageSection delay={0.25}>
-        <Card>
-          <CardHeader>
-            <CardTitle>Metadata</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-4">
-              <TimestampField label="Created" value={data.createdAt} />
-              <TimestampField label="Updated" value={data.updatedAt} />
-              <TimestampField label="Last Health Check" value={data.lastHealthCheck} />
-              <div>
-                <p className="text-muted-foreground text-sm">Team ID</p>
-                <div className="flex items-center gap-1">
-                  <p className="font-mono text-xs">{data.teamId}</p>
-                  <CopyButton value={data.teamId} label="team ID" />
+                <Separator />
+
+                {/* Raw JSON editor */}
+                <div className="space-y-2">
+                  <Label htmlFor="settings-json">Configuration JSON</Label>
+                  <Textarea
+                    id="settings-json"
+                    value={currentSettingsText}
+                    onChange={(e) => {
+                      setSettingsText(e.target.value)
+                      setSettingsError(null)
+                      setSettingsDirty(true)
+                    }}
+                    rows={8}
+                    className="font-mono text-xs"
+                    placeholder='{"key": "value"}'
+                  />
+                  {settingsError && (
+                    <p className="text-destructive text-sm">{settingsError}</p>
+                  )}
                 </div>
-              </div>
-            </div>
-            {data.lastError && (
-              <div className="mt-4">
-                <Alert variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertTitle>Last Error</AlertTitle>
-                  <AlertDescription className="font-mono text-xs">
-                    {data.lastError}
-                  </AlertDescription>
-                </Alert>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                <div className="flex items-center justify-end gap-2">
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      setSettingsText(null)
+                      setSettingsError(null)
+                      setSettingsDirty(false)
+                    }}
+                    disabled={!settingsDirty || updateConnection.isPending}
+                  >
+                    Reset
+                  </Button>
+                  <Button
+                    onClick={handleSaveSettings}
+                    disabled={!settingsDirty || updateConnection.isPending}
+                  >
+                    {updateConnection.isPending && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+                    Save Settings
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Metadata */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Metadata</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-4">
+                  <TimestampField label="Created" value={data.createdAt} />
+                  <TimestampField label="Updated" value={data.updatedAt} />
+                  <TimestampField label="Last Health Check" value={data.lastHealthCheck} />
+                  <div>
+                    <p className="text-muted-foreground text-sm">Team ID</p>
+                    <div className="flex items-center gap-1">
+                      <p className="font-mono text-xs">{data.teamId}</p>
+                      <CopyButton value={data.teamId} label="team ID" />
+                    </div>
+                  </div>
+                </div>
+                {data.lastError && (
+                  <div className="mt-4">
+                    <Alert variant="destructive">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertTitle>Last Error</AlertTitle>
+                      <AlertDescription className="font-mono text-xs">
+                        {data.lastError}
+                      </AlertDescription>
+                    </Alert>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="activity" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Activity Log</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <EntityActivityPanel
+                  targetType="connection"
+                  targetId={connectionId}
+                  enabled={tab === "activity"}
+                />
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </PageSection>
 
       {/* Danger Zone */}
