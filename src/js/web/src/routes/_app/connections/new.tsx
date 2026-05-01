@@ -9,6 +9,7 @@ import {
   KeyRound,
   Loader2,
   Lock,
+  Network,
   Phone,
   Plug,
   ShieldCheck,
@@ -72,6 +73,11 @@ const tips = [
     description: "Connect to Twilio, Telnyx, etc.",
   },
   {
+    icon: Network,
+    title: "Network Gateway",
+    description: "Connect to UniFi, Meraki, etc.",
+  },
+  {
     icon: Plug,
     title: "Other Sources",
     description: "Any external API or data source",
@@ -82,6 +88,7 @@ const connectionTypes = [
   { value: "pbx", label: "PBX / Phone Server", icon: Phone },
   { value: "helpdesk", label: "Helpdesk / Ticketing", icon: Headphones },
   { value: "carrier", label: "Telephone Carrier", icon: Globe },
+  { value: "network", label: "Network Gateway", icon: Network },
   { value: "other", label: "Other", icon: Plug },
 ]
 
@@ -358,7 +365,6 @@ function NewConnectionPage() {
     !!currentTeam
 
   // Get the icon for the currently selected connection type
-  const selectedTypeIcon = connectionTypes.find((t) => t.value === connectionType)?.icon
 
   return (
     <>
@@ -436,14 +442,7 @@ function NewConnectionPage() {
                   </Label>
                   <Select value={connectionType} onValueChange={setConnectionType}>
                     <SelectTrigger id="conn-type">
-                      <span className="flex items-center gap-2">
-                        {selectedTypeIcon &&
-                          (() => {
-                            const Icon = selectedTypeIcon
-                            return <Icon className="h-4 w-4 text-muted-foreground" />
-                          })()}
-                        <SelectValue />
-                      </span>
+                      <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       {connectionTypes.map((t) => (
@@ -514,7 +513,7 @@ function NewConnectionPage() {
                   <Label htmlFor="conn-host">Host / URL</Label>
                   <Input
                     id="conn-host"
-                    placeholder="e.g., pbx.example.com or https://api.example.com"
+                    placeholder={connectionType === "network" ? "e.g., 192.168.1.1 or unifi.local" : "e.g., pbx.example.com or https://api.example.com"}
                     value={host}
                     onChange={(e) => handleFieldChange("host", e.target.value, setHost)}
                     onBlur={() => handleFieldBlur("host", host)}

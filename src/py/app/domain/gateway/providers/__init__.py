@@ -42,6 +42,7 @@ def get_provider(name: str) -> type[GatewayProvider] | None:
 # defined because the provider modules reference them at decoration time.
 from app.domain.gateway.providers._freepbx import FreePBXProvider
 from app.domain.gateway.providers._telnyx import TelnyxProvider
+from app.domain.gateway.providers._unifi import UnifiProvider
 
 __all__ = (
     "FreePBXProvider",
@@ -49,6 +50,7 @@ __all__ = (
     "GatewayProvider",
     "ProviderResult",
     "TelnyxProvider",
+    "UnifiProvider",
     "get_provider",
     "register_provider",
 )

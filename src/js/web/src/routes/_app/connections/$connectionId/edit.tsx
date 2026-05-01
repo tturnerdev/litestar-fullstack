@@ -9,6 +9,7 @@ import {
   KeyRound,
   Loader2,
   Lock,
+  Network,
   Phone,
   Plug,
   ShieldCheck,
@@ -72,6 +73,11 @@ const tips = [
     description: "Connect to Twilio, Telnyx, etc.",
   },
   {
+    icon: Network,
+    title: "Network Gateway",
+    description: "Connect to UniFi, Meraki, etc.",
+  },
+  {
     icon: Plug,
     title: "Other Sources",
     description: "Any external API or data source",
@@ -82,6 +88,7 @@ const connectionTypes = [
   { value: "pbx", label: "PBX / Phone Server", icon: Phone },
   { value: "helpdesk", label: "Helpdesk / Ticketing", icon: Headphones },
   { value: "carrier", label: "Telephone Carrier", icon: Globe },
+  { value: "network", label: "Network Gateway", icon: Network },
   { value: "other", label: "Other", icon: Plug },
 ]
 
@@ -624,7 +631,7 @@ function EditConnectionPage() {
                   <Label htmlFor="conn-host">Host / URL</Label>
                   <Input
                     id="conn-host"
-                    placeholder="e.g., pbx.example.com or https://api.example.com"
+                    placeholder={connectionType === "network" ? "e.g., 192.168.1.1 or unifi.local" : "e.g., pbx.example.com or https://api.example.com"}
                     value={host}
                     onChange={(e) => handleFieldChange("host", e.target.value, setHost)}
                     onBlur={() => handleFieldBlur("host", host)}

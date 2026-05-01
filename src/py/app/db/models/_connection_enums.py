@@ -9,6 +9,7 @@ class ConnectionType(StrEnum):
     PBX = "pbx"
     HELPDESK = "helpdesk"
     CARRIER = "carrier"
+    NETWORK = "network"
     OTHER = "other"
 
 

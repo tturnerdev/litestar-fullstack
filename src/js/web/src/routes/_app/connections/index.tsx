@@ -68,6 +68,7 @@ const typeLabels: Record<string, string> = {
   pbx: "PBX",
   helpdesk: "Helpdesk",
   carrier: "Carrier",
+  network: "Network",
   other: "Other",
 }
 
@@ -75,6 +76,7 @@ const typeBadgeVariant: Record<string, "default" | "secondary" | "outline" | "de
   pbx: "default",
   helpdesk: "secondary",
   carrier: "outline",
+  network: "secondary",
   other: "outline",
 }
 
@@ -82,6 +84,7 @@ const connectionTypeOptions: FilterOption[] = [
   { value: "pbx", label: "PBX" },
   { value: "helpdesk", label: "Helpdesk" },
   { value: "carrier", label: "Carrier" },
+  { value: "network", label: "Network" },
   { value: "other", label: "Other" },
 ]
 

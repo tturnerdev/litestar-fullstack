@@ -3,12 +3,16 @@ import {
   ChevronDown,
   ChevronRight,
   Clock,
+  Code,
   Download,
   FileSpreadsheet,
   FileText,
   Globe,
   Loader2,
+  Minus,
   Monitor,
+  Plus,
+  RefreshCw,
   Search,
   User,
   X,
@@ -16,6 +20,7 @@ import {
 import { Fragment, useCallback, useMemo, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { DateRangeFilter, getPresetDates } from "@/components/ui/date-range-filter"
 import {
   DropdownMenu,
@@ -26,6 +31,14 @@ import {
 import { EmptyState } from "@/components/ui/empty-state"
 import { FilterDropdown, type FilterOption } from "@/components/ui/filter-dropdown"
 import { Input } from "@/components/ui/input"
+import { Separator } from "@/components/ui/separator"
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet"
 import { SkeletonTable } from "@/components/ui/skeleton"
 import {
   nextSortDirection,
@@ -365,6 +378,349 @@ function DetailField({
   )
 }
 
+// ── Diff helpers ──────────────────────────────────────────────────────────
+
+interface DiffDetails {
+  before: Record<string, unknown> | null
+  after: Record<string, unknown> | null
+  changedFields: string[] | null
+}
+
+/** Try to extract before/after diff data from the entry details. */
+function parseDiffDetails(
+  details: Record<string, unknown> | null | undefined,
+): DiffDetails | null {
+  if (!details) return null
+  const before = details.before as Record<string, unknown> | null | undefined
+  const after = details.after as Record<string, unknown> | null | undefined
+  if (before === undefined && after === undefined) return null
+  return {
+    before: (before as Record<string, unknown> | null) ?? null,
+    after: (after as Record<string, unknown> | null) ?? null,
+    changedFields: (details.changed_fields ?? details.changedFields) as string[] | null,
+  }
+}
+
+/** Format a value for display in the diff view. */
+function formatDiffValue(value: unknown): string {
+  if (value === null || value === undefined) return "null"
+  if (typeof value === "boolean") return value ? "true" : "false"
+  if (typeof value === "object") return JSON.stringify(value)
+  return String(value)
+}
+
+/** Collect all unique keys from before and after objects. */
+function collectAllFields(
+  before: Record<string, unknown> | null,
+  after: Record<string, unknown> | null,
+): string[] {
+  const keys = new Set<string>()
+  if (before) for (const k of Object.keys(before)) keys.add(k)
+  if (after) for (const k of Object.keys(after)) keys.add(k)
+  return [...keys].sort()
+}
+
+type FieldChangeType = "added" | "removed" | "changed" | "unchanged"
+
+function getFieldChangeType(
+  field: string,
+  before: Record<string, unknown> | null,
+  after: Record<string, unknown> | null,
+  changedFields: string[] | null,
+): FieldChangeType {
+  const inBefore = before !== null && field in before
+  const inAfter = after !== null && field in after
+
+  // Create: everything is "added"
+  if (before === null) return "added"
+  // Delete: everything is "removed"
+  if (after === null) return "removed"
+
+  if (!inBefore && inAfter) return "added"
+  if (inBefore && !inAfter) return "removed"
+
+  // If the server provided changed_fields, trust it
+  if (changedFields !== null) {
+    return changedFields.includes(field) ? "changed" : "unchanged"
+  }
+
+  // Fall back to value comparison
+  if (inBefore && inAfter) {
+    const bv = JSON.stringify(before[field])
+    const av = JSON.stringify(after[field])
+    return bv !== av ? "changed" : "unchanged"
+  }
+  return "unchanged"
+}
+
+// ── Change Diff ───────────────────────────────────────────────────────────
+
+function ChangeDiff({ diff }: { diff: DiffDetails }) {
+  const { before, after, changedFields } = diff
+  const allFields = collectAllFields(before, after)
+
+  // Determine the kind of action for the header
+  const isCreate = before === null && after !== null
+  const isDelete = before !== null && after === null
+
+  if (allFields.length === 0) {
+    return (
+      <p className="text-xs italic text-muted-foreground">No field data available.</p>
+    )
+  }
+
+  return (
+    <div className="space-y-1">
+      {/* Legend */}
+      <div className="mb-3 flex items-center gap-3 text-xs text-muted-foreground">
+        {isCreate ? (
+          <span className="flex items-center gap-1">
+            <Plus className="h-3 w-3 text-green-600 dark:text-green-400" />
+            All fields created
+          </span>
+        ) : isDelete ? (
+          <span className="flex items-center gap-1">
+            <Minus className="h-3 w-3 text-red-600 dark:text-red-400" />
+            All fields removed
+          </span>
+        ) : (
+          <>
+            <span className="flex items-center gap-1">
+              <RefreshCw className="h-3 w-3 text-yellow-600 dark:text-yellow-400" />
+              Modified
+            </span>
+            <span className="flex items-center gap-1">
+              <Plus className="h-3 w-3 text-green-600 dark:text-green-400" />
+              Added
+            </span>
+            <span className="flex items-center gap-1">
+              <Minus className="h-3 w-3 text-red-600 dark:text-red-400" />
+              Removed
+            </span>
+          </>
+        )}
+      </div>
+
+      <div className="divide-y divide-border rounded-md border">
+        {allFields.map((field) => {
+          const changeType = getFieldChangeType(field, before, after, changedFields)
+          return (
+            <DiffRow
+              key={field}
+              field={field}
+              changeType={changeType}
+              beforeValue={before?.[field]}
+              afterValue={after?.[field]}
+            />
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function DiffRow({
+  field,
+  changeType,
+  beforeValue,
+  afterValue,
+}: {
+  field: string
+  changeType: FieldChangeType
+  beforeValue: unknown
+  afterValue: unknown
+}) {
+  const rowBg =
+    changeType === "added"
+      ? "bg-green-50/50 dark:bg-green-950/20"
+      : changeType === "removed"
+        ? "bg-red-50/50 dark:bg-red-950/20"
+        : changeType === "changed"
+          ? "bg-yellow-50/50 dark:bg-yellow-950/20"
+          : ""
+
+  const icon =
+    changeType === "added" ? (
+      <Plus className="h-3.5 w-3.5 shrink-0 text-green-600 dark:text-green-400" />
+    ) : changeType === "removed" ? (
+      <Minus className="h-3.5 w-3.5 shrink-0 text-red-600 dark:text-red-400" />
+    ) : changeType === "changed" ? (
+      <RefreshCw className="h-3.5 w-3.5 shrink-0 text-yellow-600 dark:text-yellow-400" />
+    ) : null
+
+  return (
+    <div className={`flex items-start gap-3 px-3 py-2 ${rowBg}`}>
+      <div className="flex w-5 shrink-0 items-center pt-0.5">{icon}</div>
+      <div className="min-w-0 flex-1">
+        <span className="text-xs font-medium text-foreground">
+          {field.replace(/_/g, " ")}
+        </span>
+        <div className="mt-0.5">
+          {changeType === "added" && (
+            <span className="font-mono text-xs text-green-700 dark:text-green-300">
+              {formatDiffValue(afterValue)}
+            </span>
+          )}
+          {changeType === "removed" && (
+            <span className="font-mono text-xs text-red-700 line-through dark:text-red-300">
+              {formatDiffValue(beforeValue)}
+            </span>
+          )}
+          {changeType === "changed" && (
+            <div className="flex flex-col gap-0.5">
+              <span className="font-mono text-xs text-red-700 line-through dark:text-red-300">
+                {formatDiffValue(beforeValue)}
+              </span>
+              <span className="font-mono text-xs text-green-700 dark:text-green-300">
+                {formatDiffValue(afterValue)}
+              </span>
+            </div>
+          )}
+          {changeType === "unchanged" && (
+            <span className="font-mono text-xs text-muted-foreground">
+              {formatDiffValue(afterValue ?? beforeValue)}
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Detail Sheet ──────────────────────────────────────────────────────────
+
+function AuditLogDetailSheet({
+  entry,
+  open,
+  onOpenChange,
+}: {
+  entry: AuditLogEntry | null
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}) {
+  const [rawJsonOpen, setRawJsonOpen] = useState(false)
+
+  if (!entry) return null
+
+  const diff = parseDiffDetails(entry.details)
+  const hasDetails = entry.details && Object.keys(entry.details).length > 0
+  const actionVerb = getActionVerb(entry.action)
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className="sm:max-w-lg">
+        <SheetHeader>
+          <SheetTitle className="flex items-center gap-2">
+            <Badge
+              variant="outline"
+              className={getActionBadgeClasses(entry.action)}
+            >
+              {entry.action}
+            </Badge>
+          </SheetTitle>
+          <SheetDescription>
+            {new Date(entry.createdAt).toLocaleString()}
+            {entry.actorEmail && ` by ${entry.actorEmail}`}
+          </SheetDescription>
+        </SheetHeader>
+
+        <div className="flex-1 overflow-y-auto px-4 pb-4">
+          {/* Metadata section */}
+          <div className="space-y-4">
+            {/* Actor */}
+            <div>
+              <h4 className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                <User className="h-3.5 w-3.5" />
+                Actor
+              </h4>
+              <div className="space-y-1.5">
+                <DetailField label="Name" value={entry.actorName} />
+                <DetailField label="Email" value={entry.actorEmail} mono />
+                <DetailField label="ID" value={entry.actorId} mono />
+              </div>
+            </div>
+
+            {/* Request */}
+            <div>
+              <h4 className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                <Globe className="h-3.5 w-3.5" />
+                Request
+              </h4>
+              <div className="space-y-1.5">
+                <DetailField label="IP Address" value={entry.ipAddress} mono />
+                <DetailField label="User Agent" value={entry.userAgent} />
+                <DetailField
+                  label="Timestamp"
+                  value={new Date(entry.createdAt).toLocaleString()}
+                />
+              </div>
+            </div>
+
+            {/* Target */}
+            <div>
+              <h4 className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                <Monitor className="h-3.5 w-3.5" />
+                Target
+              </h4>
+              <div className="space-y-1.5">
+                <DetailField label="Type" value={entry.targetType} />
+                <DetailField label="Label" value={entry.targetLabel} />
+                <DetailField label="ID" value={entry.targetId} mono />
+              </div>
+            </div>
+          </div>
+
+          {/* Diff section */}
+          {diff && (
+            <>
+              <Separator className="my-4" />
+              <div>
+                <h4 className="mb-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <FileText className="h-3.5 w-3.5" />
+                  {actionVerb === "created"
+                    ? "Created Values"
+                    : actionVerb === "deleted"
+                      ? "Deleted Values"
+                      : "Changes"}
+                </h4>
+                <ChangeDiff diff={diff} />
+              </div>
+            </>
+          )}
+
+          {/* Raw JSON fallback */}
+          {hasDetails && (
+            <>
+              <Separator className="my-4" />
+              <Collapsible open={rawJsonOpen} onOpenChange={setRawJsonOpen}>
+                <CollapsibleTrigger asChild>
+                  <button
+                    type="button"
+                    className="flex w-full items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground"
+                  >
+                    {rawJsonOpen ? (
+                      <ChevronDown className="h-3.5 w-3.5" />
+                    ) : (
+                      <ChevronRight className="h-3.5 w-3.5" />
+                    )}
+                    <Code className="h-3.5 w-3.5" />
+                    Raw Details
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <pre className="mt-2 max-h-64 overflow-auto rounded-md border bg-muted/50 p-3 font-mono text-xs leading-relaxed">
+                    {JSON.stringify(entry.details, null, 2)}
+                  </pre>
+                </CollapsibleContent>
+              </Collapsible>
+            </>
+          )}
+        </div>
+      </SheetContent>
+    </Sheet>
+  )
+}
+
 // ── Main Component ─────────────────────────────────────────────────────────
 
 export function AuditLogTable() {
@@ -384,6 +740,9 @@ export function AuditLogTable() {
 
   // Expand
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
+
+  // Detail sheet
+  const [selectedEntry, setSelectedEntry] = useState<AuditLogEntry | null>(null)
 
   // Export
   const [isExporting, setIsExporting] = useState(false)
@@ -741,14 +1100,24 @@ export function AuditLogTable() {
                     <Fragment key={entry.id}>
                       <TableRow
                         className="cursor-pointer transition-colors hover:bg-muted/50"
-                        onClick={() => toggleRow(entry.id)}
+                        onClick={() => setSelectedEntry(entry)}
                       >
                         <TableCell className="w-8 pr-0">
-                          {isExpanded ? (
-                            <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                          ) : (
-                            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                          )}
+                          <button
+                            type="button"
+                            className="rounded p-0.5 hover:bg-muted"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              toggleRow(entry.id)
+                            }}
+                            aria-label={isExpanded ? "Collapse row" : "Expand row"}
+                          >
+                            {isExpanded ? (
+                              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                            )}
+                          </button>
                         </TableCell>
                         <TableCell>
                           <Badge
@@ -843,6 +1212,15 @@ export function AuditLogTable() {
           </div>
         </div>
       )}
+
+      {/* Detail sheet */}
+      <AuditLogDetailSheet
+        entry={selectedEntry}
+        open={selectedEntry !== null}
+        onOpenChange={(open) => {
+          if (!open) setSelectedEntry(null)
+        }}
+      />
     </div>
   )
 }

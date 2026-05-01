@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   AlertCircle,
   Clock,
@@ -26,7 +26,9 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -69,6 +71,7 @@ import {
   type RingGroup,
 } from "@/lib/api/hooks/call-routing"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
+import { client } from "@/lib/generated/api/client.gen"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 
@@ -388,6 +391,7 @@ function TimeConditionsTab() {
   const debouncedSearch = useDebouncedValue(search)
   const [page, setPage] = useState(1)
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
   useEffect(() => { setPage(1) }, [debouncedSearch])
 
@@ -400,10 +404,48 @@ function TimeConditionsTab() {
   const total = data?.total ?? 0
   const totalPages = Math.max(1, Math.ceil(total / 25))
 
+  const allVisibleIds = useMemo(() => items.map((tc) => tc.id), [items])
+  const allSelected = items.length > 0 && items.every((tc) => selectedIds.has(tc.id))
+  const someSelected = items.some((tc) => selectedIds.has(tc.id))
+
+  const toggleAll = useCallback(() => {
+    if (allSelected) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(allVisibleIds))
+    }
+  }, [allSelected, allVisibleIds])
+
+  const toggleOne = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }, [])
+
   const handleExport = useCallback(() => {
     if (!items.length) return
     exportToCsv("time-conditions", timeConditionCsvHeaders, items)
   }, [items])
+
+  const bulkActions = useMemo(
+    () => [
+      createBulkDeleteAction(
+        async (id) => {
+          await client.request({ method: "DELETE", url: `/api/time-conditions/${id}` })
+        },
+        () => setSelectedIds(new Set()),
+      ),
+      createExportAction<TimeCondition>(
+        "time-conditions-selected",
+        timeConditionCsvHeaders,
+        (ids) => items.filter((tc) => ids.includes(tc.id)),
+      ),
+    ],
+    [items],
+  )
 
   return (
     <div className="space-y-4">
@@ -444,6 +486,14 @@ function TimeConditionsTab() {
             <Table aria-label="Time Conditions">
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-10">
+                    <Checkbox
+                      checked={allSelected}
+                      indeterminate={someSelected && !allSelected}
+                      onChange={toggleAll}
+                      aria-label="Select all time conditions"
+                    />
+                  </TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Match Destination</TableHead>
                   <TableHead>No Match Destination</TableHead>
@@ -453,7 +503,14 @@ function TimeConditionsTab() {
               </TableHeader>
               <TableBody>
                 {items.map((tc: TimeCondition, index: number) => (
-                  <TableRow key={tc.id} className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`} onClick={(e) => { const target = e.target as HTMLElement; if (target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) return; navigate({ to: "/call-routing/time-conditions/$timeConditionId", params: { timeConditionId: tc.id } }); }}>
+                  <TableRow key={tc.id} data-state={selectedIds.has(tc.id) ? "selected" : undefined} className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`} onClick={(e) => { const target = e.target as HTMLElement; if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) return; navigate({ to: "/call-routing/time-conditions/$timeConditionId", params: { timeConditionId: tc.id } }); }}>
+                    <TableCell>
+                      <Checkbox
+                        checked={selectedIds.has(tc.id)}
+                        onChange={(e) => { e.stopPropagation(); toggleOne(tc.id) }}
+                        aria-label={`Select ${tc.name}`}
+                      />
+                    </TableCell>
                     <TableCell>
                       <Link to="/call-routing/time-conditions/$timeConditionId" params={{ timeConditionId: tc.id }} className="group flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                         <Clock className="h-4 w-4 text-muted-foreground" />
@@ -504,6 +561,13 @@ function TimeConditionsTab() {
       )}
 
       <NewTimeConditionDialog open={dialogOpen} onOpenChange={setDialogOpen} />
+
+      <BulkActionBar
+        selectedCount={selectedIds.size}
+        selectedIds={Array.from(selectedIds)}
+        onClearSelection={() => setSelectedIds(new Set())}
+        actions={bulkActions}
+      />
     </div>
   )
 }
@@ -514,6 +578,7 @@ function IvrMenusTab() {
   const debouncedSearch = useDebouncedValue(search)
   const [page, setPage] = useState(1)
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
   useEffect(() => { setPage(1) }, [debouncedSearch])
 
@@ -526,10 +591,48 @@ function IvrMenusTab() {
   const total = data?.total ?? 0
   const totalPages = Math.max(1, Math.ceil(total / 25))
 
+  const allVisibleIds = useMemo(() => items.map((ivr) => ivr.id), [items])
+  const allSelected = items.length > 0 && items.every((ivr) => selectedIds.has(ivr.id))
+  const someSelected = items.some((ivr) => selectedIds.has(ivr.id))
+
+  const toggleAll = useCallback(() => {
+    if (allSelected) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(allVisibleIds))
+    }
+  }, [allSelected, allVisibleIds])
+
+  const toggleOne = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }, [])
+
   const handleExport = useCallback(() => {
     if (!items.length) return
     exportToCsv("ivr-menus", ivrMenuCsvHeaders, items)
   }, [items])
+
+  const bulkActions = useMemo(
+    () => [
+      createBulkDeleteAction(
+        async (id) => {
+          await client.request({ method: "DELETE", url: `/api/ivr-menus/${id}` })
+        },
+        () => setSelectedIds(new Set()),
+      ),
+      createExportAction<IvrMenu>(
+        "ivr-menus-selected",
+        ivrMenuCsvHeaders,
+        (ids) => items.filter((ivr) => ids.includes(ivr.id)),
+      ),
+    ],
+    [items],
+  )
 
   return (
     <div className="space-y-4">
@@ -570,6 +673,14 @@ function IvrMenusTab() {
             <Table aria-label="IVR Menus">
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-10">
+                    <Checkbox
+                      checked={allSelected}
+                      indeterminate={someSelected && !allSelected}
+                      onChange={toggleAll}
+                      aria-label="Select all IVR menus"
+                    />
+                  </TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Greeting</TableHead>
                   <TableHead>Options</TableHead>
@@ -579,7 +690,14 @@ function IvrMenusTab() {
               </TableHeader>
               <TableBody>
                 {items.map((ivr: IvrMenu, index: number) => (
-                  <TableRow key={ivr.id} className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`} onClick={(e) => { const target = e.target as HTMLElement; if (target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) return; navigate({ to: "/call-routing/ivr-menus/$ivrMenuId", params: { ivrMenuId: ivr.id } }); }}>
+                  <TableRow key={ivr.id} data-state={selectedIds.has(ivr.id) ? "selected" : undefined} className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`} onClick={(e) => { const target = e.target as HTMLElement; if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) return; navigate({ to: "/call-routing/ivr-menus/$ivrMenuId", params: { ivrMenuId: ivr.id } }); }}>
+                    <TableCell>
+                      <Checkbox
+                        checked={selectedIds.has(ivr.id)}
+                        onChange={(e) => { e.stopPropagation(); toggleOne(ivr.id) }}
+                        aria-label={`Select ${ivr.name}`}
+                      />
+                    </TableCell>
                     <TableCell>
                       <Link to="/call-routing/ivr-menus/$ivrMenuId" params={{ ivrMenuId: ivr.id }} className="group flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                         <Menu className="h-4 w-4 text-muted-foreground" />
@@ -626,6 +744,13 @@ function IvrMenusTab() {
       )}
 
       <NewIvrMenuDialog open={dialogOpen} onOpenChange={setDialogOpen} />
+
+      <BulkActionBar
+        selectedCount={selectedIds.size}
+        selectedIds={Array.from(selectedIds)}
+        onClearSelection={() => setSelectedIds(new Set())}
+        actions={bulkActions}
+      />
     </div>
   )
 }
@@ -636,6 +761,7 @@ function CallQueuesTab() {
   const debouncedSearch = useDebouncedValue(search)
   const [page, setPage] = useState(1)
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
   useEffect(() => { setPage(1) }, [debouncedSearch])
 
@@ -648,10 +774,48 @@ function CallQueuesTab() {
   const total = data?.total ?? 0
   const totalPages = Math.max(1, Math.ceil(total / 25))
 
+  const allVisibleIds = useMemo(() => items.map((q) => q.id), [items])
+  const allSelected = items.length > 0 && items.every((q) => selectedIds.has(q.id))
+  const someSelected = items.some((q) => selectedIds.has(q.id))
+
+  const toggleAll = useCallback(() => {
+    if (allSelected) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(allVisibleIds))
+    }
+  }, [allSelected, allVisibleIds])
+
+  const toggleOne = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }, [])
+
   const handleExport = useCallback(() => {
     if (!items.length) return
     exportToCsv("call-queues", callQueueCsvHeaders, items)
   }, [items])
+
+  const bulkActions = useMemo(
+    () => [
+      createBulkDeleteAction(
+        async (id) => {
+          await client.request({ method: "DELETE", url: `/api/call-queues/${id}` })
+        },
+        () => setSelectedIds(new Set()),
+      ),
+      createExportAction<CallQueue>(
+        "call-queues-selected",
+        callQueueCsvHeaders,
+        (ids) => items.filter((q) => ids.includes(q.id)),
+      ),
+    ],
+    [items],
+  )
 
   return (
     <div className="space-y-4">
@@ -692,6 +856,14 @@ function CallQueuesTab() {
             <Table aria-label="Call Queues">
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-10">
+                    <Checkbox
+                      checked={allSelected}
+                      indeterminate={someSelected && !allSelected}
+                      onChange={toggleAll}
+                      aria-label="Select all call queues"
+                    />
+                  </TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Number</TableHead>
                   <TableHead>Strategy</TableHead>
@@ -702,7 +874,14 @@ function CallQueuesTab() {
               </TableHeader>
               <TableBody>
                 {items.map((q: CallQueue, index: number) => (
-                  <TableRow key={q.id} className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`} onClick={(e) => { const target = e.target as HTMLElement; if (target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) return; navigate({ to: "/call-routing/call-queues/$callQueueId", params: { callQueueId: q.id } }); }}>
+                  <TableRow key={q.id} data-state={selectedIds.has(q.id) ? "selected" : undefined} className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`} onClick={(e) => { const target = e.target as HTMLElement; if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) return; navigate({ to: "/call-routing/call-queues/$callQueueId", params: { callQueueId: q.id } }); }}>
+                    <TableCell>
+                      <Checkbox
+                        checked={selectedIds.has(q.id)}
+                        onChange={(e) => { e.stopPropagation(); toggleOne(q.id) }}
+                        aria-label={`Select ${q.name}`}
+                      />
+                    </TableCell>
                     <TableCell>
                       <Link to="/call-routing/call-queues/$callQueueId" params={{ callQueueId: q.id }} className="group flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                         <Phone className="h-4 w-4 text-muted-foreground" />
@@ -750,6 +929,13 @@ function CallQueuesTab() {
       )}
 
       <NewCallQueueDialog open={dialogOpen} onOpenChange={setDialogOpen} />
+
+      <BulkActionBar
+        selectedCount={selectedIds.size}
+        selectedIds={Array.from(selectedIds)}
+        onClearSelection={() => setSelectedIds(new Set())}
+        actions={bulkActions}
+      />
     </div>
   )
 }
@@ -760,6 +946,7 @@ function RingGroupsTab() {
   const debouncedSearch = useDebouncedValue(search)
   const [page, setPage] = useState(1)
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
   useEffect(() => { setPage(1) }, [debouncedSearch])
 
@@ -772,10 +959,48 @@ function RingGroupsTab() {
   const total = data?.total ?? 0
   const totalPages = Math.max(1, Math.ceil(total / 25))
 
+  const allVisibleIds = useMemo(() => items.map((rg) => rg.id), [items])
+  const allSelected = items.length > 0 && items.every((rg) => selectedIds.has(rg.id))
+  const someSelected = items.some((rg) => selectedIds.has(rg.id))
+
+  const toggleAll = useCallback(() => {
+    if (allSelected) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(allVisibleIds))
+    }
+  }, [allSelected, allVisibleIds])
+
+  const toggleOne = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }, [])
+
   const handleExport = useCallback(() => {
     if (!items.length) return
     exportToCsv("ring-groups", ringGroupCsvHeaders, items)
   }, [items])
+
+  const bulkActions = useMemo(
+    () => [
+      createBulkDeleteAction(
+        async (id) => {
+          await client.request({ method: "DELETE", url: `/api/ring-groups/${id}` })
+        },
+        () => setSelectedIds(new Set()),
+      ),
+      createExportAction<RingGroup>(
+        "ring-groups-selected",
+        ringGroupCsvHeaders,
+        (ids) => items.filter((rg) => ids.includes(rg.id)),
+      ),
+    ],
+    [items],
+  )
 
   return (
     <div className="space-y-4">
@@ -816,6 +1041,14 @@ function RingGroupsTab() {
             <Table aria-label="Ring Groups">
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-10">
+                    <Checkbox
+                      checked={allSelected}
+                      indeterminate={someSelected && !allSelected}
+                      onChange={toggleAll}
+                      aria-label="Select all ring groups"
+                    />
+                  </TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Number</TableHead>
                   <TableHead>Strategy</TableHead>
@@ -826,7 +1059,14 @@ function RingGroupsTab() {
               </TableHeader>
               <TableBody>
                 {items.map((rg: RingGroup, index: number) => (
-                  <TableRow key={rg.id} className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`} onClick={(e) => { const target = e.target as HTMLElement; if (target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) return; navigate({ to: "/call-routing/ring-groups/$ringGroupId", params: { ringGroupId: rg.id } }); }}>
+                  <TableRow key={rg.id} data-state={selectedIds.has(rg.id) ? "selected" : undefined} className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`} onClick={(e) => { const target = e.target as HTMLElement; if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) return; navigate({ to: "/call-routing/ring-groups/$ringGroupId", params: { ringGroupId: rg.id } }); }}>
+                    <TableCell>
+                      <Checkbox
+                        checked={selectedIds.has(rg.id)}
+                        onChange={(e) => { e.stopPropagation(); toggleOne(rg.id) }}
+                        aria-label={`Select ${rg.name}`}
+                      />
+                    </TableCell>
                     <TableCell>
                       <Link to="/call-routing/ring-groups/$ringGroupId" params={{ ringGroupId: rg.id }} className="group flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                         <Users className="h-4 w-4 text-muted-foreground" />
@@ -874,6 +1114,13 @@ function RingGroupsTab() {
       )}
 
       <NewRingGroupDialog open={dialogOpen} onOpenChange={setDialogOpen} />
+
+      <BulkActionBar
+        selectedCount={selectedIds.size}
+        selectedIds={Array.from(selectedIds)}
+        onClearSelection={() => setSelectedIds(new Set())}
+        actions={bulkActions}
+      />
     </div>
   )
 }

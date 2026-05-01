@@ -66,6 +66,7 @@ const typeLabels: Record<string, string> = {
   pbx: "PBX",
   helpdesk: "Helpdesk",
   carrier: "Carrier",
+  network: "Network",
   other: "Other",
 }
 

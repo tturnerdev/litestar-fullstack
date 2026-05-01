@@ -101,7 +101,7 @@ export function QuickActionsCard({ isSuperuser, teamCount }: QuickActionsCardPro
                 <action.icon className="h-4 w-4" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="flex items-center text-sm font-medium">
+                <span className="flex items-center text-sm font-medium">
                   {action.label}
                   {action.isNew && (
                     <Badge variant="default" className="ml-2 h-4 text-[9px]">NEW</Badge>
@@ -109,7 +109,7 @@ export function QuickActionsCard({ isSuperuser, teamCount }: QuickActionsCardPro
                   {action.key === "browse-teams" && teamCount !== undefined && teamCount > 0 && (
                     <Badge variant="secondary" className="ml-2 h-4 text-[9px]">{teamCount}</Badge>
                   )}
-                </p>
+                </span>
                 <p className="text-xs text-muted-foreground">{action.description}</p>
               </div>
               {action.shortcut && (

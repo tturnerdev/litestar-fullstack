@@ -9,12 +9,11 @@ from litestar import Controller, delete, get, patch
 from litestar.di import Provide
 from litestar.params import Dependency, Parameter
 
+from sqlalchemy.orm import selectinload
+
 from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
-from app.domain.voice.deps import (
-    provide_extensions_service,
-    provide_voicemail_boxes_service,
-)
+from app.domain.voice.deps import provide_extensions_service
 from app.domain.voice.guards import requires_extension_ownership
 from app.domain.voice.schemas import (
     VoicemailMessage,
@@ -22,7 +21,7 @@ from app.domain.voice.schemas import (
     VoicemailSettings,
     VoicemailSettingsUpdate,
 )
-from app.domain.voice.services import VoicemailMessageService
+from app.domain.voice.services import ExtensionService, VoicemailBoxService, VoicemailMessageService
 from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
 
@@ -33,7 +32,6 @@ if TYPE_CHECKING:
     from litestar.security.jwt import Token
 
     from app.domain.admin.services import AuditLogService
-    from app.domain.voice.services import ExtensionService, VoicemailBoxService
 
 
 class VoicemailController(Controller):
@@ -41,23 +39,34 @@ class VoicemailController(Controller):
 
     tags = ["Voice - Voicemail"]
     guards = [requires_extension_ownership]
-    dependencies = {
+    signature_types = [
+        ExtensionService,
+        VoicemailBoxService,
+        VoicemailMessageService,
+        VoicemailMessage,
+        VoicemailMessageUpdate,
+        VoicemailSettings,
+        VoicemailSettingsUpdate,
+    ]
+    dependencies = create_service_dependencies(
+        VoicemailMessageService,
+        key="voicemail_messages_service",
+        filters={
+            "id_filter": UUID,
+            "pagination_type": "limit_offset",
+            "pagination_size": 20,
+            "created_at": True,
+            "updated_at": True,
+            "sort_field": "created_at",
+            "sort_order": "desc",
+        },
+    ) | create_service_dependencies(
+        VoicemailBoxService,
+        key="voicemail_boxes_service",
+        load=[selectinload(m.VoicemailBox.extension)],
+    ) | {
         "extensions_service": Provide(provide_extensions_service),
-        "voicemail_boxes_service": Provide(provide_voicemail_boxes_service),
         "audit_service": Provide(provide_audit_log_service),
-        **create_service_dependencies(
-            VoicemailMessageService,
-            key="voicemail_messages_service",
-            filters={
-                "id_filter": UUID,
-                "pagination_type": "limit_offset",
-                "pagination_size": 20,
-                "created_at": True,
-                "updated_at": True,
-                "sort_field": "created_at",
-                "sort_order": "desc",
-            },
-        ),
     }
 
     @get(operation_id="GetVoicemailSettings", path="/api/voice/extensions/{ext_id:uuid}/voicemail")
