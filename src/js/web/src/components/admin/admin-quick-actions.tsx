@@ -33,7 +33,7 @@ const actionGroups = [
         color: "text-violet-600 dark:text-violet-400",
         bg: "bg-violet-500/10",
         hoverBg: "group-hover/action:bg-violet-500",
-        to: "/admin/teams",
+        to: "/admin/roles",
       },
     ],
   },

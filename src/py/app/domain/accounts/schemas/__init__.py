@@ -27,6 +27,7 @@ from app.domain.accounts.schemas._password_reset import (
     ValidateResetTokenRequest,
 )
 from app.domain.accounts.schemas._roles import Role, RoleCreate, RoleUpdate, UserRoleAdd, UserRoleRevoke
+from app.domain.accounts.schemas._security_activity import SecurityActivityEntry
 from app.domain.accounts.schemas._sessions import ActiveSession, TokenRefresh
 from app.domain.accounts.schemas._user import (
     OauthAccount,
@@ -70,6 +71,7 @@ __all__ = (
     "Role",
     "RoleCreate",
     "RoleUpdate",
+    "SecurityActivityEntry",
     "TokenRefresh",
     "User",
     "UserCreate",

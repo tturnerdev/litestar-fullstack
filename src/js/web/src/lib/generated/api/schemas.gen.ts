@@ -7334,6 +7334,38 @@ export const SearchResultItemSchema = {
   type: "object",
 } as const;
 
+export const SecurityActivityEntrySchema = {
+  properties: {
+    action: {
+      type: "string",
+    },
+    createdAt: {
+      format: "date-time",
+      type: "string",
+    },
+    description: {
+      type: "string",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    ipAddress: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: ["action", "createdAt", "description", "id"],
+  title: "SecurityActivityEntry",
+  type: "object",
+} as const;
+
 export const SendFaxSchema = {
   properties: {
     body: {

@@ -615,6 +615,13 @@
       ],
       "uri": "/api/voice/phone-numbers/{phone_number_id}"
     },
+    "delete_read_notifications": {
+      "method": "delete",
+      "methods": [
+        "DELETE"
+      ],
+      "uri": "/api/notifications/read"
+    },
     "delete_registration": {
       "method": "delete",
       "methods": [
@@ -859,6 +866,31 @@
         "startDate": "DateTime | undefined"
       },
       "uri": "/api/analytics/cdrs/export"
+    },
+    "export_logs": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "queryParameters": {
+        "action": "string | undefined",
+        "actionIn": "string[] | undefined",
+        "actorIdIn": "string[] | undefined",
+        "createdAfter": "DateTime | undefined",
+        "createdBefore": "DateTime | undefined",
+        "currentPage": "number | undefined",
+        "domain": "string | undefined",
+        "end_date": "DateTime | undefined",
+        "ids": "string[] | undefined",
+        "orderBy": "string | undefined",
+        "pageSize": "number | undefined",
+        "searchIgnoreCase": "boolean | undefined",
+        "searchString": "string | undefined",
+        "sortOrder": "\"asc\" | \"desc\" | undefined",
+        "targetIdIn": "string[] | undefined",
+        "targetTypeIn": "string[] | undefined"
+      },
+      "uri": "/api/admin/audit/export"
     },
     "forgot_password": {
       "method": "post",
@@ -1221,6 +1253,13 @@
         "schedule_id"
       ],
       "uri": "/api/schedules/{schedule_id}"
+    },
+    "get_security_activity": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "uri": "/api/me/security-activity"
     },
     "get_sessions": {
       "method": "get",
@@ -2813,6 +2852,22 @@
         "file_path"
       ],
       "uri": "/saq/static/{file_path}"
+    },
+    "send_device_action": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "parameterTypes": {
+        "device_id": "UUID"
+      },
+      "parameters": [
+        "device_id"
+      ],
+      "queryParameters": {
+        "key": "string"
+      },
+      "uri": "/api/devices/{device_id}/action"
     },
     "send_fax": {
       "method": "post",

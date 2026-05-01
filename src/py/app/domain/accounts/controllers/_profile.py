@@ -9,7 +9,7 @@ from litestar import Controller, Request, delete, get, patch
 from litestar.di import Provide
 
 from app.domain.accounts.deps import provide_users_service
-from app.domain.accounts.schemas import PasswordUpdate, ProfileUpdate, User
+from app.domain.accounts.schemas import PasswordUpdate, ProfileUpdate, SecurityActivityEntry, User
 from app.domain.admin.deps import provide_audit_log_service
 from app.lib.audit import capture_snapshot, log_audit
 from app.lib.schema import Message
@@ -46,6 +46,91 @@ class ProfileController(Controller):
             User: The current user's profile.
         """
         return users_service.to_schema(current_user, schema_type=User)
+
+    # Security-relevant actions shown on the user's profile page.
+    _SECURITY_ACTIONS: frozenset[str] = frozenset({
+        "account.login",
+        "account.logout",
+        "account.password_change",
+        "account.password_reset",
+        "account.session_revoke",
+        "account.sessions_revoke_all",
+        "account.profile_update",
+        "account.oauth_unlink",
+        "mfa.setup.confirmed",
+        "mfa.setup.failed",
+        "mfa.disabled",
+        "mfa.disabled.oauth",
+        "mfa.challenge.success",
+        "mfa.challenge.failed",
+        "mfa.backup_codes.regenerated",
+        "mfa_disable",
+    })
+
+    # Human-readable labels for security actions.
+    _ACTION_LABELS: dict[str, str] = {
+        "account.login": "Signed in",
+        "account.logout": "Signed out",
+        "account.password_change": "Password changed",
+        "account.password_reset": "Password reset via email",
+        "account.session_revoke": "Session revoked",
+        "account.sessions_revoke_all": "All other sessions revoked",
+        "account.profile_update": "Profile information updated",
+        "account.oauth_unlink": "OAuth account unlinked",
+        "mfa.setup.confirmed": "Two-factor authentication enabled",
+        "mfa.setup.failed": "Two-factor setup attempt failed",
+        "mfa.disabled": "Two-factor authentication disabled",
+        "mfa.disabled.oauth": "Two-factor disabled (OAuth migration)",
+        "mfa.challenge.success": "Two-factor challenge passed",
+        "mfa.challenge.failed": "Two-factor challenge failed",
+        "mfa.backup_codes.regenerated": "Backup codes regenerated",
+        "mfa_disable": "Two-factor authentication disabled",
+    }
+
+    @get(
+        operation_id="GetSecurityActivity",
+        path="/api/me/security-activity",
+        summary="Recent Security Activity",
+        description="Returns the current user's recent security-relevant audit events.",
+    )
+    async def get_security_activity(
+        self,
+        current_user: m.User,
+        audit_service: AuditLogService,
+    ) -> list[SecurityActivityEntry]:
+        """Return the 10 most recent security events for the current user.
+
+        Queries the audit log for events where the current user is the actor,
+        filtered to security-relevant actions only.
+
+        Args:
+            current_user: The authenticated user.
+            audit_service: Audit log service.
+
+        Returns:
+            List of recent security activity entries.
+        """
+        from sqlalchemy import desc
+
+        from app.db.models import AuditLog
+
+        results = await audit_service.list(
+            AuditLog.actor_id == current_user.id,
+            AuditLog.action.in_(self._SECURITY_ACTIONS),
+            order_by=[desc(AuditLog.created_at)],
+            limit=10,
+        )
+
+        return [
+            SecurityActivityEntry(
+                id=entry.id,
+                action=entry.action,
+                description=self._ACTION_LABELS.get(entry.action, entry.action),
+                created_at=entry.created_at,
+                ip_address=entry.ip_address,
+            )
+            for entry in results
+        ]
 
     @patch(operation_id="AccountProfileUpdate", path="/api/me")
     async def update_profile(

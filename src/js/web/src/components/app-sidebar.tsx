@@ -132,6 +132,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         items: [
           { title: "Fax Numbers", to: "/fax/numbers" },
           { title: "Messages", to: "/fax/messages" },
+          { title: "Email Routes", to: "/fax/email-routes" },
           { title: "Send Fax", to: "/fax/send" },
         ],
       },

@@ -104,6 +104,8 @@ import type {
   CreateWebhookData,
   CreateWebhookErrors,
   CreateWebhookResponses,
+  DeleteReadNotificationsData,
+  DeleteReadNotificationsResponses,
   DisableMfaData,
   DisableMfaErrors,
   DisableMfaResponses,
@@ -118,6 +120,8 @@ import type {
   GetDashboardTrendsResponses,
   GetMfaStatusData,
   GetMfaStatusResponses,
+  GetSecurityActivityData,
+  GetSecurityActivityResponses,
   GetUnreadNotificationCountData,
   GetUnreadNotificationCountResponses,
   InitiateMfaSetupData,
@@ -192,6 +196,7 @@ export type OperationName =
   | 'create_user'
   | 'create_voicemail_box'
   | 'create_webhook'
+  | 'delete_read_notifications'
   | 'disable_mfa'
   | 'forgot_password'
   | 'get_gateway_settings'
@@ -199,6 +204,7 @@ export type OperationName =
   | 'get_organization'
   | 'get_preferences'
   | 'get_profile'
+  | 'get_security_activity'
   | 'get_sessions'
   | 'get_stats'
   | 'get_stats_api_admin_devices_stats'
@@ -282,6 +288,7 @@ export interface OperationDataTypes {
   'create_user': CreateUserData
   'create_voicemail_box': CreateVoicemailBoxData
   'create_webhook': CreateWebhookData
+  'delete_read_notifications': DeleteReadNotificationsData
   'disable_mfa': DisableMfaData
   'forgot_password': ForgotPasswordData
   'get_gateway_settings': UpdateAdminGatewaySettingsData
@@ -289,6 +296,7 @@ export interface OperationDataTypes {
   'get_organization': UpdateOrganizationData
   'get_preferences': UpdateNotificationPreferencesData
   'get_profile': AccountProfileUpdateData
+  'get_security_activity': GetSecurityActivityData
   'get_sessions': RevokeAllSessionsData
   'get_stats': GetDashboardStatsData
   'get_stats_api_admin_devices_stats': AdminGetDeviceStatsData
@@ -373,6 +381,7 @@ export interface OperationResponseTypes {
   'create_user': CreateUserResponses
   'create_voicemail_box': CreateVoicemailBoxResponses
   'create_webhook': CreateWebhookResponses
+  'delete_read_notifications': DeleteReadNotificationsResponses
   'disable_mfa': DisableMfaResponses
   'forgot_password': ForgotPasswordResponses
   'get_gateway_settings': UpdateAdminGatewaySettingsResponses
@@ -380,6 +389,7 @@ export interface OperationResponseTypes {
   'get_organization': UpdateOrganizationResponses
   'get_preferences': UpdateNotificationPreferencesResponses
   'get_profile': AccountProfileUpdateResponses
+  'get_security_activity': GetSecurityActivityResponses
   'get_sessions': RevokeAllSessionsResponses
   'get_stats': GetDashboardStatsResponses
   'get_stats_api_admin_devices_stats': AdminGetDeviceStatsResponses
@@ -464,6 +474,7 @@ export interface OperationErrorTypes {
   'create_user': CreateUserErrors
   'create_voicemail_box': CreateVoicemailBoxErrors
   'create_webhook': CreateWebhookErrors
+  'delete_read_notifications': never
   'disable_mfa': DisableMfaErrors
   'forgot_password': ForgotPasswordErrors
   'get_gateway_settings': UpdateAdminGatewaySettingsErrors
@@ -471,6 +482,7 @@ export interface OperationErrorTypes {
   'get_organization': UpdateOrganizationErrors
   'get_preferences': UpdateNotificationPreferencesErrors
   'get_profile': AccountProfileUpdateErrors
+  'get_security_activity': never
   'get_sessions': never
   'get_stats': never
   'get_stats_api_admin_devices_stats': never

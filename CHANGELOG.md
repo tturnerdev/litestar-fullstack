@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.116.0 (2026-05-01)
+
+### Added
+- **Profile security activity** — New `GET /api/me/security-activity` endpoint and profile card showing recent login, MFA, password, and session events with action-specific icons and IP addresses
+- **System health connections** — Admin system health card now shows gateway connection status (FreePBX, Unifi) with health indicators
+- **Fax email routes in sidebar** — Added missing "Email Routes" entry to the Fax section of the sidebar navigation
+
+### Fixed
+- **Admin quick actions link** — "Manage Roles" now links to `/admin/roles` instead of `/admin/teams`
+- **Notification delete endpoint** — Simplified `DELETE /api/notifications/read` to use Litestar's native 204 response handling
+
 ## v0.115.0 (2026-05-01)
 
 ### Added

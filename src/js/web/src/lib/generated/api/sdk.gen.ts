@@ -51,6 +51,9 @@ import type {
   AdminDeleteUserData,
   AdminDeleteUserErrors,
   AdminDeleteUserResponses,
+  AdminExportAuditLogData,
+  AdminExportAuditLogErrors,
+  AdminExportAuditLogResponses,
   AdminGetAuditLogData,
   AdminGetAuditLogErrors,
   AdminGetAuditLogResponses,
@@ -303,6 +306,8 @@ import type {
   DeletePhoneNumberData,
   DeletePhoneNumberErrors,
   DeletePhoneNumberResponses,
+  DeleteReadNotificationsData,
+  DeleteReadNotificationsResponses,
   DeleteRingGroupData,
   DeleteRingGroupErrors,
   DeleteRingGroupMemberData,
@@ -446,6 +451,8 @@ import type {
   GetScheduleData,
   GetScheduleErrors,
   GetScheduleResponses,
+  GetSecurityActivityData,
+  GetSecurityActivityResponses,
   GetTagData,
   GetTagErrors,
   GetTagResponses,
@@ -1016,6 +1023,22 @@ export const adminListAuditLogs = <ThrowOnError extends boolean = false>(
   >({
     security: [{ scheme: "bearer", type: "http" }],
     url: "/api/admin/audit",
+    ...options,
+  });
+
+/**
+ * ExportLogs
+ */
+export const adminExportAuditLog = <ThrowOnError extends boolean = false>(
+  options?: Options<AdminExportAuditLogData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    AdminExportAuditLogResponses,
+    AdminExportAuditLogErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/admin/audit/export",
     ...options,
   });
 
@@ -3084,6 +3107,24 @@ export const accountPasswordUpdate = <ThrowOnError extends boolean = false>(
   });
 
 /**
+ * Recent Security Activity
+ *
+ * Returns the current user's recent security-relevant audit events.
+ */
+export const getSecurityActivity = <ThrowOnError extends boolean = false>(
+  options?: Options<GetSecurityActivityData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    GetSecurityActivityResponses,
+    unknown,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/me/security-activity",
+    ...options,
+  });
+
+/**
  * VerifyChallenge
  */
 export const verifyMfaChallenge = <ThrowOnError extends boolean = false>(
@@ -3283,6 +3324,24 @@ export const updateNotificationPreferences = <
       "Content-Type": "application/json",
       ...options.headers,
     },
+  });
+
+/**
+ * Delete all read notifications
+ *
+ * Permanently delete all read notifications for the current user.
+ */
+export const deleteReadNotifications = <ThrowOnError extends boolean = false>(
+  options?: Options<DeleteReadNotificationsData, ThrowOnError>,
+) =>
+  (options?.client ?? client).delete<
+    DeleteReadNotificationsResponses,
+    unknown,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/notifications/read",
+    ...options,
   });
 
 /**

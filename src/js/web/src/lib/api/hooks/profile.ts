@@ -103,3 +103,27 @@ export function useRevokeAllSessions() {
     },
   })
 }
+
+export interface SecurityActivityEntry {
+  id: string
+  action: string
+  description: string
+  createdAt: string
+  ipAddress: string | null
+}
+
+export function useSecurityActivity() {
+  return useQuery({
+    queryKey: ["profile", "security-activity"],
+    queryFn: async (): Promise<SecurityActivityEntry[]> => {
+      const response = await fetch("/api/me/security-activity", {
+        credentials: "same-origin",
+      })
+      if (!response.ok) {
+        throw new Error(`Failed to load security activity: ${response.status}`)
+      }
+      return response.json()
+    },
+    staleTime: 60_000,
+  })
+}

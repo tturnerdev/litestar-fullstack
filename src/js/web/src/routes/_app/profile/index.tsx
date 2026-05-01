@@ -8,6 +8,7 @@ import { ActiveSessions } from "@/components/profile/active-sessions"
 import { ConnectedAccounts } from "@/components/profile/connected-accounts"
 import { MfaSection } from "@/components/profile/mfa-section"
 import { PasswordChangeCard } from "@/components/profile/password-change-card"
+import { RecentSecurityActivity } from "@/components/profile/recent-security-activity"
 import { PersonalInfoForm } from "@/components/profile/personal-info-form"
 import { ProfileHero } from "@/components/profile/profile-hero"
 import { Button } from "@/components/ui/button"
@@ -192,6 +193,7 @@ function ProfilePage() {
           <PasswordChangeCard />
           <MfaSection />
         </div>
+        <RecentSecurityActivity />
       </PageSection>
 
       <Separator />

@@ -23,6 +23,7 @@ import {
   adminDeleteMusicOnHold,
   adminDeleteTeam,
   adminDeleteUser,
+  adminExportAuditLog,
   adminGetAuditLog,
   adminGetDeviceStats,
   adminGetDeviceTemplate,
@@ -109,6 +110,7 @@ import {
   deleteLocation,
   deleteNotification,
   deletePhoneNumber,
+  deleteReadNotifications,
   deleteRingGroup,
   deleteRingGroupMember,
   deleteRole,
@@ -159,6 +161,7 @@ import {
   getRingGroup,
   getRole,
   getSchedule,
+  getSecurityActivity,
   getTag,
   getTeam,
   getTicket,
@@ -326,6 +329,9 @@ import type {
   AdminDeleteUserData,
   AdminDeleteUserError,
   AdminDeleteUserResponse,
+  AdminExportAuditLogData,
+  AdminExportAuditLogError,
+  AdminExportAuditLogResponse,
   AdminGetAuditLogData,
   AdminGetAuditLogError,
   AdminGetAuditLogResponse,
@@ -576,6 +582,8 @@ import type {
   DeletePhoneNumberData,
   DeletePhoneNumberError,
   DeletePhoneNumberResponse,
+  DeleteReadNotificationsData,
+  DeleteReadNotificationsResponse,
   DeleteRingGroupData,
   DeleteRingGroupError,
   DeleteRingGroupMemberData,
@@ -719,6 +727,8 @@ import type {
   GetScheduleData,
   GetScheduleError,
   GetScheduleResponse,
+  GetSecurityActivityData,
+  GetSecurityActivityResponse,
   GetTagData,
   GetTagError,
   GetTagResponse,
@@ -1420,6 +1430,34 @@ export const adminListAuditLogsOptions = (
       return data;
     },
     queryKey: adminListAuditLogsQueryKey(options),
+  });
+
+export const adminExportAuditLogQueryKey = (
+  options?: Options<AdminExportAuditLogData>,
+) => createQueryKey("adminExportAuditLog", options);
+
+/**
+ * ExportLogs
+ */
+export const adminExportAuditLogOptions = (
+  options?: Options<AdminExportAuditLogData>,
+) =>
+  queryOptions<
+    AdminExportAuditLogResponse,
+    AdminExportAuditLogError,
+    AdminExportAuditLogResponse,
+    ReturnType<typeof adminExportAuditLogQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await adminExportAuditLog({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: adminExportAuditLogQueryKey(options),
   });
 
 export const adminGetTargetAuditLogsQueryKey = (
@@ -4619,6 +4657,36 @@ export const accountPasswordUpdateMutation = (
   return mutationOptions;
 };
 
+export const getSecurityActivityQueryKey = (
+  options?: Options<GetSecurityActivityData>,
+) => createQueryKey("getSecurityActivity", options);
+
+/**
+ * Recent Security Activity
+ *
+ * Returns the current user's recent security-relevant audit events.
+ */
+export const getSecurityActivityOptions = (
+  options?: Options<GetSecurityActivityData>,
+) =>
+  queryOptions<
+    GetSecurityActivityResponse,
+    DefaultError,
+    GetSecurityActivityResponse,
+    ReturnType<typeof getSecurityActivityQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getSecurityActivity({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getSecurityActivityQueryKey(options),
+  });
+
 /**
  * VerifyChallenge
  */
@@ -4911,6 +4979,35 @@ export const updateNotificationPreferencesMutation = (
   > = {
     mutationFn: async (fnOptions) => {
       const { data } = await updateNotificationPreferences({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * Delete all read notifications
+ *
+ * Permanently delete all read notifications for the current user.
+ */
+export const deleteReadNotificationsMutation = (
+  options?: Partial<Options<DeleteReadNotificationsData>>,
+): UseMutationOptions<
+  DeleteReadNotificationsResponse,
+  DefaultError,
+  Options<DeleteReadNotificationsData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    DeleteReadNotificationsResponse,
+    DefaultError,
+    Options<DeleteReadNotificationsData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await deleteReadNotifications({
         ...options,
         ...fnOptions,
         throwOnError: true,

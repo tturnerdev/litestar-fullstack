@@ -74,6 +74,7 @@ export type RouteName =
   | 'delete_notification'
   | 'delete_option'
   | 'delete_phone_number'
+  | 'delete_read_notifications'
   | 'delete_registration'
   | 'delete_ring_group'
   | 'delete_role'
@@ -93,6 +94,7 @@ export type RouteName =
   | 'delete_webhook'
   | 'disable_mfa'
   | 'export_call_records'
+  | 'export_logs'
   | 'forgot_password'
   | 'get_activity'
   | 'get_attachment'
@@ -123,6 +125,7 @@ export type RouteName =
   | 'get_ring_group'
   | 'get_role'
   | 'get_schedule'
+  | 'get_security_activity'
   | 'get_sessions'
   | 'get_stats'
   | 'get_stats_api_admin_devices_stats'
@@ -232,6 +235,7 @@ export type RouteName =
   | 'revoke_role_api_users_roles'
   | 'revoke_session'
   | 'saq'
+  | 'send_device_action'
   | 'send_fax'
   | 'set_device_lines'
   | 'set_forwarding_rules'
@@ -441,6 +445,7 @@ export interface RoutePathParams {
   'delete_phone_number': {
     phone_number_id: UUID;
   };
+  'delete_read_notifications': Record<string, never>;
   'delete_registration': {
     registration_id: UUID;
   };
@@ -496,6 +501,7 @@ export interface RoutePathParams {
   };
   'disable_mfa': Record<string, never>;
   'export_call_records': Record<string, never>;
+  'export_logs': Record<string, never>;
   'forgot_password': Record<string, never>;
   'get_activity': Record<string, never>;
   'get_attachment': {
@@ -571,6 +577,7 @@ export interface RoutePathParams {
   'get_schedule': {
     schedule_id: UUID;
   };
+  'get_security_activity': Record<string, never>;
   'get_sessions': Record<string, never>;
   'get_stats': Record<string, never>;
   'get_stats_api_admin_devices_stats': Record<string, never>;
@@ -767,6 +774,9 @@ export interface RoutePathParams {
   };
   'saq': {
     file_path: any;
+  };
+  'send_device_action': {
+    device_id: UUID;
   };
   'send_fax': Record<string, never>;
   'set_device_lines': {
@@ -1035,6 +1045,7 @@ export interface RouteQueryParams {
   'delete_notification': Record<string, never>;
   'delete_option': Record<string, never>;
   'delete_phone_number': Record<string, never>;
+  'delete_read_notifications': Record<string, never>;
   'delete_registration': Record<string, never>;
   'delete_ring_group': Record<string, never>;
   'delete_role': Record<string, never>;
@@ -1058,6 +1069,24 @@ export interface RouteQueryParams {
     disposition?: string;
     endDate?: DateTime;
     startDate?: DateTime;
+  };
+  'export_logs': {
+    action?: string;
+    actionIn?: string[];
+    actorIdIn?: string[];
+    createdAfter?: DateTime;
+    createdBefore?: DateTime;
+    currentPage?: number;
+    domain?: string;
+    end_date?: DateTime;
+    ids?: string[];
+    orderBy?: string;
+    pageSize?: number;
+    searchIgnoreCase?: boolean;
+    searchString?: string;
+    sortOrder?: "asc" | "desc";
+    targetIdIn?: string[];
+    targetTypeIn?: string[];
   };
   'forgot_password': Record<string, never>;
   'get_activity': {
@@ -1102,6 +1131,7 @@ export interface RouteQueryParams {
   'get_ring_group': Record<string, never>;
   'get_role': Record<string, never>;
   'get_schedule': Record<string, never>;
+  'get_security_activity': Record<string, never>;
   'get_sessions': {
     createdAfter?: DateTime;
     createdBefore?: DateTime;
@@ -1726,6 +1756,9 @@ export interface RouteQueryParams {
   };
   'revoke_session': Record<string, never>;
   'saq': Record<string, never>;
+  'send_device_action': {
+    key: string;
+  };
   'send_fax': Record<string, never>;
   'set_device_lines': Record<string, never>;
   'set_forwarding_rules': Record<string, never>;
@@ -2213,6 +2246,13 @@ export const routeDefinitions = {
     pathParams: ['phone_number_id'] as const,
     queryParams: [] as const,
   },
+  'delete_read_notifications': {
+    path: '/api/notifications/read',
+    methods: ['DELETE'] as const,
+    method: 'delete',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
   'delete_registration': {
     path: '/api/e911/{registration_id}',
     methods: ['DELETE'] as const,
@@ -2345,6 +2385,13 @@ export const routeDefinitions = {
     method: 'get',
     pathParams: [] as const,
     queryParams: ['direction', 'disposition', 'endDate', 'startDate'] as const,
+  },
+  'export_logs': {
+    path: '/api/admin/audit/export',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: ['action', 'actionIn', 'actorIdIn', 'createdAfter', 'createdBefore', 'currentPage', 'domain', 'end_date', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'targetIdIn', 'targetTypeIn'] as const,
   },
   'forgot_password': {
     path: '/api/access/forgot-password',
@@ -2554,6 +2601,13 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: ['schedule_id'] as const,
+    queryParams: [] as const,
+  },
+  'get_security_activity': {
+    path: '/api/me/security-activity',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
     queryParams: [] as const,
   },
   'get_sessions': {
@@ -3321,6 +3375,13 @@ export const routeDefinitions = {
     method: 'get',
     pathParams: ['file_path'] as const,
     queryParams: [] as const,
+  },
+  'send_device_action': {
+    path: '/api/devices/{device_id}/action',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: ['device_id'] as const,
+    queryParams: ['key'] as const,
   },
   'send_fax': {
     path: '/api/fax/send',

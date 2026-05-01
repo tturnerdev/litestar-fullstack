@@ -1986,6 +1986,17 @@ export type SearchResultItem = {
 };
 
 /**
+ * SecurityActivityEntry
+ */
+export type SecurityActivityEntry = {
+  action: string;
+  createdAt: string;
+  description: string;
+  id: string;
+  ipAddress?: string | null;
+};
+
+/**
  * SendFax
  */
 export type SendFax = {
@@ -3004,10 +3015,10 @@ export type AdminListAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    actionIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3058,6 +3069,71 @@ export type AdminListAuditLogsResponses = {
 export type AdminListAuditLogsResponse =
   AdminListAuditLogsResponses[keyof AdminListAuditLogsResponses];
 
+export type AdminExportAuditLogData = {
+  body?: never;
+  path?: never;
+  query?: {
+    ids?: Array<string> | null;
+    createdBefore?: string | null;
+    createdAfter?: string | null;
+    /**
+     * Field to search
+     */
+    searchString?: string | null;
+    /**
+     * Search should be case sensitive
+     */
+    searchIgnoreCase?: boolean | null;
+    currentPage?: number;
+    pageSize?: number;
+    /**
+     * Order by field
+     */
+    orderBy?: string | null;
+    /**
+     * Field to search
+     */
+    sortOrder?: "asc" | "desc" | null;
+    targetTypeIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
+    action?: string | null;
+    domain?: string | null;
+    end_date?: string | null;
+  };
+  url: "/api/admin/audit/export";
+};
+
+export type AdminExportAuditLogErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type AdminExportAuditLogError =
+  AdminExportAuditLogErrors[keyof AdminExportAuditLogErrors];
+
+export type AdminExportAuditLogResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: string;
+};
+
+export type AdminExportAuditLogResponse =
+  AdminExportAuditLogResponses[keyof AdminExportAuditLogResponses];
+
 export type AdminGetTargetAuditLogsData = {
   body?: never;
   path: {
@@ -3086,10 +3162,10 @@ export type AdminGetTargetAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    actionIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -3166,10 +3242,10 @@ export type AdminGetUserAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    actionIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -8199,6 +8275,23 @@ export type AccountPasswordUpdateResponses = {
 export type AccountPasswordUpdateResponse =
   AccountPasswordUpdateResponses[keyof AccountPasswordUpdateResponses];
 
+export type GetSecurityActivityData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/api/me/security-activity";
+};
+
+export type GetSecurityActivityResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: Array<SecurityActivityEntry>;
+};
+
+export type GetSecurityActivityResponse =
+  GetSecurityActivityResponses[keyof GetSecurityActivityResponses];
+
 export type VerifyMfaChallengeData = {
   body: MfaChallenge;
   path?: never;
@@ -8548,6 +8641,23 @@ export type UpdateNotificationPreferencesResponses = {
 
 export type UpdateNotificationPreferencesResponse =
   UpdateNotificationPreferencesResponses[keyof UpdateNotificationPreferencesResponses];
+
+export type DeleteReadNotificationsData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/api/notifications/read";
+};
+
+export type DeleteReadNotificationsResponses = {
+  /**
+   * Request fulfilled, nothing follows
+   */
+  204: void;
+};
+
+export type DeleteReadNotificationsResponse =
+  DeleteReadNotificationsResponses[keyof DeleteReadNotificationsResponses];
 
 export type GetUnreadNotificationCountData = {
   body?: never;

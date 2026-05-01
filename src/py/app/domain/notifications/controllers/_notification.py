@@ -131,23 +131,14 @@ class NotificationController(Controller):
         summary="Delete all read notifications",
         description="Permanently delete all read notifications for the current user.",
         return_dto=None,
+        status_code=204,
     )
     async def delete_read_notifications(
         self,
         notifications_service: NotificationService,
         current_user: m.User,
-    ) -> Response:
-        """Delete all read notifications for the current user.
-
-        Args:
-            notifications_service: The notification service.
-            current_user: The current authenticated user.
-
-        Returns:
-            HTTP 204 No Content.
-        """
+    ) -> None:
         await notifications_service.delete_read(current_user.id)
-        return Response(content=None, status_code=204)
 
     @delete(operation_id="DeleteNotification", path="/{notification_id:uuid}", return_dto=None)
     async def delete_notification(
