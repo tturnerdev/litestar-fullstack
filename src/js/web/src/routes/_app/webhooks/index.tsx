@@ -62,6 +62,7 @@ import {
   useWebhookDeliveries,
 } from "@/lib/api/hooks/webhooks"
 import type { WebhookDelivery } from "@/lib/api/hooks/webhooks"
+import { formatDateTime } from "@/lib/date-utils"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import type { WebhookCreate, WebhookList, WebhookUpdate } from "@/lib/generated/api"
@@ -92,23 +93,6 @@ const AVAILABLE_EVENTS = [
 ] as const
 
 // -- Helpers ------------------------------------------------------------------
-
-function formatRelativeTime(dateStr: string | null | undefined): string {
-  if (!dateStr) return "Never"
-  const date = new Date(dateStr)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffSec = Math.floor(diffMs / 1000)
-  const diffMin = Math.floor(diffSec / 60)
-  const diffHour = Math.floor(diffMin / 60)
-  const diffDay = Math.floor(diffHour / 24)
-
-  if (diffSec < 60) return "Just now"
-  if (diffMin < 60) return `${diffMin}m ago`
-  if (diffHour < 24) return `${diffHour}h ago`
-  if (diffDay < 30) return `${diffDay}d ago`
-  return date.toLocaleDateString()
-}
 
 function truncateUrl(url: string, maxLen = 40): string {
   if (url.length <= maxLen) return url
@@ -142,18 +126,6 @@ function statusCodeBadge(code: number | null): React.ReactNode {
       {code}
     </Badge>
   )
-}
-
-function formatTimestamp(dateStr: string | null | undefined): string {
-  if (!dateStr) return "--"
-  const date = new Date(dateStr)
-  return date.toLocaleString(undefined, {
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  })
 }
 
 // -- Delivery History Panel ---------------------------------------------------
@@ -206,7 +178,7 @@ function DeliveryHistoryPanel({ webhookId }: { webhookId: string }) {
               <TableCell className="text-xs text-muted-foreground">
                 <div className="flex items-center gap-1.5">
                   <Clock className="h-3 w-3" />
-                  {formatTimestamp(delivery.createdAt)}
+                  {formatDateTime(delivery.createdAt, "--")}
                 </div>
               </TableCell>
               <TableCell>
@@ -801,7 +773,7 @@ function WebhookRow({
           </TableCell>
           <TableCell>
             <span className="text-sm text-muted-foreground">
-              {formatRelativeTime(webhook.lastTriggeredAt as string | null | undefined)}
+              {formatDateTime(webhook.lastTriggeredAt as string | null | undefined, "Never")}
             </span>
           </TableCell>
           <TableCell>

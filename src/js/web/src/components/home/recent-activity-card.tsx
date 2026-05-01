@@ -9,7 +9,7 @@ import { formatRelativeTimeShort } from "@/lib/date-utils"
 
 function formatActionLabel(action: string): string {
   return action
-    .replace(/_/g, " ")
+    .replace(/[._-]/g, " ")
     .replace(/\b\w/g, (c) => c.toUpperCase())
 }
 

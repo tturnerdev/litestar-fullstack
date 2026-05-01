@@ -26,27 +26,10 @@ import {
   useVoicemailMessages,
   type VoicemailMessage,
 } from "@/lib/api/hooks/voice"
-import { formatFullDateTime } from "@/lib/date-utils"
+import { formatDateTime, formatFullDateTime } from "@/lib/date-utils"
 import { formatDuration } from "@/lib/format-utils"
 
 const PAGE_SIZE = 15
-
-function formatReceivedAt(dateStr: string): string {
-  const date = new Date(dateStr)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffHours = diffMs / (1000 * 60 * 60)
-
-  if (diffHours < 1) {
-    const mins = Math.floor(diffMs / (1000 * 60))
-    return `${mins}m ago`
-  }
-  if (diffHours < 24) {
-    return `${Math.floor(diffHours)}h ago`
-  }
-
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })
-}
 
 interface VoicemailMessageListProps {
   extensionId: string
@@ -382,7 +365,7 @@ function MessageRow({ message, isExpanded, isSelected, isEvenRow, onExpand, onDe
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span className="text-sm">{formatReceivedAt(message.receivedAt)}</span>
+                  <span className="text-sm">{formatDateTime(message.receivedAt)}</span>
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>{formatFullDateTime(message.receivedAt)}</p>

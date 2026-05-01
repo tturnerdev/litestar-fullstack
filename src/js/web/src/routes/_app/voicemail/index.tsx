@@ -65,7 +65,7 @@ import { VoicemailPlayer } from "@/components/voice/voicemail-player"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
-import { formatFullDateTime } from "@/lib/date-utils"
+import { formatDateTime, formatFullDateTime } from "@/lib/date-utils"
 import { formatDuration } from "@/lib/format-utils"
 import {
   useBulkDeleteVoicemailMessages,
@@ -105,28 +105,6 @@ const csvHeaders: CsvHeader<VoicemailMessage>[] = [
   { label: "Urgent", accessor: (m) => (m.isUrgent ? "Yes" : "No") },
   { label: "Transcription", accessor: (m) => m.transcription ?? "" },
 ]
-
-function formatReceivedAt(dateStr: string): string {
-  const date = new Date(dateStr)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffHours = diffMs / (1000 * 60 * 60)
-
-  if (diffHours < 1) {
-    const mins = Math.floor(diffMs / (1000 * 60))
-    return `${mins}m ago`
-  }
-  if (diffHours < 24) {
-    return `${Math.floor(diffHours)}h ago`
-  }
-
-  return date.toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  })
-}
 
 // -- Main page ----------------------------------------------------------------
 
@@ -514,7 +492,7 @@ function MessagesTab() {
                     <TableCell>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <span className="text-sm">{formatReceivedAt(msg.receivedAt)}</span>
+                          <span className="text-sm">{formatDateTime(msg.receivedAt)}</span>
                         </TooltipTrigger>
                         <TooltipContent>
                           <p>{formatFullDateTime(msg.receivedAt)}</p>

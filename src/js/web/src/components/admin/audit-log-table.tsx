@@ -55,6 +55,7 @@ import {
 } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAdminAuditLogs, useAdminAuditLogsExport } from "@/lib/api/hooks/admin"
+import { formatDateTime } from "@/lib/date-utils"
 import type { AuditLogEntry } from "@/lib/generated/api"
 
 // ── Constants ──────────────────────────────────────────────────────────────
@@ -294,7 +295,7 @@ function AuditDetailRow({ entry, colSpan }: { entry: AuditLogEntry; colSpan: num
             </Tooltip>
             <DetailField
               label="Timestamp"
-              value={new Date(entry.createdAt).toLocaleString()}
+              value={formatDateTime(entry.createdAt)}
             />
           </div>
           <div className="space-y-2">
@@ -589,7 +590,7 @@ function AuditLogDetailSheet({
             </Badge>
           </SheetTitle>
           <SheetDescription>
-            {new Date(entry.createdAt).toLocaleString()}
+            {formatDateTime(entry.createdAt)}
             {entry.actorEmail && ` by ${entry.actorEmail}`}
           </SheetDescription>
         </SheetHeader>
@@ -621,7 +622,7 @@ function AuditLogDetailSheet({
                 <DetailField label="User Agent" value={entry.userAgent} />
                 <DetailField
                   label="Timestamp"
-                  value={new Date(entry.createdAt).toLocaleString()}
+                  value={formatDateTime(entry.createdAt)}
                 />
               </div>
             </div>
@@ -1144,7 +1145,7 @@ export function AuditLogTable() {
                               </span>
                             </TooltipTrigger>
                             <TooltipContent>
-                              {new Date(entry.createdAt).toLocaleString()}
+                              {formatDateTime(entry.createdAt)}
                             </TooltipContent>
                           </Tooltip>
                         </TableCell>

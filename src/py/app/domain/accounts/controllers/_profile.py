@@ -57,6 +57,11 @@ class ProfileController(Controller):
         "account.sessions_revoke_all",
         "account.profile_update",
         "account.oauth_unlink",
+        "account.email.verified",
+        "account.register",
+        "account.delete",
+        "account.oauth.linked",
+        "account.oauth.upgraded",
         "mfa.setup.confirmed",
         "mfa.setup.failed",
         "mfa.disabled",
@@ -64,7 +69,6 @@ class ProfileController(Controller):
         "mfa.challenge.success",
         "mfa.challenge.failed",
         "mfa.backup_codes.regenerated",
-        "mfa_disable",
     })
 
     # Human-readable labels for security actions.
@@ -77,6 +81,11 @@ class ProfileController(Controller):
         "account.sessions_revoke_all": "All other sessions revoked",
         "account.profile_update": "Profile information updated",
         "account.oauth_unlink": "OAuth account unlinked",
+        "account.email.verified": "Email address verified",
+        "account.register": "Account registered",
+        "account.delete": "Account deleted",
+        "account.oauth.linked": "OAuth account linked",
+        "account.oauth.upgraded": "Account upgraded via OAuth",
         "mfa.setup.confirmed": "Two-factor authentication enabled",
         "mfa.setup.failed": "Two-factor setup attempt failed",
         "mfa.disabled": "Two-factor authentication disabled",
@@ -84,7 +93,6 @@ class ProfileController(Controller):
         "mfa.challenge.success": "Two-factor challenge passed",
         "mfa.challenge.failed": "Two-factor challenge failed",
         "mfa.backup_codes.regenerated": "Backup codes regenerated",
-        "mfa_disable": "Two-factor authentication disabled",
     }
 
     @get(

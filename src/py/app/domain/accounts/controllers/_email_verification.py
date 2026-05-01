@@ -81,7 +81,7 @@ class EmailVerificationController(Controller):
 
         await log_audit(
             audit_service,
-            action="account.email_verify",
+            action="account.email.verified",
             actor_id=user.id,
             actor_email=user.email,
             target_type="user",

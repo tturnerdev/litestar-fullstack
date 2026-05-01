@@ -21,7 +21,7 @@ import {
 import type { TicketMessage as TicketMessageType } from "@/lib/api/hooks/support"
 import { useDeleteTicketMessage } from "@/lib/api/hooks/support"
 import { useAuthStore } from "@/lib/auth"
-import { formatRelativeTimeShort } from "@/lib/date-utils"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { cn } from "@/lib/utils"
 
 // ── Helpers ──────────────────────────────────────────────────────────────
@@ -160,7 +160,7 @@ export function TicketMessage({ message, ticketId, isFirstMessage = false, onRep
                       </p>
                     </TooltipTrigger>
                     <TooltipContent side="bottom" align="start">
-                      {message.createdAt ? new Date(message.createdAt).toLocaleString() : ""}
+                      {formatDateTime(message.createdAt, "")}
                     </TooltipContent>
                   </Tooltip>
                   {edited && (
@@ -172,7 +172,7 @@ export function TicketMessage({ message, ticketId, isFirstMessage = false, onRep
                         </span>
                       </TooltipTrigger>
                       <TooltipContent side="bottom" align="start">
-                        Edited {message.updatedAt ? new Date(message.updatedAt).toLocaleString() : ""}
+                        Edited {formatDateTime(message.updatedAt, "")}
                       </TooltipContent>
                     </Tooltip>
                   )}

@@ -55,7 +55,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { VoicemailPlayer } from "@/components/voice/voicemail-player"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { useDocumentTitle } from "@/hooks/use-document-title"
-import { formatFullDateTime } from "@/lib/date-utils"
+import { formatDateTime, formatFullDateTime } from "@/lib/date-utils"
 import { formatDuration, formatDurationHuman } from "@/lib/format-utils"
 import {
   useDeleteVoicemailMessage,
@@ -98,28 +98,6 @@ function formatRetention(days: number): string {
   }
   const months = Math.round(days / 30)
   return `${months} month${months !== 1 ? "s" : ""}`
-}
-
-function formatReceivedAt(dateStr: string): string {
-  const date = new Date(dateStr)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffHours = diffMs / (1000 * 60 * 60)
-
-  if (diffHours < 1) {
-    const mins = Math.floor(diffMs / (1000 * 60))
-    return `${mins}m ago`
-  }
-  if (diffHours < 24) {
-    return `${Math.floor(diffHours)}h ago`
-  }
-
-  return date.toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  })
 }
 
 // -- Main page ----------------------------------------------------------------
@@ -978,7 +956,7 @@ function BoxMessageRow({
           <div className="flex items-center gap-2">
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="text-sm">{formatReceivedAt(message.receivedAt)}</span>
+                <span className="text-sm">{formatDateTime(message.receivedAt)}</span>
               </TooltipTrigger>
               <TooltipContent>
                 <p>{formatFullDateTime(message.receivedAt)}</p>

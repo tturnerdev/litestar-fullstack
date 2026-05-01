@@ -259,7 +259,7 @@ function TicketDetailPage() {
       <PageHeader
         eyebrow="Helpdesk"
         title={ticket.subject}
-        description={`${ticket.ticketNumber} · Created ${ticket.createdAt ? new Date(ticket.createdAt).toLocaleDateString(undefined, { weekday: "short", year: "numeric", month: "short", day: "numeric" }) : ""}`}
+        description={`${ticket.ticketNumber} · Created ${formatDateTime(ticket.createdAt, "")}`}
         breadcrumbs={
           <Breadcrumb>
             <BreadcrumbList>

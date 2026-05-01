@@ -135,7 +135,7 @@ class MfaController(Controller):
             provider=provider,
             redirect_url=redirect_url,
             secret_key=settings.SECRET_KEY,
-            action="mfa_disable",
+            action="mfa.disabled",
             user_id=str(user.id),
         )
         client: GitHubOAuth2 | GoogleOAuth2

@@ -115,7 +115,7 @@ function formatFullTimestamp(dateString: string): string {
 /** Format an action string for display (e.g. "user_login" becomes "User Login"). */
 function formatAction(action: string): string {
   return action
-    .replace(/[_-]/g, " ")
+    .replace(/[._-]/g, " ")
     .replace(/\b\w/g, (c) => c.toUpperCase())
 }
 

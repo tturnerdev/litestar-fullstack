@@ -8,7 +8,7 @@ import {
 } from "lucide-react"
 import { useMemo } from "react"
 import type { TicketMessage } from "@/lib/api/hooks/support"
-import { formatRelativeTimeShort } from "@/lib/date-utils"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 
 interface TicketMessageSystemProps {
   message: TicketMessage
@@ -101,7 +101,7 @@ export function TicketMessageSystem({ message }: TicketMessageSystemProps) {
             <span className="text-muted-foreground/30">·</span>
             <span
               className="text-xs text-muted-foreground/60"
-              title={new Date(message.createdAt).toLocaleString()}
+              title={formatDateTime(message.createdAt, "")}
             >
               {formatRelativeTimeShort(message.createdAt)}
             </span>

@@ -123,7 +123,7 @@ class OAuthAccountController(Controller):
             provider=provider,
             redirect_url=frontend_callback,
             secret_key=settings.SECRET_KEY,
-            action="link",
+            action="account.oauth.linked",
             user_id=str(current_user.id),
         )
         callback_url = str(request.url_for(f"oauth:{provider}:callback"))
@@ -213,7 +213,7 @@ class OAuthAccountController(Controller):
             provider=provider,
             redirect_url=frontend_callback,
             secret_key=settings.SECRET_KEY,
-            action="upgrade",
+            action="account.oauth.upgraded",
             user_id=str(current_user.id),
         )
         callback_url = str(request.url_for(f"oauth:{provider}:callback"))
