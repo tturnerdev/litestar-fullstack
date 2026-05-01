@@ -88,8 +88,8 @@ const csvHeaders: CsvHeader<Ticket>[] = [
   { label: "Status", accessor: (t) => t.status },
   { label: "Priority", accessor: (t) => t.priority },
   { label: "Category", accessor: (t) => t.category ?? "" },
-  { label: "Created", accessor: (t) => t.createdAt ?? "" },
-  { label: "Updated", accessor: (t) => t.updatedAt ?? "" },
+  { label: "Created", accessor: (t) => (t.createdAt ? formatDateTime(t.createdAt) : "") },
+  { label: "Updated", accessor: (t) => (t.updatedAt ? formatDateTime(t.updatedAt) : "") },
 ]
 
 // ── Helpers ──────────────────────────────────────────────────────────────

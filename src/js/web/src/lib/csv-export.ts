@@ -49,18 +49,6 @@ function todaySuffix(): string {
  *                 keys are exported using the given header labels. When omitted
  *                 every key found across the data rows is exported.
  */
-export function buildCsvString(data: Record<string, unknown>[], keys: string[]): string {
-  const headerRow = keys.join(",")
-  const bodyRows = data.map((row) => keys.map((k) => escapeCell(row[k])).join(","))
-  return [headerRow, ...bodyRows].join("\n")
-}
-
-export function buildCsvStringWithAccessors<T>(data: T[], columns: { header: string; accessor: (item: T) => unknown }[]): string {
-  const headerRow = columns.map((c) => escapeCell(c.header)).join(",")
-  const bodyRows = data.map((item) => columns.map((c) => escapeCell(c.accessor(item))).join(","))
-  return [headerRow, ...bodyRows].join("\n")
-}
-
 export function exportToCSV(data: Record<string, unknown>[], filename: string, columns?: CsvColumn[]): void {
   if (data.length === 0) {
     return
@@ -79,7 +67,7 @@ export function exportToCSV(data: Record<string, unknown>[], filename: string, c
 
   const csv = [headerRow, ...bodyRows].join("\n")
 
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" })
+  const blob = new Blob(["﻿", csv], { type: "text/csv;charset=utf-8;" })
   const url = URL.createObjectURL(blob)
 
   const anchor = document.createElement("a")
@@ -98,7 +86,7 @@ export function exportToCsv<T>(filename: string, headers: CsvHeader<T>[], items:
   const bodyRows = items.map((item) => headers.map((h) => escapeCell(h.accessor(item))).join(","))
   const csv = [headerRow, ...bodyRows].join("\n")
 
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" })
+  const blob = new Blob(["﻿", csv], { type: "text/csv;charset=utf-8;" })
   const url = URL.createObjectURL(blob)
   const anchor = document.createElement("a")
   anchor.href = url

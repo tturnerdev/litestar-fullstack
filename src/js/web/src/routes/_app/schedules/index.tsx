@@ -61,6 +61,7 @@ import {
   type ScheduleCreate,
 } from "@/lib/api/hooks/schedules"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
+import { formatDateTime } from "@/lib/date-utils"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 
@@ -110,8 +111,8 @@ const csvHeaders: CsvHeader<Schedule>[] = [
   { label: "Type", accessor: (s) => scheduleTypeLabels[s.scheduleType] ?? s.scheduleType },
   { label: "Timezone", accessor: (s) => s.timezone },
   { label: "Default", accessor: (s) => (s.isDefault ? "Yes" : "No") },
-  { label: "Created", accessor: (s) => s.createdAt },
-  { label: "Updated", accessor: (s) => s.updatedAt },
+  { label: "Created", accessor: (s) => (s.createdAt ? formatDateTime(s.createdAt) : "") },
+  { label: "Updated", accessor: (s) => (s.updatedAt ? formatDateTime(s.updatedAt) : "") },
 ]
 
 // -- Status badge (per-row) ---------------------------------------------------

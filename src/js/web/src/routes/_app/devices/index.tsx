@@ -94,7 +94,7 @@ const csvHeaders: CsvHeader<Device>[] = [
   { label: "MAC Address", accessor: (d) => d.macAddress ?? "" },
   { label: "Model", accessor: (d) => d.deviceModel ?? "" },
   { label: "IP Address", accessor: (d) => d.ipAddress ?? "" },
-  { label: "Last Seen", accessor: (d) => d.lastSeenAt ?? "Never" },
+  { label: "Last Seen", accessor: (d) => (d.lastSeenAt ? formatDateTime(d.lastSeenAt) : "Never") },
   { label: "Active", accessor: (d) => (d.isActive === false ? "No" : "Yes") },
 ]
 

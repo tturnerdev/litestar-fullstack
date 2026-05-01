@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.118.0 (2026-05-01)
+
+### Fixed
+- **CSV export dates** — Date columns in device, schedule, support ticket, and fax message CSV exports now use human-readable formatting instead of raw ISO timestamps
+- **CSV Excel compatibility** — Added UTF-8 BOM to all CSV exports for proper character display in Excel
+
+### Changed
+- Removed unused `buildCsvString`/`buildCsvStringWithAccessors` CSV functions and `useTableSelection` hook
+
 ## v0.117.0 (2026-05-01)
 
 ### Added

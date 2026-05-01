@@ -75,7 +75,7 @@ const csvHeaders: CsvHeader<FaxMessage>[] = [
   { label: "Status", accessor: (m) => m.status },
   { label: "Pages", accessor: (m) => m.pageCount },
   { label: "Error", accessor: (m) => m.errorMessage ?? "" },
-  { label: "Date", accessor: (m) => m.receivedAt ?? m.createdAt ?? "" },
+  { label: "Date", accessor: (m) => { const d = m.receivedAt ?? m.createdAt; return d ? formatDateTime(d) : "" } },
 ]
 
 // -- Helpers ------------------------------------------------------------------
