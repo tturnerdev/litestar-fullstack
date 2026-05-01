@@ -594,6 +594,7 @@ function FaxEmailRoutesPage() {
               </div>
             </CardHeader>
             <CardContent>
+              <div className="overflow-x-auto">
               <Table aria-label="Email routes">
                 <TableHeader>
                   <TableRow>
@@ -738,6 +739,7 @@ function FaxEmailRoutesPage() {
                   ))}
                 </TableBody>
               </Table>
+              </div>
             </CardContent>
           </Card>
         ) : (

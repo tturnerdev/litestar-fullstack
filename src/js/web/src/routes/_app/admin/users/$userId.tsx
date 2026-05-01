@@ -625,6 +625,7 @@ function AdminUserDetailPage() {
             {(data.teams ?? []).length === 0 ? (
               <p className="text-sm text-muted-foreground">Not a member of any teams.</p>
             ) : (
+              <div className="overflow-x-auto">
               <Table aria-label="User team memberships">
                 <TableHeader>
                   <TableRow>
@@ -663,6 +664,7 @@ function AdminUserDetailPage() {
                   ))}
                 </TableBody>
               </Table>
+              </div>
             )}
           </CardContent>
         </Card>
@@ -680,6 +682,7 @@ function AdminUserDetailPage() {
             />
             <Card>
               <CardContent className="pt-6">
+                <div className="overflow-x-auto">
                 <Table aria-label="Linked OAuth accounts">
                   <TableHeader>
                     <TableRow>
@@ -705,6 +708,7 @@ function AdminUserDetailPage() {
                     ))}
                   </TableBody>
                 </Table>
+                </div>
               </CardContent>
             </Card>
           </PageSection>

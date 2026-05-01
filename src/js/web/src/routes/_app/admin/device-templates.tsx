@@ -496,6 +496,7 @@ function AdminDeviceTemplatesPage() {
               />
             ) : (
               <>
+                <div className="overflow-x-auto">
                 <Table aria-label="Device templates">
                   <TableHeader>
                     <TableRow>
@@ -591,6 +592,7 @@ function AdminDeviceTemplatesPage() {
                     ))}
                   </TableBody>
                 </Table>
+                </div>
                 {totalPages > 1 && (
                   <div className="flex items-center justify-between">
                     <p className="text-xs text-muted-foreground">

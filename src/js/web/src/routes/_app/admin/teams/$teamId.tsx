@@ -544,6 +544,7 @@ function MembersCard({ members }: MembersCardProps) {
   return (
     <Card>
       <CardContent className="pt-6">
+        <div className="overflow-x-auto">
         <Table aria-label="Team members">
           <TableHeader>
             <TableRow>
@@ -597,6 +598,7 @@ function MembersCard({ members }: MembersCardProps) {
             ))}
           </TableBody>
         </Table>
+        </div>
       </CardContent>
     </Card>
   )
@@ -669,6 +671,7 @@ function InvitationsCard({ teamId }: { teamId: string }) {
         </div>
       </CardHeader>
       <CardContent>
+        <div className="overflow-x-auto">
         <Table aria-label="Team invitations">
           <TableHeader>
             <TableRow>
@@ -718,6 +721,7 @@ function InvitationsCard({ teamId }: { teamId: string }) {
             ))}
           </TableBody>
         </Table>
+        </div>
       </CardContent>
     </Card>
   )

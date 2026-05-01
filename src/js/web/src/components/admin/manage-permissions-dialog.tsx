@@ -272,7 +272,7 @@ function TeamPermissionSummary({
         </div>
       ) : (
         <>
-          <div className="rounded-md border">
+          <div className="overflow-x-auto rounded-md border">
             <Table aria-label="Feature permissions summary">
               <TableHeader>
                 <TableRow>
@@ -421,7 +421,7 @@ function TeamPermissionEditor({
         </span>
       </div>
 
-      <div className="rounded-md border">
+      <div className="overflow-x-auto rounded-md border">
         <Table aria-label="Edit role permissions">
           <TableHeader>
             <TableRow>

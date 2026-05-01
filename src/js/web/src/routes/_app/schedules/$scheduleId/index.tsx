@@ -667,6 +667,7 @@ function ScheduleDetailPage() {
                   <CardDescription>Define operating hours for each day of the week.</CardDescription>
                 </CardHeader>
                 <CardContent>
+                  <div className="overflow-x-auto">
                   <Table aria-label="Weekly schedule entries">
                     <TableHeader>
                       <TableRow>
@@ -700,6 +701,7 @@ function ScheduleDetailPage() {
                       })}
                     </TableBody>
                   </Table>
+                  </div>
                 </CardContent>
               </Card>
             )}
@@ -716,6 +718,7 @@ function ScheduleDetailPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {holidayEntries.length > 0 ? (
+                    <div className="overflow-x-auto">
                     <Table aria-label="Holiday entries">
                       <TableHeader>
                         <TableRow>
@@ -731,6 +734,7 @@ function ScheduleDetailPage() {
                         ))}
                       </TableBody>
                     </Table>
+                    </div>
                   ) : (
                     <p className="text-sm text-muted-foreground py-4 text-center">No holidays configured.</p>
                   )}

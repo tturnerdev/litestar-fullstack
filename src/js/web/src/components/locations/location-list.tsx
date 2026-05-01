@@ -250,7 +250,7 @@ export function LocationList() {
 
         {/* Table */}
         {locations.length > 0 ? (
-          <div className="rounded-md border border-border/60 bg-card/80">
+          <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
             <Table aria-label="Locations">
               <TableHeader>
                 <TableRow>

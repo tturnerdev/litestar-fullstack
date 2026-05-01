@@ -318,6 +318,7 @@ function RulesTable({
   }
 
   return (
+    <div className="overflow-x-auto">
     <Table aria-label="Forwarding rules">
       <TableHeader>
         <TableRow>
@@ -379,6 +380,7 @@ function RulesTable({
         ))}
       </TableBody>
     </Table>
+    </div>
   )
 }
 

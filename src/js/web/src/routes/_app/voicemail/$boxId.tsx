@@ -734,6 +734,7 @@ function BoxMessageList({ boxId }: { boxId: string }) {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        <div className="overflow-x-auto">
         <Table aria-label="Voicemail messages">
           <TableHeader>
             <TableRow>
@@ -800,6 +801,7 @@ function BoxMessageList({ boxId }: { boxId: string }) {
             })}
           </TableBody>
         </Table>
+        </div>
 
         {totalPages > 1 && (
           <div className="flex items-center justify-between">

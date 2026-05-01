@@ -170,6 +170,7 @@ export function DeviceLineConfig({ deviceId }: DeviceLineConfigProps) {
           </div>
         ) : (
           <>
+            <div className="overflow-x-auto">
             <Table aria-label="Line assignments">
               <TableHeader>
                 <TableRow>
@@ -257,6 +258,7 @@ export function DeviceLineConfig({ deviceId }: DeviceLineConfigProps) {
                 ))}
               </TableBody>
             </Table>
+            </div>
 
             {dirty && (
               <>

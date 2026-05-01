@@ -162,6 +162,7 @@ export function EmailRouteEditor({ faxNumberId }: { faxNumberId: string }) {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="overflow-x-auto">
           <Table aria-label="Email routing rules">
             <TableHeader>
               <TableRow>
@@ -201,6 +202,7 @@ export function EmailRouteEditor({ faxNumberId }: { faxNumberId: string }) {
               ))}
             </TableBody>
           </Table>
+          </div>
           {data.items.length > 0 && (
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4 text-sm">

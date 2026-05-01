@@ -421,7 +421,7 @@ function TeamPermissionCard({
             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
           </div>
         ) : (
-          <div className="rounded-md border">
+          <div className="overflow-x-auto rounded-md border">
             <Table aria-label="Role permissions matrix">
               <TableHeader>
                 <TableRow>

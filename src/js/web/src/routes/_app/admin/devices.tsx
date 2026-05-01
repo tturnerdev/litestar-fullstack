@@ -242,41 +242,43 @@ function AdminDevicesPage() {
                 description="Devices will appear here once registered."
               />
             ) : (
-              <Table aria-label="Recent devices">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>MAC Address</TableHead>
-                    <TableHead>Model</TableHead>
-                    <TableHead>Team</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Last Seen</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {recentDevices.map((device, index) => (
-                    <TableRow key={device.id} className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")} onClick={() => navigate({ to: "/devices/$deviceId", params: { deviceId: device.id } })}>
-                      <TableCell className="font-medium">{device.name}</TableCell>
-                      <TableCell className="font-mono text-muted-foreground text-sm">{device.macAddress ?? "—"}</TableCell>
-                      <TableCell className="text-muted-foreground">{device.model ?? "—"}</TableCell>
-                      <TableCell className="text-muted-foreground">{device.teamName ?? "—"}</TableCell>
-                      <TableCell>
-                        <Badge variant={statusVariant[device.status] ?? "outline"} className="gap-1.5">
-                          <span className={cn("h-1.5 w-1.5 rounded-full", {
-                            "bg-emerald-500": device.status === "online",
-                            "bg-red-500": device.status === "offline" || device.status === "error",
-                            "bg-amber-500": device.status === "provisioning",
-                          })} />
-                          {device.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {formatDateTime(device.lastSeenAt, "Never")}
-                      </TableCell>
+              <div className="overflow-x-auto">
+                <Table aria-label="Recent devices">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>MAC Address</TableHead>
+                      <TableHead>Model</TableHead>
+                      <TableHead>Team</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Last Seen</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {recentDevices.map((device, index) => (
+                      <TableRow key={device.id} className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")} onClick={() => navigate({ to: "/devices/$deviceId", params: { deviceId: device.id } })}>
+                        <TableCell className="font-medium">{device.name}</TableCell>
+                        <TableCell className="font-mono text-muted-foreground text-sm">{device.macAddress ?? "—"}</TableCell>
+                        <TableCell className="text-muted-foreground">{device.model ?? "—"}</TableCell>
+                        <TableCell className="text-muted-foreground">{device.teamName ?? "—"}</TableCell>
+                        <TableCell>
+                          <Badge variant={statusVariant[device.status] ?? "outline"} className="gap-1.5">
+                            <span className={cn("h-1.5 w-1.5 rounded-full", {
+                              "bg-emerald-500": device.status === "online",
+                              "bg-red-500": device.status === "offline" || device.status === "error",
+                              "bg-amber-500": device.status === "provisioning",
+                            })} />
+                            {device.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {formatDateTime(device.lastSeenAt, "Never")}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             )}
           </CardContent>
         </Card>
@@ -341,41 +343,43 @@ function AdminDevicesPage() {
               />
             ) : (
               <>
-                <Table aria-label="All devices">
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>MAC Address</TableHead>
-                      <TableHead>Model</TableHead>
-                      <TableHead>Team</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Last Seen</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {devices.map((device, index) => (
-                      <TableRow key={device.id} className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")} onClick={() => navigate({ to: "/devices/$deviceId", params: { deviceId: device.id } })}>
-                        <TableCell className="font-medium">{device.name}</TableCell>
-                        <TableCell className="font-mono text-muted-foreground text-sm">{device.macAddress ?? "—"}</TableCell>
-                        <TableCell className="text-muted-foreground">{device.model ?? "—"}</TableCell>
-                        <TableCell className="text-muted-foreground">{device.teamName ?? "—"}</TableCell>
-                        <TableCell>
-                          <Badge variant={statusVariant[device.status] ?? "outline"} className="gap-1.5">
-                          <span className={cn("h-1.5 w-1.5 rounded-full", {
-                            "bg-emerald-500": device.status === "online",
-                            "bg-red-500": device.status === "offline" || device.status === "error",
-                            "bg-amber-500": device.status === "provisioning",
-                          })} />
-                          {device.status}
-                        </Badge>
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {formatDateTime(device.lastSeenAt, "Never")}
-                        </TableCell>
+                <div className="overflow-x-auto">
+                  <Table aria-label="All devices">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead>MAC Address</TableHead>
+                        <TableHead>Model</TableHead>
+                        <TableHead>Team</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Last Seen</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {devices.map((device, index) => (
+                        <TableRow key={device.id} className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")} onClick={() => navigate({ to: "/devices/$deviceId", params: { deviceId: device.id } })}>
+                          <TableCell className="font-medium">{device.name}</TableCell>
+                          <TableCell className="font-mono text-muted-foreground text-sm">{device.macAddress ?? "—"}</TableCell>
+                          <TableCell className="text-muted-foreground">{device.model ?? "—"}</TableCell>
+                          <TableCell className="text-muted-foreground">{device.teamName ?? "—"}</TableCell>
+                          <TableCell>
+                            <Badge variant={statusVariant[device.status] ?? "outline"} className="gap-1.5">
+                            <span className={cn("h-1.5 w-1.5 rounded-full", {
+                              "bg-emerald-500": device.status === "online",
+                              "bg-red-500": device.status === "offline" || device.status === "error",
+                              "bg-amber-500": device.status === "provisioning",
+                            })} />
+                            {device.status}
+                          </Badge>
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {formatDateTime(device.lastSeenAt, "Never")}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
                 {totalPages > 1 && (
                   <div className="flex items-center justify-between">
                     <p className="text-xs text-muted-foreground">

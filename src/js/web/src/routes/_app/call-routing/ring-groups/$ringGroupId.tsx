@@ -426,6 +426,7 @@ function RingGroupDetailPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {sortedMembers.length > 0 ? (
+                  <div className="overflow-x-auto">
                   <Table aria-label="Ring group members">
                     <TableHeader>
                       <TableRow>
@@ -441,6 +442,7 @@ function RingGroupDetailPage() {
                       ))}
                     </TableBody>
                   </Table>
+                  </div>
                 ) : (
                   <p className="text-sm text-muted-foreground py-4 text-center">No members assigned.</p>
                 )}

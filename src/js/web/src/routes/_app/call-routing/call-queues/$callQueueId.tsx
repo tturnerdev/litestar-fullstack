@@ -482,6 +482,7 @@ function CallQueueDetailPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {members.length > 0 ? (
+                  <div className="overflow-x-auto">
                   <Table aria-label="Queue members">
                     <TableHeader>
                       <TableRow>
@@ -498,6 +499,7 @@ function CallQueueDetailPage() {
                       ))}
                     </TableBody>
                   </Table>
+                  </div>
                 ) : (
                   <p className="text-sm text-muted-foreground py-4 text-center">No members assigned.</p>
                 )}

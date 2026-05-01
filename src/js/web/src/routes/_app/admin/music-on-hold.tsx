@@ -435,6 +435,7 @@ function AdminMusicOnHoldPage() {
               />
             ) : (
               <>
+                <div className="overflow-x-auto">
                 <Table aria-label="Music on Hold classes">
                   <TableHeader>
                     <TableRow>
@@ -538,6 +539,7 @@ function AdminMusicOnHoldPage() {
                     ))}
                   </TableBody>
                 </Table>
+                </div>
                 {totalPages > 1 && (
                   <div className="flex items-center justify-between">
                     <p className="text-xs text-muted-foreground">

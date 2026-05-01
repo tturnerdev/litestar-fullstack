@@ -263,35 +263,37 @@ function AdminVoicePage() {
               />
             ) : (
               <>
-                <Table aria-label="Phone numbers">
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Number</TableHead>
-                      <TableHead>Label</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Team</TableHead>
-                      <TableHead>Owner</TableHead>
-                      <TableHead>Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {phoneNumbers.map((pn, index) => (
-                      <TableRow key={pn.id} className={cn("hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")}>
-                        <TableCell className="font-mono font-medium">{pn.number}</TableCell>
-                        <TableCell className="text-muted-foreground">{pn.label ?? "—"}</TableCell>
-                        <TableCell className="text-muted-foreground capitalize">{pn.numberType}</TableCell>
-                        <TableCell className="text-muted-foreground">{pn.teamName ?? "—"}</TableCell>
-                        <TableCell className="text-muted-foreground">{pn.ownerEmail ?? "Unassigned"}</TableCell>
-                        <TableCell>
-                          <Badge variant={pn.isActive ? "default" : "secondary"} className="gap-1.5">
-                            <span className={cn("h-1.5 w-1.5 rounded-full", pn.isActive ? "bg-emerald-500" : "bg-gray-400")} />
-                            {pn.isActive ? "Active" : "Inactive"}
-                          </Badge>
-                        </TableCell>
+                <div className="overflow-x-auto">
+                  <Table aria-label="Phone numbers">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Number</TableHead>
+                        <TableHead>Label</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Team</TableHead>
+                        <TableHead>Owner</TableHead>
+                        <TableHead>Status</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {phoneNumbers.map((pn, index) => (
+                        <TableRow key={pn.id} className={cn("hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")}>
+                          <TableCell className="font-mono font-medium">{pn.number}</TableCell>
+                          <TableCell className="text-muted-foreground">{pn.label ?? "—"}</TableCell>
+                          <TableCell className="text-muted-foreground capitalize">{pn.numberType}</TableCell>
+                          <TableCell className="text-muted-foreground">{pn.teamName ?? "—"}</TableCell>
+                          <TableCell className="text-muted-foreground">{pn.ownerEmail ?? "Unassigned"}</TableCell>
+                          <TableCell>
+                            <Badge variant={pn.isActive ? "default" : "secondary"} className="gap-1.5">
+                              <span className={cn("h-1.5 w-1.5 rounded-full", pn.isActive ? "bg-emerald-500" : "bg-gray-400")} />
+                              {pn.isActive ? "Active" : "Inactive"}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
                 {phoneTotalPages > 1 && (
                   <div className="flex items-center justify-between">
                     <p className="text-xs text-muted-foreground">
@@ -358,33 +360,35 @@ function AdminVoicePage() {
                 description="Extensions will appear here once configured."
               />
             ) : (
-              <Table aria-label="Extensions">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Extension</TableHead>
-                    <TableHead>Display Name</TableHead>
-                    <TableHead>Owner</TableHead>
-                    <TableHead>Phone Number</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {recentExtensions.map((ext, index) => (
-                    <TableRow key={ext.id} className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")} onClick={() => navigate({ to: "/voice/extensions/$extensionId", params: { extensionId: ext.id } })}>
-                      <TableCell className="font-mono font-medium">{ext.extensionNumber}</TableCell>
-                      <TableCell className="text-muted-foreground">{ext.displayName}</TableCell>
-                      <TableCell className="text-muted-foreground">{ext.ownerEmail ?? "—"}</TableCell>
-                      <TableCell className="font-mono text-muted-foreground">{ext.phoneNumber ?? "—"}</TableCell>
-                      <TableCell>
-                        <Badge variant={ext.isActive ? "default" : "secondary"} className="gap-1.5">
-                          <span className={cn("h-1.5 w-1.5 rounded-full", ext.isActive ? "bg-emerald-500" : "bg-gray-400")} />
-                          {ext.isActive ? "Active" : "Inactive"}
-                        </Badge>
-                      </TableCell>
+              <div className="overflow-x-auto">
+                <Table aria-label="Extensions">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Extension</TableHead>
+                      <TableHead>Display Name</TableHead>
+                      <TableHead>Owner</TableHead>
+                      <TableHead>Phone Number</TableHead>
+                      <TableHead>Status</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {recentExtensions.map((ext, index) => (
+                      <TableRow key={ext.id} className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")} onClick={() => navigate({ to: "/voice/extensions/$extensionId", params: { extensionId: ext.id } })}>
+                        <TableCell className="font-mono font-medium">{ext.extensionNumber}</TableCell>
+                        <TableCell className="text-muted-foreground">{ext.displayName}</TableCell>
+                        <TableCell className="text-muted-foreground">{ext.ownerEmail ?? "—"}</TableCell>
+                        <TableCell className="font-mono text-muted-foreground">{ext.phoneNumber ?? "—"}</TableCell>
+                        <TableCell>
+                          <Badge variant={ext.isActive ? "default" : "secondary"} className="gap-1.5">
+                            <span className={cn("h-1.5 w-1.5 rounded-full", ext.isActive ? "bg-emerald-500" : "bg-gray-400")} />
+                            {ext.isActive ? "Active" : "Inactive"}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             )}
           </CardContent>
         </Card>

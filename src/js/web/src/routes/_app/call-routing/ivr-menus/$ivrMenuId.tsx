@@ -425,6 +425,7 @@ function IvrMenuDetailPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {sortedOptions.length > 0 ? (
+                  <div className="overflow-x-auto">
                   <Table aria-label="IVR menu options">
                     <TableHeader>
                       <TableRow>
@@ -440,6 +441,7 @@ function IvrMenuDetailPage() {
                       ))}
                     </TableBody>
                   </Table>
+                  </div>
                 ) : (
                   <p className="text-sm text-muted-foreground py-4 text-center">No options configured.</p>
                 )}

@@ -231,47 +231,49 @@ function AdminFaxPage() {
                 description="Fax messages will appear here once sent or received."
               />
             ) : (
-              <Table aria-label="Recent fax activity">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Direction</TableHead>
-                    <TableHead>Fax Number</TableHead>
-                    <TableHead>Remote Number</TableHead>
-                    <TableHead>Pages</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Received</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {recentMessages.map((msg, index) => (
-                    <TableRow key={msg.id} className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")} onClick={() => navigate({ to: "/fax/messages/$messageId", params: { messageId: msg.id } })}>
-                      <TableCell>
-                        <Badge variant={msg.direction === "inbound" ? "outline" : "secondary"}>
-                          <span className="flex items-center gap-1">
-                            {msg.direction === "inbound" ? <Inbox className="h-3 w-3" /> : <Send className="h-3 w-3" />}
-                            {msg.direction}
-                          </span>
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="font-mono font-medium">{msg.faxNumber}</TableCell>
-                      <TableCell className="font-mono text-muted-foreground">{msg.remoteNumber}</TableCell>
-                      <TableCell className="text-muted-foreground">{msg.pageCount}</TableCell>
-                      <TableCell>
-                        <Badge variant={statusVariant[msg.status] ?? "outline"} className="gap-1.5">
-                          <span className={cn("h-1.5 w-1.5 rounded-full", {
-                            "bg-emerald-500": msg.status === "completed" || msg.status === "delivered",
-                            "bg-amber-500": msg.status === "sending",
-                            "bg-gray-400": msg.status === "queued",
-                            "bg-red-500": msg.status === "failed",
-                          })} />
-                          {msg.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">{formatDateTime(msg.receivedAt)}</TableCell>
+              <div className="overflow-x-auto">
+                <Table aria-label="Recent fax activity">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Direction</TableHead>
+                      <TableHead>Fax Number</TableHead>
+                      <TableHead>Remote Number</TableHead>
+                      <TableHead>Pages</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Received</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {recentMessages.map((msg, index) => (
+                      <TableRow key={msg.id} className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")} onClick={() => navigate({ to: "/fax/messages/$messageId", params: { messageId: msg.id } })}>
+                        <TableCell>
+                          <Badge variant={msg.direction === "inbound" ? "outline" : "secondary"}>
+                            <span className="flex items-center gap-1">
+                              {msg.direction === "inbound" ? <Inbox className="h-3 w-3" /> : <Send className="h-3 w-3" />}
+                              {msg.direction}
+                            </span>
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="font-mono font-medium">{msg.faxNumber}</TableCell>
+                        <TableCell className="font-mono text-muted-foreground">{msg.remoteNumber}</TableCell>
+                        <TableCell className="text-muted-foreground">{msg.pageCount}</TableCell>
+                        <TableCell>
+                          <Badge variant={statusVariant[msg.status] ?? "outline"} className="gap-1.5">
+                            <span className={cn("h-1.5 w-1.5 rounded-full", {
+                              "bg-emerald-500": msg.status === "completed" || msg.status === "delivered",
+                              "bg-amber-500": msg.status === "sending",
+                              "bg-gray-400": msg.status === "queued",
+                              "bg-red-500": msg.status === "failed",
+                            })} />
+                            {msg.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">{formatDateTime(msg.receivedAt)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             )}
           </CardContent>
         </Card>
@@ -350,33 +352,35 @@ function AdminFaxPage() {
               />
             ) : (
               <>
-                <Table aria-label="Fax numbers">
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Number</TableHead>
-                      <TableHead>Label</TableHead>
-                      <TableHead>Team</TableHead>
-                      <TableHead>Owner</TableHead>
-                      <TableHead>Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {faxNumbers.map((fn, index) => (
-                      <TableRow key={fn.id} className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")} onClick={() => navigate({ to: "/fax/numbers/$faxNumberId", params: { faxNumberId: fn.id } })}>
-                        <TableCell className="font-mono font-medium">{fn.number}</TableCell>
-                        <TableCell className="text-muted-foreground">{fn.label ?? "—"}</TableCell>
-                        <TableCell className="text-muted-foreground">{fn.teamName ?? "—"}</TableCell>
-                        <TableCell className="text-muted-foreground">{fn.ownerEmail ?? "Unassigned"}</TableCell>
-                        <TableCell>
-                          <Badge variant={fn.isActive ? "default" : "secondary"} className="gap-1.5">
-                            <span className={cn("h-1.5 w-1.5 rounded-full", fn.isActive ? "bg-emerald-500" : "bg-gray-400")} />
-                            {fn.isActive ? "Active" : "Inactive"}
-                          </Badge>
-                        </TableCell>
+                <div className="overflow-x-auto">
+                  <Table aria-label="Fax numbers">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Number</TableHead>
+                        <TableHead>Label</TableHead>
+                        <TableHead>Team</TableHead>
+                        <TableHead>Owner</TableHead>
+                        <TableHead>Status</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {faxNumbers.map((fn, index) => (
+                        <TableRow key={fn.id} className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")} onClick={() => navigate({ to: "/fax/numbers/$faxNumberId", params: { faxNumberId: fn.id } })}>
+                          <TableCell className="font-mono font-medium">{fn.number}</TableCell>
+                          <TableCell className="text-muted-foreground">{fn.label ?? "—"}</TableCell>
+                          <TableCell className="text-muted-foreground">{fn.teamName ?? "—"}</TableCell>
+                          <TableCell className="text-muted-foreground">{fn.ownerEmail ?? "Unassigned"}</TableCell>
+                          <TableCell>
+                            <Badge variant={fn.isActive ? "default" : "secondary"} className="gap-1.5">
+                              <span className={cn("h-1.5 w-1.5 rounded-full", fn.isActive ? "bg-emerald-500" : "bg-gray-400")} />
+                              {fn.isActive ? "Active" : "Inactive"}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
                 {numberTotalPages > 1 && (
                   <div className="flex items-center justify-between">
                     <p className="text-xs text-muted-foreground">

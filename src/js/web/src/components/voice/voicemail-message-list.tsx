@@ -178,6 +178,7 @@ export function VoicemailMessageList({ extensionId }: VoicemailMessageListProps)
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        <div className="overflow-x-auto">
         <Table aria-label="Voicemail messages">
           <TableHeader>
             <TableRow>
@@ -215,6 +216,7 @@ export function VoicemailMessageList({ extensionId }: VoicemailMessageListProps)
             ))}
           </TableBody>
         </Table>
+        </div>
 
         {totalPages > 1 && (
           <div className="flex items-center justify-between">

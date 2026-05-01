@@ -259,56 +259,58 @@ function AdminSupportPage() {
                 description="Support tickets will appear here once created."
               />
             ) : (
-              <Table aria-label="Recent support tickets">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Ticket #</TableHead>
-                    <TableHead>Subject</TableHead>
-                    <TableHead>Priority</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Created</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {recentTickets.map((ticket, index) => (
-                    <TableRow key={ticket.id} className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")} onClick={() => navigate({ to: "/support/$ticketId", params: { ticketId: ticket.id } })}>
-                      <TableCell className="font-mono text-sm">{ticket.ticketNumber}</TableCell>
-                      <TableCell className="font-medium max-w-[300px] truncate">
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span>{ticket.subject}</span>
-                          </TooltipTrigger>
-                          <TooltipContent>{ticket.subject}</TooltipContent>
-                        </Tooltip>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={priorityVariant[ticket.priority] ?? "outline"} className="gap-1.5">
-                          <span className={cn("h-1.5 w-1.5 rounded-full", {
-                            "bg-gray-400": ticket.priority === "low",
-                            "bg-amber-500": ticket.priority === "medium",
-                            "bg-orange-500": ticket.priority === "high",
-                            "bg-red-500": ticket.priority === "urgent",
-                          })} />
-                          {ticket.priority}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={statusVariant[ticket.status] ?? "outline"} className="gap-1.5">
-                          <span className={cn("h-1.5 w-1.5 rounded-full", {
-                            "bg-blue-500": ticket.status === "open",
-                            "bg-amber-500": ticket.status === "in_progress",
-                            "bg-violet-500": ticket.status === "waiting_on_customer" || ticket.status === "waiting_on_support",
-                            "bg-emerald-500": ticket.status === "resolved",
-                            "bg-gray-400": ticket.status === "closed",
-                          })} />
-                          {statusLabel[ticket.status] ?? ticket.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">{formatRelativeTimeShort(ticket.createdAt)}</TableCell>
+              <div className="overflow-x-auto">
+                <Table aria-label="Recent support tickets">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Ticket #</TableHead>
+                      <TableHead>Subject</TableHead>
+                      <TableHead>Priority</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Created</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {recentTickets.map((ticket, index) => (
+                      <TableRow key={ticket.id} className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")} onClick={() => navigate({ to: "/support/$ticketId", params: { ticketId: ticket.id } })}>
+                        <TableCell className="font-mono text-sm">{ticket.ticketNumber}</TableCell>
+                        <TableCell className="font-medium max-w-[300px] truncate">
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span>{ticket.subject}</span>
+                            </TooltipTrigger>
+                            <TooltipContent>{ticket.subject}</TooltipContent>
+                          </Tooltip>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={priorityVariant[ticket.priority] ?? "outline"} className="gap-1.5">
+                            <span className={cn("h-1.5 w-1.5 rounded-full", {
+                              "bg-gray-400": ticket.priority === "low",
+                              "bg-amber-500": ticket.priority === "medium",
+                              "bg-orange-500": ticket.priority === "high",
+                              "bg-red-500": ticket.priority === "urgent",
+                            })} />
+                            {ticket.priority}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={statusVariant[ticket.status] ?? "outline"} className="gap-1.5">
+                            <span className={cn("h-1.5 w-1.5 rounded-full", {
+                              "bg-blue-500": ticket.status === "open",
+                              "bg-amber-500": ticket.status === "in_progress",
+                              "bg-violet-500": ticket.status === "waiting_on_customer" || ticket.status === "waiting_on_support",
+                              "bg-emerald-500": ticket.status === "resolved",
+                              "bg-gray-400": ticket.status === "closed",
+                            })} />
+                            {statusLabel[ticket.status] ?? ticket.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground text-sm">{formatRelativeTimeShort(ticket.createdAt)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             )}
           </CardContent>
         </Card>
@@ -373,60 +375,62 @@ function AdminSupportPage() {
               />
             ) : (
               <>
-                <Table aria-label="All support tickets">
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Ticket #</TableHead>
-                      <TableHead>Subject</TableHead>
-                      <TableHead>Creator</TableHead>
-                      <TableHead>Assigned To</TableHead>
-                      <TableHead>Priority</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Created</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {tickets.map((ticket, index) => (
-                      <TableRow key={ticket.id} className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")} onClick={() => navigate({ to: "/support/$ticketId", params: { ticketId: ticket.id } })}>
-                        <TableCell className="font-mono text-sm">{ticket.ticketNumber}</TableCell>
-                        <TableCell className="font-medium max-w-[250px] truncate">
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <span>{ticket.subject}</span>
-                            </TooltipTrigger>
-                            <TooltipContent>{ticket.subject}</TooltipContent>
-                          </Tooltip>
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">{ticket.creatorEmail ?? "—"}</TableCell>
-                        <TableCell className="text-muted-foreground">{ticket.assignedToEmail ?? "Unassigned"}</TableCell>
-                        <TableCell>
-                          <Badge variant={priorityVariant[ticket.priority] ?? "outline"} className="gap-1.5">
-                          <span className={cn("h-1.5 w-1.5 rounded-full", {
-                            "bg-gray-400": ticket.priority === "low",
-                            "bg-amber-500": ticket.priority === "medium",
-                            "bg-orange-500": ticket.priority === "high",
-                            "bg-red-500": ticket.priority === "urgent",
-                          })} />
-                          {ticket.priority}
-                        </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={statusVariant[ticket.status] ?? "outline"} className="gap-1.5">
-                          <span className={cn("h-1.5 w-1.5 rounded-full", {
-                            "bg-blue-500": ticket.status === "open",
-                            "bg-amber-500": ticket.status === "in_progress",
-                            "bg-violet-500": ticket.status === "waiting_on_customer" || ticket.status === "waiting_on_support",
-                            "bg-emerald-500": ticket.status === "resolved",
-                            "bg-gray-400": ticket.status === "closed",
-                          })} />
-                          {statusLabel[ticket.status] ?? ticket.status}
-                        </Badge>
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">{formatDateTime(ticket.createdAt)}</TableCell>
+                <div className="overflow-x-auto">
+                  <Table aria-label="All support tickets">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Ticket #</TableHead>
+                        <TableHead>Subject</TableHead>
+                        <TableHead>Creator</TableHead>
+                        <TableHead>Assigned To</TableHead>
+                        <TableHead>Priority</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Created</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {tickets.map((ticket, index) => (
+                        <TableRow key={ticket.id} className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")} onClick={() => navigate({ to: "/support/$ticketId", params: { ticketId: ticket.id } })}>
+                          <TableCell className="font-mono text-sm">{ticket.ticketNumber}</TableCell>
+                          <TableCell className="font-medium max-w-[250px] truncate">
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span>{ticket.subject}</span>
+                              </TooltipTrigger>
+                              <TooltipContent>{ticket.subject}</TooltipContent>
+                            </Tooltip>
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">{ticket.creatorEmail ?? "—"}</TableCell>
+                          <TableCell className="text-muted-foreground">{ticket.assignedToEmail ?? "Unassigned"}</TableCell>
+                          <TableCell>
+                            <Badge variant={priorityVariant[ticket.priority] ?? "outline"} className="gap-1.5">
+                            <span className={cn("h-1.5 w-1.5 rounded-full", {
+                              "bg-gray-400": ticket.priority === "low",
+                              "bg-amber-500": ticket.priority === "medium",
+                              "bg-orange-500": ticket.priority === "high",
+                              "bg-red-500": ticket.priority === "urgent",
+                            })} />
+                            {ticket.priority}
+                          </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={statusVariant[ticket.status] ?? "outline"} className="gap-1.5">
+                            <span className={cn("h-1.5 w-1.5 rounded-full", {
+                              "bg-blue-500": ticket.status === "open",
+                              "bg-amber-500": ticket.status === "in_progress",
+                              "bg-violet-500": ticket.status === "waiting_on_customer" || ticket.status === "waiting_on_support",
+                              "bg-emerald-500": ticket.status === "resolved",
+                              "bg-gray-400": ticket.status === "closed",
+                            })} />
+                            {statusLabel[ticket.status] ?? ticket.status}
+                          </Badge>
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">{formatDateTime(ticket.createdAt)}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
                 {totalPages > 1 && (
                   <div className="flex items-center justify-between">
                     <p className="text-xs text-muted-foreground">
