@@ -1,10 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   AlertCircle,
   Calendar,
   CheckCircle2,
   Clock,
+  Download,
   Eye,
   Home,
   Loader2,
@@ -25,7 +26,9 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { BulkActionBar, createExportAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -57,6 +60,7 @@ import {
   type Schedule,
   type ScheduleCreate,
 } from "@/lib/api/hooks/schedules"
+import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 
@@ -99,6 +103,15 @@ const COMMON_TIMEZONES = [
   "Australia/Sydney",
   "Pacific/Auckland",
   "UTC",
+]
+
+const csvHeaders: CsvHeader<Schedule>[] = [
+  { label: "Name", accessor: (s) => s.name },
+  { label: "Type", accessor: (s) => scheduleTypeLabels[s.scheduleType] ?? s.scheduleType },
+  { label: "Timezone", accessor: (s) => s.timezone },
+  { label: "Default", accessor: (s) => (s.isDefault ? "Yes" : "No") },
+  { label: "Created", accessor: (s) => s.createdAt },
+  { label: "Updated", accessor: (s) => s.updatedAt },
 ]
 
 // -- Status badge (per-row) ---------------------------------------------------
@@ -261,9 +274,40 @@ function SchedulesPage() {
     sortOrder: sortDir ?? undefined,
   })
 
+  // Selection state
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+
   const schedules = data?.items ?? []
   const total = data?.total ?? 0
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
+
+  // filteredItems (no client-side filters currently, but keeps export consistent)
+  const filteredItems = useMemo(() => schedules, [schedules])
+
+  // Selection helpers
+  const allVisibleIds = useMemo(() => filteredItems.map((s) => s.id), [filteredItems])
+  const allSelected = filteredItems.length > 0 && filteredItems.every((s) => selectedIds.has(s.id))
+  const someSelected = filteredItems.some((s) => selectedIds.has(s.id))
+
+  const toggleAll = useCallback(() => {
+    if (allSelected) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(allVisibleIds))
+    }
+  }, [allSelected, allVisibleIds])
+
+  const toggleOne = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      return next
+    })
+  }, [])
 
   const handleSort = useCallback(
     (key: string) => {
@@ -281,6 +325,25 @@ function SchedulesPage() {
     [navigate],
   )
 
+  // Bulk actions
+  const bulkActions = useMemo(
+    () => [
+      createExportAction<Schedule>(
+        "schedules-selected",
+        csvHeaders,
+        (ids) => filteredItems.filter((s) => ids.includes(s.id)),
+      ),
+    ],
+    [filteredItems],
+  )
+
+  // Export all visible
+  const handleExportAll = useCallback(() => {
+    if (!filteredItems.length) return
+    exportToCsv("schedules", csvHeaders, filteredItems)
+  }, [filteredItems])
+
+  const hasData = filteredItems.length > 0
   const hasActiveFilters = search !== ""
 
   const breadcrumbs = (
@@ -309,9 +372,15 @@ function SchedulesPage() {
         description="Manage business hours, holiday schedules, and custom time windows."
         breadcrumbs={breadcrumbs}
         actions={
-          <Button size="sm" onClick={() => setDialogOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" /> New schedule
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={handleExportAll} disabled={!hasData}>
+              <Download className="mr-2 h-4 w-4" />
+              Export
+            </Button>
+            <Button size="sm" onClick={() => setDialogOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" /> New schedule
+            </Button>
+          </div>
         }
       />
 
@@ -398,6 +467,14 @@ function SchedulesPage() {
               <Table aria-label="Schedules">
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-10">
+                      <Checkbox
+                        checked={allSelected}
+                        indeterminate={someSelected && !allSelected}
+                        onChange={toggleAll}
+                        aria-label="Select all schedules"
+                      />
+                    </TableHead>
                     <SortableHeader
                       label="Name"
                       sortKey="name"
@@ -419,11 +496,13 @@ function SchedulesPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {schedules.map((schedule, index) => (
+                  {filteredItems.map((schedule, index) => (
                     <ScheduleRow
                       key={schedule.id}
                       schedule={schedule}
                       index={index}
+                      selected={selectedIds.has(schedule.id)}
+                      onToggle={() => toggleOne(schedule.id)}
                       onRowClick={() => handleRowClick(schedule.id)}
                     />
                   ))}
@@ -458,6 +537,14 @@ function SchedulesPage() {
 
       {/* New schedule dialog */}
       <NewScheduleDialog open={dialogOpen} onOpenChange={setDialogOpen} />
+
+      {/* Bulk action bar */}
+      <BulkActionBar
+        selectedCount={selectedIds.size}
+        selectedIds={Array.from(selectedIds)}
+        onClearSelection={() => setSelectedIds(new Set())}
+        actions={bulkActions}
+      />
     </PageContainer>
   )
 }
@@ -467,23 +554,38 @@ function SchedulesPage() {
 function ScheduleRow({
   schedule,
   index,
+  selected,
+  onToggle,
   onRowClick,
 }: {
   schedule: Schedule
   index: number
+  selected: boolean
+  onToggle: () => void
   onRowClick: () => void
 }) {
   const deleteSchedule = useDeleteSchedule()
 
   return (
     <TableRow
+      data-state={selected ? "selected" : undefined}
       className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`}
       onClick={(e) => {
         const target = e.target as HTMLElement
-        if (target.closest("a") || target.closest("button") || target.closest("[data-slot=dropdown]")) return
+        if (target.closest("[role=checkbox]") || target.closest("a") || target.closest("button") || target.closest("[data-slot=dropdown]")) return
         onRowClick()
       }}
     >
+      <TableCell>
+        <Checkbox
+          checked={selected}
+          onChange={(e) => {
+            e.stopPropagation()
+            onToggle()
+          }}
+          aria-label={`Select ${schedule.name}`}
+        />
+      </TableCell>
       <TableCell>
         <Link
           to="/schedules/$scheduleId"

@@ -21,6 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
 import { OrganizationQuickLinks } from "@/components/organization/organization-quick-links"
 import { OrganizationStats } from "@/components/organization/organization-stats"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useAuthStore } from "@/lib/auth"
 import { useOrganization, useOrganizationStats, useUpdateOrganization } from "@/lib/api/hooks/organization"
 
@@ -73,6 +74,7 @@ interface OrgFormData {
 }
 
 function OrganizationSettingsPage() {
+  useDocumentTitle("Organization")
   const user = useAuthStore((s) => s.user)
   const isSuperuser = user?.isSuperuser ?? false
   const { data: org, isLoading } = useOrganization()

@@ -43,6 +43,7 @@ import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-lay
 import { Skeleton } from "@/components/ui/skeleton"
 import { CopyButton } from "@/components/ui/copy-button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import {
   useDeleteFaxNumber,
   useFaxMessages,
@@ -127,6 +128,7 @@ function FaxNumberDetailPage() {
   const { faxNumberId } = Route.useParams()
   const navigate = useNavigate()
   const { data, isLoading, isError } = useFaxNumber(faxNumberId)
+  useDocumentTitle(data?.number ?? "Fax Number")
   const updateFaxNumber = useUpdateFaxNumber(faxNumberId)
   const deleteFaxNumber = useDeleteFaxNumber()
 

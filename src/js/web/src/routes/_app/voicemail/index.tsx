@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { z } from "zod"
 import {
   AlertCircle,
   AlertTriangle,
   CheckSquare,
+  Download,
   Home,
   Inbox,
   Loader2,
@@ -63,6 +64,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { VoicemailPlayer } from "@/components/voice/voicemail-player"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
+import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { formatFullDateTime } from "@/lib/date-utils"
 import { formatDuration } from "@/lib/format-utils"
 import {
@@ -92,6 +94,16 @@ const PAGE_SIZE = 25
 const readFilterOptions: FilterOption[] = [
   { value: "unread", label: "Unread" },
   { value: "read", label: "Read" },
+]
+
+const csvHeaders: CsvHeader<VoicemailMessage>[] = [
+  { label: "Caller", accessor: (m) => m.callerName ?? m.callerNumber },
+  { label: "Caller Number", accessor: (m) => m.callerNumber },
+  { label: "Duration", accessor: (m) => formatDuration(m.durationSeconds) },
+  { label: "Date", accessor: (m) => m.receivedAt },
+  { label: "Read", accessor: (m) => (m.isRead ? "Yes" : "No") },
+  { label: "Urgent", accessor: (m) => (m.isUrgent ? "Yes" : "No") },
+  { label: "Transcription", accessor: (m) => m.transcription ?? "" },
 ]
 
 function formatReceivedAt(dateStr: string): string {
@@ -211,6 +223,12 @@ function MessagesTab() {
   const someSelected = selectedIds.size > 0
 
   const activeFilterCount = readFilter.length + (startDate || endDate ? 1 : 0)
+
+  // Export all visible
+  const handleExportAll = useCallback(() => {
+    if (!items.length) return
+    exportToCsv("voicemail-messages", csvHeaders, items)
+  }, [items])
 
   function toggleSelectAll() {
     if (allSelected) {
@@ -346,6 +364,12 @@ function MessagesTab() {
             Clear filters
           </Button>
         )}
+        <div className="ml-auto">
+          <Button variant="outline" size="sm" onClick={handleExportAll} disabled={items.length === 0}>
+            <Download className="mr-2 h-4 w-4" />
+            Export
+          </Button>
+        </div>
       </div>
 
       {/* Bulk actions */}

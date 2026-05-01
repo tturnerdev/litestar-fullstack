@@ -42,6 +42,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { DeleteExtensionDialog } from "@/components/voice/delete-extension-dialog"
 import { DndQuickToggle } from "@/components/voice/dnd-quick-toggle"
 import { EditExtensionDialog } from "@/components/voice/edit-extension-dialog"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import {
   type Extension as ExtensionType,
@@ -105,6 +106,7 @@ function ExtensionDetailPage() {
   const router = useRouter()
   const navigate = Route.useNavigate()
   const { data, isLoading, isError } = useExtension(extensionId)
+  useDocumentTitle(data ? `${data.displayName} (Ext. ${data.extensionNumber})` : "Extension")
   const updateExtension = useUpdateExtension(extensionId)
   const gatewayQuery = useGatewayLookupExtension(data?.extensionNumber ?? "", tab === "external")
   const [showEditDialog, setShowEditDialog] = useState(false)

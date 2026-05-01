@@ -22,7 +22,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { Badge } from "@/components/ui/badge"
-import { BulkActionBar, createBulkDeleteAction } from "@/components/ui/bulk-action-bar"
+import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { DateRangeFilter, getPresetDates, isDateInRange } from "@/components/ui/date-range-filter"
@@ -41,6 +41,7 @@ import {
   useFaxMessages,
   useFaxNumbers,
 } from "@/lib/api/hooks/fax"
+import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
@@ -66,6 +67,16 @@ const statusOptions: FilterOption[] = [
 ]
 
 const PAGE_SIZE = 25
+
+const csvHeaders: CsvHeader<FaxMessage>[] = [
+  { label: "Remote Number", accessor: (m) => m.remoteNumber },
+  { label: "Remote Name", accessor: (m) => m.remoteName ?? "" },
+  { label: "Direction", accessor: (m) => m.direction },
+  { label: "Status", accessor: (m) => m.status },
+  { label: "Pages", accessor: (m) => m.pageCount },
+  { label: "Error", accessor: (m) => m.errorMessage ?? "" },
+  { label: "Date", accessor: (m) => m.receivedAt ?? m.createdAt ?? "" },
+]
 
 // -- Helpers ------------------------------------------------------------------
 
@@ -195,6 +206,12 @@ function FaxMessagesPage() {
     setPage(1)
   }, [])
 
+  // Export all visible
+  const handleExportAll = useCallback(() => {
+    if (!filteredItems.length) return
+    exportToCsv("fax-messages", csvHeaders, filteredItems)
+  }, [filteredItems])
+
   // Bulk actions
   const bulkActions = useMemo(
     () => [
@@ -204,8 +221,13 @@ function FaxMessagesPage() {
           setSelectedIds(new Set())
         },
       ),
+      createExportAction<FaxMessage>(
+        "fax-messages-selected",
+        csvHeaders,
+        (ids) => filteredItems.filter((m) => ids.includes(m.id)),
+      ),
     ],
-    [deleteMessage],
+    [filteredItems, deleteMessage],
   )
 
   // Row click handler
@@ -254,11 +276,17 @@ function FaxMessagesPage() {
         description="View your fax history, filter by direction and status."
         breadcrumbs={breadcrumbs}
         actions={
-          <Button asChild size="sm">
-            <Link to="/fax/send">
-              <Send className="mr-2 h-4 w-4" /> Send Fax
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={handleExportAll} disabled={!hasData}>
+              <Download className="mr-2 h-4 w-4" />
+              Export
+            </Button>
+            <Button asChild size="sm">
+              <Link to="/fax/send">
+                <Send className="mr-2 h-4 w-4" /> Send Fax
+              </Link>
+            </Button>
+          </div>
         }
       />
 

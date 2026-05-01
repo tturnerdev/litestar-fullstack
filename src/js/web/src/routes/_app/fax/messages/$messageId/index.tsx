@@ -44,6 +44,7 @@ import { SkeletonCard } from "@/components/ui/skeleton"
 import { CopyButton } from "@/components/ui/copy-button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { DirectionBadge, FaxStatusBadge } from "@/components/fax/fax-status-badge"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useDeleteFaxMessage, useDownloadFaxDocument, useFaxMessage } from "@/lib/api/hooks/fax"
 import { formatDateTime } from "@/lib/date-utils"
 import { formatBytes } from "@/lib/format-utils"
@@ -102,6 +103,7 @@ function TimestampField({
 // -- Main page --------------------------------------------------------------
 
 function FaxMessageDetailPage() {
+  useDocumentTitle("Fax Message")
   const { messageId } = Route.useParams()
   const router = useRouter()
   const { data, isLoading, isError } = useFaxMessage(messageId)

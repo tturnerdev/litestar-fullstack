@@ -23,6 +23,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { CopyButton } from "@/components/ui/copy-button"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useAuthStore } from "@/lib/auth"
 import { formatDateTime, formatRelativeTime } from "@/lib/date-utils"
 import { useDeleteLocation, useLocation, useUpdateLocation, type Location } from "@/lib/api/hooks/locations"
@@ -47,6 +48,7 @@ function LocationDetailPage() {
   const teamId = currentTeam?.id ?? ""
 
   const { data, isLoading, isError } = useLocation(teamId, locationId)
+  useDocumentTitle(data?.name ?? "Location")
   const updateLocation = useUpdateLocation(teamId, locationId)
   const deleteLocation = useDeleteLocation(teamId)
 

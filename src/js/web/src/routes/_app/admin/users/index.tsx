@@ -1,17 +1,21 @@
-import { createFileRoute, Link } from "@tanstack/react-router"
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { useCallback, useMemo, useState } from "react"
 import {
   AlertCircle,
   CheckCircle2,
-  Loader2,
+  Eye,
+  Lock,
+  MoreVertical,
+  Pencil,
   Search,
   Shield,
   ShieldCheck,
   ShieldOff,
   Trash2,
   UserCheck,
-  Users,
+  UserPlus,
   UserX,
+  Users,
   X,
   XCircle,
 } from "lucide-react"
@@ -19,12 +23,18 @@ import { toast } from "sonner"
 import { useQueryClient } from "@tanstack/react-query"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
-import { UserRowActions } from "@/components/admin/user-row-actions"
+import { DeleteUserDialog } from "@/components/admin/delete-user-dialog"
+import { EditUserDialog } from "@/components/admin/edit-user-dialog"
+import { JoinTeamDialog } from "@/components/admin/join-team-dialog"
+import { ManagePermissionsDialog } from "@/components/admin/manage-permissions-dialog"
+import { ManageRolesDialog } from "@/components/admin/manage-roles-dialog"
+import { ToggleUserStatusDialog } from "@/components/admin/toggle-user-status-dialog"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { type BulkAction, BulkActionBar } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { ExportButton } from "@/components/ui/export-button"
 import { FilterDropdown, type FilterOption } from "@/components/ui/filter-dropdown"
@@ -34,8 +44,9 @@ import { SkeletonTable } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
-import { useAdminUsers, useAdminUpdateUser } from "@/lib/api/hooks/admin"
+import { useAdminUsers } from "@/lib/api/hooks/admin"
 import { adminDeleteUser, adminUpdateUser } from "@/lib/generated/api"
 import type { AdminUserSummary } from "@/lib/generated/api"
 
@@ -119,79 +130,12 @@ function matchesStatusFilter(user: AdminUserSummary, filters: string[]): boolean
   return false
 }
 
-// -- Quick action buttons -----------------------------------------------------
-
-function ToggleActiveButton({ user }: { user: AdminUserSummary }) {
-  const updateUser = useAdminUpdateUser(user.id)
-  const isPending = updateUser.isPending
-
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-7 gap-1.5 px-2 text-xs"
-          disabled={isPending}
-          onClick={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-            updateUser.mutate({ isActive: !user.isActive })
-          }}
-        >
-          {isPending ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-          ) : user.isActive ? (
-            <UserX className="h-3.5 w-3.5" />
-          ) : (
-            <UserCheck className="h-3.5 w-3.5" />
-          )}
-          {user.isActive ? "Deactivate" : "Activate"}
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>{user.isActive ? "Deactivate this user" : "Activate this user"}</TooltipContent>
-    </Tooltip>
-  )
-}
-
-function ToggleRoleButton({ user }: { user: AdminUserSummary }) {
-  const updateUser = useAdminUpdateUser(user.id)
-  const isPending = updateUser.isPending
-
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-7 gap-1.5 px-2 text-xs"
-          disabled={isPending}
-          onClick={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-            updateUser.mutate({ isSuperuser: !user.isSuperuser })
-          }}
-        >
-          {isPending ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-          ) : user.isSuperuser ? (
-            <ShieldOff className="h-3.5 w-3.5" />
-          ) : (
-            <Shield className="h-3.5 w-3.5" />
-          )}
-          {user.isSuperuser ? "Demote" : "Promote"}
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>
-        {user.isSuperuser ? "Remove superuser role" : "Promote to superuser"}
-      </TooltipContent>
-    </Tooltip>
-  )
-}
-
 // -- Main page ----------------------------------------------------------------
 
 function AdminUsersPage() {
+  useDocumentTitle("Admin — Users")
+  const navigate = useNavigate()
+
   // Filter & search state
   const [search, setSearch] = useState("")
   const [roleFilter, setRoleFilter] = useState<string[]>([])
@@ -351,6 +295,14 @@ function AdminUsersPage() {
       },
     ],
     [queryClient],
+  )
+
+  // Row click handler
+  const handleRowClick = useCallback(
+    (userId: string) => {
+      navigate({ to: "/admin/users/$userId", params: { userId } })
+    },
+    [navigate],
   )
 
   // Computed
@@ -544,16 +496,18 @@ function AdminUsersPage() {
                       currentDirection={sortDir}
                       onSort={handleSort}
                     />
-                    <TableHead className="w-44 text-right">Actions</TableHead>
+                    <TableHead className="w-16 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredItems.map((user) => (
+                  {filteredItems.map((user, index) => (
                     <UserRow
                       key={user.id}
                       user={user}
+                      index={index}
                       selected={selectedIds.has(user.id)}
                       onToggle={() => toggleOne(user.id)}
+                      onRowClick={() => handleRowClick(user.id)}
                     />
                   ))}
                 </TableBody>
@@ -606,95 +560,178 @@ function AdminUsersPage() {
 
 function UserRow({
   user,
+  index,
   selected,
   onToggle,
+  onRowClick,
 }: {
   user: AdminUserSummary
+  index: number
   selected: boolean
   onToggle: () => void
+  onRowClick: () => void
 }) {
+  const [editOpen, setEditOpen] = useState(false)
+  const [rolesOpen, setRolesOpen] = useState(false)
+  const [joinTeamOpen, setJoinTeamOpen] = useState(false)
+  const [permissionsOpen, setPermissionsOpen] = useState(false)
+  const [statusOpen, setStatusOpen] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
+
   return (
-    <TableRow data-state={selected ? "selected" : undefined} className="hover:bg-muted/50 transition-colors even:bg-muted/20">
-      <TableCell>
-        <Checkbox
-          checked={selected}
-          onChange={(e) => {
-            e.stopPropagation()
-            onToggle()
-          }}
-          aria-label={`Select ${user.name ?? user.email}`}
-        />
-      </TableCell>
-      <TableCell>
-        <Link
-          to="/admin/users/$userId"
-          params={{ userId: user.id }}
-          className="group flex items-center gap-3"
-        >
-          <Avatar className="size-8 text-xs">
-            <AvatarFallback>{getInitials(user.name, user.email)}</AvatarFallback>
-          </Avatar>
-          <div className="flex flex-col gap-0.5 min-w-0">
-            <span className="font-medium truncate group-hover:underline">
-              {user.name ?? user.email}
-            </span>
-            {user.username && (
-              <span className="text-xs text-muted-foreground truncate">
-                @{user.username}
+    <>
+      <TableRow
+        data-state={selected ? "selected" : undefined}
+        className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`}
+        onClick={(e) => {
+          const target = e.target as HTMLElement
+          if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) {
+            return
+          }
+          onRowClick()
+        }}
+      >
+        <TableCell>
+          <Checkbox
+            checked={selected}
+            onChange={(e) => {
+              e.stopPropagation()
+              onToggle()
+            }}
+            aria-label={`Select ${user.name ?? user.email}`}
+          />
+        </TableCell>
+        <TableCell>
+          <Link
+            to="/admin/users/$userId"
+            params={{ userId: user.id }}
+            className="group flex items-center gap-3"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Avatar className="size-8 text-xs">
+              <AvatarFallback>{getInitials(user.name, user.email)}</AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col gap-0.5 min-w-0">
+              <span className="font-medium truncate group-hover:underline">
+                {user.name ?? user.email}
               </span>
-            )}
-          </div>
-        </Link>
-      </TableCell>
-      <TableCell>
-        <span className="text-sm text-muted-foreground">{user.email}</span>
-      </TableCell>
-      <TableCell>
-        {user.isSuperuser ? (
-          <Badge variant="destructive" className="gap-1">
-            <Shield className="h-3 w-3" />
-            Superuser
-          </Badge>
-        ) : (
-          <span className="text-sm text-muted-foreground">Member</span>
-        )}
-      </TableCell>
-      <TableCell>
-        <div className="flex items-center gap-2">
-          <ActiveStatusIndicator isActive={user.isActive} />
-          {user.isVerified ? (
-            <Badge variant="outline" className="border-emerald-200 text-emerald-700 dark:border-emerald-800 dark:text-emerald-400 text-[10px]">
-              Verified
+              {user.username && (
+                <span className="text-xs text-muted-foreground truncate">
+                  @{user.username}
+                </span>
+              )}
+            </div>
+          </Link>
+        </TableCell>
+        <TableCell>
+          <span className="text-sm text-muted-foreground">{user.email}</span>
+        </TableCell>
+        <TableCell>
+          {user.isSuperuser ? (
+            <Badge variant="destructive" className="gap-1">
+              <Shield className="h-3 w-3" />
+              Superuser
             </Badge>
           ) : (
-            <Badge variant="outline" className="border-muted-foreground/30 text-muted-foreground text-[10px]">
-              Unverified
-            </Badge>
+            <span className="text-sm text-muted-foreground">Member</span>
           )}
-        </div>
-      </TableCell>
-      <TableCell>
-        <span className="text-sm tabular-nums text-muted-foreground">
-          {user.loginCount ?? 0}
-        </span>
-      </TableCell>
-      <TableCell>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="cursor-default text-xs text-muted-foreground">
-              {formatRelativeTimeShort(user.createdAt)}
-            </span>
-          </TooltipTrigger>
-          <TooltipContent>{formatDateTime(user.createdAt)}</TooltipContent>
-        </Tooltip>
-      </TableCell>
-      <TableCell className="text-right">
-        <div className="flex items-center justify-end gap-1">
-          <ToggleActiveButton user={user} />
-          <ToggleRoleButton user={user} />
-          <UserRowActions user={user} />
-        </div>
-      </TableCell>
-    </TableRow>
+        </TableCell>
+        <TableCell>
+          <div className="flex items-center gap-2">
+            <ActiveStatusIndicator isActive={user.isActive} />
+            {user.isVerified ? (
+              <Badge variant="outline" className="border-emerald-200 text-emerald-700 dark:border-emerald-800 dark:text-emerald-400 text-[10px]">
+                Verified
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="border-muted-foreground/30 text-muted-foreground text-[10px]">
+                Unverified
+              </Badge>
+            )}
+          </div>
+        </TableCell>
+        <TableCell>
+          <span className="text-sm tabular-nums text-muted-foreground">
+            {user.loginCount ?? 0}
+          </span>
+        </TableCell>
+        <TableCell>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="cursor-default text-xs text-muted-foreground">
+                {formatRelativeTimeShort(user.createdAt)}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>{formatDateTime(user.createdAt)}</TooltipContent>
+          </Tooltip>
+        </TableCell>
+        <TableCell className="text-right">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                data-slot="dropdown"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <MoreVertical className="h-4 w-4" />
+                <span className="sr-only">Actions for {user.name ?? user.email}</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild>
+                <Link to="/admin/users/$userId" params={{ userId: user.id }}>
+                  <Eye className="mr-2 h-4 w-4" />
+                  View details
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setEditOpen(true)}>
+                <Pencil className="mr-2 h-4 w-4" />
+                Edit user
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setRolesOpen(true)}>
+                <Shield className="mr-2 h-4 w-4" />
+                Manage roles
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setJoinTeamOpen(true)}>
+                <UserPlus className="mr-2 h-4 w-4" />
+                Join team
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setPermissionsOpen(true)}>
+                <Lock className="mr-2 h-4 w-4" />
+                Manage permissions
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onSelect={() => setStatusOpen(true)}>
+                {user.isActive ? (
+                  <>
+                    <UserX className="mr-2 h-4 w-4" />
+                    Deactivate
+                  </>
+                ) : (
+                  <>
+                    <UserCheck className="mr-2 h-4 w-4" />
+                    Activate
+                  </>
+                )}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-destructive" onSelect={() => setDeleteOpen(true)}>
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete user
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </TableCell>
+      </TableRow>
+
+      <EditUserDialog user={user} open={editOpen} onOpenChange={setEditOpen} />
+      <ManageRolesDialog userId={user.id} userEmail={user.email} open={rolesOpen} onOpenChange={setRolesOpen} />
+      <JoinTeamDialog userId={user.id} userName={user.name ?? user.email} open={joinTeamOpen} onOpenChange={setJoinTeamOpen} />
+      <ManagePermissionsDialog userId={user.id} open={permissionsOpen} onOpenChange={setPermissionsOpen} />
+      <ToggleUserStatusDialog userId={user.id} userEmail={user.email} userName={user.name ?? undefined} isActive={user.isActive ?? true} open={statusOpen} onOpenChange={setStatusOpen} />
+      <DeleteUserDialog userId={user.id} userEmail={user.email} open={deleteOpen} onOpenChange={setDeleteOpen} />
+    </>
   )
 }

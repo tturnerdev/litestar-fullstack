@@ -4,6 +4,7 @@ import {
   AlertCircle,
   AlertTriangle,
   CheckCircle2,
+  Download,
   Eye,
   Home,
   Loader2,
@@ -66,6 +67,7 @@ import {
   type UnregisteredPhoneNumber,
 } from "@/lib/api/hooks/e911"
 import { useLocations, type Location } from "@/lib/api/hooks/locations"
+import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { useAuthStore } from "@/lib/auth"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
@@ -77,6 +79,21 @@ export const Route = createFileRoute("/_app/e911/")({
 // -- Constants ----------------------------------------------------------------
 
 const PAGE_SIZE = 20
+
+const csvHeaders: CsvHeader<E911Registration>[] = [
+  { label: "Phone Number", accessor: (r) => r.phoneNumberDisplay ?? "" },
+  { label: "Phone Number Label", accessor: (r) => r.phoneNumberLabel ?? "" },
+  { label: "Address Line 1", accessor: (r) => r.addressLine1 },
+  { label: "Address Line 2", accessor: (r) => r.addressLine2 ?? "" },
+  { label: "City", accessor: (r) => r.city },
+  { label: "State", accessor: (r) => r.state },
+  { label: "Postal Code", accessor: (r) => r.postalCode },
+  { label: "Country", accessor: (r) => r.country },
+  { label: "Validated", accessor: (r) => (r.validated ? "Yes" : "No") },
+  { label: "Validated At", accessor: (r) => r.validatedAt ?? "" },
+  { label: "Carrier Reg ID", accessor: (r) => r.carrierRegistrationId ?? "" },
+  { label: "Location", accessor: (r) => r.locationName ?? "" },
+]
 
 // -- E911 Row -----------------------------------------------------------------
 
@@ -412,6 +429,11 @@ function E911Page() {
     [navigate],
   )
 
+  const handleExportAll = useCallback(() => {
+    if (!items.length) return
+    exportToCsv("e911-registrations", csvHeaders, items)
+  }, [items])
+
   const breadcrumbs = (
     <Breadcrumb>
       <BreadcrumbList>
@@ -437,7 +459,15 @@ function E911Page() {
         title="E911 Addresses"
         description="Manage E911 emergency address registrations for your phone numbers."
         breadcrumbs={breadcrumbs}
-        actions={teamId ? <RegisterNumberDialog teamId={teamId} /> : undefined}
+        actions={
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={handleExportAll} disabled={!hasData}>
+              <Download className="mr-2 h-4 w-4" />
+              Export
+            </Button>
+            {teamId && <RegisterNumberDialog teamId={teamId} />}
+          </div>
+        }
       />
 
       {/* Search */}

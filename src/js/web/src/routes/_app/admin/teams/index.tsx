@@ -1,8 +1,11 @@
-import { createFileRoute, Link } from "@tanstack/react-router"
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { useCallback, useMemo, useState } from "react"
 import {
   AlertCircle,
   CheckCircle2,
+  Eye,
+  MoreVertical,
+  Pencil,
   Search,
   Trash2,
   Users,
@@ -14,11 +17,13 @@ import { toast } from "sonner"
 import { useQueryClient } from "@tanstack/react-query"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
-import { TeamRowActions } from "@/components/admin/team-row-actions"
+import { DeleteTeamDialog } from "@/components/admin/delete-team-dialog"
+import { EditTeamDialog } from "@/components/admin/edit-team-dialog"
 import { Badge } from "@/components/ui/badge"
 import { type BulkAction, BulkActionBar } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { ExportButton } from "@/components/ui/export-button"
 import { FilterDropdown, type FilterOption } from "@/components/ui/filter-dropdown"
@@ -28,6 +33,7 @@ import { SkeletonTable } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { useAdminTeams } from "@/lib/api/hooks/admin"
 import { adminDeleteTeam } from "@/lib/generated/api"
@@ -91,6 +97,9 @@ function formatMemberCount(count: number | undefined): string {
 // -- Main page ----------------------------------------------------------------
 
 function AdminTeamsPage() {
+  useDocumentTitle("Admin — Teams")
+  const navigate = useNavigate()
+
   // Filter & search state
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState<string[]>([])
@@ -188,6 +197,14 @@ function AdminTeamsPage() {
       },
     ],
     [queryClient],
+  )
+
+  // Row click handler
+  const handleRowClick = useCallback(
+    (teamId: string) => {
+      navigate({ to: "/admin/teams/$teamId", params: { teamId } })
+    },
+    [navigate],
   )
 
   // Computed
@@ -366,16 +383,18 @@ function AdminTeamsPage() {
                       currentDirection={sortDir}
                       onSort={handleSort}
                     />
-                    <TableHead className="w-20 text-right">Actions</TableHead>
+                    <TableHead className="w-16 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredItems.map((team) => (
+                  {filteredItems.map((team, index) => (
                     <TeamRow
                       key={team.id}
                       team={team}
+                      index={index}
                       selected={selectedIds.has(team.id)}
                       onToggle={() => toggleOne(team.id)}
+                      onRowClick={() => handleRowClick(team.id)}
                     />
                   ))}
                 </TableBody>
@@ -428,69 +447,129 @@ function AdminTeamsPage() {
 
 function TeamRow({
   team,
+  index,
   selected,
   onToggle,
+  onRowClick,
 }: {
   team: AdminTeamSummary
+  index: number
   selected: boolean
   onToggle: () => void
+  onRowClick: () => void
 }) {
+  const [editOpen, setEditOpen] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
+
   return (
-    <TableRow data-state={selected ? "selected" : undefined} className="hover:bg-muted/50 transition-colors even:bg-muted/20">
-      <TableCell>
-        <Checkbox
-          checked={selected}
-          onChange={(e) => {
-            e.stopPropagation()
-            onToggle()
-          }}
-          aria-label={`Select ${team.name}`}
-        />
-      </TableCell>
-      <TableCell>
-        <Link
-          to="/admin/teams/$teamId"
-          params={{ teamId: team.id }}
-          className="group flex items-center gap-3"
-        >
-          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10 text-primary">
-            <Users className="h-4 w-4" />
-          </div>
+    <>
+      <TableRow
+        data-state={selected ? "selected" : undefined}
+        className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`}
+        onClick={(e) => {
+          const target = e.target as HTMLElement
+          if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) {
+            return
+          }
+          onRowClick()
+        }}
+      >
+        <TableCell>
+          <Checkbox
+            checked={selected}
+            onChange={(e) => {
+              e.stopPropagation()
+              onToggle()
+            }}
+            aria-label={`Select ${team.name}`}
+          />
+        </TableCell>
+        <TableCell>
+          <Link
+            to="/admin/teams/$teamId"
+            params={{ teamId: team.id }}
+            className="group flex items-center gap-3"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10 text-primary">
+              <Users className="h-4 w-4" />
+            </div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="font-medium truncate group-hover:underline">
+                  {team.name}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>{team.name}</TooltipContent>
+            </Tooltip>
+          </Link>
+        </TableCell>
+        <TableCell>
+          <span className="text-sm text-muted-foreground">{team.slug}</span>
+        </TableCell>
+        <TableCell>
+          <Badge variant="outline" className="gap-1 tabular-nums">
+            <Users className="h-3 w-3" />
+            {formatMemberCount(team.memberCount)}
+          </Badge>
+        </TableCell>
+        <TableCell>
+          <ActiveStatusIndicator isActive={team.isActive} />
+        </TableCell>
+        <TableCell>
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className="font-medium truncate group-hover:underline">
-                {team.name}
+              <span className="cursor-default text-xs text-muted-foreground">
+                {formatRelativeTimeShort(team.createdAt)}
               </span>
             </TooltipTrigger>
-            <TooltipContent>{team.name}</TooltipContent>
+            <TooltipContent>{formatDateTime(team.createdAt)}</TooltipContent>
           </Tooltip>
-        </Link>
-      </TableCell>
-      <TableCell>
-        <span className="text-sm text-muted-foreground">{team.slug}</span>
-      </TableCell>
-      <TableCell>
-        <Badge variant="outline" className="gap-1 tabular-nums">
-          <Users className="h-3 w-3" />
-          {formatMemberCount(team.memberCount)}
-        </Badge>
-      </TableCell>
-      <TableCell>
-        <ActiveStatusIndicator isActive={team.isActive} />
-      </TableCell>
-      <TableCell>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="cursor-default text-xs text-muted-foreground">
-              {formatRelativeTimeShort(team.createdAt)}
-            </span>
-          </TooltipTrigger>
-          <TooltipContent>{formatDateTime(team.createdAt)}</TooltipContent>
-        </Tooltip>
-      </TableCell>
-      <TableCell className="text-right">
-        <TeamRowActions team={team} />
-      </TableCell>
-    </TableRow>
+        </TableCell>
+        <TableCell className="text-right">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                data-slot="dropdown"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <MoreVertical className="h-4 w-4" />
+                <span className="sr-only">Actions for {team.name}</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild>
+                <Link to="/admin/teams/$teamId" params={{ teamId: team.id }}>
+                  <Eye className="mr-2 h-4 w-4" />
+                  View details
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setEditOpen(true)}>
+                <Pencil className="mr-2 h-4 w-4" />
+                Edit team
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-destructive" onSelect={() => setDeleteOpen(true)}>
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete team
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </TableCell>
+      </TableRow>
+
+      <EditTeamDialog
+        teamId={team.id}
+        currentName={team.name}
+        currentDescription={null}
+        currentIsActive={team.isActive}
+        open={editOpen}
+        onOpenChange={setEditOpen}
+      />
+      <DeleteTeamDialog teamId={team.id} teamName={team.name} open={deleteOpen} onOpenChange={setDeleteOpen} />
+    </>
   )
 }
