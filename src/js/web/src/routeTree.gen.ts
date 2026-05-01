@@ -23,6 +23,7 @@ import { Route as PublicLoginRouteImport } from './routes/_public/login'
 import { Route as PublicLandingRouteImport } from './routes/_public/landing'
 import { Route as PublicForgotPasswordRouteImport } from './routes/_public/forgot-password'
 import { Route as PublicAboutRouteImport } from './routes/_public/about'
+import { Route as AppVoicemailRouteImport } from './routes/_app/voicemail'
 import { Route as AppTeamsRouteImport } from './routes/_app/teams'
 import { Route as AppSupportRouteImport } from './routes/_app/support'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
@@ -30,11 +31,13 @@ import { Route as AppSchedulesRouteImport } from './routes/_app/schedules'
 import { Route as AppOrganizationRouteImport } from './routes/_app/organization'
 import { Route as AppLocationsRouteImport } from './routes/_app/locations'
 import { Route as AppHomeRouteImport } from './routes/_app/home'
+import { Route as AppE911RouteImport } from './routes/_app/e911'
 import { Route as AppDevicesRouteImport } from './routes/_app/devices'
 import { Route as AppConnectionsRouteImport } from './routes/_app/connections'
 import { Route as AppCallRoutingRouteImport } from './routes/_app/call-routing'
 import { Route as AppAnalyticsRouteImport } from './routes/_app/analytics'
 import { Route as AppAdminRouteImport } from './routes/_app/admin'
+import { Route as AppVoicemailIndexRouteImport } from './routes/_app/voicemail/index'
 import { Route as AppVoiceIndexRouteImport } from './routes/_app/voice/index'
 import { Route as AppTeamsIndexRouteImport } from './routes/_app/teams/index'
 import { Route as AppTagsIndexRouteImport } from './routes/_app/tags/index'
@@ -46,11 +49,13 @@ import { Route as AppNotificationsIndexRouteImport } from './routes/_app/notific
 import { Route as AppLocationsIndexRouteImport } from './routes/_app/locations/index'
 import { Route as AppGatewayIndexRouteImport } from './routes/_app/gateway/index'
 import { Route as AppFaxIndexRouteImport } from './routes/_app/fax/index'
+import { Route as AppE911IndexRouteImport } from './routes/_app/e911/index'
 import { Route as AppDevicesIndexRouteImport } from './routes/_app/devices/index'
 import { Route as AppConnectionsIndexRouteImport } from './routes/_app/connections/index'
 import { Route as AppCallRoutingIndexRouteImport } from './routes/_app/call-routing/index'
 import { Route as AppAnalyticsIndexRouteImport } from './routes/_app/analytics/index'
 import { Route as AppAdminIndexRouteImport } from './routes/_app/admin/index'
+import { Route as AppVoicemailBoxIdRouteImport } from './routes/_app/voicemail/$boxId'
 import { Route as AppVoicePhoneNumbersRouteImport } from './routes/_app/voice/phone-numbers'
 import { Route as AppTeamsNewRouteImport } from './routes/_app/teams/new'
 import { Route as AppTagsNewRouteImport } from './routes/_app/tags/new'
@@ -60,6 +65,7 @@ import { Route as AppLocationsNewRouteImport } from './routes/_app/locations/new
 import { Route as AppLocationsLocationIdRouteImport } from './routes/_app/locations/$locationId'
 import { Route as AppFaxSendRouteImport } from './routes/_app/fax/send'
 import { Route as AppFaxEmailRoutesRouteImport } from './routes/_app/fax/email-routes'
+import { Route as AppE911RegistrationIdRouteImport } from './routes/_app/e911/$registrationId'
 import { Route as AppDevicesNewRouteImport } from './routes/_app/devices/new'
 import { Route as AppConnectionsNewRouteImport } from './routes/_app/connections/new'
 import { Route as AppConnectionsConnectionIdRouteImport } from './routes/_app/connections/$connectionId'
@@ -174,6 +180,11 @@ const PublicAboutRoute = PublicAboutRouteImport.update({
   path: '/about',
   getParentRoute: () => PublicRoute,
 } as any)
+const AppVoicemailRoute = AppVoicemailRouteImport.update({
+  id: '/voicemail',
+  path: '/voicemail',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppTeamsRoute = AppTeamsRouteImport.update({
   id: '/teams',
   path: '/teams',
@@ -209,6 +220,11 @@ const AppHomeRoute = AppHomeRouteImport.update({
   path: '/home',
   getParentRoute: () => AppRoute,
 } as any)
+const AppE911Route = AppE911RouteImport.update({
+  id: '/e911',
+  path: '/e911',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppDevicesRoute = AppDevicesRouteImport.update({
   id: '/devices',
   path: '/devices',
@@ -233,6 +249,11 @@ const AppAdminRoute = AppAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
   getParentRoute: () => AppRoute,
+} as any)
+const AppVoicemailIndexRoute = AppVoicemailIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppVoicemailRoute,
 } as any)
 const AppVoiceIndexRoute = AppVoiceIndexRouteImport.update({
   id: '/voice/',
@@ -289,6 +310,11 @@ const AppFaxIndexRoute = AppFaxIndexRouteImport.update({
   path: '/fax/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppE911IndexRoute = AppE911IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppE911Route,
+} as any)
 const AppDevicesIndexRoute = AppDevicesIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -313,6 +339,11 @@ const AppAdminIndexRoute = AppAdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppAdminRoute,
+} as any)
+const AppVoicemailBoxIdRoute = AppVoicemailBoxIdRouteImport.update({
+  id: '/$boxId',
+  path: '/$boxId',
+  getParentRoute: () => AppVoicemailRoute,
 } as any)
 const AppVoicePhoneNumbersRoute = AppVoicePhoneNumbersRouteImport.update({
   id: '/voice/phone-numbers',
@@ -358,6 +389,11 @@ const AppFaxEmailRoutesRoute = AppFaxEmailRoutesRouteImport.update({
   id: '/fax/email-routes',
   path: '/fax/email-routes',
   getParentRoute: () => AppRoute,
+} as any)
+const AppE911RegistrationIdRoute = AppE911RegistrationIdRouteImport.update({
+  id: '/$registrationId',
+  path: '/$registrationId',
+  getParentRoute: () => AppE911Route,
 } as any)
 const AppDevicesNewRoute = AppDevicesNewRouteImport.update({
   id: '/new',
@@ -614,6 +650,7 @@ export interface FileRoutesByFullPath {
   '/call-routing': typeof AppCallRoutingRouteWithChildren
   '/connections': typeof AppConnectionsRouteWithChildren
   '/devices': typeof AppDevicesRouteWithChildren
+  '/e911': typeof AppE911RouteWithChildren
   '/home': typeof AppHomeRoute
   '/locations': typeof AppLocationsRouteWithChildren
   '/organization': typeof AppOrganizationRouteWithChildren
@@ -621,6 +658,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AppSettingsRoute
   '/support': typeof AppSupportRouteWithChildren
   '/teams': typeof AppTeamsRouteWithChildren
+  '/voicemail': typeof AppVoicemailRouteWithChildren
   '/about': typeof PublicAboutRoute
   '/forgot-password': typeof PublicForgotPasswordRoute
   '/landing': typeof PublicLandingRoute
@@ -641,6 +679,7 @@ export interface FileRoutesByFullPath {
   '/connections/$connectionId': typeof AppConnectionsConnectionIdRouteWithChildren
   '/connections/new': typeof AppConnectionsNewRoute
   '/devices/new': typeof AppDevicesNewRoute
+  '/e911/$registrationId': typeof AppE911RegistrationIdRoute
   '/fax/email-routes': typeof AppFaxEmailRoutesRoute
   '/fax/send': typeof AppFaxSendRoute
   '/locations/$locationId': typeof AppLocationsLocationIdRouteWithChildren
@@ -650,11 +689,13 @@ export interface FileRoutesByFullPath {
   '/tags/new': typeof AppTagsNewRoute
   '/teams/new': typeof AppTeamsNewRoute
   '/voice/phone-numbers': typeof AppVoicePhoneNumbersRouteWithChildren
+  '/voicemail/$boxId': typeof AppVoicemailBoxIdRoute
   '/admin/': typeof AppAdminIndexRoute
   '/analytics/': typeof AppAnalyticsIndexRoute
   '/call-routing/': typeof AppCallRoutingIndexRoute
   '/connections/': typeof AppConnectionsIndexRoute
   '/devices/': typeof AppDevicesIndexRoute
+  '/e911/': typeof AppE911IndexRoute
   '/fax/': typeof AppFaxIndexRoute
   '/gateway/': typeof AppGatewayIndexRoute
   '/locations/': typeof AppLocationsIndexRoute
@@ -666,6 +707,7 @@ export interface FileRoutesByFullPath {
   '/tags/': typeof AppTagsIndexRoute
   '/teams/': typeof AppTeamsIndexRoute
   '/voice/': typeof AppVoiceIndexRoute
+  '/voicemail/': typeof AppVoicemailIndexRoute
   '/admin/teams/$teamId': typeof AppAdminTeamsTeamIdRoute
   '/admin/users/$userId': typeof AppAdminUsersUserIdRoute
   '/call-routing/call-queues/$callQueueId': typeof AppCallRoutingCallQueuesCallQueueIdRoute
@@ -726,17 +768,20 @@ export interface FileRoutesByTo {
   '/admin/voice': typeof AppAdminVoiceRoute
   '/connections/new': typeof AppConnectionsNewRoute
   '/devices/new': typeof AppDevicesNewRoute
+  '/e911/$registrationId': typeof AppE911RegistrationIdRoute
   '/fax/email-routes': typeof AppFaxEmailRoutesRoute
   '/fax/send': typeof AppFaxSendRoute
   '/locations/new': typeof AppLocationsNewRoute
   '/support/new': typeof AppSupportNewRoute
   '/tags/new': typeof AppTagsNewRoute
   '/teams/new': typeof AppTeamsNewRoute
+  '/voicemail/$boxId': typeof AppVoicemailBoxIdRoute
   '/admin': typeof AppAdminIndexRoute
   '/analytics': typeof AppAnalyticsIndexRoute
   '/call-routing': typeof AppCallRoutingIndexRoute
   '/connections': typeof AppConnectionsIndexRoute
   '/devices': typeof AppDevicesIndexRoute
+  '/e911': typeof AppE911IndexRoute
   '/fax': typeof AppFaxIndexRoute
   '/gateway': typeof AppGatewayIndexRoute
   '/locations': typeof AppLocationsIndexRoute
@@ -748,6 +793,7 @@ export interface FileRoutesByTo {
   '/tags': typeof AppTagsIndexRoute
   '/teams': typeof AppTeamsIndexRoute
   '/voice': typeof AppVoiceIndexRoute
+  '/voicemail': typeof AppVoicemailIndexRoute
   '/admin/teams/$teamId': typeof AppAdminTeamsTeamIdRoute
   '/admin/users/$userId': typeof AppAdminUsersUserIdRoute
   '/call-routing/call-queues/$callQueueId': typeof AppCallRoutingCallQueuesCallQueueIdRoute
@@ -795,6 +841,7 @@ export interface FileRoutesById {
   '/_app/call-routing': typeof AppCallRoutingRouteWithChildren
   '/_app/connections': typeof AppConnectionsRouteWithChildren
   '/_app/devices': typeof AppDevicesRouteWithChildren
+  '/_app/e911': typeof AppE911RouteWithChildren
   '/_app/home': typeof AppHomeRoute
   '/_app/locations': typeof AppLocationsRouteWithChildren
   '/_app/organization': typeof AppOrganizationRouteWithChildren
@@ -802,6 +849,7 @@ export interface FileRoutesById {
   '/_app/settings': typeof AppSettingsRoute
   '/_app/support': typeof AppSupportRouteWithChildren
   '/_app/teams': typeof AppTeamsRouteWithChildren
+  '/_app/voicemail': typeof AppVoicemailRouteWithChildren
   '/_public/about': typeof PublicAboutRoute
   '/_public/forgot-password': typeof PublicForgotPasswordRoute
   '/_public/landing': typeof PublicLandingRoute
@@ -822,6 +870,7 @@ export interface FileRoutesById {
   '/_app/connections/$connectionId': typeof AppConnectionsConnectionIdRouteWithChildren
   '/_app/connections/new': typeof AppConnectionsNewRoute
   '/_app/devices/new': typeof AppDevicesNewRoute
+  '/_app/e911/$registrationId': typeof AppE911RegistrationIdRoute
   '/_app/fax/email-routes': typeof AppFaxEmailRoutesRoute
   '/_app/fax/send': typeof AppFaxSendRoute
   '/_app/locations/$locationId': typeof AppLocationsLocationIdRouteWithChildren
@@ -831,11 +880,13 @@ export interface FileRoutesById {
   '/_app/tags/new': typeof AppTagsNewRoute
   '/_app/teams/new': typeof AppTeamsNewRoute
   '/_app/voice/phone-numbers': typeof AppVoicePhoneNumbersRouteWithChildren
+  '/_app/voicemail/$boxId': typeof AppVoicemailBoxIdRoute
   '/_app/admin/': typeof AppAdminIndexRoute
   '/_app/analytics/': typeof AppAnalyticsIndexRoute
   '/_app/call-routing/': typeof AppCallRoutingIndexRoute
   '/_app/connections/': typeof AppConnectionsIndexRoute
   '/_app/devices/': typeof AppDevicesIndexRoute
+  '/_app/e911/': typeof AppE911IndexRoute
   '/_app/fax/': typeof AppFaxIndexRoute
   '/_app/gateway/': typeof AppGatewayIndexRoute
   '/_app/locations/': typeof AppLocationsIndexRoute
@@ -847,6 +898,7 @@ export interface FileRoutesById {
   '/_app/tags/': typeof AppTagsIndexRoute
   '/_app/teams/': typeof AppTeamsIndexRoute
   '/_app/voice/': typeof AppVoiceIndexRoute
+  '/_app/voicemail/': typeof AppVoicemailIndexRoute
   '/_app/admin/teams/$teamId': typeof AppAdminTeamsTeamIdRoute
   '/_app/admin/users/$userId': typeof AppAdminUsersUserIdRoute
   '/_app/call-routing/call-queues/$callQueueId': typeof AppCallRoutingCallQueuesCallQueueIdRoute
@@ -893,6 +945,7 @@ export interface FileRouteTypes {
     | '/call-routing'
     | '/connections'
     | '/devices'
+    | '/e911'
     | '/home'
     | '/locations'
     | '/organization'
@@ -900,6 +953,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/support'
     | '/teams'
+    | '/voicemail'
     | '/about'
     | '/forgot-password'
     | '/landing'
@@ -920,6 +974,7 @@ export interface FileRouteTypes {
     | '/connections/$connectionId'
     | '/connections/new'
     | '/devices/new'
+    | '/e911/$registrationId'
     | '/fax/email-routes'
     | '/fax/send'
     | '/locations/$locationId'
@@ -929,11 +984,13 @@ export interface FileRouteTypes {
     | '/tags/new'
     | '/teams/new'
     | '/voice/phone-numbers'
+    | '/voicemail/$boxId'
     | '/admin/'
     | '/analytics/'
     | '/call-routing/'
     | '/connections/'
     | '/devices/'
+    | '/e911/'
     | '/fax/'
     | '/gateway/'
     | '/locations/'
@@ -945,6 +1002,7 @@ export interface FileRouteTypes {
     | '/tags/'
     | '/teams/'
     | '/voice/'
+    | '/voicemail/'
     | '/admin/teams/$teamId'
     | '/admin/users/$userId'
     | '/call-routing/call-queues/$callQueueId'
@@ -1005,17 +1063,20 @@ export interface FileRouteTypes {
     | '/admin/voice'
     | '/connections/new'
     | '/devices/new'
+    | '/e911/$registrationId'
     | '/fax/email-routes'
     | '/fax/send'
     | '/locations/new'
     | '/support/new'
     | '/tags/new'
     | '/teams/new'
+    | '/voicemail/$boxId'
     | '/admin'
     | '/analytics'
     | '/call-routing'
     | '/connections'
     | '/devices'
+    | '/e911'
     | '/fax'
     | '/gateway'
     | '/locations'
@@ -1027,6 +1088,7 @@ export interface FileRouteTypes {
     | '/tags'
     | '/teams'
     | '/voice'
+    | '/voicemail'
     | '/admin/teams/$teamId'
     | '/admin/users/$userId'
     | '/call-routing/call-queues/$callQueueId'
@@ -1073,6 +1135,7 @@ export interface FileRouteTypes {
     | '/_app/call-routing'
     | '/_app/connections'
     | '/_app/devices'
+    | '/_app/e911'
     | '/_app/home'
     | '/_app/locations'
     | '/_app/organization'
@@ -1080,6 +1143,7 @@ export interface FileRouteTypes {
     | '/_app/settings'
     | '/_app/support'
     | '/_app/teams'
+    | '/_app/voicemail'
     | '/_public/about'
     | '/_public/forgot-password'
     | '/_public/landing'
@@ -1100,6 +1164,7 @@ export interface FileRouteTypes {
     | '/_app/connections/$connectionId'
     | '/_app/connections/new'
     | '/_app/devices/new'
+    | '/_app/e911/$registrationId'
     | '/_app/fax/email-routes'
     | '/_app/fax/send'
     | '/_app/locations/$locationId'
@@ -1109,11 +1174,13 @@ export interface FileRouteTypes {
     | '/_app/tags/new'
     | '/_app/teams/new'
     | '/_app/voice/phone-numbers'
+    | '/_app/voicemail/$boxId'
     | '/_app/admin/'
     | '/_app/analytics/'
     | '/_app/call-routing/'
     | '/_app/connections/'
     | '/_app/devices/'
+    | '/_app/e911/'
     | '/_app/fax/'
     | '/_app/gateway/'
     | '/_app/locations/'
@@ -1125,6 +1192,7 @@ export interface FileRouteTypes {
     | '/_app/tags/'
     | '/_app/teams/'
     | '/_app/voice/'
+    | '/_app/voicemail/'
     | '/_app/admin/teams/$teamId'
     | '/_app/admin/users/$userId'
     | '/_app/call-routing/call-queues/$callQueueId'
@@ -1269,6 +1337,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicAboutRouteImport
       parentRoute: typeof PublicRoute
     }
+    '/_app/voicemail': {
+      id: '/_app/voicemail'
+      path: '/voicemail'
+      fullPath: '/voicemail'
+      preLoaderRoute: typeof AppVoicemailRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/teams': {
       id: '/_app/teams'
       path: '/teams'
@@ -1318,6 +1393,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppHomeRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/e911': {
+      id: '/_app/e911'
+      path: '/e911'
+      fullPath: '/e911'
+      preLoaderRoute: typeof AppE911RouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/devices': {
       id: '/_app/devices'
       path: '/devices'
@@ -1352,6 +1434,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin'
       preLoaderRoute: typeof AppAdminRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/_app/voicemail/': {
+      id: '/_app/voicemail/'
+      path: '/'
+      fullPath: '/voicemail/'
+      preLoaderRoute: typeof AppVoicemailIndexRouteImport
+      parentRoute: typeof AppVoicemailRoute
     }
     '/_app/voice/': {
       id: '/_app/voice/'
@@ -1430,6 +1519,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppFaxIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/e911/': {
+      id: '/_app/e911/'
+      path: '/'
+      fullPath: '/e911/'
+      preLoaderRoute: typeof AppE911IndexRouteImport
+      parentRoute: typeof AppE911Route
+    }
     '/_app/devices/': {
       id: '/_app/devices/'
       path: '/'
@@ -1464,6 +1560,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AppAdminIndexRouteImport
       parentRoute: typeof AppAdminRoute
+    }
+    '/_app/voicemail/$boxId': {
+      id: '/_app/voicemail/$boxId'
+      path: '/$boxId'
+      fullPath: '/voicemail/$boxId'
+      preLoaderRoute: typeof AppVoicemailBoxIdRouteImport
+      parentRoute: typeof AppVoicemailRoute
     }
     '/_app/voice/phone-numbers': {
       id: '/_app/voice/phone-numbers'
@@ -1527,6 +1630,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/fax/email-routes'
       preLoaderRoute: typeof AppFaxEmailRoutesRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/_app/e911/$registrationId': {
+      id: '/_app/e911/$registrationId'
+      path: '/$registrationId'
+      fullPath: '/e911/$registrationId'
+      preLoaderRoute: typeof AppE911RegistrationIdRouteImport
+      parentRoute: typeof AppE911Route
     }
     '/_app/devices/new': {
       id: '/_app/devices/new'
@@ -1963,6 +2073,19 @@ const AppDevicesRouteWithChildren = AppDevicesRoute._addFileChildren(
   AppDevicesRouteChildren,
 )
 
+interface AppE911RouteChildren {
+  AppE911RegistrationIdRoute: typeof AppE911RegistrationIdRoute
+  AppE911IndexRoute: typeof AppE911IndexRoute
+}
+
+const AppE911RouteChildren: AppE911RouteChildren = {
+  AppE911RegistrationIdRoute: AppE911RegistrationIdRoute,
+  AppE911IndexRoute: AppE911IndexRoute,
+}
+
+const AppE911RouteWithChildren =
+  AppE911Route._addFileChildren(AppE911RouteChildren)
+
 interface AppLocationsLocationIdRouteChildren {
   AppLocationsLocationIdEditRoute: typeof AppLocationsLocationIdEditRoute
   AppLocationsLocationIdIndexRoute: typeof AppLocationsLocationIdIndexRoute
@@ -2074,6 +2197,20 @@ const AppTeamsRouteWithChildren = AppTeamsRoute._addFileChildren(
   AppTeamsRouteChildren,
 )
 
+interface AppVoicemailRouteChildren {
+  AppVoicemailBoxIdRoute: typeof AppVoicemailBoxIdRoute
+  AppVoicemailIndexRoute: typeof AppVoicemailIndexRoute
+}
+
+const AppVoicemailRouteChildren: AppVoicemailRouteChildren = {
+  AppVoicemailBoxIdRoute: AppVoicemailBoxIdRoute,
+  AppVoicemailIndexRoute: AppVoicemailIndexRoute,
+}
+
+const AppVoicemailRouteWithChildren = AppVoicemailRoute._addFileChildren(
+  AppVoicemailRouteChildren,
+)
+
 interface AppVoicePhoneNumbersRouteChildren {
   AppVoicePhoneNumbersPhoneNumberIdRoute: typeof AppVoicePhoneNumbersPhoneNumberIdRoute
   AppVoicePhoneNumbersIndexRoute: typeof AppVoicePhoneNumbersIndexRoute
@@ -2094,6 +2231,7 @@ interface AppRouteChildren {
   AppCallRoutingRoute: typeof AppCallRoutingRouteWithChildren
   AppConnectionsRoute: typeof AppConnectionsRouteWithChildren
   AppDevicesRoute: typeof AppDevicesRouteWithChildren
+  AppE911Route: typeof AppE911RouteWithChildren
   AppHomeRoute: typeof AppHomeRoute
   AppLocationsRoute: typeof AppLocationsRouteWithChildren
   AppOrganizationRoute: typeof AppOrganizationRouteWithChildren
@@ -2101,6 +2239,7 @@ interface AppRouteChildren {
   AppSettingsRoute: typeof AppSettingsRoute
   AppSupportRoute: typeof AppSupportRouteWithChildren
   AppTeamsRoute: typeof AppTeamsRouteWithChildren
+  AppVoicemailRoute: typeof AppVoicemailRouteWithChildren
   AppFaxEmailRoutesRoute: typeof AppFaxEmailRoutesRoute
   AppFaxSendRoute: typeof AppFaxSendRoute
   AppTagsNewRoute: typeof AppTagsNewRoute
@@ -2131,6 +2270,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppCallRoutingRoute: AppCallRoutingRouteWithChildren,
   AppConnectionsRoute: AppConnectionsRouteWithChildren,
   AppDevicesRoute: AppDevicesRouteWithChildren,
+  AppE911Route: AppE911RouteWithChildren,
   AppHomeRoute: AppHomeRoute,
   AppLocationsRoute: AppLocationsRouteWithChildren,
   AppOrganizationRoute: AppOrganizationRouteWithChildren,
@@ -2138,6 +2278,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppSettingsRoute: AppSettingsRoute,
   AppSupportRoute: AppSupportRouteWithChildren,
   AppTeamsRoute: AppTeamsRouteWithChildren,
+  AppVoicemailRoute: AppVoicemailRouteWithChildren,
   AppFaxEmailRoutesRoute: AppFaxEmailRoutesRoute,
   AppFaxSendRoute: AppFaxSendRoute,
   AppTagsNewRoute: AppTagsNewRoute,

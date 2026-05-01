@@ -18,6 +18,7 @@ class VoicemailSettings(CamelizedBaseStruct):
     greeting_type: GreetingType = GreetingType.DEFAULT
     greeting_file_path: str | None = None
     max_message_length_seconds: int = 120
+    email_address: str | None = None
     email_notification: bool = True
     email_attach_audio: bool = False
     transcription_enabled: bool = False
@@ -29,6 +30,7 @@ class VoicemailSettingsUpdate(CamelizedBaseStruct, omit_defaults=True):
 
     is_enabled: bool | msgspec.UnsetType = msgspec.UNSET
     pin: str | msgspec.UnsetType | None = msgspec.UNSET
+    email_address: str | msgspec.UnsetType | None = msgspec.UNSET
     greeting_type: GreetingType | msgspec.UnsetType = msgspec.UNSET
     max_message_length_seconds: int | msgspec.UnsetType = msgspec.UNSET
     email_notification: bool | msgspec.UnsetType = msgspec.UNSET

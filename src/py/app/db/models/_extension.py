@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 from uuid import UUID
 
 from advanced_alchemy.base import UUIDv7AuditBase
-from sqlalchemy import ForeignKey, String
+from sqlalchemy import ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 if TYPE_CHECKING:
@@ -28,6 +28,18 @@ class Extension(UUIDv7AuditBase):
     )
     display_name: Mapped[str] = mapped_column(String(length=100), nullable=False)
     is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
+
+    # Call forwarding fields
+    forward_always_enabled: Mapped[bool] = mapped_column(default=False, nullable=False)
+    forward_always_destination: Mapped[str | None] = mapped_column(String(length=100), nullable=True, default=None)
+    forward_busy_enabled: Mapped[bool] = mapped_column(default=False, nullable=False)
+    forward_busy_destination: Mapped[str | None] = mapped_column(String(length=100), nullable=True, default=None)
+    forward_no_answer_enabled: Mapped[bool] = mapped_column(default=False, nullable=False)
+    forward_no_answer_destination: Mapped[str | None] = mapped_column(String(length=100), nullable=True, default=None)
+    forward_no_answer_ring_count: Mapped[int] = mapped_column(Integer, default=4, nullable=False)
+    forward_unreachable_enabled: Mapped[bool] = mapped_column(default=False, nullable=False)
+    forward_unreachable_destination: Mapped[str | None] = mapped_column(String(length=100), nullable=True, default=None)
+    dnd_enabled: Mapped[bool] = mapped_column(default=False, nullable=False)
 
     user: Mapped[User] = relationship(
         foreign_keys="Extension.user_id",

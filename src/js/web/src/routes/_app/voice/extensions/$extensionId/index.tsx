@@ -1,12 +1,16 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { z } from "zod"
 import {
   AlertTriangle,
   ArrowLeft,
   ArrowRight,
   BellOff,
+  Check,
+  ExternalLink,
   Fingerprint,
+  Inbox,
+  Loader2,
   Mail,
   Pencil,
   Phone,
@@ -17,6 +21,8 @@ import {
 } from "lucide-react"
 import { ExternalDataTab } from "@/components/gateway/external-data-tab"
 import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -38,6 +44,7 @@ import { DndQuickToggle } from "@/components/voice/dnd-quick-toggle"
 import { EditExtensionDialog } from "@/components/voice/edit-extension-dialog"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import {
+  type Extension as ExtensionType,
   useDndSettings,
   useExtension,
   useForwardingRules,
@@ -46,6 +53,7 @@ import {
   useVoicemailSettings,
 } from "@/lib/api/hooks/voice"
 import { useGatewayLookupExtension } from "@/lib/api/hooks/gateway"
+import { formatDuration } from "@/lib/format-utils"
 
 const searchSchema = z.object({
   tab: z.string().optional(),
@@ -283,6 +291,7 @@ function ExtensionDetailPage() {
         <Tabs value={tab} onValueChange={(value) => navigate({ search: { tab: value }, replace: true })}>
           <TabsList>
             <TabsTrigger value="details">Details</TabsTrigger>
+            <TabsTrigger value="voicemail">Voicemail</TabsTrigger>
             <TabsTrigger value="external">External Data</TabsTrigger>
           </TabsList>
 
@@ -339,6 +348,9 @@ function ExtensionDetailPage() {
               </CardContent>
             </Card>
 
+            {/* Call Forwarding */}
+            <CallForwardingCard extensionId={extensionId} extension={data} />
+
             {/* Sub-page links (voicemail, forwarding, dnd) */}
             <SubPageLinks extensionId={extensionId} />
 
@@ -373,6 +385,10 @@ function ExtensionDetailPage() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="voicemail" className="mt-6 space-y-6">
+            <ExtensionVoicemailTab extensionId={extensionId} />
           </TabsContent>
 
           <TabsContent value="external" className="mt-6">
@@ -436,6 +452,354 @@ function ExtensionDetailPage() {
         onDeleted={() => router.navigate({ to: "/voice/extensions" })}
       />
     </PageContainer>
+  )
+}
+
+// -- Call forwarding card -----------------------------------------------------
+
+interface ForwardingState {
+  forwardAlwaysEnabled: boolean
+  forwardAlwaysDestination: string
+  forwardBusyEnabled: boolean
+  forwardBusyDestination: string
+  forwardNoAnswerEnabled: boolean
+  forwardNoAnswerDestination: string
+  forwardNoAnswerRingCount: number
+  forwardUnreachableEnabled: boolean
+  forwardUnreachableDestination: string
+  dndEnabled: boolean
+}
+
+function stateFromExtension(ext: ExtensionType): ForwardingState {
+  return {
+    forwardAlwaysEnabled: ext.forwardAlwaysEnabled,
+    forwardAlwaysDestination: ext.forwardAlwaysDestination ?? "",
+    forwardBusyEnabled: ext.forwardBusyEnabled,
+    forwardBusyDestination: ext.forwardBusyDestination ?? "",
+    forwardNoAnswerEnabled: ext.forwardNoAnswerEnabled,
+    forwardNoAnswerDestination: ext.forwardNoAnswerDestination ?? "",
+    forwardNoAnswerRingCount: ext.forwardNoAnswerRingCount,
+    forwardUnreachableEnabled: ext.forwardUnreachableEnabled,
+    forwardUnreachableDestination: ext.forwardUnreachableDestination ?? "",
+    dndEnabled: ext.dndEnabled,
+  }
+}
+
+function hasChanges(current: ForwardingState, original: ForwardingState): boolean {
+  return (
+    current.dndEnabled !== original.dndEnabled ||
+    current.forwardAlwaysEnabled !== original.forwardAlwaysEnabled ||
+    current.forwardAlwaysDestination !== original.forwardAlwaysDestination ||
+    current.forwardBusyEnabled !== original.forwardBusyEnabled ||
+    current.forwardBusyDestination !== original.forwardBusyDestination ||
+    current.forwardNoAnswerEnabled !== original.forwardNoAnswerEnabled ||
+    current.forwardNoAnswerDestination !== original.forwardNoAnswerDestination ||
+    current.forwardNoAnswerRingCount !== original.forwardNoAnswerRingCount ||
+    current.forwardUnreachableEnabled !== original.forwardUnreachableEnabled ||
+    current.forwardUnreachableDestination !== original.forwardUnreachableDestination
+  )
+}
+
+function buildPatch(current: ForwardingState, original: ForwardingState): Record<string, unknown> {
+  const patch: Record<string, unknown> = {}
+  if (current.dndEnabled !== original.dndEnabled)
+    patch.dndEnabled = current.dndEnabled
+  if (current.forwardAlwaysEnabled !== original.forwardAlwaysEnabled)
+    patch.forwardAlwaysEnabled = current.forwardAlwaysEnabled
+  if (current.forwardAlwaysDestination !== original.forwardAlwaysDestination)
+    patch.forwardAlwaysDestination = current.forwardAlwaysDestination || null
+  if (current.forwardBusyEnabled !== original.forwardBusyEnabled)
+    patch.forwardBusyEnabled = current.forwardBusyEnabled
+  if (current.forwardBusyDestination !== original.forwardBusyDestination)
+    patch.forwardBusyDestination = current.forwardBusyDestination || null
+  if (current.forwardNoAnswerEnabled !== original.forwardNoAnswerEnabled)
+    patch.forwardNoAnswerEnabled = current.forwardNoAnswerEnabled
+  if (current.forwardNoAnswerDestination !== original.forwardNoAnswerDestination)
+    patch.forwardNoAnswerDestination = current.forwardNoAnswerDestination || null
+  if (current.forwardNoAnswerRingCount !== original.forwardNoAnswerRingCount)
+    patch.forwardNoAnswerRingCount = current.forwardNoAnswerRingCount
+  if (current.forwardUnreachableEnabled !== original.forwardUnreachableEnabled)
+    patch.forwardUnreachableEnabled = current.forwardUnreachableEnabled
+  if (current.forwardUnreachableDestination !== original.forwardUnreachableDestination)
+    patch.forwardUnreachableDestination = current.forwardUnreachableDestination || null
+  return patch
+}
+
+function CallForwardingCard({
+  extensionId,
+  extension,
+}: {
+  extensionId: string
+  extension: ExtensionType
+}) {
+  const updateExtension = useUpdateExtension(extensionId)
+  const [isEditing, setIsEditing] = useState(false)
+  const [state, setState] = useState<ForwardingState>(() => stateFromExtension(extension))
+  const original = stateFromExtension(extension)
+
+  // Sync state when extension data refreshes (e.g. after save)
+  useEffect(() => {
+    if (!isEditing) {
+      setState(stateFromExtension(extension))
+    }
+  }, [extension, isEditing])
+
+  const update = useCallback(
+    <K extends keyof ForwardingState>(key: K, value: ForwardingState[K]) => {
+      setState((prev) => ({ ...prev, [key]: value }))
+    },
+    [],
+  )
+
+  function handleSave() {
+    const patch = buildPatch(state, original)
+    if (Object.keys(patch).length === 0) {
+      setIsEditing(false)
+      return
+    }
+    updateExtension.mutate(patch, {
+      onSuccess: () => setIsEditing(false),
+    })
+  }
+
+  function handleCancel() {
+    setState(stateFromExtension(extension))
+    setIsEditing(false)
+  }
+
+  const dirty = hasChanges(state, original)
+  const anyForwardingEnabled =
+    extension.forwardAlwaysEnabled ||
+    extension.forwardBusyEnabled ||
+    extension.forwardNoAnswerEnabled ||
+    extension.forwardUnreachableEnabled
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <PhoneForwarded className="h-5 w-5 text-muted-foreground" />
+            <CardTitle>Call Forwarding</CardTitle>
+            {!isEditing && extension.dndEnabled && (
+              <Badge variant="destructive" className="ml-2 gap-1 text-xs">
+                <BellOff className="h-3 w-3" /> DND
+              </Badge>
+            )}
+            {!isEditing && anyForwardingEnabled && (
+              <Badge variant="secondary" className="ml-1 text-xs">Active</Badge>
+            )}
+          </div>
+          {!isEditing ? (
+            <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+              <Pencil className="mr-2 h-4 w-4" /> Edit
+            </Button>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleCancel}
+                disabled={updateExtension.isPending}
+              >
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleSave}
+                disabled={!dirty || updateExtension.isPending}
+              >
+                {updateExtension.isPending ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Check className="mr-2 h-4 w-4" />
+                )}
+                Save
+              </Button>
+            </div>
+          )}
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {/* DND Toggle */}
+        <div className="flex items-center justify-between rounded-lg border border-border/60 bg-muted/30 p-4">
+          <div className="flex items-center gap-3">
+            <BellOff className={`h-5 w-5 ${isEditing ? (state.dndEnabled ? "text-destructive" : "text-muted-foreground") : (extension.dndEnabled ? "text-destructive" : "text-muted-foreground")}`} />
+            <div>
+              <p className="text-sm font-medium">Do Not Disturb</p>
+              <p className="text-xs text-muted-foreground">
+                Silence all incoming calls to this extension
+              </p>
+            </div>
+          </div>
+          <Switch
+            checked={isEditing ? state.dndEnabled : extension.dndEnabled}
+            onCheckedChange={(checked) => {
+              if (isEditing) {
+                update("dndEnabled", checked)
+              } else {
+                updateExtension.mutate({ dndEnabled: checked })
+              }
+            }}
+            disabled={updateExtension.isPending}
+          />
+        </div>
+
+        {/* Forwarding Rules */}
+        <div className="space-y-4">
+          <ForwardingRuleRow
+            label="Always Forward"
+            description="Forward all incoming calls"
+            enabled={isEditing ? state.forwardAlwaysEnabled : extension.forwardAlwaysEnabled}
+            destination={isEditing ? state.forwardAlwaysDestination : (extension.forwardAlwaysDestination ?? "")}
+            onEnabledChange={(v) => update("forwardAlwaysEnabled", v)}
+            onDestinationChange={(v) => update("forwardAlwaysDestination", v)}
+            isEditing={isEditing}
+            disabled={updateExtension.isPending}
+          />
+
+          <ForwardingRuleRow
+            label="Forward on Busy"
+            description="Forward when the line is busy"
+            enabled={isEditing ? state.forwardBusyEnabled : extension.forwardBusyEnabled}
+            destination={isEditing ? state.forwardBusyDestination : (extension.forwardBusyDestination ?? "")}
+            onEnabledChange={(v) => update("forwardBusyEnabled", v)}
+            onDestinationChange={(v) => update("forwardBusyDestination", v)}
+            isEditing={isEditing}
+            disabled={updateExtension.isPending}
+          />
+
+          <ForwardingRuleRow
+            label="Forward on No Answer"
+            description="Forward after the ring timeout"
+            enabled={isEditing ? state.forwardNoAnswerEnabled : extension.forwardNoAnswerEnabled}
+            destination={isEditing ? state.forwardNoAnswerDestination : (extension.forwardNoAnswerDestination ?? "")}
+            ringCount={isEditing ? state.forwardNoAnswerRingCount : extension.forwardNoAnswerRingCount}
+            onEnabledChange={(v) => update("forwardNoAnswerEnabled", v)}
+            onDestinationChange={(v) => update("forwardNoAnswerDestination", v)}
+            onRingCountChange={(v) => update("forwardNoAnswerRingCount", v)}
+            showRingCount
+            isEditing={isEditing}
+            disabled={updateExtension.isPending}
+          />
+
+          <ForwardingRuleRow
+            label="Forward on Unreachable"
+            description="Forward when the extension is offline"
+            enabled={isEditing ? state.forwardUnreachableEnabled : extension.forwardUnreachableEnabled}
+            destination={isEditing ? state.forwardUnreachableDestination : (extension.forwardUnreachableDestination ?? "")}
+            onEnabledChange={(v) => update("forwardUnreachableEnabled", v)}
+            onDestinationChange={(v) => update("forwardUnreachableDestination", v)}
+            isEditing={isEditing}
+            disabled={updateExtension.isPending}
+          />
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+// -- Forwarding rule row ------------------------------------------------------
+
+function ForwardingRuleRow({
+  label,
+  description,
+  enabled,
+  destination,
+  ringCount,
+  onEnabledChange,
+  onDestinationChange,
+  onRingCountChange,
+  showRingCount = false,
+  isEditing,
+  disabled,
+}: {
+  label: string
+  description: string
+  enabled: boolean
+  destination: string
+  ringCount?: number
+  onEnabledChange: (v: boolean) => void
+  onDestinationChange: (v: string) => void
+  onRingCountChange?: (v: number) => void
+  showRingCount?: boolean
+  isEditing: boolean
+  disabled: boolean
+}) {
+  if (!isEditing) {
+    // Read-only view
+    return (
+      <div className="flex items-center justify-between rounded-lg border border-border/40 p-4">
+        <div className="flex items-center gap-3">
+          <PhoneForwarded className={`h-4 w-4 ${enabled ? "text-primary" : "text-muted-foreground"}`} />
+          <div>
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-medium">{label}</p>
+              {enabled ? (
+                <Badge variant="default" className="text-xs">On</Badge>
+              ) : (
+                <Badge variant="outline" className="text-xs">Off</Badge>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground">{description}</p>
+            {enabled && destination && (
+              <p className="mt-1 font-mono text-xs text-muted-foreground">
+                Destination: {destination}
+                {showRingCount && ringCount != null && ` (${ringCount} rings)`}
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Editing view
+  return (
+    <div className="rounded-lg border border-border/40 p-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium">{label}</p>
+          <p className="text-xs text-muted-foreground">{description}</p>
+        </div>
+        <Switch
+          checked={enabled}
+          onCheckedChange={onEnabledChange}
+          disabled={disabled}
+        />
+      </div>
+      {enabled && (
+        <div className="grid gap-3 pt-1 md:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label className="text-xs">Destination</Label>
+            <Input
+              value={destination}
+              onChange={(e) => onDestinationChange(e.target.value)}
+              placeholder="Phone number or extension"
+              disabled={disabled}
+              className="h-9 text-sm"
+            />
+          </div>
+          {showRingCount && onRingCountChange && (
+            <div className="space-y-1.5">
+              <Label className="text-xs">Ring count</Label>
+              <Input
+                type="number"
+                value={ringCount ?? 4}
+                onChange={(e) => {
+                  const v = parseInt(e.target.value, 10)
+                  if (!isNaN(v) && v >= 1 && v <= 10) onRingCountChange(v)
+                }}
+                min={1}
+                max={10}
+                disabled={disabled}
+                className="h-9 text-sm"
+              />
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -575,6 +939,215 @@ function SubPageLinks({ extensionId }: { extensionId: string }) {
           </CardContent>
         </Card>
       ))}
+    </div>
+  )
+}
+
+// -- Extension Voicemail Tab --------------------------------------------------
+
+function formatReceivedAt(dateStr: string): string {
+  const date = new Date(dateStr)
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffHours = diffMs / (1000 * 60 * 60)
+
+  if (diffHours < 1) {
+    const mins = Math.floor(diffMs / (1000 * 60))
+    return `${mins}m ago`
+  }
+  if (diffHours < 24) {
+    return `${Math.floor(diffHours)}h ago`
+  }
+
+  return date.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  })
+}
+
+function ExtensionVoicemailTab({ extensionId }: { extensionId: string }) {
+  const { data: vmSettings, isLoading: settingsLoading } = useVoicemailSettings(extensionId)
+  const { data: vmMessages, isLoading: msgsLoading } = useVoicemailMessages(extensionId, 1, 5)
+
+  const isLoading = settingsLoading || msgsLoading
+  const vmEnabled = vmSettings?.isEnabled ?? false
+  const unreadCount = vmMessages?.items.filter((m) => !m.isRead).length ?? 0
+  const totalCount = vmMessages?.total ?? 0
+  const recentMessages = vmMessages?.items ?? []
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Voicemail className="h-5 w-5 text-muted-foreground" />
+              <CardTitle>Voicemail Settings</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="space-y-1.5">
+                  <div className="h-3.5 w-24 animate-pulse rounded bg-muted" />
+                  <div className="h-5 w-16 animate-pulse rounded bg-muted" />
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  if (!vmSettings) {
+    return (
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Voicemail className="h-5 w-5 text-muted-foreground" />
+            <CardTitle>Voicemail</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col items-center gap-4 py-8 text-center">
+            <Voicemail className="h-10 w-10 text-muted-foreground/50" />
+            <div>
+              <p className="font-medium">No voicemail box configured</p>
+              <p className="text-sm text-muted-foreground">
+                Set up voicemail for this extension to allow callers to leave messages.
+              </p>
+            </div>
+            <Button variant="outline" size="sm" asChild>
+              <Link
+                to="/voice/extensions/$extensionId/voicemail"
+                params={{ extensionId }}
+              >
+                Set Up Voicemail
+              </Link>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Voicemail settings card */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Voicemail className="h-5 w-5 text-muted-foreground" />
+            <CardTitle>Voicemail Settings</CardTitle>
+          </div>
+          <div className="flex items-center gap-2">
+            <Badge variant={vmEnabled ? "default" : "outline"}>
+              {vmEnabled ? "Enabled" : "Disabled"}
+            </Badge>
+            <Button variant="ghost" size="sm" asChild>
+              <Link
+                to="/voice/extensions/$extensionId/voicemail"
+                params={{ extensionId }}
+              >
+                <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
+                Full settings
+              </Link>
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-4">
+            <div>
+              <p className="text-muted-foreground">Greeting</p>
+              <p className="capitalize">{vmSettings.greetingType.replace("_", " ")}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Transcription</p>
+              <p>{vmSettings.transcriptionEnabled ? "Enabled" : "Disabled"}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Email Notification</p>
+              <p>{vmSettings.emailNotification ? "Enabled" : "Disabled"}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Max Length</p>
+              <p>{vmSettings.maxMessageLengthSeconds}s</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Recent messages */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div className="flex items-center gap-3">
+            <CardTitle>Recent Messages</CardTitle>
+            {unreadCount > 0 && (
+              <Badge variant="secondary" className="gap-1">
+                <Mail className="h-3 w-3" />
+                {unreadCount} unread
+              </Badge>
+            )}
+          </div>
+          {totalCount > 0 && (
+            <Button variant="ghost" size="sm" asChild>
+              <Link
+                to="/voice/extensions/$extensionId/voicemail"
+                params={{ extensionId }}
+              >
+                View all ({totalCount})
+                <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+              </Link>
+            </Button>
+          )}
+        </CardHeader>
+        <CardContent>
+          {recentMessages.length === 0 ? (
+            <div className="flex flex-col items-center gap-2 py-6 text-center">
+              <Inbox className="h-8 w-8 text-muted-foreground/50" />
+              <p className="text-sm text-muted-foreground">No voicemail messages yet.</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {recentMessages.map((msg) => (
+                <Link
+                  key={msg.id}
+                  to="/voice/extensions/$extensionId/voicemail"
+                  params={{ extensionId }}
+                  className="group flex items-center gap-3 rounded-lg border border-border/40 p-3 transition-all hover:bg-muted/30 hover:shadow-sm"
+                >
+                  <div className="flex items-center gap-2">
+                    {!msg.isRead && (
+                      <div className="h-2 w-2 rounded-full bg-primary" />
+                    )}
+                    {msg.isUrgent && (
+                      <Badge variant="destructive" className="text-[10px] px-1 py-0">
+                        Urgent
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-sm ${!msg.isRead ? "font-semibold" : ""}`}>
+                      {msg.callerName ?? msg.callerNumber}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {formatDuration(msg.durationSeconds)} &middot;{" "}
+                      {formatReceivedAt(msg.receivedAt)}
+                      {msg.transcription
+                        ? ` — ${msg.transcription.slice(0, 50)}${msg.transcription.length > 50 ? "..." : ""}`
+                        : ""}
+                    </p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" />
+                </Link>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 }

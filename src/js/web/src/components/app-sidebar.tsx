@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { BarChart3, Bell, Building2, Cable, Clock, GitBranch, Home, LifeBuoy, MapPin, Monitor, Phone, Printer, Search, Settings, ShieldCheck, Tags, Users } from "lucide-react"
+import { BarChart3, Bell, Building2, Cable, Clock, GitBranch, Home, LifeBuoy, MapPin, Monitor, Phone, Printer, Search, Settings, ShieldAlert, ShieldCheck, Tags, Users, Voicemail } from "lucide-react"
 import type * as React from "react"
 import { useEffect, useMemo } from "react"
 import { NavMain, type NavMainItem } from "@/components/nav-main"
@@ -117,6 +117,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         ],
       },
       {
+        title: "Voicemail",
+        to: "/voicemail",
+        icon: Voicemail,
+        items: [
+          { title: "All Messages", to: "/voicemail" },
+          { title: "Voicemail Boxes", to: "/voicemail?tab=boxes" },
+        ],
+      },
+      {
         title: "Fax",
         to: "/fax",
         icon: Printer,
@@ -132,6 +141,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         icon: Clock,
         items: [
           { title: "All schedules", to: "/schedules" },
+        ],
+      },
+      {
+        title: "E911",
+        to: "/e911",
+        icon: ShieldAlert,
+        items: [
+          { title: "All registrations", to: "/e911" },
         ],
       },
       {

@@ -27,6 +27,16 @@ export interface Extension {
   phoneNumberId: string | null
   displayName: string
   isActive: boolean
+  forwardAlwaysEnabled: boolean
+  forwardAlwaysDestination: string | null
+  forwardBusyEnabled: boolean
+  forwardBusyDestination: string | null
+  forwardNoAnswerEnabled: boolean
+  forwardNoAnswerDestination: string | null
+  forwardNoAnswerRingCount: number
+  forwardUnreachableEnabled: boolean
+  forwardUnreachableDestination: string | null
+  dndEnabled: boolean
   createdAt: string | null
   updatedAt: string | null
 }

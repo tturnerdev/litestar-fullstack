@@ -40,6 +40,7 @@ class VoicemailBox(UUIDv7AuditBase):
     )
     greeting_file_path: Mapped[str | None] = mapped_column(String(length=500), nullable=True, default=None)
     max_message_length_seconds: Mapped[int] = mapped_column(default=120, nullable=False)
+    email_address: Mapped[str | None] = mapped_column(String(length=255), nullable=True, default=None)
     email_notification: Mapped[bool] = mapped_column(default=True, nullable=False)
     email_attach_audio: Mapped[bool] = mapped_column(default=False, nullable=False)
     transcription_enabled: Mapped[bool] = mapped_column(default=False, nullable=False)

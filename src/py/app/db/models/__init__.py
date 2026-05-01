@@ -12,6 +12,7 @@ from app.db.models._device_line_type import DeviceLineType
 from app.db.models._device_status import DeviceStatus
 from app.db.models._device_type import DeviceType
 from app.db.models._do_not_disturb import DoNotDisturb
+from app.db.models._e911_registration import E911Registration
 from app.db.models._email_verification_token import EmailVerificationToken
 from app.db.models._extension import Extension
 from app.db.models._fax_email_route import FaxEmailRoute
@@ -79,6 +80,7 @@ __all__ = (
     "DeviceType",
     "DndMode",
     "DoNotDisturb",
+    "E911Registration",
     "EmailVerificationToken",
     "Extension",
     "FaxDirection",

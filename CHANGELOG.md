@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.100.0 (2026-04-30)
+
+### Added
+- **Call forwarding** — Extension model extended with 10 forwarding fields (always/busy/no-answer/unreachable forwarding + DND). Call Forwarding card on extension detail page with toggle switches and destination inputs.
+- **Voicemail domain** — New `voicemail` domain with VoicemailBox and VoicemailMessage models. Box settings (PIN, email, transcription, greeting, retention), message inbox with audio player, read/unread badges, and bulk operations. Voicemail tab added to extension detail page.
+- **E911 management** — New `e911` domain for emergency address registration. E911Registration model linked to phone numbers and locations. List page with unregistered number warnings, registration dialog, address validation, and detail page with in-place editing.
+- **Sidebar navigation** — Added Voicemail, E911, and Call Routing nav items.
+
+### Fixed
+- **Sidebar horizontal scrollbar** — Changed SidebarContent overflow from `overflow-auto` to `overflow-y-auto overflow-x-hidden` to eliminate horizontal scrollbar.
+
 ## v0.99.0 (2026-04-30)
 
 ### Added
