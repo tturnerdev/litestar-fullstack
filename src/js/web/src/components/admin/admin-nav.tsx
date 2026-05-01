@@ -8,6 +8,7 @@ const navItems = [
   { label: "Devices", to: "/admin/devices" },
   { label: "Device Templates", to: "/admin/device-templates" },
   { label: "Voice", to: "/admin/voice" },
+  { label: "Music on Hold", to: "/admin/music-on-hold" },
   { label: "Fax", to: "/admin/fax" },
   { label: "Support", to: "/admin/support" },
   { label: "Gateway", to: "/admin/gateway" },

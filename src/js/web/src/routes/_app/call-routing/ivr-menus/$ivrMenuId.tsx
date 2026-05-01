@@ -47,6 +47,7 @@ import {
   type IvrMenu,
   type IvrMenuOption,
 } from "@/lib/api/hooks/call-routing"
+import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 
 export const Route = createFileRoute("/_app/call-routing/ivr-menus/$ivrMenuId")({
@@ -507,6 +508,13 @@ function IvrMenuDetailPage() {
             </Card>
           </div>
         </div>
+      </PageSection>
+
+      <PageSection>
+        <EntityActivityPanel
+          targetType="ivr_menu"
+          targetId={ivrMenuId}
+        />
       </PageSection>
     </PageContainer>
   )

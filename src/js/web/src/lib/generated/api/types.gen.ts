@@ -1421,6 +1421,61 @@ export type MfaStatus = {
 };
 
 /**
+ * MusicOnHoldCreate
+ */
+export type MusicOnHoldCreate = {
+  category?: string;
+  description?: string;
+  fileList?: Array<string>;
+  isActive?: boolean;
+  isDefault?: boolean;
+  name: string;
+  randomOrder?: boolean;
+};
+
+/**
+ * MusicOnHoldDetail
+ */
+export type MusicOnHoldDetail = {
+  category: string;
+  createdAt: string;
+  description: string;
+  fileList: Array<string>;
+  id: string;
+  isActive: boolean;
+  isDefault: boolean;
+  name: string;
+  randomOrder: boolean;
+  updatedAt: string;
+};
+
+/**
+ * MusicOnHoldList
+ */
+export type MusicOnHoldList = {
+  category: string;
+  createdAt: string;
+  fileCount: number;
+  id: string;
+  isActive: boolean;
+  isDefault: boolean;
+  name: string;
+};
+
+/**
+ * MusicOnHoldUpdate
+ */
+export type MusicOnHoldUpdate = {
+  category?: string;
+  description?: string;
+  fileList?: Array<string>;
+  isActive?: boolean;
+  isDefault?: boolean;
+  name?: string;
+  randomOrder?: boolean;
+};
+
+/**
  * Notification
  */
 export type Notification = {
@@ -2434,6 +2489,83 @@ export type VoicemailUnreadCount = {
 };
 
 /**
+ * WebhookCreate
+ */
+export type WebhookCreate = {
+  description?: string;
+  events?: Array<string>;
+  headers?: {
+    [key: string]: string;
+  };
+  isActive?: boolean;
+  name: string;
+  secret?: string | null;
+  url: string;
+};
+
+/**
+ * WebhookDetail
+ */
+export type WebhookDetail = {
+  createdAt?: string | null;
+  description?: string;
+  events: Array<string>;
+  failureCount?: number;
+  headers?: {
+    [key: string]: string;
+  };
+  id: string;
+  isActive: boolean;
+  lastStatusCode?: number | null;
+  lastTriggeredAt?: string | null;
+  name: string;
+  secret?: string | null;
+  updatedAt?: string | null;
+  url: string;
+  userId?: string | null;
+};
+
+/**
+ * WebhookList
+ */
+export type WebhookList = {
+  createdAt?: string | null;
+  events: Array<string>;
+  failureCount?: number;
+  id: string;
+  isActive: boolean;
+  lastStatusCode?: number | null;
+  lastTriggeredAt?: string | null;
+  name: string;
+  url: string;
+};
+
+/**
+ * WebhookTestResult
+ */
+export type WebhookTestResult = {
+  error?: string | null;
+  responseTimeMs?: number;
+  statusCode?: number | null;
+  success: boolean;
+};
+
+/**
+ * WebhookUpdate
+ */
+export type WebhookUpdate = {
+  description?: string;
+  events?: Array<string>;
+  headers?: {
+    [key: string]: string;
+  };
+  isActive?: boolean;
+  name?: string;
+  secret?: string | null;
+  url?: string;
+};
+
+/**
  * WorkerQueueInfo
  */
 export type WorkerQueueInfo = {
@@ -2832,8 +2964,8 @@ export type AdminListAuditLogsData = {
     sortOrder?: "asc" | "desc" | null;
     targetTypeIn?: Array<string> | null;
     actionIn?: Array<string> | null;
-    targetIdIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -2914,8 +3046,8 @@ export type AdminGetTargetAuditLogsData = {
     sortOrder?: "asc" | "desc" | null;
     targetTypeIn?: Array<string> | null;
     actionIn?: Array<string> | null;
-    targetIdIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -2994,8 +3126,8 @@ export type AdminGetUserAuditLogsData = {
     sortOrder?: "asc" | "desc" | null;
     targetTypeIn?: Array<string> | null;
     actionIn?: Array<string> | null;
-    targetIdIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -3644,6 +3776,245 @@ export type UpdateAdminGatewaySettingsResponses = {
 
 export type UpdateAdminGatewaySettingsResponse =
   UpdateAdminGatewaySettingsResponses[keyof UpdateAdminGatewaySettingsResponses];
+
+export type AdminListMusicOnHoldData = {
+  body?: never;
+  path?: never;
+  query?: {
+    ids?: Array<string> | null;
+    createdBefore?: string | null;
+    createdAfter?: string | null;
+    updatedBefore?: string | null;
+    updatedAfter?: string | null;
+    /**
+     * Field to search
+     */
+    searchString?: string | null;
+    /**
+     * Search should be case sensitive
+     */
+    searchIgnoreCase?: boolean | null;
+    currentPage?: number;
+    pageSize?: number;
+    /**
+     * Order by field
+     */
+    orderBy?: string | null;
+    /**
+     * Field to search
+     */
+    sortOrder?: "asc" | "desc" | null;
+  };
+  url: "/api/admin/music-on-hold";
+};
+
+export type AdminListMusicOnHoldErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type AdminListMusicOnHoldError =
+  AdminListMusicOnHoldErrors[keyof AdminListMusicOnHoldErrors];
+
+export type AdminListMusicOnHoldResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: {
+    items?: Array<MusicOnHoldList>;
+    /**
+     * Maximal number of items to send.
+     */
+    limit?: number;
+    /**
+     * Offset from the beginning of the query.
+     */
+    offset?: number;
+    /**
+     * Total number of items.
+     */
+    total?: number;
+  };
+};
+
+export type AdminListMusicOnHoldResponse =
+  AdminListMusicOnHoldResponses[keyof AdminListMusicOnHoldResponses];
+
+export type AdminCreateMusicOnHoldData = {
+  body: MusicOnHoldCreate;
+  path?: never;
+  query?: never;
+  url: "/api/admin/music-on-hold";
+};
+
+export type AdminCreateMusicOnHoldErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type AdminCreateMusicOnHoldError =
+  AdminCreateMusicOnHoldErrors[keyof AdminCreateMusicOnHoldErrors];
+
+export type AdminCreateMusicOnHoldResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: MusicOnHoldDetail;
+};
+
+export type AdminCreateMusicOnHoldResponse =
+  AdminCreateMusicOnHoldResponses[keyof AdminCreateMusicOnHoldResponses];
+
+export type AdminDeleteMusicOnHoldData = {
+  body?: never;
+  path: {
+    /**
+     * MOH ID
+     *
+     * The Music on Hold class to delete.
+     */
+    moh_id: string;
+  };
+  query?: never;
+  url: "/api/admin/music-on-hold/{moh_id}";
+};
+
+export type AdminDeleteMusicOnHoldErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type AdminDeleteMusicOnHoldError =
+  AdminDeleteMusicOnHoldErrors[keyof AdminDeleteMusicOnHoldErrors];
+
+export type AdminDeleteMusicOnHoldResponses = {
+  /**
+   * Request fulfilled, nothing follows
+   */
+  204: void;
+};
+
+export type AdminDeleteMusicOnHoldResponse =
+  AdminDeleteMusicOnHoldResponses[keyof AdminDeleteMusicOnHoldResponses];
+
+export type AdminGetMusicOnHoldData = {
+  body?: never;
+  path: {
+    /**
+     * MOH ID
+     *
+     * The Music on Hold class to retrieve.
+     */
+    moh_id: string;
+  };
+  query?: never;
+  url: "/api/admin/music-on-hold/{moh_id}";
+};
+
+export type AdminGetMusicOnHoldErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type AdminGetMusicOnHoldError =
+  AdminGetMusicOnHoldErrors[keyof AdminGetMusicOnHoldErrors];
+
+export type AdminGetMusicOnHoldResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: MusicOnHoldDetail;
+};
+
+export type AdminGetMusicOnHoldResponse =
+  AdminGetMusicOnHoldResponses[keyof AdminGetMusicOnHoldResponses];
+
+export type AdminUpdateMusicOnHoldData = {
+  body: MusicOnHoldUpdate;
+  path: {
+    /**
+     * MOH ID
+     *
+     * The Music on Hold class to update.
+     */
+    moh_id: string;
+  };
+  query?: never;
+  url: "/api/admin/music-on-hold/{moh_id}";
+};
+
+export type AdminUpdateMusicOnHoldErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type AdminUpdateMusicOnHoldError =
+  AdminUpdateMusicOnHoldErrors[keyof AdminUpdateMusicOnHoldErrors];
+
+export type AdminUpdateMusicOnHoldResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: MusicOnHoldDetail;
+};
+
+export type AdminUpdateMusicOnHoldResponse =
+  AdminUpdateMusicOnHoldResponses[keyof AdminUpdateMusicOnHoldResponses];
 
 export type AdminGetSupportStatsData = {
   body?: never;
@@ -13818,6 +14189,281 @@ export type ToggleVoicemailMessageReadResponses = {
 
 export type ToggleVoicemailMessageReadResponse =
   ToggleVoicemailMessageReadResponses[keyof ToggleVoicemailMessageReadResponses];
+
+export type ListWebhooksData = {
+  body?: never;
+  path?: never;
+  query?: {
+    ids?: Array<string> | null;
+    createdBefore?: string | null;
+    createdAfter?: string | null;
+    updatedBefore?: string | null;
+    updatedAfter?: string | null;
+    /**
+     * Field to search
+     */
+    searchString?: string | null;
+    /**
+     * Search should be case sensitive
+     */
+    searchIgnoreCase?: boolean | null;
+    currentPage?: number;
+    pageSize?: number;
+    /**
+     * Order by field
+     */
+    orderBy?: string | null;
+    /**
+     * Field to search
+     */
+    sortOrder?: "asc" | "desc" | null;
+  };
+  url: "/api/webhooks";
+};
+
+export type ListWebhooksErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type ListWebhooksError = ListWebhooksErrors[keyof ListWebhooksErrors];
+
+export type ListWebhooksResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: {
+    items?: Array<WebhookList>;
+    /**
+     * Maximal number of items to send.
+     */
+    limit?: number;
+    /**
+     * Offset from the beginning of the query.
+     */
+    offset?: number;
+    /**
+     * Total number of items.
+     */
+    total?: number;
+  };
+};
+
+export type ListWebhooksResponse =
+  ListWebhooksResponses[keyof ListWebhooksResponses];
+
+export type CreateWebhookData = {
+  body: WebhookCreate;
+  path?: never;
+  query?: never;
+  url: "/api/webhooks";
+};
+
+export type CreateWebhookErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type CreateWebhookError = CreateWebhookErrors[keyof CreateWebhookErrors];
+
+export type CreateWebhookResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: WebhookDetail;
+};
+
+export type CreateWebhookResponse =
+  CreateWebhookResponses[keyof CreateWebhookResponses];
+
+export type DeleteWebhookData = {
+  body?: never;
+  path: {
+    /**
+     * Webhook ID
+     *
+     * The webhook to delete.
+     */
+    webhook_id: string;
+  };
+  query?: never;
+  url: "/api/webhooks/{webhook_id}";
+};
+
+export type DeleteWebhookErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type DeleteWebhookError = DeleteWebhookErrors[keyof DeleteWebhookErrors];
+
+export type DeleteWebhookResponses = {
+  /**
+   * Request fulfilled, nothing follows
+   */
+  204: void;
+};
+
+export type DeleteWebhookResponse =
+  DeleteWebhookResponses[keyof DeleteWebhookResponses];
+
+export type GetWebhookData = {
+  body?: never;
+  path: {
+    /**
+     * Webhook ID
+     *
+     * The webhook to retrieve.
+     */
+    webhook_id: string;
+  };
+  query?: never;
+  url: "/api/webhooks/{webhook_id}";
+};
+
+export type GetWebhookErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type GetWebhookError = GetWebhookErrors[keyof GetWebhookErrors];
+
+export type GetWebhookResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: WebhookDetail;
+};
+
+export type GetWebhookResponse = GetWebhookResponses[keyof GetWebhookResponses];
+
+export type UpdateWebhookData = {
+  body: WebhookUpdate;
+  path: {
+    /**
+     * Webhook ID
+     *
+     * The webhook to update.
+     */
+    webhook_id: string;
+  };
+  query?: never;
+  url: "/api/webhooks/{webhook_id}";
+};
+
+export type UpdateWebhookErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type UpdateWebhookError = UpdateWebhookErrors[keyof UpdateWebhookErrors];
+
+export type UpdateWebhookResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: WebhookDetail;
+};
+
+export type UpdateWebhookResponse =
+  UpdateWebhookResponses[keyof UpdateWebhookResponses];
+
+export type TestWebhookData = {
+  body?: never;
+  path: {
+    /**
+     * Webhook ID
+     *
+     * The webhook to test.
+     */
+    webhook_id: string;
+  };
+  query?: never;
+  url: "/api/webhooks/{webhook_id}/test";
+};
+
+export type TestWebhookErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type TestWebhookError = TestWebhookErrors[keyof TestWebhookErrors];
+
+export type TestWebhookResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: WebhookTestResult;
+};
+
+export type TestWebhookResponse =
+  TestWebhookResponses[keyof TestWebhookResponses];
 
 export type SystemHealthData = {
   body?: never;

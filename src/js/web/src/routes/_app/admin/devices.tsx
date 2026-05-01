@@ -12,6 +12,7 @@ import {
   Wifi,
   X,
 } from "lucide-react"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { Badge } from "@/components/ui/badge"
@@ -96,6 +97,7 @@ function StatsCardSkeleton() {
 }
 
 function AdminDevicesPage() {
+  useDocumentTitle("Admin Devices")
   const navigate = useNavigate()
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState("")

@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import {
   AlertTriangle,
   ArrowDown,
@@ -59,6 +60,7 @@ const responseTimes = [
 ]
 
 function NewTicketPage() {
+  useDocumentTitle("New Ticket")
   return (
     <PageContainer className="flex-1 space-y-8">
       <PageHeader

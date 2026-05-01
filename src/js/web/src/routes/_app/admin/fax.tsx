@@ -12,6 +12,7 @@ import {
   X,
   XCircle,
 } from "lucide-react"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { Badge } from "@/components/ui/badge"
@@ -97,6 +98,7 @@ function StatsCardSkeleton() {
 }
 
 function AdminFaxPage() {
+  useDocumentTitle("Admin Fax")
   const navigate = useNavigate()
   const [numberPage, setNumberPage] = useState(1)
   const [numberSearch, setNumberSearch] = useState("")

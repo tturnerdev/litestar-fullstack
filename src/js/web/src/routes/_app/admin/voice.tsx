@@ -11,6 +11,7 @@ import {
   Signal,
   X,
 } from "lucide-react"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { EmptyState } from "@/components/ui/empty-state"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
@@ -89,6 +90,7 @@ function StatsCardSkeleton() {
 }
 
 function AdminVoicePage() {
+  useDocumentTitle("Admin Voice")
   const navigate = useNavigate()
   const [phoneNumberPage, setPhoneNumberPage] = useState(1)
   const [phoneSearch, setPhoneSearch] = useState("")

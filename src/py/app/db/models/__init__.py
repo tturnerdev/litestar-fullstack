@@ -26,6 +26,7 @@ from app.db.models._ivr_menu import IvrMenu
 from app.db.models._ivr_menu_option import IvrMenuOption
 from app.db.models._location import Location
 from app.db.models._location_type import LocationType
+from app.db.models._music_on_hold import MusicOnHold
 from app.db.models._notification import Notification
 from app.db.models._notification_preference import NotificationPreference
 from app.db.models._oauth_account import UserOAuthAccount
@@ -62,6 +63,7 @@ from app.db.models._voice_enums import (
 )
 from app.db.models._voicemail_box import VoicemailBox
 from app.db.models._voicemail_message import VoicemailMessage
+from app.db.models._webhook import Webhook
 
 __all__ = (
     "AuditLog",
@@ -100,6 +102,7 @@ __all__ = (
     "IvrMenuOption",
     "Location",
     "LocationType",
+    "MusicOnHold",
     "Notification",
     "NotificationPreference",
     "Organization",
@@ -134,5 +137,6 @@ __all__ = (
     "UserRole",
     "VoicemailBox",
     "VoicemailMessage",
+    "Webhook",
     "team_tag",
 )

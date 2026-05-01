@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { ChevronRight, Monitor, Phone, Radio, Settings } from "lucide-react"
 import { CreateDeviceForm } from "@/components/devices/device-form"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
@@ -33,6 +34,7 @@ const tips = [
 ]
 
 function NewDevicePage() {
+  useDocumentTitle("New Device")
   return (
     <PageContainer className="flex-1 space-y-8">
       <PageHeader eyebrow="Devices" title="Add New Device" description="Register a new phone or SIP device to your account." breadcrumbs={<Breadcrumb><BreadcrumbList><BreadcrumbItem><BreadcrumbLink asChild><Link to="/home">Home</Link></BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbLink asChild><Link to="/devices">Devices</Link></BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbPage>New Device</BreadcrumbPage></BreadcrumbItem></BreadcrumbList></Breadcrumb>} />

@@ -23,6 +23,9 @@ import type {
   AdminCreateDeviceTemplateData,
   AdminCreateDeviceTemplateErrors,
   AdminCreateDeviceTemplateResponses,
+  AdminCreateMusicOnHoldData,
+  AdminCreateMusicOnHoldErrors,
+  AdminCreateMusicOnHoldResponses,
   AdminGetDeviceStatsData,
   AdminGetDeviceStatsResponses,
   AdminGetFaxStatsData,
@@ -98,6 +101,9 @@ import type {
   CreateVoicemailBoxData,
   CreateVoicemailBoxErrors,
   CreateVoicemailBoxResponses,
+  CreateWebhookData,
+  CreateWebhookErrors,
+  CreateWebhookResponses,
   DisableMfaData,
   DisableMfaErrors,
   DisableMfaResponses,
@@ -172,6 +178,7 @@ export type OperationName =
   | 'create_extension'
   | 'create_fax_number'
   | 'create_ivr_menu'
+  | 'create_music_on_hold'
   | 'create_phone_number'
   | 'create_registration'
   | 'create_ring_group'
@@ -184,6 +191,7 @@ export type OperationName =
   | 'create_time_condition'
   | 'create_user'
   | 'create_voicemail_box'
+  | 'create_webhook'
   | 'disable_mfa'
   | 'forgot_password'
   | 'get_gateway_settings'
@@ -210,6 +218,7 @@ export type OperationName =
   | 'list_fax_messages'
   | 'list_fax_numbers_api_fax_numbers'
   | 'list_ivr_menus'
+  | 'list_music_on_hold'
   | 'list_phone_numbers_api_voice_phone_numbers'
   | 'list_registrations'
   | 'list_ring_groups'
@@ -222,6 +231,7 @@ export type OperationName =
   | 'list_time_conditions'
   | 'list_users_api_users'
   | 'list_voicemail_boxes'
+  | 'list_webhooks'
   | 'login'
   | 'logout'
   | 'mark_all_read'
@@ -258,6 +268,7 @@ export interface OperationDataTypes {
   'create_extension': CreateExtensionData
   'create_fax_number': CreateFaxNumberData
   'create_ivr_menu': CreateIvrMenuData
+  'create_music_on_hold': AdminCreateMusicOnHoldData
   'create_phone_number': CreatePhoneNumberData
   'create_registration': CreateE911RegistrationData
   'create_ring_group': CreateRingGroupData
@@ -270,6 +281,7 @@ export interface OperationDataTypes {
   'create_time_condition': CreateTimeConditionData
   'create_user': CreateUserData
   'create_voicemail_box': CreateVoicemailBoxData
+  'create_webhook': CreateWebhookData
   'disable_mfa': DisableMfaData
   'forgot_password': ForgotPasswordData
   'get_gateway_settings': UpdateAdminGatewaySettingsData
@@ -296,6 +308,7 @@ export interface OperationDataTypes {
   'list_fax_messages': AdminListFaxMessagesData
   'list_fax_numbers_api_fax_numbers': CreateFaxNumberData
   'list_ivr_menus': CreateIvrMenuData
+  'list_music_on_hold': AdminCreateMusicOnHoldData
   'list_phone_numbers_api_voice_phone_numbers': CreatePhoneNumberData
   'list_registrations': CreateE911RegistrationData
   'list_ring_groups': CreateRingGroupData
@@ -308,6 +321,7 @@ export interface OperationDataTypes {
   'list_time_conditions': CreateTimeConditionData
   'list_users_api_users': CreateUserData
   'list_voicemail_boxes': CreateVoicemailBoxData
+  'list_webhooks': CreateWebhookData
   'login': AccountLoginData
   'logout': AccountLogoutData
   'mark_all_read': MarkAllNotificationsReadData
@@ -345,6 +359,7 @@ export interface OperationResponseTypes {
   'create_extension': CreateExtensionResponses
   'create_fax_number': CreateFaxNumberResponses
   'create_ivr_menu': CreateIvrMenuResponses
+  'create_music_on_hold': AdminCreateMusicOnHoldResponses
   'create_phone_number': CreatePhoneNumberResponses
   'create_registration': CreateE911RegistrationResponses
   'create_ring_group': CreateRingGroupResponses
@@ -357,6 +372,7 @@ export interface OperationResponseTypes {
   'create_time_condition': CreateTimeConditionResponses
   'create_user': CreateUserResponses
   'create_voicemail_box': CreateVoicemailBoxResponses
+  'create_webhook': CreateWebhookResponses
   'disable_mfa': DisableMfaResponses
   'forgot_password': ForgotPasswordResponses
   'get_gateway_settings': UpdateAdminGatewaySettingsResponses
@@ -383,6 +399,7 @@ export interface OperationResponseTypes {
   'list_fax_messages': AdminListFaxMessagesResponses
   'list_fax_numbers_api_fax_numbers': CreateFaxNumberResponses
   'list_ivr_menus': CreateIvrMenuResponses
+  'list_music_on_hold': AdminCreateMusicOnHoldResponses
   'list_phone_numbers_api_voice_phone_numbers': CreatePhoneNumberResponses
   'list_registrations': CreateE911RegistrationResponses
   'list_ring_groups': CreateRingGroupResponses
@@ -395,6 +412,7 @@ export interface OperationResponseTypes {
   'list_time_conditions': CreateTimeConditionResponses
   'list_users_api_users': CreateUserResponses
   'list_voicemail_boxes': CreateVoicemailBoxResponses
+  'list_webhooks': CreateWebhookResponses
   'login': AccountLoginResponses
   'logout': AccountLogoutResponses
   'mark_all_read': MarkAllNotificationsReadResponses
@@ -432,6 +450,7 @@ export interface OperationErrorTypes {
   'create_extension': CreateExtensionErrors
   'create_fax_number': CreateFaxNumberErrors
   'create_ivr_menu': CreateIvrMenuErrors
+  'create_music_on_hold': AdminCreateMusicOnHoldErrors
   'create_phone_number': CreatePhoneNumberErrors
   'create_registration': CreateE911RegistrationErrors
   'create_ring_group': CreateRingGroupErrors
@@ -444,6 +463,7 @@ export interface OperationErrorTypes {
   'create_time_condition': CreateTimeConditionErrors
   'create_user': CreateUserErrors
   'create_voicemail_box': CreateVoicemailBoxErrors
+  'create_webhook': CreateWebhookErrors
   'disable_mfa': DisableMfaErrors
   'forgot_password': ForgotPasswordErrors
   'get_gateway_settings': UpdateAdminGatewaySettingsErrors
@@ -470,6 +490,7 @@ export interface OperationErrorTypes {
   'list_fax_messages': never
   'list_fax_numbers_api_fax_numbers': CreateFaxNumberErrors
   'list_ivr_menus': CreateIvrMenuErrors
+  'list_music_on_hold': AdminCreateMusicOnHoldErrors
   'list_phone_numbers_api_voice_phone_numbers': CreatePhoneNumberErrors
   'list_registrations': CreateE911RegistrationErrors
   'list_ring_groups': CreateRingGroupErrors
@@ -482,6 +503,7 @@ export interface OperationErrorTypes {
   'list_time_conditions': CreateTimeConditionErrors
   'list_users_api_users': CreateUserErrors
   'list_voicemail_boxes': CreateVoicemailBoxErrors
+  'list_webhooks': CreateWebhookErrors
   'login': AccountLoginErrors
   'logout': never
   'mark_all_read': never

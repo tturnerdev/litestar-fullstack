@@ -238,6 +238,47 @@ query {
 }
 """
 
+_GQL_FETCH_VOICEMAIL_EXT = """\
+query {{
+  fetchVoiceMail(extensionId: "{ext}") {{
+    status
+    message
+    name
+    password
+    context
+    email
+    pager
+    saycid
+    envelope
+    attach
+    delete
+  }}
+}}
+"""
+
+_GQL_ENABLE_VOICEMAIL = """\
+mutation {{
+  enableVoiceMail(input: {{
+    extensionId: "{ext}"
+    {fields}
+  }}) {{
+    status
+    message
+  }}
+}}
+"""
+
+_GQL_DISABLE_VOICEMAIL = """\
+mutation {{
+  disableVoiceMail(input: {{
+    extensionId: "{ext}"
+  }}) {{
+    status
+    message
+  }}
+}}
+"""
+
 _GQL_ALL_CDRS = """\
 query {
   fetchAllCdrs {
@@ -607,6 +648,72 @@ class FreePBXProvider(GatewayProvider):
 
         await self._do_reload(connection)
         return result
+
+    # -- Voicemail mutation helpers ----------------------------------------
+
+    @staticmethod
+    def _build_voicemail_fields(
+        password: str,
+        name: str | None = None,
+        email: str | None = None,
+        attach: bool | None = None,
+        delete: bool | None = None,
+    ) -> str:
+        escaped_pw = password.replace("\\", "\\\\").replace('"', '\\"')
+        parts: list[str] = [f'password: "{escaped_pw}"']
+        if name is not None:
+            escaped = name.replace("\\", "\\\\").replace('"', '\\"')
+            parts.append(f'name: "{escaped}"')
+        if email is not None:
+            parts.append(f'email: "{email}"')
+        if attach is not None:
+            parts.append(f"attach: {'true' if attach else 'false'}")
+        if delete is not None:
+            parts.append(f"delete: {'true' if delete else 'false'}")
+        return "\n    ".join(parts)
+
+    async def enable_voicemail_on_pbx(
+        self,
+        ext_number: str,
+        connection: m.Connection,
+        *,
+        password: str,
+        name: str | None = None,
+        email: str | None = None,
+        attach: bool | None = None,
+        delete: bool | None = None,
+    ) -> dict[str, Any]:
+        fields = self._build_voicemail_fields(
+            password=password, name=name, email=email, attach=attach, delete=delete,
+        )
+        query = _GQL_ENABLE_VOICEMAIL.format(ext=ext_number, fields=fields)
+        result = await self._execute_graphql(query, connection)
+        await logger.ainfo("freepbx_enable_voicemail", ext=ext_number, result=result)
+        await self._do_reload(connection)
+        return result
+
+    async def disable_voicemail_on_pbx(
+        self,
+        ext_number: str,
+        connection: m.Connection,
+    ) -> dict[str, Any]:
+        query = _GQL_DISABLE_VOICEMAIL.format(ext=ext_number)
+        result = await self._execute_graphql(query, connection)
+        await logger.ainfo("freepbx_disable_voicemail", ext=ext_number, result=result)
+        await self._do_reload(connection)
+        return result
+
+    async def fetch_voicemail_from_pbx(
+        self,
+        ext_number: str,
+        connection: m.Connection,
+    ) -> dict[str, Any] | None:
+        query = _GQL_FETCH_VOICEMAIL_EXT.format(ext=ext_number)
+        result = await self._execute_graphql(query, connection)
+        vm_data = result.get("data", {}).get("fetchVoiceMail", {})
+        if not vm_data.get("status"):
+            return None
+        return vm_data
 
     # -- Internal query implementations ------------------------------------
 

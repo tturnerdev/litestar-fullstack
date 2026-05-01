@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { ChevronRight, Shield, Tag, UserPlus, Users } from "lucide-react"
 import { CreateTeamForm } from "@/components/teams/create-team-form"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
@@ -33,6 +34,7 @@ const tips = [
 ]
 
 function NewTeamPage() {
+  useDocumentTitle("New Team")
   return (
     <PageContainer className="flex-1 space-y-8">
       <PageHeader

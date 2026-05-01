@@ -4,6 +4,7 @@ from app.domain.admin.controllers._admin_device_templates import AdminDeviceTemp
 from app.domain.admin.controllers._admin_devices import AdminDevicesController
 from app.domain.admin.controllers._admin_fax import AdminFaxController
 from app.domain.admin.controllers._admin_gateway import AdminGatewayController
+from app.domain.admin.controllers._admin_music_on_hold import AdminMusicOnHoldController
 from app.domain.admin.controllers._admin_support import AdminSupportController
 from app.domain.admin.controllers._admin_system import AdminSystemController
 from app.domain.admin.controllers._admin_voice import AdminVoiceController
@@ -17,6 +18,7 @@ __all__ = (
     "AdminDevicesController",
     "AdminFaxController",
     "AdminGatewayController",
+    "AdminMusicOnHoldController",
     "AdminSupportController",
     "AdminSystemController",
     "AdminTeamsController",

@@ -51,6 +51,7 @@ import {
   type CallQueue,
   type CallQueueMember,
 } from "@/lib/api/hooks/call-routing"
+import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 
 export const Route = createFileRoute("/_app/call-routing/call-queues/$callQueueId")({
@@ -570,6 +571,13 @@ function CallQueueDetailPage() {
             </Card>
           </div>
         </div>
+      </PageSection>
+
+      <PageSection>
+        <EntityActivityPanel
+          targetType="call_queue"
+          targetId={callQueueId}
+        />
       </PageSection>
     </PageContainer>
   )

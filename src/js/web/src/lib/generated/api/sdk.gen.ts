@@ -36,9 +36,15 @@ import type {
   AdminCreateDeviceTemplateData,
   AdminCreateDeviceTemplateErrors,
   AdminCreateDeviceTemplateResponses,
+  AdminCreateMusicOnHoldData,
+  AdminCreateMusicOnHoldErrors,
+  AdminCreateMusicOnHoldResponses,
   AdminDeleteDeviceTemplateData,
   AdminDeleteDeviceTemplateErrors,
   AdminDeleteDeviceTemplateResponses,
+  AdminDeleteMusicOnHoldData,
+  AdminDeleteMusicOnHoldErrors,
+  AdminDeleteMusicOnHoldResponses,
   AdminDeleteTeamData,
   AdminDeleteTeamErrors,
   AdminDeleteTeamResponses,
@@ -55,6 +61,9 @@ import type {
   AdminGetDeviceTemplateResponses,
   AdminGetFaxStatsData,
   AdminGetFaxStatsResponses,
+  AdminGetMusicOnHoldData,
+  AdminGetMusicOnHoldErrors,
+  AdminGetMusicOnHoldResponses,
   AdminGetSupportStatsData,
   AdminGetSupportStatsResponses,
   AdminGetTargetAuditLogsData,
@@ -87,6 +96,9 @@ import type {
   AdminListFaxNumbersData,
   AdminListFaxNumbersErrors,
   AdminListFaxNumbersResponses,
+  AdminListMusicOnHoldData,
+  AdminListMusicOnHoldErrors,
+  AdminListMusicOnHoldResponses,
   AdminListPhoneNumbersData,
   AdminListPhoneNumbersErrors,
   AdminListPhoneNumbersResponses,
@@ -102,6 +114,9 @@ import type {
   AdminUpdateDeviceTemplateData,
   AdminUpdateDeviceTemplateErrors,
   AdminUpdateDeviceTemplateResponses,
+  AdminUpdateMusicOnHoldData,
+  AdminUpdateMusicOnHoldErrors,
+  AdminUpdateMusicOnHoldResponses,
   AdminUpdateTeamData,
   AdminUpdateTeamErrors,
   AdminUpdateTeamResponses,
@@ -225,6 +240,9 @@ import type {
   CreateVoicemailBoxData,
   CreateVoicemailBoxErrors,
   CreateVoicemailBoxResponses,
+  CreateWebhookData,
+  CreateWebhookErrors,
+  CreateWebhookResponses,
   DeleteAttachmentData,
   DeleteAttachmentErrors,
   DeleteAttachmentResponses,
@@ -318,6 +336,9 @@ import type {
   DeleteVoicemailMessageData,
   DeleteVoicemailMessageErrors,
   DeleteVoicemailMessageResponses,
+  DeleteWebhookData,
+  DeleteWebhookErrors,
+  DeleteWebhookResponses,
   DisableMfaData,
   DisableMfaErrors,
   DisableMfaResponses,
@@ -445,6 +466,9 @@ import type {
   GetVoicemailSettingsData,
   GetVoicemailSettingsErrors,
   GetVoicemailSettingsResponses,
+  GetWebhookData,
+  GetWebhookErrors,
+  GetWebhookResponses,
   GlobalSearchData,
   GlobalSearchErrors,
   GlobalSearchResponses,
@@ -558,6 +582,9 @@ import type {
   ListVoicemailMessagesData,
   ListVoicemailMessagesErrors,
   ListVoicemailMessagesResponses,
+  ListWebhooksData,
+  ListWebhooksErrors,
+  ListWebhooksResponses,
   LookupDeviceTemplateData,
   LookupDeviceTemplateErrors,
   LookupDeviceTemplateResponses,
@@ -643,6 +670,9 @@ import type {
   TestConnectionData,
   TestConnectionErrors,
   TestConnectionResponses,
+  TestWebhookData,
+  TestWebhookErrors,
+  TestWebhookResponses,
   ToggleDndData,
   ToggleDndErrors,
   ToggleDndResponses,
@@ -750,6 +780,9 @@ import type {
   UpdateVoicemailSettingsData,
   UpdateVoicemailSettingsErrors,
   UpdateVoicemailSettingsResponses,
+  UpdateWebhookData,
+  UpdateWebhookErrors,
+  UpdateWebhookResponses,
   UploadAttachmentData,
   UploadAttachmentErrors,
   UploadAttachmentResponses,
@@ -1269,6 +1302,94 @@ export const updateAdminGatewaySettings = <
   >({
     security: [{ scheme: "bearer", type: "http" }],
     url: "/api/admin/gateway/settings",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * ListMusicOnHold
+ */
+export const adminListMusicOnHold = <ThrowOnError extends boolean = false>(
+  options?: Options<AdminListMusicOnHoldData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    AdminListMusicOnHoldResponses,
+    AdminListMusicOnHoldErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/admin/music-on-hold",
+    ...options,
+  });
+
+/**
+ * CreateMusicOnHold
+ */
+export const adminCreateMusicOnHold = <ThrowOnError extends boolean = false>(
+  options: Options<AdminCreateMusicOnHoldData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    AdminCreateMusicOnHoldResponses,
+    AdminCreateMusicOnHoldErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/admin/music-on-hold",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * DeleteMusicOnHold
+ */
+export const adminDeleteMusicOnHold = <ThrowOnError extends boolean = false>(
+  options: Options<AdminDeleteMusicOnHoldData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    AdminDeleteMusicOnHoldResponses,
+    AdminDeleteMusicOnHoldErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/admin/music-on-hold/{moh_id}",
+    ...options,
+  });
+
+/**
+ * GetMusicOnHold
+ */
+export const adminGetMusicOnHold = <ThrowOnError extends boolean = false>(
+  options: Options<AdminGetMusicOnHoldData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    AdminGetMusicOnHoldResponses,
+    AdminGetMusicOnHoldErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/admin/music-on-hold/{moh_id}",
+    ...options,
+  });
+
+/**
+ * UpdateMusicOnHold
+ */
+export const adminUpdateMusicOnHold = <ThrowOnError extends boolean = false>(
+  options: Options<AdminUpdateMusicOnHoldData, ThrowOnError>,
+) =>
+  (options.client ?? client).patch<
+    AdminUpdateMusicOnHoldResponses,
+    AdminUpdateMusicOnHoldErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/admin/music-on-hold/{moh_id}",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -5291,6 +5412,110 @@ export const toggleVoicemailMessageRead = <
       "Content-Type": "application/json",
       ...options.headers,
     },
+  });
+
+/**
+ * ListWebhooks
+ */
+export const listWebhooks = <ThrowOnError extends boolean = false>(
+  options?: Options<ListWebhooksData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    ListWebhooksResponses,
+    ListWebhooksErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/webhooks",
+    ...options,
+  });
+
+/**
+ * CreateWebhook
+ */
+export const createWebhook = <ThrowOnError extends boolean = false>(
+  options: Options<CreateWebhookData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    CreateWebhookResponses,
+    CreateWebhookErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/webhooks",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * DeleteWebhook
+ */
+export const deleteWebhook = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteWebhookData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    DeleteWebhookResponses,
+    DeleteWebhookErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/webhooks/{webhook_id}",
+    ...options,
+  });
+
+/**
+ * GetWebhook
+ */
+export const getWebhook = <ThrowOnError extends boolean = false>(
+  options: Options<GetWebhookData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    GetWebhookResponses,
+    GetWebhookErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/webhooks/{webhook_id}",
+    ...options,
+  });
+
+/**
+ * UpdateWebhook
+ */
+export const updateWebhook = <ThrowOnError extends boolean = false>(
+  options: Options<UpdateWebhookData, ThrowOnError>,
+) =>
+  (options.client ?? client).patch<
+    UpdateWebhookResponses,
+    UpdateWebhookErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/webhooks/{webhook_id}",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * TestWebhook
+ */
+export const testWebhook = <ThrowOnError extends boolean = false>(
+  options: Options<TestWebhookData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    TestWebhookResponses,
+    TestWebhookErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/webhooks/{webhook_id}/test",
+    ...options,
   });
 
 /**

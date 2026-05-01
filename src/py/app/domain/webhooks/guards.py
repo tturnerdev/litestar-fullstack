@@ -1,0 +1,43 @@
+"""Webhook domain guards."""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from litestar.exceptions import PermissionDeniedException
+
+from app.lib import constants
+
+if TYPE_CHECKING:
+    from typing import Any
+
+    from litestar.connection import ASGIConnection
+    from litestar.handlers.base import BaseRouteHandler
+    from litestar.security.jwt import Token
+
+    from app.db import models as m
+
+
+def requires_webhook_ownership(connection: ASGIConnection[Any, m.User, Token, Any], _: BaseRouteHandler) -> None:
+    """Verify the connection user owns the webhook or is a superuser.
+
+    Args:
+        connection: Request/Connection object.
+        _: Route handler.
+
+    Raises:
+        PermissionDeniedException: Not authorized
+    """
+    if connection.user.is_superuser:
+        return
+    has_system_role = any(
+        assigned_role.role_name
+        for assigned_role in connection.user.roles
+        if assigned_role.role_name == constants.SUPERUSER_ACCESS_ROLE
+    )
+    if has_system_role:
+        return
+    raise PermissionDeniedException(detail="Insufficient permissions to access this webhook.")
+
+
+__all__ = ("requires_webhook_ownership",)

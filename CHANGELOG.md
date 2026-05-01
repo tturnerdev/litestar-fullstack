@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.111.0 (2026-05-01)
+
+### Added
+- **Music on Hold domain** — New admin domain for managing MOH classes. Model with name, description, category, file list, default/active flags, random order. Full CRUD API at `/api/admin/music-on-hold` with superuser guard. Admin page with table, search, create/edit dialog. Audit logging on all write operations. Admin sidebar nav entry.
+- **Webhooks domain** — New domain for webhook management. Model with URL, secret, event subscriptions (JSONB), custom headers, failure tracking. Full CRUD API at `/api/webhooks` with ownership guard. Test endpoint (`POST /{id}/test`) sends a sample payload and returns status/timing. Frontend page with event multi-select, secret masking, failure count badges, test action. Sidebar nav entry with `g w` keyboard shortcut.
+- **Document titles** — Added `useDocumentTitle` to 17 route pages missing it (admin sub-pages, create/new pages, fax email routes, send fax).
+- **Activity panels** — Added `EntityActivityPanel` to 7 detail pages: call queues, IVR menus, ring groups, time conditions, E911 registrations, phone numbers, voicemail boxes.
+- **Admin audit logging** — Added audit logging with before/after diffs to device template CRUD and gateway settings update controllers.
+
 ## v0.110.0 (2026-05-01)
 
 ### Added

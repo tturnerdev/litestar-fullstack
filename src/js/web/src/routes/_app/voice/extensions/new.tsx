@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
 import { AlertCircle, AlertTriangle, Loader2 } from "lucide-react"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -41,6 +42,7 @@ const createExtensionSchema = z.object({
 type CreateExtensionFormData = z.infer<typeof createExtensionSchema>
 
 function NewExtensionPage() {
+  useDocumentTitle("New Extension")
   const router = useRouter()
   const createExtension = useCreateExtension()
   const { data: phoneNumbers } = usePhoneNumbers(1, 100)

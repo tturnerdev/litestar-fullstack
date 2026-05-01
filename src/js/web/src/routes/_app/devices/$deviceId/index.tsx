@@ -5,12 +5,15 @@ import {
   AlertTriangle,
   ArrowLeft,
   Cpu,
+  Eye,
+  EyeOff,
   Fingerprint,
   Loader2,
   Network,
   Pencil,
   Phone,
   Settings,
+  Shield,
   Wrench,
 } from "lucide-react"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
@@ -641,8 +644,16 @@ interface SettingsTabProps {
 
 function SettingsTab({ deviceId, data }: SettingsTabProps) {
   const updateDevice = useUpdateDevice(deviceId)
+  const phoneAuth = (data.configJson?.phoneAuth ?? {}) as { username?: string; password?: string }
   const [name, setName] = useState(data.name)
-  const [configText, setConfigText] = useState(data.configJson ? JSON.stringify(data.configJson, null, 2) : "")
+  const [phoneUser, setPhoneUser] = useState(phoneAuth.username ?? "admin")
+  const [phonePass, setPhonePass] = useState(phoneAuth.password ?? "admin")
+  const [showPass, setShowPass] = useState(false)
+  const [configText, setConfigText] = useState(() => {
+    if (!data.configJson) return ""
+    const { phoneAuth: _strip, ...rest } = data.configJson
+    return Object.keys(rest).length > 0 ? JSON.stringify(rest, null, 2) : ""
+  })
   const [configError, setConfigError] = useState<string | null>(null)
   const [dirty, setDirty] = useState(false)
 
@@ -653,16 +664,20 @@ function SettingsTab({ deviceId, data }: SettingsTabProps) {
       payload.name = name
     }
 
+    let extraConfig: Record<string, unknown> = {}
     if (configText.trim()) {
       try {
-        payload.configJson = JSON.parse(configText)
+        extraConfig = JSON.parse(configText)
         setConfigError(null)
       } catch {
         setConfigError("Invalid JSON")
         return
       }
-    } else {
-      payload.configJson = null
+    }
+
+    payload.configJson = {
+      ...extraConfig,
+      phoneAuth: { username: phoneUser, password: phonePass },
     }
 
     updateDevice.mutate(payload, {
@@ -705,6 +720,58 @@ function SettingsTab({ deviceId, data }: SettingsTabProps) {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
+            <Shield className="h-5 w-5 text-muted-foreground" />
+            <CardTitle>Phone Authentication</CardTitle>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Credentials used for Live View screenshot capture and device management.
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="phone-username">Username</Label>
+            <Input
+              id="phone-username"
+              value={phoneUser}
+              onChange={(e) => {
+                setPhoneUser(e.target.value)
+                setDirty(true)
+              }}
+              placeholder="admin"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="phone-password">Password</Label>
+            <div className="relative">
+              <Input
+                id="phone-password"
+                type={showPass ? "text" : "password"}
+                value={phonePass}
+                onChange={(e) => {
+                  setPhonePass(e.target.value)
+                  setDirty(true)
+                }}
+                placeholder="admin"
+                className="pr-10"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="absolute right-0 top-0 h-full w-10 hover:bg-transparent"
+                onClick={() => setShowPass(!showPass)}
+                tabIndex={-1}
+              >
+                {showPass ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
             <Wrench className="h-5 w-5 text-muted-foreground" />
             <CardTitle>Advanced Configuration</CardTitle>
           </div>
@@ -726,26 +793,31 @@ function SettingsTab({ deviceId, data }: SettingsTabProps) {
             />
             {configError && <p className="text-destructive text-sm">{configError}</p>}
           </div>
-          <div className="flex items-center justify-end gap-2">
-            <Button
-              variant="ghost"
-              onClick={() => {
-                setName(data.name)
-                setConfigText(data.configJson ? JSON.stringify(data.configJson, null, 2) : "")
-                setConfigError(null)
-                setDirty(false)
-              }}
-              disabled={!dirty || updateDevice.isPending}
-            >
-              Reset
-            </Button>
-            <Button onClick={handleSave} disabled={!dirty || updateDevice.isPending}>
-              {updateDevice.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Settings
-            </Button>
-          </div>
         </CardContent>
       </Card>
+
+      <div className="flex items-center justify-end gap-2">
+        <Button
+          variant="ghost"
+          onClick={() => {
+            setName(data.name)
+            setPhoneUser(phoneAuth.username ?? "admin")
+            setPhonePass(phoneAuth.password ?? "admin")
+            setShowPass(false)
+            const { phoneAuth: _strip, ...rest } = data.configJson ?? {}
+            setConfigText(Object.keys(rest).length > 0 ? JSON.stringify(rest, null, 2) : "")
+            setConfigError(null)
+            setDirty(false)
+          }}
+          disabled={!dirty || updateDevice.isPending}
+        >
+          Reset
+        </Button>
+        <Button onClick={handleSave} disabled={!dirty || updateDevice.isPending}>
+          {updateDevice.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          Save Settings
+        </Button>
+      </div>
     </div>
   )
 }

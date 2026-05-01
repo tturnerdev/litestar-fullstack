@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { ArrowLeft, Fingerprint, Home, Pencil, Phone, Trash2 } from "lucide-react"
 import { useEffect, useState } from "react"
+import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { ExternalDataTab } from "@/components/gateway/external-data-tab"
 import { PhoneNumberDeleteDialog } from "@/components/voice/phone-number-delete-dialog"
 import { PhoneNumberEditSheet } from "@/components/voice/phone-number-edit-sheet"
@@ -188,6 +189,7 @@ function PhoneNumberDetailPage() {
           <TabsList>
             <TabsTrigger value="details">Details</TabsTrigger>
             <TabsTrigger value="external">External Data</TabsTrigger>
+            <TabsTrigger value="activity">Activity</TabsTrigger>
           </TabsList>
 
           <TabsContent value="details" className="mt-6 space-y-6">
@@ -284,6 +286,14 @@ function PhoneNumberDetailPage() {
               isRefetching={gatewayQuery.isRefetching}
               isError={gatewayQuery.isError}
               onRefresh={() => gatewayQuery.refetch()}
+            />
+          </TabsContent>
+
+          <TabsContent value="activity" className="mt-6 space-y-6">
+            <EntityActivityPanel
+              targetType="phone_number"
+              targetId={phoneNumberId}
+              enabled={tab === "activity"}
             />
           </TabsContent>
         </Tabs>

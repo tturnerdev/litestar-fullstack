@@ -14,6 +14,7 @@ import {
   Plug,
   ShieldCheck,
 } from "lucide-react"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -208,6 +209,7 @@ function FieldError({ message }: { message?: string }) {
 // ── Page component ───────────────────────────────────────────────────────
 
 function NewConnectionPage() {
+  useDocumentTitle("New Connection")
   const router = useRouter()
   const { currentTeam } = useAuth()
   const createConnection = useCreateConnection()

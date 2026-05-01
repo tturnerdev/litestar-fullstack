@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { ArrowLeft } from "lucide-react"
 import { SendFaxForm } from "@/components/fax/send-fax-form"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
@@ -10,6 +11,7 @@ export const Route = createFileRoute("/_app/fax/send")({
 })
 
 function SendFaxPage() {
+  useDocumentTitle("Send Fax")
   return (
     <PageContainer className="flex-1 space-y-8">
       <PageHeader

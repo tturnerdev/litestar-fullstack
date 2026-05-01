@@ -12,6 +12,7 @@ import {
   TicketCheck,
   X,
 } from "lucide-react"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { EmptyState } from "@/components/ui/empty-state"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
@@ -116,6 +117,7 @@ function StatsCardSkeleton() {
 }
 
 function AdminSupportPage() {
+  useDocumentTitle("Admin Support")
   const navigate = useNavigate()
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState("")

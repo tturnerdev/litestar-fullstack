@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
 import { useRef, useState } from "react"
 import { AlertTriangle, Loader2 } from "lucide-react"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,6 +30,7 @@ export const Route = createFileRoute("/_app/fax/numbers/new")({
 const LABEL_MAX = 100
 
 function NewFaxNumberPage() {
+  useDocumentTitle("New Fax Number")
   const router = useRouter()
   const { currentTeam } = useAuth()
   const createFaxNumber = useCreateFaxNumber()

@@ -42,6 +42,7 @@ import {
   useSetTimeConditionOverride,
   type TimeCondition,
 } from "@/lib/api/hooks/call-routing"
+import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 
 export const Route = createFileRoute("/_app/call-routing/time-conditions/$timeConditionId")({
@@ -374,6 +375,13 @@ function TimeConditionDetailPage() {
             </Card>
           </div>
         </div>
+      </PageSection>
+
+      <PageSection>
+        <EntityActivityPanel
+          targetType="time_condition"
+          targetId={timeConditionId}
+        />
       </PageSection>
     </PageContainer>
   )

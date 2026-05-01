@@ -64,6 +64,7 @@ export function AppLayout() {
       { prefix: "g", key: "y", action: () => goTo("/analytics"), description: "Go to Analytics", category: "navigation" },
       { prefix: "g", key: "n", action: () => goTo("/notifications"), description: "Go to Notifications", category: "navigation" },
       { prefix: "g", key: "o", action: () => goTo("/organization"), description: "Go to Organization", category: "navigation" },
+      { prefix: "g", key: "w", action: () => goTo("/webhooks"), description: "Go to Webhooks", category: "navigation" },
       { prefix: "g", key: "p", action: () => goTo("/profile"), description: "Go to Profile", category: "navigation" },
     ]
     if (user?.isSuperuser) {
@@ -100,6 +101,7 @@ export function AppLayout() {
       { keys: ["g", "y"], description: "Go to Analytics" },
       { keys: ["g", "n"], description: "Go to Notifications" },
       { keys: ["g", "o"], description: "Go to Organization" },
+      { keys: ["g", "w"], description: "Go to Webhooks" },
       { keys: ["g", "p"], description: "Go to Profile" },
     ]
     if (user?.isSuperuser) {

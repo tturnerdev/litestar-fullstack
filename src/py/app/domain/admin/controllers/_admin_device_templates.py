@@ -2,14 +2,16 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Annotated
+from typing import TYPE_CHECKING, Annotated, Any
 from uuid import UUID
 
 from advanced_alchemy.service.pagination import OffsetPagination
 from litestar import Controller, delete, get, patch, post
+from litestar.di import Provide
 from litestar.params import Dependency, Parameter
 
 from app.domain.accounts.guards import requires_superuser
+from app.domain.admin.deps import provide_audit_log_service
 from app.domain.admin.schemas import (
     DeviceTemplateCreate,
     DeviceTemplateDetail,
@@ -17,10 +19,16 @@ from app.domain.admin.schemas import (
     DeviceTemplateUpdate,
 )
 from app.domain.admin.services import DeviceTemplateService
+from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
 
 if TYPE_CHECKING:
     from advanced_alchemy.filters import FilterTypes, LimitOffset
+    from litestar import Request
+    from litestar.security.jwt import Token
+
+    from app.db import models as m
+    from app.domain.admin.services import AuditLogService
 
 
 class AdminDeviceTemplatesController(Controller):
@@ -42,7 +50,9 @@ class AdminDeviceTemplatesController(Controller):
             "sort_field": "created_at",
             "sort_order": "desc",
         },
-    )
+    ) | {
+        "audit_service": Provide(provide_audit_log_service),
+    }
 
     @get(operation_id="AdminListDeviceTemplates", path="/")
     async def list_templates(
@@ -77,11 +87,27 @@ class AdminDeviceTemplatesController(Controller):
     @post(operation_id="AdminCreateDeviceTemplate", path="/")
     async def create_template(
         self,
+        request: Request[m.User, Token, Any],
         template_service: DeviceTemplateService,
+        audit_service: AuditLogService,
         data: DeviceTemplateCreate,
     ) -> DeviceTemplateDetail:
         """Create a new device template."""
         db_obj = await template_service.create(data.to_dict())
+        after = capture_snapshot(db_obj)
+        await log_audit(
+            audit_service,
+            action="admin.device_template_create",
+            actor_id=request.user.id,
+            actor_email=request.user.email,
+            actor_name=request.user.name,
+            target_type="device_template",
+            target_id=db_obj.id,
+            target_label=f"{db_obj.manufacturer} {db_obj.model}",
+            before=None,
+            after=after,
+            request=request,
+        )
         return DeviceTemplateDetail(
             id=db_obj.id,
             manufacturer=db_obj.manufacturer,
@@ -123,14 +149,32 @@ class AdminDeviceTemplatesController(Controller):
     @patch(operation_id="AdminUpdateDeviceTemplate", path="/{template_id:uuid}")
     async def update_template(
         self,
+        request: Request[m.User, Token, Any],
         template_service: DeviceTemplateService,
+        audit_service: AuditLogService,
         data: DeviceTemplateUpdate,
         template_id: Annotated[UUID, Parameter(title="Template ID", description="The device template to update.")],
     ) -> DeviceTemplateDetail:
         """Update a device template."""
+        db_obj = await template_service.get(template_id)
+        before = capture_snapshot(db_obj)
         db_obj = await template_service.update(
             item_id=template_id,
             data=data.to_dict(),
+        )
+        after = capture_snapshot(db_obj)
+        await log_audit(
+            audit_service,
+            action="admin.device_template_update",
+            actor_id=request.user.id,
+            actor_email=request.user.email,
+            actor_name=request.user.name,
+            target_type="device_template",
+            target_id=db_obj.id,
+            target_label=f"{db_obj.manufacturer} {db_obj.model}",
+            before=before,
+            after=after,
+            request=request,
         )
         return DeviceTemplateDetail(
             id=db_obj.id,
@@ -150,8 +194,26 @@ class AdminDeviceTemplatesController(Controller):
     @delete(operation_id="AdminDeleteDeviceTemplate", path="/{template_id:uuid}")
     async def delete_template(
         self,
+        request: Request[m.User, Token, Any],
         template_service: DeviceTemplateService,
+        audit_service: AuditLogService,
         template_id: Annotated[UUID, Parameter(title="Template ID", description="The device template to delete.")],
     ) -> None:
         """Delete a device template."""
+        db_obj = await template_service.get(template_id)
+        before = capture_snapshot(db_obj)
+        target_label = f"{db_obj.manufacturer} {db_obj.model}"
         await template_service.delete(template_id)
+        await log_audit(
+            audit_service,
+            action="admin.device_template_delete",
+            actor_id=request.user.id,
+            actor_email=request.user.email,
+            actor_name=request.user.name,
+            target_type="device_template",
+            target_id=template_id,
+            target_label=target_label,
+            before=before,
+            after=None,
+            request=request,
+        )

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react"
 import { createFileRoute } from "@tanstack/react-router"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { AlertCircle, Clock, Database, Info, Loader2, Network, Save } from "lucide-react"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
@@ -52,6 +53,7 @@ function validateCacheTtl(value: string): string | undefined {
 // ---------------------------------------------------------------------------
 
 function AdminGatewayPage() {
+  useDocumentTitle("Gateway Settings")
   const { data, isLoading, isError } = useAdminGatewaySettings()
   const updateSettings = useUpdateAdminGatewaySettings()
 

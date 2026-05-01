@@ -47,6 +47,7 @@ import {
   type RingGroup,
   type RingGroupMember,
 } from "@/lib/api/hooks/call-routing"
+import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 
 export const Route = createFileRoute("/_app/call-routing/ring-groups/$ringGroupId")({
@@ -513,6 +514,13 @@ function RingGroupDetailPage() {
             </Card>
           </div>
         </div>
+      </PageSection>
+
+      <PageSection>
+        <EntityActivityPanel
+          targetType="ring_group"
+          targetId={ringGroupId}
+        />
       </PageSection>
     </PageContainer>
   )

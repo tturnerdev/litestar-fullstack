@@ -38,6 +38,7 @@ import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-lay
 import { Skeleton } from "@/components/ui/skeleton"
 import { CopyButton } from "@/components/ui/copy-button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import {
@@ -533,6 +534,13 @@ function E911DetailPage() {
             </div>
           </CardContent>
         </Card>
+      </PageSection>
+
+      <PageSection delay={0.35}>
+        <EntityActivityPanel
+          targetType="e911_registration"
+          targetId={registrationId}
+        />
       </PageSection>
     </PageContainer>
   )

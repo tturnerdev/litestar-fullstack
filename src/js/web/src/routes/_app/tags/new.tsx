@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
 import { useCallback, useMemo, useRef, useState } from "react"
 import { Hash, Loader2, Tags } from "lucide-react"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -40,6 +41,7 @@ function nameToSlug(name: string): string {
 }
 
 function NewTagPage() {
+  useDocumentTitle("New Tag")
   const router = useRouter()
   const createTag = useCreateTag()
   const justSubmittedRef = useRef(false)

@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { Building2, ChevronRight, MapPin, Navigation, Tag } from "lucide-react"
 import { CreateLocationForm } from "@/components/locations/location-form"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
@@ -33,6 +34,7 @@ const tips = [
 ]
 
 function NewLocationPage() {
+  useDocumentTitle("New Location")
   return (
     <PageContainer className="flex-1 space-y-8">
       <PageHeader eyebrow="Locations" title="Create New Location" description="Add a new location to organize where your devices and extensions are placed." breadcrumbs={<Breadcrumb><BreadcrumbList><BreadcrumbItem><BreadcrumbLink asChild><Link to="/home">Home</Link></BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbLink asChild><Link to="/locations">Locations</Link></BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbPage>New Location</BreadcrumbPage></BreadcrumbItem></BreadcrumbList></Breadcrumb>} />

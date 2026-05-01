@@ -37,6 +37,7 @@ import { Route as AppConnectionsRouteImport } from './routes/_app/connections'
 import { Route as AppCallRoutingRouteImport } from './routes/_app/call-routing'
 import { Route as AppAnalyticsRouteImport } from './routes/_app/analytics'
 import { Route as AppAdminRouteImport } from './routes/_app/admin'
+import { Route as AppWebhooksIndexRouteImport } from './routes/_app/webhooks/index'
 import { Route as AppVoicemailIndexRouteImport } from './routes/_app/voicemail/index'
 import { Route as AppVoiceIndexRouteImport } from './routes/_app/voice/index'
 import { Route as AppTeamsIndexRouteImport } from './routes/_app/teams/index'
@@ -72,6 +73,7 @@ import { Route as AppConnectionsConnectionIdRouteImport } from './routes/_app/co
 import { Route as AppAdminVoiceRouteImport } from './routes/_app/admin/voice'
 import { Route as AppAdminSystemRouteImport } from './routes/_app/admin/system'
 import { Route as AppAdminSupportRouteImport } from './routes/_app/admin/support'
+import { Route as AppAdminMusicOnHoldRouteImport } from './routes/_app/admin/music-on-hold'
 import { Route as AppAdminGatewayRouteImport } from './routes/_app/admin/gateway'
 import { Route as AppAdminFaxRouteImport } from './routes/_app/admin/fax'
 import { Route as AppAdminDevicesRouteImport } from './routes/_app/admin/devices'
@@ -251,6 +253,11 @@ const AppAdminRoute = AppAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AppRoute,
 } as any)
+const AppWebhooksIndexRoute = AppWebhooksIndexRouteImport.update({
+  id: '/webhooks/',
+  path: '/webhooks/',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppVoicemailIndexRoute = AppVoicemailIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -425,6 +432,11 @@ const AppAdminSystemRoute = AppAdminSystemRouteImport.update({
 const AppAdminSupportRoute = AppAdminSupportRouteImport.update({
   id: '/support',
   path: '/support',
+  getParentRoute: () => AppAdminRoute,
+} as any)
+const AppAdminMusicOnHoldRoute = AppAdminMusicOnHoldRouteImport.update({
+  id: '/music-on-hold',
+  path: '/music-on-hold',
   getParentRoute: () => AppAdminRoute,
 } as any)
 const AppAdminGatewayRoute = AppAdminGatewayRouteImport.update({
@@ -680,6 +692,7 @@ export interface FileRoutesByFullPath {
   '/admin/devices': typeof AppAdminDevicesRoute
   '/admin/fax': typeof AppAdminFaxRoute
   '/admin/gateway': typeof AppAdminGatewayRoute
+  '/admin/music-on-hold': typeof AppAdminMusicOnHoldRoute
   '/admin/support': typeof AppAdminSupportRoute
   '/admin/system': typeof AppAdminSystemRoute
   '/admin/voice': typeof AppAdminVoiceRoute
@@ -715,6 +728,7 @@ export interface FileRoutesByFullPath {
   '/teams/': typeof AppTeamsIndexRoute
   '/voice/': typeof AppVoiceIndexRoute
   '/voicemail/': typeof AppVoicemailIndexRoute
+  '/webhooks/': typeof AppWebhooksIndexRoute
   '/admin/teams/$teamId': typeof AppAdminTeamsTeamIdRoute
   '/admin/users/$userId': typeof AppAdminUsersUserIdRoute
   '/call-routing/call-queues/$callQueueId': typeof AppCallRoutingCallQueuesCallQueueIdRoute
@@ -771,6 +785,7 @@ export interface FileRoutesByTo {
   '/admin/devices': typeof AppAdminDevicesRoute
   '/admin/fax': typeof AppAdminFaxRoute
   '/admin/gateway': typeof AppAdminGatewayRoute
+  '/admin/music-on-hold': typeof AppAdminMusicOnHoldRoute
   '/admin/support': typeof AppAdminSupportRoute
   '/admin/system': typeof AppAdminSystemRoute
   '/admin/voice': typeof AppAdminVoiceRoute
@@ -802,6 +817,7 @@ export interface FileRoutesByTo {
   '/teams': typeof AppTeamsIndexRoute
   '/voice': typeof AppVoiceIndexRoute
   '/voicemail': typeof AppVoicemailIndexRoute
+  '/webhooks': typeof AppWebhooksIndexRoute
   '/admin/teams/$teamId': typeof AppAdminTeamsTeamIdRoute
   '/admin/users/$userId': typeof AppAdminUsersUserIdRoute
   '/call-routing/call-queues/$callQueueId': typeof AppCallRoutingCallQueuesCallQueueIdRoute
@@ -873,6 +889,7 @@ export interface FileRoutesById {
   '/_app/admin/devices': typeof AppAdminDevicesRoute
   '/_app/admin/fax': typeof AppAdminFaxRoute
   '/_app/admin/gateway': typeof AppAdminGatewayRoute
+  '/_app/admin/music-on-hold': typeof AppAdminMusicOnHoldRoute
   '/_app/admin/support': typeof AppAdminSupportRoute
   '/_app/admin/system': typeof AppAdminSystemRoute
   '/_app/admin/voice': typeof AppAdminVoiceRoute
@@ -908,6 +925,7 @@ export interface FileRoutesById {
   '/_app/teams/': typeof AppTeamsIndexRoute
   '/_app/voice/': typeof AppVoiceIndexRoute
   '/_app/voicemail/': typeof AppVoicemailIndexRoute
+  '/_app/webhooks/': typeof AppWebhooksIndexRoute
   '/_app/admin/teams/$teamId': typeof AppAdminTeamsTeamIdRoute
   '/_app/admin/users/$userId': typeof AppAdminUsersUserIdRoute
   '/_app/call-routing/call-queues/$callQueueId': typeof AppCallRoutingCallQueuesCallQueueIdRoute
@@ -978,6 +996,7 @@ export interface FileRouteTypes {
     | '/admin/devices'
     | '/admin/fax'
     | '/admin/gateway'
+    | '/admin/music-on-hold'
     | '/admin/support'
     | '/admin/system'
     | '/admin/voice'
@@ -1013,6 +1032,7 @@ export interface FileRouteTypes {
     | '/teams/'
     | '/voice/'
     | '/voicemail/'
+    | '/webhooks/'
     | '/admin/teams/$teamId'
     | '/admin/users/$userId'
     | '/call-routing/call-queues/$callQueueId'
@@ -1069,6 +1089,7 @@ export interface FileRouteTypes {
     | '/admin/devices'
     | '/admin/fax'
     | '/admin/gateway'
+    | '/admin/music-on-hold'
     | '/admin/support'
     | '/admin/system'
     | '/admin/voice'
@@ -1100,6 +1121,7 @@ export interface FileRouteTypes {
     | '/teams'
     | '/voice'
     | '/voicemail'
+    | '/webhooks'
     | '/admin/teams/$teamId'
     | '/admin/users/$userId'
     | '/call-routing/call-queues/$callQueueId'
@@ -1170,6 +1192,7 @@ export interface FileRouteTypes {
     | '/_app/admin/devices'
     | '/_app/admin/fax'
     | '/_app/admin/gateway'
+    | '/_app/admin/music-on-hold'
     | '/_app/admin/support'
     | '/_app/admin/system'
     | '/_app/admin/voice'
@@ -1205,6 +1228,7 @@ export interface FileRouteTypes {
     | '/_app/teams/'
     | '/_app/voice/'
     | '/_app/voicemail/'
+    | '/_app/webhooks/'
     | '/_app/admin/teams/$teamId'
     | '/_app/admin/users/$userId'
     | '/_app/call-routing/call-queues/$callQueueId'
@@ -1445,6 +1469,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AppAdminRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/webhooks/': {
+      id: '/_app/webhooks/'
+      path: '/webhooks'
+      fullPath: '/webhooks/'
+      preLoaderRoute: typeof AppWebhooksIndexRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/voicemail/': {
@@ -1690,6 +1721,13 @@ declare module '@tanstack/react-router' {
       path: '/support'
       fullPath: '/admin/support'
       preLoaderRoute: typeof AppAdminSupportRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
+    '/_app/admin/music-on-hold': {
+      id: '/_app/admin/music-on-hold'
+      path: '/music-on-hold'
+      fullPath: '/admin/music-on-hold'
+      preLoaderRoute: typeof AppAdminMusicOnHoldRouteImport
       parentRoute: typeof AppAdminRoute
     }
     '/_app/admin/gateway': {
@@ -1981,6 +2019,7 @@ interface AppAdminRouteChildren {
   AppAdminDevicesRoute: typeof AppAdminDevicesRoute
   AppAdminFaxRoute: typeof AppAdminFaxRoute
   AppAdminGatewayRoute: typeof AppAdminGatewayRoute
+  AppAdminMusicOnHoldRoute: typeof AppAdminMusicOnHoldRoute
   AppAdminSupportRoute: typeof AppAdminSupportRoute
   AppAdminSystemRoute: typeof AppAdminSystemRoute
   AppAdminVoiceRoute: typeof AppAdminVoiceRoute
@@ -1997,6 +2036,7 @@ const AppAdminRouteChildren: AppAdminRouteChildren = {
   AppAdminDevicesRoute: AppAdminDevicesRoute,
   AppAdminFaxRoute: AppAdminFaxRoute,
   AppAdminGatewayRoute: AppAdminGatewayRoute,
+  AppAdminMusicOnHoldRoute: AppAdminMusicOnHoldRoute,
   AppAdminSupportRoute: AppAdminSupportRoute,
   AppAdminSystemRoute: AppAdminSystemRoute,
   AppAdminVoiceRoute: AppAdminVoiceRoute,
@@ -2271,6 +2311,7 @@ interface AppRouteChildren {
   AppProfileIndexRoute: typeof AppProfileIndexRoute
   AppTagsIndexRoute: typeof AppTagsIndexRoute
   AppVoiceIndexRoute: typeof AppVoiceIndexRoute
+  AppWebhooksIndexRoute: typeof AppWebhooksIndexRoute
   AppFaxNumbersNewRoute: typeof AppFaxNumbersNewRoute
   AppTagsTagIdEditRoute: typeof AppTagsTagIdEditRoute
   AppVoiceExtensionsNewRoute: typeof AppVoiceExtensionsNewRoute
@@ -2310,6 +2351,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppProfileIndexRoute: AppProfileIndexRoute,
   AppTagsIndexRoute: AppTagsIndexRoute,
   AppVoiceIndexRoute: AppVoiceIndexRoute,
+  AppWebhooksIndexRoute: AppWebhooksIndexRoute,
   AppFaxNumbersNewRoute: AppFaxNumbersNewRoute,
   AppTagsTagIdEditRoute: AppTagsTagIdEditRoute,
   AppVoiceExtensionsNewRoute: AppVoiceExtensionsNewRoute,

@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { cn } from "@/lib/utils"
 import {
   AlertCircle,
@@ -431,6 +432,7 @@ function DeleteEmailRouteDialog({
 // ---------------------------------------------------------------------------
 
 function FaxEmailRoutesPage() {
+  useDocumentTitle("Fax Email Routes")
   const { data: routes, isLoading, isError } = useAllFaxEmailRoutes()
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [editRoute, setEditRoute] = useState<FaxEmailRouteWithNumber | null>(null)

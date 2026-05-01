@@ -18,13 +18,16 @@ import {
   accountRegister,
   addMemberToTeam,
   adminCreateDeviceTemplate,
+  adminCreateMusicOnHold,
   adminDeleteDeviceTemplate,
+  adminDeleteMusicOnHold,
   adminDeleteTeam,
   adminDeleteUser,
   adminGetAuditLog,
   adminGetDeviceStats,
   adminGetDeviceTemplate,
   adminGetFaxStats,
+  adminGetMusicOnHold,
   adminGetSupportStats,
   adminGetTargetAuditLogs,
   adminGetTeam,
@@ -37,11 +40,13 @@ import {
   adminListExtensions,
   adminListFaxMessages,
   adminListFaxNumbers,
+  adminListMusicOnHold,
   adminListPhoneNumbers,
   adminListTeams,
   adminListTickets,
   adminListUsers,
   adminUpdateDeviceTemplate,
+  adminUpdateMusicOnHold,
   adminUpdateTeam,
   adminUpdateUser,
   apiAuthOauthGithubCallbackGithubCallback,
@@ -83,6 +88,7 @@ import {
   createTimeCondition,
   createUser,
   createVoicemailBox,
+  createWebhook,
   deleteAttachment,
   deleteCallQueue,
   deleteCallQueueMember,
@@ -114,6 +120,7 @@ import {
   deleteVoicemailBox,
   deleteVoicemailMessage,
   deleteVoicemailMessageById,
+  deleteWebhook,
   disableMfa,
   exportCallRecords,
   forgotPassword,
@@ -159,6 +166,7 @@ import {
   getVoicemailMessage,
   getVoicemailMessageById,
   getVoicemailSettings,
+  getWebhook,
   globalSearch,
   initiateDisableMfaOAuth,
   initiateMfaSetup,
@@ -197,6 +205,7 @@ import {
   listVoicemailBoxes,
   listVoicemailBoxMessages,
   listVoicemailMessages,
+  listWebhooks,
   lookupDeviceTemplate,
   markAllNotificationsRead,
   markNotificationRead,
@@ -228,6 +237,7 @@ import {
   syncExtensions,
   systemHealth,
   testConnection,
+  testWebhook,
   toggleDnd,
   toggleVoicemailMessageRead,
   tokenRefresh,
@@ -264,6 +274,7 @@ import {
   updateVoicemailBox,
   updateVoicemailMessage,
   updateVoicemailSettings,
+  updateWebhook,
   uploadAttachment,
   validateE911Registration,
   validateResetToken,
@@ -296,9 +307,15 @@ import type {
   AdminCreateDeviceTemplateData,
   AdminCreateDeviceTemplateError,
   AdminCreateDeviceTemplateResponse,
+  AdminCreateMusicOnHoldData,
+  AdminCreateMusicOnHoldError,
+  AdminCreateMusicOnHoldResponse,
   AdminDeleteDeviceTemplateData,
   AdminDeleteDeviceTemplateError,
   AdminDeleteDeviceTemplateResponse,
+  AdminDeleteMusicOnHoldData,
+  AdminDeleteMusicOnHoldError,
+  AdminDeleteMusicOnHoldResponse,
   AdminDeleteTeamData,
   AdminDeleteTeamError,
   AdminDeleteTeamResponse,
@@ -315,6 +332,9 @@ import type {
   AdminGetDeviceTemplateResponse,
   AdminGetFaxStatsData,
   AdminGetFaxStatsResponse,
+  AdminGetMusicOnHoldData,
+  AdminGetMusicOnHoldError,
+  AdminGetMusicOnHoldResponse,
   AdminGetSupportStatsData,
   AdminGetSupportStatsResponse,
   AdminGetTargetAuditLogsData,
@@ -347,6 +367,9 @@ import type {
   AdminListFaxNumbersData,
   AdminListFaxNumbersError,
   AdminListFaxNumbersResponse,
+  AdminListMusicOnHoldData,
+  AdminListMusicOnHoldError,
+  AdminListMusicOnHoldResponse,
   AdminListPhoneNumbersData,
   AdminListPhoneNumbersError,
   AdminListPhoneNumbersResponse,
@@ -362,6 +385,9 @@ import type {
   AdminUpdateDeviceTemplateData,
   AdminUpdateDeviceTemplateError,
   AdminUpdateDeviceTemplateResponse,
+  AdminUpdateMusicOnHoldData,
+  AdminUpdateMusicOnHoldError,
+  AdminUpdateMusicOnHoldResponse,
   AdminUpdateTeamData,
   AdminUpdateTeamError,
   AdminUpdateTeamResponse,
@@ -483,6 +509,9 @@ import type {
   CreateVoicemailBoxData,
   CreateVoicemailBoxError,
   CreateVoicemailBoxResponse,
+  CreateWebhookData,
+  CreateWebhookError,
+  CreateWebhookResponse,
   DeleteAttachmentData,
   DeleteAttachmentError,
   DeleteAttachmentResponse,
@@ -576,6 +605,9 @@ import type {
   DeleteVoicemailMessageData,
   DeleteVoicemailMessageError,
   DeleteVoicemailMessageResponse,
+  DeleteWebhookData,
+  DeleteWebhookError,
+  DeleteWebhookResponse,
   DisableMfaData,
   DisableMfaError,
   DisableMfaResponse,
@@ -703,6 +735,9 @@ import type {
   GetVoicemailSettingsData,
   GetVoicemailSettingsError,
   GetVoicemailSettingsResponse,
+  GetWebhookData,
+  GetWebhookError,
+  GetWebhookResponse,
   GlobalSearchData,
   GlobalSearchError,
   GlobalSearchResponse,
@@ -816,6 +851,9 @@ import type {
   ListVoicemailMessagesData,
   ListVoicemailMessagesError,
   ListVoicemailMessagesResponse,
+  ListWebhooksData,
+  ListWebhooksError,
+  ListWebhooksResponse,
   LookupDeviceTemplateData,
   LookupDeviceTemplateError,
   LookupDeviceTemplateResponse,
@@ -901,6 +939,9 @@ import type {
   TestConnectionData,
   TestConnectionError,
   TestConnectionResponse,
+  TestWebhookData,
+  TestWebhookError,
+  TestWebhookResponse,
   ToggleDndData,
   ToggleDndError,
   ToggleDndResponse,
@@ -1008,6 +1049,9 @@ import type {
   UpdateVoicemailSettingsData,
   UpdateVoicemailSettingsError,
   UpdateVoicemailSettingsResponse,
+  UpdateWebhookData,
+  UpdateWebhookError,
+  UpdateWebhookResponse,
   UploadAttachmentData,
   UploadAttachmentError,
   UploadAttachmentResponse,
@@ -1852,6 +1896,143 @@ export const updateAdminGatewaySettingsMutation = (
   > = {
     mutationFn: async (fnOptions) => {
       const { data } = await updateAdminGatewaySettings({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const adminListMusicOnHoldQueryKey = (
+  options?: Options<AdminListMusicOnHoldData>,
+) => createQueryKey("adminListMusicOnHold", options);
+
+/**
+ * ListMusicOnHold
+ */
+export const adminListMusicOnHoldOptions = (
+  options?: Options<AdminListMusicOnHoldData>,
+) =>
+  queryOptions<
+    AdminListMusicOnHoldResponse,
+    AdminListMusicOnHoldError,
+    AdminListMusicOnHoldResponse,
+    ReturnType<typeof adminListMusicOnHoldQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await adminListMusicOnHold({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: adminListMusicOnHoldQueryKey(options),
+  });
+
+/**
+ * CreateMusicOnHold
+ */
+export const adminCreateMusicOnHoldMutation = (
+  options?: Partial<Options<AdminCreateMusicOnHoldData>>,
+): UseMutationOptions<
+  AdminCreateMusicOnHoldResponse,
+  AdminCreateMusicOnHoldError,
+  Options<AdminCreateMusicOnHoldData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    AdminCreateMusicOnHoldResponse,
+    AdminCreateMusicOnHoldError,
+    Options<AdminCreateMusicOnHoldData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await adminCreateMusicOnHold({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * DeleteMusicOnHold
+ */
+export const adminDeleteMusicOnHoldMutation = (
+  options?: Partial<Options<AdminDeleteMusicOnHoldData>>,
+): UseMutationOptions<
+  AdminDeleteMusicOnHoldResponse,
+  AdminDeleteMusicOnHoldError,
+  Options<AdminDeleteMusicOnHoldData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    AdminDeleteMusicOnHoldResponse,
+    AdminDeleteMusicOnHoldError,
+    Options<AdminDeleteMusicOnHoldData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await adminDeleteMusicOnHold({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const adminGetMusicOnHoldQueryKey = (
+  options: Options<AdminGetMusicOnHoldData>,
+) => createQueryKey("adminGetMusicOnHold", options);
+
+/**
+ * GetMusicOnHold
+ */
+export const adminGetMusicOnHoldOptions = (
+  options: Options<AdminGetMusicOnHoldData>,
+) =>
+  queryOptions<
+    AdminGetMusicOnHoldResponse,
+    AdminGetMusicOnHoldError,
+    AdminGetMusicOnHoldResponse,
+    ReturnType<typeof adminGetMusicOnHoldQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await adminGetMusicOnHold({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: adminGetMusicOnHoldQueryKey(options),
+  });
+
+/**
+ * UpdateMusicOnHold
+ */
+export const adminUpdateMusicOnHoldMutation = (
+  options?: Partial<Options<AdminUpdateMusicOnHoldData>>,
+): UseMutationOptions<
+  AdminUpdateMusicOnHoldResponse,
+  AdminUpdateMusicOnHoldError,
+  Options<AdminUpdateMusicOnHoldData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    AdminUpdateMusicOnHoldResponse,
+    AdminUpdateMusicOnHoldError,
+    Options<AdminUpdateMusicOnHoldData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await adminUpdateMusicOnHold({
         ...options,
         ...fnOptions,
         throwOnError: true,
@@ -8006,6 +8187,164 @@ export const toggleVoicemailMessageReadMutation = (
   > = {
     mutationFn: async (fnOptions) => {
       const { data } = await toggleVoicemailMessageRead({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const listWebhooksQueryKey = (options?: Options<ListWebhooksData>) =>
+  createQueryKey("listWebhooks", options);
+
+/**
+ * ListWebhooks
+ */
+export const listWebhooksOptions = (options?: Options<ListWebhooksData>) =>
+  queryOptions<
+    ListWebhooksResponse,
+    ListWebhooksError,
+    ListWebhooksResponse,
+    ReturnType<typeof listWebhooksQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listWebhooks({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listWebhooksQueryKey(options),
+  });
+
+/**
+ * CreateWebhook
+ */
+export const createWebhookMutation = (
+  options?: Partial<Options<CreateWebhookData>>,
+): UseMutationOptions<
+  CreateWebhookResponse,
+  CreateWebhookError,
+  Options<CreateWebhookData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    CreateWebhookResponse,
+    CreateWebhookError,
+    Options<CreateWebhookData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await createWebhook({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * DeleteWebhook
+ */
+export const deleteWebhookMutation = (
+  options?: Partial<Options<DeleteWebhookData>>,
+): UseMutationOptions<
+  DeleteWebhookResponse,
+  DeleteWebhookError,
+  Options<DeleteWebhookData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    DeleteWebhookResponse,
+    DeleteWebhookError,
+    Options<DeleteWebhookData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await deleteWebhook({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const getWebhookQueryKey = (options: Options<GetWebhookData>) =>
+  createQueryKey("getWebhook", options);
+
+/**
+ * GetWebhook
+ */
+export const getWebhookOptions = (options: Options<GetWebhookData>) =>
+  queryOptions<
+    GetWebhookResponse,
+    GetWebhookError,
+    GetWebhookResponse,
+    ReturnType<typeof getWebhookQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getWebhook({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getWebhookQueryKey(options),
+  });
+
+/**
+ * UpdateWebhook
+ */
+export const updateWebhookMutation = (
+  options?: Partial<Options<UpdateWebhookData>>,
+): UseMutationOptions<
+  UpdateWebhookResponse,
+  UpdateWebhookError,
+  Options<UpdateWebhookData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    UpdateWebhookResponse,
+    UpdateWebhookError,
+    Options<UpdateWebhookData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await updateWebhook({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * TestWebhook
+ */
+export const testWebhookMutation = (
+  options?: Partial<Options<TestWebhookData>>,
+): UseMutationOptions<
+  TestWebhookResponse,
+  TestWebhookError,
+  Options<TestWebhookData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    TestWebhookResponse,
+    TestWebhookError,
+    Options<TestWebhookData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await testWebhook({
         ...options,
         ...fnOptions,
         throwOnError: true,

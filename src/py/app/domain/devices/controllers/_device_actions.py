@@ -151,8 +151,6 @@ class DeviceActionsController(Controller):
         self,
         devices_service: DeviceService,
         device_id: Annotated[UUID, Parameter(title="Device ID", description="The device to capture.")],
-        username: str = "admin",
-        password: str = "admin",
     ) -> Response[bytes]:
         device = await devices_service.get(device_id)
         if not device.ip_address:
@@ -163,6 +161,10 @@ class DeviceActionsController(Controller):
                 raise ValidationException(detail="Only private/LAN IP addresses are allowed.")
         except ValueError as exc:
             raise ValidationException(detail="Invalid device IP address.") from exc
+
+        phone_auth = (device.config_json or {}).get("phoneAuth", {})
+        username = phone_auth.get("username", "admin")
+        password = phone_auth.get("password", "admin")
 
         url = f"https://{device.ip_address}/servlet?m=mod_action&command=screenshot"
         try:

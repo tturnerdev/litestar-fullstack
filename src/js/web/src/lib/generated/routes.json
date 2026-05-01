@@ -228,6 +228,13 @@
       ],
       "uri": "/api/support/tickets/{ticket_id}/messages"
     },
+    "create_music_on_hold": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "uri": "/api/admin/music-on-hold"
+    },
     "create_option": {
       "method": "post",
       "methods": [
@@ -337,6 +344,13 @@
         "POST"
       ],
       "uri": "/api/voicemail/boxes"
+    },
+    "create_webhook": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "uri": "/api/webhooks"
     },
     "delete_attachment": {
       "method": "delete",
@@ -546,6 +560,19 @@
         "ticket_id"
       ],
       "uri": "/api/support/tickets/{ticket_id}/messages/{msg_id}"
+    },
+    "delete_music_on_hold": {
+      "method": "delete",
+      "methods": [
+        "DELETE"
+      ],
+      "parameterTypes": {
+        "moh_id": "UUID"
+      },
+      "parameters": [
+        "moh_id"
+      ],
+      "uri": "/api/admin/music-on-hold/{moh_id}"
     },
     "delete_notification": {
       "method": "delete",
@@ -800,6 +827,19 @@
       ],
       "uri": "/api/voicemail/messages/{message_id}"
     },
+    "delete_webhook": {
+      "method": "delete",
+      "methods": [
+        "DELETE"
+      ],
+      "parameterTypes": {
+        "webhook_id": "UUID"
+      },
+      "parameters": [
+        "webhook_id"
+      ],
+      "uri": "/api/webhooks/{webhook_id}"
+    },
     "disable_mfa": {
       "method": "delete",
       "methods": [
@@ -942,10 +982,6 @@
       "parameters": [
         "device_id"
       ],
-      "queryParameters": {
-        "password": "string | undefined",
-        "username": "string | undefined"
-      },
       "uri": "/api/devices/{device_id}/screenshot"
     },
     "get_dnd_settings": {
@@ -1070,6 +1106,19 @@
         "GET"
       ],
       "uri": "/api/mfa/status"
+    },
+    "get_music_on_hold": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "moh_id": "UUID"
+      },
+      "parameters": [
+        "moh_id"
+      ],
+      "uri": "/api/admin/music-on-hold/{moh_id}"
     },
     "get_number_data": {
       "method": "get",
@@ -1514,6 +1563,19 @@
         "teamId": "UUID"
       },
       "uri": "/api/analytics/volume"
+    },
+    "get_webhook": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "webhook_id": "UUID"
+      },
+      "parameters": [
+        "webhook_id"
+      ],
+      "uri": "/api/webhooks/{webhook_id}"
     },
     "initiate_disable_mfa_oauth": {
       "method": "get",
@@ -1966,6 +2028,26 @@
       },
       "uri": "/api/support/tickets/{ticket_id}/messages"
     },
+    "list_music_on_hold": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "queryParameters": {
+        "createdAfter": "DateTime | undefined",
+        "createdBefore": "DateTime | undefined",
+        "currentPage": "number | undefined",
+        "ids": "string[] | undefined",
+        "orderBy": "string | undefined",
+        "pageSize": "number | undefined",
+        "searchIgnoreCase": "boolean | undefined",
+        "searchString": "string | undefined",
+        "sortOrder": "\"asc\" | \"desc\" | undefined",
+        "updatedAfter": "DateTime | undefined",
+        "updatedBefore": "DateTime | undefined"
+      },
+      "uri": "/api/admin/music-on-hold"
+    },
     "list_notifications": {
       "method": "get",
       "methods": [
@@ -2401,6 +2483,26 @@
       },
       "uri": "/api/voicemail/messages"
     },
+    "list_webhooks": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "queryParameters": {
+        "createdAfter": "DateTime | undefined",
+        "createdBefore": "DateTime | undefined",
+        "currentPage": "number | undefined",
+        "ids": "string[] | undefined",
+        "orderBy": "string | undefined",
+        "pageSize": "number | undefined",
+        "searchIgnoreCase": "boolean | undefined",
+        "searchString": "string | undefined",
+        "sortOrder": "\"asc\" | \"desc\" | undefined",
+        "updatedAfter": "DateTime | undefined",
+        "updatedBefore": "DateTime | undefined"
+      },
+      "uri": "/api/webhooks"
+    },
     "login": {
       "method": "post",
       "methods": [
@@ -2822,6 +2924,19 @@
       ],
       "uri": "/api/connections/{connection_id}/test"
     },
+    "test_webhook": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "parameterTypes": {
+        "webhook_id": "UUID"
+      },
+      "parameters": [
+        "webhook_id"
+      ],
+      "uri": "/api/webhooks/{webhook_id}/test"
+    },
     "toggle_dnd": {
       "method": "post",
       "methods": [
@@ -3063,6 +3178,19 @@
         "ticket_id"
       ],
       "uri": "/api/support/tickets/{ticket_id}/messages/{msg_id}"
+    },
+    "update_music_on_hold": {
+      "method": "patch",
+      "methods": [
+        "PATCH"
+      ],
+      "parameterTypes": {
+        "moh_id": "UUID"
+      },
+      "parameters": [
+        "moh_id"
+      ],
+      "uri": "/api/admin/music-on-hold/{moh_id}"
     },
     "update_option": {
       "method": "patch",
@@ -3344,6 +3472,19 @@
         "ext_id"
       ],
       "uri": "/api/voice/extensions/{ext_id}/voicemail"
+    },
+    "update_webhook": {
+      "method": "patch",
+      "methods": [
+        "PATCH"
+      ],
+      "parameterTypes": {
+        "webhook_id": "UUID"
+      },
+      "parameters": [
+        "webhook_id"
+      ],
+      "uri": "/api/webhooks/{webhook_id}"
     },
     "upgrade_scopes": {
       "method": "post",

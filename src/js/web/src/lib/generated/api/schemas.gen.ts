@@ -5423,6 +5423,197 @@ export const MfaStatusSchema = {
   type: "object",
 } as const;
 
+export const MusicOnHoldCreateSchema = {
+  properties: {
+    category: {
+      default: "custom",
+      type: "string",
+    },
+    description: {
+      default: "",
+      type: "string",
+    },
+    fileList: {
+      items: {
+        type: "string",
+      },
+      type: "array",
+    },
+    isActive: {
+      default: true,
+      type: "boolean",
+    },
+    isDefault: {
+      default: false,
+      type: "boolean",
+    },
+    name: {
+      type: "string",
+    },
+    randomOrder: {
+      default: false,
+      type: "boolean",
+    },
+  },
+  required: ["name"],
+  title: "MusicOnHoldCreate",
+  type: "object",
+} as const;
+
+export const MusicOnHoldDetailSchema = {
+  properties: {
+    category: {
+      type: "string",
+    },
+    createdAt: {
+      format: "date-time",
+      type: "string",
+    },
+    description: {
+      type: "string",
+    },
+    fileList: {
+      items: {
+        type: "string",
+      },
+      type: "array",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    isActive: {
+      type: "boolean",
+    },
+    isDefault: {
+      type: "boolean",
+    },
+    name: {
+      type: "string",
+    },
+    randomOrder: {
+      type: "boolean",
+    },
+    updatedAt: {
+      format: "date-time",
+      type: "string",
+    },
+  },
+  required: [
+    "category",
+    "createdAt",
+    "description",
+    "fileList",
+    "id",
+    "isActive",
+    "isDefault",
+    "name",
+    "randomOrder",
+    "updatedAt",
+  ],
+  title: "MusicOnHoldDetail",
+  type: "object",
+} as const;
+
+export const MusicOnHoldListSchema = {
+  properties: {
+    category: {
+      type: "string",
+    },
+    createdAt: {
+      format: "date-time",
+      type: "string",
+    },
+    fileCount: {
+      type: "integer",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    isActive: {
+      type: "boolean",
+    },
+    isDefault: {
+      type: "boolean",
+    },
+    name: {
+      type: "string",
+    },
+  },
+  required: [
+    "category",
+    "createdAt",
+    "fileCount",
+    "id",
+    "isActive",
+    "isDefault",
+    "name",
+  ],
+  title: "MusicOnHoldList",
+  type: "object",
+} as const;
+
+export const MusicOnHoldUpdateSchema = {
+  properties: {
+    category: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+    description: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+    fileList: {
+      oneOf: [
+        {
+          items: {
+            type: "string",
+          },
+          type: "array",
+        },
+      ],
+    },
+    isActive: {
+      oneOf: [
+        {
+          type: "boolean",
+        },
+      ],
+    },
+    isDefault: {
+      oneOf: [
+        {
+          type: "boolean",
+        },
+      ],
+    },
+    name: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+    randomOrder: {
+      oneOf: [
+        {
+          type: "boolean",
+        },
+      ],
+    },
+  },
+  required: [],
+  title: "MusicOnHoldUpdate",
+  type: "object",
+} as const;
+
 export const NotificationSchema = {
   properties: {
     actionUrl: {
@@ -8852,6 +9043,319 @@ export const VoicemailUnreadCountSchema = {
   },
   required: ["unreadCount", "voicemailBoxId"],
   title: "VoicemailUnreadCount",
+  type: "object",
+} as const;
+
+export const WebhookCreateSchema = {
+  properties: {
+    description: {
+      default: "",
+      type: "string",
+    },
+    events: {
+      items: {
+        type: "string",
+      },
+      type: "array",
+    },
+    headers: {
+      additionalProperties: {
+        type: "string",
+      },
+      type: "object",
+    },
+    isActive: {
+      default: true,
+      type: "boolean",
+    },
+    name: {
+      type: "string",
+    },
+    secret: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    url: {
+      type: "string",
+    },
+  },
+  required: ["name", "url"],
+  title: "WebhookCreate",
+  type: "object",
+} as const;
+
+export const WebhookDetailSchema = {
+  properties: {
+    createdAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    description: {
+      default: "",
+      type: "string",
+    },
+    events: {
+      items: {
+        type: "string",
+      },
+      type: "array",
+    },
+    failureCount: {
+      default: 0,
+      type: "integer",
+    },
+    headers: {
+      additionalProperties: {
+        type: "string",
+      },
+      type: "object",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    isActive: {
+      type: "boolean",
+    },
+    lastStatusCode: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    lastTriggeredAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    name: {
+      type: "string",
+    },
+    secret: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    updatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    url: {
+      type: "string",
+    },
+    userId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: ["events", "id", "isActive", "name", "url"],
+  title: "WebhookDetail",
+  type: "object",
+} as const;
+
+export const WebhookListSchema = {
+  properties: {
+    createdAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    events: {
+      items: {
+        type: "string",
+      },
+      type: "array",
+    },
+    failureCount: {
+      default: 0,
+      type: "integer",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    isActive: {
+      type: "boolean",
+    },
+    lastStatusCode: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    lastTriggeredAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    name: {
+      type: "string",
+    },
+    url: {
+      type: "string",
+    },
+  },
+  required: ["events", "id", "isActive", "name", "url"],
+  title: "WebhookList",
+  type: "object",
+} as const;
+
+export const WebhookTestResultSchema = {
+  properties: {
+    error: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    responseTimeMs: {
+      default: 0,
+      type: "integer",
+    },
+    statusCode: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    success: {
+      type: "boolean",
+    },
+  },
+  required: ["success"],
+  title: "WebhookTestResult",
+  type: "object",
+} as const;
+
+export const WebhookUpdateSchema = {
+  properties: {
+    description: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+    events: {
+      oneOf: [
+        {
+          items: {
+            type: "string",
+          },
+          type: "array",
+        },
+      ],
+    },
+    headers: {
+      oneOf: [
+        {
+          additionalProperties: {
+            type: "string",
+          },
+          type: "object",
+        },
+      ],
+    },
+    isActive: {
+      oneOf: [
+        {
+          type: "boolean",
+        },
+      ],
+    },
+    name: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+    secret: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    url: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+  },
+  required: [],
+  title: "WebhookUpdate",
   type: "object",
 } as const;
 

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { createFileRoute, Link } from "@tanstack/react-router"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import {
   Activity,
   AlertCircle,
@@ -509,6 +510,7 @@ function ExternalConnectionsCard() {
 const AUTO_REFRESH_INTERVAL = 30_000
 
 function AdminSystemPage() {
+  useDocumentTitle("System Status")
   const [autoRefresh, setAutoRefresh] = useState(false)
   const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null)
   const lastRefreshedRef = useRef<Date | null>(null)

@@ -39,6 +39,7 @@ export type RouteName =
   | 'create_member'
   | 'create_member_api_ring_groups_ring_group_id:uuid_members'
   | 'create_message'
+  | 'create_music_on_hold'
   | 'create_option'
   | 'create_phone_number'
   | 'create_registration'
@@ -53,6 +54,7 @@ export type RouteName =
   | 'create_time_condition'
   | 'create_user'
   | 'create_voicemail_box'
+  | 'create_webhook'
   | 'delete_attachment'
   | 'delete_call_queue'
   | 'delete_connection'
@@ -68,6 +70,7 @@ export type RouteName =
   | 'delete_member'
   | 'delete_member_api_ring_groups_ring_group_id:uuid_members_member_id:uuid'
   | 'delete_message'
+  | 'delete_music_on_hold'
   | 'delete_notification'
   | 'delete_option'
   | 'delete_phone_number'
@@ -87,6 +90,7 @@ export type RouteName =
   | 'delete_voicemail_box'
   | 'delete_voicemail_message'
   | 'delete_voicemail_message_api_voicemail_messages_message_id:uuid'
+  | 'delete_webhook'
   | 'disable_mfa'
   | 'export_call_records'
   | 'forgot_password'
@@ -109,6 +113,7 @@ export type RouteName =
   | 'get_location'
   | 'get_log'
   | 'get_mfa_status'
+  | 'get_music_on_hold'
   | 'get_number_data'
   | 'get_organization'
   | 'get_phone_number'
@@ -145,6 +150,7 @@ export type RouteName =
   | 'get_voicemail_message_api_voicemail_messages_message_id:uuid'
   | 'get_voicemail_settings'
   | 'get_volume'
+  | 'get_webhook'
   | 'initiate_disable_mfa_oauth'
   | 'initiate_setup'
   | 'list_accounts'
@@ -170,6 +176,7 @@ export type RouteName =
   | 'list_members'
   | 'list_members_api_ring_groups_ring_group_id:uuid_members'
   | 'list_messages'
+  | 'list_music_on_hold'
   | 'list_notifications'
   | 'list_options'
   | 'list_phone_numbers'
@@ -193,6 +200,7 @@ export type RouteName =
   | 'list_voicemail_boxes'
   | 'list_voicemail_messages'
   | 'list_voicemail_messages_api_voicemail_messages'
+  | 'list_webhooks'
   | 'login'
   | 'logout'
   | 'lookup_template'
@@ -233,6 +241,7 @@ export type RouteName =
   | 'system:oauth-config'
   | 'system:sync-entity'
   | 'test_connection'
+  | 'test_webhook'
   | 'toggle_dnd'
   | 'toggle_read_status'
   | 'unlink'
@@ -251,6 +260,7 @@ export type RouteName =
   | 'update_member'
   | 'update_member_api_ring_groups_ring_group_id:uuid_members_member_id:uuid'
   | 'update_message'
+  | 'update_music_on_hold'
   | 'update_option'
   | 'update_organization'
   | 'update_password'
@@ -274,6 +284,7 @@ export type RouteName =
   | 'update_voicemail_box'
   | 'update_voicemail_message'
   | 'update_voicemail_settings'
+  | 'update_webhook'
   | 'upgrade_scopes'
   | 'upload_attachment'
   | 'validate_registration'
@@ -341,6 +352,7 @@ export interface RoutePathParams {
   'create_message': {
     ticket_id: UUID;
   };
+  'create_music_on_hold': Record<string, never>;
   'create_option': {
     ivr_menu_id: UUID;
   };
@@ -359,6 +371,7 @@ export interface RoutePathParams {
   'create_time_condition': Record<string, never>;
   'create_user': Record<string, never>;
   'create_voicemail_box': Record<string, never>;
+  'create_webhook': Record<string, never>;
   'delete_attachment': {
     attachment_id: UUID;
   };
@@ -410,6 +423,9 @@ export interface RoutePathParams {
   'delete_message': {
     msg_id: UUID;
     ticket_id: UUID;
+  };
+  'delete_music_on_hold': {
+    moh_id: UUID;
   };
   'delete_notification': {
     notification_id: UUID;
@@ -471,6 +487,9 @@ export interface RoutePathParams {
   'delete_voicemail_message_api_voicemail_messages_message_id:uuid': {
     message_id: UUID;
   };
+  'delete_webhook': {
+    webhook_id: UUID;
+  };
   'disable_mfa': Record<string, never>;
   'export_call_records': Record<string, never>;
   'forgot_password': Record<string, never>;
@@ -524,6 +543,9 @@ export interface RoutePathParams {
     log_id: UUID;
   };
   'get_mfa_status': Record<string, never>;
+  'get_music_on_hold': {
+    moh_id: UUID;
+  };
   'get_number_data': {
     phone_number: string;
   };
@@ -606,6 +628,9 @@ export interface RoutePathParams {
     ext_id: UUID;
   };
   'get_volume': Record<string, never>;
+  'get_webhook': {
+    webhook_id: UUID;
+  };
   'initiate_disable_mfa_oauth': {
     provider: string;
   };
@@ -651,6 +676,7 @@ export interface RoutePathParams {
   'list_messages': {
     ticket_id: UUID;
   };
+  'list_music_on_hold': Record<string, never>;
   'list_notifications': Record<string, never>;
   'list_options': {
     ivr_menu_id: UUID;
@@ -682,6 +708,7 @@ export interface RoutePathParams {
     ext_id: UUID;
   };
   'list_voicemail_messages_api_voicemail_messages': Record<string, never>;
+  'list_webhooks': Record<string, never>;
   'login': Record<string, never>;
   'logout': Record<string, never>;
   'lookup_template': Record<string, never>;
@@ -760,6 +787,9 @@ export interface RoutePathParams {
   'test_connection': {
     connection_id: UUID;
   };
+  'test_webhook': {
+    webhook_id: UUID;
+  };
   'toggle_dnd': {
     ext_id: UUID;
   };
@@ -818,6 +848,9 @@ export interface RoutePathParams {
   'update_message': {
     msg_id: UUID;
     ticket_id: UUID;
+  };
+  'update_music_on_hold': {
+    moh_id: UUID;
   };
   'update_option': {
     ivr_menu_id: UUID;
@@ -882,6 +915,9 @@ export interface RoutePathParams {
   };
   'update_voicemail_settings': {
     ext_id: UUID;
+  };
+  'update_webhook': {
+    webhook_id: UUID;
   };
   'upgrade_scopes': {
     provider: string;
@@ -956,6 +992,7 @@ export interface RouteQueryParams {
   'create_member': Record<string, never>;
   'create_member_api_ring_groups_ring_group_id:uuid_members': Record<string, never>;
   'create_message': Record<string, never>;
+  'create_music_on_hold': Record<string, never>;
   'create_option': Record<string, never>;
   'create_phone_number': Record<string, never>;
   'create_registration': Record<string, never>;
@@ -970,6 +1007,7 @@ export interface RouteQueryParams {
   'create_time_condition': Record<string, never>;
   'create_user': Record<string, never>;
   'create_voicemail_box': Record<string, never>;
+  'create_webhook': Record<string, never>;
   'delete_attachment': Record<string, never>;
   'delete_call_queue': Record<string, never>;
   'delete_connection': Record<string, never>;
@@ -985,6 +1023,7 @@ export interface RouteQueryParams {
   'delete_member': Record<string, never>;
   'delete_member_api_ring_groups_ring_group_id:uuid_members_member_id:uuid': Record<string, never>;
   'delete_message': Record<string, never>;
+  'delete_music_on_hold': Record<string, never>;
   'delete_notification': Record<string, never>;
   'delete_option': Record<string, never>;
   'delete_phone_number': Record<string, never>;
@@ -1004,6 +1043,7 @@ export interface RouteQueryParams {
   'delete_voicemail_box': Record<string, never>;
   'delete_voicemail_message': Record<string, never>;
   'delete_voicemail_message_api_voicemail_messages_message_id:uuid': Record<string, never>;
+  'delete_webhook': Record<string, never>;
   'disable_mfa': Record<string, never>;
   'export_call_records': {
     direction?: string;
@@ -1029,10 +1069,7 @@ export interface RouteQueryParams {
   'get_device_data': {
     refresh?: boolean;
   };
-  'get_device_screenshot': {
-    password?: string;
-    username?: string;
-  };
+  'get_device_screenshot': Record<string, never>;
   'get_dnd_settings': Record<string, never>;
   'get_extension': Record<string, never>;
   'get_extension_data': {
@@ -1045,6 +1082,7 @@ export interface RouteQueryParams {
   'get_location': Record<string, never>;
   'get_log': Record<string, never>;
   'get_mfa_status': Record<string, never>;
+  'get_music_on_hold': Record<string, never>;
   'get_number_data': {
     refresh?: boolean;
   };
@@ -1131,6 +1169,7 @@ export interface RouteQueryParams {
     startDate: DateTime;
     teamId: UUID;
   };
+  'get_webhook': Record<string, never>;
   'initiate_disable_mfa_oauth': Record<string, never>;
   'initiate_setup': Record<string, never>;
   'list_accounts': {
@@ -1352,6 +1391,19 @@ export interface RouteQueryParams {
     orderBy?: string;
     pageSize?: number;
     sortOrder?: "asc" | "desc";
+  };
+  'list_music_on_hold': {
+    createdAfter?: DateTime;
+    createdBefore?: DateTime;
+    currentPage?: number;
+    ids?: string[];
+    orderBy?: string;
+    pageSize?: number;
+    searchIgnoreCase?: boolean;
+    searchString?: string;
+    sortOrder?: "asc" | "desc";
+    updatedAfter?: DateTime;
+    updatedBefore?: DateTime;
   };
   'list_notifications': {
     createdAfter?: DateTime;
@@ -1604,6 +1656,19 @@ export interface RouteQueryParams {
     updatedAfter?: DateTime;
     updatedBefore?: DateTime;
   };
+  'list_webhooks': {
+    createdAfter?: DateTime;
+    createdBefore?: DateTime;
+    currentPage?: number;
+    ids?: string[];
+    orderBy?: string;
+    pageSize?: number;
+    searchIgnoreCase?: boolean;
+    searchString?: string;
+    sortOrder?: "asc" | "desc";
+    updatedAfter?: DateTime;
+    updatedBefore?: DateTime;
+  };
   'login': Record<string, never>;
   'logout': Record<string, never>;
   'lookup_template': {
@@ -1667,6 +1732,7 @@ export interface RouteQueryParams {
   'system:oauth-config': Record<string, never>;
   'system:sync-entity': Record<string, never>;
   'test_connection': Record<string, never>;
+  'test_webhook': Record<string, never>;
   'toggle_dnd': Record<string, never>;
   'toggle_read_status': Record<string, never>;
   'unlink': Record<string, never>;
@@ -1685,6 +1751,7 @@ export interface RouteQueryParams {
   'update_member': Record<string, never>;
   'update_member_api_ring_groups_ring_group_id:uuid_members_member_id:uuid': Record<string, never>;
   'update_message': Record<string, never>;
+  'update_music_on_hold': Record<string, never>;
   'update_option': Record<string, never>;
   'update_organization': Record<string, never>;
   'update_password': Record<string, never>;
@@ -1708,6 +1775,7 @@ export interface RouteQueryParams {
   'update_voicemail_box': Record<string, never>;
   'update_voicemail_message': Record<string, never>;
   'update_voicemail_settings': Record<string, never>;
+  'update_webhook': Record<string, never>;
   'upgrade_scopes': {
     redirect_url?: string;
   };
@@ -1888,6 +1956,13 @@ export const routeDefinitions = {
     pathParams: ['ticket_id'] as const,
     queryParams: [] as const,
   },
+  'create_music_on_hold': {
+    path: '/api/admin/music-on-hold',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
   'create_option': {
     path: '/api/ivr-menus/{ivr_menu_id}/options',
     methods: ['POST'] as const,
@@ -1981,6 +2056,13 @@ export const routeDefinitions = {
   },
   'create_voicemail_box': {
     path: '/api/voicemail/boxes',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
+  'create_webhook': {
+    path: '/api/webhooks',
     methods: ['POST'] as const,
     method: 'post',
     pathParams: [] as const,
@@ -2089,6 +2171,13 @@ export const routeDefinitions = {
     methods: ['DELETE'] as const,
     method: 'delete',
     pathParams: ['msg_id', 'ticket_id'] as const,
+    queryParams: [] as const,
+  },
+  'delete_music_on_hold': {
+    path: '/api/admin/music-on-hold/{moh_id}',
+    methods: ['DELETE'] as const,
+    method: 'delete',
+    pathParams: ['moh_id'] as const,
     queryParams: [] as const,
   },
   'delete_notification': {
@@ -2224,6 +2313,13 @@ export const routeDefinitions = {
     pathParams: ['message_id'] as const,
     queryParams: [] as const,
   },
+  'delete_webhook': {
+    path: '/api/webhooks/{webhook_id}',
+    methods: ['DELETE'] as const,
+    method: 'delete',
+    pathParams: ['webhook_id'] as const,
+    queryParams: [] as const,
+  },
   'disable_mfa': {
     path: '/api/mfa/disable',
     methods: ['DELETE'] as const,
@@ -2306,7 +2402,7 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: ['device_id'] as const,
-    queryParams: ['password', 'username'] as const,
+    queryParams: [] as const,
   },
   'get_dnd_settings': {
     path: '/api/voice/extensions/{ext_id}/dnd',
@@ -2376,6 +2472,13 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: [] as const,
+    queryParams: [] as const,
+  },
+  'get_music_on_hold': {
+    path: '/api/admin/music-on-hold/{moh_id}',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['moh_id'] as const,
     queryParams: [] as const,
   },
   'get_number_data': {
@@ -2630,6 +2733,13 @@ export const routeDefinitions = {
     pathParams: [] as const,
     queryParams: ['endDate', 'interval', 'startDate', 'teamId'] as const,
   },
+  'get_webhook': {
+    path: '/api/webhooks/{webhook_id}',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['webhook_id'] as const,
+    queryParams: [] as const,
+  },
   'initiate_disable_mfa_oauth': {
     path: '/api/mfa/disable/oauth/{provider}',
     methods: ['GET'] as const,
@@ -2807,6 +2917,13 @@ export const routeDefinitions = {
     pathParams: ['ticket_id'] as const,
     queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'sortOrder'] as const,
   },
+  'list_music_on_hold': {
+    path: '/api/admin/music-on-hold',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
+  },
   'list_notifications': {
     path: '/api/notifications',
     methods: ['GET'] as const,
@@ -2968,6 +3085,13 @@ export const routeDefinitions = {
     method: 'get',
     pathParams: [] as const,
     queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'is_read', 'is_urgent', 'orderBy', 'pageSize', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
+  },
+  'list_webhooks': {
+    path: '/api/webhooks',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
   },
   'login': {
     path: '/api/access/login',
@@ -3249,6 +3373,13 @@ export const routeDefinitions = {
     pathParams: ['connection_id'] as const,
     queryParams: [] as const,
   },
+  'test_webhook': {
+    path: '/api/webhooks/{webhook_id}/test',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: ['webhook_id'] as const,
+    queryParams: [] as const,
+  },
   'toggle_dnd': {
     path: '/api/voice/extensions/{ext_id}/dnd/toggle',
     methods: ['POST'] as const,
@@ -3373,6 +3504,13 @@ export const routeDefinitions = {
     methods: ['PATCH'] as const,
     method: 'patch',
     pathParams: ['msg_id', 'ticket_id'] as const,
+    queryParams: [] as const,
+  },
+  'update_music_on_hold': {
+    path: '/api/admin/music-on-hold/{moh_id}',
+    methods: ['PATCH'] as const,
+    method: 'patch',
+    pathParams: ['moh_id'] as const,
     queryParams: [] as const,
   },
   'update_option': {
@@ -3534,6 +3672,13 @@ export const routeDefinitions = {
     methods: ['PATCH'] as const,
     method: 'patch',
     pathParams: ['ext_id'] as const,
+    queryParams: [] as const,
+  },
+  'update_webhook': {
+    path: '/api/webhooks/{webhook_id}',
+    methods: ['PATCH'] as const,
+    method: 'patch',
+    pathParams: ['webhook_id'] as const,
     queryParams: [] as const,
   },
   'upgrade_scopes': {

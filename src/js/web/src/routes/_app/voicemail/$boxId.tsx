@@ -52,6 +52,7 @@ import { Switch } from "@/components/ui/switch"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { VoicemailPlayer } from "@/components/voice/voicemail-player"
+import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { formatFullDateTime } from "@/lib/date-utils"
 import { formatDuration, formatDurationHuman } from "@/lib/format-utils"
@@ -230,6 +231,14 @@ function VoicemailBoxDetailPage() {
       {/* Messages */}
       <PageSection delay={0.1}>
         <BoxMessageList boxId={boxId} />
+      </PageSection>
+
+      {/* Activity */}
+      <PageSection delay={0.2}>
+        <EntityActivityPanel
+          targetType="voicemail_box"
+          targetId={boxId}
+        />
       </PageSection>
     </PageContainer>
   )
