@@ -14,6 +14,7 @@ from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.call_routing.deps import provide_ivr_menu_options_service
 from app.domain.call_routing.guards import requires_call_routing_access
+from app.domain.teams.guards import requires_feature_permission
 from app.domain.call_routing.schemas import (
     IvrMenu,
     IvrMenuCreate,
@@ -39,7 +40,6 @@ class IvrMenuController(Controller):
     """IVR Menus."""
 
     tags = ["Call Routing - IVR Menus"]
-    guards = [requires_call_routing_access]
     dependencies = create_service_dependencies(
         IvrMenuService,
         key="ivr_menus_service",
@@ -59,7 +59,11 @@ class IvrMenuController(Controller):
         "ivr_menu_options_service": Provide(provide_ivr_menu_options_service),
     }
 
-    @get(operation_id="ListIvrMenus", path="/api/ivr-menus")
+    @get(
+        operation_id="ListIvrMenus",
+        path="/api/ivr-menus",
+        guards=[requires_feature_permission("call_routing", "view"), requires_call_routing_access],
+    )
     async def list_ivr_menus(
         self,
         ivr_menus_service: IvrMenuService,
@@ -79,7 +83,11 @@ class IvrMenuController(Controller):
         results, total = await ivr_menus_service.list_and_count(*filters)
         return ivr_menus_service.to_schema(results, total, filters, schema_type=IvrMenu)
 
-    @post(operation_id="CreateIvrMenu", path="/api/ivr-menus")
+    @post(
+        operation_id="CreateIvrMenu",
+        path="/api/ivr-menus",
+        guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
+    )
     async def create_ivr_menu(
         self,
         request: Request[m.User, Token, Any],
@@ -119,7 +127,11 @@ class IvrMenuController(Controller):
         )
         return ivr_menus_service.to_schema(db_obj, schema_type=IvrMenu)
 
-    @get(operation_id="GetIvrMenu", path="/api/ivr-menus/{ivr_menu_id:uuid}")
+    @get(
+        operation_id="GetIvrMenu",
+        path="/api/ivr-menus/{ivr_menu_id:uuid}",
+        guards=[requires_feature_permission("call_routing", "view"), requires_call_routing_access],
+    )
     async def get_ivr_menu(
         self,
         ivr_menus_service: IvrMenuService,
@@ -137,7 +149,11 @@ class IvrMenuController(Controller):
         db_obj = await ivr_menus_service.get(ivr_menu_id)
         return ivr_menus_service.to_schema(db_obj, schema_type=IvrMenu)
 
-    @patch(operation_id="UpdateIvrMenu", path="/api/ivr-menus/{ivr_menu_id:uuid}")
+    @patch(
+        operation_id="UpdateIvrMenu",
+        path="/api/ivr-menus/{ivr_menu_id:uuid}",
+        guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
+    )
     async def update_ivr_menu(
         self,
         request: Request[m.User, Token, Any],
@@ -179,7 +195,12 @@ class IvrMenuController(Controller):
         )
         return ivr_menus_service.to_schema(fresh_obj, schema_type=IvrMenu)
 
-    @delete(operation_id="DeleteIvrMenu", path="/api/ivr-menus/{ivr_menu_id:uuid}", return_dto=None)
+    @delete(
+        operation_id="DeleteIvrMenu",
+        path="/api/ivr-menus/{ivr_menu_id:uuid}",
+        return_dto=None,
+        guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
+    )
     async def delete_ivr_menu(
         self,
         request: Request[m.User, Token, Any],
@@ -217,7 +238,11 @@ class IvrMenuController(Controller):
 
     # --- IVR Menu Options ---
 
-    @get(operation_id="ListIvrMenuOptions", path="/api/ivr-menus/{ivr_menu_id:uuid}/options")
+    @get(
+        operation_id="ListIvrMenuOptions",
+        path="/api/ivr-menus/{ivr_menu_id:uuid}/options",
+        guards=[requires_feature_permission("call_routing", "view"), requires_call_routing_access],
+    )
     async def list_options(
         self,
         ivr_menus_service: IvrMenuService,
@@ -238,7 +263,11 @@ class IvrMenuController(Controller):
         results = await ivr_menu_options_service.list(m.IvrMenuOption.ivr_menu_id == ivr_menu_id)
         return ivr_menu_options_service.to_schema(results, schema_type=IvrMenuOption)
 
-    @post(operation_id="CreateIvrMenuOption", path="/api/ivr-menus/{ivr_menu_id:uuid}/options")
+    @post(
+        operation_id="CreateIvrMenuOption",
+        path="/api/ivr-menus/{ivr_menu_id:uuid}/options",
+        guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
+    )
     async def create_option(
         self,
         request: Request[m.User, Token, Any],
@@ -286,6 +315,7 @@ class IvrMenuController(Controller):
     @patch(
         operation_id="UpdateIvrMenuOption",
         path="/api/ivr-menus/{ivr_menu_id:uuid}/options/{option_id:uuid}",
+        guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
     )
     async def update_option(
         self,
@@ -337,6 +367,7 @@ class IvrMenuController(Controller):
         operation_id="DeleteIvrMenuOption",
         path="/api/ivr-menus/{ivr_menu_id:uuid}/options/{option_id:uuid}",
         return_dto=None,
+        guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
     )
     async def delete_option(
         self,

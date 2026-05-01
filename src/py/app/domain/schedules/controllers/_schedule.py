@@ -15,6 +15,7 @@ from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.schedules.deps import provide_schedule_entries_service
 from app.domain.schedules.guards import requires_schedule_team_membership
+from app.domain.teams.guards import requires_feature_permission
 from app.domain.schedules.schemas import (
     ScheduleCheckResponse,
     ScheduleCreate,
@@ -64,7 +65,11 @@ class ScheduleController(Controller):
 
     # ── Schedule CRUD ──────────────────────────────────────────────────
 
-    @get(operation_id="ListSchedules", path="/api/schedules")
+    @get(
+        operation_id="ListSchedules",
+        path="/api/schedules",
+        guards=[requires_feature_permission("schedules", "view")],
+    )
     async def list_schedules(
         self,
         schedules_service: ScheduleService,
@@ -93,7 +98,11 @@ class ScheduleController(Controller):
         results, total = await schedules_service.list_and_count(*filters, *extra_filters)
         return schedules_service.to_schema(results, total, filters, schema_type=ScheduleList)
 
-    @post(operation_id="CreateSchedule", path="/api/schedules")
+    @post(
+        operation_id="CreateSchedule",
+        path="/api/schedules",
+        guards=[requires_feature_permission("schedules", "edit")],
+    )
     async def create_schedule(
         self,
         request: Request[m.User, Token, Any],
@@ -135,6 +144,7 @@ class ScheduleController(Controller):
     @get(
         operation_id="GetSchedule",
         path="/api/schedules/{schedule_id:uuid}",
+        guards=[requires_feature_permission("schedules", "view")],
     )
     async def get_schedule(
         self,
@@ -156,6 +166,7 @@ class ScheduleController(Controller):
     @patch(
         operation_id="UpdateSchedule",
         path="/api/schedules/{schedule_id:uuid}",
+        guards=[requires_feature_permission("schedules", "edit")],
     )
     async def update_schedule(
         self,
@@ -204,6 +215,7 @@ class ScheduleController(Controller):
     @delete(
         operation_id="DeleteSchedule",
         path="/api/schedules/{schedule_id:uuid}",
+        guards=[requires_feature_permission("schedules", "edit")],
     )
     async def delete_schedule(
         self,
@@ -245,6 +257,7 @@ class ScheduleController(Controller):
     @get(
         operation_id="CheckSchedule",
         path="/api/schedules/{schedule_id:uuid}/check",
+        guards=[requires_feature_permission("schedules", "view")],
     )
     async def check_schedule(
         self,
@@ -269,6 +282,7 @@ class ScheduleController(Controller):
     @get(
         operation_id="ListScheduleEntries",
         path="/api/schedules/{schedule_id:uuid}/entries",
+        guards=[requires_feature_permission("schedules", "view")],
     )
     async def list_entries(
         self,
@@ -290,6 +304,7 @@ class ScheduleController(Controller):
     @post(
         operation_id="CreateScheduleEntry",
         path="/api/schedules/{schedule_id:uuid}/entries",
+        guards=[requires_feature_permission("schedules", "edit")],
     )
     async def create_entry(
         self,
@@ -335,6 +350,7 @@ class ScheduleController(Controller):
     @patch(
         operation_id="UpdateScheduleEntry",
         path="/api/schedules/{schedule_id:uuid}/entries/{entry_id:uuid}",
+        guards=[requires_feature_permission("schedules", "edit")],
     )
     async def update_entry(
         self,
@@ -385,6 +401,7 @@ class ScheduleController(Controller):
     @delete(
         operation_id="DeleteScheduleEntry",
         path="/api/schedules/{schedule_id:uuid}/entries/{entry_id:uuid}",
+        guards=[requires_feature_permission("schedules", "edit")],
     )
     async def delete_entry(
         self,

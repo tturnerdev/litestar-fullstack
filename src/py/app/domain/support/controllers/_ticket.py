@@ -15,6 +15,7 @@ from app.domain.admin.deps import provide_audit_log_service
 from app.domain.notifications.deps import provide_notifications_service
 from app.domain.support.guards import requires_support_agent, requires_ticket_access
 from app.domain.support.schemas import Ticket, TicketCreate, TicketUpdate
+from app.domain.teams.guards import requires_feature_permission
 from app.domain.support.services import TicketMessageService, TicketService
 from app.domain.support.utils import render_markdown
 from app.lib.audit import capture_snapshot, log_audit
@@ -53,7 +54,11 @@ class TicketController(Controller):
         "notifications_service": Provide(provide_notifications_service),
     }
 
-    @get(operation_id="ListTickets", path="/api/support/tickets")
+    @get(
+        operation_id="ListTickets",
+        path="/api/support/tickets",
+        guards=[requires_feature_permission("support", "view")],
+    )
     async def list_tickets(
         self,
         tickets_service: TicketService,
@@ -70,7 +75,11 @@ class TicketController(Controller):
             )
         return tickets_service.to_schema(results, total, filters, schema_type=Ticket)
 
-    @post(operation_id="CreateTicket", path="/api/support/tickets")
+    @post(
+        operation_id="CreateTicket",
+        path="/api/support/tickets",
+        guards=[requires_feature_permission("support", "edit")],
+    )
     async def create_ticket(
         self,
         request: Request[m.User, Token, Any],
@@ -124,7 +133,7 @@ class TicketController(Controller):
     @get(
         operation_id="GetTicket",
         path="/api/support/tickets/{ticket_id:uuid}",
-        guards=[requires_ticket_access],
+        guards=[requires_feature_permission("support", "view"), requires_ticket_access],
     )
     async def get_ticket(
         self,
@@ -138,7 +147,7 @@ class TicketController(Controller):
     @patch(
         operation_id="UpdateTicket",
         path="/api/support/tickets/{ticket_id:uuid}",
-        guards=[requires_ticket_access],
+        guards=[requires_feature_permission("support", "edit"), requires_ticket_access],
     )
     async def update_ticket(
         self,
@@ -174,7 +183,7 @@ class TicketController(Controller):
     @delete(
         operation_id="DeleteTicket",
         path="/api/support/tickets/{ticket_id:uuid}",
-        guards=[requires_support_agent],
+        guards=[requires_feature_permission("support", "edit"), requires_support_agent],
     )
     async def delete_ticket(
         self,
@@ -206,7 +215,7 @@ class TicketController(Controller):
     @post(
         operation_id="CloseTicket",
         path="/api/support/tickets/{ticket_id:uuid}/close",
-        guards=[requires_ticket_access],
+        guards=[requires_feature_permission("support", "edit"), requires_ticket_access],
     )
     async def close_ticket(
         self,
@@ -249,7 +258,7 @@ class TicketController(Controller):
     @post(
         operation_id="ReopenTicket",
         path="/api/support/tickets/{ticket_id:uuid}/reopen",
-        guards=[requires_ticket_access],
+        guards=[requires_feature_permission("support", "edit"), requires_ticket_access],
     )
     async def reopen_ticket(
         self,

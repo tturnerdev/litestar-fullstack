@@ -11,6 +11,7 @@ from litestar.params import Dependency, Parameter
 
 from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
+from app.domain.teams.guards import requires_feature_permission
 from app.domain.voice.guards import requires_phone_number_access
 from app.domain.voice.schemas import PhoneNumber, PhoneNumberCreate, PhoneNumberUpdate
 from app.domain.voice.services import PhoneNumberService
@@ -47,7 +48,10 @@ class PhoneNumberController(Controller):
         "audit_service": Provide(provide_audit_log_service),
     }
 
-    @get(operation_id="ListPhoneNumbers")
+    @get(
+        operation_id="ListPhoneNumbers",
+        guards=[requires_feature_permission("voice", "view")],
+    )
     async def list_phone_numbers(
         self,
         phone_numbers_service: PhoneNumberService,
@@ -61,7 +65,10 @@ class PhoneNumberController(Controller):
         )
         return phone_numbers_service.to_schema(results, total, filters, schema_type=PhoneNumber)
 
-    @post(operation_id="CreatePhoneNumber")
+    @post(
+        operation_id="CreatePhoneNumber",
+        guards=[requires_feature_permission("voice", "edit")],
+    )
     async def create_phone_number(
         self,
         request: Request[m.User, Token, Any],
@@ -90,7 +97,7 @@ class PhoneNumberController(Controller):
         )
         return phone_numbers_service.to_schema(db_obj, schema_type=PhoneNumber)
 
-    @get(operation_id="GetPhoneNumber", path="/{phone_number_id:uuid}", guards=[requires_phone_number_access])
+    @get(operation_id="GetPhoneNumber", path="/{phone_number_id:uuid}", guards=[requires_feature_permission("voice", "view"), requires_phone_number_access])
     async def get_phone_number(
         self,
         phone_numbers_service: PhoneNumberService,
@@ -101,7 +108,7 @@ class PhoneNumberController(Controller):
         db_obj = await phone_numbers_service.get_one(id=phone_number_id, user_id=current_user.id)
         return phone_numbers_service.to_schema(db_obj, schema_type=PhoneNumber)
 
-    @patch(operation_id="UpdatePhoneNumber", path="/{phone_number_id:uuid}", guards=[requires_phone_number_access])
+    @patch(operation_id="UpdatePhoneNumber", path="/{phone_number_id:uuid}", guards=[requires_feature_permission("voice", "edit"), requires_phone_number_access])
     async def update_phone_number(
         self,
         request: Request[m.User, Token, Any],
@@ -134,7 +141,7 @@ class PhoneNumberController(Controller):
     @delete(
         operation_id="DeletePhoneNumber",
         path="/{phone_number_id:uuid}",
-        guards=[requires_phone_number_access],
+        guards=[requires_feature_permission("voice", "edit"), requires_phone_number_access],
         return_dto=None,
     )
     async def delete_phone_number(

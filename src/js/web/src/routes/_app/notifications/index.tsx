@@ -81,10 +81,13 @@ function getCategoryIcon(category: string) {
 function getCategoryColor(category: string) {
   switch (category) {
     case "ticket":
+    case "support":
       return "text-blue-500"
     case "team":
+    case "teams":
       return "text-purple-500"
     case "device":
+    case "devices":
       return "text-green-500"
     case "system":
       return "text-orange-500"
@@ -187,9 +190,9 @@ function NotificationCard({ notification, onRequestDelete }: { notification: Not
 
 const PREFERENCE_CATEGORIES = [
   { key: "system", label: "System", description: "System alerts and maintenance updates", icon: Settings },
-  { key: "team", label: "Team", description: "Team invitations and membership changes", icon: Users },
-  { key: "ticket", label: "Ticket", description: "Support ticket updates and replies", icon: MessageSquare },
-  { key: "device", label: "Device", description: "Device status and provisioning alerts", icon: Laptop },
+  { key: "teams", label: "Teams", description: "Team invitations and membership changes", icon: Users },
+  { key: "support", label: "Support", description: "Support ticket updates and replies", icon: MessageSquare },
+  { key: "devices", label: "Devices", description: "Device status and provisioning alerts", icon: Laptop },
   { key: "voice", label: "Voice", description: "Call routing and voicemail notifications", icon: Phone },
   { key: "fax", label: "Fax", description: "Inbound and outbound fax notifications", icon: Printer },
 ] as const

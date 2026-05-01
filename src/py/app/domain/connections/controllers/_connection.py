@@ -13,6 +13,7 @@ from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.connections.guards import requires_connections_admin
 from app.domain.connections.schemas import ConnectionCreate, ConnectionDetail, ConnectionList, ConnectionUpdate
+from app.domain.teams.guards import requires_feature_permission
 from app.domain.connections.services import ConnectionService
 from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
@@ -45,7 +46,6 @@ class ConnectionController(Controller):
     """Connections."""
 
     tags = ["Connections"]
-    guards = [requires_connections_admin]
     dependencies = create_service_dependencies(
         ConnectionService,
         key="connections_service",
@@ -63,7 +63,11 @@ class ConnectionController(Controller):
         "audit_service": Provide(provide_audit_log_service),
     }
 
-    @get(operation_id="ListConnections", path="/api/connections")
+    @get(
+        operation_id="ListConnections",
+        path="/api/connections",
+        guards=[requires_feature_permission("connections", "view"), requires_connections_admin],
+    )
     async def list_connections(
         self,
         connections_service: ConnectionService,
@@ -88,7 +92,11 @@ class ConnectionController(Controller):
         results, total = await connections_service.list_and_count(*filters, *extra_filters)
         return connections_service.to_schema(results, total, filters, schema_type=ConnectionList)
 
-    @post(operation_id="CreateConnection", path="/api/connections")
+    @post(
+        operation_id="CreateConnection",
+        path="/api/connections",
+        guards=[requires_feature_permission("connections", "edit"), requires_connections_admin],
+    )
     async def create_connection(
         self,
         request: Request[m.User, Token, Any],
@@ -130,6 +138,7 @@ class ConnectionController(Controller):
     @get(
         operation_id="GetConnection",
         path="/api/connections/{connection_id:uuid}",
+        guards=[requires_feature_permission("connections", "view"), requires_connections_admin],
     )
     async def get_connection(
         self,
@@ -155,6 +164,7 @@ class ConnectionController(Controller):
     @patch(
         operation_id="UpdateConnection",
         path="/api/connections/{connection_id:uuid}",
+        guards=[requires_feature_permission("connections", "edit"), requires_connections_admin],
     )
     async def update_connection(
         self,
@@ -205,6 +215,7 @@ class ConnectionController(Controller):
     @delete(
         operation_id="DeleteConnection",
         path="/api/connections/{connection_id:uuid}",
+        guards=[requires_feature_permission("connections", "edit"), requires_connections_admin],
     )
     async def delete_connection(
         self,
@@ -244,6 +255,7 @@ class ConnectionController(Controller):
     @post(
         operation_id="TestConnection",
         path="/api/connections/{connection_id:uuid}/test",
+        guards=[requires_feature_permission("connections", "edit"), requires_connections_admin],
     )
     async def test_connection(
         self,

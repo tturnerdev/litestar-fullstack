@@ -11,6 +11,7 @@ from litestar.params import Dependency, Parameter
 
 from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
+from app.domain.teams.guards import requires_feature_permission
 from app.domain.voice.deps import provide_extensions_service
 from app.domain.voice.guards import requires_extension_ownership
 from app.domain.voice.schemas import ForwardingRule, ForwardingRuleCreate, ForwardingRuleUpdate
@@ -32,7 +33,6 @@ class ForwardingController(Controller):
     """Call Forwarding Rules."""
 
     tags = ["Voice - Forwarding"]
-    guards = [requires_extension_ownership]
     dependencies = {
         "extensions_service": Provide(provide_extensions_service),
         "audit_service": Provide(provide_audit_log_service),
@@ -51,7 +51,11 @@ class ForwardingController(Controller):
         ),
     }
 
-    @get(operation_id="ListForwardingRules", path="/api/voice/extensions/{ext_id:uuid}/forwarding")
+    @get(
+        operation_id="ListForwardingRules",
+        path="/api/voice/extensions/{ext_id:uuid}/forwarding",
+        guards=[requires_feature_permission("voice", "view"), requires_extension_ownership],
+    )
     async def list_forwarding_rules(
         self,
         extensions_service: ExtensionService,
@@ -68,7 +72,11 @@ class ForwardingController(Controller):
         )
         return forwarding_rules_service.to_schema(results, total, filters, schema_type=ForwardingRule)
 
-    @post(operation_id="CreateForwardingRule", path="/api/voice/extensions/{ext_id:uuid}/forwarding")
+    @post(
+        operation_id="CreateForwardingRule",
+        path="/api/voice/extensions/{ext_id:uuid}/forwarding",
+        guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],
+    )
     async def create_forwarding_rule(
         self,
         request: Request[m.User, Token, Any],
@@ -100,7 +108,11 @@ class ForwardingController(Controller):
         )
         return forwarding_rules_service.to_schema(db_obj, schema_type=ForwardingRule)
 
-    @put(operation_id="SetForwardingRules", path="/api/voice/extensions/{ext_id:uuid}/forwarding")
+    @put(
+        operation_id="SetForwardingRules",
+        path="/api/voice/extensions/{ext_id:uuid}/forwarding",
+        guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],
+    )
     async def set_forwarding_rules(
         self,
         request: Request[m.User, Token, Any],
@@ -148,6 +160,7 @@ class ForwardingController(Controller):
     @patch(
         operation_id="UpdateForwardingRule",
         path="/api/voice/extensions/{ext_id:uuid}/forwarding/{rule_id:uuid}",
+        guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],
     )
     async def update_forwarding_rule(
         self,
@@ -185,6 +198,7 @@ class ForwardingController(Controller):
         operation_id="DeleteForwardingRule",
         path="/api/voice/extensions/{ext_id:uuid}/forwarding/{rule_id:uuid}",
         return_dto=None,
+        guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],
     )
     async def delete_forwarding_rule(
         self,

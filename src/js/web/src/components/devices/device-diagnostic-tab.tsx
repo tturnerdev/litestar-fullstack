@@ -673,7 +673,7 @@ function WireframeRendererV1({ data, screenshotUrl }: { data: V1WireframeData; s
             width={data.display.bounds.width}
             height={data.display.bounds.height}
             clipPath="url(#lcd-clip)"
-            preserveAspectRatio="xMidYMid slice"
+            preserveAspectRatio="xMidYMid meet"
           />
         </g>
       ) : (

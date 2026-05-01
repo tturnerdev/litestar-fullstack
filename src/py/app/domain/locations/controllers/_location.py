@@ -14,6 +14,7 @@ from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.locations.guards import requires_location_team_membership
 from app.domain.locations.schemas import Location, LocationCreate, LocationUpdate
+from app.domain.teams.guards import requires_feature_permission
 from app.domain.locations.services import LocationService
 from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
@@ -49,7 +50,11 @@ class LocationController(Controller):
         "audit_service": Provide(provide_audit_log_service),
     }
 
-    @get(operation_id="ListLocations", path="/api/teams/{team_id:uuid}/locations")
+    @get(
+        operation_id="ListLocations",
+        path="/api/teams/{team_id:uuid}/locations",
+        guards=[requires_feature_permission("locations", "view")],
+    )
     async def list_locations(
         self,
         locations_service: LocationService,
@@ -76,7 +81,11 @@ class LocationController(Controller):
         results, total = await locations_service.list_and_count(*filters, *extra_filters)
         return locations_service.to_schema(results, total, filters, schema_type=Location)
 
-    @post(operation_id="CreateLocation", path="/api/teams/{team_id:uuid}/locations")
+    @post(
+        operation_id="CreateLocation",
+        path="/api/teams/{team_id:uuid}/locations",
+        guards=[requires_feature_permission("locations", "edit")],
+    )
     async def create_location(
         self,
         request: Request[m.User, Token, Any],
@@ -121,7 +130,7 @@ class LocationController(Controller):
     @get(
         operation_id="GetLocation",
         path="/api/teams/{team_id:uuid}/locations/{location_id:uuid}",
-        guards=[requires_location_team_membership],
+        guards=[requires_feature_permission("locations", "view"), requires_location_team_membership],
     )
     async def get_location(
         self,
@@ -145,7 +154,7 @@ class LocationController(Controller):
     @patch(
         operation_id="UpdateLocation",
         path="/api/teams/{team_id:uuid}/locations/{location_id:uuid}",
-        guards=[requires_location_team_membership],
+        guards=[requires_feature_permission("locations", "edit"), requires_location_team_membership],
     )
     async def update_location(
         self,
@@ -196,7 +205,7 @@ class LocationController(Controller):
     @delete(
         operation_id="DeleteLocation",
         path="/api/teams/{team_id:uuid}/locations/{location_id:uuid}",
-        guards=[requires_location_team_membership],
+        guards=[requires_feature_permission("locations", "edit"), requires_location_team_membership],
     )
     async def delete_location(
         self,

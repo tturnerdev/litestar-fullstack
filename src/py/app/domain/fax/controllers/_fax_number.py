@@ -18,6 +18,7 @@ from app.domain.fax.guards import requires_fax_number_access
 from app.domain.fax.schemas import FaxNumber, FaxNumberCreate, FaxNumberUpdate
 from app.domain.fax.services import FaxNumberService
 from app.domain.notifications.deps import provide_notifications_service
+from app.domain.teams.guards import requires_feature_permission
 from app.lib import constants
 from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
@@ -67,7 +68,12 @@ class FaxNumberController(Controller):
         "notifications_service": Provide(provide_notifications_service),
     }
 
-    @get(component="fax/number-list", operation_id="ListFaxNumbers", path="/api/fax/numbers")
+    @get(
+        component="fax/number-list",
+        operation_id="ListFaxNumbers",
+        path="/api/fax/numbers",
+        guards=[requires_feature_permission("fax", "view")],
+    )
     async def list_fax_numbers(
         self,
         fax_numbers_service: FaxNumberService,
@@ -91,7 +97,11 @@ class FaxNumberController(Controller):
         )
         return fax_numbers_service.to_schema(results, total, filters, schema_type=FaxNumber)
 
-    @post(operation_id="CreateFaxNumber", path="/api/fax/numbers")
+    @post(
+        operation_id="CreateFaxNumber",
+        path="/api/fax/numbers",
+        guards=[requires_feature_permission("fax", "edit")],
+    )
     async def create_fax_number(
         self,
         request: Request[m.User, Token, Any],
@@ -133,7 +143,7 @@ class FaxNumberController(Controller):
     @get(
         operation_id="GetFaxNumber",
         path="/api/fax/numbers/{fax_number_id:uuid}",
-        guards=[requires_fax_number_access],
+        guards=[requires_feature_permission("fax", "view"), requires_fax_number_access],
     )
     async def get_fax_number(
         self,
@@ -162,7 +172,7 @@ class FaxNumberController(Controller):
     @patch(
         operation_id="UpdateFaxNumber",
         path="/api/fax/numbers/{fax_number_id:uuid}",
-        guards=[requires_fax_number_access],
+        guards=[requires_feature_permission("fax", "edit"), requires_fax_number_access],
     )
     async def update_fax_number(
         self,
@@ -213,7 +223,7 @@ class FaxNumberController(Controller):
     @delete(
         operation_id="DeleteFaxNumber",
         path="/api/fax/numbers/{fax_number_id:uuid}",
-        guards=[requires_fax_number_access],
+        guards=[requires_feature_permission("fax", "edit"), requires_fax_number_access],
     )
     async def delete_fax_number(
         self,

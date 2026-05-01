@@ -13,6 +13,7 @@ from sqlalchemy.orm import joinedload
 from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.e911.guards import requires_team_membership
+from app.domain.teams.guards import requires_feature_permission
 from app.domain.e911.schemas import (
     E911Registration,
     E911RegistrationCreate,
@@ -36,7 +37,6 @@ class E911RegistrationController(Controller):
     """E911 Address Registrations."""
 
     tags = ["E911"]
-    guards = [requires_team_membership]
     dependencies = create_service_dependencies(
         E911RegistrationService,
         key="e911_service",
@@ -58,7 +58,11 @@ class E911RegistrationController(Controller):
         "audit_service": Provide(provide_audit_log_service),
     }
 
-    @get(operation_id="ListE911Registrations", path="/api/e911")
+    @get(
+        operation_id="ListE911Registrations",
+        path="/api/e911",
+        guards=[requires_feature_permission("e911", "view"), requires_team_membership],
+    )
     async def list_registrations(
         self,
         e911_service: E911RegistrationService,
@@ -83,7 +87,11 @@ class E911RegistrationController(Controller):
         results, total = await e911_service.list_and_count(*filters, *extra_filters)
         return e911_service.to_schema(results, total, filters, schema_type=E911Registration)
 
-    @post(operation_id="CreateE911Registration", path="/api/e911")
+    @post(
+        operation_id="CreateE911Registration",
+        path="/api/e911",
+        guards=[requires_feature_permission("e911", "edit"), requires_team_membership],
+    )
     async def create_registration(
         self,
         request: Request[m.User, Token, Any],
@@ -125,6 +133,7 @@ class E911RegistrationController(Controller):
     @get(
         operation_id="GetE911Registration",
         path="/api/e911/{registration_id:uuid}",
+        guards=[requires_feature_permission("e911", "view"), requires_team_membership],
     )
     async def get_registration(
         self,
@@ -146,6 +155,7 @@ class E911RegistrationController(Controller):
     @patch(
         operation_id="UpdateE911Registration",
         path="/api/e911/{registration_id:uuid}",
+        guards=[requires_feature_permission("e911", "edit"), requires_team_membership],
     )
     async def update_registration(
         self,
@@ -194,6 +204,7 @@ class E911RegistrationController(Controller):
     @delete(
         operation_id="DeleteE911Registration",
         path="/api/e911/{registration_id:uuid}",
+        guards=[requires_feature_permission("e911", "edit"), requires_team_membership],
     )
     async def delete_registration(
         self,
@@ -233,6 +244,7 @@ class E911RegistrationController(Controller):
     @post(
         operation_id="ValidateE911Registration",
         path="/api/e911/{registration_id:uuid}/validate",
+        guards=[requires_feature_permission("e911", "edit"), requires_team_membership],
     )
     async def validate_registration(
         self,
@@ -278,6 +290,7 @@ class E911RegistrationController(Controller):
     @get(
         operation_id="ListUnregisteredPhoneNumbers",
         path="/api/e911/unregistered",
+        guards=[requires_feature_permission("e911", "view"), requires_team_membership],
     )
     async def list_unregistered(
         self,

@@ -87,6 +87,25 @@ class NotificationService(service.SQLAlchemyAsyncRepositoryService[m.Notificatio
         await self.repository.session.execute(stmt)
         await self.repository.session.flush()
 
+    async def delete_read(self, user_id: UUID) -> int:
+        """Delete all read notifications for a user.
+
+        Args:
+            user_id: The user whose read notifications to delete.
+
+        Returns:
+            Number of deleted notifications.
+        """
+        from sqlalchemy import delete as sa_delete
+
+        stmt = sa_delete(m.Notification).where(
+            m.Notification.user_id == user_id,
+            m.Notification.is_read.is_(True),
+        )
+        result = await self.repository.session.execute(stmt)
+        await self.repository.session.flush()
+        return result.rowcount  # type: ignore[return-value]
+
     async def get_unread_count(self, user_id: UUID) -> int:
         """Count unread notifications for a user.
 

@@ -18,6 +18,7 @@ from app.domain.admin.deps import provide_audit_log_service
 from app.domain.gateway.deps import provide_gateway_connections
 from app.domain.gateway.providers import FreePBXProvider
 from app.domain.voice.deps import provide_extensions_service
+from app.domain.teams.guards import requires_feature_permission
 from app.domain.voice.guards import requires_extension_ownership
 from app.domain.voice.schemas import (
     VoicemailMessage,
@@ -44,7 +45,6 @@ class VoicemailController(Controller):
     """Voicemail settings and messages."""
 
     tags = ["Voice - Voicemail"]
-    guards = [requires_extension_ownership]
     signature_types = [
         ExtensionService,
         VoicemailBoxService,
@@ -76,7 +76,11 @@ class VoicemailController(Controller):
         "gateway_connections": Provide(provide_gateway_connections),
     }
 
-    @get(operation_id="GetVoicemailSettings", path="/api/voice/extensions/{ext_id:uuid}/voicemail")
+    @get(
+        operation_id="GetVoicemailSettings",
+        path="/api/voice/extensions/{ext_id:uuid}/voicemail",
+        guards=[requires_feature_permission("voice", "view"), requires_extension_ownership],
+    )
     async def get_voicemail_settings(
         self,
         extensions_service: ExtensionService,
@@ -89,7 +93,11 @@ class VoicemailController(Controller):
         db_obj = await voicemail_boxes_service.get_or_create_for_extension(ext_id)
         return voicemail_boxes_service.to_schema(db_obj, schema_type=VoicemailSettings)
 
-    @patch(operation_id="UpdateVoicemailSettings", path="/api/voice/extensions/{ext_id:uuid}/voicemail")
+    @patch(
+        operation_id="UpdateVoicemailSettings",
+        path="/api/voice/extensions/{ext_id:uuid}/voicemail",
+        guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],
+    )
     async def update_voicemail_settings(
         self,
         request: Request[m.User, Token, Any],
@@ -155,7 +163,11 @@ class VoicemailController(Controller):
 
         return voicemail_boxes_service.to_schema(db_obj, schema_type=VoicemailSettings)
 
-    @get(operation_id="ListVoicemailMessages", path="/api/voice/extensions/{ext_id:uuid}/voicemail/messages")
+    @get(
+        operation_id="ListVoicemailMessages",
+        path="/api/voice/extensions/{ext_id:uuid}/voicemail/messages",
+        guards=[requires_feature_permission("voice", "view"), requires_extension_ownership],
+    )
     async def list_voicemail_messages(
         self,
         extensions_service: ExtensionService,
@@ -177,6 +189,7 @@ class VoicemailController(Controller):
     @get(
         operation_id="GetVoicemailMessage",
         path="/api/voice/extensions/{ext_id:uuid}/voicemail/messages/{msg_id:uuid}",
+        guards=[requires_feature_permission("voice", "view"), requires_extension_ownership],
     )
     async def get_voicemail_message(
         self,
@@ -196,6 +209,7 @@ class VoicemailController(Controller):
     @patch(
         operation_id="UpdateVoicemailMessage",
         path="/api/voice/extensions/{ext_id:uuid}/voicemail/messages/{msg_id:uuid}",
+        guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],
     )
     async def update_voicemail_message(
         self,
@@ -218,6 +232,7 @@ class VoicemailController(Controller):
         operation_id="DeleteVoicemailMessage",
         path="/api/voice/extensions/{ext_id:uuid}/voicemail/messages/{msg_id:uuid}",
         return_dto=None,
+        guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],
     )
     async def delete_voicemail_message(
         self,

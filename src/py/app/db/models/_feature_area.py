@@ -6,9 +6,14 @@ from enum import StrEnum
 class FeatureArea(StrEnum):
     """Feature areas available for team role permissions."""
 
+    CALL_ROUTING = "CALL_ROUTING"
+    CONNECTIONS = "CONNECTIONS"
     DEVICES = "DEVICES"
-    VOICE = "VOICE"
+    E911 = "E911"
     FAX = "FAX"
-    SUPPORT = "SUPPORT"
+    LOCATIONS = "LOCATIONS"
     ORGANIZATION = "ORGANIZATION"
+    SCHEDULES = "SCHEDULES"
+    SUPPORT = "SUPPORT"
     TEAMS = "TEAMS"
+    VOICE = "VOICE"

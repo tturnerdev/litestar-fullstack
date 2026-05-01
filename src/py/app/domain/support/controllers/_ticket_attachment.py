@@ -13,6 +13,7 @@ from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.support.guards import requires_ticket_access
 from app.domain.support.schemas import TicketAttachment
+from app.domain.teams.guards import requires_feature_permission
 from app.domain.support.services import TicketAttachmentService
 from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
@@ -38,7 +39,7 @@ class TicketAttachmentController(Controller):
     @post(
         operation_id="UploadAttachment",
         path="/api/support/tickets/{ticket_id:uuid}/attachments",
-        guards=[requires_ticket_access],
+        guards=[requires_feature_permission("support", "edit"), requires_ticket_access],
     )
     async def upload_attachment(
         self,
@@ -57,7 +58,11 @@ class TicketAttachmentController(Controller):
         msg = "File upload not yet implemented. Coming in Phase 3."
         raise NotImplementedError(msg)
 
-    @get(operation_id="GetAttachment", path="/api/support/attachments/{attachment_id:uuid}")
+    @get(
+        operation_id="GetAttachment",
+        path="/api/support/attachments/{attachment_id:uuid}",
+        guards=[requires_feature_permission("support", "view")],
+    )
     async def get_attachment(
         self,
         attachments_service: TicketAttachmentService,
@@ -67,7 +72,11 @@ class TicketAttachmentController(Controller):
         db_obj = await attachments_service.get(attachment_id)
         return attachments_service.to_schema(db_obj, schema_type=TicketAttachment)
 
-    @delete(operation_id="DeleteAttachment", path="/api/support/attachments/{attachment_id:uuid}")
+    @delete(
+        operation_id="DeleteAttachment",
+        path="/api/support/attachments/{attachment_id:uuid}",
+        guards=[requires_feature_permission("support", "edit")],
+    )
     async def delete_attachment(
         self,
         request: Request[m.User, Token, Any],
@@ -98,7 +107,7 @@ class TicketAttachmentController(Controller):
     @post(
         operation_id="PasteImage",
         path="/api/support/tickets/{ticket_id:uuid}/paste-image",
-        guards=[requires_ticket_access],
+        guards=[requires_feature_permission("support", "edit"), requires_ticket_access],
     )
     async def paste_image(
         self,

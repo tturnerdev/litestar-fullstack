@@ -17,6 +17,7 @@ from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.fax.controllers._fax_number import _can_access_fax_number
 from app.domain.fax.guards import requires_fax_message_access
+from app.domain.teams.guards import requires_feature_permission
 from app.db.models._fax_enums import FaxDirection, FaxStatus
 from app.domain.fax.schemas import FaxMessage, SendFax
 from app.domain.fax.services import FaxMessageService, FaxNumberService
@@ -60,7 +61,12 @@ class FaxMessageController(Controller):
         "notifications_service": Provide(provide_notifications_service),
     }
 
-    @get(component="fax/message-list", operation_id="ListFaxMessages", path="/api/fax/messages")
+    @get(
+        component="fax/message-list",
+        operation_id="ListFaxMessages",
+        path="/api/fax/messages",
+        guards=[requires_feature_permission("fax", "view")],
+    )
     async def list_fax_messages(
         self,
         fax_messages_service: FaxMessageService,
@@ -100,7 +106,7 @@ class FaxMessageController(Controller):
     @get(
         operation_id="GetFaxMessage",
         path="/api/fax/messages/{message_id:uuid}",
-        guards=[requires_fax_message_access],
+        guards=[requires_feature_permission("fax", "view"), requires_fax_message_access],
     )
     async def get_fax_message(
         self,
@@ -129,7 +135,7 @@ class FaxMessageController(Controller):
     @delete(
         operation_id="DeleteFaxMessage",
         path="/api/fax/messages/{message_id:uuid}",
-        guards=[requires_fax_message_access],
+        guards=[requires_feature_permission("fax", "edit"), requires_fax_message_access],
     )
     async def delete_fax_message(
         self,
@@ -170,7 +176,11 @@ class FaxMessageController(Controller):
             request=request,
         )
 
-    @post(operation_id="SendFax", path="/api/fax/send")
+    @post(
+        operation_id="SendFax",
+        path="/api/fax/send",
+        guards=[requires_feature_permission("fax", "edit")],
+    )
     async def send_fax(
         self,
         request: Request[m.User, Token, Any],

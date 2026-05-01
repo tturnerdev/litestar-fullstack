@@ -14,6 +14,7 @@ from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.support.guards import requires_ticket_access, requires_ticket_message_edit
 from app.domain.support.schemas import TicketMessage, TicketMessageCreate
+from app.domain.teams.guards import requires_feature_permission
 from app.domain.support.services import TicketMessageService
 from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
@@ -31,7 +32,6 @@ class TicketMessageController(Controller):
     """Ticket Messages."""
 
     tags = ["Support"]
-    guards = [requires_ticket_access]
     dependencies = create_service_dependencies(
         TicketMessageService,
         key="messages_service",
@@ -48,7 +48,11 @@ class TicketMessageController(Controller):
         "audit_service": Provide(provide_audit_log_service),
     }
 
-    @get(operation_id="ListTicketMessages", path="/api/support/tickets/{ticket_id:uuid}/messages")
+    @get(
+        operation_id="ListTicketMessages",
+        path="/api/support/tickets/{ticket_id:uuid}/messages",
+        guards=[requires_feature_permission("support", "view"), requires_ticket_access],
+    )
     async def list_messages(
         self,
         messages_service: TicketMessageService,
@@ -71,7 +75,11 @@ class TicketMessageController(Controller):
             )
         return messages_service.to_schema(results, total, filters, schema_type=TicketMessage)
 
-    @post(operation_id="CreateTicketMessage", path="/api/support/tickets/{ticket_id:uuid}/messages")
+    @post(
+        operation_id="CreateTicketMessage",
+        path="/api/support/tickets/{ticket_id:uuid}/messages",
+        guards=[requires_feature_permission("support", "edit"), requires_ticket_access],
+    )
     async def create_message(
         self,
         request: Request[m.User, Token, Any],
@@ -105,7 +113,7 @@ class TicketMessageController(Controller):
     @patch(
         operation_id="UpdateTicketMessage",
         path="/api/support/tickets/{ticket_id:uuid}/messages/{msg_id:uuid}",
-        guards=[requires_ticket_message_edit],
+        guards=[requires_feature_permission("support", "edit"), requires_ticket_access, requires_ticket_message_edit],
     )
     async def update_message(
         self,
@@ -142,7 +150,7 @@ class TicketMessageController(Controller):
     @delete(
         operation_id="DeleteTicketMessage",
         path="/api/support/tickets/{ticket_id:uuid}/messages/{msg_id:uuid}",
-        guards=[requires_ticket_message_edit],
+        guards=[requires_feature_permission("support", "edit"), requires_ticket_access, requires_ticket_message_edit],
     )
     async def delete_message(
         self,

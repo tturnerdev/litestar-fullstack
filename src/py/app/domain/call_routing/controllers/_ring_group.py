@@ -14,6 +14,7 @@ from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.call_routing.deps import provide_ring_group_members_service
 from app.domain.call_routing.guards import requires_call_routing_access
+from app.domain.teams.guards import requires_feature_permission
 from app.domain.call_routing.schemas import (
     RingGroup,
     RingGroupCreate,
@@ -39,7 +40,6 @@ class RingGroupController(Controller):
     """Ring Groups."""
 
     tags = ["Call Routing - Ring Groups"]
-    guards = [requires_call_routing_access]
     dependencies = create_service_dependencies(
         RingGroupService,
         key="ring_groups_service",
@@ -59,7 +59,11 @@ class RingGroupController(Controller):
         "ring_group_members_service": Provide(provide_ring_group_members_service),
     }
 
-    @get(operation_id="ListRingGroups", path="/api/ring-groups")
+    @get(
+        operation_id="ListRingGroups",
+        path="/api/ring-groups",
+        guards=[requires_feature_permission("call_routing", "view"), requires_call_routing_access],
+    )
     async def list_ring_groups(
         self,
         ring_groups_service: RingGroupService,
@@ -79,7 +83,11 @@ class RingGroupController(Controller):
         results, total = await ring_groups_service.list_and_count(*filters)
         return ring_groups_service.to_schema(results, total, filters, schema_type=RingGroup)
 
-    @post(operation_id="CreateRingGroup", path="/api/ring-groups")
+    @post(
+        operation_id="CreateRingGroup",
+        path="/api/ring-groups",
+        guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
+    )
     async def create_ring_group(
         self,
         request: Request[m.User, Token, Any],
@@ -119,7 +127,11 @@ class RingGroupController(Controller):
         )
         return ring_groups_service.to_schema(db_obj, schema_type=RingGroup)
 
-    @get(operation_id="GetRingGroup", path="/api/ring-groups/{ring_group_id:uuid}")
+    @get(
+        operation_id="GetRingGroup",
+        path="/api/ring-groups/{ring_group_id:uuid}",
+        guards=[requires_feature_permission("call_routing", "view"), requires_call_routing_access],
+    )
     async def get_ring_group(
         self,
         ring_groups_service: RingGroupService,
@@ -137,7 +149,11 @@ class RingGroupController(Controller):
         db_obj = await ring_groups_service.get(ring_group_id)
         return ring_groups_service.to_schema(db_obj, schema_type=RingGroup)
 
-    @patch(operation_id="UpdateRingGroup", path="/api/ring-groups/{ring_group_id:uuid}")
+    @patch(
+        operation_id="UpdateRingGroup",
+        path="/api/ring-groups/{ring_group_id:uuid}",
+        guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
+    )
     async def update_ring_group(
         self,
         request: Request[m.User, Token, Any],
@@ -179,7 +195,12 @@ class RingGroupController(Controller):
         )
         return ring_groups_service.to_schema(fresh_obj, schema_type=RingGroup)
 
-    @delete(operation_id="DeleteRingGroup", path="/api/ring-groups/{ring_group_id:uuid}", return_dto=None)
+    @delete(
+        operation_id="DeleteRingGroup",
+        path="/api/ring-groups/{ring_group_id:uuid}",
+        return_dto=None,
+        guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
+    )
     async def delete_ring_group(
         self,
         request: Request[m.User, Token, Any],
@@ -217,7 +238,11 @@ class RingGroupController(Controller):
 
     # --- Ring Group Members ---
 
-    @get(operation_id="ListRingGroupMembers", path="/api/ring-groups/{ring_group_id:uuid}/members")
+    @get(
+        operation_id="ListRingGroupMembers",
+        path="/api/ring-groups/{ring_group_id:uuid}/members",
+        guards=[requires_feature_permission("call_routing", "view"), requires_call_routing_access],
+    )
     async def list_members(
         self,
         ring_groups_service: RingGroupService,
@@ -238,7 +263,11 @@ class RingGroupController(Controller):
         results = await ring_group_members_service.list(m.RingGroupMember.ring_group_id == ring_group_id)
         return ring_group_members_service.to_schema(results, schema_type=RingGroupMember)
 
-    @post(operation_id="CreateRingGroupMember", path="/api/ring-groups/{ring_group_id:uuid}/members")
+    @post(
+        operation_id="CreateRingGroupMember",
+        path="/api/ring-groups/{ring_group_id:uuid}/members",
+        guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
+    )
     async def create_member(
         self,
         request: Request[m.User, Token, Any],
@@ -286,6 +315,7 @@ class RingGroupController(Controller):
     @patch(
         operation_id="UpdateRingGroupMember",
         path="/api/ring-groups/{ring_group_id:uuid}/members/{member_id:uuid}",
+        guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
     )
     async def update_member(
         self,
@@ -339,6 +369,7 @@ class RingGroupController(Controller):
         operation_id="DeleteRingGroupMember",
         path="/api/ring-groups/{ring_group_id:uuid}/members/{member_id:uuid}",
         return_dto=None,
+        guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
     )
     async def delete_member(
         self,

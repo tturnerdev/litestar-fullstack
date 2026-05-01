@@ -8,6 +8,7 @@ from uuid import UUID
 from litestar import Controller, delete, get, patch, post
 from litestar.exceptions import NotFoundException, PermissionDeniedException
 from litestar.params import Dependency, Parameter
+from litestar.response import Response
 
 from app.db import models as m
 from app.domain.notifications.schemas import Notification, NotificationUpdate, UnreadCount
@@ -123,6 +124,30 @@ class NotificationController(Controller):
         """
         await notifications_service.mark_all_read(current_user.id)
         return UnreadCount(count=0)
+
+    @delete(
+        operation_id="DeleteReadNotifications",
+        path="/read",
+        summary="Delete all read notifications",
+        description="Permanently delete all read notifications for the current user.",
+        return_dto=None,
+    )
+    async def delete_read_notifications(
+        self,
+        notifications_service: NotificationService,
+        current_user: m.User,
+    ) -> Response:
+        """Delete all read notifications for the current user.
+
+        Args:
+            notifications_service: The notification service.
+            current_user: The current authenticated user.
+
+        Returns:
+            HTTP 204 No Content.
+        """
+        await notifications_service.delete_read(current_user.id)
+        return Response(content=None, status_code=204)
 
     @delete(operation_id="DeleteNotification", path="/{notification_id:uuid}", return_dto=None)
     async def delete_notification(

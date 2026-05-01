@@ -9,6 +9,7 @@ from litestar.di import Provide
 from litestar.params import Parameter
 
 from app.domain.admin.deps import provide_audit_log_service
+from app.domain.teams.guards import requires_feature_permission
 from app.domain.voice.deps import provide_dnd_service, provide_extensions_service
 from app.domain.voice.guards import requires_extension_ownership
 from app.domain.voice.schemas import DndSettings, DndSettingsUpdate, DndToggleResponse
@@ -29,14 +30,17 @@ class DndController(Controller):
     """Do Not Disturb."""
 
     tags = ["Voice - DND"]
-    guards = [requires_extension_ownership]
     dependencies = {
         "extensions_service": Provide(provide_extensions_service),
         "dnd_service": Provide(provide_dnd_service),
         "audit_service": Provide(provide_audit_log_service),
     }
 
-    @get(operation_id="GetDndSettings", path="/api/voice/extensions/{ext_id:uuid}/dnd")
+    @get(
+        operation_id="GetDndSettings",
+        path="/api/voice/extensions/{ext_id:uuid}/dnd",
+        guards=[requires_feature_permission("voice", "view"), requires_extension_ownership],
+    )
     async def get_dnd_settings(
         self,
         extensions_service: ExtensionService,
@@ -49,7 +53,11 @@ class DndController(Controller):
         db_obj = await dnd_service.get_or_create_for_extension(ext_id)
         return dnd_service.to_schema(db_obj, schema_type=DndSettings)
 
-    @patch(operation_id="UpdateDndSettings", path="/api/voice/extensions/{ext_id:uuid}/dnd")
+    @patch(
+        operation_id="UpdateDndSettings",
+        path="/api/voice/extensions/{ext_id:uuid}/dnd",
+        guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],
+    )
     async def update_dnd_settings(
         self,
         extensions_service: ExtensionService,
@@ -64,7 +72,11 @@ class DndController(Controller):
         db_obj = await dnd_service.update(item_id=db_obj.id, data=data.to_dict())
         return dnd_service.to_schema(db_obj, schema_type=DndSettings)
 
-    @post(operation_id="ToggleDnd", path="/api/voice/extensions/{ext_id:uuid}/dnd/toggle")
+    @post(
+        operation_id="ToggleDnd",
+        path="/api/voice/extensions/{ext_id:uuid}/dnd/toggle",
+        guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],
+    )
     async def toggle_dnd(
         self,
         request: Request[m.User, Token, Any],

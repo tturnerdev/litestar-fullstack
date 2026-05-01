@@ -16,6 +16,7 @@ from app.domain.fax.controllers._fax_number import _can_access_fax_number
 from app.domain.fax.deps import provide_fax_numbers_service
 from app.domain.fax.guards import requires_fax_number_access
 from app.domain.fax.schemas import FaxEmailRoute, FaxEmailRouteCreate, FaxEmailRouteUpdate
+from app.domain.teams.guards import requires_feature_permission
 from app.domain.fax.services import FaxEmailRouteService
 from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
@@ -37,7 +38,6 @@ class FaxEmailRouteController(Controller):
 
     path = "/api/fax/numbers/{fax_number_id:uuid}/email-routes"
     tags = ["Fax Email Routes"]
-    guards = [requires_fax_number_access]
     dependencies = create_service_dependencies(
         FaxEmailRouteService,
         key="fax_email_routes_service",
@@ -78,7 +78,11 @@ class FaxEmailRouteController(Controller):
             raise PermissionDeniedException(detail="Insufficient permissions to access this fax number.")
         return fax_number
 
-    @get(operation_id="ListFaxEmailRoutes", path="")
+    @get(
+        operation_id="ListFaxEmailRoutes",
+        path="",
+        guards=[requires_feature_permission("fax", "view"), requires_fax_number_access],
+    )
     async def list_fax_email_routes(
         self,
         fax_email_routes_service: FaxEmailRouteService,
@@ -106,7 +110,11 @@ class FaxEmailRouteController(Controller):
         )
         return fax_email_routes_service.to_schema(results, total, filters, schema_type=FaxEmailRoute)
 
-    @post(operation_id="CreateFaxEmailRoute", path="")
+    @post(
+        operation_id="CreateFaxEmailRoute",
+        path="",
+        guards=[requires_feature_permission("fax", "edit"), requires_fax_number_access],
+    )
     async def create_fax_email_route(
         self,
         request: Request[m.User, Token, Any],
@@ -151,7 +159,11 @@ class FaxEmailRouteController(Controller):
         )
         return fax_email_routes_service.to_schema(db_obj, schema_type=FaxEmailRoute)
 
-    @patch(operation_id="UpdateFaxEmailRoute", path="/{route_id:uuid}")
+    @patch(
+        operation_id="UpdateFaxEmailRoute",
+        path="/{route_id:uuid}",
+        guards=[requires_feature_permission("fax", "edit"), requires_fax_number_access],
+    )
     async def update_fax_email_route(
         self,
         request: Request[m.User, Token, Any],
@@ -203,7 +215,11 @@ class FaxEmailRouteController(Controller):
         )
         return fax_email_routes_service.to_schema(db_obj, schema_type=FaxEmailRoute)
 
-    @delete(operation_id="DeleteFaxEmailRoute", path="/{route_id:uuid}")
+    @delete(
+        operation_id="DeleteFaxEmailRoute",
+        path="/{route_id:uuid}",
+        guards=[requires_feature_permission("fax", "edit"), requires_fax_number_access],
+    )
     async def delete_fax_email_route(
         self,
         request: Request[m.User, Token, Any],

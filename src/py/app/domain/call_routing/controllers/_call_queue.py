@@ -14,6 +14,7 @@ from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.call_routing.deps import provide_call_queue_members_service
 from app.domain.call_routing.guards import requires_call_routing_access
+from app.domain.teams.guards import requires_feature_permission
 from app.domain.call_routing.schemas import (
     CallQueue,
     CallQueueCreate,
@@ -40,7 +41,6 @@ class CallQueueController(Controller):
     """Call Queues."""
 
     tags = ["Call Routing - Call Queues"]
-    guards = [requires_call_routing_access]
     dependencies = create_service_dependencies(
         CallQueueService,
         key="call_queues_service",
@@ -60,7 +60,11 @@ class CallQueueController(Controller):
         "call_queue_members_service": Provide(provide_call_queue_members_service),
     }
 
-    @get(operation_id="ListCallQueues", path="/api/call-queues")
+    @get(
+        operation_id="ListCallQueues",
+        path="/api/call-queues",
+        guards=[requires_feature_permission("call_routing", "view"), requires_call_routing_access],
+    )
     async def list_call_queues(
         self,
         call_queues_service: CallQueueService,
@@ -80,7 +84,11 @@ class CallQueueController(Controller):
         results, total = await call_queues_service.list_and_count(*filters)
         return call_queues_service.to_schema(results, total, filters, schema_type=CallQueue)
 
-    @post(operation_id="CreateCallQueue", path="/api/call-queues")
+    @post(
+        operation_id="CreateCallQueue",
+        path="/api/call-queues",
+        guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
+    )
     async def create_call_queue(
         self,
         request: Request[m.User, Token, Any],
@@ -120,7 +128,11 @@ class CallQueueController(Controller):
         )
         return call_queues_service.to_schema(db_obj, schema_type=CallQueue)
 
-    @get(operation_id="GetCallQueue", path="/api/call-queues/{call_queue_id:uuid}")
+    @get(
+        operation_id="GetCallQueue",
+        path="/api/call-queues/{call_queue_id:uuid}",
+        guards=[requires_feature_permission("call_routing", "view"), requires_call_routing_access],
+    )
     async def get_call_queue(
         self,
         call_queues_service: CallQueueService,
@@ -138,7 +150,11 @@ class CallQueueController(Controller):
         db_obj = await call_queues_service.get(call_queue_id)
         return call_queues_service.to_schema(db_obj, schema_type=CallQueue)
 
-    @patch(operation_id="UpdateCallQueue", path="/api/call-queues/{call_queue_id:uuid}")
+    @patch(
+        operation_id="UpdateCallQueue",
+        path="/api/call-queues/{call_queue_id:uuid}",
+        guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
+    )
     async def update_call_queue(
         self,
         request: Request[m.User, Token, Any],
@@ -180,7 +196,12 @@ class CallQueueController(Controller):
         )
         return call_queues_service.to_schema(fresh_obj, schema_type=CallQueue)
 
-    @delete(operation_id="DeleteCallQueue", path="/api/call-queues/{call_queue_id:uuid}", return_dto=None)
+    @delete(
+        operation_id="DeleteCallQueue",
+        path="/api/call-queues/{call_queue_id:uuid}",
+        return_dto=None,
+        guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
+    )
     async def delete_call_queue(
         self,
         request: Request[m.User, Token, Any],
@@ -218,7 +239,11 @@ class CallQueueController(Controller):
 
     # --- Call Queue Members ---
 
-    @get(operation_id="ListCallQueueMembers", path="/api/call-queues/{call_queue_id:uuid}/members")
+    @get(
+        operation_id="ListCallQueueMembers",
+        path="/api/call-queues/{call_queue_id:uuid}/members",
+        guards=[requires_feature_permission("call_routing", "view"), requires_call_routing_access],
+    )
     async def list_members(
         self,
         call_queues_service: CallQueueService,
@@ -239,7 +264,11 @@ class CallQueueController(Controller):
         results = await call_queue_members_service.list(m.CallQueueMember.call_queue_id == call_queue_id)
         return call_queue_members_service.to_schema(results, schema_type=CallQueueMember)
 
-    @post(operation_id="CreateCallQueueMember", path="/api/call-queues/{call_queue_id:uuid}/members")
+    @post(
+        operation_id="CreateCallQueueMember",
+        path="/api/call-queues/{call_queue_id:uuid}/members",
+        guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
+    )
     async def create_member(
         self,
         request: Request[m.User, Token, Any],
@@ -287,6 +316,7 @@ class CallQueueController(Controller):
     @patch(
         operation_id="UpdateCallQueueMember",
         path="/api/call-queues/{call_queue_id:uuid}/members/{member_id:uuid}",
+        guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
     )
     async def update_member(
         self,
@@ -340,6 +370,7 @@ class CallQueueController(Controller):
         operation_id="DeleteCallQueueMember",
         path="/api/call-queues/{call_queue_id:uuid}/members/{member_id:uuid}",
         return_dto=None,
+        guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
     )
     async def delete_member(
         self,
@@ -383,6 +414,7 @@ class CallQueueController(Controller):
     @put(
         operation_id="PauseCallQueueMember",
         path="/api/call-queues/{call_queue_id:uuid}/members/{member_id:uuid}/pause",
+        guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
     )
     async def pause_member(
         self,

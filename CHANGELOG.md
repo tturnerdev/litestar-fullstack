@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.112.0 (2026-05-01)
+
+### Added
+- **RBAC Permission Guards**: Added `requires_feature_permission` guard enforcing `TeamRolePermission` entries on device and voice extension endpoints
+- **Admin Roles & Permissions Page**: New admin page at `/admin/roles` with editable permission grid per team
+- **Editable Permissions Dialog**: Manage-permissions dialog rewritten from read-only to fully editable checkbox matrix
+- **CSV Bulk Import**: Admin page at `/admin/bulk-import` supporting CSV upload for devices and extensions with preview/validate/import flow
+- **Voicemail PBX Integration**: Voicemail settings updates now push enable/disable/update to FreePBX via GraphQL mutations with `doreload`
+- **Location Activity Panel**: Added `EntityActivityPanel` to location detail page sidebar
+
+### Changed
+- Device and voice extension controllers now enforce RBAC permission checks before ownership guards
+
 ## v0.111.0 (2026-05-01)
 
 ### Added

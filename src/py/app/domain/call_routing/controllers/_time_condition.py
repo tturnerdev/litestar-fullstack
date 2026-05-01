@@ -12,6 +12,7 @@ from litestar.params import Dependency, Parameter
 from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.call_routing.guards import requires_call_routing_access
+from app.domain.teams.guards import requires_feature_permission
 from app.domain.call_routing.schemas import (
     TimeCondition,
     TimeConditionCreate,
@@ -35,7 +36,6 @@ class TimeConditionController(Controller):
     """Time Conditions."""
 
     tags = ["Call Routing - Time Conditions"]
-    guards = [requires_call_routing_access]
     dependencies = create_service_dependencies(
         TimeConditionService,
         key="time_conditions_service",
@@ -53,7 +53,11 @@ class TimeConditionController(Controller):
         "audit_service": Provide(provide_audit_log_service),
     }
 
-    @get(operation_id="ListTimeConditions", path="/api/time-conditions")
+    @get(
+        operation_id="ListTimeConditions",
+        path="/api/time-conditions",
+        guards=[requires_feature_permission("call_routing", "view"), requires_call_routing_access],
+    )
     async def list_time_conditions(
         self,
         time_conditions_service: TimeConditionService,
@@ -73,7 +77,11 @@ class TimeConditionController(Controller):
         results, total = await time_conditions_service.list_and_count(*filters)
         return time_conditions_service.to_schema(results, total, filters, schema_type=TimeCondition)
 
-    @post(operation_id="CreateTimeCondition", path="/api/time-conditions")
+    @post(
+        operation_id="CreateTimeCondition",
+        path="/api/time-conditions",
+        guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
+    )
     async def create_time_condition(
         self,
         request: Request[m.User, Token, Any],
@@ -113,7 +121,11 @@ class TimeConditionController(Controller):
         )
         return time_conditions_service.to_schema(db_obj, schema_type=TimeCondition)
 
-    @get(operation_id="GetTimeCondition", path="/api/time-conditions/{time_condition_id:uuid}")
+    @get(
+        operation_id="GetTimeCondition",
+        path="/api/time-conditions/{time_condition_id:uuid}",
+        guards=[requires_feature_permission("call_routing", "view"), requires_call_routing_access],
+    )
     async def get_time_condition(
         self,
         time_conditions_service: TimeConditionService,
@@ -133,7 +145,11 @@ class TimeConditionController(Controller):
         db_obj = await time_conditions_service.get(time_condition_id)
         return time_conditions_service.to_schema(db_obj, schema_type=TimeCondition)
 
-    @patch(operation_id="UpdateTimeCondition", path="/api/time-conditions/{time_condition_id:uuid}")
+    @patch(
+        operation_id="UpdateTimeCondition",
+        path="/api/time-conditions/{time_condition_id:uuid}",
+        guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
+    )
     async def update_time_condition(
         self,
         request: Request[m.User, Token, Any],
@@ -177,7 +193,12 @@ class TimeConditionController(Controller):
         )
         return time_conditions_service.to_schema(fresh_obj, schema_type=TimeCondition)
 
-    @delete(operation_id="DeleteTimeCondition", path="/api/time-conditions/{time_condition_id:uuid}", return_dto=None)
+    @delete(
+        operation_id="DeleteTimeCondition",
+        path="/api/time-conditions/{time_condition_id:uuid}",
+        return_dto=None,
+        guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
+    )
     async def delete_time_condition(
         self,
         request: Request[m.User, Token, Any],
@@ -218,6 +239,7 @@ class TimeConditionController(Controller):
     @put(
         operation_id="SetTimeConditionOverride",
         path="/api/time-conditions/{time_condition_id:uuid}/override",
+        guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
     )
     async def set_override(
         self,
