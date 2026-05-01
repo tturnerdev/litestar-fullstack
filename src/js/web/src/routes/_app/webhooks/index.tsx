@@ -1,8 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { useCallback, useState } from "react"
 import {
+  Activity,
   AlertCircle,
   Check,
+  ChevronDown,
+  Clock,
   Home,
   Loader2,
   MoreVertical,
@@ -25,6 +28,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import {
   Dialog,
   DialogContent,
@@ -54,7 +58,9 @@ import {
   useUpdateWebhook,
   useDeleteWebhook,
   useTestWebhook,
+  useWebhookDeliveries,
 } from "@/lib/api/hooks/webhooks"
+import type { WebhookDelivery } from "@/lib/api/hooks/webhooks"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import type { WebhookCreate, WebhookList, WebhookUpdate } from "@/lib/generated/api"
 
@@ -105,6 +111,130 @@ function formatRelativeTime(dateStr: string | null | undefined): string {
 function truncateUrl(url: string, maxLen = 40): string {
   if (url.length <= maxLen) return url
   return url.slice(0, maxLen) + "..."
+}
+
+function statusCodeBadge(code: number | null): React.ReactNode {
+  if (code === null) {
+    return (
+      <Badge variant="outline" className="text-muted-foreground">
+        --
+      </Badge>
+    )
+  }
+  if (code >= 200 && code < 300) {
+    return (
+      <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400">
+        {code}
+      </Badge>
+    )
+  }
+  if (code >= 300 && code < 400) {
+    return (
+      <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400">
+        {code}
+      </Badge>
+    )
+  }
+  return (
+    <Badge className="bg-red-100 text-red-700 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400">
+      {code}
+    </Badge>
+  )
+}
+
+function formatTimestamp(dateStr: string | null | undefined): string {
+  if (!dateStr) return "--"
+  const date = new Date(dateStr)
+  return date.toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  })
+}
+
+// -- Delivery History Panel ---------------------------------------------------
+
+function DeliveryHistoryPanel({ webhookId }: { webhookId: string }) {
+  const { data: deliveries, isLoading, isError } = useWebhookDeliveries(webhookId)
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center gap-2 py-4 px-6 text-sm text-muted-foreground">
+        <Loader2 className="h-4 w-4 animate-spin" />
+        Loading deliveries...
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div className="flex items-center gap-2 py-4 px-6 text-sm text-destructive">
+        <AlertCircle className="h-4 w-4" />
+        Failed to load delivery history.
+      </div>
+    )
+  }
+
+  if (!deliveries || deliveries.length === 0) {
+    return (
+      <div className="flex items-center gap-2 py-4 px-6 text-sm text-muted-foreground">
+        <Activity className="h-4 w-4" />
+        No delivery attempts yet. Use the Test action to send a test payload.
+      </div>
+    )
+  }
+
+  return (
+    <div className="px-2 pb-3">
+      <Table aria-label="Delivery history">
+        <TableHeader>
+          <TableRow>
+            <TableHead className="text-xs">Timestamp</TableHead>
+            <TableHead className="text-xs">Event</TableHead>
+            <TableHead className="text-xs">Status</TableHead>
+            <TableHead className="text-xs">Response Time</TableHead>
+            <TableHead className="text-xs">Result</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {deliveries.map((delivery: WebhookDelivery) => (
+            <TableRow key={delivery.id}>
+              <TableCell className="text-xs text-muted-foreground">
+                <div className="flex items-center gap-1.5">
+                  <Clock className="h-3 w-3" />
+                  {formatTimestamp(delivery.createdAt)}
+                </div>
+              </TableCell>
+              <TableCell>
+                <span className="text-xs font-mono">{delivery.event}</span>
+              </TableCell>
+              <TableCell>{statusCodeBadge(delivery.statusCode)}</TableCell>
+              <TableCell className="text-xs text-muted-foreground">{delivery.responseTimeMs}ms</TableCell>
+              <TableCell>
+                {delivery.success ? (
+                  <Badge className="gap-1 bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400">
+                    <Check className="h-3 w-3" />
+                    Success
+                  </Badge>
+                ) : (
+                  <Badge
+                    variant="destructive"
+                    className="gap-1"
+                    title={delivery.error ?? undefined}
+                  >
+                    <XCircle className="h-3 w-3" />
+                    Failed
+                  </Badge>
+                )}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  )
 }
 
 // -- Create/Edit Webhook Dialog -----------------------------------------------
@@ -525,7 +655,7 @@ function WebhooksPage() {
                     <TableHead>Status</TableHead>
                     <TableHead>Last Triggered</TableHead>
                     <TableHead>Failures</TableHead>
-                    <TableHead className="w-16 text-right">Actions</TableHead>
+                    <TableHead className="w-24 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -605,84 +735,123 @@ function WebhookRow({
   onDelete: () => void
 }) {
   const testWebhookMutation = useTestWebhook()
+  const [deliveriesOpen, setDeliveriesOpen] = useState(false)
 
   return (
-    <TableRow className={`transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`}>
-      <TableCell>
-        <div className="flex items-center gap-2">
-          <Webhook className="h-4 w-4 text-muted-foreground" />
-          <span className="font-medium">{webhook.name}</span>
-        </div>
-      </TableCell>
-      <TableCell>
-        <span className="text-sm text-muted-foreground font-mono" title={webhook.url}>
-          {truncateUrl(webhook.url)}
-        </span>
-      </TableCell>
-      <TableCell>
-        <Badge variant="secondary" className="gap-1">
-          {webhook.events.length} event{webhook.events.length === 1 ? "" : "s"}
-        </Badge>
-      </TableCell>
-      <TableCell>
-        {webhook.isActive ? (
-          <Badge className="gap-1 bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400">
-            <Check className="h-3 w-3" />
-            Active
-          </Badge>
-        ) : (
-          <Badge variant="outline" className="gap-1 text-muted-foreground">
-            <XCircle className="h-3 w-3" />
-            Inactive
-          </Badge>
-        )}
-      </TableCell>
-      <TableCell>
-        <span className="text-sm text-muted-foreground">
-          {formatRelativeTime(webhook.lastTriggeredAt as string | null | undefined)}
-        </span>
-      </TableCell>
-      <TableCell>
-        {(webhook.failureCount ?? 0) > 0 ? (
-          <Badge variant="destructive" className="gap-1">
-            {webhook.failureCount}
-          </Badge>
-        ) : (
-          <span className="text-sm text-muted-foreground">0</span>
-        )}
-      </TableCell>
-      <TableCell className="text-right">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8" data-slot="dropdown">
-              <MoreVertical className="h-4 w-4" />
-              <span className="sr-only">Actions</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={onEdit}>
-              <Pencil className="mr-2 h-4 w-4" />
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => testWebhookMutation.mutate(webhook.id)}
-              disabled={testWebhookMutation.isPending}
-            >
-              {testWebhookMutation.isPending ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Play className="mr-2 h-4 w-4" />
-              )}
-              Test
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={onDelete}>
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </TableCell>
-    </TableRow>
+    <Collapsible open={deliveriesOpen} onOpenChange={setDeliveriesOpen} asChild>
+      <>
+        <TableRow className={`transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`}>
+          <TableCell>
+            <div className="flex items-center gap-2">
+              <Webhook className="h-4 w-4 text-muted-foreground" />
+              <span className="font-medium">{webhook.name}</span>
+            </div>
+          </TableCell>
+          <TableCell>
+            <span className="text-sm text-muted-foreground font-mono" title={webhook.url}>
+              {truncateUrl(webhook.url)}
+            </span>
+          </TableCell>
+          <TableCell>
+            <Badge variant="secondary" className="gap-1">
+              {webhook.events.length} event{webhook.events.length === 1 ? "" : "s"}
+            </Badge>
+          </TableCell>
+          <TableCell>
+            {webhook.isActive ? (
+              <Badge className="gap-1 bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400">
+                <Check className="h-3 w-3" />
+                Active
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="gap-1 text-muted-foreground">
+                <XCircle className="h-3 w-3" />
+                Inactive
+              </Badge>
+            )}
+          </TableCell>
+          <TableCell>
+            <span className="text-sm text-muted-foreground">
+              {formatRelativeTime(webhook.lastTriggeredAt as string | null | undefined)}
+            </span>
+          </TableCell>
+          <TableCell>
+            {(webhook.failureCount ?? 0) > 0 ? (
+              <Badge variant="destructive" className="gap-1">
+                {webhook.failureCount}
+              </Badge>
+            ) : (
+              <span className="text-sm text-muted-foreground">0</span>
+            )}
+          </TableCell>
+          <TableCell className="text-right">
+            <div className="flex items-center justify-end gap-1">
+              <CollapsibleTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  title="Delivery history"
+                >
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform ${deliveriesOpen ? "rotate-180" : ""}`}
+                  />
+                  <span className="sr-only">Toggle deliveries</span>
+                </Button>
+              </CollapsibleTrigger>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" data-slot="dropdown">
+                    <MoreVertical className="h-4 w-4" />
+                    <span className="sr-only">Actions</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={onEdit}>
+                    <Pencil className="mr-2 h-4 w-4" />
+                    Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => testWebhookMutation.mutate(webhook.id)}
+                    disabled={testWebhookMutation.isPending}
+                  >
+                    {testWebhookMutation.isPending ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Play className="mr-2 h-4 w-4" />
+                    )}
+                    Test
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setDeliveriesOpen((prev) => !prev)}>
+                    <Activity className="mr-2 h-4 w-4" />
+                    Deliveries
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={onDelete}>
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </TableCell>
+        </TableRow>
+        <CollapsibleContent asChild>
+          <tr>
+            <td colSpan={7} className="p-0">
+              <div className="border-t border-border/40 bg-muted/30">
+                <div className="flex items-center gap-2 px-6 pt-3 pb-1">
+                  <Activity className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-xs font-medium text-muted-foreground">
+                    Recent Deliveries
+                  </span>
+                </div>
+                <DeliveryHistoryPanel webhookId={webhook.id} />
+              </div>
+            </td>
+          </tr>
+        </CollapsibleContent>
+      </>
+    </Collapsible>
   )
 }

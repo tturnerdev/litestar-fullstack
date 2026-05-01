@@ -5,7 +5,7 @@ import { useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAuthStore } from "@/lib/auth"
-import { listTeams } from "@/lib/generated/api"
+import { listDevices, listExtensions, listTeams } from "@/lib/generated/api"
 
 const DISMISSED_KEY = "getting-started-dismissed"
 
@@ -37,8 +37,30 @@ export function GettingStarted() {
     enabled: isAuthenticated,
   })
 
+  const { data: deviceCount = 0 } = useQuery({
+    queryKey: ["getting-started", "devices"],
+    queryFn: async () => {
+      const response = await listDevices({ query: { pageSize: 1 } })
+      return (response.data as { total?: number } | undefined)?.total ?? 0
+    },
+    enabled: isAuthenticated,
+    staleTime: 60_000,
+  })
+
+  const { data: extensionCount = 0 } = useQuery({
+    queryKey: ["getting-started", "extensions"],
+    queryFn: async () => {
+      const response = await listExtensions({ query: { pageSize: 1 } })
+      return (response.data as { total?: number } | undefined)?.total ?? 0
+    },
+    enabled: isAuthenticated,
+    staleTime: 60_000,
+  })
+
   const hasProfile = !!(user?.name && user.name.trim().length > 0)
   const hasTeam = teams.length > 0
+  const hasDevice = deviceCount > 0
+  const hasVoice = extensionCount > 0
 
   const items: ChecklistItem[] = useMemo(
     () => [
@@ -60,18 +82,18 @@ export function GettingStarted() {
         id: "device",
         label: "Add a device",
         description: "Register a phone, computer, or other device",
-        completed: false,
+        completed: hasDevice,
         to: "/devices",
       },
       {
         id: "voice",
         label: "Set up voice",
         description: "Configure phone numbers and extensions",
-        completed: false,
-        to: "/voice/phone-numbers",
+        completed: hasVoice,
+        to: "/voice/extensions",
       },
     ],
-    [hasProfile, hasTeam],
+    [hasProfile, hasTeam, hasDevice, hasVoice],
   )
 
   const completedCount = items.filter((item) => item.completed).length

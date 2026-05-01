@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.117.0 (2026-05-01)
+
+### Added
+- **Webhook delivery tracking** — New `WebhookDelivery` model and `GET /api/webhooks/{id}/deliveries` endpoint. Test webhook endpoint now records delivery attempts. Frontend shows expandable delivery history per webhook with status codes, response times, and success/failure badges
+- **Getting Started completion tracking** — Device and Voice checklist items now query real data (device count, extension count) instead of showing hardcoded incomplete status
+
+### Changed
+- Removed 5 unused frontend components (UserMenu, TeamActivity, UserRowActions, TeamRowActions, UserBulkActions) and 4 dead audit service helper methods
+
 ## v0.116.0 (2026-05-01)
 
 ### Added

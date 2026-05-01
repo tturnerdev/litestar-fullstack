@@ -14,8 +14,16 @@ from litestar.params import Dependency, Parameter
 
 from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
-from app.domain.webhooks.schemas import WebhookCreate, WebhookDetail, WebhookList, WebhookTestResult, WebhookUpdate
-from app.domain.webhooks.services import WebhookService
+from app.domain.webhooks.deps import provide_webhook_delivery_service
+from app.domain.webhooks.schemas import (
+    WebhookCreate,
+    WebhookDeliveryList,
+    WebhookDetail,
+    WebhookList,
+    WebhookTestResult,
+    WebhookUpdate,
+)
+from app.domain.webhooks.services import WebhookDeliveryService, WebhookService
 from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
 
@@ -77,6 +85,7 @@ class WebhookController(Controller):
         },
     ) | {
         "audit_service": Provide(provide_audit_log_service),
+        "delivery_service": Provide(provide_webhook_delivery_service),
     }
 
     @get(operation_id="ListWebhooks", path="/api/webhooks")
@@ -259,6 +268,41 @@ class WebhookController(Controller):
             request=request,
         )
 
+    @get(
+        operation_id="ListWebhookDeliveries",
+        path="/api/webhooks/{webhook_id:uuid}/deliveries",
+    )
+    async def list_deliveries(
+        self,
+        webhooks_service: WebhookService,
+        delivery_service: WebhookDeliveryService,
+        current_user: m.User,
+        webhook_id: Annotated[UUID, Parameter(title="Webhook ID", description="The webhook to list deliveries for.")],
+    ) -> list[WebhookDeliveryList]:
+        """List the 20 most recent deliveries for a webhook.
+
+        Args:
+            webhooks_service: Webhook Service
+            delivery_service: Webhook Delivery Service
+            current_user: Current User
+            webhook_id: Webhook ID
+
+        Returns:
+            list[WebhookDeliveryList]
+        """
+        db_obj = await webhooks_service.get(webhook_id)
+        if db_obj.user_id != current_user.id and not current_user.is_superuser:
+            raise NotFoundException(detail="Webhook not found.")
+
+        from advanced_alchemy.filters import LimitOffset, OrderBy
+
+        results, _total = await delivery_service.list_and_count(
+            m.WebhookDelivery.webhook_id == webhook_id,
+            LimitOffset(limit=20, offset=0),
+            OrderBy(field_name="created_at", sort_order="desc"),
+        )
+        return [delivery_service.to_schema(obj, schema_type=WebhookDeliveryList) for obj in results]
+
     @post(
         operation_id="TestWebhook",
         path="/api/webhooks/{webhook_id:uuid}/test",
@@ -266,6 +310,7 @@ class WebhookController(Controller):
     async def test_webhook(
         self,
         webhooks_service: WebhookService,
+        delivery_service: WebhookDeliveryService,
         current_user: m.User,
         webhook_id: Annotated[UUID, Parameter(title="Webhook ID", description="The webhook to test.")],
     ) -> WebhookTestResult:
@@ -273,6 +318,7 @@ class WebhookController(Controller):
 
         Args:
             webhooks_service: Webhook Service
+            delivery_service: Webhook Delivery Service
             current_user: Current User
             webhook_id: Webhook ID
 
@@ -299,6 +345,11 @@ class WebhookController(Controller):
         if db_obj.secret:
             custom_headers["X-Webhook-Secret"] = db_obj.secret
 
+        status_code: int | None = None
+        elapsed_ms: int = 0
+        success: bool = False
+        error: str | None = None
+
         start_time = time.monotonic()
         try:
             async with httpx.AsyncClient(timeout=10.0) as client:
@@ -308,26 +359,30 @@ class WebhookController(Controller):
                     headers=custom_headers,
                 )
             elapsed_ms = int((time.monotonic() - start_time) * 1000)
+            status_code = response.status_code
             success = 200 <= response.status_code < 300
-            return WebhookTestResult(
-                success=success,
-                status_code=response.status_code,
-                response_time_ms=elapsed_ms,
-                error=None if success else f"HTTP {response.status_code}",
-            )
+            if not success:
+                error = f"HTTP {response.status_code}"
         except httpx.TimeoutException:
             elapsed_ms = int((time.monotonic() - start_time) * 1000)
-            return WebhookTestResult(
-                success=False,
-                status_code=None,
-                response_time_ms=elapsed_ms,
-                error="Request timed out after 10 seconds",
-            )
+            error = "Request timed out after 10 seconds"
         except Exception as exc:
             elapsed_ms = int((time.monotonic() - start_time) * 1000)
-            return WebhookTestResult(
-                success=False,
-                status_code=None,
-                response_time_ms=elapsed_ms,
-                error=str(exc),
-            )
+            error = str(exc)
+
+        # Record the delivery attempt
+        await delivery_service.create({
+            "webhook_id": webhook_id,
+            "event": "webhook.test",
+            "status_code": status_code,
+            "response_time_ms": elapsed_ms,
+            "success": success,
+            "error": error,
+        })
+
+        return WebhookTestResult(
+            success=success,
+            status_code=status_code,
+            response_time_ms=elapsed_ms,
+            error=error,
+        )

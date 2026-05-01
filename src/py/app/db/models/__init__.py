@@ -64,6 +64,7 @@ from app.db.models._voice_enums import (
 from app.db.models._voicemail_box import VoicemailBox
 from app.db.models._voicemail_message import VoicemailMessage
 from app.db.models._webhook import Webhook
+from app.db.models._webhook_delivery import WebhookDelivery
 
 __all__ = (
     "AuditLog",
@@ -138,5 +139,6 @@ __all__ = (
     "VoicemailBox",
     "VoicemailMessage",
     "Webhook",
+    "WebhookDelivery",
     "team_tag",
 )

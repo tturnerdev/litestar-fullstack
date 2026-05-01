@@ -72,3 +72,16 @@ class WebhookTestResult(CamelizedBaseStruct):
     status_code: int | None = None
     response_time_ms: int = 0
     error: str | None = None
+
+
+class WebhookDeliveryList(CamelizedBaseStruct):
+    """Webhook delivery record (list view)."""
+
+    id: UUID
+    webhook_id: UUID
+    event: str
+    status_code: int | None = None
+    response_time_ms: int = 0
+    success: bool = False
+    error: str | None = None
+    created_at: datetime | None = None

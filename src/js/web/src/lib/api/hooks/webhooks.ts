@@ -20,6 +20,21 @@ import {
 } from "@/lib/generated/api"
 
 // ---------------------------------------------------------------------------
+// Manual types (not in generated client — endpoint uses manual fetch)
+// ---------------------------------------------------------------------------
+
+export interface WebhookDelivery {
+  id: string
+  webhookId: string
+  event: string
+  statusCode: number | null
+  responseTimeMs: number
+  success: boolean
+  error: string | null
+  createdAt: string | null
+}
+
+// ---------------------------------------------------------------------------
 // List Webhooks
 // ---------------------------------------------------------------------------
 
@@ -138,6 +153,7 @@ export function useDeleteWebhook() {
 // ---------------------------------------------------------------------------
 
 export function useTestWebhook() {
+  const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (webhookId: string) => {
       const response = await testWebhook({
@@ -145,7 +161,8 @@ export function useTestWebhook() {
       } as unknown as { path: { webhook_id: string } })
       return response.data as WebhookTestResult
     },
-    onSuccess: (data) => {
+    onSuccess: (data, webhookId) => {
+      queryClient.invalidateQueries({ queryKey: ["webhook-deliveries", webhookId] })
       if (data?.success) {
         toast.success("Webhook test successful", {
           description: `Status ${data.statusCode} in ${data.responseTimeMs}ms`,
@@ -161,5 +178,25 @@ export function useTestWebhook() {
         description: error instanceof Error ? error.message : "Try again later",
       })
     },
+  })
+}
+
+// ---------------------------------------------------------------------------
+// List Webhook Deliveries (manual fetch — not in generated client)
+// ---------------------------------------------------------------------------
+
+export function useWebhookDeliveries(webhookId: string) {
+  return useQuery({
+    queryKey: ["webhook-deliveries", webhookId],
+    queryFn: async () => {
+      const response = await fetch(`/api/webhooks/${webhookId}/deliveries`, {
+        credentials: "same-origin",
+      })
+      if (!response.ok) {
+        throw new Error(`Failed to fetch deliveries: ${response.status}`)
+      }
+      return (await response.json()) as WebhookDelivery[]
+    },
+    enabled: !!webhookId,
   })
 }
