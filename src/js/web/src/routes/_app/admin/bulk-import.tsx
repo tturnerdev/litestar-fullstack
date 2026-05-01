@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from "react"
 import { createFileRoute } from "@tanstack/react-router"
+import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import {
   AlertCircle,
@@ -339,7 +340,15 @@ function ImportSection({
   const handlePreview = () => {
     if (!file) return
     previewMutation.mutate(file, {
-      onSuccess: (data) => setPreview(data),
+      onSuccess: (data) => {
+        setPreview(data)
+        toast.success(`Preview ready — ${data.validRows} valid row${data.validRows !== 1 ? "s" : ""}`)
+      },
+      onError: (err) => {
+        toast.error("Preview failed", {
+          description: err instanceof Error ? err.message : undefined,
+        })
+      },
     })
   }
 
@@ -349,6 +358,14 @@ function ImportSection({
       onSuccess: (data) => {
         setResult(data)
         setPreview(null)
+        toast.success("Import completed", {
+          description: `${data.created} created, ${data.updated} updated, ${data.skipped} skipped`,
+        })
+      },
+      onError: (err) => {
+        toast.error("Import failed", {
+          description: err instanceof Error ? err.message : undefined,
+        })
       },
     })
   }

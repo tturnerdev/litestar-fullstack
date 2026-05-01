@@ -4,6 +4,7 @@ import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import {
   AlertCircle,
+  AlertTriangle,
   Check,
   Cpu,
   Loader2,
@@ -15,7 +16,18 @@ import {
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Dialog,
@@ -496,29 +508,57 @@ function AdminDeviceTemplatesPage() {
                           {formatDateTime(tmpl.createdAt)}
                         </TableCell>
                         <TableCell>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              if (window.confirm(`Delete template "${tmpl.displayName}"?`)) {
-                                deleteMutation.mutate(tmpl.id, {
-                                  onSuccess: () => {
-                                    toast.success("Device template deleted")
-                                  },
-                                  onError: (err) => {
-                                    toast.error("Failed to delete device template", {
-                                      description: err instanceof Error ? err.message : undefined,
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                                <span className="sr-only">Delete</span>
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle className="flex items-center gap-2">
+                                  <AlertTriangle className="h-5 w-5 text-destructive" />
+                                  Delete Device Template
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete the template{" "}
+                                  <span className="font-medium text-foreground">
+                                    {tmpl.displayName}
+                                  </span>
+                                  ? This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel disabled={deleteMutation.isPending}>
+                                  Cancel
+                                </AlertDialogCancel>
+                                <AlertDialogAction
+                                  className={buttonVariants({ variant: "destructive" })}
+                                  disabled={deleteMutation.isPending}
+                                  onClick={() => {
+                                    deleteMutation.mutate(tmpl.id, {
+                                      onSuccess: () => {
+                                        toast.success("Device template deleted")
+                                      },
+                                      onError: (err) => {
+                                        toast.error("Failed to delete device template", {
+                                          description: err instanceof Error ? err.message : undefined,
+                                        })
+                                      },
                                     })
-                                  },
-                                })
-                              }
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            <span className="sr-only">Delete</span>
-                          </Button>
+                                  }}
+                                >
+                                  {deleteMutation.isPending ? "Deleting..." : "Delete Template"}
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </TableCell>
                       </TableRow>
                     ))}

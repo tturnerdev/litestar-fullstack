@@ -229,9 +229,10 @@ export function useTestAnyConnection() {
       } as never)
       return (response as { data: unknown }).data as { message: string }
     },
-    onSuccess: (_data, connectionId) => {
+    onSuccess: (data, connectionId) => {
       queryClient.invalidateQueries({ queryKey: ["connection", connectionId] })
       queryClient.invalidateQueries({ queryKey: ["connections"] })
+      toast.success(data.message)
     },
     onError: (error) => {
       toast.error("Connection test failed", {
