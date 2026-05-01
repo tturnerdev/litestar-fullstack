@@ -55,11 +55,22 @@ export function AppLayout() {
       { prefix: "g", key: "h", action: () => goTo("/home"), description: "Go to Home", category: "navigation" },
       { prefix: "g", key: "t", action: () => goTo("/teams"), description: "Go to Teams", category: "navigation" },
       { prefix: "g", key: "d", action: () => goTo("/devices"), description: "Go to Devices", category: "navigation" },
+      { prefix: "g", key: "v", action: () => goTo("/voice"), description: "Go to Voice", category: "navigation" },
+      { prefix: "g", key: "f", action: () => goTo("/fax"), description: "Go to Fax", category: "navigation" },
       { prefix: "g", key: "s", action: () => goTo("/support"), description: "Go to Support", category: "navigation" },
+      { prefix: "g", key: "l", action: () => goTo("/locations"), description: "Go to Locations", category: "navigation" },
+      { prefix: "g", key: "r", action: () => goTo("/call-routing"), description: "Go to Call Routing", category: "navigation" },
+      { prefix: "g", key: "e", action: () => goTo("/schedules"), description: "Go to Schedules", category: "navigation" },
+      { prefix: "g", key: "y", action: () => goTo("/analytics"), description: "Go to Analytics", category: "navigation" },
+      { prefix: "g", key: "n", action: () => goTo("/notifications"), description: "Go to Notifications", category: "navigation" },
+      { prefix: "g", key: "o", action: () => goTo("/organization"), description: "Go to Organization", category: "navigation" },
       { prefix: "g", key: "p", action: () => goTo("/profile"), description: "Go to Profile", category: "navigation" },
     ]
     if (user?.isSuperuser) {
-      items.push({ prefix: "g", key: "a", action: () => goTo("/admin"), description: "Go to Admin", category: "navigation" })
+      items.push(
+        { prefix: "g", key: "a", action: () => goTo("/admin"), description: "Go to Admin", category: "navigation" },
+        { prefix: "g", key: "c", action: () => goTo("/connections"), description: "Go to Connections", category: "navigation" },
+      )
     }
     return items
   }, [goTo, user?.isSuperuser])
@@ -68,7 +79,7 @@ export function AppLayout() {
     shortcuts,
     sequences,
     onSequenceStart: (prefix) => {
-      if (prefix === "g") toast("Go to…", { id: "keyboard-go-to", description: "Press h/t/d/s/p to navigate", duration: 1000 })
+      if (prefix === "g") toast("Go to…", { id: "keyboard-go-to", description: "Press a key to navigate (h=home, t=teams, d=devices, v=voice, f=fax, s=support, ...)", duration: 1500 })
     },
     onSequenceEnd: () => toast.dismiss("keyboard-go-to"),
   })
@@ -80,10 +91,23 @@ export function AppLayout() {
       { keys: ["g", "h"], description: "Go to Home" },
       { keys: ["g", "t"], description: "Go to Teams" },
       { keys: ["g", "d"], description: "Go to Devices" },
+      { keys: ["g", "v"], description: "Go to Voice" },
+      { keys: ["g", "f"], description: "Go to Fax" },
       { keys: ["g", "s"], description: "Go to Support" },
+      { keys: ["g", "l"], description: "Go to Locations" },
+      { keys: ["g", "r"], description: "Go to Call Routing" },
+      { keys: ["g", "e"], description: "Go to Schedules" },
+      { keys: ["g", "y"], description: "Go to Analytics" },
+      { keys: ["g", "n"], description: "Go to Notifications" },
+      { keys: ["g", "o"], description: "Go to Organization" },
       { keys: ["g", "p"], description: "Go to Profile" },
     ]
-    if (user?.isSuperuser) navigation.push({ keys: ["g", "a"], description: "Go to Admin" })
+    if (user?.isSuperuser) {
+      navigation.push(
+        { keys: ["g", "a"], description: "Go to Admin" },
+        { keys: ["g", "c"], description: "Go to Connections" },
+      )
+    }
     return [
       { category: "Navigation", shortcuts: navigation },
       { category: "Actions", shortcuts: [{ keys: [`${modKey}+K`], description: "Open search" }, { keys: [`${modKey}+Shift+N`], description: "New ticket" }, { keys: ["n"], description: "Create new item (context-dependent)" }] },

@@ -50,6 +50,7 @@ import {
   useFaxNumber,
   useUpdateFaxNumber,
 } from "@/lib/api/hooks/fax"
+import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { formatDateTime } from "@/lib/date-utils"
 import { formatPhoneNumber } from "@/lib/format-utils"
 
@@ -586,8 +587,23 @@ function FaxNumberDetailPage() {
         </Card>
       </PageSection>
 
-      {/* Danger Zone */}
+      {/* Activity History */}
       <PageSection delay={0.25}>
+        <Card>
+          <CardHeader>
+            <CardTitle>Activity History</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <EntityActivityPanel
+              targetType="fax_number"
+              targetId={faxNumberId}
+            />
+          </CardContent>
+        </Card>
+      </PageSection>
+
+      {/* Danger Zone */}
+      <PageSection delay={0.3}>
         <Card className="border-destructive/30">
           <CardHeader>
             <CardTitle className="text-destructive">Danger Zone</CardTitle>

@@ -54,6 +54,7 @@ import {
   type ScheduleEntry,
   type ScheduleEntryCreate,
 } from "@/lib/api/hooks/schedules"
+import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 
 export const Route = createFileRoute("/_app/schedules/$scheduleId/")({
@@ -834,6 +835,19 @@ function ScheduleDetailPage() {
                   <span className="text-sm text-muted-foreground">Total entries</span>
                   <span className="font-medium text-sm">{data.entries?.length ?? 0}</span>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Activity History (Audit Trail) */}
+            <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  Activity History
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <EntityActivityPanel targetType="schedule" targetId={scheduleId} />
               </CardContent>
             </Card>
           </div>

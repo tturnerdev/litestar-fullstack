@@ -37,6 +37,7 @@ import { Switch } from "@/components/ui/switch"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { CopyButton } from "@/components/ui/copy-button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { useAdminTeam, useAdminUpdateTeam } from "@/lib/api/hooks/admin"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
@@ -456,8 +457,22 @@ function AdminTeamDetailPage() {
 
       <Separator />
 
-      {/* Danger Zone */}
+      {/* Activity History (Audit Trail) */}
       <PageSection delay={0.3}>
+        <Card>
+          <CardHeader>
+            <CardTitle>Activity History</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <EntityActivityPanel targetType="team" targetId={teamId} />
+          </CardContent>
+        </Card>
+      </PageSection>
+
+      <Separator />
+
+      {/* Danger Zone */}
+      <PageSection delay={0.35}>
         <Card className="border-destructive/30">
           <CardHeader>
             <CardTitle className="text-destructive">Danger Zone</CardTitle>

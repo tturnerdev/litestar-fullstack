@@ -39,6 +39,7 @@ import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { CopyButton } from "@/components/ui/copy-button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { DeleteExtensionDialog } from "@/components/voice/delete-extension-dialog"
 import { DndQuickToggle } from "@/components/voice/dnd-quick-toggle"
 import { EditExtensionDialog } from "@/components/voice/edit-extension-dialog"
@@ -295,6 +296,7 @@ function ExtensionDetailPage() {
             <TabsTrigger value="details">Details</TabsTrigger>
             <TabsTrigger value="voicemail">Voicemail</TabsTrigger>
             <TabsTrigger value="external">External Data</TabsTrigger>
+            <TabsTrigger value="activity">Activity</TabsTrigger>
           </TabsList>
 
           <TabsContent value="details" className="mt-6 space-y-6">
@@ -403,6 +405,21 @@ function ExtensionDetailPage() {
               isError={gatewayQuery.isError}
               onRefresh={() => gatewayQuery.refetch()}
             />
+          </TabsContent>
+
+          <TabsContent value="activity" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Activity Log</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <EntityActivityPanel
+                  targetType="extension"
+                  targetId={extensionId}
+                  enabled={tab === "activity"}
+                />
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </PageSection>

@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { AlertCircle, Plus, ShieldCheck, Tag, Users } from "lucide-react"
+import { ConnectionsStatusCard } from "@/components/home/connections-status-card"
 import { FeatureAreasGrid } from "@/components/home/feature-areas-grid"
 import { GettingStarted } from "@/components/home/getting-started"
 import { useGreeting } from "@/components/home/greeting"
@@ -191,14 +192,17 @@ function HomePage() {
         </div>
       </PageSection>
 
-      {/* Recent Activity (admin only) */}
+      {/* Admin Section: Connections + Recent Activity */}
       {isSuperuser && (
         <PageSection delay={0.18}>
-          <RecentActivityCard
-            activities={activityData?.activities ?? []}
-            isLoading={activityLoading}
-            isAdmin={isSuperuser}
-          />
+          <div className="grid gap-6 md:grid-cols-2">
+            <ConnectionsStatusCard />
+            <RecentActivityCard
+              activities={activityData?.activities ?? []}
+              isLoading={activityLoading}
+              isAdmin={isSuperuser}
+            />
+          </div>
         </PageSection>
       )}
     </PageContainer>
