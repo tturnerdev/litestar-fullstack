@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react"
 import {
   AlertCircle,
   Clock,
+  Download,
   Eye,
   Home,
   Loader2,
@@ -67,6 +68,7 @@ import {
   type CallQueue,
   type RingGroup,
 } from "@/lib/api/hooks/call-routing"
+import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 
@@ -100,6 +102,43 @@ const overrideModeLabels: Record<string, string> = {
   force_match: "Force Match",
   force_no_match: "Force No Match",
 }
+
+// ---------------------------------------------------------------------------
+// CSV headers
+// ---------------------------------------------------------------------------
+
+const timeConditionCsvHeaders: CsvHeader<TimeCondition>[] = [
+  { label: "Name", accessor: (tc) => tc.name },
+  { label: "Match Destination", accessor: (tc) => tc.matchDestination },
+  { label: "No Match Destination", accessor: (tc) => tc.noMatchDestination },
+  { label: "Override Mode", accessor: (tc) => overrideModeLabels[tc.overrideMode] ?? tc.overrideMode },
+]
+
+const ivrMenuCsvHeaders: CsvHeader<IvrMenu>[] = [
+  { label: "Name", accessor: (ivr) => ivr.name },
+  { label: "Greeting Type", accessor: (ivr) => ivr.greetingType },
+  { label: "Max Retries", accessor: (ivr) => ivr.maxRetries },
+  { label: "Timeout (s)", accessor: (ivr) => ivr.timeoutSeconds },
+  { label: "Options", accessor: (ivr) => ivr.options?.length ?? 0 },
+]
+
+const callQueueCsvHeaders: CsvHeader<CallQueue>[] = [
+  { label: "Name", accessor: (q) => q.name },
+  { label: "Number", accessor: (q) => q.number },
+  { label: "Strategy", accessor: (q) => strategyLabels[q.strategy] ?? q.strategy },
+  { label: "Max Wait Time (s)", accessor: (q) => q.maxWaitTime },
+  { label: "Wrap-up Time (s)", accessor: (q) => q.wrapupTime },
+  { label: "Ring Time (s)", accessor: (q) => q.ringTime },
+  { label: "Members", accessor: (q) => q.members?.length ?? 0 },
+]
+
+const ringGroupCsvHeaders: CsvHeader<RingGroup>[] = [
+  { label: "Name", accessor: (rg) => rg.name },
+  { label: "Number", accessor: (rg) => rg.number },
+  { label: "Strategy", accessor: (rg) => strategyLabels[rg.strategy] ?? rg.strategy },
+  { label: "Ring Time (s)", accessor: (rg) => rg.ringTime },
+  { label: "Members", accessor: (rg) => rg.members?.length ?? 0 },
+]
 
 // ---------------------------------------------------------------------------
 // New entity dialogs
@@ -361,6 +400,11 @@ function TimeConditionsTab() {
   const total = data?.total ?? 0
   const totalPages = Math.max(1, Math.ceil(total / 25))
 
+  const handleExport = useCallback(() => {
+    if (!items.length) return
+    exportToCsv("time-conditions", timeConditionCsvHeaders, items)
+  }, [items])
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
@@ -373,9 +417,15 @@ function TimeConditionsTab() {
             </button>
           )}
         </div>
-        <Button size="sm" onClick={() => setDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> New
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={handleExport} disabled={!items.length}>
+            <Download className="mr-2 h-4 w-4" />
+            Export
+          </Button>
+          <Button size="sm" onClick={() => setDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" /> New
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (
@@ -476,6 +526,11 @@ function IvrMenusTab() {
   const total = data?.total ?? 0
   const totalPages = Math.max(1, Math.ceil(total / 25))
 
+  const handleExport = useCallback(() => {
+    if (!items.length) return
+    exportToCsv("ivr-menus", ivrMenuCsvHeaders, items)
+  }, [items])
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
@@ -488,9 +543,15 @@ function IvrMenusTab() {
             </button>
           )}
         </div>
-        <Button size="sm" onClick={() => setDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> New
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={handleExport} disabled={!items.length}>
+            <Download className="mr-2 h-4 w-4" />
+            Export
+          </Button>
+          <Button size="sm" onClick={() => setDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" /> New
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (
@@ -587,6 +648,11 @@ function CallQueuesTab() {
   const total = data?.total ?? 0
   const totalPages = Math.max(1, Math.ceil(total / 25))
 
+  const handleExport = useCallback(() => {
+    if (!items.length) return
+    exportToCsv("call-queues", callQueueCsvHeaders, items)
+  }, [items])
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
@@ -599,9 +665,15 @@ function CallQueuesTab() {
             </button>
           )}
         </div>
-        <Button size="sm" onClick={() => setDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> New
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={handleExport} disabled={!items.length}>
+            <Download className="mr-2 h-4 w-4" />
+            Export
+          </Button>
+          <Button size="sm" onClick={() => setDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" /> New
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (
@@ -700,6 +772,11 @@ function RingGroupsTab() {
   const total = data?.total ?? 0
   const totalPages = Math.max(1, Math.ceil(total / 25))
 
+  const handleExport = useCallback(() => {
+    if (!items.length) return
+    exportToCsv("ring-groups", ringGroupCsvHeaders, items)
+  }, [items])
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
@@ -712,9 +789,15 @@ function RingGroupsTab() {
             </button>
           )}
         </div>
-        <Button size="sm" onClick={() => setDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> New
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={handleExport} disabled={!items.length}>
+            <Download className="mr-2 h-4 w-4" />
+            Export
+          </Button>
+          <Button size="sm" onClick={() => setDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" /> New
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (

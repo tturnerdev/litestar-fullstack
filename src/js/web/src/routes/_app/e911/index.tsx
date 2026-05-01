@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   AlertCircle,
   AlertTriangle,
@@ -26,7 +26,9 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   Dialog,
   DialogContent,
@@ -100,10 +102,14 @@ const csvHeaders: CsvHeader<E911Registration>[] = [
 function E911Row({
   reg,
   index,
+  selected,
+  onToggle,
   onRowClick,
 }: {
   reg: E911Registration
   index: number
+  selected: boolean
+  onToggle: () => void
   onRowClick: () => void
 }) {
   const validateMutation = useValidateE911Registration(reg.id)
@@ -111,6 +117,7 @@ function E911Row({
 
   return (
     <TableRow
+      data-state={selected ? "selected" : undefined}
       className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`}
       onClick={(e) => {
         const target = e.target as HTMLElement
@@ -120,6 +127,16 @@ function E911Row({
         onRowClick()
       }}
     >
+      <TableCell>
+        <Checkbox
+          checked={selected}
+          onChange={(e) => {
+            e.stopPropagation()
+            onToggle()
+          }}
+          aria-label={`Select ${reg.phoneNumberDisplay ?? reg.id}`}
+        />
+      </TableCell>
       <TableCell>
         <Link
           to="/e911/$registrationId"
@@ -415,9 +432,60 @@ function E911Page() {
     teamId: teamId || undefined,
   })
 
+  const deleteMutation = useDeleteE911Registration()
   const { data: unregistered } = useUnregisteredPhoneNumbers(teamId)
 
+  // Selection state
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+
   const items = data?.items ?? []
+
+  // Selection helpers
+  const allVisibleIds = useMemo(() => items.map((r) => r.id), [items])
+  const allSelected = items.length > 0 && items.every((r) => selectedIds.has(r.id))
+  const someSelected = items.some((r) => selectedIds.has(r.id))
+
+  const toggleAll = useCallback(() => {
+    if (allSelected) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(allVisibleIds))
+    }
+  }, [allSelected, allVisibleIds])
+
+  const toggleOne = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      return next
+    })
+  }, [])
+
+  // Bulk actions
+  const bulkActions = useMemo(
+    () => [
+      createBulkDeleteAction(
+        async (id) => {
+          await deleteMutation.mutateAsync(id)
+        },
+        () => {
+          setSelectedIds(new Set())
+          deleteMutation.reset()
+        },
+      ),
+      createExportAction<E911Registration>(
+        "e911-registrations-selected",
+        csvHeaders,
+        (ids) => items.filter((r) => ids.includes(r.id)),
+      ),
+    ],
+    [items, deleteMutation],
+  )
+
   const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / PAGE_SIZE))
   const hasData = items.length > 0
   const unregisteredCount = unregistered?.length ?? 0
@@ -579,6 +647,14 @@ function E911Page() {
               <Table aria-label="E911 Registrations">
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-10">
+                      <Checkbox
+                        checked={allSelected}
+                        indeterminate={someSelected && !allSelected}
+                        onChange={toggleAll}
+                        aria-label="Select all registrations"
+                      />
+                    </TableHead>
                     <TableHead>Phone Number</TableHead>
                     <TableHead>Address</TableHead>
                     <TableHead className="hidden md:table-cell">City / State</TableHead>
@@ -593,6 +669,8 @@ function E911Page() {
                       key={reg.id}
                       reg={reg}
                       index={index}
+                      selected={selectedIds.has(reg.id)}
+                      onToggle={() => toggleOne(reg.id)}
                       onRowClick={() => handleRowClick(reg.id)}
                     />
                   ))}
@@ -624,6 +702,14 @@ function E911Page() {
           </div>
         )}
       </PageSection>
+
+      {/* Bulk action bar */}
+      <BulkActionBar
+        selectedCount={selectedIds.size}
+        selectedIds={Array.from(selectedIds)}
+        onClearSelection={() => setSelectedIds(new Set())}
+        actions={bulkActions}
+      />
     </PageContainer>
   )
 }

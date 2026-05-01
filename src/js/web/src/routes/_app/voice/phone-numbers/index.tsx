@@ -45,7 +45,6 @@ import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-lay
 import { SkeletonTable } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { CreatePhoneNumberDialog } from "@/components/voice/create-phone-number-dialog"
 import {
   type PhoneNumber,

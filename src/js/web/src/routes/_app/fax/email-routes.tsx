@@ -5,12 +5,15 @@ import {
   AlertTriangle,
   Bell,
   BellOff,
+  Download,
+  Eye,
   Mail,
   MailPlus,
+  MoreVertical,
   Pencil,
   Trash2,
 } from "lucide-react"
-import { useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,8 +33,10 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   Dialog,
   DialogContent,
@@ -40,6 +45,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -70,12 +82,27 @@ import {
   useFaxNumbers,
   useUpdateFaxEmailRoute,
 } from "@/lib/api/hooks/fax"
+import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
+import { client } from "@/lib/generated/api/client.gen"
 
 export const Route = createFileRoute("/_app/fax/email-routes")({
   component: FaxEmailRoutesPage,
 })
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+// ---------------------------------------------------------------------------
+// CSV Headers
+// ---------------------------------------------------------------------------
+
+const csvHeaders: CsvHeader<FaxEmailRouteWithNumber>[] = [
+  { label: "Email Address", accessor: (r) => r.emailAddress },
+  { label: "Fax Number", accessor: (r) => r.faxNumber },
+  { label: "Fax Number Label", accessor: (r) => r.faxNumberLabel ?? "" },
+  { label: "Status", accessor: (r) => (r.isActive ? "Active" : "Inactive") },
+  { label: "Failure Alerts", accessor: (r) => (r.notifyOnFailure ? "On" : "Off") },
+  { label: "Created", accessor: (r) => (r.createdAt ? new Date(r.createdAt).toLocaleDateString() : "") },
+]
 
 // ---------------------------------------------------------------------------
 // Create Dialog
@@ -409,6 +436,66 @@ function FaxEmailRoutesPage() {
   const [editRoute, setEditRoute] = useState<FaxEmailRouteWithNumber | null>(null)
   const [deleteRoute, setDeleteRoute] = useState<FaxEmailRouteWithNumber | null>(null)
 
+  // Selection state
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+
+  const allVisibleIds = useMemo(() => (routes ?? []).map((r) => r.id), [routes])
+  const allSelected = (routes ?? []).length > 0 && (routes ?? []).every((r) => selectedIds.has(r.id))
+  const someSelected = (routes ?? []).some((r) => selectedIds.has(r.id))
+
+  const toggleAll = useCallback(() => {
+    if (allSelected) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(allVisibleIds))
+    }
+  }, [allSelected, allVisibleIds])
+
+  const toggleOne = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      return next
+    })
+  }, [])
+
+  // Export all visible
+  const handleExportAll = useCallback(() => {
+    if (!routes?.length) return
+    exportToCsv("fax-email-routes", csvHeaders, routes)
+  }, [routes])
+
+  // Bulk actions
+  const bulkActions = useMemo(
+    () => [
+      createBulkDeleteAction(
+        async (id) => {
+          const route = routes?.find((r) => r.id === id)
+          if (!route) return
+          await client.request({
+            method: "DELETE",
+            url: `/api/fax/numbers/${route.faxNumberId}/email-routes/${id}`,
+          })
+        },
+        () => {
+          setSelectedIds(new Set())
+        },
+      ),
+      createExportAction<FaxEmailRouteWithNumber>(
+        "fax-email-routes-selected",
+        csvHeaders,
+        (ids) => (routes ?? []).filter((r) => ids.includes(r.id)),
+      ),
+    ],
+    [routes],
+  )
+
+  const hasData = (routes ?? []).length > 0
+
   const breadcrumbs = (
     <Breadcrumb>
       <BreadcrumbList>
@@ -439,9 +526,15 @@ function FaxEmailRoutesPage() {
         description="Configure where incoming faxes are delivered via email across all fax numbers."
         breadcrumbs={breadcrumbs}
         actions={
-          <Button size="sm" onClick={() => setShowCreateDialog(true)}>
-            <MailPlus className="mr-2 h-4 w-4" /> New Route
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={handleExportAll} disabled={!hasData}>
+              <Download className="mr-2 h-4 w-4" />
+              Export
+            </Button>
+            <Button size="sm" onClick={() => setShowCreateDialog(true)}>
+              <MailPlus className="mr-2 h-4 w-4" /> New Route
+            </Button>
+          </div>
         }
       />
 
@@ -478,17 +571,54 @@ function FaxEmailRoutesPage() {
               <Table aria-label="Email routes">
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-10">
+                      <Checkbox
+                        checked={allSelected}
+                        indeterminate={someSelected && !allSelected}
+                        onChange={toggleAll}
+                        aria-label="Select all email routes"
+                      />
+                    </TableHead>
                     <TableHead>Email Address</TableHead>
                     <TableHead>Fax Number</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Failure Alerts</TableHead>
                     <TableHead>Created</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead className="w-16 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {routes.map((route, index) => (
-                    <TableRow key={route.id} className={cn("hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")}>
+                    <TableRow
+                      key={route.id}
+                      data-state={selectedIds.has(route.id) ? "selected" : undefined}
+                      className={cn(
+                        "cursor-pointer hover:bg-muted/50 transition-colors",
+                        index % 2 === 1 ? "bg-muted/20" : "",
+                      )}
+                      onClick={(e) => {
+                        const target = e.target as HTMLElement
+                        if (
+                          target.closest("[role=checkbox]") ||
+                          target.closest("[data-slot=dropdown]") ||
+                          target.closest("button") ||
+                          target.closest("a")
+                        ) {
+                          return
+                        }
+                        setEditRoute(route)
+                      }}
+                    >
+                      <TableCell>
+                        <Checkbox
+                          checked={selectedIds.has(route.id)}
+                          onChange={(e) => {
+                            e.stopPropagation()
+                            toggleOne(route.id)
+                          }}
+                          aria-label={`Select route for ${route.emailAddress}`}
+                        />
+                      </TableCell>
                       <TableCell className="font-mono text-sm">
                         {route.emailAddress}
                       </TableCell>
@@ -497,6 +627,7 @@ function FaxEmailRoutesPage() {
                           to="/fax/numbers/$faxNumberId"
                           params={{ faxNumberId: route.faxNumberId }}
                           className="text-sm text-primary hover:underline"
+                          onClick={(e) => e.stopPropagation()}
                         >
                           <span className="font-mono">{route.faxNumber}</span>
                           {route.faxNumberLabel && (
@@ -544,34 +675,40 @@ function FaxEmailRoutesPage() {
                           : "--"}
                       </TableCell>
                       <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setEditRoute(route)}
-                                className="h-8 w-8 p-0"
-                              >
-                                <Pencil className="h-3.5 w-3.5" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>Edit route</TooltipContent>
-                          </Tooltip>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setDeleteRoute(route)}
-                                className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>Delete route</TooltipContent>
-                          </Tooltip>
-                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              data-slot="dropdown"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <MoreVertical className="h-4 w-4" />
+                              <span className="sr-only">Actions for {route.emailAddress}</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem asChild>
+                              <Link to="/fax/numbers/$faxNumberId" params={{ faxNumberId: route.faxNumberId }}>
+                                <Eye className="mr-2 h-4 w-4" />
+                                View fax number
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setEditRoute(route)}>
+                              <Pencil className="mr-2 h-4 w-4" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              className="text-destructive focus:text-destructive"
+                              onClick={() => setDeleteRoute(route)}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -608,6 +745,14 @@ function FaxEmailRoutesPage() {
         onOpenChange={(open) => {
           if (!open) setDeleteRoute(null)
         }}
+      />
+
+      {/* Bulk action bar */}
+      <BulkActionBar
+        selectedCount={selectedIds.size}
+        selectedIds={Array.from(selectedIds)}
+        onClearSelection={() => setSelectedIds(new Set())}
+        actions={bulkActions}
       />
     </PageContainer>
   )
