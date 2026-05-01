@@ -56,7 +56,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { VoicemailPlayer } from "@/components/voice/voicemail-player"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { useDocumentTitle } from "@/hooks/use-document-title"
-import { formatDateTime, formatFullDateTime } from "@/lib/date-utils"
+import { formatDateTime, formatFullDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { formatDuration, formatDurationHuman } from "@/lib/format-utils"
 import {
   useDeleteVoicemailMessage,
@@ -589,6 +589,36 @@ function BoxSettingsForm({ boxId }: { boxId: string }) {
         <Separator />
 
         {/* Actions */}
+        <Separator />
+        <div className="grid gap-4 text-sm md:grid-cols-2">
+          <div>
+            <p className="text-muted-foreground text-sm">Created</p>
+            {data.createdAt ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <p className="cursor-default text-sm">{formatRelativeTimeShort(data.createdAt)}</p>
+                </TooltipTrigger>
+                <TooltipContent>{formatDateTime(data.createdAt)}</TooltipContent>
+              </Tooltip>
+            ) : (
+              <p className="text-sm">---</p>
+            )}
+          </div>
+          <div>
+            <p className="text-muted-foreground text-sm">Last Updated</p>
+            {data.updatedAt ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <p className="cursor-default text-sm">{formatRelativeTimeShort(data.updatedAt)}</p>
+                </TooltipTrigger>
+                <TooltipContent>{formatDateTime(data.updatedAt)}</TooltipContent>
+              </Tooltip>
+            ) : (
+              <p className="text-sm">---</p>
+            )}
+          </div>
+        </div>
+
         <div className="flex items-center gap-3">
           <Button
             onClick={handleSave}
