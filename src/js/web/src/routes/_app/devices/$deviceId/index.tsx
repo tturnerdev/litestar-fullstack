@@ -44,6 +44,8 @@ import {
   useReprovisionDevice,
   useUpdateDevice,
 } from "@/lib/api/hooks/devices"
+import { useGatewayLookupDevice } from "@/lib/api/hooks/gateway"
+import { ExternalDataTab } from "@/components/gateway/external-data-tab"
 import type { Device } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/devices/$deviceId/")({
@@ -109,6 +111,7 @@ function DeviceDetailPage() {
   const rebootDevice = useRebootDevice(deviceId)
   const reprovisionDevice = useReprovisionDevice(deviceId)
   const linesQuery = useDeviceLines(deviceId)
+  const gatewayQuery = useGatewayLookupDevice(data?.macAddress ?? "", tab === "external")
 
   const [editing, setEditing] = useState(false)
   const [editName, setEditName] = useState("")
@@ -323,6 +326,7 @@ function DeviceDetailPage() {
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="lines">Lines</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
+            <TabsTrigger value="external">External Data</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="mt-6 space-y-6">
@@ -540,6 +544,18 @@ function DeviceDetailPage() {
 
           <TabsContent value="settings" className="mt-6">
             <SettingsTab deviceId={deviceId} data={data} />
+          </TabsContent>
+
+          <TabsContent value="external" className="mt-6">
+            <ExternalDataTab
+              hasIdentifier={!!data.macAddress}
+              noIdentifierMessage="This device has no MAC address configured. A MAC address is required to look up external provisioning data."
+              sources={gatewayQuery.data?.sources}
+              isLoading={gatewayQuery.isLoading}
+              isRefetching={gatewayQuery.isRefetching}
+              isError={gatewayQuery.isError}
+              onRefresh={() => gatewayQuery.refetch()}
+            />
           </TabsContent>
         </Tabs>
       </PageSection>

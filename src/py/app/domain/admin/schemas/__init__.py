@@ -2,6 +2,7 @@
 
 from app.domain.admin.schemas._admin_devices import AdminDeviceStats, AdminDeviceSummary
 from app.domain.admin.schemas._admin_fax import AdminFaxMessageSummary, AdminFaxNumberSummary, AdminFaxStats
+from app.domain.admin.schemas._admin_gateway import AdminGatewaySettings, AdminGatewaySettingsUpdate
 from app.domain.admin.schemas._admin_support import AdminSupportStats, AdminTicketSummary
 from app.domain.admin.schemas._admin_system import AdminSystemStatus, WorkerQueueInfo
 from app.domain.admin.schemas._admin_voice import AdminExtensionSummary, AdminPhoneNumberSummary, AdminVoiceStats
@@ -18,6 +19,8 @@ __all__ = (
     "AdminFaxMessageSummary",
     "AdminFaxNumberSummary",
     "AdminFaxStats",
+    "AdminGatewaySettings",
+    "AdminGatewaySettingsUpdate",
     "AdminPhoneNumberSummary",
     "AdminSupportStats",
     "AdminTeamDetail",

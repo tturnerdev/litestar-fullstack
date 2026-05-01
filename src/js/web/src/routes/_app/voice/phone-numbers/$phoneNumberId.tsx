@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { ArrowLeft, Fingerprint, Home, Pencil, Phone, Trash2 } from "lucide-react"
 import { useEffect, useState } from "react"
+import { ExternalDataTab } from "@/components/gateway/external-data-tab"
 import { PhoneNumberDeleteDialog } from "@/components/voice/phone-number-delete-dialog"
 import { PhoneNumberEditSheet } from "@/components/voice/phone-number-edit-sheet"
 import { Badge } from "@/components/ui/badge"
@@ -17,19 +18,23 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CopyButton } from "@/components/ui/copy-button"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { usePhoneNumber } from "@/lib/api/hooks/voice"
+import { useGatewayLookupNumber } from "@/lib/api/hooks/gateway"
 import { formatPhoneNumber } from "@/lib/format-utils"
 
 type PhoneNumberDetailSearch = {
+  tab?: string
   edit?: boolean
 }
 
 export const Route = createFileRoute("/_app/voice/phone-numbers/$phoneNumberId")({
   component: PhoneNumberDetailPage,
   validateSearch: (search: Record<string, unknown>): PhoneNumberDetailSearch => ({
+    tab: (search.tab as string) || undefined,
     edit: search.edit === true || search.edit === "true" || undefined,
   }),
 })
@@ -48,11 +53,12 @@ const numberTypeBadgeVariant: Record<string, "default" | "secondary" | "outline"
 
 function PhoneNumberDetailPage() {
   const { phoneNumberId } = Route.useParams()
-  const { edit } = Route.useSearch()
+  const { tab = "details", edit } = Route.useSearch()
   const navigate = useNavigate()
 
   const { data, isLoading, isError } = usePhoneNumber(phoneNumberId)
   useDocumentTitle(data ? formatPhoneNumber(data.number) : "Phone Number Details")
+  const gatewayQuery = useGatewayLookupNumber(data?.number ?? "", tab === "external")
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
 
@@ -178,90 +184,109 @@ function PhoneNumberDetailPage() {
       />
 
       <PageSection>
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Phone className="h-5 w-5 text-muted-foreground" />
-              <CardTitle>Number Info</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
-              <div>
-                <p className="text-muted-foreground">Number</p>
-                <p className="font-mono text-base font-medium">{formatPhoneNumber(data.number)}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Label</p>
-                <p className="font-medium">{data.label ?? "---"}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Type</p>
-                <Badge variant={numberTypeBadgeVariant[data.numberType] ?? "outline"}>
-                  {numberTypeLabel[data.numberType] ?? data.numberType}
-                </Badge>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Caller ID Name</p>
-                <p className="font-medium">{data.callerIdName ?? "---"}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Status</p>
-                <Badge variant={data.isActive ? "default" : "secondary"}>
-                  {data.isActive ? "Active" : "Inactive"}
-                </Badge>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Team</p>
-                <p>{data.teamId ?? "Not assigned"}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </PageSection>
+        <Tabs value={tab} onValueChange={(value) => navigate({ to: "/voice/phone-numbers/$phoneNumberId", params: { phoneNumberId }, search: { tab: value }, replace: true })}>
+          <TabsList>
+            <TabsTrigger value="details">Details</TabsTrigger>
+            <TabsTrigger value="external">External Data</TabsTrigger>
+          </TabsList>
 
-      <PageSection delay={0.1}>
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Fingerprint className="h-5 w-5 text-muted-foreground" />
-              <CardTitle>Metadata</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-4">
-              <div>
-                <p className="text-muted-foreground">ID</p>
-                <div className="flex items-center gap-1">
-                  <p className="font-mono text-xs">{phoneNumberId}</p>
-                  <CopyButton value={phoneNumberId} label="phone number ID" />
+          <TabsContent value="details" className="mt-6 space-y-6">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Phone className="h-5 w-5 text-muted-foreground" />
+                  <CardTitle>Number Info</CardTitle>
                 </div>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Created</p>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <p className="cursor-default">{data.createdAt ? formatRelativeTimeShort(data.createdAt) : "---"}</p>
-                  </TooltipTrigger>
-                  <TooltipContent>{data.createdAt ? formatDateTime(data.createdAt) : "Unknown"}</TooltipContent>
-                </Tooltip>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Updated</p>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <p className="cursor-default">{data.updatedAt ? formatRelativeTimeShort(data.updatedAt) : "---"}</p>
-                  </TooltipTrigger>
-                  <TooltipContent>{data.updatedAt ? formatDateTime(data.updatedAt) : "Unknown"}</TooltipContent>
-                </Tooltip>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Extension</p>
-                <p>{data.extensionId ?? "None"}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
+                  <div>
+                    <p className="text-muted-foreground">Number</p>
+                    <p className="font-mono text-base font-medium">{formatPhoneNumber(data.number)}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Label</p>
+                    <p className="font-medium">{data.label ?? "---"}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Type</p>
+                    <Badge variant={numberTypeBadgeVariant[data.numberType] ?? "outline"}>
+                      {numberTypeLabel[data.numberType] ?? data.numberType}
+                    </Badge>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Caller ID Name</p>
+                    <p className="font-medium">{data.callerIdName ?? "---"}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Status</p>
+                    <Badge variant={data.isActive ? "default" : "secondary"}>
+                      {data.isActive ? "Active" : "Inactive"}
+                    </Badge>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Team</p>
+                    <p>{data.teamId ?? "Not assigned"}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Fingerprint className="h-5 w-5 text-muted-foreground" />
+                  <CardTitle>Metadata</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-4">
+                  <div>
+                    <p className="text-muted-foreground">ID</p>
+                    <div className="flex items-center gap-1">
+                      <p className="font-mono text-xs">{phoneNumberId}</p>
+                      <CopyButton value={phoneNumberId} label="phone number ID" />
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Created</p>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <p className="cursor-default">{data.createdAt ? formatRelativeTimeShort(data.createdAt) : "---"}</p>
+                      </TooltipTrigger>
+                      <TooltipContent>{data.createdAt ? formatDateTime(data.createdAt) : "Unknown"}</TooltipContent>
+                    </Tooltip>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Updated</p>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <p className="cursor-default">{data.updatedAt ? formatRelativeTimeShort(data.updatedAt) : "---"}</p>
+                      </TooltipTrigger>
+                      <TooltipContent>{data.updatedAt ? formatDateTime(data.updatedAt) : "Unknown"}</TooltipContent>
+                    </Tooltip>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Extension</p>
+                    <p>{data.extensionId ?? "None"}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="external" className="mt-6">
+            <ExternalDataTab
+              hasIdentifier={!!data.number}
+              noIdentifierMessage="This phone number record has no number value. Cannot look up external data."
+              sources={gatewayQuery.data?.sources}
+              isLoading={gatewayQuery.isLoading}
+              isRefetching={gatewayQuery.isRefetching}
+              isError={gatewayQuery.isError}
+              onRefresh={() => gatewayQuery.refetch()}
+            />
+          </TabsContent>
+        </Tabs>
       </PageSection>
 
       <PhoneNumberEditSheet phoneNumber={data} open={editOpen} onOpenChange={setEditOpen} />

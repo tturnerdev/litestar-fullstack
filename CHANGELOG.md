@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.97.0 (2026-04-30)
+
+### Added
+- **Gateway: FreePBX voicemail queries** — `_fetch_voicemail` method retrieves per-extension voicemail configuration (email, pager, enabled status) and integrates into extension gateway results.
+- **Gateway: CDR queries** — `_fetch_cdrs` method retrieves recent call detail records from FreePBX, filtered by source/destination. Integrated into both number and extension gateway results as `recent_calls`.
+- **Gateway: Redis caching** — Response caching with configurable TTL (default 300s), `?refresh=true` cache bypass, and graceful degradation on Redis failure. Cache key format: `gateway:{provider}:{domain}:{identifier}:{connection_id}`.
+- **Gateway: Connection test wiring** — `ConnectionService.test_connection()` now delegates to actual provider health checks (FreePBX OAuth2 token exchange, Telnyx API ping) instead of always returning success. Falls back to stub for non-gateway connection types.
+- **Gateway: External Data tabs** — Phone number, extension, and device detail pages now have "External Data" tabs showing live gateway data per source with status badges, data grids, and refresh buttons. Data is fetched lazily only when the tab is selected.
+- **Gateway: Admin settings page** — New `/admin/gateway` page for configuring default request timeout and cache TTL. Per-connection overrides added to connection edit and create forms.
+- **FEATURE-UCAAS.md** — Comprehensive UCaaS feature plan covering call routing (IVR, queues, ring groups), analytics/CDR, voicemail management, E911, SMS/MMS messaging, RBAC, bulk operations, device templates, webhooks, and notification alerts across 8 implementation phases.
+
 ## v0.96.0 (2026-04-30)
 
 ### Added

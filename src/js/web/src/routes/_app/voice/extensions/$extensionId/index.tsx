@@ -15,6 +15,7 @@ import {
   Trash2,
   Voicemail,
 } from "lucide-react"
+import { ExternalDataTab } from "@/components/gateway/external-data-tab"
 import { Badge } from "@/components/ui/badge"
 import {
   Breadcrumb,
@@ -29,6 +30,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { CopyButton } from "@/components/ui/copy-button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { DeleteExtensionDialog } from "@/components/voice/delete-extension-dialog"
@@ -43,8 +45,10 @@ import {
   useVoicemailMessages,
   useVoicemailSettings,
 } from "@/lib/api/hooks/voice"
+import { useGatewayLookupExtension } from "@/lib/api/hooks/gateway"
 
 const searchSchema = z.object({
+  tab: z.string().optional(),
   edit: z.boolean().optional(),
 })
 
@@ -89,11 +93,12 @@ function TimestampField({
 
 function ExtensionDetailPage() {
   const { extensionId } = Route.useParams()
-  const { edit } = Route.useSearch()
+  const { tab = "details", edit } = Route.useSearch()
   const router = useRouter()
   const navigate = Route.useNavigate()
   const { data, isLoading, isError } = useExtension(extensionId)
   const updateExtension = useUpdateExtension(extensionId)
+  const gatewayQuery = useGatewayLookupExtension(data?.extensionNumber ?? "", tab === "external")
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
@@ -274,99 +279,114 @@ function ExtensionDetailPage() {
         }
       />
 
-      {/* Extension Info */}
       <PageSection>
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Phone className="h-5 w-5 text-muted-foreground" />
-              <CardTitle>Extension Info</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-4">
-              <div>
-                <p className="text-muted-foreground">Extension Number</p>
-                <p className="font-mono font-medium">{data.extensionNumber}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Display Name</p>
-                <p className="font-medium">{data.displayName}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Phone Number</p>
-                <p>{data.phoneNumberId ? "Assigned" : "Not assigned"}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Active</p>
-                <div className="mt-0.5 flex items-center gap-2">
-                  <p>{data.isActive ? "Yes" : "No"}</p>
-                  <Switch
-                    checked={data.isActive}
-                    onCheckedChange={(checked) =>
-                      updateExtension.mutate({ isActive: checked })
-                    }
-                    disabled={updateExtension.isPending}
-                  />
+        <Tabs value={tab} onValueChange={(value) => navigate({ search: { tab: value }, replace: true })}>
+          <TabsList>
+            <TabsTrigger value="details">Details</TabsTrigger>
+            <TabsTrigger value="external">External Data</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="details" className="mt-6 space-y-6">
+            {/* Extension Info */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Phone className="h-5 w-5 text-muted-foreground" />
+                  <CardTitle>Extension Info</CardTitle>
                 </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </PageSection>
-
-      {/* Call Settings */}
-      <PageSection delay={0.1}>
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Settings className="h-5 w-5 text-muted-foreground" />
-              <CardTitle>Call Settings</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <CallSettingsSummary extensionId={extensionId} />
-          </CardContent>
-        </Card>
-      </PageSection>
-
-      {/* Sub-page links (voicemail, forwarding, dnd) */}
-      <PageSection delay={0.15}>
-        <SubPageLinks extensionId={extensionId} />
-      </PageSection>
-
-      {/* Metadata */}
-      <PageSection delay={0.2}>
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Fingerprint className="h-5 w-5 text-muted-foreground" />
-              <CardTitle>Metadata</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-4">
-              <div>
-                <p className="text-sm text-muted-foreground">Extension ID</p>
-                <div className="flex items-center gap-1">
-                  <p className="font-mono text-xs">{extensionId}</p>
-                  <CopyButton value={extensionId} label="extension ID" />
-                </div>
-              </div>
-              <TimestampField label="Created" value={data.createdAt} />
-              <TimestampField label="Last Updated" value={data.updatedAt} />
-              {data.phoneNumberId && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Phone Number ID</p>
-                  <div className="flex items-center gap-1">
-                    <p className="font-mono text-xs">{data.phoneNumberId}</p>
-                    <CopyButton value={data.phoneNumberId} label="phone number ID" />
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-4">
+                  <div>
+                    <p className="text-muted-foreground">Extension Number</p>
+                    <p className="font-mono font-medium">{data.extensionNumber}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Display Name</p>
+                    <p className="font-medium">{data.displayName}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Phone Number</p>
+                    <p>{data.phoneNumberId ? "Assigned" : "Not assigned"}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Active</p>
+                    <div className="mt-0.5 flex items-center gap-2">
+                      <p>{data.isActive ? "Yes" : "No"}</p>
+                      <Switch
+                        checked={data.isActive}
+                        onCheckedChange={(checked) =>
+                          updateExtension.mutate({ isActive: checked })
+                        }
+                        disabled={updateExtension.isPending}
+                      />
+                    </div>
                   </div>
                 </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+
+            {/* Call Settings */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Settings className="h-5 w-5 text-muted-foreground" />
+                  <CardTitle>Call Settings</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <CallSettingsSummary extensionId={extensionId} />
+              </CardContent>
+            </Card>
+
+            {/* Sub-page links (voicemail, forwarding, dnd) */}
+            <SubPageLinks extensionId={extensionId} />
+
+            {/* Metadata */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Fingerprint className="h-5 w-5 text-muted-foreground" />
+                  <CardTitle>Metadata</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Extension ID</p>
+                    <div className="flex items-center gap-1">
+                      <p className="font-mono text-xs">{extensionId}</p>
+                      <CopyButton value={extensionId} label="extension ID" />
+                    </div>
+                  </div>
+                  <TimestampField label="Created" value={data.createdAt} />
+                  <TimestampField label="Last Updated" value={data.updatedAt} />
+                  {data.phoneNumberId && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Phone Number ID</p>
+                      <div className="flex items-center gap-1">
+                        <p className="font-mono text-xs">{data.phoneNumberId}</p>
+                        <CopyButton value={data.phoneNumberId} label="phone number ID" />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="external" className="mt-6">
+            <ExternalDataTab
+              hasIdentifier={!!data.extensionNumber}
+              noIdentifierMessage="This extension has no extension number. Cannot look up external PBX data."
+              sources={gatewayQuery.data?.sources}
+              isLoading={gatewayQuery.isLoading}
+              isRefetching={gatewayQuery.isRefetching}
+              isError={gatewayQuery.isError}
+              onRefresh={() => gatewayQuery.refetch()}
+            />
+          </TabsContent>
+        </Tabs>
       </PageSection>
 
       {/* Danger Zone */}

@@ -24,8 +24,10 @@ class ConnectionService(service.SQLAlchemyAsyncRepositoryService[m.Connection]):
     async def test_connection(self, connection_id: Any) -> tuple[bool, str | None]:
         """Test connectivity to an external data source.
 
-        This is a stub that can be extended with actual connectivity checks
-        per provider type (HTTP ping, DB connect, API health endpoint, etc.).
+        Looks up the connection's ``provider`` field and delegates to the
+        matching gateway provider's ``health_check`` method when one is
+        registered.  Falls back to reporting success for connection types
+        that do not have a gateway provider (helpdesk, other, etc.).
 
         Args:
             connection_id: The primary key of the connection to test.
@@ -36,9 +38,18 @@ class ConnectionService(service.SQLAlchemyAsyncRepositoryService[m.Connection]):
         db_obj = await self.get(connection_id)
         now = datetime.now(tz=timezone.utc)
 
-        # Stub: always reports success. Replace with real provider checks.
-        success = True
-        error_message = None
+        # Lazy import to avoid circular dependency between domains.
+        from app.domain.gateway.providers import get_provider
+
+        provider_cls = get_provider(db_obj.provider)
+        if provider_cls is not None:
+            provider = provider_cls()
+            success, error_message = await provider.health_check(db_obj)
+        else:
+            # No gateway provider registered for this connection type;
+            # fall back to optimistic success.
+            success = True
+            error_message = None
 
         if success:
             db_obj.status = m.ConnectionStatus.CONNECTED

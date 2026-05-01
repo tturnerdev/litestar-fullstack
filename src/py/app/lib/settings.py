@@ -521,6 +521,16 @@ class LogSettings:
 
 
 @dataclass
+class GatewaySettings:
+    """Gateway service configuration."""
+
+    DEFAULT_TIMEOUT: int = field(default_factory=get_env("GATEWAY_DEFAULT_TIMEOUT", 10))
+    """Timeout in seconds for provider queries."""
+    DEFAULT_CACHE_TTL: int = field(default_factory=get_env("GATEWAY_DEFAULT_CACHE_TTL", 300))
+    """TTL in seconds for cached gateway responses."""
+
+
+@dataclass
 class Settings:
     app: AppSettings = field(default_factory=AppSettings)
     db: DatabaseSettings = field(default_factory=DatabaseSettings)
@@ -529,6 +539,7 @@ class Settings:
     saq: SaqSettings = field(default_factory=SaqSettings)
     log: LogSettings = field(default_factory=LogSettings)
     email: EmailSettings = field(default_factory=EmailSettings)
+    gateway: GatewaySettings = field(default_factory=GatewaySettings)
 
     @classmethod
     @lru_cache(maxsize=1, typed=True)
@@ -547,10 +558,11 @@ class Settings:
             vite: ViteSettings = ViteSettings()
             app: AppSettings = AppSettings()
             log: LogSettings = LogSettings()
+            gateway: GatewaySettings = GatewaySettings()
         except Exception as e:  # noqa: BLE001
             logger.fatal("Could not load settings. %s", e)
             sys.exit(1)
-        return Settings(app=app, db=db, vite=vite, server=server, saq=saq, log=log)
+        return Settings(app=app, db=db, vite=vite, server=server, saq=saq, log=log, gateway=gateway)
 
 
 def get_settings(dotenv_filename: str = ".env") -> Settings:

@@ -177,6 +177,8 @@ function NewConnectionPage() {
   const [credentials, setCredentials] = useState<Record<string, string>>({})
   const [description, setDescription] = useState("")
   const [verifySsl, setVerifySsl] = useState(true)
+  const [gatewayTimeout, setGatewayTimeout] = useState("")
+  const [gatewayCacheTtl, setGatewayCacheTtl] = useState("")
 
   // Validation state
   const [errors, setErrors] = useState<FieldErrors>({})
@@ -198,8 +200,10 @@ function NewConnectionPage() {
       description !== "" ||
       authType !== "none" ||
       connectionType !== "pbx" ||
+      gatewayTimeout !== "" ||
+      gatewayCacheTtl !== "" ||
       Object.values(credentials).some((v) => v !== ""),
-    [name, provider, host, port, description, authType, connectionType, credentials],
+    [name, provider, host, port, description, authType, connectionType, gatewayTimeout, gatewayCacheTtl, credentials],
   )
 
   // Ref to skip blocking after a successful submit
@@ -310,7 +314,10 @@ function NewConnectionPage() {
     if (port) payload.port = Number.parseInt(port, 10)
     if (description) payload.description = description
 
-    payload.settings = { verify_ssl: verifySsl }
+    const settings: Record<string, unknown> = { verify_ssl: verifySsl }
+    if (gatewayTimeout.trim()) settings.timeout = parseInt(gatewayTimeout, 10)
+    if (gatewayCacheTtl.trim()) settings.cache_ttl = parseInt(gatewayCacheTtl, 10)
+    payload.settings = settings
 
     // Only include credentials if auth type requires them and values are provided
     if (authType !== "none" && Object.keys(credentials).length > 0) {
@@ -599,6 +606,51 @@ function NewConnectionPage() {
                   </div>
                 </div>
                 <Switch checked={verifySsl} onCheckedChange={setVerifySsl} />
+              </div>
+
+              {/* Gateway Overrides */}
+              <div className="space-y-4 rounded-lg border border-border/60 bg-muted/20 p-4">
+                <div className="flex items-center gap-2">
+                  <Info className="h-4 w-4 text-muted-foreground" />
+                  <p className="font-medium text-sm">Gateway Overrides</p>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Override global gateway defaults for this connection. Leave empty to use the global defaults.
+                </p>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="conn-gateway-timeout">Timeout</Label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        id="conn-gateway-timeout"
+                        type="number"
+                        min={1}
+                        max={300}
+                        value={gatewayTimeout}
+                        onChange={(e) => setGatewayTimeout(e.target.value)}
+                        placeholder="Uses global default"
+                      />
+                      <span className="shrink-0 text-xs text-muted-foreground">sec</span>
+                    </div>
+                    <FieldHint>Request timeout for this provider (1-300s).</FieldHint>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="conn-gateway-cache-ttl">Cache TTL</Label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        id="conn-gateway-cache-ttl"
+                        type="number"
+                        min={0}
+                        max={86400}
+                        value={gatewayCacheTtl}
+                        onChange={(e) => setGatewayCacheTtl(e.target.value)}
+                        placeholder="Uses global default"
+                      />
+                      <span className="shrink-0 text-xs text-muted-foreground">sec</span>
+                    </div>
+                    <FieldHint>Cache duration for responses (0-86400s).</FieldHint>
+                  </div>
+                </div>
               </div>
 
               {/* Submit */}

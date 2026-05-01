@@ -4,7 +4,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from redis.asyncio import Redis
+
 from app.domain.connections.services import ConnectionService
+from app.lib.settings import get_settings
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -29,4 +32,17 @@ async def provide_gateway_connections(db_session: AsyncSession) -> list[m.Connec
     return list(results)
 
 
-__all__ = ("provide_gateway_connections",)
+async def provide_gateway_redis() -> Redis:
+    """Provide a Redis client for gateway response caching.
+
+    Uses the same Redis URL configured for SAQ so no additional
+    infrastructure is required.
+
+    Returns:
+        An async Redis client instance.
+    """
+    settings = get_settings()
+    return Redis.from_url(settings.saq.REDIS_URL, decode_responses=False)
+
+
+__all__ = ("provide_gateway_connections", "provide_gateway_redis")

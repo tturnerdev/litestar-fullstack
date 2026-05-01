@@ -1,4 +1,6 @@
-import { useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { toast } from "sonner"
+import { client } from "@/lib/generated/api/client.gen"
 import {
   gatewayLookupNumber,
   gatewayLookupExtension,
@@ -12,7 +14,7 @@ import {
 // Phone Number Lookup
 // ---------------------------------------------------------------------------
 
-export function useGatewayLookupNumber(phoneNumber: string) {
+export function useGatewayLookupNumber(phoneNumber: string, enabled = false) {
   return useQuery({
     queryKey: ["gateway", "number", phoneNumber],
     queryFn: async () => {
@@ -21,7 +23,8 @@ export function useGatewayLookupNumber(phoneNumber: string) {
       })
       return response.data as NumberGatewayResponse
     },
-    enabled: false,
+    enabled: enabled && !!phoneNumber,
+    staleTime: 5 * 60 * 1000,
   })
 }
 
@@ -29,7 +32,7 @@ export function useGatewayLookupNumber(phoneNumber: string) {
 // Extension Lookup
 // ---------------------------------------------------------------------------
 
-export function useGatewayLookupExtension(extensionNumber: string) {
+export function useGatewayLookupExtension(extensionNumber: string, enabled = false) {
   return useQuery({
     queryKey: ["gateway", "extension", extensionNumber],
     queryFn: async () => {
@@ -38,7 +41,8 @@ export function useGatewayLookupExtension(extensionNumber: string) {
       })
       return response.data as ExtensionGatewayResponse
     },
-    enabled: false,
+    enabled: enabled && !!extensionNumber,
+    staleTime: 5 * 60 * 1000,
   })
 }
 
@@ -46,7 +50,7 @@ export function useGatewayLookupExtension(extensionNumber: string) {
 // Device Lookup
 // ---------------------------------------------------------------------------
 
-export function useGatewayLookupDevice(macAddress: string) {
+export function useGatewayLookupDevice(macAddress: string, enabled = false) {
   return useQuery({
     queryKey: ["gateway", "device", macAddress],
     queryFn: async () => {
@@ -55,6 +59,57 @@ export function useGatewayLookupDevice(macAddress: string) {
       })
       return response.data as DeviceGatewayResponse
     },
-    enabled: false,
+    enabled: enabled && !!macAddress,
+    staleTime: 5 * 60 * 1000,
+  })
+}
+
+// ---------------------------------------------------------------------------
+// Admin Gateway Settings
+// ---------------------------------------------------------------------------
+
+export interface GatewaySettings {
+  defaultTimeout: number
+  defaultCacheTtl: number
+}
+
+export interface GatewaySettingsUpdate {
+  defaultTimeout?: number
+  defaultCacheTtl?: number
+}
+
+export function useAdminGatewaySettings() {
+  return useQuery({
+    queryKey: ["admin", "gateway", "settings"],
+    queryFn: async () => {
+      const response = await client.get({
+        url: "/api/admin/gateway/settings",
+        security: [{ scheme: "bearer", type: "http" }],
+      } as never)
+      return (response as { data: unknown }).data as GatewaySettings
+    },
+  })
+}
+
+export function useUpdateAdminGatewaySettings() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (payload: GatewaySettingsUpdate) => {
+      const response = await client.put({
+        url: "/api/admin/gateway/settings",
+        body: payload,
+        security: [{ scheme: "bearer", type: "http" }],
+      } as never)
+      return (response as { data: unknown }).data as GatewaySettings
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "gateway", "settings"] })
+      toast.success("Gateway settings updated")
+    },
+    onError: (error) => {
+      toast.error("Unable to update gateway settings", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
+    },
   })
 }

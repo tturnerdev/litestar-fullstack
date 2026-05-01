@@ -190,6 +190,46 @@ query {
 }
 """
 
+_GQL_VOICEMAIL = """\
+query {
+  fetchVoiceMail {
+    status
+    message
+    voicemail {
+      mailbox
+      email
+      pager
+    }
+  }
+}
+"""
+
+_GQL_ALL_CDRS = """\
+query {
+  fetchAllCdrs {
+    status
+    message
+    totalCount
+    cdr {
+      calldate
+      clid
+      src
+      dst
+      dcontext
+      channel
+      dstchannel
+      lastapp
+      lastdata
+      duration
+      billsec
+      disposition
+      amaflags
+      uniqueid
+    }
+  }
+}
+"""
+
 
 # ---------------------------------------------------------------------------
 # Asterisk dialplan destination parser
@@ -513,11 +553,15 @@ class FreePBXProvider(GatewayProvider):
                     "type": "outbound_cid",
                 })
 
+        # 3. Fetch recent call detail records for this number
+        recent_calls = await self._fetch_cdrs(phone_number, connection)
+
         return ProviderResult(
             status="ok",
             data={
                 "inbound_routes": matching_routes,
                 "extensions_using": extensions_using,
+                "recent_calls": recent_calls,
             },
         )
 
@@ -601,6 +645,12 @@ class FreePBXProvider(GatewayProvider):
         # 3. Fetch ring groups containing this extension
         ring_groups = await self._fetch_ring_groups_for_extension(extension, connection)
 
+        # 4. Fetch voicemail configuration
+        voicemail_info = await self._fetch_voicemail(extension, connection)
+
+        # 5. Fetch recent call detail records
+        recent_calls = await self._fetch_cdrs(extension, connection)
+
         return ProviderResult(
             status="ok",
             data={
@@ -608,6 +658,8 @@ class FreePBXProvider(GatewayProvider):
                 "device": device_info,
                 "follow_me": follow_me_info,
                 "ring_groups": ring_groups,
+                "voicemail": voicemail_info,
+                "recent_calls": recent_calls,
             },
         )
 
@@ -772,6 +824,97 @@ class FreePBXProvider(GatewayProvider):
             return matching
         except Exception:  # noqa: BLE001
             await logger.adebug("freepbx_ring_groups_query_failed", extension=extension)
+            return []
+
+    async def _fetch_voicemail(self, extension: str, connection: m.Connection) -> dict[str, Any] | None:
+        """Fetch voicemail configuration for an extension.
+
+        Queries all voicemail boxes and returns the one matching
+        *extension*, or ``None`` if not found or the query fails.
+        """
+        try:
+            vm_resp = await self._execute_graphql(_GQL_VOICEMAIL, connection)
+            vm_data = vm_resp.get("data", {}).get("fetchVoiceMail", {})
+
+            vm_status = vm_data.get("status", "")
+            if vm_status and str(vm_status).lower() not in ("true", "ok", "success", "1"):
+                return None
+
+            all_boxes: list[dict[str, Any]] = vm_data.get("voicemail", []) or []
+
+            for box in all_boxes:
+                if str(box.get("mailbox", "")) == str(extension):
+                    return {
+                        "enabled": True,
+                        "email": box.get("email") or None,
+                        "pager": box.get("pager") or None,
+                        "mailbox": box.get("mailbox", ""),
+                    }
+
+            return None
+        except Exception:  # noqa: BLE001
+            await logger.adebug("freepbx_voicemail_query_failed", extension=extension)
+            return None
+
+    async def _fetch_cdrs(
+        self,
+        identifier: str,
+        connection: m.Connection,
+        limit: int = 20,
+    ) -> list[dict[str, Any]]:
+        """Fetch recent call detail records matching *identifier*.
+
+        Queries all CDRs and filters for records where the source or
+        destination matches the given phone number or extension.
+
+        Args:
+            identifier: A phone number or extension to filter by.
+            connection: The connection to query against.
+            limit: Maximum number of records to return.
+
+        Returns:
+            A list of CDR dicts, or an empty list on failure.
+        """
+        try:
+            cdr_resp = await self._execute_graphql(_GQL_ALL_CDRS, connection)
+            cdr_data = cdr_resp.get("data", {}).get("fetchAllCdrs", {})
+
+            cdr_status = cdr_data.get("status", "")
+            if cdr_status and str(cdr_status).lower() not in ("true", "ok", "success", "1"):
+                return []
+
+            all_cdrs: list[dict[str, Any]] = cdr_data.get("cdr", []) or []
+
+            normalized = re.sub(r"[^\d]", "", identifier)
+            results: list[dict[str, Any]] = []
+
+            for record in all_cdrs:
+                src = str(record.get("src", ""))
+                dst = str(record.get("dst", ""))
+                src_digits = re.sub(r"[^\d]", "", src)
+                dst_digits = re.sub(r"[^\d]", "", dst)
+
+                if (
+                    src == identifier
+                    or dst == identifier
+                    or (normalized and (src_digits == normalized or dst_digits == normalized))
+                ):
+                    results.append({
+                        "date": record.get("calldate", ""),
+                        "source": src,
+                        "destination": dst,
+                        "duration": _to_int(record.get("duration")),
+                        "disposition": record.get("disposition", ""),
+                        "channel": record.get("channel", ""),
+                        "uniqueId": record.get("uniqueid", ""),
+                    })
+
+                    if len(results) >= limit:
+                        break
+
+            return results
+        except Exception:  # noqa: BLE001
+            await logger.adebug("freepbx_cdr_query_failed", identifier=identifier)
             return []
 
     @staticmethod

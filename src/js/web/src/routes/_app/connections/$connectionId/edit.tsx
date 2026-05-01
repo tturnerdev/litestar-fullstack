@@ -177,6 +177,8 @@ function EditConnectionPage() {
   const [credentials, setCredentials] = useState<Record<string, string>>({})
   const [description, setDescription] = useState("")
   const [verifySsl, setVerifySsl] = useState(true)
+  const [gatewayTimeout, setGatewayTimeout] = useState("")
+  const [gatewayCacheTtl, setGatewayCacheTtl] = useState("")
   const [settingsText, setSettingsText] = useState("")
   const [initialized, setInitialized] = useState(false)
 
@@ -212,6 +214,8 @@ function EditConnectionPage() {
       setAuthType(data.authType ?? "none")
       setDescription(data.description ?? "")
       setVerifySsl(data.settings?.verify_ssl !== false)
+      setGatewayTimeout(data.settings?.timeout != null ? String(data.settings.timeout) : "")
+      setGatewayCacheTtl(data.settings?.cache_ttl != null ? String(data.settings.cache_ttl) : "")
       setSettingsText(data.settings ? JSON.stringify(data.settings, null, 2) : "")
       setInitialized(true)
     }
@@ -229,10 +233,12 @@ function EditConnectionPage() {
       authType !== (data.authType ?? "none") ||
       description !== (data.description ?? "") ||
       verifySsl !== (data.settings?.verify_ssl !== false) ||
+      gatewayTimeout !== (data.settings?.timeout != null ? String(data.settings.timeout) : "") ||
+      gatewayCacheTtl !== (data.settings?.cache_ttl != null ? String(data.settings.cache_ttl) : "") ||
       settingsText !== (data.settings ? JSON.stringify(data.settings, null, 2) : "") ||
       Object.values(credentials).some((v) => v !== "")
     )
-  }, [name, connectionType, provider, host, port, authType, description, verifySsl, settingsText, credentials, data, initialized])
+  }, [name, connectionType, provider, host, port, authType, description, verifySsl, gatewayTimeout, gatewayCacheTtl, settingsText, credentials, data, initialized])
 
   // Ref to skip blocking after a successful submit
   const justSubmittedRef = useRef(false)
@@ -356,11 +362,26 @@ function EditConnectionPage() {
       }
     }
 
-    // Check if verify_ssl changed -- merge into settings
+    // Check if verify_ssl or gateway overrides changed -- merge into settings
     const originalVerifySsl = data.settings?.verify_ssl !== false
-    if (verifySsl !== originalVerifySsl || parsedSettings !== null) {
+    const originalTimeout = data.settings?.timeout != null ? String(data.settings.timeout) : ""
+    const originalCacheTtl = data.settings?.cache_ttl != null ? String(data.settings.cache_ttl) : ""
+    const gatewayFieldsChanged = gatewayTimeout !== originalTimeout || gatewayCacheTtl !== originalCacheTtl
+    if (verifySsl !== originalVerifySsl || gatewayFieldsChanged || parsedSettings !== null) {
       const base = parsedSettings ?? data.settings ?? {}
-      payload.settings = { ...base, verify_ssl: verifySsl }
+      const merged: Record<string, unknown> = { ...base, verify_ssl: verifySsl }
+      // Gateway overrides: set if provided, remove if cleared
+      if (gatewayTimeout.trim()) {
+        merged.timeout = parseInt(gatewayTimeout, 10)
+      } else {
+        delete merged.timeout
+      }
+      if (gatewayCacheTtl.trim()) {
+        merged.cache_ttl = parseInt(gatewayCacheTtl, 10)
+      } else {
+        delete merged.cache_ttl
+      }
+      payload.settings = merged
     }
 
     // Only include credentials if the user actually entered new values
@@ -701,6 +722,51 @@ function EditConnectionPage() {
                 <Switch checked={verifySsl} onCheckedChange={setVerifySsl} />
               </div>
 
+              {/* Gateway Overrides */}
+              <div className="space-y-4 rounded-lg border border-border/60 bg-muted/20 p-4">
+                <div className="flex items-center gap-2">
+                  <Info className="h-4 w-4 text-muted-foreground" />
+                  <p className="font-medium text-sm">Gateway Overrides</p>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Override global gateway defaults for this connection. Leave empty to use the global defaults.
+                </p>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="conn-gateway-timeout">Timeout</Label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        id="conn-gateway-timeout"
+                        type="number"
+                        min={1}
+                        max={300}
+                        value={gatewayTimeout}
+                        onChange={(e) => setGatewayTimeout(e.target.value)}
+                        placeholder="Uses global default"
+                      />
+                      <span className="shrink-0 text-xs text-muted-foreground">sec</span>
+                    </div>
+                    <FieldHint>Request timeout for this provider (1-300s).</FieldHint>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="conn-gateway-cache-ttl">Cache TTL</Label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        id="conn-gateway-cache-ttl"
+                        type="number"
+                        min={0}
+                        max={86400}
+                        value={gatewayCacheTtl}
+                        onChange={(e) => setGatewayCacheTtl(e.target.value)}
+                        placeholder="Uses global default"
+                      />
+                      <span className="shrink-0 text-xs text-muted-foreground">sec</span>
+                    </div>
+                    <FieldHint>Cache duration for responses (0-86400s).</FieldHint>
+                  </div>
+                </div>
+              </div>
+
               {/* Settings JSON */}
               <div className="space-y-2">
                 <Label htmlFor="conn-settings">Settings JSON</Label>
@@ -712,7 +778,7 @@ function EditConnectionPage() {
                   className="font-mono text-xs"
                   placeholder='{"key": "value"}'
                 />
-                <FieldHint>Advanced settings as raw JSON. The verify_ssl toggle above is merged automatically.</FieldHint>
+                <FieldHint>Advanced settings as raw JSON. The verify_ssl toggle and gateway overrides above are merged automatically.</FieldHint>
               </div>
 
               {/* Submit */}

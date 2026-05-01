@@ -59,6 +59,7 @@ import { Route as AppConnectionsConnectionIdRouteImport } from './routes/_app/co
 import { Route as AppAdminVoiceRouteImport } from './routes/_app/admin/voice'
 import { Route as AppAdminSystemRouteImport } from './routes/_app/admin/system'
 import { Route as AppAdminSupportRouteImport } from './routes/_app/admin/support'
+import { Route as AppAdminGatewayRouteImport } from './routes/_app/admin/gateway'
 import { Route as AppAdminFaxRouteImport } from './routes/_app/admin/fax'
 import { Route as AppAdminDevicesRouteImport } from './routes/_app/admin/devices'
 import { Route as AppAdminAuditRouteImport } from './routes/_app/admin/audit'
@@ -342,6 +343,11 @@ const AppAdminSupportRoute = AppAdminSupportRouteImport.update({
   path: '/support',
   getParentRoute: () => AppAdminRoute,
 } as any)
+const AppAdminGatewayRoute = AppAdminGatewayRouteImport.update({
+  id: '/gateway',
+  path: '/gateway',
+  getParentRoute: () => AppAdminRoute,
+} as any)
 const AppAdminFaxRoute = AppAdminFaxRouteImport.update({
   id: '/fax',
   path: '/fax',
@@ -548,6 +554,7 @@ export interface FileRoutesByFullPath {
   '/admin/audit': typeof AppAdminAuditRoute
   '/admin/devices': typeof AppAdminDevicesRoute
   '/admin/fax': typeof AppAdminFaxRoute
+  '/admin/gateway': typeof AppAdminGatewayRoute
   '/admin/support': typeof AppAdminSupportRoute
   '/admin/system': typeof AppAdminSystemRoute
   '/admin/voice': typeof AppAdminVoiceRoute
@@ -624,6 +631,7 @@ export interface FileRoutesByTo {
   '/admin/audit': typeof AppAdminAuditRoute
   '/admin/devices': typeof AppAdminDevicesRoute
   '/admin/fax': typeof AppAdminFaxRoute
+  '/admin/gateway': typeof AppAdminGatewayRoute
   '/admin/support': typeof AppAdminSupportRoute
   '/admin/system': typeof AppAdminSystemRoute
   '/admin/voice': typeof AppAdminVoiceRoute
@@ -707,6 +715,7 @@ export interface FileRoutesById {
   '/_app/admin/audit': typeof AppAdminAuditRoute
   '/_app/admin/devices': typeof AppAdminDevicesRoute
   '/_app/admin/fax': typeof AppAdminFaxRoute
+  '/_app/admin/gateway': typeof AppAdminGatewayRoute
   '/_app/admin/support': typeof AppAdminSupportRoute
   '/_app/admin/system': typeof AppAdminSystemRoute
   '/_app/admin/voice': typeof AppAdminVoiceRoute
@@ -792,6 +801,7 @@ export interface FileRouteTypes {
     | '/admin/audit'
     | '/admin/devices'
     | '/admin/fax'
+    | '/admin/gateway'
     | '/admin/support'
     | '/admin/system'
     | '/admin/voice'
@@ -868,6 +878,7 @@ export interface FileRouteTypes {
     | '/admin/audit'
     | '/admin/devices'
     | '/admin/fax'
+    | '/admin/gateway'
     | '/admin/support'
     | '/admin/system'
     | '/admin/voice'
@@ -950,6 +961,7 @@ export interface FileRouteTypes {
     | '/_app/admin/audit'
     | '/_app/admin/devices'
     | '/_app/admin/fax'
+    | '/_app/admin/gateway'
     | '/_app/admin/support'
     | '/_app/admin/system'
     | '/_app/admin/voice'
@@ -1368,6 +1380,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminSupportRouteImport
       parentRoute: typeof AppAdminRoute
     }
+    '/_app/admin/gateway': {
+      id: '/_app/admin/gateway'
+      path: '/gateway'
+      fullPath: '/admin/gateway'
+      preLoaderRoute: typeof AppAdminGatewayRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
     '/_app/admin/fax': {
       id: '/_app/admin/fax'
       path: '/fax'
@@ -1606,6 +1625,7 @@ interface AppAdminRouteChildren {
   AppAdminAuditRoute: typeof AppAdminAuditRoute
   AppAdminDevicesRoute: typeof AppAdminDevicesRoute
   AppAdminFaxRoute: typeof AppAdminFaxRoute
+  AppAdminGatewayRoute: typeof AppAdminGatewayRoute
   AppAdminSupportRoute: typeof AppAdminSupportRoute
   AppAdminSystemRoute: typeof AppAdminSystemRoute
   AppAdminVoiceRoute: typeof AppAdminVoiceRoute
@@ -1620,6 +1640,7 @@ const AppAdminRouteChildren: AppAdminRouteChildren = {
   AppAdminAuditRoute: AppAdminAuditRoute,
   AppAdminDevicesRoute: AppAdminDevicesRoute,
   AppAdminFaxRoute: AppAdminFaxRoute,
+  AppAdminGatewayRoute: AppAdminGatewayRoute,
   AppAdminSupportRoute: AppAdminSupportRoute,
   AppAdminSystemRoute: AppAdminSystemRoute,
   AppAdminVoiceRoute: AppAdminVoiceRoute,
