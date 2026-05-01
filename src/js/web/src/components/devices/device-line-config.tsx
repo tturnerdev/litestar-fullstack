@@ -202,7 +202,7 @@ export function DeviceLineConfig({ deviceId }: DeviceLineConfigProps) {
                       <div className="flex items-center gap-2">
                         <Select value={line.lineType} onValueChange={(v) => updateLine(index, "lineType", v)}>
                           <SelectTrigger className="h-8 w-32">
-                            <SelectValue />
+                            <SelectValue placeholder="Select type..." />
                           </SelectTrigger>
                           <SelectContent>
                             {lineTypes.map((t) => (
@@ -234,7 +234,7 @@ export function DeviceLineConfig({ deviceId }: DeviceLineConfigProps) {
                     <TableCell>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive">
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive" aria-label="Remove line">
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </AlertDialogTrigger>

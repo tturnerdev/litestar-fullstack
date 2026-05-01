@@ -223,7 +223,7 @@ export function ManageRolesDialog({ userId, userEmail, open, onOpenChange }: Man
                         disabled={updateTeamMember.isPending || team.isOwner}
                       >
                         <SelectTrigger className="w-28">
-                          <SelectValue />
+                          <SelectValue placeholder="Select a role..." />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="MEMBER">Member</SelectItem>

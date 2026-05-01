@@ -413,6 +413,7 @@ function MessageRow({ message, isExpanded, isSelected, isEvenRow, onExpand, onDe
                 e.stopPropagation()
                 onDelete()
               }}
+              aria-label="Delete message"
             >
               <Trash2 className="h-4 w-4" />
             </Button>

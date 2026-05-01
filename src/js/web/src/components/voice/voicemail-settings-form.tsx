@@ -182,7 +182,7 @@ export function VoicemailSettingsForm({ extensionId }: { extensionId: string }) 
             }}
           >
             <SelectTrigger>
-              <SelectValue />
+              <SelectValue placeholder="Select greeting type..." />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="default">

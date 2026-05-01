@@ -64,7 +64,7 @@ export function ForwardingRuleRow({ rule, onUpdate, onDelete, isUpdating, isDele
             <Label className="text-xs">Condition</Label>
             <Select value={editRuleType} onValueChange={(v) => setEditRuleType(v as ForwardingRule["ruleType"])}>
               <SelectTrigger className="h-8">
-                <SelectValue />
+                <SelectValue placeholder="Select condition..." />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="always">Always</SelectItem>
@@ -78,7 +78,7 @@ export function ForwardingRuleRow({ rule, onUpdate, onDelete, isUpdating, isDele
             <Label className="text-xs">Destination</Label>
             <Select value={editDestType} onValueChange={(v) => setEditDestType(v as ForwardingRule["destinationType"])}>
               <SelectTrigger className="h-8">
-                <SelectValue />
+                <SelectValue placeholder="Select destination..." />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="extension">Extension</SelectItem>
@@ -131,10 +131,10 @@ export function ForwardingRuleRow({ rule, onUpdate, onDelete, isUpdating, isDele
         {rule.isActive ? "Active" : "Inactive"}
       </Badge>
       <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-        <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)}>
+        <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)} aria-label="Edit rule">
           <Pencil className="h-4 w-4" />
         </Button>
-        <Button variant="ghost" size="sm" onClick={() => onDelete(rule.id)} disabled={isDeleting}>
+        <Button variant="ghost" size="sm" onClick={() => onDelete(rule.id)} disabled={isDeleting} aria-label="Delete rule">
           <Trash2 className="h-4 w-4" />
         </Button>
       </div>

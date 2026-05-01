@@ -65,7 +65,7 @@ export function PhoneNumberEditSheet({ phoneNumber, open, onOpenChange }: PhoneN
             <Label htmlFor="edit-active">Status</Label>
             <Select value={isActive ? "active" : "inactive"} onValueChange={(v) => setIsActive(v === "active")}>
               <SelectTrigger id="edit-active">
-                <SelectValue />
+                <SelectValue placeholder="Select status..." />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="active">Active</SelectItem>

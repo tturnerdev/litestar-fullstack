@@ -111,7 +111,7 @@ export function CreatePhoneNumberDialog({ trigger }: { trigger: React.ReactNode 
               <Label htmlFor="pn-type">Type</Label>
               <Select value={numberType} onValueChange={setNumberType}>
                 <SelectTrigger id="pn-type">
-                  <SelectValue />
+                  <SelectValue placeholder="Select a type..." />
                 </SelectTrigger>
                 <SelectContent>
                   {TYPE_OPTIONS.map(({ value, label: optLabel, icon: Icon }) => (
