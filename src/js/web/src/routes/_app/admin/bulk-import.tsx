@@ -199,7 +199,7 @@ function PreviewTable({ preview, columns }: PreviewTableProps) {
       </div>
 
       <div className="max-h-[400px] overflow-auto rounded-md border">
-        <Table>
+        <Table aria-label="Import preview">
           <TableHeader>
             <TableRow>
               <TableHead className="w-16">Row</TableHead>

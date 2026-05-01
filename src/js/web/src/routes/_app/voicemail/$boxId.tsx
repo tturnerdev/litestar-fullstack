@@ -739,7 +739,7 @@ function BoxMessageList({ boxId }: { boxId: string }) {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <Table>
+        <Table aria-label="Voicemail messages">
           <TableHeader>
             <TableRow>
               <TableHead className="w-10">

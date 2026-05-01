@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
 import { useMemo, useState } from "react"
 import {
+  AlertCircle,
   AlertTriangle,
   ArrowLeft,
   Calendar,
@@ -33,6 +34,7 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/empty-state"
 import { CopyButton } from "@/components/ui/copy-button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -391,7 +393,7 @@ function ScheduleDetailPage() {
   const { scheduleId } = Route.useParams()
   const router = useRouter()
 
-  const { data, isLoading, isError } = useSchedule(scheduleId)
+  const { data, isLoading, isError, refetch } = useSchedule(scheduleId)
   const updateSchedule = useUpdateSchedule(scheduleId)
   const deleteSchedule = useDeleteSchedule()
 
@@ -518,12 +520,12 @@ function ScheduleDetailPage() {
           }
         />
         <PageSection>
-          <Card>
-            <CardHeader>
-              <CardTitle>Schedule detail</CardTitle>
-            </CardHeader>
-            <CardContent className="text-muted-foreground">We could not load this schedule.</CardContent>
-          </Card>
+          <EmptyState
+            icon={AlertCircle}
+            title="Unable to load schedule"
+            description="Something went wrong. Please try again."
+            action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+          />
         </PageSection>
       </PageContainer>
     )

@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
 import { useState } from "react"
 import {
+  AlertCircle,
   AlertTriangle,
   ArrowLeft,
   Loader2,
@@ -30,6 +31,7 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/empty-state"
 import { CopyButton } from "@/components/ui/copy-button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -223,7 +225,7 @@ function RingGroupDetailPage() {
   const { ringGroupId } = Route.useParams()
   const router = useRouter()
 
-  const { data, isLoading, isError } = useRingGroup(ringGroupId)
+  const { data, isLoading, isError, refetch } = useRingGroup(ringGroupId)
   const updateMutation = useUpdateRingGroup(ringGroupId)
   const deleteMutation = useDeleteRingGroup()
 
@@ -303,7 +305,12 @@ function RingGroupDetailPage() {
       <PageContainer className="flex-1 space-y-8">
         <PageHeader eyebrow="Call Routing" title="Ring Group" actions={<Button variant="outline" size="sm" asChild><Link to="/call-routing" search={{ tab: "ring-groups" }}><ArrowLeft className="mr-2 h-4 w-4" /> Back</Link></Button>} />
         <PageSection>
-          <Card><CardHeader><CardTitle>Ring group detail</CardTitle></CardHeader><CardContent className="text-muted-foreground">We could not load this ring group.</CardContent></Card>
+          <EmptyState
+            icon={AlertCircle}
+            title="Unable to load ring group"
+            description="Something went wrong. Please try again."
+            action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+          />
         </PageSection>
       </PageContainer>
     )

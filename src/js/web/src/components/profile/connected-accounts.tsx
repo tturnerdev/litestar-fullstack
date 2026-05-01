@@ -1,8 +1,9 @@
-import { Link2, LogIn } from "lucide-react"
+import { AlertCircle, Link2, LogIn } from "lucide-react"
 import { useMemo, useState } from "react"
 import { toast } from "sonner"
 import { Icons } from "@/components/icons"
 import { OAuthLinkButton } from "@/components/profile/oauth-link-button"
+import { EmptyState } from "@/components/ui/empty-state"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,7 +34,7 @@ const providerMeta: Record<string, { label: string; iconBg: string }> = {
 }
 
 export function ConnectedAccounts() {
-  const { data, isLoading, isError } = useOAuthAccounts()
+  const { data, isLoading, isError, refetch } = useOAuthAccounts()
   const { data: oauthConfig } = useOAuthConfig()
   const startLink = useStartOAuthLink()
   const unlink = useUnlinkOAuthAccount()
@@ -48,12 +49,12 @@ export function ConnectedAccounts() {
 
   if (isError) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Connected accounts</CardTitle>
-          <CardDescription>We could not load your connected accounts.</CardDescription>
-        </CardHeader>
-      </Card>
+      <EmptyState
+        icon={AlertCircle}
+        title="Unable to load connected accounts"
+        description="Something went wrong. Please try again."
+        action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+      />
     )
   }
 

@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query"
-import { Check, MailPlus, Plus, ToggleLeft, ToggleRight, X } from "lucide-react"
+import { AlertCircle, Check, MailPlus, Plus, ToggleLeft, ToggleRight, X } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { EmailRouteRow } from "@/components/fax/email-route-row"
@@ -16,6 +16,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { SkeletonTable } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -28,7 +29,7 @@ import {
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export function EmailRouteEditor({ faxNumberId }: { faxNumberId: string }) {
-  const { data, isLoading, isError } = useFaxEmailRoutes(faxNumberId)
+  const { data, isLoading, isError, refetch } = useFaxEmailRoutes(faxNumberId)
   const createRoute = useCreateFaxEmailRoute(faxNumberId)
   const deleteRoute = useDeleteFaxEmailRoute(faxNumberId)
   const [newEmail, setNewEmail] = useState("")
@@ -97,12 +98,12 @@ export function EmailRouteEditor({ faxNumberId }: { faxNumberId: string }) {
 
   if (isError || !data) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Email Routes</CardTitle>
-        </CardHeader>
-        <CardContent className="text-muted-foreground">We could not load email routes.</CardContent>
-      </Card>
+      <EmptyState
+        icon={AlertCircle}
+        title="Unable to load email routes"
+        description="Something went wrong. Please try again."
+        action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+      />
     )
   }
 

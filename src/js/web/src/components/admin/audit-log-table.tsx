@@ -1056,7 +1056,7 @@ export function AuditLogTable() {
 
           {/* Table */}
           <div className="rounded-md border border-border/60 bg-card/80">
-            <Table>
+            <Table aria-label="Audit log entries">
               <TableHeader className="sticky top-0 z-10 bg-background">
                 <TableRow>
                   <TableHead className="w-8" />

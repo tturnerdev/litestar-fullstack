@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/empty-state"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -90,7 +91,7 @@ function FaxMessageDetailPage() {
   useDocumentTitle("Fax Message")
   const { messageId } = Route.useParams()
   const router = useRouter()
-  const { data, isLoading, isError } = useFaxMessage(messageId)
+  const { data, isLoading, isError, refetch } = useFaxMessage(messageId)
   const deleteMutation = useDeleteFaxMessage()
   const { data: pdfUrl, isLoading: pdfLoading } = useDownloadFaxDocument(
     data ? messageId : "",
@@ -130,11 +131,12 @@ function FaxMessageDetailPage() {
           }
         />
         <PageSection>
-          <Card>
-            <CardContent className="py-8 text-center text-muted-foreground">
-              We could not load this message.
-            </CardContent>
-          </Card>
+          <EmptyState
+            icon={AlertCircle}
+            title="Unable to load message"
+            description="Something went wrong. Please try again."
+            action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+          />
         </PageSection>
       </PageContainer>
     )

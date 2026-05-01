@@ -1,11 +1,12 @@
 import { useState } from "react"
-import { Info, ShieldAlert, ShieldCheck } from "lucide-react"
+import { AlertCircle, Info, ShieldAlert, ShieldCheck } from "lucide-react"
 import { toast } from "sonner"
 import { BackupCodesDisplay } from "@/components/mfa/backup-codes-display"
 import { MfaDisableDialog } from "@/components/mfa/mfa-disable-dialog"
 import { MfaSetupDialog } from "@/components/mfa/mfa-setup-dialog"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/empty-state"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { SkeletonCard } from "@/components/ui/skeleton"
@@ -58,7 +59,7 @@ function BackupCodesProgress({ remaining }: { remaining: number }) {
 }
 
 export function MfaSection() {
-  const { data, isLoading, isError } = useMfaStatus()
+  const { data, isLoading, isError, refetch } = useMfaStatus()
   const regenerate = useRegenerateBackupCodes()
   const [regenOpen, setRegenOpen] = useState(false)
   const [regenPassword, setRegenPassword] = useState("")
@@ -70,12 +71,12 @@ export function MfaSection() {
 
   if (isError || !data) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Multi-factor authentication</CardTitle>
-          <CardDescription>We could not load MFA status.</CardDescription>
-        </CardHeader>
-      </Card>
+      <EmptyState
+        icon={AlertCircle}
+        title="Unable to load MFA status"
+        description="Something went wrong. Please try again."
+        action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+      />
     )
   }
 

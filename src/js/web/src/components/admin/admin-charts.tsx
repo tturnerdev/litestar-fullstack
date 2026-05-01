@@ -1,5 +1,8 @@
+import { AlertCircle } from "lucide-react"
 import { useMemo, useState } from "react"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/empty-state"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { useAdminTrends } from "@/lib/api/hooks/admin"
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
@@ -43,7 +46,7 @@ function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: 
 }
 
 export function AdminCharts() {
-  const { data, isLoading, isError } = useAdminTrends()
+  const { data, isLoading, isError, refetch } = useAdminTrends()
   const [activityPeriod, setActivityPeriod] = useState<Period>("30d")
   const [growthPeriod, setGrowthPeriod] = useState<Period>("30d")
 
@@ -78,12 +81,12 @@ export function AdminCharts() {
 
   if (isError || !data) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Analytics</CardTitle>
-        </CardHeader>
-        <CardContent className="text-muted-foreground">We could not load trend data.</CardContent>
-      </Card>
+      <EmptyState
+        icon={AlertCircle}
+        title="Unable to load trend data"
+        description="Something went wrong. Please try again."
+        action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+      />
     )
   }
 

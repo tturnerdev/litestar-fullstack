@@ -170,7 +170,7 @@ export function DeviceLineConfig({ deviceId }: DeviceLineConfigProps) {
           </div>
         ) : (
           <>
-            <Table>
+            <Table aria-label="Line assignments">
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-10" />

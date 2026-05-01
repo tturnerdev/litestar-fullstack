@@ -178,7 +178,7 @@ export function VoicemailMessageList({ extensionId }: VoicemailMessageListProps)
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <Table>
+        <Table aria-label="Voicemail messages">
           <TableHeader>
             <TableRow>
               <TableHead className="w-10">
