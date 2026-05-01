@@ -1,6 +1,6 @@
 """add call routing tables
 
-Revision ID: a1b2c3d4e5f6
+Revision ID: aa1b2c3d4e5f
 Revises: 94e85cc5fbd3
 Create Date: 2026-04-30 18:00:00.000000
 
@@ -28,7 +28,7 @@ sa.StoredObject = StoredObject  # pyright: ignore
 sa.PasswordHash = PasswordHash  # pyright: ignore
 
 # revision identifiers, used by Alembic.
-revision = "a1b2c3d4e5f6"
+revision = "aa1b2c3d4e5f"
 down_revision = "94e85cc5fbd3"
 branch_labels = None
 depends_on = None

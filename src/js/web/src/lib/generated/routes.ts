@@ -22,48 +22,77 @@ export type RouteName =
   | 'add_member_to_team'
   | 'assign_role'
   | 'assign_role_api_users_roles'
+  | 'check_schedule'
   | 'close_ticket'
   | 'confirm_setup'
+  | 'create_call_queue'
+  | 'create_call_record'
   | 'create_connection'
   | 'create_device'
+  | 'create_entry'
   | 'create_extension'
   | 'create_fax_email_route'
   | 'create_fax_number'
   | 'create_forwarding_rule'
+  | 'create_ivr_menu'
   | 'create_location'
+  | 'create_member'
+  | 'create_member_api_ring_groups_ring_group_id:uuid_members'
   | 'create_message'
+  | 'create_option'
   | 'create_phone_number'
+  | 'create_registration'
+  | 'create_ring_group'
   | 'create_role'
+  | 'create_schedule'
   | 'create_tag'
   | 'create_team'
   | 'create_team_invitation'
   | 'create_ticket'
+  | 'create_time_condition'
   | 'create_user'
+  | 'create_voicemail_box'
   | 'delete_attachment'
+  | 'delete_call_queue'
   | 'delete_connection'
   | 'delete_device'
+  | 'delete_entry'
   | 'delete_extension'
   | 'delete_fax_email_route'
   | 'delete_fax_message'
   | 'delete_fax_number'
   | 'delete_forwarding_rule'
+  | 'delete_ivr_menu'
   | 'delete_location'
+  | 'delete_member'
+  | 'delete_member_api_ring_groups_ring_group_id:uuid_members_member_id:uuid'
   | 'delete_message'
   | 'delete_notification'
+  | 'delete_option'
   | 'delete_phone_number'
+  | 'delete_registration'
+  | 'delete_ring_group'
   | 'delete_role'
+  | 'delete_schedule'
   | 'delete_tag'
   | 'delete_team'
   | 'delete_team_api_teams_team_id:uuid'
   | 'delete_team_invitation'
   | 'delete_ticket'
+  | 'delete_time_condition'
   | 'delete_user'
   | 'delete_user_api_users_user_id:uuid'
+  | 'delete_voicemail_box'
   | 'delete_voicemail_message'
+  | 'delete_voicemail_message_api_voicemail_messages_message_id:uuid'
   | 'disable_mfa'
+  | 'export_call_records'
   | 'forgot_password'
   | 'get_activity'
   | 'get_attachment'
+  | 'get_by_extension'
+  | 'get_call_queue'
+  | 'get_call_record'
   | 'get_connection'
   | 'get_device'
   | 'get_device_data'
@@ -72,6 +101,8 @@ export type RouteName =
   | 'get_extension_data'
   | 'get_fax_message'
   | 'get_fax_number'
+  | 'get_gateway_settings'
+  | 'get_ivr_menu'
   | 'get_location'
   | 'get_log'
   | 'get_mfa_status'
@@ -80,34 +111,47 @@ export type RouteName =
   | 'get_phone_number'
   | 'get_preferences'
   | 'get_profile'
+  | 'get_registration'
+  | 'get_ring_group'
   | 'get_role'
+  | 'get_schedule'
   | 'get_sessions'
   | 'get_stats'
   | 'get_stats_api_admin_devices_stats'
   | 'get_stats_api_admin_fax_stats'
   | 'get_stats_api_admin_support_stats'
   | 'get_stats_api_admin_voice_stats'
+  | 'get_summary'
   | 'get_system_status'
   | 'get_tag'
   | 'get_target_logs'
   | 'get_team'
   | 'get_team_api_teams_team_id:uuid'
   | 'get_ticket'
+  | 'get_time_condition'
   | 'get_trends'
   | 'get_unread_count'
+  | 'get_unread_count_api_voicemail_boxes_box_id:uuid_unread'
   | 'get_user'
   | 'get_user_api_users_user_id:uuid'
   | 'get_user_logs'
   | 'get_verification_status'
+  | 'get_voicemail_box'
   | 'get_voicemail_message'
+  | 'get_voicemail_message_api_voicemail_messages_message_id:uuid'
   | 'get_voicemail_settings'
+  | 'get_volume'
   | 'initiate_disable_mfa_oauth'
   | 'initiate_setup'
   | 'list_accounts'
+  | 'list_box_messages'
+  | 'list_call_queues'
+  | 'list_call_records'
   | 'list_connections'
   | 'list_device_lines'
   | 'list_devices'
   | 'list_devices_api_devices'
+  | 'list_entries'
   | 'list_extensions'
   | 'list_extensions_api_voice_extensions'
   | 'list_fax_email_routes'
@@ -116,13 +160,20 @@ export type RouteName =
   | 'list_fax_numbers'
   | 'list_fax_numbers_api_fax_numbers'
   | 'list_forwarding_rules'
+  | 'list_ivr_menus'
   | 'list_locations'
   | 'list_logs'
+  | 'list_members'
+  | 'list_members_api_ring_groups_ring_group_id:uuid_members'
   | 'list_messages'
   | 'list_notifications'
+  | 'list_options'
   | 'list_phone_numbers'
   | 'list_phone_numbers_api_voice_phone_numbers'
+  | 'list_registrations'
+  | 'list_ring_groups'
   | 'list_roles'
+  | 'list_schedules'
   | 'list_tags'
   | 'list_team_invitations'
   | 'list_team_permissions'
@@ -130,9 +181,13 @@ export type RouteName =
   | 'list_teams_api_teams'
   | 'list_tickets'
   | 'list_tickets_api_support_tickets'
+  | 'list_time_conditions'
+  | 'list_unregistered'
   | 'list_users'
   | 'list_users_api_users'
+  | 'list_voicemail_boxes'
   | 'list_voicemail_messages'
+  | 'list_voicemail_messages_api_voicemail_messages'
   | 'login'
   | 'logout'
   | 'mark_all_read'
@@ -143,6 +198,7 @@ export type RouteName =
   | 'oauth:google:callback'
   | 'openapi.json'
   | 'paste_image'
+  | 'pause_member'
   | 'reboot_device'
   | 'refresh_token'
   | 'regenerate_backup_codes'
@@ -161,6 +217,7 @@ export type RouteName =
   | 'send_fax'
   | 'set_device_lines'
   | 'set_forwarding_rules'
+  | 'set_override'
   | 'signup'
   | 'start_link'
   | 'submit_feedback'
@@ -170,34 +227,48 @@ export type RouteName =
   | 'system:sync-entity'
   | 'test_connection'
   | 'toggle_dnd'
+  | 'toggle_read_status'
   | 'unlink'
+  | 'update_call_queue'
   | 'update_connection'
   | 'update_device'
   | 'update_dnd_settings'
+  | 'update_entry'
   | 'update_extension'
   | 'update_fax_email_route'
   | 'update_fax_number'
   | 'update_forwarding_rule'
+  | 'update_gateway_settings'
+  | 'update_ivr_menu'
   | 'update_location'
+  | 'update_member'
+  | 'update_member_api_ring_groups_ring_group_id:uuid_members_member_id:uuid'
   | 'update_message'
+  | 'update_option'
   | 'update_organization'
   | 'update_password'
   | 'update_phone_number'
   | 'update_preferences'
   | 'update_profile'
+  | 'update_registration'
+  | 'update_ring_group'
   | 'update_role'
+  | 'update_schedule'
   | 'update_tag'
   | 'update_team'
   | 'update_team_api_teams_team_id:uuid'
   | 'update_team_member'
   | 'update_team_permissions'
   | 'update_ticket'
+  | 'update_time_condition'
   | 'update_user'
   | 'update_user_api_users_user_id:uuid'
+  | 'update_voicemail_box'
   | 'update_voicemail_message'
   | 'update_voicemail_settings'
   | 'upgrade_scopes'
   | 'upload_attachment'
+  | 'validate_registration'
   | 'validate_reset_token'
   | 'verify_challenge'
   | 'verify_email'
@@ -227,12 +298,20 @@ export interface RoutePathParams {
     role_slug: string;
   };
   'assign_role_api_users_roles': Record<string, never>;
+  'check_schedule': {
+    schedule_id: UUID;
+  };
   'close_ticket': {
     ticket_id: UUID;
   };
   'confirm_setup': Record<string, never>;
+  'create_call_queue': Record<string, never>;
+  'create_call_record': Record<string, never>;
   'create_connection': Record<string, never>;
   'create_device': Record<string, never>;
+  'create_entry': {
+    schedule_id: UUID;
+  };
   'create_extension': Record<string, never>;
   'create_fax_email_route': {
     fax_number_id: UUID;
@@ -241,29 +320,51 @@ export interface RoutePathParams {
   'create_forwarding_rule': {
     ext_id: UUID;
   };
+  'create_ivr_menu': Record<string, never>;
   'create_location': {
     team_id: UUID;
+  };
+  'create_member': {
+    call_queue_id: UUID;
+  };
+  'create_member_api_ring_groups_ring_group_id:uuid_members': {
+    ring_group_id: UUID;
   };
   'create_message': {
     ticket_id: UUID;
   };
+  'create_option': {
+    ivr_menu_id: UUID;
+  };
   'create_phone_number': Record<string, never>;
+  'create_registration': Record<string, never>;
+  'create_ring_group': Record<string, never>;
   'create_role': Record<string, never>;
+  'create_schedule': Record<string, never>;
   'create_tag': Record<string, never>;
   'create_team': Record<string, never>;
   'create_team_invitation': {
     team_id: UUID;
   };
   'create_ticket': Record<string, never>;
+  'create_time_condition': Record<string, never>;
   'create_user': Record<string, never>;
+  'create_voicemail_box': Record<string, never>;
   'delete_attachment': {
     attachment_id: UUID;
+  };
+  'delete_call_queue': {
+    call_queue_id: UUID;
   };
   'delete_connection': {
     connection_id: UUID;
   };
   'delete_device': {
     device_id: UUID;
+  };
+  'delete_entry': {
+    entry_id: UUID;
+    schedule_id: UUID;
   };
   'delete_extension': {
     ext_id: UUID;
@@ -282,9 +383,20 @@ export interface RoutePathParams {
     ext_id: UUID;
     rule_id: UUID;
   };
+  'delete_ivr_menu': {
+    ivr_menu_id: UUID;
+  };
   'delete_location': {
     location_id: UUID;
     team_id: UUID;
+  };
+  'delete_member': {
+    call_queue_id: UUID;
+    member_id: UUID;
+  };
+  'delete_member_api_ring_groups_ring_group_id:uuid_members_member_id:uuid': {
+    member_id: UUID;
+    ring_group_id: UUID;
   };
   'delete_message': {
     msg_id: UUID;
@@ -293,11 +405,24 @@ export interface RoutePathParams {
   'delete_notification': {
     notification_id: UUID;
   };
+  'delete_option': {
+    ivr_menu_id: UUID;
+    option_id: UUID;
+  };
   'delete_phone_number': {
     phone_number_id: UUID;
   };
+  'delete_registration': {
+    registration_id: UUID;
+  };
+  'delete_ring_group': {
+    ring_group_id: UUID;
+  };
   'delete_role': {
     role_id: UUID;
+  };
+  'delete_schedule': {
+    schedule_id: UUID;
   };
   'delete_tag': {
     tag_id: UUID;
@@ -315,21 +440,38 @@ export interface RoutePathParams {
   'delete_ticket': {
     ticket_id: UUID;
   };
+  'delete_time_condition': {
+    time_condition_id: UUID;
+  };
   'delete_user': {
     user_id: UUID;
   };
   'delete_user_api_users_user_id:uuid': {
     user_id: UUID;
   };
+  'delete_voicemail_box': {
+    box_id: UUID;
+  };
   'delete_voicemail_message': {
     ext_id: UUID;
     msg_id: UUID;
   };
+  'delete_voicemail_message_api_voicemail_messages_message_id:uuid': {
+    message_id: UUID;
+  };
   'disable_mfa': Record<string, never>;
+  'export_call_records': Record<string, never>;
   'forgot_password': Record<string, never>;
   'get_activity': Record<string, never>;
   'get_attachment': {
     attachment_id: UUID;
+  };
+  'get_by_extension': Record<string, never>;
+  'get_call_queue': {
+    call_queue_id: UUID;
+  };
+  'get_call_record': {
+    cdr_id: UUID;
   };
   'get_connection': {
     connection_id: UUID;
@@ -355,6 +497,10 @@ export interface RoutePathParams {
   'get_fax_number': {
     fax_number_id: UUID;
   };
+  'get_gateway_settings': Record<string, never>;
+  'get_ivr_menu': {
+    ivr_menu_id: UUID;
+  };
   'get_location': {
     location_id: UUID;
     team_id: UUID;
@@ -372,8 +518,17 @@ export interface RoutePathParams {
   };
   'get_preferences': Record<string, never>;
   'get_profile': Record<string, never>;
+  'get_registration': {
+    registration_id: UUID;
+  };
+  'get_ring_group': {
+    ring_group_id: UUID;
+  };
   'get_role': {
     role_id: UUID;
+  };
+  'get_schedule': {
+    schedule_id: UUID;
   };
   'get_sessions': Record<string, never>;
   'get_stats': Record<string, never>;
@@ -381,6 +536,7 @@ export interface RoutePathParams {
   'get_stats_api_admin_fax_stats': Record<string, never>;
   'get_stats_api_admin_support_stats': Record<string, never>;
   'get_stats_api_admin_voice_stats': Record<string, never>;
+  'get_summary': Record<string, never>;
   'get_system_status': Record<string, never>;
   'get_tag': {
     tag_id: UUID;
@@ -398,8 +554,14 @@ export interface RoutePathParams {
   'get_ticket': {
     ticket_id: UUID;
   };
+  'get_time_condition': {
+    time_condition_id: UUID;
+  };
   'get_trends': Record<string, never>;
   'get_unread_count': Record<string, never>;
+  'get_unread_count_api_voicemail_boxes_box_id:uuid_unread': {
+    box_id: UUID;
+  };
   'get_user': {
     user_id: UUID;
   };
@@ -412,24 +574,39 @@ export interface RoutePathParams {
   'get_verification_status': {
     user_id: UUID;
   };
+  'get_voicemail_box': {
+    box_id: UUID;
+  };
   'get_voicemail_message': {
     ext_id: UUID;
     msg_id: UUID;
   };
+  'get_voicemail_message_api_voicemail_messages_message_id:uuid': {
+    message_id: UUID;
+  };
   'get_voicemail_settings': {
     ext_id: UUID;
   };
+  'get_volume': Record<string, never>;
   'initiate_disable_mfa_oauth': {
     provider: string;
   };
   'initiate_setup': Record<string, never>;
   'list_accounts': Record<string, never>;
+  'list_box_messages': {
+    box_id: UUID;
+  };
+  'list_call_queues': Record<string, never>;
+  'list_call_records': Record<string, never>;
   'list_connections': Record<string, never>;
   'list_device_lines': {
     device_id: UUID;
   };
   'list_devices': Record<string, never>;
   'list_devices_api_devices': Record<string, never>;
+  'list_entries': {
+    schedule_id: UUID;
+  };
   'list_extensions': Record<string, never>;
   'list_extensions_api_voice_extensions': Record<string, never>;
   'list_fax_email_routes': {
@@ -442,17 +619,30 @@ export interface RoutePathParams {
   'list_forwarding_rules': {
     ext_id: UUID;
   };
+  'list_ivr_menus': Record<string, never>;
   'list_locations': {
     team_id: UUID;
   };
   'list_logs': Record<string, never>;
+  'list_members': {
+    call_queue_id: UUID;
+  };
+  'list_members_api_ring_groups_ring_group_id:uuid_members': {
+    ring_group_id: UUID;
+  };
   'list_messages': {
     ticket_id: UUID;
   };
   'list_notifications': Record<string, never>;
+  'list_options': {
+    ivr_menu_id: UUID;
+  };
   'list_phone_numbers': Record<string, never>;
   'list_phone_numbers_api_voice_phone_numbers': Record<string, never>;
+  'list_registrations': Record<string, never>;
+  'list_ring_groups': Record<string, never>;
   'list_roles': Record<string, never>;
+  'list_schedules': Record<string, never>;
   'list_tags': Record<string, never>;
   'list_team_invitations': {
     team_id: UUID;
@@ -464,11 +654,15 @@ export interface RoutePathParams {
   'list_teams_api_teams': Record<string, never>;
   'list_tickets': Record<string, never>;
   'list_tickets_api_support_tickets': Record<string, never>;
+  'list_time_conditions': Record<string, never>;
+  'list_unregistered': Record<string, never>;
   'list_users': Record<string, never>;
   'list_users_api_users': Record<string, never>;
+  'list_voicemail_boxes': Record<string, never>;
   'list_voicemail_messages': {
     ext_id: UUID;
   };
+  'list_voicemail_messages_api_voicemail_messages': Record<string, never>;
   'login': Record<string, never>;
   'logout': Record<string, never>;
   'mark_all_read': Record<string, never>;
@@ -482,6 +676,10 @@ export interface RoutePathParams {
   'openapi.json': Record<string, never>;
   'paste_image': {
     ticket_id: UUID;
+  };
+  'pause_member': {
+    call_queue_id: UUID;
+    member_id: UUID;
   };
   'reboot_device': {
     device_id: UUID;
@@ -522,6 +720,9 @@ export interface RoutePathParams {
   'set_forwarding_rules': {
     ext_id: UUID;
   };
+  'set_override': {
+    time_condition_id: UUID;
+  };
   'signup': Record<string, never>;
   'start_link': {
     provider: string;
@@ -541,8 +742,14 @@ export interface RoutePathParams {
   'toggle_dnd': {
     ext_id: UUID;
   };
+  'toggle_read_status': {
+    message_id: UUID;
+  };
   'unlink': {
     provider: string;
+  };
+  'update_call_queue': {
+    call_queue_id: UUID;
   };
   'update_connection': {
     connection_id: UUID;
@@ -552,6 +759,10 @@ export interface RoutePathParams {
   };
   'update_dnd_settings': {
     ext_id: UUID;
+  };
+  'update_entry': {
+    entry_id: UUID;
+    schedule_id: UUID;
   };
   'update_extension': {
     ext_id: UUID;
@@ -567,13 +778,29 @@ export interface RoutePathParams {
     ext_id: UUID;
     rule_id: UUID;
   };
+  'update_gateway_settings': Record<string, never>;
+  'update_ivr_menu': {
+    ivr_menu_id: UUID;
+  };
   'update_location': {
     location_id: UUID;
     team_id: UUID;
   };
+  'update_member': {
+    call_queue_id: UUID;
+    member_id: UUID;
+  };
+  'update_member_api_ring_groups_ring_group_id:uuid_members_member_id:uuid': {
+    member_id: UUID;
+    ring_group_id: UUID;
+  };
   'update_message': {
     msg_id: UUID;
     ticket_id: UUID;
+  };
+  'update_option': {
+    ivr_menu_id: UUID;
+    option_id: UUID;
   };
   'update_organization': Record<string, never>;
   'update_password': Record<string, never>;
@@ -582,8 +809,17 @@ export interface RoutePathParams {
   };
   'update_preferences': Record<string, never>;
   'update_profile': Record<string, never>;
+  'update_registration': {
+    registration_id: UUID;
+  };
+  'update_ring_group': {
+    ring_group_id: UUID;
+  };
   'update_role': {
     role_id: UUID;
+  };
+  'update_schedule': {
+    schedule_id: UUID;
   };
   'update_tag': {
     tag_id: UUID;
@@ -604,11 +840,17 @@ export interface RoutePathParams {
   'update_ticket': {
     ticket_id: UUID;
   };
+  'update_time_condition': {
+    time_condition_id: UUID;
+  };
   'update_user': {
     user_id: UUID;
   };
   'update_user_api_users_user_id:uuid': {
     user_id: UUID;
+  };
+  'update_voicemail_box': {
+    box_id: UUID;
   };
   'update_voicemail_message': {
     ext_id: UUID;
@@ -622,6 +864,9 @@ export interface RoutePathParams {
   };
   'upload_attachment': {
     ticket_id: UUID;
+  };
+  'validate_registration': {
+    registration_id: UUID;
   };
   'validate_reset_token': Record<string, never>;
   'verify_challenge': Record<string, never>;
@@ -668,68 +913,119 @@ export interface RouteQueryParams {
   'assign_role_api_users_roles': {
     role_slug: string;
   };
+  'check_schedule': {
+    time?: DateTime;
+  };
   'close_ticket': Record<string, never>;
   'confirm_setup': Record<string, never>;
+  'create_call_queue': Record<string, never>;
+  'create_call_record': Record<string, never>;
   'create_connection': Record<string, never>;
   'create_device': Record<string, never>;
+  'create_entry': Record<string, never>;
   'create_extension': Record<string, never>;
   'create_fax_email_route': Record<string, never>;
   'create_fax_number': Record<string, never>;
   'create_forwarding_rule': Record<string, never>;
+  'create_ivr_menu': Record<string, never>;
   'create_location': Record<string, never>;
+  'create_member': Record<string, never>;
+  'create_member_api_ring_groups_ring_group_id:uuid_members': Record<string, never>;
   'create_message': Record<string, never>;
+  'create_option': Record<string, never>;
   'create_phone_number': Record<string, never>;
+  'create_registration': Record<string, never>;
+  'create_ring_group': Record<string, never>;
   'create_role': Record<string, never>;
+  'create_schedule': Record<string, never>;
   'create_tag': Record<string, never>;
   'create_team': Record<string, never>;
   'create_team_invitation': Record<string, never>;
   'create_ticket': Record<string, never>;
+  'create_time_condition': Record<string, never>;
   'create_user': Record<string, never>;
+  'create_voicemail_box': Record<string, never>;
   'delete_attachment': Record<string, never>;
+  'delete_call_queue': Record<string, never>;
   'delete_connection': Record<string, never>;
   'delete_device': Record<string, never>;
+  'delete_entry': Record<string, never>;
   'delete_extension': Record<string, never>;
   'delete_fax_email_route': Record<string, never>;
   'delete_fax_message': Record<string, never>;
   'delete_fax_number': Record<string, never>;
   'delete_forwarding_rule': Record<string, never>;
+  'delete_ivr_menu': Record<string, never>;
   'delete_location': Record<string, never>;
+  'delete_member': Record<string, never>;
+  'delete_member_api_ring_groups_ring_group_id:uuid_members_member_id:uuid': Record<string, never>;
   'delete_message': Record<string, never>;
   'delete_notification': Record<string, never>;
+  'delete_option': Record<string, never>;
   'delete_phone_number': Record<string, never>;
+  'delete_registration': Record<string, never>;
+  'delete_ring_group': Record<string, never>;
   'delete_role': Record<string, never>;
+  'delete_schedule': Record<string, never>;
   'delete_tag': Record<string, never>;
   'delete_team': Record<string, never>;
   'delete_team_api_teams_team_id:uuid': Record<string, never>;
   'delete_team_invitation': Record<string, never>;
   'delete_ticket': Record<string, never>;
+  'delete_time_condition': Record<string, never>;
   'delete_user': Record<string, never>;
   'delete_user_api_users_user_id:uuid': Record<string, never>;
+  'delete_voicemail_box': Record<string, never>;
   'delete_voicemail_message': Record<string, never>;
+  'delete_voicemail_message_api_voicemail_messages_message_id:uuid': Record<string, never>;
   'disable_mfa': Record<string, never>;
+  'export_call_records': {
+    direction?: string;
+    disposition?: string;
+    endDate?: DateTime;
+    startDate?: DateTime;
+  };
   'forgot_password': Record<string, never>;
   'get_activity': {
     hours?: number;
     limit?: number;
   };
   'get_attachment': Record<string, never>;
+  'get_by_extension': {
+    endDate: DateTime;
+    startDate: DateTime;
+    teamId: UUID;
+  };
+  'get_call_queue': Record<string, never>;
+  'get_call_record': Record<string, never>;
   'get_connection': Record<string, never>;
   'get_device': Record<string, never>;
-  'get_device_data': Record<string, never>;
+  'get_device_data': {
+    refresh?: boolean;
+  };
   'get_dnd_settings': Record<string, never>;
   'get_extension': Record<string, never>;
-  'get_extension_data': Record<string, never>;
+  'get_extension_data': {
+    refresh?: boolean;
+  };
   'get_fax_message': Record<string, never>;
   'get_fax_number': Record<string, never>;
+  'get_gateway_settings': Record<string, never>;
+  'get_ivr_menu': Record<string, never>;
   'get_location': Record<string, never>;
   'get_log': Record<string, never>;
   'get_mfa_status': Record<string, never>;
-  'get_number_data': Record<string, never>;
+  'get_number_data': {
+    refresh?: boolean;
+  };
   'get_organization': Record<string, never>;
   'get_phone_number': Record<string, never>;
   'get_preferences': Record<string, never>;
   'get_profile': Record<string, never>;
+  'get_registration': Record<string, never>;
+  'get_ring_group': Record<string, never>;
   'get_role': Record<string, never>;
+  'get_schedule': Record<string, never>;
   'get_sessions': {
     createdAfter?: DateTime;
     createdBefore?: DateTime;
@@ -743,6 +1039,11 @@ export interface RouteQueryParams {
   'get_stats_api_admin_fax_stats': Record<string, never>;
   'get_stats_api_admin_support_stats': Record<string, never>;
   'get_stats_api_admin_voice_stats': Record<string, never>;
+  'get_summary': {
+    endDate: DateTime;
+    startDate: DateTime;
+    teamId: UUID;
+  };
   'get_system_status': Record<string, never>;
   'get_tag': Record<string, never>;
   'get_target_logs': {
@@ -765,8 +1066,10 @@ export interface RouteQueryParams {
   'get_team': Record<string, never>;
   'get_team_api_teams_team_id:uuid': Record<string, never>;
   'get_ticket': Record<string, never>;
+  'get_time_condition': Record<string, never>;
   'get_trends': Record<string, never>;
   'get_unread_count': Record<string, never>;
+  'get_unread_count_api_voicemail_boxes_box_id:uuid_unread': Record<string, never>;
   'get_user': Record<string, never>;
   'get_user_api_users_user_id:uuid': Record<string, never>;
   'get_user_logs': {
@@ -787,8 +1090,16 @@ export interface RouteQueryParams {
     targetTypeIn?: string[];
   };
   'get_verification_status': Record<string, never>;
+  'get_voicemail_box': Record<string, never>;
   'get_voicemail_message': Record<string, never>;
+  'get_voicemail_message_api_voicemail_messages_message_id:uuid': Record<string, never>;
   'get_voicemail_settings': Record<string, never>;
+  'get_volume': {
+    endDate: DateTime;
+    interval?: string;
+    startDate: DateTime;
+    teamId: UUID;
+  };
   'initiate_disable_mfa_oauth': Record<string, never>;
   'initiate_setup': Record<string, never>;
   'list_accounts': {
@@ -798,6 +1109,53 @@ export interface RouteQueryParams {
     orderBy?: string;
     pageSize?: number;
     sortOrder?: "asc" | "desc";
+  };
+  'list_box_messages': {
+    createdAfter?: DateTime;
+    createdBefore?: DateTime;
+    currentPage?: number;
+    ids?: string[];
+    is_read?: boolean;
+    is_urgent?: boolean;
+    orderBy?: string;
+    pageSize?: number;
+    sortOrder?: "asc" | "desc";
+    updatedAfter?: DateTime;
+    updatedBefore?: DateTime;
+  };
+  'list_call_queues': {
+    createdAfter?: DateTime;
+    createdBefore?: DateTime;
+    currentPage?: number;
+    ids?: string[];
+    orderBy?: string;
+    pageSize?: number;
+    searchIgnoreCase?: boolean;
+    searchString?: string;
+    sortOrder?: "asc" | "desc";
+    updatedAfter?: DateTime;
+    updatedBefore?: DateTime;
+  };
+  'list_call_records': {
+    createdAfter?: DateTime;
+    createdBefore?: DateTime;
+    currentPage?: number;
+    destination?: string;
+    direction?: string;
+    disposition?: string;
+    endDate?: DateTime;
+    ids?: string[];
+    maxDuration?: number;
+    minDuration?: number;
+    orderBy?: string;
+    pageSize?: number;
+    searchIgnoreCase?: boolean;
+    searchString?: string;
+    sortOrder?: "asc" | "desc";
+    source?: string;
+    startDate?: DateTime;
+    updatedAfter?: DateTime;
+    updatedBefore?: DateTime;
   };
   'list_connections': {
     createdAfter?: DateTime;
@@ -840,6 +1198,7 @@ export interface RouteQueryParams {
     updatedAfter?: DateTime;
     updatedBefore?: DateTime;
   };
+  'list_entries': Record<string, never>;
   'list_extensions': Record<string, never>;
   'list_extensions_api_voice_extensions': {
     createdAfter?: DateTime;
@@ -907,6 +1266,19 @@ export interface RouteQueryParams {
     updatedAfter?: DateTime;
     updatedBefore?: DateTime;
   };
+  'list_ivr_menus': {
+    createdAfter?: DateTime;
+    createdBefore?: DateTime;
+    currentPage?: number;
+    ids?: string[];
+    orderBy?: string;
+    pageSize?: number;
+    searchIgnoreCase?: boolean;
+    searchString?: string;
+    sortOrder?: "asc" | "desc";
+    updatedAfter?: DateTime;
+    updatedBefore?: DateTime;
+  };
   'list_locations': {
     createdAfter?: DateTime;
     createdBefore?: DateTime;
@@ -939,6 +1311,8 @@ export interface RouteQueryParams {
     targetIdIn?: string[];
     targetTypeIn?: string[];
   };
+  'list_members': Record<string, never>;
+  'list_members_api_ring_groups_ring_group_id:uuid_members': Record<string, never>;
   'list_messages': {
     createdAfter?: DateTime;
     createdBefore?: DateTime;
@@ -959,6 +1333,7 @@ export interface RouteQueryParams {
     updatedAfter?: DateTime;
     updatedBefore?: DateTime;
   };
+  'list_options': Record<string, never>;
   'list_phone_numbers': {
     createdAfter?: DateTime;
     createdBefore?: DateTime;
@@ -981,6 +1356,33 @@ export interface RouteQueryParams {
     updatedAfter?: DateTime;
     updatedBefore?: DateTime;
   };
+  'list_registrations': {
+    createdAfter?: DateTime;
+    createdBefore?: DateTime;
+    currentPage?: number;
+    ids?: string[];
+    orderBy?: string;
+    pageSize?: number;
+    searchIgnoreCase?: boolean;
+    searchString?: string;
+    sortOrder?: "asc" | "desc";
+    team_id?: UUID;
+    updatedAfter?: DateTime;
+    updatedBefore?: DateTime;
+  };
+  'list_ring_groups': {
+    createdAfter?: DateTime;
+    createdBefore?: DateTime;
+    currentPage?: number;
+    ids?: string[];
+    orderBy?: string;
+    pageSize?: number;
+    searchIgnoreCase?: boolean;
+    searchString?: string;
+    sortOrder?: "asc" | "desc";
+    updatedAfter?: DateTime;
+    updatedBefore?: DateTime;
+  };
   'list_roles': {
     currentPage?: number;
     ids?: string[];
@@ -989,6 +1391,21 @@ export interface RouteQueryParams {
     searchIgnoreCase?: boolean;
     searchString?: string;
     sortOrder?: "asc" | "desc";
+  };
+  'list_schedules': {
+    createdAfter?: DateTime;
+    createdBefore?: DateTime;
+    currentPage?: number;
+    ids?: string[];
+    orderBy?: string;
+    pageSize?: number;
+    schedule_type?: string;
+    searchIgnoreCase?: boolean;
+    searchString?: string;
+    sortOrder?: "asc" | "desc";
+    team_id?: UUID;
+    updatedAfter?: DateTime;
+    updatedBefore?: DateTime;
   };
   'list_tags': {
     createdAfter?: DateTime;
@@ -1066,6 +1483,22 @@ export interface RouteQueryParams {
     updatedAfter?: DateTime;
     updatedBefore?: DateTime;
   };
+  'list_time_conditions': {
+    createdAfter?: DateTime;
+    createdBefore?: DateTime;
+    currentPage?: number;
+    ids?: string[];
+    orderBy?: string;
+    pageSize?: number;
+    searchIgnoreCase?: boolean;
+    searchString?: string;
+    sortOrder?: "asc" | "desc";
+    updatedAfter?: DateTime;
+    updatedBefore?: DateTime;
+  };
+  'list_unregistered': {
+    team_id: UUID;
+  };
   'list_users': {
     createdAfter?: DateTime;
     createdBefore?: DateTime;
@@ -1092,11 +1525,35 @@ export interface RouteQueryParams {
     updatedAfter?: DateTime;
     updatedBefore?: DateTime;
   };
+  'list_voicemail_boxes': {
+    createdAfter?: DateTime;
+    createdBefore?: DateTime;
+    currentPage?: number;
+    ids?: string[];
+    orderBy?: string;
+    pageSize?: number;
+    sortOrder?: "asc" | "desc";
+    updatedAfter?: DateTime;
+    updatedBefore?: DateTime;
+  };
   'list_voicemail_messages': {
     createdAfter?: DateTime;
     createdBefore?: DateTime;
     currentPage?: number;
     ids?: string[];
+    orderBy?: string;
+    pageSize?: number;
+    sortOrder?: "asc" | "desc";
+    updatedAfter?: DateTime;
+    updatedBefore?: DateTime;
+  };
+  'list_voicemail_messages_api_voicemail_messages': {
+    createdAfter?: DateTime;
+    createdBefore?: DateTime;
+    currentPage?: number;
+    ids?: string[];
+    is_read?: boolean;
+    is_urgent?: boolean;
     orderBy?: string;
     pageSize?: number;
     sortOrder?: "asc" | "desc";
@@ -1126,6 +1583,7 @@ export interface RouteQueryParams {
   };
   'openapi.json': Record<string, never>;
   'paste_image': Record<string, never>;
+  'pause_member': Record<string, never>;
   'reboot_device': Record<string, never>;
   'refresh_token': Record<string, never>;
   'regenerate_backup_codes': Record<string, never>;
@@ -1146,6 +1604,7 @@ export interface RouteQueryParams {
   'send_fax': Record<string, never>;
   'set_device_lines': Record<string, never>;
   'set_forwarding_rules': Record<string, never>;
+  'set_override': Record<string, never>;
   'signup': Record<string, never>;
   'start_link': {
     redirect_url?: string;
@@ -1160,36 +1619,50 @@ export interface RouteQueryParams {
   'system:sync-entity': Record<string, never>;
   'test_connection': Record<string, never>;
   'toggle_dnd': Record<string, never>;
+  'toggle_read_status': Record<string, never>;
   'unlink': Record<string, never>;
+  'update_call_queue': Record<string, never>;
   'update_connection': Record<string, never>;
   'update_device': Record<string, never>;
   'update_dnd_settings': Record<string, never>;
+  'update_entry': Record<string, never>;
   'update_extension': Record<string, never>;
   'update_fax_email_route': Record<string, never>;
   'update_fax_number': Record<string, never>;
   'update_forwarding_rule': Record<string, never>;
+  'update_gateway_settings': Record<string, never>;
+  'update_ivr_menu': Record<string, never>;
   'update_location': Record<string, never>;
+  'update_member': Record<string, never>;
+  'update_member_api_ring_groups_ring_group_id:uuid_members_member_id:uuid': Record<string, never>;
   'update_message': Record<string, never>;
+  'update_option': Record<string, never>;
   'update_organization': Record<string, never>;
   'update_password': Record<string, never>;
   'update_phone_number': Record<string, never>;
   'update_preferences': Record<string, never>;
   'update_profile': Record<string, never>;
+  'update_registration': Record<string, never>;
+  'update_ring_group': Record<string, never>;
   'update_role': Record<string, never>;
+  'update_schedule': Record<string, never>;
   'update_tag': Record<string, never>;
   'update_team': Record<string, never>;
   'update_team_api_teams_team_id:uuid': Record<string, never>;
   'update_team_member': Record<string, never>;
   'update_team_permissions': Record<string, never>;
   'update_ticket': Record<string, never>;
+  'update_time_condition': Record<string, never>;
   'update_user': Record<string, never>;
   'update_user_api_users_user_id:uuid': Record<string, never>;
+  'update_voicemail_box': Record<string, never>;
   'update_voicemail_message': Record<string, never>;
   'update_voicemail_settings': Record<string, never>;
   'upgrade_scopes': {
     redirect_url?: string;
   };
   'upload_attachment': Record<string, never>;
+  'validate_registration': Record<string, never>;
   'validate_reset_token': {
     token: string;
   };
@@ -1246,6 +1719,13 @@ export const routeDefinitions = {
     pathParams: [] as const,
     queryParams: ['role_slug'] as const,
   },
+  'check_schedule': {
+    path: '/api/schedules/{schedule_id}/check',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['schedule_id'] as const,
+    queryParams: ['time'] as const,
+  },
   'close_ticket': {
     path: '/api/support/tickets/{ticket_id}/close',
     methods: ['POST'] as const,
@@ -1255,6 +1735,20 @@ export const routeDefinitions = {
   },
   'confirm_setup': {
     path: '/api/mfa/confirm',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
+  'create_call_queue': {
+    path: '/api/call-queues',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
+  'create_call_record': {
+    path: '/api/analytics/cdrs',
     methods: ['POST'] as const,
     method: 'post',
     pathParams: [] as const,
@@ -1272,6 +1766,13 @@ export const routeDefinitions = {
     methods: ['POST'] as const,
     method: 'post',
     pathParams: [] as const,
+    queryParams: [] as const,
+  },
+  'create_entry': {
+    path: '/api/schedules/{schedule_id}/entries',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: ['schedule_id'] as const,
     queryParams: [] as const,
   },
   'create_extension': {
@@ -1302,11 +1803,32 @@ export const routeDefinitions = {
     pathParams: ['ext_id'] as const,
     queryParams: [] as const,
   },
+  'create_ivr_menu': {
+    path: '/api/ivr-menus',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
   'create_location': {
     path: '/api/teams/{team_id}/locations',
     methods: ['POST'] as const,
     method: 'post',
     pathParams: ['team_id'] as const,
+    queryParams: [] as const,
+  },
+  'create_member': {
+    path: '/api/call-queues/{call_queue_id}/members',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: ['call_queue_id'] as const,
+    queryParams: [] as const,
+  },
+  'create_member_api_ring_groups_ring_group_id:uuid_members': {
+    path: '/api/ring-groups/{ring_group_id}/members',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: ['ring_group_id'] as const,
     queryParams: [] as const,
   },
   'create_message': {
@@ -1316,6 +1838,13 @@ export const routeDefinitions = {
     pathParams: ['ticket_id'] as const,
     queryParams: [] as const,
   },
+  'create_option': {
+    path: '/api/ivr-menus/{ivr_menu_id}/options',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: ['ivr_menu_id'] as const,
+    queryParams: [] as const,
+  },
   'create_phone_number': {
     path: '/api/voice/phone-numbers',
     methods: ['POST'] as const,
@@ -1323,8 +1852,29 @@ export const routeDefinitions = {
     pathParams: [] as const,
     queryParams: [] as const,
   },
+  'create_registration': {
+    path: '/api/e911',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
+  'create_ring_group': {
+    path: '/api/ring-groups',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
   'create_role': {
     path: '/api/roles',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
+  'create_schedule': {
+    path: '/api/schedules',
     methods: ['POST'] as const,
     method: 'post',
     pathParams: [] as const,
@@ -1358,8 +1908,22 @@ export const routeDefinitions = {
     pathParams: [] as const,
     queryParams: [] as const,
   },
+  'create_time_condition': {
+    path: '/api/time-conditions',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
   'create_user': {
     path: '/api/users',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
+  'create_voicemail_box': {
+    path: '/api/voicemail/boxes',
     methods: ['POST'] as const,
     method: 'post',
     pathParams: [] as const,
@@ -1370,6 +1934,13 @@ export const routeDefinitions = {
     methods: ['DELETE'] as const,
     method: 'delete',
     pathParams: ['attachment_id'] as const,
+    queryParams: [] as const,
+  },
+  'delete_call_queue': {
+    path: '/api/call-queues/{call_queue_id}',
+    methods: ['DELETE'] as const,
+    method: 'delete',
+    pathParams: ['call_queue_id'] as const,
     queryParams: [] as const,
   },
   'delete_connection': {
@@ -1384,6 +1955,13 @@ export const routeDefinitions = {
     methods: ['DELETE'] as const,
     method: 'delete',
     pathParams: ['device_id'] as const,
+    queryParams: [] as const,
+  },
+  'delete_entry': {
+    path: '/api/schedules/{schedule_id}/entries/{entry_id}',
+    methods: ['DELETE'] as const,
+    method: 'delete',
+    pathParams: ['entry_id', 'schedule_id'] as const,
     queryParams: [] as const,
   },
   'delete_extension': {
@@ -1421,11 +1999,32 @@ export const routeDefinitions = {
     pathParams: ['ext_id', 'rule_id'] as const,
     queryParams: [] as const,
   },
+  'delete_ivr_menu': {
+    path: '/api/ivr-menus/{ivr_menu_id}',
+    methods: ['DELETE'] as const,
+    method: 'delete',
+    pathParams: ['ivr_menu_id'] as const,
+    queryParams: [] as const,
+  },
   'delete_location': {
     path: '/api/teams/{team_id}/locations/{location_id}',
     methods: ['DELETE'] as const,
     method: 'delete',
     pathParams: ['location_id', 'team_id'] as const,
+    queryParams: [] as const,
+  },
+  'delete_member': {
+    path: '/api/call-queues/{call_queue_id}/members/{member_id}',
+    methods: ['DELETE'] as const,
+    method: 'delete',
+    pathParams: ['call_queue_id', 'member_id'] as const,
+    queryParams: [] as const,
+  },
+  'delete_member_api_ring_groups_ring_group_id:uuid_members_member_id:uuid': {
+    path: '/api/ring-groups/{ring_group_id}/members/{member_id}',
+    methods: ['DELETE'] as const,
+    method: 'delete',
+    pathParams: ['member_id', 'ring_group_id'] as const,
     queryParams: [] as const,
   },
   'delete_message': {
@@ -1442,6 +2041,13 @@ export const routeDefinitions = {
     pathParams: ['notification_id'] as const,
     queryParams: [] as const,
   },
+  'delete_option': {
+    path: '/api/ivr-menus/{ivr_menu_id}/options/{option_id}',
+    methods: ['DELETE'] as const,
+    method: 'delete',
+    pathParams: ['ivr_menu_id', 'option_id'] as const,
+    queryParams: [] as const,
+  },
   'delete_phone_number': {
     path: '/api/voice/phone-numbers/{phone_number_id}',
     methods: ['DELETE'] as const,
@@ -1449,11 +2055,32 @@ export const routeDefinitions = {
     pathParams: ['phone_number_id'] as const,
     queryParams: [] as const,
   },
+  'delete_registration': {
+    path: '/api/e911/{registration_id}',
+    methods: ['DELETE'] as const,
+    method: 'delete',
+    pathParams: ['registration_id'] as const,
+    queryParams: [] as const,
+  },
+  'delete_ring_group': {
+    path: '/api/ring-groups/{ring_group_id}',
+    methods: ['DELETE'] as const,
+    method: 'delete',
+    pathParams: ['ring_group_id'] as const,
+    queryParams: [] as const,
+  },
   'delete_role': {
     path: '/api/roles/{role_id}',
     methods: ['DELETE'] as const,
     method: 'delete',
     pathParams: ['role_id'] as const,
+    queryParams: [] as const,
+  },
+  'delete_schedule': {
+    path: '/api/schedules/{schedule_id}',
+    methods: ['DELETE'] as const,
+    method: 'delete',
+    pathParams: ['schedule_id'] as const,
     queryParams: [] as const,
   },
   'delete_tag': {
@@ -1491,6 +2118,13 @@ export const routeDefinitions = {
     pathParams: ['ticket_id'] as const,
     queryParams: [] as const,
   },
+  'delete_time_condition': {
+    path: '/api/time-conditions/{time_condition_id}',
+    methods: ['DELETE'] as const,
+    method: 'delete',
+    pathParams: ['time_condition_id'] as const,
+    queryParams: [] as const,
+  },
   'delete_user': {
     path: '/api/admin/users/{user_id}',
     methods: ['DELETE'] as const,
@@ -1505,11 +2139,25 @@ export const routeDefinitions = {
     pathParams: ['user_id'] as const,
     queryParams: [] as const,
   },
+  'delete_voicemail_box': {
+    path: '/api/voicemail/boxes/{box_id}',
+    methods: ['DELETE'] as const,
+    method: 'delete',
+    pathParams: ['box_id'] as const,
+    queryParams: [] as const,
+  },
   'delete_voicemail_message': {
     path: '/api/voice/extensions/{ext_id}/voicemail/messages/{msg_id}',
     methods: ['DELETE'] as const,
     method: 'delete',
     pathParams: ['ext_id', 'msg_id'] as const,
+    queryParams: [] as const,
+  },
+  'delete_voicemail_message_api_voicemail_messages_message_id:uuid': {
+    path: '/api/voicemail/messages/{message_id}',
+    methods: ['DELETE'] as const,
+    method: 'delete',
+    pathParams: ['message_id'] as const,
     queryParams: [] as const,
   },
   'disable_mfa': {
@@ -1518,6 +2166,13 @@ export const routeDefinitions = {
     method: 'delete',
     pathParams: [] as const,
     queryParams: [] as const,
+  },
+  'export_call_records': {
+    path: '/api/analytics/cdrs/export',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: ['direction', 'disposition', 'endDate', 'startDate'] as const,
   },
   'forgot_password': {
     path: '/api/access/forgot-password',
@@ -1540,6 +2195,27 @@ export const routeDefinitions = {
     pathParams: ['attachment_id'] as const,
     queryParams: [] as const,
   },
+  'get_by_extension': {
+    path: '/api/analytics/by-extension',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: ['endDate', 'startDate', 'teamId'] as const,
+  },
+  'get_call_queue': {
+    path: '/api/call-queues/{call_queue_id}',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['call_queue_id'] as const,
+    queryParams: [] as const,
+  },
+  'get_call_record': {
+    path: '/api/analytics/cdrs/{cdr_id}',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['cdr_id'] as const,
+    queryParams: [] as const,
+  },
   'get_connection': {
     path: '/api/connections/{connection_id}',
     methods: ['GET'] as const,
@@ -1559,7 +2235,7 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: ['mac_address'] as const,
-    queryParams: [] as const,
+    queryParams: ['refresh'] as const,
   },
   'get_dnd_settings': {
     path: '/api/voice/extensions/{ext_id}/dnd',
@@ -1580,7 +2256,7 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: ['extension_number'] as const,
-    queryParams: [] as const,
+    queryParams: ['refresh'] as const,
   },
   'get_fax_message': {
     path: '/api/fax/messages/{message_id}',
@@ -1594,6 +2270,20 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: ['fax_number_id'] as const,
+    queryParams: [] as const,
+  },
+  'get_gateway_settings': {
+    path: '/api/admin/gateway/settings',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
+  'get_ivr_menu': {
+    path: '/api/ivr-menus/{ivr_menu_id}',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['ivr_menu_id'] as const,
     queryParams: [] as const,
   },
   'get_location': {
@@ -1622,7 +2312,7 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: ['phone_number'] as const,
-    queryParams: [] as const,
+    queryParams: ['refresh'] as const,
   },
   'get_organization': {
     path: '/api/organization',
@@ -1652,11 +2342,32 @@ export const routeDefinitions = {
     pathParams: [] as const,
     queryParams: [] as const,
   },
+  'get_registration': {
+    path: '/api/e911/{registration_id}',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['registration_id'] as const,
+    queryParams: [] as const,
+  },
+  'get_ring_group': {
+    path: '/api/ring-groups/{ring_group_id}',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['ring_group_id'] as const,
+    queryParams: [] as const,
+  },
   'get_role': {
     path: '/api/roles/{role_id}',
     methods: ['GET'] as const,
     method: 'get',
     pathParams: ['role_id'] as const,
+    queryParams: [] as const,
+  },
+  'get_schedule': {
+    path: '/api/schedules/{schedule_id}',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['schedule_id'] as const,
     queryParams: [] as const,
   },
   'get_sessions': {
@@ -1701,6 +2412,13 @@ export const routeDefinitions = {
     pathParams: [] as const,
     queryParams: [] as const,
   },
+  'get_summary': {
+    path: '/api/analytics/summary',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: ['endDate', 'startDate', 'teamId'] as const,
+  },
   'get_system_status': {
     path: '/api/admin/system/status',
     methods: ['GET'] as const,
@@ -1743,6 +2461,13 @@ export const routeDefinitions = {
     pathParams: ['ticket_id'] as const,
     queryParams: [] as const,
   },
+  'get_time_condition': {
+    path: '/api/time-conditions/{time_condition_id}',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['time_condition_id'] as const,
+    queryParams: [] as const,
+  },
   'get_trends': {
     path: '/api/admin/dashboard/trends',
     methods: ['GET'] as const,
@@ -1755,6 +2480,13 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: [] as const,
+    queryParams: [] as const,
+  },
+  'get_unread_count_api_voicemail_boxes_box_id:uuid_unread': {
+    path: '/api/voicemail/boxes/{box_id}/unread',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['box_id'] as const,
     queryParams: [] as const,
   },
   'get_user': {
@@ -1785,11 +2517,25 @@ export const routeDefinitions = {
     pathParams: ['user_id'] as const,
     queryParams: [] as const,
   },
+  'get_voicemail_box': {
+    path: '/api/voicemail/boxes/{box_id}',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['box_id'] as const,
+    queryParams: [] as const,
+  },
   'get_voicemail_message': {
     path: '/api/voice/extensions/{ext_id}/voicemail/messages/{msg_id}',
     methods: ['GET'] as const,
     method: 'get',
     pathParams: ['ext_id', 'msg_id'] as const,
+    queryParams: [] as const,
+  },
+  'get_voicemail_message_api_voicemail_messages_message_id:uuid': {
+    path: '/api/voicemail/messages/{message_id}',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['message_id'] as const,
     queryParams: [] as const,
   },
   'get_voicemail_settings': {
@@ -1798,6 +2544,13 @@ export const routeDefinitions = {
     method: 'get',
     pathParams: ['ext_id'] as const,
     queryParams: [] as const,
+  },
+  'get_volume': {
+    path: '/api/analytics/volume',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: ['endDate', 'interval', 'startDate', 'teamId'] as const,
   },
   'initiate_disable_mfa_oauth': {
     path: '/api/mfa/disable/oauth/{provider}',
@@ -1819,6 +2572,27 @@ export const routeDefinitions = {
     method: 'get',
     pathParams: [] as const,
     queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'orderBy', 'pageSize', 'sortOrder'] as const,
+  },
+  'list_box_messages': {
+    path: '/api/voicemail/boxes/{box_id}/messages',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['box_id'] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'is_read', 'is_urgent', 'orderBy', 'pageSize', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
+  },
+  'list_call_queues': {
+    path: '/api/call-queues',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
+  },
+  'list_call_records': {
+    path: '/api/analytics/cdrs',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'destination', 'direction', 'disposition', 'endDate', 'ids', 'maxDuration', 'minDuration', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'source', 'startDate', 'updatedAfter', 'updatedBefore'] as const,
   },
   'list_connections': {
     path: '/api/connections',
@@ -1847,6 +2621,13 @@ export const routeDefinitions = {
     method: 'get',
     pathParams: [] as const,
     queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
+  },
+  'list_entries': {
+    path: '/api/schedules/{schedule_id}/entries',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['schedule_id'] as const,
+    queryParams: [] as const,
   },
   'list_extensions': {
     path: '/api/admin/voice/extensions',
@@ -1906,6 +2687,13 @@ export const routeDefinitions = {
     pathParams: ['ext_id'] as const,
     queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
   },
+  'list_ivr_menus': {
+    path: '/api/ivr-menus',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
+  },
   'list_locations': {
     path: '/api/teams/{team_id}/locations',
     methods: ['GET'] as const,
@@ -1919,6 +2707,20 @@ export const routeDefinitions = {
     method: 'get',
     pathParams: [] as const,
     queryParams: ['action', 'actionIn', 'actorIdIn', 'createdAfter', 'createdBefore', 'currentPage', 'domain', 'end_date', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'targetIdIn', 'targetTypeIn'] as const,
+  },
+  'list_members': {
+    path: '/api/call-queues/{call_queue_id}/members',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['call_queue_id'] as const,
+    queryParams: [] as const,
+  },
+  'list_members_api_ring_groups_ring_group_id:uuid_members': {
+    path: '/api/ring-groups/{ring_group_id}/members',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['ring_group_id'] as const,
+    queryParams: [] as const,
   },
   'list_messages': {
     path: '/api/support/tickets/{ticket_id}/messages',
@@ -1934,6 +2736,13 @@ export const routeDefinitions = {
     pathParams: [] as const,
     queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
   },
+  'list_options': {
+    path: '/api/ivr-menus/{ivr_menu_id}/options',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['ivr_menu_id'] as const,
+    queryParams: [] as const,
+  },
   'list_phone_numbers': {
     path: '/api/admin/voice/phone-numbers',
     methods: ['GET'] as const,
@@ -1948,12 +2757,33 @@ export const routeDefinitions = {
     pathParams: [] as const,
     queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
   },
+  'list_registrations': {
+    path: '/api/e911',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'team_id', 'updatedAfter', 'updatedBefore'] as const,
+  },
+  'list_ring_groups': {
+    path: '/api/ring-groups',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
+  },
   'list_roles': {
     path: '/api/roles',
     methods: ['GET'] as const,
     method: 'get',
     pathParams: [] as const,
     queryParams: ['currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder'] as const,
+  },
+  'list_schedules': {
+    path: '/api/schedules',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'schedule_type', 'searchIgnoreCase', 'searchString', 'sortOrder', 'team_id', 'updatedAfter', 'updatedBefore'] as const,
   },
   'list_tags': {
     path: '/api/tags',
@@ -2005,6 +2835,20 @@ export const routeDefinitions = {
     pathParams: [] as const,
     queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
   },
+  'list_time_conditions': {
+    path: '/api/time-conditions',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
+  },
+  'list_unregistered': {
+    path: '/api/e911/unregistered',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: ['team_id'] as const,
+  },
   'list_users': {
     path: '/api/admin/users',
     methods: ['GET'] as const,
@@ -2019,12 +2863,26 @@ export const routeDefinitions = {
     pathParams: [] as const,
     queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
   },
+  'list_voicemail_boxes': {
+    path: '/api/voicemail/boxes',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
+  },
   'list_voicemail_messages': {
     path: '/api/voice/extensions/{ext_id}/voicemail/messages',
     methods: ['GET'] as const,
     method: 'get',
     pathParams: ['ext_id'] as const,
     queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
+  },
+  'list_voicemail_messages_api_voicemail_messages': {
+    path: '/api/voicemail/messages',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'is_read', 'is_urgent', 'orderBy', 'pageSize', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
   },
   'login': {
     path: '/api/access/login',
@@ -2094,6 +2952,13 @@ export const routeDefinitions = {
     methods: ['POST'] as const,
     method: 'post',
     pathParams: ['ticket_id'] as const,
+    queryParams: [] as const,
+  },
+  'pause_member': {
+    path: '/api/call-queues/{call_queue_id}/members/{member_id}/pause',
+    methods: ['PUT'] as const,
+    method: 'put',
+    pathParams: ['call_queue_id', 'member_id'] as const,
     queryParams: [] as const,
   },
   'reboot_device': {
@@ -2222,6 +3087,13 @@ export const routeDefinitions = {
     pathParams: ['ext_id'] as const,
     queryParams: [] as const,
   },
+  'set_override': {
+    path: '/api/time-conditions/{time_condition_id}/override',
+    methods: ['PUT'] as const,
+    method: 'put',
+    pathParams: ['time_condition_id'] as const,
+    queryParams: [] as const,
+  },
   'signup': {
     path: '/api/access/signup',
     methods: ['POST'] as const,
@@ -2285,11 +3157,25 @@ export const routeDefinitions = {
     pathParams: ['ext_id'] as const,
     queryParams: [] as const,
   },
+  'toggle_read_status': {
+    path: '/api/voicemail/messages/{message_id}/read',
+    methods: ['PUT'] as const,
+    method: 'put',
+    pathParams: ['message_id'] as const,
+    queryParams: [] as const,
+  },
   'unlink': {
     path: '/api/profile/oauth/{provider}',
     methods: ['DELETE'] as const,
     method: 'delete',
     pathParams: ['provider'] as const,
+    queryParams: [] as const,
+  },
+  'update_call_queue': {
+    path: '/api/call-queues/{call_queue_id}',
+    methods: ['PATCH'] as const,
+    method: 'patch',
+    pathParams: ['call_queue_id'] as const,
     queryParams: [] as const,
   },
   'update_connection': {
@@ -2311,6 +3197,13 @@ export const routeDefinitions = {
     methods: ['PATCH'] as const,
     method: 'patch',
     pathParams: ['ext_id'] as const,
+    queryParams: [] as const,
+  },
+  'update_entry': {
+    path: '/api/schedules/{schedule_id}/entries/{entry_id}',
+    methods: ['PATCH'] as const,
+    method: 'patch',
+    pathParams: ['entry_id', 'schedule_id'] as const,
     queryParams: [] as const,
   },
   'update_extension': {
@@ -2341,6 +3234,20 @@ export const routeDefinitions = {
     pathParams: ['ext_id', 'rule_id'] as const,
     queryParams: [] as const,
   },
+  'update_gateway_settings': {
+    path: '/api/admin/gateway/settings',
+    methods: ['PUT'] as const,
+    method: 'put',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
+  'update_ivr_menu': {
+    path: '/api/ivr-menus/{ivr_menu_id}',
+    methods: ['PATCH'] as const,
+    method: 'patch',
+    pathParams: ['ivr_menu_id'] as const,
+    queryParams: [] as const,
+  },
   'update_location': {
     path: '/api/teams/{team_id}/locations/{location_id}',
     methods: ['PATCH'] as const,
@@ -2348,11 +3255,32 @@ export const routeDefinitions = {
     pathParams: ['location_id', 'team_id'] as const,
     queryParams: [] as const,
   },
+  'update_member': {
+    path: '/api/call-queues/{call_queue_id}/members/{member_id}',
+    methods: ['PATCH'] as const,
+    method: 'patch',
+    pathParams: ['call_queue_id', 'member_id'] as const,
+    queryParams: [] as const,
+  },
+  'update_member_api_ring_groups_ring_group_id:uuid_members_member_id:uuid': {
+    path: '/api/ring-groups/{ring_group_id}/members/{member_id}',
+    methods: ['PATCH'] as const,
+    method: 'patch',
+    pathParams: ['member_id', 'ring_group_id'] as const,
+    queryParams: [] as const,
+  },
   'update_message': {
     path: '/api/support/tickets/{ticket_id}/messages/{msg_id}',
     methods: ['PATCH'] as const,
     method: 'patch',
     pathParams: ['msg_id', 'ticket_id'] as const,
+    queryParams: [] as const,
+  },
+  'update_option': {
+    path: '/api/ivr-menus/{ivr_menu_id}/options/{option_id}',
+    methods: ['PATCH'] as const,
+    method: 'patch',
+    pathParams: ['ivr_menu_id', 'option_id'] as const,
     queryParams: [] as const,
   },
   'update_organization': {
@@ -2390,11 +3318,32 @@ export const routeDefinitions = {
     pathParams: [] as const,
     queryParams: [] as const,
   },
+  'update_registration': {
+    path: '/api/e911/{registration_id}',
+    methods: ['PATCH'] as const,
+    method: 'patch',
+    pathParams: ['registration_id'] as const,
+    queryParams: [] as const,
+  },
+  'update_ring_group': {
+    path: '/api/ring-groups/{ring_group_id}',
+    methods: ['PATCH'] as const,
+    method: 'patch',
+    pathParams: ['ring_group_id'] as const,
+    queryParams: [] as const,
+  },
   'update_role': {
     path: '/api/roles/{role_id}',
     methods: ['PATCH'] as const,
     method: 'patch',
     pathParams: ['role_id'] as const,
+    queryParams: [] as const,
+  },
+  'update_schedule': {
+    path: '/api/schedules/{schedule_id}',
+    methods: ['PATCH'] as const,
+    method: 'patch',
+    pathParams: ['schedule_id'] as const,
     queryParams: [] as const,
   },
   'update_tag': {
@@ -2439,6 +3388,13 @@ export const routeDefinitions = {
     pathParams: ['ticket_id'] as const,
     queryParams: [] as const,
   },
+  'update_time_condition': {
+    path: '/api/time-conditions/{time_condition_id}',
+    methods: ['PATCH'] as const,
+    method: 'patch',
+    pathParams: ['time_condition_id'] as const,
+    queryParams: [] as const,
+  },
   'update_user': {
     path: '/api/admin/users/{user_id}',
     methods: ['PATCH'] as const,
@@ -2451,6 +3407,13 @@ export const routeDefinitions = {
     methods: ['PATCH'] as const,
     method: 'patch',
     pathParams: ['user_id'] as const,
+    queryParams: [] as const,
+  },
+  'update_voicemail_box': {
+    path: '/api/voicemail/boxes/{box_id}',
+    methods: ['PATCH'] as const,
+    method: 'patch',
+    pathParams: ['box_id'] as const,
     queryParams: [] as const,
   },
   'update_voicemail_message': {
@@ -2479,6 +3442,13 @@ export const routeDefinitions = {
     methods: ['POST'] as const,
     method: 'post',
     pathParams: ['ticket_id'] as const,
+    queryParams: [] as const,
+  },
+  'validate_registration': {
+    path: '/api/e911/{registration_id}/validate',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: ['registration_id'] as const,
     queryParams: [] as const,
   },
   'validate_reset_token': {

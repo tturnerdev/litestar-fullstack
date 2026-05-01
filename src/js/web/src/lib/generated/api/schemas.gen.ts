@@ -478,6 +478,42 @@ export const AdminFaxStatsSchema = {
   type: "object",
 } as const;
 
+export const AdminGatewaySettingsSchema = {
+  properties: {
+    defaultCacheTtl: {
+      type: "integer",
+    },
+    defaultTimeout: {
+      type: "integer",
+    },
+  },
+  required: ["defaultCacheTtl", "defaultTimeout"],
+  title: "AdminGatewaySettings",
+  type: "object",
+} as const;
+
+export const AdminGatewaySettingsUpdateSchema = {
+  properties: {
+    defaultCacheTtl: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+      ],
+    },
+    defaultTimeout: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+      ],
+    },
+  },
+  required: [],
+  title: "AdminGatewaySettingsUpdate",
+  type: "object",
+} as const;
+
 export const AdminPhoneNumberSummarySchema = {
   properties: {
     callerIdName: {
@@ -1255,6 +1291,810 @@ export const AuditLogEntrySchema = {
   },
   required: ["action", "createdAt", "id"],
   title: "AuditLogEntry",
+  type: "object",
+} as const;
+
+export const CallAnalyticsSummarySchema = {
+  properties: {
+    answered: {
+      default: 0,
+      type: "integer",
+    },
+    avgBillableSeconds: {
+      default: 0,
+      type: "number",
+    },
+    avgDuration: {
+      default: 0,
+      type: "number",
+    },
+    missed: {
+      default: 0,
+      type: "integer",
+    },
+    totalCalls: {
+      default: 0,
+      type: "integer",
+    },
+    totalDuration: {
+      default: 0,
+      type: "integer",
+    },
+    voicemail: {
+      default: 0,
+      type: "integer",
+    },
+  },
+  required: [],
+  title: "CallAnalyticsSummary",
+  type: "object",
+} as const;
+
+export const CallQueueSchema = {
+  properties: {
+    announceFrequency: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    announceHoldtime: {
+      type: "boolean",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    joinEmpty: {
+      type: "boolean",
+    },
+    leaveWhenEmpty: {
+      type: "boolean",
+    },
+    maxCallers: {
+      type: "integer",
+    },
+    maxWaitTime: {
+      type: "integer",
+    },
+    members: {
+      items: {
+        $ref: "#/components/schemas/CallQueueMember",
+      },
+      type: "array",
+    },
+    musicOnHoldClass: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    name: {
+      type: "string",
+    },
+    number: {
+      type: "string",
+    },
+    ringTime: {
+      type: "integer",
+    },
+    strategy: {
+      type: "string",
+    },
+    teamId: {
+      format: "uuid",
+      type: "string",
+    },
+    timeoutDestination: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    wrapupTime: {
+      type: "integer",
+    },
+  },
+  required: [
+    "announceHoldtime",
+    "id",
+    "joinEmpty",
+    "leaveWhenEmpty",
+    "maxCallers",
+    "maxWaitTime",
+    "name",
+    "number",
+    "ringTime",
+    "strategy",
+    "teamId",
+    "wrapupTime",
+  ],
+  title: "CallQueue",
+  type: "object",
+} as const;
+
+export const CallQueueCreateSchema = {
+  properties: {
+    announceFrequency: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    announceHoldtime: {
+      default: false,
+      type: "boolean",
+    },
+    joinEmpty: {
+      default: false,
+      type: "boolean",
+    },
+    leaveWhenEmpty: {
+      default: true,
+      type: "boolean",
+    },
+    maxCallers: {
+      default: 10,
+      type: "integer",
+    },
+    maxWaitTime: {
+      default: 300,
+      type: "integer",
+    },
+    musicOnHoldClass: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    name: {
+      type: "string",
+    },
+    number: {
+      type: "string",
+    },
+    ringTime: {
+      default: 15,
+      type: "integer",
+    },
+    strategy: {
+      default: "ring_all",
+      type: "string",
+    },
+    timeoutDestination: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    wrapupTime: {
+      default: 0,
+      type: "integer",
+    },
+  },
+  required: ["name", "number"],
+  title: "CallQueueCreate",
+  type: "object",
+} as const;
+
+export const CallQueueMemberSchema = {
+  properties: {
+    callQueueId: {
+      format: "uuid",
+      type: "string",
+    },
+    extensionId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    isPaused: {
+      type: "boolean",
+    },
+    penalty: {
+      type: "integer",
+    },
+    priority: {
+      type: "integer",
+    },
+  },
+  required: ["callQueueId", "id", "isPaused", "penalty", "priority"],
+  title: "CallQueueMember",
+  type: "object",
+} as const;
+
+export const CallQueueMemberCreateSchema = {
+  properties: {
+    extensionId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    isPaused: {
+      default: false,
+      type: "boolean",
+    },
+    penalty: {
+      default: 0,
+      type: "integer",
+    },
+    priority: {
+      default: 0,
+      type: "integer",
+    },
+  },
+  required: [],
+  title: "CallQueueMemberCreate",
+  type: "object",
+} as const;
+
+export const CallQueueMemberPauseSchema = {
+  properties: {
+    isPaused: {
+      type: "boolean",
+    },
+  },
+  required: ["isPaused"],
+  title: "CallQueueMemberPause",
+  type: "object",
+} as const;
+
+export const CallQueueMemberUpdateSchema = {
+  properties: {
+    extensionId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    isPaused: {
+      oneOf: [
+        {
+          type: "boolean",
+        },
+      ],
+    },
+    penalty: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+      ],
+    },
+    priority: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+      ],
+    },
+  },
+  required: [],
+  title: "CallQueueMemberUpdate",
+  type: "object",
+} as const;
+
+export const CallQueueUpdateSchema = {
+  properties: {
+    announceFrequency: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    announceHoldtime: {
+      oneOf: [
+        {
+          type: "boolean",
+        },
+      ],
+    },
+    joinEmpty: {
+      oneOf: [
+        {
+          type: "boolean",
+        },
+      ],
+    },
+    leaveWhenEmpty: {
+      oneOf: [
+        {
+          type: "boolean",
+        },
+      ],
+    },
+    maxCallers: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+      ],
+    },
+    maxWaitTime: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+      ],
+    },
+    musicOnHoldClass: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    name: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+    number: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+    ringTime: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+      ],
+    },
+    strategy: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+    timeoutDestination: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    wrapupTime: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+      ],
+    },
+  },
+  required: [],
+  title: "CallQueueUpdate",
+  type: "object",
+} as const;
+
+export const CallRecordCreateSchema = {
+  properties: {
+    billableSeconds: {
+      default: 0,
+      type: "integer",
+    },
+    callDate: {
+      format: "date-time",
+      type: "string",
+    },
+    callerId: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    channel: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    connectionId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    cost: {
+      oneOf: [
+        {
+          type: "number",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    destination: {
+      type: "string",
+    },
+    direction: {
+      type: "string",
+    },
+    disposition: {
+      type: "string",
+    },
+    duration: {
+      default: 0,
+      type: "integer",
+    },
+    notes: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    recordingUrl: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    source: {
+      type: "string",
+    },
+    teamId: {
+      format: "uuid",
+      type: "string",
+    },
+    uniqueId: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: [
+    "callDate",
+    "destination",
+    "direction",
+    "disposition",
+    "source",
+    "teamId",
+  ],
+  title: "CallRecordCreate",
+  type: "object",
+} as const;
+
+export const CallRecordDetailSchema = {
+  properties: {
+    billableSeconds: {
+      default: 0,
+      type: "integer",
+    },
+    callDate: {
+      format: "date-time",
+      type: "string",
+    },
+    callerId: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    channel: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    connectionId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    cost: {
+      oneOf: [
+        {
+          type: "number",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    createdAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    destination: {
+      default: "",
+      type: "string",
+    },
+    direction: {
+      default: "",
+      type: "string",
+    },
+    disposition: {
+      default: "",
+      type: "string",
+    },
+    duration: {
+      default: 0,
+      type: "integer",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    notes: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    recordingUrl: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    source: {
+      default: "",
+      type: "string",
+    },
+    teamId: {
+      format: "uuid",
+      type: "string",
+    },
+    uniqueId: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    updatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: ["callDate", "id", "teamId"],
+  title: "CallRecordDetail",
+  type: "object",
+} as const;
+
+export const CallRecordListSchema = {
+  properties: {
+    billableSeconds: {
+      default: 0,
+      type: "integer",
+    },
+    callDate: {
+      format: "date-time",
+      type: "string",
+    },
+    callerId: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    connectionId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    cost: {
+      oneOf: [
+        {
+          type: "number",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    createdAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    destination: {
+      default: "",
+      type: "string",
+    },
+    direction: {
+      default: "",
+      type: "string",
+    },
+    disposition: {
+      default: "",
+      type: "string",
+    },
+    duration: {
+      default: 0,
+      type: "integer",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    source: {
+      default: "",
+      type: "string",
+    },
+    teamId: {
+      format: "uuid",
+      type: "string",
+    },
+    updatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: ["callDate", "id", "teamId"],
+  title: "CallRecordList",
+  type: "object",
+} as const;
+
+export const CallVolumePointSchema = {
+  properties: {
+    answered: {
+      default: 0,
+      type: "integer",
+    },
+    count: {
+      default: 0,
+      type: "integer",
+    },
+    missed: {
+      default: 0,
+      type: "integer",
+    },
+    period: {
+      type: "string",
+    },
+  },
+  required: ["period"],
+  title: "CallVolumePoint",
   type: "object",
 } as const;
 
@@ -2278,6 +3118,282 @@ export const DndToggleResponseSchema = {
   type: "object",
 } as const;
 
+export const E911RegistrationSchema = {
+  properties: {
+    addressLine1: {
+      type: "string",
+    },
+    addressLine2: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    carrierRegistrationId: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    city: {
+      type: "string",
+    },
+    country: {
+      default: "US",
+      type: "string",
+    },
+    createdAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    locationId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    locationName: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    phoneNumberDisplay: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    phoneNumberId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    phoneNumberLabel: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    postalCode: {
+      type: "string",
+    },
+    state: {
+      type: "string",
+    },
+    teamId: {
+      format: "uuid",
+      type: "string",
+    },
+    updatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    validated: {
+      default: false,
+      type: "boolean",
+    },
+    validatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: ["addressLine1", "city", "id", "postalCode", "state", "teamId"],
+  title: "E911Registration",
+  type: "object",
+} as const;
+
+export const E911RegistrationCreateSchema = {
+  properties: {
+    addressLine1: {
+      type: "string",
+    },
+    addressLine2: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    city: {
+      type: "string",
+    },
+    country: {
+      default: "US",
+      type: "string",
+    },
+    locationId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    phoneNumberId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    postalCode: {
+      type: "string",
+    },
+    state: {
+      type: "string",
+    },
+    teamId: {
+      format: "uuid",
+      type: "string",
+    },
+  },
+  required: ["addressLine1", "city", "postalCode", "state", "teamId"],
+  title: "E911RegistrationCreate",
+  type: "object",
+} as const;
+
+export const E911RegistrationUpdateSchema = {
+  properties: {
+    addressLine1: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+    addressLine2: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    city: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+    country: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+    locationId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    phoneNumberId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    postalCode: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+    state: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+  },
+  required: [],
+  title: "E911RegistrationUpdate",
+  type: "object",
+} as const;
+
 export const EmailVerificationConfirmSchema = {
   properties: {
     token: {
@@ -2349,8 +3465,72 @@ export const ExtensionSchema = {
       default: "",
       type: "string",
     },
+    dndEnabled: {
+      default: false,
+      type: "boolean",
+    },
     extensionNumber: {
       type: "string",
+    },
+    forwardAlwaysDestination: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    forwardAlwaysEnabled: {
+      default: false,
+      type: "boolean",
+    },
+    forwardBusyDestination: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    forwardBusyEnabled: {
+      default: false,
+      type: "boolean",
+    },
+    forwardNoAnswerDestination: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    forwardNoAnswerEnabled: {
+      default: false,
+      type: "boolean",
+    },
+    forwardNoAnswerRingCount: {
+      default: 4,
+      type: "integer",
+    },
+    forwardUnreachableDestination: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    forwardUnreachableEnabled: {
+      default: false,
+      type: "boolean",
     },
     id: {
       format: "uuid",
@@ -2450,12 +3630,121 @@ export const ExtensionGatewayResponseSchema = {
   type: "object",
 } as const;
 
+export const ExtensionStatsSchema = {
+  properties: {
+    answered: {
+      default: 0,
+      type: "integer",
+    },
+    avgDuration: {
+      default: 0,
+      type: "number",
+    },
+    extension: {
+      type: "string",
+    },
+    missed: {
+      default: 0,
+      type: "integer",
+    },
+    totalCalls: {
+      default: 0,
+      type: "integer",
+    },
+  },
+  required: ["extension"],
+  title: "ExtensionStats",
+  type: "object",
+} as const;
+
 export const ExtensionUpdateSchema = {
   properties: {
     displayName: {
       oneOf: [
         {
           type: "string",
+        },
+      ],
+    },
+    dndEnabled: {
+      oneOf: [
+        {
+          type: "boolean",
+        },
+      ],
+    },
+    forwardAlwaysDestination: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    forwardAlwaysEnabled: {
+      oneOf: [
+        {
+          type: "boolean",
+        },
+      ],
+    },
+    forwardBusyDestination: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    forwardBusyEnabled: {
+      oneOf: [
+        {
+          type: "boolean",
+        },
+      ],
+    },
+    forwardNoAnswerDestination: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    forwardNoAnswerEnabled: {
+      oneOf: [
+        {
+          type: "boolean",
+        },
+      ],
+    },
+    forwardNoAnswerRingCount: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+      ],
+    },
+    forwardUnreachableDestination: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    forwardUnreachableEnabled: {
+      oneOf: [
+        {
+          type: "boolean",
         },
       ],
     },
@@ -3000,6 +4289,312 @@ export const GreetingTypeSchema = {
   enum: ["default", "custom", "name_only"],
   title: "GreetingType",
   type: "string",
+} as const;
+
+export const IvrMenuSchema = {
+  properties: {
+    greetingFileUrl: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    greetingText: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    greetingType: {
+      type: "string",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    invalidDestination: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    maxRetries: {
+      type: "integer",
+    },
+    name: {
+      type: "string",
+    },
+    options: {
+      items: {
+        $ref: "#/components/schemas/IvrMenuOption",
+      },
+      type: "array",
+    },
+    teamId: {
+      format: "uuid",
+      type: "string",
+    },
+    timeoutDestination: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    timeoutSeconds: {
+      type: "integer",
+    },
+  },
+  required: [
+    "greetingType",
+    "id",
+    "maxRetries",
+    "name",
+    "teamId",
+    "timeoutSeconds",
+  ],
+  title: "IvrMenu",
+  type: "object",
+} as const;
+
+export const IvrMenuCreateSchema = {
+  properties: {
+    greetingFileUrl: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    greetingText: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    greetingType: {
+      default: "none",
+      type: "string",
+    },
+    invalidDestination: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    maxRetries: {
+      default: 3,
+      type: "integer",
+    },
+    name: {
+      type: "string",
+    },
+    timeoutDestination: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    timeoutSeconds: {
+      default: 5,
+      type: "integer",
+    },
+  },
+  required: ["name"],
+  title: "IvrMenuCreate",
+  type: "object",
+} as const;
+
+export const IvrMenuOptionSchema = {
+  properties: {
+    destination: {
+      type: "string",
+    },
+    digit: {
+      type: "string",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    ivrMenuId: {
+      format: "uuid",
+      type: "string",
+    },
+    label: {
+      type: "string",
+    },
+    sortOrder: {
+      default: 0,
+      type: "integer",
+    },
+  },
+  required: ["destination", "digit", "id", "ivrMenuId", "label"],
+  title: "IvrMenuOption",
+  type: "object",
+} as const;
+
+export const IvrMenuOptionCreateSchema = {
+  properties: {
+    destination: {
+      type: "string",
+    },
+    digit: {
+      type: "string",
+    },
+    label: {
+      type: "string",
+    },
+    sortOrder: {
+      default: 0,
+      type: "integer",
+    },
+  },
+  required: ["destination", "digit", "label"],
+  title: "IvrMenuOptionCreate",
+  type: "object",
+} as const;
+
+export const IvrMenuOptionUpdateSchema = {
+  properties: {
+    destination: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+    digit: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+    label: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+    sortOrder: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+      ],
+    },
+  },
+  required: [],
+  title: "IvrMenuOptionUpdate",
+  type: "object",
+} as const;
+
+export const IvrMenuUpdateSchema = {
+  properties: {
+    greetingFileUrl: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    greetingText: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    greetingType: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+    invalidDestination: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    maxRetries: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+      ],
+    },
+    name: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+    timeoutDestination: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    timeoutSeconds: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+      ],
+    },
+  },
+  required: [],
+  title: "IvrMenuUpdate",
+  type: "object",
 } as const;
 
 export const LocationSchema = {
@@ -4350,6 +5945,237 @@ export const ResetTokenValidationSchema = {
   type: "object",
 } as const;
 
+export const RingGroupSchema = {
+  properties: {
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    members: {
+      items: {
+        $ref: "#/components/schemas/RingGroupMember",
+      },
+      type: "array",
+    },
+    name: {
+      type: "string",
+    },
+    noAnswerDestination: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    number: {
+      type: "string",
+    },
+    ringTime: {
+      type: "integer",
+    },
+    strategy: {
+      type: "string",
+    },
+    teamId: {
+      format: "uuid",
+      type: "string",
+    },
+  },
+  required: ["id", "name", "number", "ringTime", "strategy", "teamId"],
+  title: "RingGroup",
+  type: "object",
+} as const;
+
+export const RingGroupCreateSchema = {
+  properties: {
+    name: {
+      type: "string",
+    },
+    noAnswerDestination: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    number: {
+      type: "string",
+    },
+    ringTime: {
+      default: 20,
+      type: "integer",
+    },
+    strategy: {
+      default: "ring_all",
+      type: "string",
+    },
+  },
+  required: ["name", "number"],
+  title: "RingGroupCreate",
+  type: "object",
+} as const;
+
+export const RingGroupMemberSchema = {
+  properties: {
+    extensionId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    externalNumber: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    ringGroupId: {
+      format: "uuid",
+      type: "string",
+    },
+    sortOrder: {
+      type: "integer",
+    },
+  },
+  required: ["id", "ringGroupId", "sortOrder"],
+  title: "RingGroupMember",
+  type: "object",
+} as const;
+
+export const RingGroupMemberCreateSchema = {
+  properties: {
+    extensionId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    externalNumber: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    sortOrder: {
+      default: 0,
+      type: "integer",
+    },
+  },
+  required: [],
+  title: "RingGroupMemberCreate",
+  type: "object",
+} as const;
+
+export const RingGroupMemberUpdateSchema = {
+  properties: {
+    extensionId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    externalNumber: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    sortOrder: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+      ],
+    },
+  },
+  required: [],
+  title: "RingGroupMemberUpdate",
+  type: "object",
+} as const;
+
+export const RingGroupUpdateSchema = {
+  properties: {
+    name: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+    noAnswerDestination: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    number: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+    ringTime: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+      ],
+    },
+    strategy: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+  },
+  required: [],
+  title: "RingGroupUpdate",
+  type: "object",
+} as const;
+
 export const RoleSchema = {
   properties: {
     createdAt: {
@@ -4402,6 +6228,394 @@ export const RoleUpdateSchema = {
   },
   required: [],
   title: "RoleUpdate",
+  type: "object",
+} as const;
+
+export const ScheduleCheckResponseSchema = {
+  properties: {
+    currentEntry: {
+      oneOf: [
+        {
+          $ref: "#/components/schemas/ScheduleEntryDetail",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    isOpen: {
+      type: "boolean",
+    },
+    nextChangeAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: ["isOpen"],
+  title: "ScheduleCheckResponse",
+  type: "object",
+} as const;
+
+export const ScheduleCreateSchema = {
+  properties: {
+    isDefault: {
+      default: false,
+      type: "boolean",
+    },
+    name: {
+      type: "string",
+    },
+    scheduleType: {
+      default: "business_hours",
+      type: "string",
+    },
+    teamId: {
+      format: "uuid",
+      type: "string",
+    },
+    timezone: {
+      default: "America/Chicago",
+      type: "string",
+    },
+  },
+  required: ["name", "teamId"],
+  title: "ScheduleCreate",
+  type: "object",
+} as const;
+
+export const ScheduleDetailSchema = {
+  properties: {
+    entries: {
+      items: {
+        $ref: "#/components/schemas/ScheduleEntryList",
+      },
+      type: "array",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    isDefault: {
+      type: "boolean",
+    },
+    name: {
+      type: "string",
+    },
+    scheduleType: {
+      type: "string",
+    },
+    teamId: {
+      format: "uuid",
+      type: "string",
+    },
+    timezone: {
+      type: "string",
+    },
+  },
+  required: ["id", "isDefault", "name", "scheduleType", "teamId", "timezone"],
+  title: "ScheduleDetail",
+  type: "object",
+} as const;
+
+export const ScheduleEntryCreateSchema = {
+  properties: {
+    date: {
+      oneOf: [
+        {
+          format: "date",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    dayOfWeek: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    endTime: {
+      format: "duration",
+      type: "string",
+    },
+    isClosed: {
+      default: false,
+      type: "boolean",
+    },
+    label: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    startTime: {
+      format: "duration",
+      type: "string",
+    },
+  },
+  required: ["endTime", "startTime"],
+  title: "ScheduleEntryCreate",
+  type: "object",
+} as const;
+
+export const ScheduleEntryDetailSchema = {
+  properties: {
+    date: {
+      oneOf: [
+        {
+          format: "date",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    dayOfWeek: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    endTime: {
+      format: "duration",
+      type: "string",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    isClosed: {
+      default: false,
+      type: "boolean",
+    },
+    label: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    scheduleId: {
+      format: "uuid",
+      type: "string",
+    },
+    startTime: {
+      format: "duration",
+      type: "string",
+    },
+  },
+  required: ["endTime", "id", "scheduleId", "startTime"],
+  title: "ScheduleEntryDetail",
+  type: "object",
+} as const;
+
+export const ScheduleEntryListSchema = {
+  properties: {
+    date: {
+      oneOf: [
+        {
+          format: "date",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    dayOfWeek: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    endTime: {
+      format: "duration",
+      type: "string",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    isClosed: {
+      default: false,
+      type: "boolean",
+    },
+    label: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    scheduleId: {
+      format: "uuid",
+      type: "string",
+    },
+    startTime: {
+      format: "duration",
+      type: "string",
+    },
+  },
+  required: ["endTime", "id", "scheduleId", "startTime"],
+  title: "ScheduleEntryList",
+  type: "object",
+} as const;
+
+export const ScheduleEntryUpdateSchema = {
+  properties: {
+    date: {
+      oneOf: [
+        {
+          format: "date",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    dayOfWeek: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    endTime: {
+      oneOf: [
+        {
+          format: "duration",
+          type: "string",
+        },
+      ],
+    },
+    isClosed: {
+      oneOf: [
+        {
+          type: "boolean",
+        },
+      ],
+    },
+    label: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    startTime: {
+      oneOf: [
+        {
+          format: "duration",
+          type: "string",
+        },
+      ],
+    },
+  },
+  required: [],
+  title: "ScheduleEntryUpdate",
+  type: "object",
+} as const;
+
+export const ScheduleListSchema = {
+  properties: {
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    isDefault: {
+      type: "boolean",
+    },
+    name: {
+      type: "string",
+    },
+    scheduleType: {
+      type: "string",
+    },
+    teamId: {
+      format: "uuid",
+      type: "string",
+    },
+    timezone: {
+      type: "string",
+    },
+  },
+  required: ["id", "isDefault", "name", "scheduleType", "teamId", "timezone"],
+  title: "ScheduleList",
+  type: "object",
+} as const;
+
+export const ScheduleUpdateSchema = {
+  properties: {
+    isDefault: {
+      oneOf: [
+        {
+          type: "boolean",
+        },
+      ],
+    },
+    name: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+    scheduleType: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+    timezone: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+  },
+  required: [],
+  title: "ScheduleUpdate",
   type: "object",
 } as const;
 
@@ -5289,6 +7503,142 @@ export const TicketUserSchema = {
   type: "object",
 } as const;
 
+export const TimeConditionSchema = {
+  properties: {
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    matchDestination: {
+      type: "string",
+    },
+    name: {
+      type: "string",
+    },
+    noMatchDestination: {
+      type: "string",
+    },
+    overrideMode: {
+      type: "string",
+    },
+    scheduleId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    teamId: {
+      format: "uuid",
+      type: "string",
+    },
+  },
+  required: [
+    "id",
+    "matchDestination",
+    "name",
+    "noMatchDestination",
+    "overrideMode",
+    "teamId",
+  ],
+  title: "TimeCondition",
+  type: "object",
+} as const;
+
+export const TimeConditionCreateSchema = {
+  properties: {
+    matchDestination: {
+      type: "string",
+    },
+    name: {
+      type: "string",
+    },
+    noMatchDestination: {
+      type: "string",
+    },
+    overrideMode: {
+      default: "none",
+      type: "string",
+    },
+    scheduleId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: ["matchDestination", "name", "noMatchDestination"],
+  title: "TimeConditionCreate",
+  type: "object",
+} as const;
+
+export const TimeConditionOverrideSchema = {
+  properties: {
+    overrideMode: {
+      type: "string",
+    },
+  },
+  required: ["overrideMode"],
+  title: "TimeConditionOverride",
+  type: "object",
+} as const;
+
+export const TimeConditionUpdateSchema = {
+  properties: {
+    matchDestination: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+    name: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+    noMatchDestination: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+    overrideMode: {
+      oneOf: [
+        {
+          type: "string",
+        },
+      ],
+    },
+    scheduleId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: [],
+  title: "TimeConditionUpdate",
+  type: "object",
+} as const;
+
 export const TrendPointSchema = {
   properties: {
     date: {
@@ -5314,6 +7664,49 @@ export const UnreadCountSchema = {
   },
   required: ["count"],
   title: "UnreadCount",
+  type: "object",
+} as const;
+
+export const UnregisteredPhoneNumberSchema = {
+  properties: {
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    label: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    number: {
+      type: "string",
+    },
+    numberType: {
+      type: "string",
+    },
+    teamId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    userId: {
+      format: "uuid",
+      type: "string",
+    },
+  },
+  required: ["id", "number", "numberType", "userId"],
+  title: "UnregisteredPhoneNumber",
   type: "object",
 } as const;
 
@@ -5627,6 +8020,272 @@ export const UserUpdateSchema = {
   type: "object",
 } as const;
 
+export const VoicemailBoxSchema = {
+  properties: {
+    autoDeleteDays: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    createdAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    emailAddress: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    emailAttachAudio: {
+      default: false,
+      type: "boolean",
+    },
+    emailNotification: {
+      default: true,
+      type: "boolean",
+    },
+    extensionId: {
+      format: "uuid",
+      type: "string",
+    },
+    greetingFilePath: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    greetingType: {
+      $ref: "#/components/schemas/GreetingType",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    isEnabled: {
+      default: true,
+      type: "boolean",
+    },
+    maxMessageLengthSeconds: {
+      default: 120,
+      type: "integer",
+    },
+    pin: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    transcriptionEnabled: {
+      default: false,
+      type: "boolean",
+    },
+    updatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: ["extensionId", "id"],
+  title: "VoicemailBox",
+  type: "object",
+} as const;
+
+export const VoicemailBoxCreateSchema = {
+  properties: {
+    autoDeleteDays: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    emailAddress: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    emailAttachAudio: {
+      default: false,
+      type: "boolean",
+    },
+    emailNotification: {
+      default: true,
+      type: "boolean",
+    },
+    extensionId: {
+      format: "uuid",
+      type: "string",
+    },
+    greetingFilePath: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    greetingType: {
+      $ref: "#/components/schemas/GreetingType",
+    },
+    isEnabled: {
+      default: true,
+      type: "boolean",
+    },
+    maxMessageLengthSeconds: {
+      default: 120,
+      type: "integer",
+    },
+    pin: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    transcriptionEnabled: {
+      default: false,
+      type: "boolean",
+    },
+  },
+  required: ["extensionId"],
+  title: "VoicemailBoxCreate",
+  type: "object",
+} as const;
+
+export const VoicemailBoxUpdateSchema = {
+  properties: {
+    autoDeleteDays: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    emailAddress: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    emailAttachAudio: {
+      oneOf: [
+        {
+          type: "boolean",
+        },
+      ],
+    },
+    emailNotification: {
+      oneOf: [
+        {
+          type: "boolean",
+        },
+      ],
+    },
+    greetingFilePath: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    greetingType: {
+      oneOf: [
+        {
+          $ref: "#/components/schemas/GreetingType",
+        },
+      ],
+    },
+    isEnabled: {
+      oneOf: [
+        {
+          type: "boolean",
+        },
+      ],
+    },
+    maxMessageLengthSeconds: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+      ],
+    },
+    pin: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    transcriptionEnabled: {
+      oneOf: [
+        {
+          type: "boolean",
+        },
+      ],
+    },
+  },
+  required: [],
+  title: "VoicemailBoxUpdate",
+  type: "object",
+} as const;
+
 export const VoicemailMessageSchema = {
   properties: {
     audioFilePath: {
@@ -5645,6 +8304,17 @@ export const VoicemailMessageSchema = {
     },
     callerNumber: {
       type: "string",
+    },
+    createdAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
     },
     durationSeconds: {
       default: 0,
@@ -5683,6 +8353,17 @@ export const VoicemailMessageSchema = {
         },
       ],
     },
+    updatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     voicemailBoxId: {
       format: "uuid",
       type: "string",
@@ -5702,9 +8383,37 @@ export const VoicemailMessageUpdateSchema = {
         },
       ],
     },
+    isUrgent: {
+      oneOf: [
+        {
+          type: "boolean",
+        },
+      ],
+    },
+    transcription: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
   },
   required: [],
   title: "VoicemailMessageUpdate",
+  type: "object",
+} as const;
+
+export const VoicemailReadToggleSchema = {
+  properties: {
+    isRead: {
+      type: "boolean",
+    },
+  },
+  required: ["isRead"],
+  title: "VoicemailReadToggle",
   type: "object",
 } as const;
 
@@ -5714,6 +8423,16 @@ export const VoicemailSettingsSchema = {
       oneOf: [
         {
           type: "integer",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    emailAddress: {
+      oneOf: [
+        {
+          type: "string",
         },
         {
           type: "null",
@@ -5779,6 +8498,16 @@ export const VoicemailSettingsUpdateSchema = {
         },
       ],
     },
+    emailAddress: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     emailAttachAudio: {
       oneOf: [
         {
@@ -5834,6 +8563,21 @@ export const VoicemailSettingsUpdateSchema = {
   },
   required: [],
   title: "VoicemailSettingsUpdate",
+  type: "object",
+} as const;
+
+export const VoicemailUnreadCountSchema = {
+  properties: {
+    unreadCount: {
+      type: "integer",
+    },
+    voicemailBoxId: {
+      format: "uuid",
+      type: "string",
+    },
+  },
+  required: ["unreadCount", "voicemailBoxId"],
+  title: "VoicemailUnreadCount",
   type: "object",
 } as const;
 

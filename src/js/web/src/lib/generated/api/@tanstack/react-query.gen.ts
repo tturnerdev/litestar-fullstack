@@ -48,100 +48,156 @@ import {
   apiEmailVerificationVerifyVerifyEmail,
   assignRole,
   assignUserRole,
+  checkSchedule,
   closeTicket,
   confirmMfaSetup,
+  createCallQueue,
+  createCallQueueMember,
+  createCallRecord,
   createConnection,
   createDevice,
+  createE911Registration,
   createExtension,
   createFaxEmailRoute,
   createFaxNumber,
   createForwardingRule,
+  createIvrMenu,
+  createIvrMenuOption,
   createLocation,
   createPhoneNumber,
+  createRingGroup,
+  createRingGroupMember,
   createRole,
+  createSchedule,
+  createScheduleEntry,
   createTag,
   createTeam,
   createTeamInvitation,
   createTicket,
   createTicketMessage,
+  createTimeCondition,
   createUser,
+  createVoicemailBox,
   deleteAttachment,
+  deleteCallQueue,
+  deleteCallQueueMember,
   deleteConnection,
   deleteDevice,
+  deleteE911Registration,
   deleteExtension,
   deleteFaxEmailRoute,
   deleteFaxMessage,
   deleteFaxNumber,
   deleteForwardingRule,
+  deleteIvrMenu,
+  deleteIvrMenuOption,
   deleteLocation,
   deleteNotification,
   deletePhoneNumber,
+  deleteRingGroup,
+  deleteRingGroupMember,
   deleteRole,
+  deleteSchedule,
+  deleteScheduleEntry,
   deleteTag,
   deleteTeam,
   deleteTeamInvitation,
   deleteTicket,
   deleteTicketMessage,
+  deleteTimeCondition,
   deleteUser,
+  deleteVoicemailBox,
   deleteVoicemailMessage,
+  deleteVoicemailMessageById,
   disableMfa,
+  exportCallRecords,
   forgotPassword,
   gatewayLookupDevice,
   gatewayLookupExtension,
   gatewayLookupNumber,
   getActiveSessions,
+  getAdminGatewaySettings,
   getAdminSystemStatus,
   getAttachment,
+  getCallQueue,
+  getCallRecord,
+  getCallsByExtension,
+  getCallSummary,
+  getCallVolume,
   getConnection,
   getDashboardStats,
   getDashboardTrends,
   getDevice,
   getDndSettings,
+  getE911Registration,
   getExtension,
   getFaxMessage,
   getFaxNumber,
+  getIvrMenu,
   getLocation,
   getMfaStatus,
   getNotificationPreferences,
   getOrganization,
   getPhoneNumber,
   getRecentActivity,
+  getRingGroup,
   getRole,
+  getSchedule,
   getTag,
   getTeam,
   getTicket,
+  getTimeCondition,
   getUnreadNotificationCount,
   getUser,
+  getVoicemailBox,
+  getVoicemailBoxUnreadCount,
   getVoicemailMessage,
+  getVoicemailMessageById,
   getVoicemailSettings,
   globalSearch,
   initiateDisableMfaOAuth,
   initiateMfaSetup,
+  listAllVoicemailMessages,
+  listCallQueueMembers,
+  listCallQueues,
+  listCallRecords,
   listConnections,
   listDeviceLines,
   listDevices,
+  listE911Registrations,
   listExtensions,
   listFaxEmailRoutes,
   listFaxMessages,
   listFaxNumbers,
   listForwardingRules,
+  listIvrMenuOptions,
+  listIvrMenus,
   listLocations,
   listNotifications,
   listPhoneNumbers,
+  listRingGroupMembers,
+  listRingGroups,
   listRoles,
+  listScheduleEntries,
+  listSchedules,
   listTags,
   listTeamInvitations,
   listTeamPermissions,
   listTeams,
   listTicketMessages,
   listTickets,
+  listTimeConditions,
+  listUnregisteredPhoneNumbers,
   listUsers,
+  listVoicemailBoxes,
+  listVoicemailBoxMessages,
   listVoicemailMessages,
   markAllNotificationsRead,
   markNotificationRead,
   oAuthConfig,
   type Options,
   pasteImage,
+  pauseCallQueueMember,
   profileOAuthAccounts,
   profileOAuthLink,
   profileOAuthUnlink,
@@ -160,34 +216,49 @@ import {
   sendFax,
   setDeviceLines,
   setForwardingRules,
+  setTimeConditionOverride,
   submitFeedback,
   syncEntity,
   systemHealth,
   testConnection,
   toggleDnd,
+  toggleVoicemailMessageRead,
   tokenRefresh,
+  updateAdminGatewaySettings,
+  updateCallQueue,
+  updateCallQueueMember,
   updateConnection,
   updateDevice,
   updateDndSettings,
+  updateE911Registration,
   updateExtension,
   updateFaxEmailRoute,
   updateFaxNumber,
   updateForwardingRule,
+  updateIvrMenu,
+  updateIvrMenuOption,
   updateLocation,
   updateNotificationPreferences,
   updateOrganization,
   updatePhoneNumber,
+  updateRingGroup,
+  updateRingGroupMember,
   updateRole,
+  updateSchedule,
+  updateScheduleEntry,
   updateTag,
   updateTeam,
   updateTeamMember,
   updateTeamPermissions,
   updateTicket,
   updateTicketMessage,
+  updateTimeCondition,
   updateUser,
+  updateVoicemailBox,
   updateVoicemailMessage,
   updateVoicemailSettings,
   uploadAttachment,
+  validateE911Registration,
   validateResetToken,
   verifyMfaChallenge,
 } from "../sdk.gen";
@@ -300,18 +371,33 @@ import type {
   AssignUserRoleData,
   AssignUserRoleError,
   AssignUserRoleResponse,
+  CheckScheduleData,
+  CheckScheduleError,
+  CheckScheduleResponse,
   CloseTicketData,
   CloseTicketError,
   CloseTicketResponse,
   ConfirmMfaSetupData,
   ConfirmMfaSetupError,
   ConfirmMfaSetupResponse,
+  CreateCallQueueData,
+  CreateCallQueueError,
+  CreateCallQueueMemberData,
+  CreateCallQueueMemberError,
+  CreateCallQueueMemberResponse,
+  CreateCallQueueResponse,
+  CreateCallRecordData,
+  CreateCallRecordError,
+  CreateCallRecordResponse,
   CreateConnectionData,
   CreateConnectionError,
   CreateConnectionResponse,
   CreateDeviceData,
   CreateDeviceError,
   CreateDeviceResponse,
+  CreateE911RegistrationData,
+  CreateE911RegistrationError,
+  CreateE911RegistrationResponse,
   CreateExtensionData,
   CreateExtensionError,
   CreateExtensionResponse,
@@ -324,15 +410,33 @@ import type {
   CreateForwardingRuleData,
   CreateForwardingRuleError,
   CreateForwardingRuleResponse,
+  CreateIvrMenuData,
+  CreateIvrMenuError,
+  CreateIvrMenuOptionData,
+  CreateIvrMenuOptionError,
+  CreateIvrMenuOptionResponse,
+  CreateIvrMenuResponse,
   CreateLocationData,
   CreateLocationError,
   CreateLocationResponse,
   CreatePhoneNumberData,
   CreatePhoneNumberError,
   CreatePhoneNumberResponse,
+  CreateRingGroupData,
+  CreateRingGroupError,
+  CreateRingGroupMemberData,
+  CreateRingGroupMemberError,
+  CreateRingGroupMemberResponse,
+  CreateRingGroupResponse,
   CreateRoleData,
   CreateRoleError,
   CreateRoleResponse,
+  CreateScheduleData,
+  CreateScheduleEntryData,
+  CreateScheduleEntryError,
+  CreateScheduleEntryResponse,
+  CreateScheduleError,
+  CreateScheduleResponse,
   CreateTagData,
   CreateTagError,
   CreateTagResponse,
@@ -348,18 +452,33 @@ import type {
   CreateTicketMessageError,
   CreateTicketMessageResponse,
   CreateTicketResponse,
+  CreateTimeConditionData,
+  CreateTimeConditionError,
+  CreateTimeConditionResponse,
   CreateUserData,
   CreateUserError,
   CreateUserResponse,
+  CreateVoicemailBoxData,
+  CreateVoicemailBoxError,
+  CreateVoicemailBoxResponse,
   DeleteAttachmentData,
   DeleteAttachmentError,
   DeleteAttachmentResponse,
+  DeleteCallQueueData,
+  DeleteCallQueueError,
+  DeleteCallQueueMemberData,
+  DeleteCallQueueMemberError,
+  DeleteCallQueueMemberResponse,
+  DeleteCallQueueResponse,
   DeleteConnectionData,
   DeleteConnectionError,
   DeleteConnectionResponse,
   DeleteDeviceData,
   DeleteDeviceError,
   DeleteDeviceResponse,
+  DeleteE911RegistrationData,
+  DeleteE911RegistrationError,
+  DeleteE911RegistrationResponse,
   DeleteExtensionData,
   DeleteExtensionError,
   DeleteExtensionResponse,
@@ -375,6 +494,12 @@ import type {
   DeleteForwardingRuleData,
   DeleteForwardingRuleError,
   DeleteForwardingRuleResponse,
+  DeleteIvrMenuData,
+  DeleteIvrMenuError,
+  DeleteIvrMenuOptionData,
+  DeleteIvrMenuOptionError,
+  DeleteIvrMenuOptionResponse,
+  DeleteIvrMenuResponse,
   DeleteLocationData,
   DeleteLocationError,
   DeleteLocationResponse,
@@ -384,9 +509,21 @@ import type {
   DeletePhoneNumberData,
   DeletePhoneNumberError,
   DeletePhoneNumberResponse,
+  DeleteRingGroupData,
+  DeleteRingGroupError,
+  DeleteRingGroupMemberData,
+  DeleteRingGroupMemberError,
+  DeleteRingGroupMemberResponse,
+  DeleteRingGroupResponse,
   DeleteRoleData,
   DeleteRoleError,
   DeleteRoleResponse,
+  DeleteScheduleData,
+  DeleteScheduleEntryData,
+  DeleteScheduleEntryError,
+  DeleteScheduleEntryResponse,
+  DeleteScheduleError,
+  DeleteScheduleResponse,
   DeleteTagData,
   DeleteTagError,
   DeleteTagResponse,
@@ -402,15 +539,27 @@ import type {
   DeleteTicketMessageError,
   DeleteTicketMessageResponse,
   DeleteTicketResponse,
+  DeleteTimeConditionData,
+  DeleteTimeConditionError,
+  DeleteTimeConditionResponse,
   DeleteUserData,
   DeleteUserError,
   DeleteUserResponse,
+  DeleteVoicemailBoxData,
+  DeleteVoicemailBoxError,
+  DeleteVoicemailBoxResponse,
+  DeleteVoicemailMessageByIdData,
+  DeleteVoicemailMessageByIdError,
+  DeleteVoicemailMessageByIdResponse,
   DeleteVoicemailMessageData,
   DeleteVoicemailMessageError,
   DeleteVoicemailMessageResponse,
   DisableMfaData,
   DisableMfaError,
   DisableMfaResponse,
+  ExportCallRecordsData,
+  ExportCallRecordsError,
+  ExportCallRecordsResponse,
   ForgotPasswordData,
   ForgotPasswordError,
   ForgotPasswordResponse,
@@ -426,11 +575,28 @@ import type {
   GetActiveSessionsData,
   GetActiveSessionsError,
   GetActiveSessionsResponse,
+  GetAdminGatewaySettingsData,
+  GetAdminGatewaySettingsResponse,
   GetAdminSystemStatusData,
   GetAdminSystemStatusResponse,
   GetAttachmentData,
   GetAttachmentError,
   GetAttachmentResponse,
+  GetCallQueueData,
+  GetCallQueueError,
+  GetCallQueueResponse,
+  GetCallRecordData,
+  GetCallRecordError,
+  GetCallRecordResponse,
+  GetCallsByExtensionData,
+  GetCallsByExtensionError,
+  GetCallsByExtensionResponse,
+  GetCallSummaryData,
+  GetCallSummaryError,
+  GetCallSummaryResponse,
+  GetCallVolumeData,
+  GetCallVolumeError,
+  GetCallVolumeResponse,
   GetConnectionData,
   GetConnectionError,
   GetConnectionResponse,
@@ -444,6 +610,9 @@ import type {
   GetDndSettingsData,
   GetDndSettingsError,
   GetDndSettingsResponse,
+  GetE911RegistrationData,
+  GetE911RegistrationError,
+  GetE911RegistrationResponse,
   GetExtensionData,
   GetExtensionError,
   GetExtensionResponse,
@@ -453,6 +622,9 @@ import type {
   GetFaxNumberData,
   GetFaxNumberError,
   GetFaxNumberResponse,
+  GetIvrMenuData,
+  GetIvrMenuError,
+  GetIvrMenuResponse,
   GetLocationData,
   GetLocationError,
   GetLocationResponse,
@@ -468,9 +640,15 @@ import type {
   GetRecentActivityData,
   GetRecentActivityError,
   GetRecentActivityResponse,
+  GetRingGroupData,
+  GetRingGroupError,
+  GetRingGroupResponse,
   GetRoleData,
   GetRoleError,
   GetRoleResponse,
+  GetScheduleData,
+  GetScheduleError,
+  GetScheduleResponse,
   GetTagData,
   GetTagError,
   GetTagResponse,
@@ -480,11 +658,23 @@ import type {
   GetTicketData,
   GetTicketError,
   GetTicketResponse,
+  GetTimeConditionData,
+  GetTimeConditionError,
+  GetTimeConditionResponse,
   GetUnreadNotificationCountData,
   GetUnreadNotificationCountResponse,
   GetUserData,
   GetUserError,
   GetUserResponse,
+  GetVoicemailBoxData,
+  GetVoicemailBoxError,
+  GetVoicemailBoxResponse,
+  GetVoicemailBoxUnreadCountData,
+  GetVoicemailBoxUnreadCountError,
+  GetVoicemailBoxUnreadCountResponse,
+  GetVoicemailMessageByIdData,
+  GetVoicemailMessageByIdError,
+  GetVoicemailMessageByIdResponse,
   GetVoicemailMessageData,
   GetVoicemailMessageError,
   GetVoicemailMessageResponse,
@@ -499,6 +689,18 @@ import type {
   InitiateDisableMfaOAuthResponse,
   InitiateMfaSetupData,
   InitiateMfaSetupResponse,
+  ListAllVoicemailMessagesData,
+  ListAllVoicemailMessagesError,
+  ListAllVoicemailMessagesResponse,
+  ListCallQueueMembersData,
+  ListCallQueueMembersError,
+  ListCallQueueMembersResponse,
+  ListCallQueuesData,
+  ListCallQueuesError,
+  ListCallQueuesResponse,
+  ListCallRecordsData,
+  ListCallRecordsError,
+  ListCallRecordsResponse,
   ListConnectionsData,
   ListConnectionsError,
   ListConnectionsResponse,
@@ -508,6 +710,9 @@ import type {
   ListDevicesData,
   ListDevicesError,
   ListDevicesResponse,
+  ListE911RegistrationsData,
+  ListE911RegistrationsError,
+  ListE911RegistrationsResponse,
   ListExtensionsData,
   ListExtensionsError,
   ListExtensionsResponse,
@@ -523,6 +728,12 @@ import type {
   ListForwardingRulesData,
   ListForwardingRulesError,
   ListForwardingRulesResponse,
+  ListIvrMenuOptionsData,
+  ListIvrMenuOptionsError,
+  ListIvrMenuOptionsResponse,
+  ListIvrMenusData,
+  ListIvrMenusError,
+  ListIvrMenusResponse,
   ListLocationsData,
   ListLocationsError,
   ListLocationsResponse,
@@ -532,9 +743,21 @@ import type {
   ListPhoneNumbersData,
   ListPhoneNumbersError,
   ListPhoneNumbersResponse,
+  ListRingGroupMembersData,
+  ListRingGroupMembersError,
+  ListRingGroupMembersResponse,
+  ListRingGroupsData,
+  ListRingGroupsError,
+  ListRingGroupsResponse,
   ListRolesData,
   ListRolesError,
   ListRolesResponse,
+  ListScheduleEntriesData,
+  ListScheduleEntriesError,
+  ListScheduleEntriesResponse,
+  ListSchedulesData,
+  ListSchedulesError,
+  ListSchedulesResponse,
   ListTagsData,
   ListTagsError,
   ListTagsResponse,
@@ -553,9 +776,21 @@ import type {
   ListTicketsData,
   ListTicketsError,
   ListTicketsResponse,
+  ListTimeConditionsData,
+  ListTimeConditionsError,
+  ListTimeConditionsResponse,
+  ListUnregisteredPhoneNumbersData,
+  ListUnregisteredPhoneNumbersError,
+  ListUnregisteredPhoneNumbersResponse,
   ListUsersData,
   ListUsersError,
   ListUsersResponse,
+  ListVoicemailBoxesData,
+  ListVoicemailBoxesError,
+  ListVoicemailBoxesResponse,
+  ListVoicemailBoxMessagesData,
+  ListVoicemailBoxMessagesError,
+  ListVoicemailBoxMessagesResponse,
   ListVoicemailMessagesData,
   ListVoicemailMessagesError,
   ListVoicemailMessagesResponse,
@@ -569,6 +804,9 @@ import type {
   PasteImageData,
   PasteImageError,
   PasteImageResponse,
+  PauseCallQueueMemberData,
+  PauseCallQueueMemberError,
+  PauseCallQueueMemberResponse,
   ProfileOAuthAccountsData,
   ProfileOAuthAccountsError,
   ProfileOAuthAccountsResponse,
@@ -622,6 +860,9 @@ import type {
   SetForwardingRulesData,
   SetForwardingRulesError,
   SetForwardingRulesResponse,
+  SetTimeConditionOverrideData,
+  SetTimeConditionOverrideError,
+  SetTimeConditionOverrideResponse,
   SubmitFeedbackData,
   SubmitFeedbackError,
   SubmitFeedbackResponse,
@@ -636,8 +877,20 @@ import type {
   ToggleDndData,
   ToggleDndError,
   ToggleDndResponse,
+  ToggleVoicemailMessageReadData,
+  ToggleVoicemailMessageReadError,
+  ToggleVoicemailMessageReadResponse,
   TokenRefreshData,
   TokenRefreshResponse,
+  UpdateAdminGatewaySettingsData,
+  UpdateAdminGatewaySettingsError,
+  UpdateAdminGatewaySettingsResponse,
+  UpdateCallQueueData,
+  UpdateCallQueueError,
+  UpdateCallQueueMemberData,
+  UpdateCallQueueMemberError,
+  UpdateCallQueueMemberResponse,
+  UpdateCallQueueResponse,
   UpdateConnectionData,
   UpdateConnectionError,
   UpdateConnectionResponse,
@@ -647,6 +900,9 @@ import type {
   UpdateDndSettingsData,
   UpdateDndSettingsError,
   UpdateDndSettingsResponse,
+  UpdateE911RegistrationData,
+  UpdateE911RegistrationError,
+  UpdateE911RegistrationResponse,
   UpdateExtensionData,
   UpdateExtensionError,
   UpdateExtensionResponse,
@@ -659,6 +915,12 @@ import type {
   UpdateForwardingRuleData,
   UpdateForwardingRuleError,
   UpdateForwardingRuleResponse,
+  UpdateIvrMenuData,
+  UpdateIvrMenuError,
+  UpdateIvrMenuOptionData,
+  UpdateIvrMenuOptionError,
+  UpdateIvrMenuOptionResponse,
+  UpdateIvrMenuResponse,
   UpdateLocationData,
   UpdateLocationError,
   UpdateLocationResponse,
@@ -671,9 +933,21 @@ import type {
   UpdatePhoneNumberData,
   UpdatePhoneNumberError,
   UpdatePhoneNumberResponse,
+  UpdateRingGroupData,
+  UpdateRingGroupError,
+  UpdateRingGroupMemberData,
+  UpdateRingGroupMemberError,
+  UpdateRingGroupMemberResponse,
+  UpdateRingGroupResponse,
   UpdateRoleData,
   UpdateRoleError,
   UpdateRoleResponse,
+  UpdateScheduleData,
+  UpdateScheduleEntryData,
+  UpdateScheduleEntryError,
+  UpdateScheduleEntryResponse,
+  UpdateScheduleError,
+  UpdateScheduleResponse,
   UpdateTagData,
   UpdateTagError,
   UpdateTagResponse,
@@ -692,9 +966,15 @@ import type {
   UpdateTicketMessageError,
   UpdateTicketMessageResponse,
   UpdateTicketResponse,
+  UpdateTimeConditionData,
+  UpdateTimeConditionError,
+  UpdateTimeConditionResponse,
   UpdateUserData,
   UpdateUserError,
   UpdateUserResponse,
+  UpdateVoicemailBoxData,
+  UpdateVoicemailBoxError,
+  UpdateVoicemailBoxResponse,
   UpdateVoicemailMessageData,
   UpdateVoicemailMessageError,
   UpdateVoicemailMessageResponse,
@@ -704,6 +984,9 @@ import type {
   UploadAttachmentData,
   UploadAttachmentError,
   UploadAttachmentResponse,
+  ValidateE911RegistrationData,
+  ValidateE911RegistrationError,
+  ValidateE911RegistrationResponse,
   ValidateResetTokenData,
   ValidateResetTokenError,
   ValidateResetTokenResponse,
@@ -1360,6 +1643,61 @@ export const adminGetFaxStatsOptions = (
     queryKey: adminGetFaxStatsQueryKey(options),
   });
 
+export const getAdminGatewaySettingsQueryKey = (
+  options?: Options<GetAdminGatewaySettingsData>,
+) => createQueryKey("getAdminGatewaySettings", options);
+
+/**
+ * GetGatewaySettings
+ */
+export const getAdminGatewaySettingsOptions = (
+  options?: Options<GetAdminGatewaySettingsData>,
+) =>
+  queryOptions<
+    GetAdminGatewaySettingsResponse,
+    DefaultError,
+    GetAdminGatewaySettingsResponse,
+    ReturnType<typeof getAdminGatewaySettingsQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getAdminGatewaySettings({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getAdminGatewaySettingsQueryKey(options),
+  });
+
+/**
+ * UpdateGatewaySettings
+ */
+export const updateAdminGatewaySettingsMutation = (
+  options?: Partial<Options<UpdateAdminGatewaySettingsData>>,
+): UseMutationOptions<
+  UpdateAdminGatewaySettingsResponse,
+  UpdateAdminGatewaySettingsError,
+  Options<UpdateAdminGatewaySettingsData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    UpdateAdminGatewaySettingsResponse,
+    UpdateAdminGatewaySettingsError,
+    Options<UpdateAdminGatewaySettingsData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await updateAdminGatewaySettings({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
 export const adminGetSupportStatsQueryKey = (
   options?: Options<AdminGetSupportStatsData>,
 ) => createQueryKey("adminGetSupportStats", options);
@@ -1736,6 +2074,192 @@ export const adminGetVoiceStatsOptions = (
     queryKey: adminGetVoiceStatsQueryKey(options),
   });
 
+export const getCallsByExtensionQueryKey = (
+  options: Options<GetCallsByExtensionData>,
+) => createQueryKey("getCallsByExtension", options);
+
+/**
+ * GetByExtension
+ */
+export const getCallsByExtensionOptions = (
+  options: Options<GetCallsByExtensionData>,
+) =>
+  queryOptions<
+    GetCallsByExtensionResponse,
+    GetCallsByExtensionError,
+    GetCallsByExtensionResponse,
+    ReturnType<typeof getCallsByExtensionQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getCallsByExtension({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getCallsByExtensionQueryKey(options),
+  });
+
+export const listCallRecordsQueryKey = (
+  options?: Options<ListCallRecordsData>,
+) => createQueryKey("listCallRecords", options);
+
+/**
+ * ListCallRecords
+ */
+export const listCallRecordsOptions = (
+  options?: Options<ListCallRecordsData>,
+) =>
+  queryOptions<
+    ListCallRecordsResponse,
+    ListCallRecordsError,
+    ListCallRecordsResponse,
+    ReturnType<typeof listCallRecordsQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listCallRecords({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listCallRecordsQueryKey(options),
+  });
+
+/**
+ * CreateCallRecord
+ */
+export const createCallRecordMutation = (
+  options?: Partial<Options<CreateCallRecordData>>,
+): UseMutationOptions<
+  CreateCallRecordResponse,
+  CreateCallRecordError,
+  Options<CreateCallRecordData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    CreateCallRecordResponse,
+    CreateCallRecordError,
+    Options<CreateCallRecordData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await createCallRecord({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const exportCallRecordsQueryKey = (
+  options?: Options<ExportCallRecordsData>,
+) => createQueryKey("exportCallRecords", options);
+
+/**
+ * ExportCallRecords
+ */
+export const exportCallRecordsOptions = (
+  options?: Options<ExportCallRecordsData>,
+) =>
+  queryOptions<
+    ExportCallRecordsResponse,
+    ExportCallRecordsError,
+    ExportCallRecordsResponse,
+    ReturnType<typeof exportCallRecordsQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await exportCallRecords({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: exportCallRecordsQueryKey(options),
+  });
+
+export const getCallRecordQueryKey = (options: Options<GetCallRecordData>) =>
+  createQueryKey("getCallRecord", options);
+
+/**
+ * GetCallRecord
+ */
+export const getCallRecordOptions = (options: Options<GetCallRecordData>) =>
+  queryOptions<
+    GetCallRecordResponse,
+    GetCallRecordError,
+    GetCallRecordResponse,
+    ReturnType<typeof getCallRecordQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getCallRecord({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getCallRecordQueryKey(options),
+  });
+
+export const getCallSummaryQueryKey = (options: Options<GetCallSummaryData>) =>
+  createQueryKey("getCallSummary", options);
+
+/**
+ * GetSummary
+ */
+export const getCallSummaryOptions = (options: Options<GetCallSummaryData>) =>
+  queryOptions<
+    GetCallSummaryResponse,
+    GetCallSummaryError,
+    GetCallSummaryResponse,
+    ReturnType<typeof getCallSummaryQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getCallSummary({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getCallSummaryQueryKey(options),
+  });
+
+export const getCallVolumeQueryKey = (options: Options<GetCallVolumeData>) =>
+  createQueryKey("getCallVolume", options);
+
+/**
+ * GetVolume
+ */
+export const getCallVolumeOptions = (options: Options<GetCallVolumeData>) =>
+  queryOptions<
+    GetCallVolumeResponse,
+    GetCallVolumeError,
+    GetCallVolumeResponse,
+    ReturnType<typeof getCallVolumeQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getCallVolume({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getCallVolumeQueryKey(options),
+  });
+
 export const apiAuthOauthGithubGithubAuthorizeQueryKey = (
   options?: Options<ApiAuthOauthGithubGithubAuthorizeData>,
 ) => createQueryKey("apiAuthOauthGithubGithubAuthorize", options);
@@ -1847,6 +2371,273 @@ export const apiAuthOauthGoogleCallbackGoogleCallbackOptions = (
     },
     queryKey: apiAuthOauthGoogleCallbackGoogleCallbackQueryKey(options),
   });
+
+export const listCallQueuesQueryKey = (options?: Options<ListCallQueuesData>) =>
+  createQueryKey("listCallQueues", options);
+
+/**
+ * ListCallQueues
+ */
+export const listCallQueuesOptions = (options?: Options<ListCallQueuesData>) =>
+  queryOptions<
+    ListCallQueuesResponse,
+    ListCallQueuesError,
+    ListCallQueuesResponse,
+    ReturnType<typeof listCallQueuesQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listCallQueues({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listCallQueuesQueryKey(options),
+  });
+
+/**
+ * CreateCallQueue
+ */
+export const createCallQueueMutation = (
+  options?: Partial<Options<CreateCallQueueData>>,
+): UseMutationOptions<
+  CreateCallQueueResponse,
+  CreateCallQueueError,
+  Options<CreateCallQueueData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    CreateCallQueueResponse,
+    CreateCallQueueError,
+    Options<CreateCallQueueData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await createCallQueue({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * DeleteCallQueue
+ */
+export const deleteCallQueueMutation = (
+  options?: Partial<Options<DeleteCallQueueData>>,
+): UseMutationOptions<
+  DeleteCallQueueResponse,
+  DeleteCallQueueError,
+  Options<DeleteCallQueueData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    DeleteCallQueueResponse,
+    DeleteCallQueueError,
+    Options<DeleteCallQueueData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await deleteCallQueue({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const getCallQueueQueryKey = (options: Options<GetCallQueueData>) =>
+  createQueryKey("getCallQueue", options);
+
+/**
+ * GetCallQueue
+ */
+export const getCallQueueOptions = (options: Options<GetCallQueueData>) =>
+  queryOptions<
+    GetCallQueueResponse,
+    GetCallQueueError,
+    GetCallQueueResponse,
+    ReturnType<typeof getCallQueueQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getCallQueue({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getCallQueueQueryKey(options),
+  });
+
+/**
+ * UpdateCallQueue
+ */
+export const updateCallQueueMutation = (
+  options?: Partial<Options<UpdateCallQueueData>>,
+): UseMutationOptions<
+  UpdateCallQueueResponse,
+  UpdateCallQueueError,
+  Options<UpdateCallQueueData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    UpdateCallQueueResponse,
+    UpdateCallQueueError,
+    Options<UpdateCallQueueData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await updateCallQueue({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const listCallQueueMembersQueryKey = (
+  options: Options<ListCallQueueMembersData>,
+) => createQueryKey("listCallQueueMembers", options);
+
+/**
+ * ListMembers
+ */
+export const listCallQueueMembersOptions = (
+  options: Options<ListCallQueueMembersData>,
+) =>
+  queryOptions<
+    ListCallQueueMembersResponse,
+    ListCallQueueMembersError,
+    ListCallQueueMembersResponse,
+    ReturnType<typeof listCallQueueMembersQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listCallQueueMembers({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listCallQueueMembersQueryKey(options),
+  });
+
+/**
+ * CreateMember
+ */
+export const createCallQueueMemberMutation = (
+  options?: Partial<Options<CreateCallQueueMemberData>>,
+): UseMutationOptions<
+  CreateCallQueueMemberResponse,
+  CreateCallQueueMemberError,
+  Options<CreateCallQueueMemberData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    CreateCallQueueMemberResponse,
+    CreateCallQueueMemberError,
+    Options<CreateCallQueueMemberData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await createCallQueueMember({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * DeleteMember
+ */
+export const deleteCallQueueMemberMutation = (
+  options?: Partial<Options<DeleteCallQueueMemberData>>,
+): UseMutationOptions<
+  DeleteCallQueueMemberResponse,
+  DeleteCallQueueMemberError,
+  Options<DeleteCallQueueMemberData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    DeleteCallQueueMemberResponse,
+    DeleteCallQueueMemberError,
+    Options<DeleteCallQueueMemberData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await deleteCallQueueMember({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * UpdateMember
+ */
+export const updateCallQueueMemberMutation = (
+  options?: Partial<Options<UpdateCallQueueMemberData>>,
+): UseMutationOptions<
+  UpdateCallQueueMemberResponse,
+  UpdateCallQueueMemberError,
+  Options<UpdateCallQueueMemberData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    UpdateCallQueueMemberResponse,
+    UpdateCallQueueMemberError,
+    Options<UpdateCallQueueMemberData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await updateCallQueueMember({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * PauseMember
+ */
+export const pauseCallQueueMemberMutation = (
+  options?: Partial<Options<PauseCallQueueMemberData>>,
+): UseMutationOptions<
+  PauseCallQueueMemberResponse,
+  PauseCallQueueMemberError,
+  Options<PauseCallQueueMemberData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    PauseCallQueueMemberResponse,
+    PauseCallQueueMemberError,
+    Options<PauseCallQueueMemberData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await pauseCallQueueMember({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
 
 export const oAuthConfigQueryKey = (options?: Options<OAuthConfigData>) =>
   createQueryKey("oAuthConfig", options);
@@ -2262,6 +3053,198 @@ export const reprovisionDeviceMutation = (
   > = {
     mutationFn: async (fnOptions) => {
       const { data } = await reprovisionDevice({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const listE911RegistrationsQueryKey = (
+  options?: Options<ListE911RegistrationsData>,
+) => createQueryKey("listE911Registrations", options);
+
+/**
+ * ListRegistrations
+ */
+export const listE911RegistrationsOptions = (
+  options?: Options<ListE911RegistrationsData>,
+) =>
+  queryOptions<
+    ListE911RegistrationsResponse,
+    ListE911RegistrationsError,
+    ListE911RegistrationsResponse,
+    ReturnType<typeof listE911RegistrationsQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listE911Registrations({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listE911RegistrationsQueryKey(options),
+  });
+
+/**
+ * CreateRegistration
+ */
+export const createE911RegistrationMutation = (
+  options?: Partial<Options<CreateE911RegistrationData>>,
+): UseMutationOptions<
+  CreateE911RegistrationResponse,
+  CreateE911RegistrationError,
+  Options<CreateE911RegistrationData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    CreateE911RegistrationResponse,
+    CreateE911RegistrationError,
+    Options<CreateE911RegistrationData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await createE911Registration({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const listUnregisteredPhoneNumbersQueryKey = (
+  options: Options<ListUnregisteredPhoneNumbersData>,
+) => createQueryKey("listUnregisteredPhoneNumbers", options);
+
+/**
+ * ListUnregistered
+ */
+export const listUnregisteredPhoneNumbersOptions = (
+  options: Options<ListUnregisteredPhoneNumbersData>,
+) =>
+  queryOptions<
+    ListUnregisteredPhoneNumbersResponse,
+    ListUnregisteredPhoneNumbersError,
+    ListUnregisteredPhoneNumbersResponse,
+    ReturnType<typeof listUnregisteredPhoneNumbersQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listUnregisteredPhoneNumbers({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listUnregisteredPhoneNumbersQueryKey(options),
+  });
+
+/**
+ * DeleteRegistration
+ */
+export const deleteE911RegistrationMutation = (
+  options?: Partial<Options<DeleteE911RegistrationData>>,
+): UseMutationOptions<
+  DeleteE911RegistrationResponse,
+  DeleteE911RegistrationError,
+  Options<DeleteE911RegistrationData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    DeleteE911RegistrationResponse,
+    DeleteE911RegistrationError,
+    Options<DeleteE911RegistrationData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await deleteE911Registration({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const getE911RegistrationQueryKey = (
+  options: Options<GetE911RegistrationData>,
+) => createQueryKey("getE911Registration", options);
+
+/**
+ * GetRegistration
+ */
+export const getE911RegistrationOptions = (
+  options: Options<GetE911RegistrationData>,
+) =>
+  queryOptions<
+    GetE911RegistrationResponse,
+    GetE911RegistrationError,
+    GetE911RegistrationResponse,
+    ReturnType<typeof getE911RegistrationQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getE911Registration({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getE911RegistrationQueryKey(options),
+  });
+
+/**
+ * UpdateRegistration
+ */
+export const updateE911RegistrationMutation = (
+  options?: Partial<Options<UpdateE911RegistrationData>>,
+): UseMutationOptions<
+  UpdateE911RegistrationResponse,
+  UpdateE911RegistrationError,
+  Options<UpdateE911RegistrationData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    UpdateE911RegistrationResponse,
+    UpdateE911RegistrationError,
+    Options<UpdateE911RegistrationData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await updateE911Registration({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * ValidateRegistration
+ */
+export const validateE911RegistrationMutation = (
+  options?: Partial<Options<ValidateE911RegistrationData>>,
+): UseMutationOptions<
+  ValidateE911RegistrationResponse,
+  ValidateE911RegistrationError,
+  Options<ValidateE911RegistrationData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    ValidateE911RegistrationResponse,
+    ValidateE911RegistrationError,
+    Options<ValidateE911RegistrationData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await validateE911Registration({
         ...options,
         ...fnOptions,
         throwOnError: true,
@@ -2790,6 +3773,246 @@ export const gatewayLookupNumberOptions = (
     },
     queryKey: gatewayLookupNumberQueryKey(options),
   });
+
+export const listIvrMenusQueryKey = (options?: Options<ListIvrMenusData>) =>
+  createQueryKey("listIvrMenus", options);
+
+/**
+ * ListIvrMenus
+ */
+export const listIvrMenusOptions = (options?: Options<ListIvrMenusData>) =>
+  queryOptions<
+    ListIvrMenusResponse,
+    ListIvrMenusError,
+    ListIvrMenusResponse,
+    ReturnType<typeof listIvrMenusQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listIvrMenus({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listIvrMenusQueryKey(options),
+  });
+
+/**
+ * CreateIvrMenu
+ */
+export const createIvrMenuMutation = (
+  options?: Partial<Options<CreateIvrMenuData>>,
+): UseMutationOptions<
+  CreateIvrMenuResponse,
+  CreateIvrMenuError,
+  Options<CreateIvrMenuData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    CreateIvrMenuResponse,
+    CreateIvrMenuError,
+    Options<CreateIvrMenuData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await createIvrMenu({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * DeleteIvrMenu
+ */
+export const deleteIvrMenuMutation = (
+  options?: Partial<Options<DeleteIvrMenuData>>,
+): UseMutationOptions<
+  DeleteIvrMenuResponse,
+  DeleteIvrMenuError,
+  Options<DeleteIvrMenuData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    DeleteIvrMenuResponse,
+    DeleteIvrMenuError,
+    Options<DeleteIvrMenuData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await deleteIvrMenu({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const getIvrMenuQueryKey = (options: Options<GetIvrMenuData>) =>
+  createQueryKey("getIvrMenu", options);
+
+/**
+ * GetIvrMenu
+ */
+export const getIvrMenuOptions = (options: Options<GetIvrMenuData>) =>
+  queryOptions<
+    GetIvrMenuResponse,
+    GetIvrMenuError,
+    GetIvrMenuResponse,
+    ReturnType<typeof getIvrMenuQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getIvrMenu({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getIvrMenuQueryKey(options),
+  });
+
+/**
+ * UpdateIvrMenu
+ */
+export const updateIvrMenuMutation = (
+  options?: Partial<Options<UpdateIvrMenuData>>,
+): UseMutationOptions<
+  UpdateIvrMenuResponse,
+  UpdateIvrMenuError,
+  Options<UpdateIvrMenuData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    UpdateIvrMenuResponse,
+    UpdateIvrMenuError,
+    Options<UpdateIvrMenuData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await updateIvrMenu({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const listIvrMenuOptionsQueryKey = (
+  options: Options<ListIvrMenuOptionsData>,
+) => createQueryKey("listIvrMenuOptions", options);
+
+/**
+ * ListOptions
+ */
+export const listIvrMenuOptionsOptions = (
+  options: Options<ListIvrMenuOptionsData>,
+) =>
+  queryOptions<
+    ListIvrMenuOptionsResponse,
+    ListIvrMenuOptionsError,
+    ListIvrMenuOptionsResponse,
+    ReturnType<typeof listIvrMenuOptionsQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listIvrMenuOptions({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listIvrMenuOptionsQueryKey(options),
+  });
+
+/**
+ * CreateOption
+ */
+export const createIvrMenuOptionMutation = (
+  options?: Partial<Options<CreateIvrMenuOptionData>>,
+): UseMutationOptions<
+  CreateIvrMenuOptionResponse,
+  CreateIvrMenuOptionError,
+  Options<CreateIvrMenuOptionData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    CreateIvrMenuOptionResponse,
+    CreateIvrMenuOptionError,
+    Options<CreateIvrMenuOptionData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await createIvrMenuOption({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * DeleteOption
+ */
+export const deleteIvrMenuOptionMutation = (
+  options?: Partial<Options<DeleteIvrMenuOptionData>>,
+): UseMutationOptions<
+  DeleteIvrMenuOptionResponse,
+  DeleteIvrMenuOptionError,
+  Options<DeleteIvrMenuOptionData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    DeleteIvrMenuOptionResponse,
+    DeleteIvrMenuOptionError,
+    Options<DeleteIvrMenuOptionData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await deleteIvrMenuOption({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * UpdateOption
+ */
+export const updateIvrMenuOptionMutation = (
+  options?: Partial<Options<UpdateIvrMenuOptionData>>,
+): UseMutationOptions<
+  UpdateIvrMenuOptionResponse,
+  UpdateIvrMenuOptionError,
+  Options<UpdateIvrMenuOptionData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    UpdateIvrMenuOptionResponse,
+    UpdateIvrMenuOptionError,
+    Options<UpdateIvrMenuOptionData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await updateIvrMenuOption({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
 
 /**
  * RemoveAccount
@@ -3447,6 +4670,246 @@ export const profileOAuthUpgradeScopesMutation = (
   return mutationOptions;
 };
 
+export const listRingGroupsQueryKey = (options?: Options<ListRingGroupsData>) =>
+  createQueryKey("listRingGroups", options);
+
+/**
+ * ListRingGroups
+ */
+export const listRingGroupsOptions = (options?: Options<ListRingGroupsData>) =>
+  queryOptions<
+    ListRingGroupsResponse,
+    ListRingGroupsError,
+    ListRingGroupsResponse,
+    ReturnType<typeof listRingGroupsQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listRingGroups({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listRingGroupsQueryKey(options),
+  });
+
+/**
+ * CreateRingGroup
+ */
+export const createRingGroupMutation = (
+  options?: Partial<Options<CreateRingGroupData>>,
+): UseMutationOptions<
+  CreateRingGroupResponse,
+  CreateRingGroupError,
+  Options<CreateRingGroupData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    CreateRingGroupResponse,
+    CreateRingGroupError,
+    Options<CreateRingGroupData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await createRingGroup({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * DeleteRingGroup
+ */
+export const deleteRingGroupMutation = (
+  options?: Partial<Options<DeleteRingGroupData>>,
+): UseMutationOptions<
+  DeleteRingGroupResponse,
+  DeleteRingGroupError,
+  Options<DeleteRingGroupData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    DeleteRingGroupResponse,
+    DeleteRingGroupError,
+    Options<DeleteRingGroupData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await deleteRingGroup({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const getRingGroupQueryKey = (options: Options<GetRingGroupData>) =>
+  createQueryKey("getRingGroup", options);
+
+/**
+ * GetRingGroup
+ */
+export const getRingGroupOptions = (options: Options<GetRingGroupData>) =>
+  queryOptions<
+    GetRingGroupResponse,
+    GetRingGroupError,
+    GetRingGroupResponse,
+    ReturnType<typeof getRingGroupQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getRingGroup({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getRingGroupQueryKey(options),
+  });
+
+/**
+ * UpdateRingGroup
+ */
+export const updateRingGroupMutation = (
+  options?: Partial<Options<UpdateRingGroupData>>,
+): UseMutationOptions<
+  UpdateRingGroupResponse,
+  UpdateRingGroupError,
+  Options<UpdateRingGroupData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    UpdateRingGroupResponse,
+    UpdateRingGroupError,
+    Options<UpdateRingGroupData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await updateRingGroup({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const listRingGroupMembersQueryKey = (
+  options: Options<ListRingGroupMembersData>,
+) => createQueryKey("listRingGroupMembers", options);
+
+/**
+ * ListMembers
+ */
+export const listRingGroupMembersOptions = (
+  options: Options<ListRingGroupMembersData>,
+) =>
+  queryOptions<
+    ListRingGroupMembersResponse,
+    ListRingGroupMembersError,
+    ListRingGroupMembersResponse,
+    ReturnType<typeof listRingGroupMembersQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listRingGroupMembers({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listRingGroupMembersQueryKey(options),
+  });
+
+/**
+ * CreateMember
+ */
+export const createRingGroupMemberMutation = (
+  options?: Partial<Options<CreateRingGroupMemberData>>,
+): UseMutationOptions<
+  CreateRingGroupMemberResponse,
+  CreateRingGroupMemberError,
+  Options<CreateRingGroupMemberData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    CreateRingGroupMemberResponse,
+    CreateRingGroupMemberError,
+    Options<CreateRingGroupMemberData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await createRingGroupMember({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * DeleteMember
+ */
+export const deleteRingGroupMemberMutation = (
+  options?: Partial<Options<DeleteRingGroupMemberData>>,
+): UseMutationOptions<
+  DeleteRingGroupMemberResponse,
+  DeleteRingGroupMemberError,
+  Options<DeleteRingGroupMemberData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    DeleteRingGroupMemberResponse,
+    DeleteRingGroupMemberError,
+    Options<DeleteRingGroupMemberData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await deleteRingGroupMember({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * UpdateMember
+ */
+export const updateRingGroupMemberMutation = (
+  options?: Partial<Options<UpdateRingGroupMemberData>>,
+): UseMutationOptions<
+  UpdateRingGroupMemberResponse,
+  UpdateRingGroupMemberError,
+  Options<UpdateRingGroupMemberData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    UpdateRingGroupMemberResponse,
+    UpdateRingGroupMemberError,
+    Options<UpdateRingGroupMemberData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await updateRingGroupMember({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
 export const listRolesQueryKey = (options?: Options<ListRolesData>) =>
   createQueryKey("listRoles", options);
 
@@ -3622,6 +5085,271 @@ export const revokeRoleMutation = (
   > = {
     mutationFn: async (fnOptions) => {
       const { data } = await revokeRole({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const listSchedulesQueryKey = (options?: Options<ListSchedulesData>) =>
+  createQueryKey("listSchedules", options);
+
+/**
+ * ListSchedules
+ */
+export const listSchedulesOptions = (options?: Options<ListSchedulesData>) =>
+  queryOptions<
+    ListSchedulesResponse,
+    ListSchedulesError,
+    ListSchedulesResponse,
+    ReturnType<typeof listSchedulesQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listSchedules({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listSchedulesQueryKey(options),
+  });
+
+/**
+ * CreateSchedule
+ */
+export const createScheduleMutation = (
+  options?: Partial<Options<CreateScheduleData>>,
+): UseMutationOptions<
+  CreateScheduleResponse,
+  CreateScheduleError,
+  Options<CreateScheduleData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    CreateScheduleResponse,
+    CreateScheduleError,
+    Options<CreateScheduleData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await createSchedule({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * DeleteSchedule
+ */
+export const deleteScheduleMutation = (
+  options?: Partial<Options<DeleteScheduleData>>,
+): UseMutationOptions<
+  DeleteScheduleResponse,
+  DeleteScheduleError,
+  Options<DeleteScheduleData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    DeleteScheduleResponse,
+    DeleteScheduleError,
+    Options<DeleteScheduleData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await deleteSchedule({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const getScheduleQueryKey = (options: Options<GetScheduleData>) =>
+  createQueryKey("getSchedule", options);
+
+/**
+ * GetSchedule
+ */
+export const getScheduleOptions = (options: Options<GetScheduleData>) =>
+  queryOptions<
+    GetScheduleResponse,
+    GetScheduleError,
+    GetScheduleResponse,
+    ReturnType<typeof getScheduleQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getSchedule({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getScheduleQueryKey(options),
+  });
+
+/**
+ * UpdateSchedule
+ */
+export const updateScheduleMutation = (
+  options?: Partial<Options<UpdateScheduleData>>,
+): UseMutationOptions<
+  UpdateScheduleResponse,
+  UpdateScheduleError,
+  Options<UpdateScheduleData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    UpdateScheduleResponse,
+    UpdateScheduleError,
+    Options<UpdateScheduleData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await updateSchedule({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const checkScheduleQueryKey = (options: Options<CheckScheduleData>) =>
+  createQueryKey("checkSchedule", options);
+
+/**
+ * CheckSchedule
+ */
+export const checkScheduleOptions = (options: Options<CheckScheduleData>) =>
+  queryOptions<
+    CheckScheduleResponse,
+    CheckScheduleError,
+    CheckScheduleResponse,
+    ReturnType<typeof checkScheduleQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await checkSchedule({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: checkScheduleQueryKey(options),
+  });
+
+export const listScheduleEntriesQueryKey = (
+  options: Options<ListScheduleEntriesData>,
+) => createQueryKey("listScheduleEntries", options);
+
+/**
+ * ListEntries
+ */
+export const listScheduleEntriesOptions = (
+  options: Options<ListScheduleEntriesData>,
+) =>
+  queryOptions<
+    ListScheduleEntriesResponse,
+    ListScheduleEntriesError,
+    ListScheduleEntriesResponse,
+    ReturnType<typeof listScheduleEntriesQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listScheduleEntries({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listScheduleEntriesQueryKey(options),
+  });
+
+/**
+ * CreateEntry
+ */
+export const createScheduleEntryMutation = (
+  options?: Partial<Options<CreateScheduleEntryData>>,
+): UseMutationOptions<
+  CreateScheduleEntryResponse,
+  CreateScheduleEntryError,
+  Options<CreateScheduleEntryData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    CreateScheduleEntryResponse,
+    CreateScheduleEntryError,
+    Options<CreateScheduleEntryData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await createScheduleEntry({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * DeleteEntry
+ */
+export const deleteScheduleEntryMutation = (
+  options?: Partial<Options<DeleteScheduleEntryData>>,
+): UseMutationOptions<
+  DeleteScheduleEntryResponse,
+  DeleteScheduleEntryError,
+  Options<DeleteScheduleEntryData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    DeleteScheduleEntryResponse,
+    DeleteScheduleEntryError,
+    Options<DeleteScheduleEntryData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await deleteScheduleEntry({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * UpdateEntry
+ */
+export const updateScheduleEntryMutation = (
+  options?: Partial<Options<UpdateScheduleEntryData>>,
+): UseMutationOptions<
+  UpdateScheduleEntryResponse,
+  UpdateScheduleEntryError,
+  Options<UpdateScheduleEntryData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    UpdateScheduleEntryResponse,
+    UpdateScheduleEntryError,
+    Options<UpdateScheduleEntryData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await updateScheduleEntry({
         ...options,
         ...fnOptions,
         throwOnError: true,
@@ -4774,6 +6502,170 @@ export const updateTeamPermissionsMutation = (
   return mutationOptions;
 };
 
+export const listTimeConditionsQueryKey = (
+  options?: Options<ListTimeConditionsData>,
+) => createQueryKey("listTimeConditions", options);
+
+/**
+ * ListTimeConditions
+ */
+export const listTimeConditionsOptions = (
+  options?: Options<ListTimeConditionsData>,
+) =>
+  queryOptions<
+    ListTimeConditionsResponse,
+    ListTimeConditionsError,
+    ListTimeConditionsResponse,
+    ReturnType<typeof listTimeConditionsQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listTimeConditions({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listTimeConditionsQueryKey(options),
+  });
+
+/**
+ * CreateTimeCondition
+ */
+export const createTimeConditionMutation = (
+  options?: Partial<Options<CreateTimeConditionData>>,
+): UseMutationOptions<
+  CreateTimeConditionResponse,
+  CreateTimeConditionError,
+  Options<CreateTimeConditionData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    CreateTimeConditionResponse,
+    CreateTimeConditionError,
+    Options<CreateTimeConditionData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await createTimeCondition({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * DeleteTimeCondition
+ */
+export const deleteTimeConditionMutation = (
+  options?: Partial<Options<DeleteTimeConditionData>>,
+): UseMutationOptions<
+  DeleteTimeConditionResponse,
+  DeleteTimeConditionError,
+  Options<DeleteTimeConditionData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    DeleteTimeConditionResponse,
+    DeleteTimeConditionError,
+    Options<DeleteTimeConditionData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await deleteTimeCondition({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const getTimeConditionQueryKey = (
+  options: Options<GetTimeConditionData>,
+) => createQueryKey("getTimeCondition", options);
+
+/**
+ * GetTimeCondition
+ */
+export const getTimeConditionOptions = (
+  options: Options<GetTimeConditionData>,
+) =>
+  queryOptions<
+    GetTimeConditionResponse,
+    GetTimeConditionError,
+    GetTimeConditionResponse,
+    ReturnType<typeof getTimeConditionQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getTimeCondition({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getTimeConditionQueryKey(options),
+  });
+
+/**
+ * UpdateTimeCondition
+ */
+export const updateTimeConditionMutation = (
+  options?: Partial<Options<UpdateTimeConditionData>>,
+): UseMutationOptions<
+  UpdateTimeConditionResponse,
+  UpdateTimeConditionError,
+  Options<UpdateTimeConditionData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    UpdateTimeConditionResponse,
+    UpdateTimeConditionError,
+    Options<UpdateTimeConditionData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await updateTimeCondition({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * SetOverride
+ */
+export const setTimeConditionOverrideMutation = (
+  options?: Partial<Options<SetTimeConditionOverrideData>>,
+): UseMutationOptions<
+  SetTimeConditionOverrideResponse,
+  SetTimeConditionOverrideError,
+  Options<SetTimeConditionOverrideData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    SetTimeConditionOverrideResponse,
+    SetTimeConditionOverrideError,
+    Options<SetTimeConditionOverrideData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await setTimeConditionOverride({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
 export const listUsersQueryKey = (options?: Options<ListUsersData>) =>
   createQueryKey("listUsers", options);
 
@@ -5594,6 +7486,307 @@ export const updatePhoneNumberMutation = (
   > = {
     mutationFn: async (fnOptions) => {
       const { data } = await updatePhoneNumber({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const listVoicemailBoxesQueryKey = (
+  options?: Options<ListVoicemailBoxesData>,
+) => createQueryKey("listVoicemailBoxes", options);
+
+/**
+ * ListVoicemailBoxes
+ */
+export const listVoicemailBoxesOptions = (
+  options?: Options<ListVoicemailBoxesData>,
+) =>
+  queryOptions<
+    ListVoicemailBoxesResponse,
+    ListVoicemailBoxesError,
+    ListVoicemailBoxesResponse,
+    ReturnType<typeof listVoicemailBoxesQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listVoicemailBoxes({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listVoicemailBoxesQueryKey(options),
+  });
+
+/**
+ * CreateVoicemailBox
+ */
+export const createVoicemailBoxMutation = (
+  options?: Partial<Options<CreateVoicemailBoxData>>,
+): UseMutationOptions<
+  CreateVoicemailBoxResponse,
+  CreateVoicemailBoxError,
+  Options<CreateVoicemailBoxData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    CreateVoicemailBoxResponse,
+    CreateVoicemailBoxError,
+    Options<CreateVoicemailBoxData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await createVoicemailBox({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * DeleteVoicemailBox
+ */
+export const deleteVoicemailBoxMutation = (
+  options?: Partial<Options<DeleteVoicemailBoxData>>,
+): UseMutationOptions<
+  DeleteVoicemailBoxResponse,
+  DeleteVoicemailBoxError,
+  Options<DeleteVoicemailBoxData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    DeleteVoicemailBoxResponse,
+    DeleteVoicemailBoxError,
+    Options<DeleteVoicemailBoxData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await deleteVoicemailBox({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const getVoicemailBoxQueryKey = (
+  options: Options<GetVoicemailBoxData>,
+) => createQueryKey("getVoicemailBox", options);
+
+/**
+ * GetVoicemailBox
+ */
+export const getVoicemailBoxOptions = (options: Options<GetVoicemailBoxData>) =>
+  queryOptions<
+    GetVoicemailBoxResponse,
+    GetVoicemailBoxError,
+    GetVoicemailBoxResponse,
+    ReturnType<typeof getVoicemailBoxQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getVoicemailBox({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getVoicemailBoxQueryKey(options),
+  });
+
+/**
+ * UpdateVoicemailBox
+ */
+export const updateVoicemailBoxMutation = (
+  options?: Partial<Options<UpdateVoicemailBoxData>>,
+): UseMutationOptions<
+  UpdateVoicemailBoxResponse,
+  UpdateVoicemailBoxError,
+  Options<UpdateVoicemailBoxData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    UpdateVoicemailBoxResponse,
+    UpdateVoicemailBoxError,
+    Options<UpdateVoicemailBoxData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await updateVoicemailBox({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const listVoicemailBoxMessagesQueryKey = (
+  options: Options<ListVoicemailBoxMessagesData>,
+) => createQueryKey("listVoicemailBoxMessages", options);
+
+/**
+ * ListBoxMessages
+ */
+export const listVoicemailBoxMessagesOptions = (
+  options: Options<ListVoicemailBoxMessagesData>,
+) =>
+  queryOptions<
+    ListVoicemailBoxMessagesResponse,
+    ListVoicemailBoxMessagesError,
+    ListVoicemailBoxMessagesResponse,
+    ReturnType<typeof listVoicemailBoxMessagesQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listVoicemailBoxMessages({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listVoicemailBoxMessagesQueryKey(options),
+  });
+
+export const getVoicemailBoxUnreadCountQueryKey = (
+  options: Options<GetVoicemailBoxUnreadCountData>,
+) => createQueryKey("getVoicemailBoxUnreadCount", options);
+
+/**
+ * GetUnreadCount
+ */
+export const getVoicemailBoxUnreadCountOptions = (
+  options: Options<GetVoicemailBoxUnreadCountData>,
+) =>
+  queryOptions<
+    GetVoicemailBoxUnreadCountResponse,
+    GetVoicemailBoxUnreadCountError,
+    GetVoicemailBoxUnreadCountResponse,
+    ReturnType<typeof getVoicemailBoxUnreadCountQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getVoicemailBoxUnreadCount({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getVoicemailBoxUnreadCountQueryKey(options),
+  });
+
+export const listAllVoicemailMessagesQueryKey = (
+  options?: Options<ListAllVoicemailMessagesData>,
+) => createQueryKey("listAllVoicemailMessages", options);
+
+/**
+ * ListVoicemailMessages
+ */
+export const listAllVoicemailMessagesOptions = (
+  options?: Options<ListAllVoicemailMessagesData>,
+) =>
+  queryOptions<
+    ListAllVoicemailMessagesResponse,
+    ListAllVoicemailMessagesError,
+    ListAllVoicemailMessagesResponse,
+    ReturnType<typeof listAllVoicemailMessagesQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listAllVoicemailMessages({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listAllVoicemailMessagesQueryKey(options),
+  });
+
+/**
+ * DeleteVoicemailMessage
+ */
+export const deleteVoicemailMessageByIdMutation = (
+  options?: Partial<Options<DeleteVoicemailMessageByIdData>>,
+): UseMutationOptions<
+  DeleteVoicemailMessageByIdResponse,
+  DeleteVoicemailMessageByIdError,
+  Options<DeleteVoicemailMessageByIdData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    DeleteVoicemailMessageByIdResponse,
+    DeleteVoicemailMessageByIdError,
+    Options<DeleteVoicemailMessageByIdData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await deleteVoicemailMessageById({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const getVoicemailMessageByIdQueryKey = (
+  options: Options<GetVoicemailMessageByIdData>,
+) => createQueryKey("getVoicemailMessageById", options);
+
+/**
+ * GetVoicemailMessage
+ */
+export const getVoicemailMessageByIdOptions = (
+  options: Options<GetVoicemailMessageByIdData>,
+) =>
+  queryOptions<
+    GetVoicemailMessageByIdResponse,
+    GetVoicemailMessageByIdError,
+    GetVoicemailMessageByIdResponse,
+    ReturnType<typeof getVoicemailMessageByIdQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getVoicemailMessageById({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getVoicemailMessageByIdQueryKey(options),
+  });
+
+/**
+ * ToggleReadStatus
+ */
+export const toggleVoicemailMessageReadMutation = (
+  options?: Partial<Options<ToggleVoicemailMessageReadData>>,
+): UseMutationOptions<
+  ToggleVoicemailMessageReadResponse,
+  ToggleVoicemailMessageReadError,
+  Options<ToggleVoicemailMessageReadData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    ToggleVoicemailMessageReadResponse,
+    ToggleVoicemailMessageReadError,
+    Options<ToggleVoicemailMessageReadData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await toggleVoicemailMessageRead({
         ...options,
         ...fnOptions,
         throwOnError: true,

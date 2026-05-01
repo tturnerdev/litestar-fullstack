@@ -120,18 +120,33 @@ import type {
   AssignUserRoleData,
   AssignUserRoleErrors,
   AssignUserRoleResponses,
+  CheckScheduleData,
+  CheckScheduleErrors,
+  CheckScheduleResponses,
   CloseTicketData,
   CloseTicketErrors,
   CloseTicketResponses,
   ConfirmMfaSetupData,
   ConfirmMfaSetupErrors,
   ConfirmMfaSetupResponses,
+  CreateCallQueueData,
+  CreateCallQueueErrors,
+  CreateCallQueueMemberData,
+  CreateCallQueueMemberErrors,
+  CreateCallQueueMemberResponses,
+  CreateCallQueueResponses,
+  CreateCallRecordData,
+  CreateCallRecordErrors,
+  CreateCallRecordResponses,
   CreateConnectionData,
   CreateConnectionErrors,
   CreateConnectionResponses,
   CreateDeviceData,
   CreateDeviceErrors,
   CreateDeviceResponses,
+  CreateE911RegistrationData,
+  CreateE911RegistrationErrors,
+  CreateE911RegistrationResponses,
   CreateExtensionData,
   CreateExtensionErrors,
   CreateExtensionResponses,
@@ -144,15 +159,33 @@ import type {
   CreateForwardingRuleData,
   CreateForwardingRuleErrors,
   CreateForwardingRuleResponses,
+  CreateIvrMenuData,
+  CreateIvrMenuErrors,
+  CreateIvrMenuOptionData,
+  CreateIvrMenuOptionErrors,
+  CreateIvrMenuOptionResponses,
+  CreateIvrMenuResponses,
   CreateLocationData,
   CreateLocationErrors,
   CreateLocationResponses,
   CreatePhoneNumberData,
   CreatePhoneNumberErrors,
   CreatePhoneNumberResponses,
+  CreateRingGroupData,
+  CreateRingGroupErrors,
+  CreateRingGroupMemberData,
+  CreateRingGroupMemberErrors,
+  CreateRingGroupMemberResponses,
+  CreateRingGroupResponses,
   CreateRoleData,
   CreateRoleErrors,
   CreateRoleResponses,
+  CreateScheduleData,
+  CreateScheduleEntryData,
+  CreateScheduleEntryErrors,
+  CreateScheduleEntryResponses,
+  CreateScheduleErrors,
+  CreateScheduleResponses,
   CreateTagData,
   CreateTagErrors,
   CreateTagResponses,
@@ -168,18 +201,33 @@ import type {
   CreateTicketMessageErrors,
   CreateTicketMessageResponses,
   CreateTicketResponses,
+  CreateTimeConditionData,
+  CreateTimeConditionErrors,
+  CreateTimeConditionResponses,
   CreateUserData,
   CreateUserErrors,
   CreateUserResponses,
+  CreateVoicemailBoxData,
+  CreateVoicemailBoxErrors,
+  CreateVoicemailBoxResponses,
   DeleteAttachmentData,
   DeleteAttachmentErrors,
   DeleteAttachmentResponses,
+  DeleteCallQueueData,
+  DeleteCallQueueErrors,
+  DeleteCallQueueMemberData,
+  DeleteCallQueueMemberErrors,
+  DeleteCallQueueMemberResponses,
+  DeleteCallQueueResponses,
   DeleteConnectionData,
   DeleteConnectionErrors,
   DeleteConnectionResponses,
   DeleteDeviceData,
   DeleteDeviceErrors,
   DeleteDeviceResponses,
+  DeleteE911RegistrationData,
+  DeleteE911RegistrationErrors,
+  DeleteE911RegistrationResponses,
   DeleteExtensionData,
   DeleteExtensionErrors,
   DeleteExtensionResponses,
@@ -195,6 +243,12 @@ import type {
   DeleteForwardingRuleData,
   DeleteForwardingRuleErrors,
   DeleteForwardingRuleResponses,
+  DeleteIvrMenuData,
+  DeleteIvrMenuErrors,
+  DeleteIvrMenuOptionData,
+  DeleteIvrMenuOptionErrors,
+  DeleteIvrMenuOptionResponses,
+  DeleteIvrMenuResponses,
   DeleteLocationData,
   DeleteLocationErrors,
   DeleteLocationResponses,
@@ -204,9 +258,21 @@ import type {
   DeletePhoneNumberData,
   DeletePhoneNumberErrors,
   DeletePhoneNumberResponses,
+  DeleteRingGroupData,
+  DeleteRingGroupErrors,
+  DeleteRingGroupMemberData,
+  DeleteRingGroupMemberErrors,
+  DeleteRingGroupMemberResponses,
+  DeleteRingGroupResponses,
   DeleteRoleData,
   DeleteRoleErrors,
   DeleteRoleResponses,
+  DeleteScheduleData,
+  DeleteScheduleEntryData,
+  DeleteScheduleEntryErrors,
+  DeleteScheduleEntryResponses,
+  DeleteScheduleErrors,
+  DeleteScheduleResponses,
   DeleteTagData,
   DeleteTagErrors,
   DeleteTagResponses,
@@ -222,15 +288,27 @@ import type {
   DeleteTicketMessageErrors,
   DeleteTicketMessageResponses,
   DeleteTicketResponses,
+  DeleteTimeConditionData,
+  DeleteTimeConditionErrors,
+  DeleteTimeConditionResponses,
   DeleteUserData,
   DeleteUserErrors,
   DeleteUserResponses,
+  DeleteVoicemailBoxData,
+  DeleteVoicemailBoxErrors,
+  DeleteVoicemailBoxResponses,
+  DeleteVoicemailMessageByIdData,
+  DeleteVoicemailMessageByIdErrors,
+  DeleteVoicemailMessageByIdResponses,
   DeleteVoicemailMessageData,
   DeleteVoicemailMessageErrors,
   DeleteVoicemailMessageResponses,
   DisableMfaData,
   DisableMfaErrors,
   DisableMfaResponses,
+  ExportCallRecordsData,
+  ExportCallRecordsErrors,
+  ExportCallRecordsResponses,
   ForgotPasswordData,
   ForgotPasswordErrors,
   ForgotPasswordResponses,
@@ -246,11 +324,28 @@ import type {
   GetActiveSessionsData,
   GetActiveSessionsErrors,
   GetActiveSessionsResponses,
+  GetAdminGatewaySettingsData,
+  GetAdminGatewaySettingsResponses,
   GetAdminSystemStatusData,
   GetAdminSystemStatusResponses,
   GetAttachmentData,
   GetAttachmentErrors,
   GetAttachmentResponses,
+  GetCallQueueData,
+  GetCallQueueErrors,
+  GetCallQueueResponses,
+  GetCallRecordData,
+  GetCallRecordErrors,
+  GetCallRecordResponses,
+  GetCallsByExtensionData,
+  GetCallsByExtensionErrors,
+  GetCallsByExtensionResponses,
+  GetCallSummaryData,
+  GetCallSummaryErrors,
+  GetCallSummaryResponses,
+  GetCallVolumeData,
+  GetCallVolumeErrors,
+  GetCallVolumeResponses,
   GetConnectionData,
   GetConnectionErrors,
   GetConnectionResponses,
@@ -264,6 +359,9 @@ import type {
   GetDndSettingsData,
   GetDndSettingsErrors,
   GetDndSettingsResponses,
+  GetE911RegistrationData,
+  GetE911RegistrationErrors,
+  GetE911RegistrationResponses,
   GetExtensionData,
   GetExtensionErrors,
   GetExtensionResponses,
@@ -273,6 +371,9 @@ import type {
   GetFaxNumberData,
   GetFaxNumberErrors,
   GetFaxNumberResponses,
+  GetIvrMenuData,
+  GetIvrMenuErrors,
+  GetIvrMenuResponses,
   GetLocationData,
   GetLocationErrors,
   GetLocationResponses,
@@ -288,9 +389,15 @@ import type {
   GetRecentActivityData,
   GetRecentActivityErrors,
   GetRecentActivityResponses,
+  GetRingGroupData,
+  GetRingGroupErrors,
+  GetRingGroupResponses,
   GetRoleData,
   GetRoleErrors,
   GetRoleResponses,
+  GetScheduleData,
+  GetScheduleErrors,
+  GetScheduleResponses,
   GetTagData,
   GetTagErrors,
   GetTagResponses,
@@ -300,11 +407,23 @@ import type {
   GetTicketData,
   GetTicketErrors,
   GetTicketResponses,
+  GetTimeConditionData,
+  GetTimeConditionErrors,
+  GetTimeConditionResponses,
   GetUnreadNotificationCountData,
   GetUnreadNotificationCountResponses,
   GetUserData,
   GetUserErrors,
   GetUserResponses,
+  GetVoicemailBoxData,
+  GetVoicemailBoxErrors,
+  GetVoicemailBoxResponses,
+  GetVoicemailBoxUnreadCountData,
+  GetVoicemailBoxUnreadCountErrors,
+  GetVoicemailBoxUnreadCountResponses,
+  GetVoicemailMessageByIdData,
+  GetVoicemailMessageByIdErrors,
+  GetVoicemailMessageByIdResponses,
   GetVoicemailMessageData,
   GetVoicemailMessageErrors,
   GetVoicemailMessageResponses,
@@ -319,6 +438,18 @@ import type {
   InitiateDisableMfaOAuthResponses,
   InitiateMfaSetupData,
   InitiateMfaSetupResponses,
+  ListAllVoicemailMessagesData,
+  ListAllVoicemailMessagesErrors,
+  ListAllVoicemailMessagesResponses,
+  ListCallQueueMembersData,
+  ListCallQueueMembersErrors,
+  ListCallQueueMembersResponses,
+  ListCallQueuesData,
+  ListCallQueuesErrors,
+  ListCallQueuesResponses,
+  ListCallRecordsData,
+  ListCallRecordsErrors,
+  ListCallRecordsResponses,
   ListConnectionsData,
   ListConnectionsErrors,
   ListConnectionsResponses,
@@ -328,6 +459,9 @@ import type {
   ListDevicesData,
   ListDevicesErrors,
   ListDevicesResponses,
+  ListE911RegistrationsData,
+  ListE911RegistrationsErrors,
+  ListE911RegistrationsResponses,
   ListExtensionsData,
   ListExtensionsErrors,
   ListExtensionsResponses,
@@ -343,6 +477,12 @@ import type {
   ListForwardingRulesData,
   ListForwardingRulesErrors,
   ListForwardingRulesResponses,
+  ListIvrMenuOptionsData,
+  ListIvrMenuOptionsErrors,
+  ListIvrMenuOptionsResponses,
+  ListIvrMenusData,
+  ListIvrMenusErrors,
+  ListIvrMenusResponses,
   ListLocationsData,
   ListLocationsErrors,
   ListLocationsResponses,
@@ -352,9 +492,21 @@ import type {
   ListPhoneNumbersData,
   ListPhoneNumbersErrors,
   ListPhoneNumbersResponses,
+  ListRingGroupMembersData,
+  ListRingGroupMembersErrors,
+  ListRingGroupMembersResponses,
+  ListRingGroupsData,
+  ListRingGroupsErrors,
+  ListRingGroupsResponses,
   ListRolesData,
   ListRolesErrors,
   ListRolesResponses,
+  ListScheduleEntriesData,
+  ListScheduleEntriesErrors,
+  ListScheduleEntriesResponses,
+  ListSchedulesData,
+  ListSchedulesErrors,
+  ListSchedulesResponses,
   ListTagsData,
   ListTagsErrors,
   ListTagsResponses,
@@ -373,9 +525,21 @@ import type {
   ListTicketsData,
   ListTicketsErrors,
   ListTicketsResponses,
+  ListTimeConditionsData,
+  ListTimeConditionsErrors,
+  ListTimeConditionsResponses,
+  ListUnregisteredPhoneNumbersData,
+  ListUnregisteredPhoneNumbersErrors,
+  ListUnregisteredPhoneNumbersResponses,
   ListUsersData,
   ListUsersErrors,
   ListUsersResponses,
+  ListVoicemailBoxesData,
+  ListVoicemailBoxesErrors,
+  ListVoicemailBoxesResponses,
+  ListVoicemailBoxMessagesData,
+  ListVoicemailBoxMessagesErrors,
+  ListVoicemailBoxMessagesResponses,
   ListVoicemailMessagesData,
   ListVoicemailMessagesErrors,
   ListVoicemailMessagesResponses,
@@ -389,6 +553,9 @@ import type {
   PasteImageData,
   PasteImageErrors,
   PasteImageResponses,
+  PauseCallQueueMemberData,
+  PauseCallQueueMemberErrors,
+  PauseCallQueueMemberResponses,
   ProfileOAuthAccountsData,
   ProfileOAuthAccountsErrors,
   ProfileOAuthAccountsResponses,
@@ -442,6 +609,9 @@ import type {
   SetForwardingRulesData,
   SetForwardingRulesErrors,
   SetForwardingRulesResponses,
+  SetTimeConditionOverrideData,
+  SetTimeConditionOverrideErrors,
+  SetTimeConditionOverrideResponses,
   SubmitFeedbackData,
   SubmitFeedbackErrors,
   SubmitFeedbackResponses,
@@ -456,8 +626,20 @@ import type {
   ToggleDndData,
   ToggleDndErrors,
   ToggleDndResponses,
+  ToggleVoicemailMessageReadData,
+  ToggleVoicemailMessageReadErrors,
+  ToggleVoicemailMessageReadResponses,
   TokenRefreshData,
   TokenRefreshResponses,
+  UpdateAdminGatewaySettingsData,
+  UpdateAdminGatewaySettingsErrors,
+  UpdateAdminGatewaySettingsResponses,
+  UpdateCallQueueData,
+  UpdateCallQueueErrors,
+  UpdateCallQueueMemberData,
+  UpdateCallQueueMemberErrors,
+  UpdateCallQueueMemberResponses,
+  UpdateCallQueueResponses,
   UpdateConnectionData,
   UpdateConnectionErrors,
   UpdateConnectionResponses,
@@ -467,6 +649,9 @@ import type {
   UpdateDndSettingsData,
   UpdateDndSettingsErrors,
   UpdateDndSettingsResponses,
+  UpdateE911RegistrationData,
+  UpdateE911RegistrationErrors,
+  UpdateE911RegistrationResponses,
   UpdateExtensionData,
   UpdateExtensionErrors,
   UpdateExtensionResponses,
@@ -479,6 +664,12 @@ import type {
   UpdateForwardingRuleData,
   UpdateForwardingRuleErrors,
   UpdateForwardingRuleResponses,
+  UpdateIvrMenuData,
+  UpdateIvrMenuErrors,
+  UpdateIvrMenuOptionData,
+  UpdateIvrMenuOptionErrors,
+  UpdateIvrMenuOptionResponses,
+  UpdateIvrMenuResponses,
   UpdateLocationData,
   UpdateLocationErrors,
   UpdateLocationResponses,
@@ -491,9 +682,21 @@ import type {
   UpdatePhoneNumberData,
   UpdatePhoneNumberErrors,
   UpdatePhoneNumberResponses,
+  UpdateRingGroupData,
+  UpdateRingGroupErrors,
+  UpdateRingGroupMemberData,
+  UpdateRingGroupMemberErrors,
+  UpdateRingGroupMemberResponses,
+  UpdateRingGroupResponses,
   UpdateRoleData,
   UpdateRoleErrors,
   UpdateRoleResponses,
+  UpdateScheduleData,
+  UpdateScheduleEntryData,
+  UpdateScheduleEntryErrors,
+  UpdateScheduleEntryResponses,
+  UpdateScheduleErrors,
+  UpdateScheduleResponses,
   UpdateTagData,
   UpdateTagErrors,
   UpdateTagResponses,
@@ -512,9 +715,15 @@ import type {
   UpdateTicketMessageErrors,
   UpdateTicketMessageResponses,
   UpdateTicketResponses,
+  UpdateTimeConditionData,
+  UpdateTimeConditionErrors,
+  UpdateTimeConditionResponses,
   UpdateUserData,
   UpdateUserErrors,
   UpdateUserResponses,
+  UpdateVoicemailBoxData,
+  UpdateVoicemailBoxErrors,
+  UpdateVoicemailBoxResponses,
   UpdateVoicemailMessageData,
   UpdateVoicemailMessageErrors,
   UpdateVoicemailMessageResponses,
@@ -524,6 +733,9 @@ import type {
   UploadAttachmentData,
   UploadAttachmentErrors,
   UploadAttachmentResponses,
+  ValidateE911RegistrationData,
+  ValidateE911RegistrationErrors,
+  ValidateE911RegistrationResponses,
   ValidateResetTokenData,
   ValidateResetTokenErrors,
   ValidateResetTokenResponses,
@@ -919,6 +1131,44 @@ export const adminGetFaxStats = <ThrowOnError extends boolean = false>(
   });
 
 /**
+ * GetGatewaySettings
+ */
+export const getAdminGatewaySettings = <ThrowOnError extends boolean = false>(
+  options?: Options<GetAdminGatewaySettingsData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    GetAdminGatewaySettingsResponses,
+    unknown,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/admin/gateway/settings",
+    ...options,
+  });
+
+/**
+ * UpdateGatewaySettings
+ */
+export const updateAdminGatewaySettings = <
+  ThrowOnError extends boolean = false,
+>(
+  options: Options<UpdateAdminGatewaySettingsData, ThrowOnError>,
+) =>
+  (options.client ?? client).put<
+    UpdateAdminGatewaySettingsResponses,
+    UpdateAdminGatewaySettingsErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/admin/gateway/settings",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
  * GetStats
  */
 export const adminGetSupportStats = <ThrowOnError extends boolean = false>(
@@ -1151,6 +1401,122 @@ export const adminGetVoiceStats = <ThrowOnError extends boolean = false>(
   });
 
 /**
+ * GetByExtension
+ */
+export const getCallsByExtension = <ThrowOnError extends boolean = false>(
+  options: Options<GetCallsByExtensionData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    GetCallsByExtensionResponses,
+    GetCallsByExtensionErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/analytics/by-extension",
+    ...options,
+  });
+
+/**
+ * ListCallRecords
+ */
+export const listCallRecords = <ThrowOnError extends boolean = false>(
+  options?: Options<ListCallRecordsData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    ListCallRecordsResponses,
+    ListCallRecordsErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/analytics/cdrs",
+    ...options,
+  });
+
+/**
+ * CreateCallRecord
+ */
+export const createCallRecord = <ThrowOnError extends boolean = false>(
+  options: Options<CreateCallRecordData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    CreateCallRecordResponses,
+    CreateCallRecordErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/analytics/cdrs",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * ExportCallRecords
+ */
+export const exportCallRecords = <ThrowOnError extends boolean = false>(
+  options?: Options<ExportCallRecordsData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    ExportCallRecordsResponses,
+    ExportCallRecordsErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/analytics/cdrs/export",
+    ...options,
+  });
+
+/**
+ * GetCallRecord
+ */
+export const getCallRecord = <ThrowOnError extends boolean = false>(
+  options: Options<GetCallRecordData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    GetCallRecordResponses,
+    GetCallRecordErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/analytics/cdrs/{cdr_id}",
+    ...options,
+  });
+
+/**
+ * GetSummary
+ */
+export const getCallSummary = <ThrowOnError extends boolean = false>(
+  options: Options<GetCallSummaryData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    GetCallSummaryResponses,
+    GetCallSummaryErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/analytics/summary",
+    ...options,
+  });
+
+/**
+ * GetVolume
+ */
+export const getCallVolume = <ThrowOnError extends boolean = false>(
+  options: Options<GetCallVolumeData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    GetCallVolumeResponses,
+    GetCallVolumeErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/analytics/volume",
+    ...options,
+  });
+
+/**
  * GithubAuthorize
  */
 export const apiAuthOauthGithubGithubAuthorize = <
@@ -1220,6 +1586,186 @@ export const apiAuthOauthGoogleCallbackGoogleCallback = <
     security: [{ scheme: "bearer", type: "http" }],
     url: "/api/auth/oauth/google/callback",
     ...options,
+  });
+
+/**
+ * ListCallQueues
+ */
+export const listCallQueues = <ThrowOnError extends boolean = false>(
+  options?: Options<ListCallQueuesData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    ListCallQueuesResponses,
+    ListCallQueuesErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/call-queues",
+    ...options,
+  });
+
+/**
+ * CreateCallQueue
+ */
+export const createCallQueue = <ThrowOnError extends boolean = false>(
+  options: Options<CreateCallQueueData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    CreateCallQueueResponses,
+    CreateCallQueueErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/call-queues",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * DeleteCallQueue
+ */
+export const deleteCallQueue = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteCallQueueData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    DeleteCallQueueResponses,
+    DeleteCallQueueErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/call-queues/{call_queue_id}",
+    ...options,
+  });
+
+/**
+ * GetCallQueue
+ */
+export const getCallQueue = <ThrowOnError extends boolean = false>(
+  options: Options<GetCallQueueData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    GetCallQueueResponses,
+    GetCallQueueErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/call-queues/{call_queue_id}",
+    ...options,
+  });
+
+/**
+ * UpdateCallQueue
+ */
+export const updateCallQueue = <ThrowOnError extends boolean = false>(
+  options: Options<UpdateCallQueueData, ThrowOnError>,
+) =>
+  (options.client ?? client).patch<
+    UpdateCallQueueResponses,
+    UpdateCallQueueErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/call-queues/{call_queue_id}",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * ListMembers
+ */
+export const listCallQueueMembers = <ThrowOnError extends boolean = false>(
+  options: Options<ListCallQueueMembersData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    ListCallQueueMembersResponses,
+    ListCallQueueMembersErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/call-queues/{call_queue_id}/members",
+    ...options,
+  });
+
+/**
+ * CreateMember
+ */
+export const createCallQueueMember = <ThrowOnError extends boolean = false>(
+  options: Options<CreateCallQueueMemberData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    CreateCallQueueMemberResponses,
+    CreateCallQueueMemberErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/call-queues/{call_queue_id}/members",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * DeleteMember
+ */
+export const deleteCallQueueMember = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteCallQueueMemberData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    DeleteCallQueueMemberResponses,
+    DeleteCallQueueMemberErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/call-queues/{call_queue_id}/members/{member_id}",
+    ...options,
+  });
+
+/**
+ * UpdateMember
+ */
+export const updateCallQueueMember = <ThrowOnError extends boolean = false>(
+  options: Options<UpdateCallQueueMemberData, ThrowOnError>,
+) =>
+  (options.client ?? client).patch<
+    UpdateCallQueueMemberResponses,
+    UpdateCallQueueMemberErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/call-queues/{call_queue_id}/members/{member_id}",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * PauseMember
+ */
+export const pauseCallQueueMember = <ThrowOnError extends boolean = false>(
+  options: Options<PauseCallQueueMemberData, ThrowOnError>,
+) =>
+  (options.client ?? client).put<
+    PauseCallQueueMemberResponses,
+    PauseCallQueueMemberErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/call-queues/{call_queue_id}/members/{member_id}/pause",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
   });
 
 /**
@@ -1491,6 +2037,128 @@ export const reprovisionDevice = <ThrowOnError extends boolean = false>(
   >({
     security: [{ scheme: "bearer", type: "http" }],
     url: "/api/devices/{device_id}/reprovision",
+    ...options,
+  });
+
+/**
+ * ListRegistrations
+ */
+export const listE911Registrations = <ThrowOnError extends boolean = false>(
+  options?: Options<ListE911RegistrationsData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    ListE911RegistrationsResponses,
+    ListE911RegistrationsErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/e911",
+    ...options,
+  });
+
+/**
+ * CreateRegistration
+ */
+export const createE911Registration = <ThrowOnError extends boolean = false>(
+  options: Options<CreateE911RegistrationData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    CreateE911RegistrationResponses,
+    CreateE911RegistrationErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/e911",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * ListUnregistered
+ */
+export const listUnregisteredPhoneNumbers = <
+  ThrowOnError extends boolean = false,
+>(
+  options: Options<ListUnregisteredPhoneNumbersData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    ListUnregisteredPhoneNumbersResponses,
+    ListUnregisteredPhoneNumbersErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/e911/unregistered",
+    ...options,
+  });
+
+/**
+ * DeleteRegistration
+ */
+export const deleteE911Registration = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteE911RegistrationData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    DeleteE911RegistrationResponses,
+    DeleteE911RegistrationErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/e911/{registration_id}",
+    ...options,
+  });
+
+/**
+ * GetRegistration
+ */
+export const getE911Registration = <ThrowOnError extends boolean = false>(
+  options: Options<GetE911RegistrationData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    GetE911RegistrationResponses,
+    GetE911RegistrationErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/e911/{registration_id}",
+    ...options,
+  });
+
+/**
+ * UpdateRegistration
+ */
+export const updateE911Registration = <ThrowOnError extends boolean = false>(
+  options: Options<UpdateE911RegistrationData, ThrowOnError>,
+) =>
+  (options.client ?? client).patch<
+    UpdateE911RegistrationResponses,
+    UpdateE911RegistrationErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/e911/{registration_id}",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * ValidateRegistration
+ */
+export const validateE911Registration = <ThrowOnError extends boolean = false>(
+  options: Options<ValidateE911RegistrationData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    ValidateE911RegistrationResponses,
+    ValidateE911RegistrationErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/e911/{registration_id}/validate",
     ...options,
   });
 
@@ -1836,6 +2504,166 @@ export const gatewayLookupNumber = <ThrowOnError extends boolean = false>(
     security: [{ scheme: "bearer", type: "http" }],
     url: "/api/gateway/numbers/{phone_number}",
     ...options,
+  });
+
+/**
+ * ListIvrMenus
+ */
+export const listIvrMenus = <ThrowOnError extends boolean = false>(
+  options?: Options<ListIvrMenusData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    ListIvrMenusResponses,
+    ListIvrMenusErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/ivr-menus",
+    ...options,
+  });
+
+/**
+ * CreateIvrMenu
+ */
+export const createIvrMenu = <ThrowOnError extends boolean = false>(
+  options: Options<CreateIvrMenuData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    CreateIvrMenuResponses,
+    CreateIvrMenuErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/ivr-menus",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * DeleteIvrMenu
+ */
+export const deleteIvrMenu = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteIvrMenuData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    DeleteIvrMenuResponses,
+    DeleteIvrMenuErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/ivr-menus/{ivr_menu_id}",
+    ...options,
+  });
+
+/**
+ * GetIvrMenu
+ */
+export const getIvrMenu = <ThrowOnError extends boolean = false>(
+  options: Options<GetIvrMenuData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    GetIvrMenuResponses,
+    GetIvrMenuErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/ivr-menus/{ivr_menu_id}",
+    ...options,
+  });
+
+/**
+ * UpdateIvrMenu
+ */
+export const updateIvrMenu = <ThrowOnError extends boolean = false>(
+  options: Options<UpdateIvrMenuData, ThrowOnError>,
+) =>
+  (options.client ?? client).patch<
+    UpdateIvrMenuResponses,
+    UpdateIvrMenuErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/ivr-menus/{ivr_menu_id}",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * ListOptions
+ */
+export const listIvrMenuOptions = <ThrowOnError extends boolean = false>(
+  options: Options<ListIvrMenuOptionsData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    ListIvrMenuOptionsResponses,
+    ListIvrMenuOptionsErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/ivr-menus/{ivr_menu_id}/options",
+    ...options,
+  });
+
+/**
+ * CreateOption
+ */
+export const createIvrMenuOption = <ThrowOnError extends boolean = false>(
+  options: Options<CreateIvrMenuOptionData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    CreateIvrMenuOptionResponses,
+    CreateIvrMenuOptionErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/ivr-menus/{ivr_menu_id}/options",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * DeleteOption
+ */
+export const deleteIvrMenuOption = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteIvrMenuOptionData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    DeleteIvrMenuOptionResponses,
+    DeleteIvrMenuOptionErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/ivr-menus/{ivr_menu_id}/options/{option_id}",
+    ...options,
+  });
+
+/**
+ * UpdateOption
+ */
+export const updateIvrMenuOption = <ThrowOnError extends boolean = false>(
+  options: Options<UpdateIvrMenuOptionData, ThrowOnError>,
+) =>
+  (options.client ?? client).patch<
+    UpdateIvrMenuOptionResponses,
+    UpdateIvrMenuOptionErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/ivr-menus/{ivr_menu_id}/options/{option_id}",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
   });
 
 /**
@@ -2265,6 +3093,166 @@ export const profileOAuthUpgradeScopes = <ThrowOnError extends boolean = false>(
   });
 
 /**
+ * ListRingGroups
+ */
+export const listRingGroups = <ThrowOnError extends boolean = false>(
+  options?: Options<ListRingGroupsData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    ListRingGroupsResponses,
+    ListRingGroupsErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/ring-groups",
+    ...options,
+  });
+
+/**
+ * CreateRingGroup
+ */
+export const createRingGroup = <ThrowOnError extends boolean = false>(
+  options: Options<CreateRingGroupData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    CreateRingGroupResponses,
+    CreateRingGroupErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/ring-groups",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * DeleteRingGroup
+ */
+export const deleteRingGroup = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteRingGroupData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    DeleteRingGroupResponses,
+    DeleteRingGroupErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/ring-groups/{ring_group_id}",
+    ...options,
+  });
+
+/**
+ * GetRingGroup
+ */
+export const getRingGroup = <ThrowOnError extends boolean = false>(
+  options: Options<GetRingGroupData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    GetRingGroupResponses,
+    GetRingGroupErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/ring-groups/{ring_group_id}",
+    ...options,
+  });
+
+/**
+ * UpdateRingGroup
+ */
+export const updateRingGroup = <ThrowOnError extends boolean = false>(
+  options: Options<UpdateRingGroupData, ThrowOnError>,
+) =>
+  (options.client ?? client).patch<
+    UpdateRingGroupResponses,
+    UpdateRingGroupErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/ring-groups/{ring_group_id}",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * ListMembers
+ */
+export const listRingGroupMembers = <ThrowOnError extends boolean = false>(
+  options: Options<ListRingGroupMembersData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    ListRingGroupMembersResponses,
+    ListRingGroupMembersErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/ring-groups/{ring_group_id}/members",
+    ...options,
+  });
+
+/**
+ * CreateMember
+ */
+export const createRingGroupMember = <ThrowOnError extends boolean = false>(
+  options: Options<CreateRingGroupMemberData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    CreateRingGroupMemberResponses,
+    CreateRingGroupMemberErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/ring-groups/{ring_group_id}/members",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * DeleteMember
+ */
+export const deleteRingGroupMember = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteRingGroupMemberData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    DeleteRingGroupMemberResponses,
+    DeleteRingGroupMemberErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/ring-groups/{ring_group_id}/members/{member_id}",
+    ...options,
+  });
+
+/**
+ * UpdateMember
+ */
+export const updateRingGroupMember = <ThrowOnError extends boolean = false>(
+  options: Options<UpdateRingGroupMemberData, ThrowOnError>,
+) =>
+  (options.client ?? client).patch<
+    UpdateRingGroupMemberResponses,
+    UpdateRingGroupMemberErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/ring-groups/{ring_group_id}/members/{member_id}",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
  * ListRoles
  */
 export const listRoles = <ThrowOnError extends boolean = false>(
@@ -2383,6 +3371,182 @@ export const revokeRole = <ThrowOnError extends boolean = false>(
   >({
     security: [{ scheme: "bearer", type: "http" }],
     url: "/api/roles/{role_slug}/revoke",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * ListSchedules
+ */
+export const listSchedules = <ThrowOnError extends boolean = false>(
+  options?: Options<ListSchedulesData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    ListSchedulesResponses,
+    ListSchedulesErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/schedules",
+    ...options,
+  });
+
+/**
+ * CreateSchedule
+ */
+export const createSchedule = <ThrowOnError extends boolean = false>(
+  options: Options<CreateScheduleData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    CreateScheduleResponses,
+    CreateScheduleErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/schedules",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * DeleteSchedule
+ */
+export const deleteSchedule = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteScheduleData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    DeleteScheduleResponses,
+    DeleteScheduleErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/schedules/{schedule_id}",
+    ...options,
+  });
+
+/**
+ * GetSchedule
+ */
+export const getSchedule = <ThrowOnError extends boolean = false>(
+  options: Options<GetScheduleData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    GetScheduleResponses,
+    GetScheduleErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/schedules/{schedule_id}",
+    ...options,
+  });
+
+/**
+ * UpdateSchedule
+ */
+export const updateSchedule = <ThrowOnError extends boolean = false>(
+  options: Options<UpdateScheduleData, ThrowOnError>,
+) =>
+  (options.client ?? client).patch<
+    UpdateScheduleResponses,
+    UpdateScheduleErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/schedules/{schedule_id}",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * CheckSchedule
+ */
+export const checkSchedule = <ThrowOnError extends boolean = false>(
+  options: Options<CheckScheduleData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    CheckScheduleResponses,
+    CheckScheduleErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/schedules/{schedule_id}/check",
+    ...options,
+  });
+
+/**
+ * ListEntries
+ */
+export const listScheduleEntries = <ThrowOnError extends boolean = false>(
+  options: Options<ListScheduleEntriesData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    ListScheduleEntriesResponses,
+    ListScheduleEntriesErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/schedules/{schedule_id}/entries",
+    ...options,
+  });
+
+/**
+ * CreateEntry
+ */
+export const createScheduleEntry = <ThrowOnError extends boolean = false>(
+  options: Options<CreateScheduleEntryData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    CreateScheduleEntryResponses,
+    CreateScheduleEntryErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/schedules/{schedule_id}/entries",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * DeleteEntry
+ */
+export const deleteScheduleEntry = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteScheduleEntryData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    DeleteScheduleEntryResponses,
+    DeleteScheduleEntryErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/schedules/{schedule_id}/entries/{entry_id}",
+    ...options,
+  });
+
+/**
+ * UpdateEntry
+ */
+export const updateScheduleEntry = <ThrowOnError extends boolean = false>(
+  options: Options<UpdateScheduleEntryData, ThrowOnError>,
+) =>
+  (options.client ?? client).patch<
+    UpdateScheduleEntryResponses,
+    UpdateScheduleEntryErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/schedules/{schedule_id}/entries/{entry_id}",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -3138,6 +4302,114 @@ export const updateTeamPermissions = <ThrowOnError extends boolean = false>(
   });
 
 /**
+ * ListTimeConditions
+ */
+export const listTimeConditions = <ThrowOnError extends boolean = false>(
+  options?: Options<ListTimeConditionsData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    ListTimeConditionsResponses,
+    ListTimeConditionsErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/time-conditions",
+    ...options,
+  });
+
+/**
+ * CreateTimeCondition
+ */
+export const createTimeCondition = <ThrowOnError extends boolean = false>(
+  options: Options<CreateTimeConditionData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    CreateTimeConditionResponses,
+    CreateTimeConditionErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/time-conditions",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * DeleteTimeCondition
+ */
+export const deleteTimeCondition = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteTimeConditionData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    DeleteTimeConditionResponses,
+    DeleteTimeConditionErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/time-conditions/{time_condition_id}",
+    ...options,
+  });
+
+/**
+ * GetTimeCondition
+ */
+export const getTimeCondition = <ThrowOnError extends boolean = false>(
+  options: Options<GetTimeConditionData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    GetTimeConditionResponses,
+    GetTimeConditionErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/time-conditions/{time_condition_id}",
+    ...options,
+  });
+
+/**
+ * UpdateTimeCondition
+ */
+export const updateTimeCondition = <ThrowOnError extends boolean = false>(
+  options: Options<UpdateTimeConditionData, ThrowOnError>,
+) =>
+  (options.client ?? client).patch<
+    UpdateTimeConditionResponses,
+    UpdateTimeConditionErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/time-conditions/{time_condition_id}",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * SetOverride
+ */
+export const setTimeConditionOverride = <ThrowOnError extends boolean = false>(
+  options: Options<SetTimeConditionOverrideData, ThrowOnError>,
+) =>
+  (options.client ?? client).put<
+    SetTimeConditionOverrideResponses,
+    SetTimeConditionOverrideErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/time-conditions/{time_condition_id}/override",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
  * ListUsers
  */
 export const listUsers = <ThrowOnError extends boolean = false>(
@@ -3680,6 +4952,200 @@ export const updatePhoneNumber = <ThrowOnError extends boolean = false>(
   >({
     security: [{ scheme: "bearer", type: "http" }],
     url: "/api/voice/phone-numbers/{phone_number_id}",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * ListVoicemailBoxes
+ */
+export const listVoicemailBoxes = <ThrowOnError extends boolean = false>(
+  options?: Options<ListVoicemailBoxesData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    ListVoicemailBoxesResponses,
+    ListVoicemailBoxesErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/voicemail/boxes",
+    ...options,
+  });
+
+/**
+ * CreateVoicemailBox
+ */
+export const createVoicemailBox = <ThrowOnError extends boolean = false>(
+  options: Options<CreateVoicemailBoxData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    CreateVoicemailBoxResponses,
+    CreateVoicemailBoxErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/voicemail/boxes",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * DeleteVoicemailBox
+ */
+export const deleteVoicemailBox = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteVoicemailBoxData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    DeleteVoicemailBoxResponses,
+    DeleteVoicemailBoxErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/voicemail/boxes/{box_id}",
+    ...options,
+  });
+
+/**
+ * GetVoicemailBox
+ */
+export const getVoicemailBox = <ThrowOnError extends boolean = false>(
+  options: Options<GetVoicemailBoxData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    GetVoicemailBoxResponses,
+    GetVoicemailBoxErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/voicemail/boxes/{box_id}",
+    ...options,
+  });
+
+/**
+ * UpdateVoicemailBox
+ */
+export const updateVoicemailBox = <ThrowOnError extends boolean = false>(
+  options: Options<UpdateVoicemailBoxData, ThrowOnError>,
+) =>
+  (options.client ?? client).patch<
+    UpdateVoicemailBoxResponses,
+    UpdateVoicemailBoxErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/voicemail/boxes/{box_id}",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * ListBoxMessages
+ */
+export const listVoicemailBoxMessages = <ThrowOnError extends boolean = false>(
+  options: Options<ListVoicemailBoxMessagesData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    ListVoicemailBoxMessagesResponses,
+    ListVoicemailBoxMessagesErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/voicemail/boxes/{box_id}/messages",
+    ...options,
+  });
+
+/**
+ * GetUnreadCount
+ */
+export const getVoicemailBoxUnreadCount = <
+  ThrowOnError extends boolean = false,
+>(
+  options: Options<GetVoicemailBoxUnreadCountData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    GetVoicemailBoxUnreadCountResponses,
+    GetVoicemailBoxUnreadCountErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/voicemail/boxes/{box_id}/unread",
+    ...options,
+  });
+
+/**
+ * ListVoicemailMessages
+ */
+export const listAllVoicemailMessages = <ThrowOnError extends boolean = false>(
+  options?: Options<ListAllVoicemailMessagesData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    ListAllVoicemailMessagesResponses,
+    ListAllVoicemailMessagesErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/voicemail/messages",
+    ...options,
+  });
+
+/**
+ * DeleteVoicemailMessage
+ */
+export const deleteVoicemailMessageById = <
+  ThrowOnError extends boolean = false,
+>(
+  options: Options<DeleteVoicemailMessageByIdData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    DeleteVoicemailMessageByIdResponses,
+    DeleteVoicemailMessageByIdErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/voicemail/messages/{message_id}",
+    ...options,
+  });
+
+/**
+ * GetVoicemailMessage
+ */
+export const getVoicemailMessageById = <ThrowOnError extends boolean = false>(
+  options: Options<GetVoicemailMessageByIdData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    GetVoicemailMessageByIdResponses,
+    GetVoicemailMessageByIdErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/voicemail/messages/{message_id}",
+    ...options,
+  });
+
+/**
+ * ToggleReadStatus
+ */
+export const toggleVoicemailMessageRead = <
+  ThrowOnError extends boolean = false,
+>(
+  options: Options<ToggleVoicemailMessageReadData, ThrowOnError>,
+) =>
+  (options.client ?? client).put<
+    ToggleVoicemailMessageReadResponses,
+    ToggleVoicemailMessageReadErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/voicemail/messages/{message_id}/read",
     ...options,
     headers: {
       "Content-Type": "application/json",

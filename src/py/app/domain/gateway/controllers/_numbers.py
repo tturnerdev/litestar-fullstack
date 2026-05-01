@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Annotated
+from typing import Annotated
 
 from litestar import Controller, get
 from litestar.di import Provide
@@ -12,10 +12,8 @@ from app.db import models as m
 from app.domain.gateway.deps import provide_gateway_connections, provide_gateway_redis
 from app.domain.gateway.schemas import NumberGatewayResponse
 from app.domain.gateway.services import GatewayService
+from redis.asyncio import Redis
 from app.lib.settings import get_settings
-
-if TYPE_CHECKING:
-    from redis.asyncio import Redis
 
 
 class NumbersGatewayController(Controller):

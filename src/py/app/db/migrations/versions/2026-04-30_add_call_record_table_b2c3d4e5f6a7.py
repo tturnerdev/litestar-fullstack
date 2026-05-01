@@ -1,7 +1,7 @@
 """add call record table
 
 Revision ID: b2c3d4e5f6a7
-Revises: a1b2c3d4e5f6
+Revises: aa1b2c3d4e5f
 Create Date: 2026-04-30 20:00:00.000000
 
 """
@@ -29,7 +29,7 @@ sa.PasswordHash = PasswordHash  # pyright: ignore
 
 # revision identifiers, used by Alembic.
 revision = "b2c3d4e5f6a7"
-down_revision = "a1b2c3d4e5f6"
+down_revision = "aa1b2c3d4e5f"
 branch_labels = None
 depends_on = None
 

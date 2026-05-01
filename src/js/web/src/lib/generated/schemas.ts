@@ -41,24 +41,42 @@ import type {
   ConfirmMfaSetupData,
   ConfirmMfaSetupErrors,
   ConfirmMfaSetupResponses,
+  CreateCallQueueData,
+  CreateCallQueueErrors,
+  CreateCallQueueResponses,
+  CreateCallRecordData,
+  CreateCallRecordErrors,
+  CreateCallRecordResponses,
   CreateConnectionData,
   CreateConnectionErrors,
   CreateConnectionResponses,
   CreateDeviceData,
   CreateDeviceErrors,
   CreateDeviceResponses,
+  CreateE911RegistrationData,
+  CreateE911RegistrationErrors,
+  CreateE911RegistrationResponses,
   CreateExtensionData,
   CreateExtensionErrors,
   CreateExtensionResponses,
   CreateFaxNumberData,
   CreateFaxNumberErrors,
   CreateFaxNumberResponses,
+  CreateIvrMenuData,
+  CreateIvrMenuErrors,
+  CreateIvrMenuResponses,
   CreatePhoneNumberData,
   CreatePhoneNumberErrors,
   CreatePhoneNumberResponses,
+  CreateRingGroupData,
+  CreateRingGroupErrors,
+  CreateRingGroupResponses,
   CreateRoleData,
   CreateRoleErrors,
   CreateRoleResponses,
+  CreateScheduleData,
+  CreateScheduleErrors,
+  CreateScheduleResponses,
   CreateTagData,
   CreateTagErrors,
   CreateTagResponses,
@@ -68,9 +86,15 @@ import type {
   CreateTicketData,
   CreateTicketErrors,
   CreateTicketResponses,
+  CreateTimeConditionData,
+  CreateTimeConditionErrors,
+  CreateTimeConditionResponses,
   CreateUserData,
   CreateUserErrors,
   CreateUserResponses,
+  CreateVoicemailBoxData,
+  CreateVoicemailBoxErrors,
+  CreateVoicemailBoxResponses,
   DisableMfaData,
   DisableMfaErrors,
   DisableMfaResponses,
@@ -108,6 +132,9 @@ import type {
   SystemHealthResponses,
   TokenRefreshData,
   TokenRefreshResponses,
+  UpdateAdminGatewaySettingsData,
+  UpdateAdminGatewaySettingsErrors,
+  UpdateAdminGatewaySettingsResponses,
   UpdateNotificationPreferencesData,
   UpdateNotificationPreferencesErrors,
   UpdateNotificationPreferencesResponses,
@@ -133,18 +160,27 @@ import type {
  */
 export type OperationName =
   | 'confirm_setup'
+  | 'create_call_queue'
+  | 'create_call_record'
   | 'create_connection'
   | 'create_device'
   | 'create_extension'
   | 'create_fax_number'
+  | 'create_ivr_menu'
   | 'create_phone_number'
+  | 'create_registration'
+  | 'create_ring_group'
   | 'create_role'
+  | 'create_schedule'
   | 'create_tag'
   | 'create_team'
   | 'create_ticket'
+  | 'create_time_condition'
   | 'create_user'
+  | 'create_voicemail_box'
   | 'disable_mfa'
   | 'forgot_password'
+  | 'get_gateway_settings'
   | 'get_mfa_status'
   | 'get_organization'
   | 'get_preferences'
@@ -159,18 +195,26 @@ export type OperationName =
   | 'get_trends'
   | 'get_unread_count'
   | 'initiate_setup'
+  | 'list_call_queues'
+  | 'list_call_records'
   | 'list_connections'
   | 'list_devices_api_devices'
   | 'list_extensions'
   | 'list_extensions_api_voice_extensions'
   | 'list_fax_messages'
   | 'list_fax_numbers_api_fax_numbers'
+  | 'list_ivr_menus'
   | 'list_phone_numbers_api_voice_phone_numbers'
+  | 'list_registrations'
+  | 'list_ring_groups'
   | 'list_roles'
+  | 'list_schedules'
   | 'list_tags'
   | 'list_teams_api_teams'
   | 'list_tickets_api_support_tickets'
+  | 'list_time_conditions'
   | 'list_users_api_users'
+  | 'list_voicemail_boxes'
   | 'login'
   | 'logout'
   | 'mark_all_read'
@@ -184,6 +228,7 @@ export type OperationName =
   | 'signup'
   | 'system:health'
   | 'system:oauth-config'
+  | 'update_gateway_settings'
   | 'update_organization'
   | 'update_password'
   | 'update_preferences'
@@ -198,18 +243,27 @@ export type OperationName =
  */
 export interface OperationDataTypes {
   'confirm_setup': ConfirmMfaSetupData
+  'create_call_queue': CreateCallQueueData
+  'create_call_record': CreateCallRecordData
   'create_connection': CreateConnectionData
   'create_device': CreateDeviceData
   'create_extension': CreateExtensionData
   'create_fax_number': CreateFaxNumberData
+  'create_ivr_menu': CreateIvrMenuData
   'create_phone_number': CreatePhoneNumberData
+  'create_registration': CreateE911RegistrationData
+  'create_ring_group': CreateRingGroupData
   'create_role': CreateRoleData
+  'create_schedule': CreateScheduleData
   'create_tag': CreateTagData
   'create_team': CreateTeamData
   'create_ticket': CreateTicketData
+  'create_time_condition': CreateTimeConditionData
   'create_user': CreateUserData
+  'create_voicemail_box': CreateVoicemailBoxData
   'disable_mfa': DisableMfaData
   'forgot_password': ForgotPasswordData
+  'get_gateway_settings': UpdateAdminGatewaySettingsData
   'get_mfa_status': GetMfaStatusData
   'get_organization': UpdateOrganizationData
   'get_preferences': UpdateNotificationPreferencesData
@@ -224,18 +278,26 @@ export interface OperationDataTypes {
   'get_trends': GetDashboardTrendsData
   'get_unread_count': GetUnreadNotificationCountData
   'initiate_setup': InitiateMfaSetupData
+  'list_call_queues': CreateCallQueueData
+  'list_call_records': CreateCallRecordData
   'list_connections': CreateConnectionData
   'list_devices_api_devices': CreateDeviceData
   'list_extensions': AdminListExtensionsData
   'list_extensions_api_voice_extensions': CreateExtensionData
   'list_fax_messages': AdminListFaxMessagesData
   'list_fax_numbers_api_fax_numbers': CreateFaxNumberData
+  'list_ivr_menus': CreateIvrMenuData
   'list_phone_numbers_api_voice_phone_numbers': CreatePhoneNumberData
+  'list_registrations': CreateE911RegistrationData
+  'list_ring_groups': CreateRingGroupData
   'list_roles': CreateRoleData
+  'list_schedules': CreateScheduleData
   'list_tags': CreateTagData
   'list_teams_api_teams': CreateTeamData
   'list_tickets_api_support_tickets': CreateTicketData
+  'list_time_conditions': CreateTimeConditionData
   'list_users_api_users': CreateUserData
+  'list_voicemail_boxes': CreateVoicemailBoxData
   'login': AccountLoginData
   'logout': AccountLogoutData
   'mark_all_read': MarkAllNotificationsReadData
@@ -249,6 +311,7 @@ export interface OperationDataTypes {
   'signup': AccountRegisterData
   'system:health': SystemHealthData
   'system:oauth-config': OAuthConfigData
+  'update_gateway_settings': UpdateAdminGatewaySettingsData
   'update_organization': UpdateOrganizationData
   'update_password': AccountPasswordUpdateData
   'update_preferences': UpdateNotificationPreferencesData
@@ -264,18 +327,27 @@ export interface OperationDataTypes {
  */
 export interface OperationResponseTypes {
   'confirm_setup': ConfirmMfaSetupResponses
+  'create_call_queue': CreateCallQueueResponses
+  'create_call_record': CreateCallRecordResponses
   'create_connection': CreateConnectionResponses
   'create_device': CreateDeviceResponses
   'create_extension': CreateExtensionResponses
   'create_fax_number': CreateFaxNumberResponses
+  'create_ivr_menu': CreateIvrMenuResponses
   'create_phone_number': CreatePhoneNumberResponses
+  'create_registration': CreateE911RegistrationResponses
+  'create_ring_group': CreateRingGroupResponses
   'create_role': CreateRoleResponses
+  'create_schedule': CreateScheduleResponses
   'create_tag': CreateTagResponses
   'create_team': CreateTeamResponses
   'create_ticket': CreateTicketResponses
+  'create_time_condition': CreateTimeConditionResponses
   'create_user': CreateUserResponses
+  'create_voicemail_box': CreateVoicemailBoxResponses
   'disable_mfa': DisableMfaResponses
   'forgot_password': ForgotPasswordResponses
+  'get_gateway_settings': UpdateAdminGatewaySettingsResponses
   'get_mfa_status': GetMfaStatusResponses
   'get_organization': UpdateOrganizationResponses
   'get_preferences': UpdateNotificationPreferencesResponses
@@ -290,18 +362,26 @@ export interface OperationResponseTypes {
   'get_trends': GetDashboardTrendsResponses
   'get_unread_count': GetUnreadNotificationCountResponses
   'initiate_setup': InitiateMfaSetupResponses
+  'list_call_queues': CreateCallQueueResponses
+  'list_call_records': CreateCallRecordResponses
   'list_connections': CreateConnectionResponses
   'list_devices_api_devices': CreateDeviceResponses
   'list_extensions': AdminListExtensionsResponses
   'list_extensions_api_voice_extensions': CreateExtensionResponses
   'list_fax_messages': AdminListFaxMessagesResponses
   'list_fax_numbers_api_fax_numbers': CreateFaxNumberResponses
+  'list_ivr_menus': CreateIvrMenuResponses
   'list_phone_numbers_api_voice_phone_numbers': CreatePhoneNumberResponses
+  'list_registrations': CreateE911RegistrationResponses
+  'list_ring_groups': CreateRingGroupResponses
   'list_roles': CreateRoleResponses
+  'list_schedules': CreateScheduleResponses
   'list_tags': CreateTagResponses
   'list_teams_api_teams': CreateTeamResponses
   'list_tickets_api_support_tickets': CreateTicketResponses
+  'list_time_conditions': CreateTimeConditionResponses
   'list_users_api_users': CreateUserResponses
+  'list_voicemail_boxes': CreateVoicemailBoxResponses
   'login': AccountLoginResponses
   'logout': AccountLogoutResponses
   'mark_all_read': MarkAllNotificationsReadResponses
@@ -315,6 +395,7 @@ export interface OperationResponseTypes {
   'signup': AccountRegisterResponses
   'system:health': SystemHealthResponses
   'system:oauth-config': OAuthConfigResponses
+  'update_gateway_settings': UpdateAdminGatewaySettingsResponses
   'update_organization': UpdateOrganizationResponses
   'update_password': AccountPasswordUpdateResponses
   'update_preferences': UpdateNotificationPreferencesResponses
@@ -330,18 +411,27 @@ export interface OperationResponseTypes {
  */
 export interface OperationErrorTypes {
   'confirm_setup': ConfirmMfaSetupErrors
+  'create_call_queue': CreateCallQueueErrors
+  'create_call_record': CreateCallRecordErrors
   'create_connection': CreateConnectionErrors
   'create_device': CreateDeviceErrors
   'create_extension': CreateExtensionErrors
   'create_fax_number': CreateFaxNumberErrors
+  'create_ivr_menu': CreateIvrMenuErrors
   'create_phone_number': CreatePhoneNumberErrors
+  'create_registration': CreateE911RegistrationErrors
+  'create_ring_group': CreateRingGroupErrors
   'create_role': CreateRoleErrors
+  'create_schedule': CreateScheduleErrors
   'create_tag': CreateTagErrors
   'create_team': CreateTeamErrors
   'create_ticket': CreateTicketErrors
+  'create_time_condition': CreateTimeConditionErrors
   'create_user': CreateUserErrors
+  'create_voicemail_box': CreateVoicemailBoxErrors
   'disable_mfa': DisableMfaErrors
   'forgot_password': ForgotPasswordErrors
+  'get_gateway_settings': UpdateAdminGatewaySettingsErrors
   'get_mfa_status': never
   'get_organization': UpdateOrganizationErrors
   'get_preferences': UpdateNotificationPreferencesErrors
@@ -356,18 +446,26 @@ export interface OperationErrorTypes {
   'get_trends': never
   'get_unread_count': never
   'initiate_setup': never
+  'list_call_queues': CreateCallQueueErrors
+  'list_call_records': CreateCallRecordErrors
   'list_connections': CreateConnectionErrors
   'list_devices_api_devices': CreateDeviceErrors
   'list_extensions': never
   'list_extensions_api_voice_extensions': CreateExtensionErrors
   'list_fax_messages': never
   'list_fax_numbers_api_fax_numbers': CreateFaxNumberErrors
+  'list_ivr_menus': CreateIvrMenuErrors
   'list_phone_numbers_api_voice_phone_numbers': CreatePhoneNumberErrors
+  'list_registrations': CreateE911RegistrationErrors
+  'list_ring_groups': CreateRingGroupErrors
   'list_roles': CreateRoleErrors
+  'list_schedules': CreateScheduleErrors
   'list_tags': CreateTagErrors
   'list_teams_api_teams': CreateTeamErrors
   'list_tickets_api_support_tickets': CreateTicketErrors
+  'list_time_conditions': CreateTimeConditionErrors
   'list_users_api_users': CreateUserErrors
+  'list_voicemail_boxes': CreateVoicemailBoxErrors
   'login': AccountLoginErrors
   'logout': never
   'mark_all_read': never
@@ -381,6 +479,7 @@ export interface OperationErrorTypes {
   'signup': AccountRegisterErrors
   'system:health': never
   'system:oauth-config': never
+  'update_gateway_settings': UpdateAdminGatewaySettingsErrors
   'update_organization': UpdateOrganizationErrors
   'update_password': AccountPasswordUpdateErrors
   'update_preferences': UpdateNotificationPreferencesErrors

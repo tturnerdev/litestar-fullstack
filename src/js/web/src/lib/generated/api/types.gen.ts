@@ -136,6 +136,22 @@ export type AdminFaxStats = {
 };
 
 /**
+ * AdminGatewaySettings
+ */
+export type AdminGatewaySettings = {
+  defaultCacheTtl: number;
+  defaultTimeout: number;
+};
+
+/**
+ * AdminGatewaySettingsUpdate
+ */
+export type AdminGatewaySettingsUpdate = {
+  defaultCacheTtl?: number;
+  defaultTimeout?: number;
+};
+
+/**
  * AdminPhoneNumberSummary
  */
 export type AdminPhoneNumberSummary = {
@@ -337,6 +353,193 @@ export type AuditLogEntry = {
   targetLabel?: string | null;
   targetType?: string | null;
   userAgent?: string | null;
+};
+
+/**
+ * CallAnalyticsSummary
+ */
+export type CallAnalyticsSummary = {
+  answered?: number;
+  avgBillableSeconds?: number;
+  avgDuration?: number;
+  missed?: number;
+  totalCalls?: number;
+  totalDuration?: number;
+  voicemail?: number;
+};
+
+/**
+ * CallQueue
+ */
+export type CallQueue = {
+  announceFrequency?: number | null;
+  announceHoldtime: boolean;
+  id: string;
+  joinEmpty: boolean;
+  leaveWhenEmpty: boolean;
+  maxCallers: number;
+  maxWaitTime: number;
+  members?: Array<CallQueueMember>;
+  musicOnHoldClass?: string | null;
+  name: string;
+  number: string;
+  ringTime: number;
+  strategy: string;
+  teamId: string;
+  timeoutDestination?: string | null;
+  wrapupTime: number;
+};
+
+/**
+ * CallQueueCreate
+ */
+export type CallQueueCreate = {
+  announceFrequency?: number | null;
+  announceHoldtime?: boolean;
+  joinEmpty?: boolean;
+  leaveWhenEmpty?: boolean;
+  maxCallers?: number;
+  maxWaitTime?: number;
+  musicOnHoldClass?: string | null;
+  name: string;
+  number: string;
+  ringTime?: number;
+  strategy?: string;
+  timeoutDestination?: string | null;
+  wrapupTime?: number;
+};
+
+/**
+ * CallQueueMember
+ */
+export type CallQueueMember = {
+  callQueueId: string;
+  extensionId?: string | null;
+  id: string;
+  isPaused: boolean;
+  penalty: number;
+  priority: number;
+};
+
+/**
+ * CallQueueMemberCreate
+ */
+export type CallQueueMemberCreate = {
+  extensionId?: string | null;
+  isPaused?: boolean;
+  penalty?: number;
+  priority?: number;
+};
+
+/**
+ * CallQueueMemberPause
+ */
+export type CallQueueMemberPause = {
+  isPaused: boolean;
+};
+
+/**
+ * CallQueueMemberUpdate
+ */
+export type CallQueueMemberUpdate = {
+  extensionId?: string | null;
+  isPaused?: boolean;
+  penalty?: number;
+  priority?: number;
+};
+
+/**
+ * CallQueueUpdate
+ */
+export type CallQueueUpdate = {
+  announceFrequency?: number | null;
+  announceHoldtime?: boolean;
+  joinEmpty?: boolean;
+  leaveWhenEmpty?: boolean;
+  maxCallers?: number;
+  maxWaitTime?: number;
+  musicOnHoldClass?: string | null;
+  name?: string;
+  number?: string;
+  ringTime?: number;
+  strategy?: string;
+  timeoutDestination?: string | null;
+  wrapupTime?: number;
+};
+
+/**
+ * CallRecordCreate
+ */
+export type CallRecordCreate = {
+  billableSeconds?: number;
+  callDate: string;
+  callerId?: string | null;
+  channel?: string | null;
+  connectionId?: string | null;
+  cost?: number | null;
+  destination: string;
+  direction: string;
+  disposition: string;
+  duration?: number;
+  notes?: string | null;
+  recordingUrl?: string | null;
+  source: string;
+  teamId: string;
+  uniqueId?: string | null;
+};
+
+/**
+ * CallRecordDetail
+ */
+export type CallRecordDetail = {
+  billableSeconds?: number;
+  callDate: string;
+  callerId?: string | null;
+  channel?: string | null;
+  connectionId?: string | null;
+  cost?: number | null;
+  createdAt?: string | null;
+  destination?: string;
+  direction?: string;
+  disposition?: string;
+  duration?: number;
+  id: string;
+  notes?: string | null;
+  recordingUrl?: string | null;
+  source?: string;
+  teamId: string;
+  uniqueId?: string | null;
+  updatedAt?: string | null;
+};
+
+/**
+ * CallRecordList
+ */
+export type CallRecordList = {
+  billableSeconds?: number;
+  callDate: string;
+  callerId?: string | null;
+  connectionId?: string | null;
+  cost?: number | null;
+  createdAt?: string | null;
+  destination?: string;
+  direction?: string;
+  disposition?: string;
+  duration?: number;
+  id: string;
+  source?: string;
+  teamId: string;
+  updatedAt?: string | null;
+};
+
+/**
+ * CallVolumePoint
+ */
+export type CallVolumePoint = {
+  answered?: number;
+  count?: number;
+  missed?: number;
+  period: string;
 };
 
 /**
@@ -578,6 +781,59 @@ export type DndToggleResponse = {
 };
 
 /**
+ * E911Registration
+ */
+export type E911Registration = {
+  addressLine1: string;
+  addressLine2?: string | null;
+  carrierRegistrationId?: string | null;
+  city: string;
+  country?: string;
+  createdAt?: string | null;
+  id: string;
+  locationId?: string | null;
+  locationName?: string | null;
+  phoneNumberDisplay?: string | null;
+  phoneNumberId?: string | null;
+  phoneNumberLabel?: string | null;
+  postalCode: string;
+  state: string;
+  teamId: string;
+  updatedAt?: string | null;
+  validated?: boolean;
+  validatedAt?: string | null;
+};
+
+/**
+ * E911RegistrationCreate
+ */
+export type E911RegistrationCreate = {
+  addressLine1: string;
+  addressLine2?: string | null;
+  city: string;
+  country?: string;
+  locationId?: string | null;
+  phoneNumberId?: string | null;
+  postalCode: string;
+  state: string;
+  teamId: string;
+};
+
+/**
+ * E911RegistrationUpdate
+ */
+export type E911RegistrationUpdate = {
+  addressLine1?: string;
+  addressLine2?: string | null;
+  city?: string;
+  country?: string;
+  locationId?: string | null;
+  phoneNumberId?: string | null;
+  postalCode?: string;
+  state?: string;
+};
+
+/**
  * EmailVerificationConfirm
  */
 export type EmailVerificationConfirm = {
@@ -612,7 +868,17 @@ export type EmailVerificationStatus = {
 export type Extension = {
   createdAt?: string | null;
   displayName?: string;
+  dndEnabled?: boolean;
   extensionNumber: string;
+  forwardAlwaysDestination?: string | null;
+  forwardAlwaysEnabled?: boolean;
+  forwardBusyDestination?: string | null;
+  forwardBusyEnabled?: boolean;
+  forwardNoAnswerDestination?: string | null;
+  forwardNoAnswerEnabled?: boolean;
+  forwardNoAnswerRingCount?: number;
+  forwardUnreachableDestination?: string | null;
+  forwardUnreachableEnabled?: boolean;
   id: string;
   isActive?: boolean;
   phoneNumberId?: string | null;
@@ -644,10 +910,31 @@ export type ExtensionGatewayResponse = {
 };
 
 /**
+ * ExtensionStats
+ */
+export type ExtensionStats = {
+  answered?: number;
+  avgDuration?: number;
+  extension: string;
+  missed?: number;
+  totalCalls?: number;
+};
+
+/**
  * ExtensionUpdate
  */
 export type ExtensionUpdate = {
   displayName?: string;
+  dndEnabled?: boolean;
+  forwardAlwaysDestination?: string | null;
+  forwardAlwaysEnabled?: boolean;
+  forwardBusyDestination?: string | null;
+  forwardBusyEnabled?: boolean;
+  forwardNoAnswerDestination?: string | null;
+  forwardNoAnswerEnabled?: boolean;
+  forwardNoAnswerRingCount?: number;
+  forwardUnreachableDestination?: string | null;
+  forwardUnreachableEnabled?: boolean;
   isActive?: boolean;
   phoneNumberId?: string | null;
 };
@@ -837,6 +1124,83 @@ export type ForwardingRuleUpdate = {
  * Valid voicemail greeting types.
  */
 export type GreetingType = "default" | "custom" | "name_only";
+
+/**
+ * IvrMenu
+ */
+export type IvrMenu = {
+  greetingFileUrl?: string | null;
+  greetingText?: string | null;
+  greetingType: string;
+  id: string;
+  invalidDestination?: string | null;
+  maxRetries: number;
+  name: string;
+  options?: Array<IvrMenuOption>;
+  teamId: string;
+  timeoutDestination?: string | null;
+  timeoutSeconds: number;
+};
+
+/**
+ * IvrMenuCreate
+ */
+export type IvrMenuCreate = {
+  greetingFileUrl?: string | null;
+  greetingText?: string | null;
+  greetingType?: string;
+  invalidDestination?: string | null;
+  maxRetries?: number;
+  name: string;
+  timeoutDestination?: string | null;
+  timeoutSeconds?: number;
+};
+
+/**
+ * IvrMenuOption
+ */
+export type IvrMenuOption = {
+  destination: string;
+  digit: string;
+  id: string;
+  ivrMenuId: string;
+  label: string;
+  sortOrder?: number;
+};
+
+/**
+ * IvrMenuOptionCreate
+ */
+export type IvrMenuOptionCreate = {
+  destination: string;
+  digit: string;
+  label: string;
+  sortOrder?: number;
+};
+
+/**
+ * IvrMenuOptionUpdate
+ */
+export type IvrMenuOptionUpdate = {
+  destination?: string;
+  digit?: string;
+  label?: string;
+  sortOrder?: number;
+};
+
+/**
+ * IvrMenuUpdate
+ */
+export type IvrMenuUpdate = {
+  greetingFileUrl?: string | null;
+  greetingText?: string | null;
+  greetingType?: string;
+  invalidDestination?: string | null;
+  maxRetries?: number;
+  name?: string;
+  timeoutDestination?: string | null;
+  timeoutSeconds?: number;
+};
 
 /**
  * Location
@@ -1204,6 +1568,71 @@ export type ResetTokenValidation = {
 };
 
 /**
+ * RingGroup
+ */
+export type RingGroup = {
+  id: string;
+  members?: Array<RingGroupMember>;
+  name: string;
+  noAnswerDestination?: string | null;
+  number: string;
+  ringTime: number;
+  strategy: string;
+  teamId: string;
+};
+
+/**
+ * RingGroupCreate
+ */
+export type RingGroupCreate = {
+  name: string;
+  noAnswerDestination?: string | null;
+  number: string;
+  ringTime?: number;
+  strategy?: string;
+};
+
+/**
+ * RingGroupMember
+ */
+export type RingGroupMember = {
+  extensionId?: string | null;
+  externalNumber?: string | null;
+  id: string;
+  ringGroupId: string;
+  sortOrder: number;
+};
+
+/**
+ * RingGroupMemberCreate
+ */
+export type RingGroupMemberCreate = {
+  extensionId?: string | null;
+  externalNumber?: string | null;
+  sortOrder?: number;
+};
+
+/**
+ * RingGroupMemberUpdate
+ */
+export type RingGroupMemberUpdate = {
+  extensionId?: string | null;
+  externalNumber?: string | null;
+  sortOrder?: number;
+};
+
+/**
+ * RingGroupUpdate
+ */
+export type RingGroupUpdate = {
+  name?: string;
+  noAnswerDestination?: string | null;
+  number?: string;
+  ringTime?: number;
+  strategy?: string;
+};
+
+/**
  * Role
  */
 export type Role = {
@@ -1226,6 +1655,113 @@ export type RoleCreate = {
  */
 export type RoleUpdate = {
   name?: string | null;
+};
+
+/**
+ * ScheduleCheckResponse
+ */
+export type ScheduleCheckResponse = {
+  currentEntry?: ScheduleEntryDetail | null;
+  isOpen: boolean;
+  nextChangeAt?: string | null;
+};
+
+/**
+ * ScheduleCreate
+ */
+export type ScheduleCreate = {
+  isDefault?: boolean;
+  name: string;
+  scheduleType?: string;
+  teamId: string;
+  timezone?: string;
+};
+
+/**
+ * ScheduleDetail
+ */
+export type ScheduleDetail = {
+  entries?: Array<ScheduleEntryList>;
+  id: string;
+  isDefault: boolean;
+  name: string;
+  scheduleType: string;
+  teamId: string;
+  timezone: string;
+};
+
+/**
+ * ScheduleEntryCreate
+ */
+export type ScheduleEntryCreate = {
+  date?: string | null;
+  dayOfWeek?: number | null;
+  endTime: string;
+  isClosed?: boolean;
+  label?: string | null;
+  startTime: string;
+};
+
+/**
+ * ScheduleEntryDetail
+ */
+export type ScheduleEntryDetail = {
+  date?: string | null;
+  dayOfWeek?: number | null;
+  endTime: string;
+  id: string;
+  isClosed?: boolean;
+  label?: string | null;
+  scheduleId: string;
+  startTime: string;
+};
+
+/**
+ * ScheduleEntryList
+ */
+export type ScheduleEntryList = {
+  date?: string | null;
+  dayOfWeek?: number | null;
+  endTime: string;
+  id: string;
+  isClosed?: boolean;
+  label?: string | null;
+  scheduleId: string;
+  startTime: string;
+};
+
+/**
+ * ScheduleEntryUpdate
+ */
+export type ScheduleEntryUpdate = {
+  date?: string | null;
+  dayOfWeek?: number | null;
+  endTime?: string;
+  isClosed?: boolean;
+  label?: string | null;
+  startTime?: string;
+};
+
+/**
+ * ScheduleList
+ */
+export type ScheduleList = {
+  id: string;
+  isDefault: boolean;
+  name: string;
+  scheduleType: string;
+  teamId: string;
+  timezone: string;
+};
+
+/**
+ * ScheduleUpdate
+ */
+export type ScheduleUpdate = {
+  isDefault?: boolean;
+  name?: string;
+  scheduleType?: string;
+  timezone?: string;
 };
 
 /**
@@ -1535,6 +2071,48 @@ export type TicketUser = {
 };
 
 /**
+ * TimeCondition
+ */
+export type TimeCondition = {
+  id: string;
+  matchDestination: string;
+  name: string;
+  noMatchDestination: string;
+  overrideMode: string;
+  scheduleId?: string | null;
+  teamId: string;
+};
+
+/**
+ * TimeConditionCreate
+ */
+export type TimeConditionCreate = {
+  matchDestination: string;
+  name: string;
+  noMatchDestination: string;
+  overrideMode?: string;
+  scheduleId?: string | null;
+};
+
+/**
+ * TimeConditionOverride
+ */
+export type TimeConditionOverride = {
+  overrideMode: string;
+};
+
+/**
+ * TimeConditionUpdate
+ */
+export type TimeConditionUpdate = {
+  matchDestination?: string;
+  name?: string;
+  noMatchDestination?: string;
+  overrideMode?: string;
+  scheduleId?: string | null;
+};
+
+/**
  * TrendPoint
  */
 export type TrendPoint = {
@@ -1548,6 +2126,18 @@ export type TrendPoint = {
  */
 export type UnreadCount = {
   count: number;
+};
+
+/**
+ * UnregisteredPhoneNumber
+ */
+export type UnregisteredPhoneNumber = {
+  id: string;
+  label?: string | null;
+  number: string;
+  numberType: string;
+  teamId?: string | null;
+  userId: string;
 };
 
 /**
@@ -1633,18 +2223,73 @@ export type UserUpdate = {
 };
 
 /**
+ * VoicemailBox
+ */
+export type VoicemailBox = {
+  autoDeleteDays?: number | null;
+  createdAt?: string | null;
+  emailAddress?: string | null;
+  emailAttachAudio?: boolean;
+  emailNotification?: boolean;
+  extensionId: string;
+  greetingFilePath?: string | null;
+  greetingType?: GreetingType;
+  id: string;
+  isEnabled?: boolean;
+  maxMessageLengthSeconds?: number;
+  pin?: string | null;
+  transcriptionEnabled?: boolean;
+  updatedAt?: string | null;
+};
+
+/**
+ * VoicemailBoxCreate
+ */
+export type VoicemailBoxCreate = {
+  autoDeleteDays?: number | null;
+  emailAddress?: string | null;
+  emailAttachAudio?: boolean;
+  emailNotification?: boolean;
+  extensionId: string;
+  greetingFilePath?: string | null;
+  greetingType?: GreetingType;
+  isEnabled?: boolean;
+  maxMessageLengthSeconds?: number;
+  pin?: string | null;
+  transcriptionEnabled?: boolean;
+};
+
+/**
+ * VoicemailBoxUpdate
+ */
+export type VoicemailBoxUpdate = {
+  autoDeleteDays?: number | null;
+  emailAddress?: string | null;
+  emailAttachAudio?: boolean;
+  emailNotification?: boolean;
+  greetingFilePath?: string | null;
+  greetingType?: GreetingType;
+  isEnabled?: boolean;
+  maxMessageLengthSeconds?: number;
+  pin?: string | null;
+  transcriptionEnabled?: boolean;
+};
+
+/**
  * VoicemailMessage
  */
 export type VoicemailMessage = {
   audioFilePath?: string;
   callerName?: string | null;
   callerNumber: string;
+  createdAt?: string | null;
   durationSeconds?: number;
   id: string;
   isRead?: boolean;
   isUrgent?: boolean;
   receivedAt?: string | null;
   transcription?: string | null;
+  updatedAt?: string | null;
   voicemailBoxId: string;
 };
 
@@ -1653,6 +2298,15 @@ export type VoicemailMessage = {
  */
 export type VoicemailMessageUpdate = {
   isRead?: boolean;
+  isUrgent?: boolean;
+  transcription?: string | null;
+};
+
+/**
+ * VoicemailReadToggle
+ */
+export type VoicemailReadToggle = {
+  isRead: boolean;
 };
 
 /**
@@ -1660,6 +2314,7 @@ export type VoicemailMessageUpdate = {
  */
 export type VoicemailSettings = {
   autoDeleteDays?: number | null;
+  emailAddress?: string | null;
   emailAttachAudio?: boolean;
   emailNotification?: boolean;
   extensionId: string;
@@ -1676,6 +2331,7 @@ export type VoicemailSettings = {
  */
 export type VoicemailSettingsUpdate = {
   autoDeleteDays?: number | null;
+  emailAddress?: string | null;
   emailAttachAudio?: boolean;
   emailNotification?: boolean;
   greetingType?: GreetingType;
@@ -1683,6 +2339,14 @@ export type VoicemailSettingsUpdate = {
   maxMessageLengthSeconds?: number;
   pin?: string | null;
   transcriptionEnabled?: boolean;
+};
+
+/**
+ * VoicemailUnreadCount
+ */
+export type VoicemailUnreadCount = {
+  unreadCount: number;
+  voicemailBoxId: string;
 };
 
 /**
@@ -2048,9 +2712,9 @@ export type AdminListAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
+    actionIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
-    actionIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
@@ -2130,9 +2794,9 @@ export type AdminGetTargetAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
+    actionIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
-    actionIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
@@ -2210,9 +2874,9 @@ export type AdminGetUserAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
+    actionIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
-    actionIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
@@ -2570,6 +3234,59 @@ export type AdminGetFaxStatsResponses = {
 
 export type AdminGetFaxStatsResponse =
   AdminGetFaxStatsResponses[keyof AdminGetFaxStatsResponses];
+
+export type GetAdminGatewaySettingsData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/api/admin/gateway/settings";
+};
+
+export type GetAdminGatewaySettingsResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: AdminGatewaySettings;
+};
+
+export type GetAdminGatewaySettingsResponse =
+  GetAdminGatewaySettingsResponses[keyof GetAdminGatewaySettingsResponses];
+
+export type UpdateAdminGatewaySettingsData = {
+  body: AdminGatewaySettingsUpdate;
+  path?: never;
+  query?: never;
+  url: "/api/admin/gateway/settings";
+};
+
+export type UpdateAdminGatewaySettingsErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type UpdateAdminGatewaySettingsError =
+  UpdateAdminGatewaySettingsErrors[keyof UpdateAdminGatewaySettingsErrors];
+
+export type UpdateAdminGatewaySettingsResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: AdminGatewaySettings;
+};
+
+export type UpdateAdminGatewaySettingsResponse =
+  UpdateAdminGatewaySettingsResponses[keyof UpdateAdminGatewaySettingsResponses];
 
 export type AdminGetSupportStatsData = {
   body?: never;
@@ -3159,6 +3876,327 @@ export type AdminGetVoiceStatsResponses = {
 export type AdminGetVoiceStatsResponse =
   AdminGetVoiceStatsResponses[keyof AdminGetVoiceStatsResponses];
 
+export type GetCallsByExtensionData = {
+  body?: never;
+  path?: never;
+  query: {
+    teamId: string;
+    startDate: string;
+    endDate: string;
+  };
+  url: "/api/analytics/by-extension";
+};
+
+export type GetCallsByExtensionErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type GetCallsByExtensionError =
+  GetCallsByExtensionErrors[keyof GetCallsByExtensionErrors];
+
+export type GetCallsByExtensionResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: Array<ExtensionStats>;
+};
+
+export type GetCallsByExtensionResponse =
+  GetCallsByExtensionResponses[keyof GetCallsByExtensionResponses];
+
+export type ListCallRecordsData = {
+  body?: never;
+  path?: never;
+  query?: {
+    ids?: Array<string> | null;
+    createdBefore?: string | null;
+    createdAfter?: string | null;
+    updatedBefore?: string | null;
+    updatedAfter?: string | null;
+    /**
+     * Field to search
+     */
+    searchString?: string | null;
+    /**
+     * Search should be case sensitive
+     */
+    searchIgnoreCase?: boolean | null;
+    currentPage?: number;
+    pageSize?: number;
+    /**
+     * Order by field
+     */
+    orderBy?: string | null;
+    /**
+     * Field to search
+     */
+    sortOrder?: "asc" | "desc" | null;
+    startDate?: string | null;
+    endDate?: string | null;
+    direction?: string | null;
+    disposition?: string | null;
+    source?: string | null;
+    destination?: string | null;
+    minDuration?: number | null;
+    maxDuration?: number | null;
+  };
+  url: "/api/analytics/cdrs";
+};
+
+export type ListCallRecordsErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type ListCallRecordsError =
+  ListCallRecordsErrors[keyof ListCallRecordsErrors];
+
+export type ListCallRecordsResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: {
+    items?: Array<CallRecordList>;
+    /**
+     * Maximal number of items to send.
+     */
+    limit?: number;
+    /**
+     * Offset from the beginning of the query.
+     */
+    offset?: number;
+    /**
+     * Total number of items.
+     */
+    total?: number;
+  };
+};
+
+export type ListCallRecordsResponse =
+  ListCallRecordsResponses[keyof ListCallRecordsResponses];
+
+export type CreateCallRecordData = {
+  body: CallRecordCreate;
+  path?: never;
+  query?: never;
+  url: "/api/analytics/cdrs";
+};
+
+export type CreateCallRecordErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type CreateCallRecordError =
+  CreateCallRecordErrors[keyof CreateCallRecordErrors];
+
+export type CreateCallRecordResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: CallRecordDetail;
+};
+
+export type CreateCallRecordResponse =
+  CreateCallRecordResponses[keyof CreateCallRecordResponses];
+
+export type ExportCallRecordsData = {
+  body?: never;
+  path?: never;
+  query?: {
+    startDate?: string | null;
+    endDate?: string | null;
+    direction?: string | null;
+    disposition?: string | null;
+  };
+  url: "/api/analytics/cdrs/export";
+};
+
+export type ExportCallRecordsErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type ExportCallRecordsError =
+  ExportCallRecordsErrors[keyof ExportCallRecordsErrors];
+
+export type ExportCallRecordsResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: string;
+};
+
+export type ExportCallRecordsResponse =
+  ExportCallRecordsResponses[keyof ExportCallRecordsResponses];
+
+export type GetCallRecordData = {
+  body?: never;
+  path: {
+    /**
+     * CDR ID
+     *
+     * The call record to retrieve.
+     */
+    cdr_id: string;
+  };
+  query?: never;
+  url: "/api/analytics/cdrs/{cdr_id}";
+};
+
+export type GetCallRecordErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type GetCallRecordError = GetCallRecordErrors[keyof GetCallRecordErrors];
+
+export type GetCallRecordResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: CallRecordDetail;
+};
+
+export type GetCallRecordResponse =
+  GetCallRecordResponses[keyof GetCallRecordResponses];
+
+export type GetCallSummaryData = {
+  body?: never;
+  path?: never;
+  query: {
+    teamId: string;
+    startDate: string;
+    endDate: string;
+  };
+  url: "/api/analytics/summary";
+};
+
+export type GetCallSummaryErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type GetCallSummaryError =
+  GetCallSummaryErrors[keyof GetCallSummaryErrors];
+
+export type GetCallSummaryResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: CallAnalyticsSummary;
+};
+
+export type GetCallSummaryResponse =
+  GetCallSummaryResponses[keyof GetCallSummaryResponses];
+
+export type GetCallVolumeData = {
+  body?: never;
+  path?: never;
+  query: {
+    teamId: string;
+    startDate: string;
+    endDate: string;
+    interval?: string;
+  };
+  url: "/api/analytics/volume";
+};
+
+export type GetCallVolumeErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type GetCallVolumeError = GetCallVolumeErrors[keyof GetCallVolumeErrors];
+
+export type GetCallVolumeResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: Array<CallVolumePoint>;
+};
+
+export type GetCallVolumeResponse =
+  GetCallVolumeResponses[keyof GetCallVolumeResponses];
+
 export type ApiAuthOauthGithubGithubAuthorizeData = {
   body?: never;
   path?: never;
@@ -3309,6 +4347,477 @@ export type ApiAuthOauthGoogleCallbackGoogleCallbackResponses = {
    */
   200: unknown;
 };
+
+export type ListCallQueuesData = {
+  body?: never;
+  path?: never;
+  query?: {
+    ids?: Array<string> | null;
+    createdBefore?: string | null;
+    createdAfter?: string | null;
+    updatedBefore?: string | null;
+    updatedAfter?: string | null;
+    /**
+     * Field to search
+     */
+    searchString?: string | null;
+    /**
+     * Search should be case sensitive
+     */
+    searchIgnoreCase?: boolean | null;
+    currentPage?: number;
+    pageSize?: number;
+    /**
+     * Order by field
+     */
+    orderBy?: string | null;
+    /**
+     * Field to search
+     */
+    sortOrder?: "asc" | "desc" | null;
+  };
+  url: "/api/call-queues";
+};
+
+export type ListCallQueuesErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type ListCallQueuesError =
+  ListCallQueuesErrors[keyof ListCallQueuesErrors];
+
+export type ListCallQueuesResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: {
+    items?: Array<CallQueue>;
+    /**
+     * Maximal number of items to send.
+     */
+    limit?: number;
+    /**
+     * Offset from the beginning of the query.
+     */
+    offset?: number;
+    /**
+     * Total number of items.
+     */
+    total?: number;
+  };
+};
+
+export type ListCallQueuesResponse =
+  ListCallQueuesResponses[keyof ListCallQueuesResponses];
+
+export type CreateCallQueueData = {
+  body: CallQueueCreate;
+  path?: never;
+  query?: never;
+  url: "/api/call-queues";
+};
+
+export type CreateCallQueueErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type CreateCallQueueError =
+  CreateCallQueueErrors[keyof CreateCallQueueErrors];
+
+export type CreateCallQueueResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: CallQueue;
+};
+
+export type CreateCallQueueResponse =
+  CreateCallQueueResponses[keyof CreateCallQueueResponses];
+
+export type DeleteCallQueueData = {
+  body?: never;
+  path: {
+    /**
+     * Call Queue ID
+     *
+     * The call queue to delete.
+     */
+    call_queue_id: string;
+  };
+  query?: never;
+  url: "/api/call-queues/{call_queue_id}";
+};
+
+export type DeleteCallQueueErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type DeleteCallQueueError =
+  DeleteCallQueueErrors[keyof DeleteCallQueueErrors];
+
+export type DeleteCallQueueResponses = {
+  /**
+   * Request fulfilled, nothing follows
+   */
+  204: void;
+};
+
+export type DeleteCallQueueResponse =
+  DeleteCallQueueResponses[keyof DeleteCallQueueResponses];
+
+export type GetCallQueueData = {
+  body?: never;
+  path: {
+    /**
+     * Call Queue ID
+     *
+     * The call queue to retrieve.
+     */
+    call_queue_id: string;
+  };
+  query?: never;
+  url: "/api/call-queues/{call_queue_id}";
+};
+
+export type GetCallQueueErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type GetCallQueueError = GetCallQueueErrors[keyof GetCallQueueErrors];
+
+export type GetCallQueueResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: CallQueue;
+};
+
+export type GetCallQueueResponse =
+  GetCallQueueResponses[keyof GetCallQueueResponses];
+
+export type UpdateCallQueueData = {
+  body: CallQueueUpdate;
+  path: {
+    /**
+     * Call Queue ID
+     *
+     * The call queue to update.
+     */
+    call_queue_id: string;
+  };
+  query?: never;
+  url: "/api/call-queues/{call_queue_id}";
+};
+
+export type UpdateCallQueueErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type UpdateCallQueueError =
+  UpdateCallQueueErrors[keyof UpdateCallQueueErrors];
+
+export type UpdateCallQueueResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: CallQueue;
+};
+
+export type UpdateCallQueueResponse =
+  UpdateCallQueueResponses[keyof UpdateCallQueueResponses];
+
+export type ListCallQueueMembersData = {
+  body?: never;
+  path: {
+    /**
+     * Call Queue ID
+     *
+     * The call queue.
+     */
+    call_queue_id: string;
+  };
+  query?: never;
+  url: "/api/call-queues/{call_queue_id}/members";
+};
+
+export type ListCallQueueMembersErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type ListCallQueueMembersError =
+  ListCallQueueMembersErrors[keyof ListCallQueueMembersErrors];
+
+export type ListCallQueueMembersResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: Array<CallQueueMember>;
+};
+
+export type ListCallQueueMembersResponse =
+  ListCallQueueMembersResponses[keyof ListCallQueueMembersResponses];
+
+export type CreateCallQueueMemberData = {
+  body: CallQueueMemberCreate;
+  path: {
+    /**
+     * Call Queue ID
+     *
+     * The call queue.
+     */
+    call_queue_id: string;
+  };
+  query?: never;
+  url: "/api/call-queues/{call_queue_id}/members";
+};
+
+export type CreateCallQueueMemberErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type CreateCallQueueMemberError =
+  CreateCallQueueMemberErrors[keyof CreateCallQueueMemberErrors];
+
+export type CreateCallQueueMemberResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: CallQueueMember;
+};
+
+export type CreateCallQueueMemberResponse =
+  CreateCallQueueMemberResponses[keyof CreateCallQueueMemberResponses];
+
+export type DeleteCallQueueMemberData = {
+  body?: never;
+  path: {
+    /**
+     * Call Queue ID
+     *
+     * The call queue.
+     */
+    call_queue_id: string;
+    /**
+     * Member ID
+     *
+     * The member to remove.
+     */
+    member_id: string;
+  };
+  query?: never;
+  url: "/api/call-queues/{call_queue_id}/members/{member_id}";
+};
+
+export type DeleteCallQueueMemberErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type DeleteCallQueueMemberError =
+  DeleteCallQueueMemberErrors[keyof DeleteCallQueueMemberErrors];
+
+export type DeleteCallQueueMemberResponses = {
+  /**
+   * Request fulfilled, nothing follows
+   */
+  204: void;
+};
+
+export type DeleteCallQueueMemberResponse =
+  DeleteCallQueueMemberResponses[keyof DeleteCallQueueMemberResponses];
+
+export type UpdateCallQueueMemberData = {
+  body: CallQueueMemberUpdate;
+  path: {
+    /**
+     * Call Queue ID
+     *
+     * The call queue.
+     */
+    call_queue_id: string;
+    /**
+     * Member ID
+     *
+     * The member to update.
+     */
+    member_id: string;
+  };
+  query?: never;
+  url: "/api/call-queues/{call_queue_id}/members/{member_id}";
+};
+
+export type UpdateCallQueueMemberErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type UpdateCallQueueMemberError =
+  UpdateCallQueueMemberErrors[keyof UpdateCallQueueMemberErrors];
+
+export type UpdateCallQueueMemberResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: CallQueueMember;
+};
+
+export type UpdateCallQueueMemberResponse =
+  UpdateCallQueueMemberResponses[keyof UpdateCallQueueMemberResponses];
+
+export type PauseCallQueueMemberData = {
+  body: CallQueueMemberPause;
+  path: {
+    /**
+     * Call Queue ID
+     *
+     * The call queue.
+     */
+    call_queue_id: string;
+    /**
+     * Member ID
+     *
+     * The member to pause/unpause.
+     */
+    member_id: string;
+  };
+  query?: never;
+  url: "/api/call-queues/{call_queue_id}/members/{member_id}/pause";
+};
+
+export type PauseCallQueueMemberErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type PauseCallQueueMemberError =
+  PauseCallQueueMemberErrors[keyof PauseCallQueueMemberErrors];
+
+export type PauseCallQueueMemberResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: CallQueueMember;
+};
+
+export type PauseCallQueueMemberResponse =
+  PauseCallQueueMemberResponses[keyof PauseCallQueueMemberResponses];
 
 export type OAuthConfigData = {
   body?: never;
@@ -4012,6 +5521,337 @@ export type ReprovisionDeviceResponses = {
 
 export type ReprovisionDeviceResponse =
   ReprovisionDeviceResponses[keyof ReprovisionDeviceResponses];
+
+export type ListE911RegistrationsData = {
+  body?: never;
+  path?: never;
+  query?: {
+    ids?: Array<string> | null;
+    createdBefore?: string | null;
+    createdAfter?: string | null;
+    updatedBefore?: string | null;
+    updatedAfter?: string | null;
+    /**
+     * Field to search
+     */
+    searchString?: string | null;
+    /**
+     * Search should be case sensitive
+     */
+    searchIgnoreCase?: boolean | null;
+    currentPage?: number;
+    pageSize?: number;
+    /**
+     * Order by field
+     */
+    orderBy?: string | null;
+    /**
+     * Field to search
+     */
+    sortOrder?: "asc" | "desc" | null;
+    /**
+     * Team ID
+     *
+     * Filter by team.
+     */
+    team_id?: string | null;
+  };
+  url: "/api/e911";
+};
+
+export type ListE911RegistrationsErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type ListE911RegistrationsError =
+  ListE911RegistrationsErrors[keyof ListE911RegistrationsErrors];
+
+export type ListE911RegistrationsResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: {
+    items?: Array<E911Registration>;
+    /**
+     * Maximal number of items to send.
+     */
+    limit?: number;
+    /**
+     * Offset from the beginning of the query.
+     */
+    offset?: number;
+    /**
+     * Total number of items.
+     */
+    total?: number;
+  };
+};
+
+export type ListE911RegistrationsResponse =
+  ListE911RegistrationsResponses[keyof ListE911RegistrationsResponses];
+
+export type CreateE911RegistrationData = {
+  body: E911RegistrationCreate;
+  path?: never;
+  query?: never;
+  url: "/api/e911";
+};
+
+export type CreateE911RegistrationErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type CreateE911RegistrationError =
+  CreateE911RegistrationErrors[keyof CreateE911RegistrationErrors];
+
+export type CreateE911RegistrationResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: E911Registration;
+};
+
+export type CreateE911RegistrationResponse =
+  CreateE911RegistrationResponses[keyof CreateE911RegistrationResponses];
+
+export type ListUnregisteredPhoneNumbersData = {
+  body?: never;
+  path?: never;
+  query: {
+    /**
+     * Team ID
+     *
+     * The team to check for unregistered numbers.
+     */
+    team_id: string;
+  };
+  url: "/api/e911/unregistered";
+};
+
+export type ListUnregisteredPhoneNumbersErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type ListUnregisteredPhoneNumbersError =
+  ListUnregisteredPhoneNumbersErrors[keyof ListUnregisteredPhoneNumbersErrors];
+
+export type ListUnregisteredPhoneNumbersResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: Array<UnregisteredPhoneNumber>;
+};
+
+export type ListUnregisteredPhoneNumbersResponse =
+  ListUnregisteredPhoneNumbersResponses[keyof ListUnregisteredPhoneNumbersResponses];
+
+export type DeleteE911RegistrationData = {
+  body?: never;
+  path: {
+    /**
+     * Registration ID
+     *
+     * The E911 registration to delete.
+     */
+    registration_id: string;
+  };
+  query?: never;
+  url: "/api/e911/{registration_id}";
+};
+
+export type DeleteE911RegistrationErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type DeleteE911RegistrationError =
+  DeleteE911RegistrationErrors[keyof DeleteE911RegistrationErrors];
+
+export type DeleteE911RegistrationResponses = {
+  /**
+   * Request fulfilled, nothing follows
+   */
+  204: void;
+};
+
+export type DeleteE911RegistrationResponse =
+  DeleteE911RegistrationResponses[keyof DeleteE911RegistrationResponses];
+
+export type GetE911RegistrationData = {
+  body?: never;
+  path: {
+    /**
+     * Registration ID
+     *
+     * The E911 registration to retrieve.
+     */
+    registration_id: string;
+  };
+  query?: never;
+  url: "/api/e911/{registration_id}";
+};
+
+export type GetE911RegistrationErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type GetE911RegistrationError =
+  GetE911RegistrationErrors[keyof GetE911RegistrationErrors];
+
+export type GetE911RegistrationResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: E911Registration;
+};
+
+export type GetE911RegistrationResponse =
+  GetE911RegistrationResponses[keyof GetE911RegistrationResponses];
+
+export type UpdateE911RegistrationData = {
+  body: E911RegistrationUpdate;
+  path: {
+    /**
+     * Registration ID
+     *
+     * The E911 registration to update.
+     */
+    registration_id: string;
+  };
+  query?: never;
+  url: "/api/e911/{registration_id}";
+};
+
+export type UpdateE911RegistrationErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type UpdateE911RegistrationError =
+  UpdateE911RegistrationErrors[keyof UpdateE911RegistrationErrors];
+
+export type UpdateE911RegistrationResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: E911Registration;
+};
+
+export type UpdateE911RegistrationResponse =
+  UpdateE911RegistrationResponses[keyof UpdateE911RegistrationResponses];
+
+export type ValidateE911RegistrationData = {
+  body?: never;
+  path: {
+    /**
+     * Registration ID
+     *
+     * The E911 registration to validate.
+     */
+    registration_id: string;
+  };
+  query?: never;
+  url: "/api/e911/{registration_id}/validate";
+};
+
+export type ValidateE911RegistrationErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type ValidateE911RegistrationError =
+  ValidateE911RegistrationErrors[keyof ValidateE911RegistrationErrors];
+
+export type ValidateE911RegistrationResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: E911Registration;
+};
+
+export type ValidateE911RegistrationResponse =
+  ValidateE911RegistrationResponses[keyof ValidateE911RegistrationResponses];
 
 export type ApiEmailVerificationRequestRequestVerificationData = {
   body: EmailVerificationRequest;
@@ -4741,7 +6581,12 @@ export type GatewayLookupDeviceData = {
      */
     mac_address: string;
   };
-  query?: never;
+  query?: {
+    /**
+     * Bypass cache and force a fresh query.
+     */
+    refresh?: boolean;
+  };
   url: "/api/gateway/devices/{mac_address}";
 };
 
@@ -4784,7 +6629,12 @@ export type GatewayLookupExtensionData = {
      */
     extension_number: string;
   };
-  query?: never;
+  query?: {
+    /**
+     * Bypass cache and force a fresh query.
+     */
+    refresh?: boolean;
+  };
   url: "/api/gateway/extensions/{extension_number}";
 };
 
@@ -4827,7 +6677,12 @@ export type GatewayLookupNumberData = {
      */
     phone_number: string;
   };
-  query?: never;
+  query?: {
+    /**
+     * Bypass cache and force a fresh query.
+     */
+    refresh?: boolean;
+  };
   url: "/api/gateway/numbers/{phone_number}";
 };
 
@@ -4859,6 +6714,423 @@ export type GatewayLookupNumberResponses = {
 
 export type GatewayLookupNumberResponse =
   GatewayLookupNumberResponses[keyof GatewayLookupNumberResponses];
+
+export type ListIvrMenusData = {
+  body?: never;
+  path?: never;
+  query?: {
+    ids?: Array<string> | null;
+    createdBefore?: string | null;
+    createdAfter?: string | null;
+    updatedBefore?: string | null;
+    updatedAfter?: string | null;
+    /**
+     * Field to search
+     */
+    searchString?: string | null;
+    /**
+     * Search should be case sensitive
+     */
+    searchIgnoreCase?: boolean | null;
+    currentPage?: number;
+    pageSize?: number;
+    /**
+     * Order by field
+     */
+    orderBy?: string | null;
+    /**
+     * Field to search
+     */
+    sortOrder?: "asc" | "desc" | null;
+  };
+  url: "/api/ivr-menus";
+};
+
+export type ListIvrMenusErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type ListIvrMenusError = ListIvrMenusErrors[keyof ListIvrMenusErrors];
+
+export type ListIvrMenusResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: {
+    items?: Array<IvrMenu>;
+    /**
+     * Maximal number of items to send.
+     */
+    limit?: number;
+    /**
+     * Offset from the beginning of the query.
+     */
+    offset?: number;
+    /**
+     * Total number of items.
+     */
+    total?: number;
+  };
+};
+
+export type ListIvrMenusResponse =
+  ListIvrMenusResponses[keyof ListIvrMenusResponses];
+
+export type CreateIvrMenuData = {
+  body: IvrMenuCreate;
+  path?: never;
+  query?: never;
+  url: "/api/ivr-menus";
+};
+
+export type CreateIvrMenuErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type CreateIvrMenuError = CreateIvrMenuErrors[keyof CreateIvrMenuErrors];
+
+export type CreateIvrMenuResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: IvrMenu;
+};
+
+export type CreateIvrMenuResponse =
+  CreateIvrMenuResponses[keyof CreateIvrMenuResponses];
+
+export type DeleteIvrMenuData = {
+  body?: never;
+  path: {
+    /**
+     * IVR Menu ID
+     *
+     * The IVR menu to delete.
+     */
+    ivr_menu_id: string;
+  };
+  query?: never;
+  url: "/api/ivr-menus/{ivr_menu_id}";
+};
+
+export type DeleteIvrMenuErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type DeleteIvrMenuError = DeleteIvrMenuErrors[keyof DeleteIvrMenuErrors];
+
+export type DeleteIvrMenuResponses = {
+  /**
+   * Request fulfilled, nothing follows
+   */
+  204: void;
+};
+
+export type DeleteIvrMenuResponse =
+  DeleteIvrMenuResponses[keyof DeleteIvrMenuResponses];
+
+export type GetIvrMenuData = {
+  body?: never;
+  path: {
+    /**
+     * IVR Menu ID
+     *
+     * The IVR menu to retrieve.
+     */
+    ivr_menu_id: string;
+  };
+  query?: never;
+  url: "/api/ivr-menus/{ivr_menu_id}";
+};
+
+export type GetIvrMenuErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type GetIvrMenuError = GetIvrMenuErrors[keyof GetIvrMenuErrors];
+
+export type GetIvrMenuResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: IvrMenu;
+};
+
+export type GetIvrMenuResponse = GetIvrMenuResponses[keyof GetIvrMenuResponses];
+
+export type UpdateIvrMenuData = {
+  body: IvrMenuUpdate;
+  path: {
+    /**
+     * IVR Menu ID
+     *
+     * The IVR menu to update.
+     */
+    ivr_menu_id: string;
+  };
+  query?: never;
+  url: "/api/ivr-menus/{ivr_menu_id}";
+};
+
+export type UpdateIvrMenuErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type UpdateIvrMenuError = UpdateIvrMenuErrors[keyof UpdateIvrMenuErrors];
+
+export type UpdateIvrMenuResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: IvrMenu;
+};
+
+export type UpdateIvrMenuResponse =
+  UpdateIvrMenuResponses[keyof UpdateIvrMenuResponses];
+
+export type ListIvrMenuOptionsData = {
+  body?: never;
+  path: {
+    /**
+     * IVR Menu ID
+     *
+     * The IVR menu.
+     */
+    ivr_menu_id: string;
+  };
+  query?: never;
+  url: "/api/ivr-menus/{ivr_menu_id}/options";
+};
+
+export type ListIvrMenuOptionsErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type ListIvrMenuOptionsError =
+  ListIvrMenuOptionsErrors[keyof ListIvrMenuOptionsErrors];
+
+export type ListIvrMenuOptionsResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: Array<IvrMenuOption>;
+};
+
+export type ListIvrMenuOptionsResponse =
+  ListIvrMenuOptionsResponses[keyof ListIvrMenuOptionsResponses];
+
+export type CreateIvrMenuOptionData = {
+  body: IvrMenuOptionCreate;
+  path: {
+    /**
+     * IVR Menu ID
+     *
+     * The IVR menu.
+     */
+    ivr_menu_id: string;
+  };
+  query?: never;
+  url: "/api/ivr-menus/{ivr_menu_id}/options";
+};
+
+export type CreateIvrMenuOptionErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type CreateIvrMenuOptionError =
+  CreateIvrMenuOptionErrors[keyof CreateIvrMenuOptionErrors];
+
+export type CreateIvrMenuOptionResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: IvrMenuOption;
+};
+
+export type CreateIvrMenuOptionResponse =
+  CreateIvrMenuOptionResponses[keyof CreateIvrMenuOptionResponses];
+
+export type DeleteIvrMenuOptionData = {
+  body?: never;
+  path: {
+    /**
+     * IVR Menu ID
+     *
+     * The IVR menu.
+     */
+    ivr_menu_id: string;
+    /**
+     * Option ID
+     *
+     * The option to delete.
+     */
+    option_id: string;
+  };
+  query?: never;
+  url: "/api/ivr-menus/{ivr_menu_id}/options/{option_id}";
+};
+
+export type DeleteIvrMenuOptionErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type DeleteIvrMenuOptionError =
+  DeleteIvrMenuOptionErrors[keyof DeleteIvrMenuOptionErrors];
+
+export type DeleteIvrMenuOptionResponses = {
+  /**
+   * Request fulfilled, nothing follows
+   */
+  204: void;
+};
+
+export type DeleteIvrMenuOptionResponse =
+  DeleteIvrMenuOptionResponses[keyof DeleteIvrMenuOptionResponses];
+
+export type UpdateIvrMenuOptionData = {
+  body: IvrMenuOptionUpdate;
+  path: {
+    /**
+     * IVR Menu ID
+     *
+     * The IVR menu.
+     */
+    ivr_menu_id: string;
+    /**
+     * Option ID
+     *
+     * The option to update.
+     */
+    option_id: string;
+  };
+  query?: never;
+  url: "/api/ivr-menus/{ivr_menu_id}/options/{option_id}";
+};
+
+export type UpdateIvrMenuOptionErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type UpdateIvrMenuOptionError =
+  UpdateIvrMenuOptionErrors[keyof UpdateIvrMenuOptionErrors];
+
+export type UpdateIvrMenuOptionResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: IvrMenuOption;
+};
+
+export type UpdateIvrMenuOptionResponse =
+  UpdateIvrMenuOptionResponses[keyof UpdateIvrMenuOptionResponses];
 
 export type AccountDeleteData = {
   body?: never;
@@ -5653,6 +7925,428 @@ export type ProfileOAuthUpgradeScopesResponses = {
 export type ProfileOAuthUpgradeScopesResponse =
   ProfileOAuthUpgradeScopesResponses[keyof ProfileOAuthUpgradeScopesResponses];
 
+export type ListRingGroupsData = {
+  body?: never;
+  path?: never;
+  query?: {
+    ids?: Array<string> | null;
+    createdBefore?: string | null;
+    createdAfter?: string | null;
+    updatedBefore?: string | null;
+    updatedAfter?: string | null;
+    /**
+     * Field to search
+     */
+    searchString?: string | null;
+    /**
+     * Search should be case sensitive
+     */
+    searchIgnoreCase?: boolean | null;
+    currentPage?: number;
+    pageSize?: number;
+    /**
+     * Order by field
+     */
+    orderBy?: string | null;
+    /**
+     * Field to search
+     */
+    sortOrder?: "asc" | "desc" | null;
+  };
+  url: "/api/ring-groups";
+};
+
+export type ListRingGroupsErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type ListRingGroupsError =
+  ListRingGroupsErrors[keyof ListRingGroupsErrors];
+
+export type ListRingGroupsResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: {
+    items?: Array<RingGroup>;
+    /**
+     * Maximal number of items to send.
+     */
+    limit?: number;
+    /**
+     * Offset from the beginning of the query.
+     */
+    offset?: number;
+    /**
+     * Total number of items.
+     */
+    total?: number;
+  };
+};
+
+export type ListRingGroupsResponse =
+  ListRingGroupsResponses[keyof ListRingGroupsResponses];
+
+export type CreateRingGroupData = {
+  body: RingGroupCreate;
+  path?: never;
+  query?: never;
+  url: "/api/ring-groups";
+};
+
+export type CreateRingGroupErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type CreateRingGroupError =
+  CreateRingGroupErrors[keyof CreateRingGroupErrors];
+
+export type CreateRingGroupResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: RingGroup;
+};
+
+export type CreateRingGroupResponse =
+  CreateRingGroupResponses[keyof CreateRingGroupResponses];
+
+export type DeleteRingGroupData = {
+  body?: never;
+  path: {
+    /**
+     * Ring Group ID
+     *
+     * The ring group to delete.
+     */
+    ring_group_id: string;
+  };
+  query?: never;
+  url: "/api/ring-groups/{ring_group_id}";
+};
+
+export type DeleteRingGroupErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type DeleteRingGroupError =
+  DeleteRingGroupErrors[keyof DeleteRingGroupErrors];
+
+export type DeleteRingGroupResponses = {
+  /**
+   * Request fulfilled, nothing follows
+   */
+  204: void;
+};
+
+export type DeleteRingGroupResponse =
+  DeleteRingGroupResponses[keyof DeleteRingGroupResponses];
+
+export type GetRingGroupData = {
+  body?: never;
+  path: {
+    /**
+     * Ring Group ID
+     *
+     * The ring group to retrieve.
+     */
+    ring_group_id: string;
+  };
+  query?: never;
+  url: "/api/ring-groups/{ring_group_id}";
+};
+
+export type GetRingGroupErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type GetRingGroupError = GetRingGroupErrors[keyof GetRingGroupErrors];
+
+export type GetRingGroupResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: RingGroup;
+};
+
+export type GetRingGroupResponse =
+  GetRingGroupResponses[keyof GetRingGroupResponses];
+
+export type UpdateRingGroupData = {
+  body: RingGroupUpdate;
+  path: {
+    /**
+     * Ring Group ID
+     *
+     * The ring group to update.
+     */
+    ring_group_id: string;
+  };
+  query?: never;
+  url: "/api/ring-groups/{ring_group_id}";
+};
+
+export type UpdateRingGroupErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type UpdateRingGroupError =
+  UpdateRingGroupErrors[keyof UpdateRingGroupErrors];
+
+export type UpdateRingGroupResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: RingGroup;
+};
+
+export type UpdateRingGroupResponse =
+  UpdateRingGroupResponses[keyof UpdateRingGroupResponses];
+
+export type ListRingGroupMembersData = {
+  body?: never;
+  path: {
+    /**
+     * Ring Group ID
+     *
+     * The ring group.
+     */
+    ring_group_id: string;
+  };
+  query?: never;
+  url: "/api/ring-groups/{ring_group_id}/members";
+};
+
+export type ListRingGroupMembersErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type ListRingGroupMembersError =
+  ListRingGroupMembersErrors[keyof ListRingGroupMembersErrors];
+
+export type ListRingGroupMembersResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: Array<RingGroupMember>;
+};
+
+export type ListRingGroupMembersResponse =
+  ListRingGroupMembersResponses[keyof ListRingGroupMembersResponses];
+
+export type CreateRingGroupMemberData = {
+  body: RingGroupMemberCreate;
+  path: {
+    /**
+     * Ring Group ID
+     *
+     * The ring group.
+     */
+    ring_group_id: string;
+  };
+  query?: never;
+  url: "/api/ring-groups/{ring_group_id}/members";
+};
+
+export type CreateRingGroupMemberErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type CreateRingGroupMemberError =
+  CreateRingGroupMemberErrors[keyof CreateRingGroupMemberErrors];
+
+export type CreateRingGroupMemberResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: RingGroupMember;
+};
+
+export type CreateRingGroupMemberResponse =
+  CreateRingGroupMemberResponses[keyof CreateRingGroupMemberResponses];
+
+export type DeleteRingGroupMemberData = {
+  body?: never;
+  path: {
+    /**
+     * Ring Group ID
+     *
+     * The ring group.
+     */
+    ring_group_id: string;
+    /**
+     * Member ID
+     *
+     * The member to remove.
+     */
+    member_id: string;
+  };
+  query?: never;
+  url: "/api/ring-groups/{ring_group_id}/members/{member_id}";
+};
+
+export type DeleteRingGroupMemberErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type DeleteRingGroupMemberError =
+  DeleteRingGroupMemberErrors[keyof DeleteRingGroupMemberErrors];
+
+export type DeleteRingGroupMemberResponses = {
+  /**
+   * Request fulfilled, nothing follows
+   */
+  204: void;
+};
+
+export type DeleteRingGroupMemberResponse =
+  DeleteRingGroupMemberResponses[keyof DeleteRingGroupMemberResponses];
+
+export type UpdateRingGroupMemberData = {
+  body: RingGroupMemberUpdate;
+  path: {
+    /**
+     * Ring Group ID
+     *
+     * The ring group.
+     */
+    ring_group_id: string;
+    /**
+     * Member ID
+     *
+     * The member to update.
+     */
+    member_id: string;
+  };
+  query?: never;
+  url: "/api/ring-groups/{ring_group_id}/members/{member_id}";
+};
+
+export type UpdateRingGroupMemberErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type UpdateRingGroupMemberError =
+  UpdateRingGroupMemberErrors[keyof UpdateRingGroupMemberErrors];
+
+export type UpdateRingGroupMemberResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: RingGroupMember;
+};
+
+export type UpdateRingGroupMemberResponse =
+  UpdateRingGroupMemberResponses[keyof UpdateRingGroupMemberResponses];
+
 export type ListRolesData = {
   body?: never;
   path?: never;
@@ -5959,6 +8653,488 @@ export type RevokeRoleResponses = {
 };
 
 export type RevokeRoleResponse = RevokeRoleResponses[keyof RevokeRoleResponses];
+
+export type ListSchedulesData = {
+  body?: never;
+  path?: never;
+  query?: {
+    ids?: Array<string> | null;
+    createdBefore?: string | null;
+    createdAfter?: string | null;
+    updatedBefore?: string | null;
+    updatedAfter?: string | null;
+    /**
+     * Field to search
+     */
+    searchString?: string | null;
+    /**
+     * Search should be case sensitive
+     */
+    searchIgnoreCase?: boolean | null;
+    currentPage?: number;
+    pageSize?: number;
+    /**
+     * Order by field
+     */
+    orderBy?: string | null;
+    /**
+     * Field to search
+     */
+    sortOrder?: "asc" | "desc" | null;
+    /**
+     * Team ID
+     *
+     * Filter by team.
+     */
+    team_id?: string | null;
+    /**
+     * Schedule Type
+     *
+     * Filter by schedule type.
+     */
+    schedule_type?: string | null;
+  };
+  url: "/api/schedules";
+};
+
+export type ListSchedulesErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type ListSchedulesError = ListSchedulesErrors[keyof ListSchedulesErrors];
+
+export type ListSchedulesResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: {
+    items?: Array<ScheduleList>;
+    /**
+     * Maximal number of items to send.
+     */
+    limit?: number;
+    /**
+     * Offset from the beginning of the query.
+     */
+    offset?: number;
+    /**
+     * Total number of items.
+     */
+    total?: number;
+  };
+};
+
+export type ListSchedulesResponse =
+  ListSchedulesResponses[keyof ListSchedulesResponses];
+
+export type CreateScheduleData = {
+  body: ScheduleCreate;
+  path?: never;
+  query?: never;
+  url: "/api/schedules";
+};
+
+export type CreateScheduleErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type CreateScheduleError =
+  CreateScheduleErrors[keyof CreateScheduleErrors];
+
+export type CreateScheduleResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: ScheduleDetail;
+};
+
+export type CreateScheduleResponse =
+  CreateScheduleResponses[keyof CreateScheduleResponses];
+
+export type DeleteScheduleData = {
+  body?: never;
+  path: {
+    /**
+     * Schedule ID
+     *
+     * The schedule to delete.
+     */
+    schedule_id: string;
+  };
+  query?: never;
+  url: "/api/schedules/{schedule_id}";
+};
+
+export type DeleteScheduleErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type DeleteScheduleError =
+  DeleteScheduleErrors[keyof DeleteScheduleErrors];
+
+export type DeleteScheduleResponses = {
+  /**
+   * Request fulfilled, nothing follows
+   */
+  204: void;
+};
+
+export type DeleteScheduleResponse =
+  DeleteScheduleResponses[keyof DeleteScheduleResponses];
+
+export type GetScheduleData = {
+  body?: never;
+  path: {
+    /**
+     * Schedule ID
+     *
+     * The schedule to retrieve.
+     */
+    schedule_id: string;
+  };
+  query?: never;
+  url: "/api/schedules/{schedule_id}";
+};
+
+export type GetScheduleErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type GetScheduleError = GetScheduleErrors[keyof GetScheduleErrors];
+
+export type GetScheduleResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: ScheduleDetail;
+};
+
+export type GetScheduleResponse =
+  GetScheduleResponses[keyof GetScheduleResponses];
+
+export type UpdateScheduleData = {
+  body: ScheduleUpdate;
+  path: {
+    /**
+     * Schedule ID
+     *
+     * The schedule to update.
+     */
+    schedule_id: string;
+  };
+  query?: never;
+  url: "/api/schedules/{schedule_id}";
+};
+
+export type UpdateScheduleErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type UpdateScheduleError =
+  UpdateScheduleErrors[keyof UpdateScheduleErrors];
+
+export type UpdateScheduleResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: ScheduleDetail;
+};
+
+export type UpdateScheduleResponse =
+  UpdateScheduleResponses[keyof UpdateScheduleResponses];
+
+export type CheckScheduleData = {
+  body?: never;
+  path: {
+    /**
+     * Schedule ID
+     *
+     * The schedule to check.
+     */
+    schedule_id: string;
+  };
+  query?: {
+    /**
+     * Check Time
+     *
+     * ISO datetime to check (defaults to now).
+     */
+    time?: string | null;
+  };
+  url: "/api/schedules/{schedule_id}/check";
+};
+
+export type CheckScheduleErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type CheckScheduleError = CheckScheduleErrors[keyof CheckScheduleErrors];
+
+export type CheckScheduleResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: ScheduleCheckResponse;
+};
+
+export type CheckScheduleResponse =
+  CheckScheduleResponses[keyof CheckScheduleResponses];
+
+export type ListScheduleEntriesData = {
+  body?: never;
+  path: {
+    /**
+     * Schedule ID
+     *
+     * The schedule to list entries for.
+     */
+    schedule_id: string;
+  };
+  query?: never;
+  url: "/api/schedules/{schedule_id}/entries";
+};
+
+export type ListScheduleEntriesErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type ListScheduleEntriesError =
+  ListScheduleEntriesErrors[keyof ListScheduleEntriesErrors];
+
+export type ListScheduleEntriesResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: Array<ScheduleEntryList>;
+};
+
+export type ListScheduleEntriesResponse =
+  ListScheduleEntriesResponses[keyof ListScheduleEntriesResponses];
+
+export type CreateScheduleEntryData = {
+  body: ScheduleEntryCreate;
+  path: {
+    /**
+     * Schedule ID
+     *
+     * The schedule to create the entry for.
+     */
+    schedule_id: string;
+  };
+  query?: never;
+  url: "/api/schedules/{schedule_id}/entries";
+};
+
+export type CreateScheduleEntryErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type CreateScheduleEntryError =
+  CreateScheduleEntryErrors[keyof CreateScheduleEntryErrors];
+
+export type CreateScheduleEntryResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: ScheduleEntryDetail;
+};
+
+export type CreateScheduleEntryResponse =
+  CreateScheduleEntryResponses[keyof CreateScheduleEntryResponses];
+
+export type DeleteScheduleEntryData = {
+  body?: never;
+  path: {
+    /**
+     * Schedule ID
+     *
+     * The schedule the entry belongs to.
+     */
+    schedule_id: string;
+    /**
+     * Entry ID
+     *
+     * The entry to delete.
+     */
+    entry_id: string;
+  };
+  query?: never;
+  url: "/api/schedules/{schedule_id}/entries/{entry_id}";
+};
+
+export type DeleteScheduleEntryErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type DeleteScheduleEntryError =
+  DeleteScheduleEntryErrors[keyof DeleteScheduleEntryErrors];
+
+export type DeleteScheduleEntryResponses = {
+  /**
+   * Request fulfilled, nothing follows
+   */
+  204: void;
+};
+
+export type DeleteScheduleEntryResponse =
+  DeleteScheduleEntryResponses[keyof DeleteScheduleEntryResponses];
+
+export type UpdateScheduleEntryData = {
+  body: ScheduleEntryUpdate;
+  path: {
+    /**
+     * Schedule ID
+     *
+     * The schedule the entry belongs to.
+     */
+    schedule_id: string;
+    /**
+     * Entry ID
+     *
+     * The entry to update.
+     */
+    entry_id: string;
+  };
+  query?: never;
+  url: "/api/schedules/{schedule_id}/entries/{entry_id}";
+};
+
+export type UpdateScheduleEntryErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type UpdateScheduleEntryError =
+  UpdateScheduleEntryErrors[keyof UpdateScheduleEntryErrors];
+
+export type UpdateScheduleEntryResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: ScheduleEntryDetail;
+};
+
+export type UpdateScheduleEntryResponse =
+  UpdateScheduleEntryResponses[keyof UpdateScheduleEntryResponses];
 
 export type GlobalSearchData = {
   body?: never;
@@ -7936,6 +11112,288 @@ export type UpdateTeamPermissionsResponses = {
 export type UpdateTeamPermissionsResponse =
   UpdateTeamPermissionsResponses[keyof UpdateTeamPermissionsResponses];
 
+export type ListTimeConditionsData = {
+  body?: never;
+  path?: never;
+  query?: {
+    ids?: Array<string> | null;
+    createdBefore?: string | null;
+    createdAfter?: string | null;
+    updatedBefore?: string | null;
+    updatedAfter?: string | null;
+    /**
+     * Field to search
+     */
+    searchString?: string | null;
+    /**
+     * Search should be case sensitive
+     */
+    searchIgnoreCase?: boolean | null;
+    currentPage?: number;
+    pageSize?: number;
+    /**
+     * Order by field
+     */
+    orderBy?: string | null;
+    /**
+     * Field to search
+     */
+    sortOrder?: "asc" | "desc" | null;
+  };
+  url: "/api/time-conditions";
+};
+
+export type ListTimeConditionsErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type ListTimeConditionsError =
+  ListTimeConditionsErrors[keyof ListTimeConditionsErrors];
+
+export type ListTimeConditionsResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: {
+    items?: Array<TimeCondition>;
+    /**
+     * Maximal number of items to send.
+     */
+    limit?: number;
+    /**
+     * Offset from the beginning of the query.
+     */
+    offset?: number;
+    /**
+     * Total number of items.
+     */
+    total?: number;
+  };
+};
+
+export type ListTimeConditionsResponse =
+  ListTimeConditionsResponses[keyof ListTimeConditionsResponses];
+
+export type CreateTimeConditionData = {
+  body: TimeConditionCreate;
+  path?: never;
+  query?: never;
+  url: "/api/time-conditions";
+};
+
+export type CreateTimeConditionErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type CreateTimeConditionError =
+  CreateTimeConditionErrors[keyof CreateTimeConditionErrors];
+
+export type CreateTimeConditionResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: TimeCondition;
+};
+
+export type CreateTimeConditionResponse =
+  CreateTimeConditionResponses[keyof CreateTimeConditionResponses];
+
+export type DeleteTimeConditionData = {
+  body?: never;
+  path: {
+    /**
+     * Time Condition ID
+     *
+     * The time condition to delete.
+     */
+    time_condition_id: string;
+  };
+  query?: never;
+  url: "/api/time-conditions/{time_condition_id}";
+};
+
+export type DeleteTimeConditionErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type DeleteTimeConditionError =
+  DeleteTimeConditionErrors[keyof DeleteTimeConditionErrors];
+
+export type DeleteTimeConditionResponses = {
+  /**
+   * Request fulfilled, nothing follows
+   */
+  204: void;
+};
+
+export type DeleteTimeConditionResponse =
+  DeleteTimeConditionResponses[keyof DeleteTimeConditionResponses];
+
+export type GetTimeConditionData = {
+  body?: never;
+  path: {
+    /**
+     * Time Condition ID
+     *
+     * The time condition to retrieve.
+     */
+    time_condition_id: string;
+  };
+  query?: never;
+  url: "/api/time-conditions/{time_condition_id}";
+};
+
+export type GetTimeConditionErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type GetTimeConditionError =
+  GetTimeConditionErrors[keyof GetTimeConditionErrors];
+
+export type GetTimeConditionResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: TimeCondition;
+};
+
+export type GetTimeConditionResponse =
+  GetTimeConditionResponses[keyof GetTimeConditionResponses];
+
+export type UpdateTimeConditionData = {
+  body: TimeConditionUpdate;
+  path: {
+    /**
+     * Time Condition ID
+     *
+     * The time condition to update.
+     */
+    time_condition_id: string;
+  };
+  query?: never;
+  url: "/api/time-conditions/{time_condition_id}";
+};
+
+export type UpdateTimeConditionErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type UpdateTimeConditionError =
+  UpdateTimeConditionErrors[keyof UpdateTimeConditionErrors];
+
+export type UpdateTimeConditionResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: TimeCondition;
+};
+
+export type UpdateTimeConditionResponse =
+  UpdateTimeConditionResponses[keyof UpdateTimeConditionResponses];
+
+export type SetTimeConditionOverrideData = {
+  body: TimeConditionOverride;
+  path: {
+    /**
+     * Time Condition ID
+     *
+     * The time condition to override.
+     */
+    time_condition_id: string;
+  };
+  query?: never;
+  url: "/api/time-conditions/{time_condition_id}/override";
+};
+
+export type SetTimeConditionOverrideErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type SetTimeConditionOverrideError =
+  SetTimeConditionOverrideErrors[keyof SetTimeConditionOverrideErrors];
+
+export type SetTimeConditionOverrideResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: TimeCondition;
+};
+
+export type SetTimeConditionOverrideResponse =
+  SetTimeConditionOverrideResponses[keyof SetTimeConditionOverrideResponses];
+
 export type ListUsersData = {
   body?: never;
   path?: never;
@@ -9401,6 +12859,552 @@ export type UpdatePhoneNumberResponses = {
 
 export type UpdatePhoneNumberResponse =
   UpdatePhoneNumberResponses[keyof UpdatePhoneNumberResponses];
+
+export type ListVoicemailBoxesData = {
+  body?: never;
+  path?: never;
+  query?: {
+    ids?: Array<string> | null;
+    createdBefore?: string | null;
+    createdAfter?: string | null;
+    updatedBefore?: string | null;
+    updatedAfter?: string | null;
+    currentPage?: number;
+    pageSize?: number;
+    /**
+     * Order by field
+     */
+    orderBy?: string | null;
+    /**
+     * Field to search
+     */
+    sortOrder?: "asc" | "desc" | null;
+  };
+  url: "/api/voicemail/boxes";
+};
+
+export type ListVoicemailBoxesErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type ListVoicemailBoxesError =
+  ListVoicemailBoxesErrors[keyof ListVoicemailBoxesErrors];
+
+export type ListVoicemailBoxesResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: {
+    items?: Array<VoicemailBox>;
+    /**
+     * Maximal number of items to send.
+     */
+    limit?: number;
+    /**
+     * Offset from the beginning of the query.
+     */
+    offset?: number;
+    /**
+     * Total number of items.
+     */
+    total?: number;
+  };
+};
+
+export type ListVoicemailBoxesResponse =
+  ListVoicemailBoxesResponses[keyof ListVoicemailBoxesResponses];
+
+export type CreateVoicemailBoxData = {
+  body: VoicemailBoxCreate;
+  path?: never;
+  query?: never;
+  url: "/api/voicemail/boxes";
+};
+
+export type CreateVoicemailBoxErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type CreateVoicemailBoxError =
+  CreateVoicemailBoxErrors[keyof CreateVoicemailBoxErrors];
+
+export type CreateVoicemailBoxResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: VoicemailBox;
+};
+
+export type CreateVoicemailBoxResponse =
+  CreateVoicemailBoxResponses[keyof CreateVoicemailBoxResponses];
+
+export type DeleteVoicemailBoxData = {
+  body?: never;
+  path: {
+    /**
+     * Box ID
+     *
+     * The voicemail box to delete.
+     */
+    box_id: string;
+  };
+  query?: never;
+  url: "/api/voicemail/boxes/{box_id}";
+};
+
+export type DeleteVoicemailBoxErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type DeleteVoicemailBoxError =
+  DeleteVoicemailBoxErrors[keyof DeleteVoicemailBoxErrors];
+
+export type DeleteVoicemailBoxResponses = {
+  /**
+   * Request fulfilled, nothing follows
+   */
+  204: void;
+};
+
+export type DeleteVoicemailBoxResponse =
+  DeleteVoicemailBoxResponses[keyof DeleteVoicemailBoxResponses];
+
+export type GetVoicemailBoxData = {
+  body?: never;
+  path: {
+    /**
+     * Box ID
+     *
+     * The voicemail box to retrieve.
+     */
+    box_id: string;
+  };
+  query?: never;
+  url: "/api/voicemail/boxes/{box_id}";
+};
+
+export type GetVoicemailBoxErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type GetVoicemailBoxError =
+  GetVoicemailBoxErrors[keyof GetVoicemailBoxErrors];
+
+export type GetVoicemailBoxResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: VoicemailBox;
+};
+
+export type GetVoicemailBoxResponse =
+  GetVoicemailBoxResponses[keyof GetVoicemailBoxResponses];
+
+export type UpdateVoicemailBoxData = {
+  body: VoicemailBoxUpdate;
+  path: {
+    /**
+     * Box ID
+     *
+     * The voicemail box to update.
+     */
+    box_id: string;
+  };
+  query?: never;
+  url: "/api/voicemail/boxes/{box_id}";
+};
+
+export type UpdateVoicemailBoxErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type UpdateVoicemailBoxError =
+  UpdateVoicemailBoxErrors[keyof UpdateVoicemailBoxErrors];
+
+export type UpdateVoicemailBoxResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: VoicemailBox;
+};
+
+export type UpdateVoicemailBoxResponse =
+  UpdateVoicemailBoxResponses[keyof UpdateVoicemailBoxResponses];
+
+export type ListVoicemailBoxMessagesData = {
+  body?: never;
+  path: {
+    /**
+     * Box ID
+     *
+     * The voicemail box.
+     */
+    box_id: string;
+  };
+  query?: {
+    ids?: Array<string> | null;
+    createdBefore?: string | null;
+    createdAfter?: string | null;
+    updatedBefore?: string | null;
+    updatedAfter?: string | null;
+    currentPage?: number;
+    pageSize?: number;
+    /**
+     * Order by field
+     */
+    orderBy?: string | null;
+    /**
+     * Field to search
+     */
+    sortOrder?: "asc" | "desc" | null;
+    is_read?: boolean | null;
+    is_urgent?: boolean | null;
+  };
+  url: "/api/voicemail/boxes/{box_id}/messages";
+};
+
+export type ListVoicemailBoxMessagesErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type ListVoicemailBoxMessagesError =
+  ListVoicemailBoxMessagesErrors[keyof ListVoicemailBoxMessagesErrors];
+
+export type ListVoicemailBoxMessagesResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: {
+    items?: Array<VoicemailMessage>;
+    /**
+     * Maximal number of items to send.
+     */
+    limit?: number;
+    /**
+     * Offset from the beginning of the query.
+     */
+    offset?: number;
+    /**
+     * Total number of items.
+     */
+    total?: number;
+  };
+};
+
+export type ListVoicemailBoxMessagesResponse =
+  ListVoicemailBoxMessagesResponses[keyof ListVoicemailBoxMessagesResponses];
+
+export type GetVoicemailBoxUnreadCountData = {
+  body?: never;
+  path: {
+    /**
+     * Box ID
+     *
+     * The voicemail box.
+     */
+    box_id: string;
+  };
+  query?: never;
+  url: "/api/voicemail/boxes/{box_id}/unread";
+};
+
+export type GetVoicemailBoxUnreadCountErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type GetVoicemailBoxUnreadCountError =
+  GetVoicemailBoxUnreadCountErrors[keyof GetVoicemailBoxUnreadCountErrors];
+
+export type GetVoicemailBoxUnreadCountResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: VoicemailUnreadCount;
+};
+
+export type GetVoicemailBoxUnreadCountResponse =
+  GetVoicemailBoxUnreadCountResponses[keyof GetVoicemailBoxUnreadCountResponses];
+
+export type ListAllVoicemailMessagesData = {
+  body?: never;
+  path?: never;
+  query?: {
+    ids?: Array<string> | null;
+    createdBefore?: string | null;
+    createdAfter?: string | null;
+    updatedBefore?: string | null;
+    updatedAfter?: string | null;
+    currentPage?: number;
+    pageSize?: number;
+    /**
+     * Order by field
+     */
+    orderBy?: string | null;
+    /**
+     * Field to search
+     */
+    sortOrder?: "asc" | "desc" | null;
+    is_read?: boolean | null;
+    is_urgent?: boolean | null;
+  };
+  url: "/api/voicemail/messages";
+};
+
+export type ListAllVoicemailMessagesErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type ListAllVoicemailMessagesError =
+  ListAllVoicemailMessagesErrors[keyof ListAllVoicemailMessagesErrors];
+
+export type ListAllVoicemailMessagesResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: {
+    items?: Array<VoicemailMessage>;
+    /**
+     * Maximal number of items to send.
+     */
+    limit?: number;
+    /**
+     * Offset from the beginning of the query.
+     */
+    offset?: number;
+    /**
+     * Total number of items.
+     */
+    total?: number;
+  };
+};
+
+export type ListAllVoicemailMessagesResponse =
+  ListAllVoicemailMessagesResponses[keyof ListAllVoicemailMessagesResponses];
+
+export type DeleteVoicemailMessageByIdData = {
+  body?: never;
+  path: {
+    /**
+     * Message ID
+     *
+     * The voicemail message to delete.
+     */
+    message_id: string;
+  };
+  query?: never;
+  url: "/api/voicemail/messages/{message_id}";
+};
+
+export type DeleteVoicemailMessageByIdErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type DeleteVoicemailMessageByIdError =
+  DeleteVoicemailMessageByIdErrors[keyof DeleteVoicemailMessageByIdErrors];
+
+export type DeleteVoicemailMessageByIdResponses = {
+  /**
+   * Request fulfilled, nothing follows
+   */
+  204: void;
+};
+
+export type DeleteVoicemailMessageByIdResponse =
+  DeleteVoicemailMessageByIdResponses[keyof DeleteVoicemailMessageByIdResponses];
+
+export type GetVoicemailMessageByIdData = {
+  body?: never;
+  path: {
+    /**
+     * Message ID
+     *
+     * The voicemail message to retrieve.
+     */
+    message_id: string;
+  };
+  query?: never;
+  url: "/api/voicemail/messages/{message_id}";
+};
+
+export type GetVoicemailMessageByIdErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type GetVoicemailMessageByIdError =
+  GetVoicemailMessageByIdErrors[keyof GetVoicemailMessageByIdErrors];
+
+export type GetVoicemailMessageByIdResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: VoicemailMessage;
+};
+
+export type GetVoicemailMessageByIdResponse =
+  GetVoicemailMessageByIdResponses[keyof GetVoicemailMessageByIdResponses];
+
+export type ToggleVoicemailMessageReadData = {
+  body: VoicemailReadToggle;
+  path: {
+    /**
+     * Message ID
+     *
+     * The voicemail message.
+     */
+    message_id: string;
+  };
+  query?: never;
+  url: "/api/voicemail/messages/{message_id}/read";
+};
+
+export type ToggleVoicemailMessageReadErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type ToggleVoicemailMessageReadError =
+  ToggleVoicemailMessageReadErrors[keyof ToggleVoicemailMessageReadErrors];
+
+export type ToggleVoicemailMessageReadResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: VoicemailMessage;
+};
+
+export type ToggleVoicemailMessageReadResponse =
+  ToggleVoicemailMessageReadResponses[keyof ToggleVoicemailMessageReadResponses];
 
 export type SystemHealthData = {
   body?: never;

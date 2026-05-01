@@ -52,6 +52,22 @@
       },
       "uri": "/api/users/roles"
     },
+    "check_schedule": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "schedule_id": "UUID"
+      },
+      "parameters": [
+        "schedule_id"
+      ],
+      "queryParameters": {
+        "time": "DateTime | undefined"
+      },
+      "uri": "/api/schedules/{schedule_id}/check"
+    },
     "close_ticket": {
       "method": "post",
       "methods": [
@@ -72,6 +88,20 @@
       ],
       "uri": "/api/mfa/confirm"
     },
+    "create_call_queue": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "uri": "/api/call-queues"
+    },
+    "create_call_record": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "uri": "/api/analytics/cdrs"
+    },
     "create_connection": {
       "method": "post",
       "methods": [
@@ -85,6 +115,19 @@
         "POST"
       ],
       "uri": "/api/devices"
+    },
+    "create_entry": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "parameterTypes": {
+        "schedule_id": "UUID"
+      },
+      "parameters": [
+        "schedule_id"
+      ],
+      "uri": "/api/schedules/{schedule_id}/entries"
     },
     "create_extension": {
       "method": "post",
@@ -126,6 +169,13 @@
       ],
       "uri": "/api/voice/extensions/{ext_id}/forwarding"
     },
+    "create_ivr_menu": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "uri": "/api/ivr-menus"
+    },
     "create_location": {
       "method": "post",
       "methods": [
@@ -138,6 +188,32 @@
         "team_id"
       ],
       "uri": "/api/teams/{team_id}/locations"
+    },
+    "create_member": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "parameterTypes": {
+        "call_queue_id": "UUID"
+      },
+      "parameters": [
+        "call_queue_id"
+      ],
+      "uri": "/api/call-queues/{call_queue_id}/members"
+    },
+    "create_member_api_ring_groups_ring_group_id:uuid_members": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "parameterTypes": {
+        "ring_group_id": "UUID"
+      },
+      "parameters": [
+        "ring_group_id"
+      ],
+      "uri": "/api/ring-groups/{ring_group_id}/members"
     },
     "create_message": {
       "method": "post",
@@ -152,6 +228,19 @@
       ],
       "uri": "/api/support/tickets/{ticket_id}/messages"
     },
+    "create_option": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "parameterTypes": {
+        "ivr_menu_id": "UUID"
+      },
+      "parameters": [
+        "ivr_menu_id"
+      ],
+      "uri": "/api/ivr-menus/{ivr_menu_id}/options"
+    },
     "create_phone_number": {
       "method": "post",
       "methods": [
@@ -159,12 +248,33 @@
       ],
       "uri": "/api/voice/phone-numbers"
     },
+    "create_registration": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "uri": "/api/e911"
+    },
+    "create_ring_group": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "uri": "/api/ring-groups"
+    },
     "create_role": {
       "method": "post",
       "methods": [
         "POST"
       ],
       "uri": "/api/roles"
+    },
+    "create_schedule": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "uri": "/api/schedules"
     },
     "create_tag": {
       "method": "post",
@@ -200,12 +310,26 @@
       ],
       "uri": "/api/support/tickets"
     },
+    "create_time_condition": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "uri": "/api/time-conditions"
+    },
     "create_user": {
       "method": "post",
       "methods": [
         "POST"
       ],
       "uri": "/api/users"
+    },
+    "create_voicemail_box": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "uri": "/api/voicemail/boxes"
     },
     "delete_attachment": {
       "method": "delete",
@@ -219,6 +343,19 @@
         "attachment_id"
       ],
       "uri": "/api/support/attachments/{attachment_id}"
+    },
+    "delete_call_queue": {
+      "method": "delete",
+      "methods": [
+        "DELETE"
+      ],
+      "parameterTypes": {
+        "call_queue_id": "UUID"
+      },
+      "parameters": [
+        "call_queue_id"
+      ],
+      "uri": "/api/call-queues/{call_queue_id}"
     },
     "delete_connection": {
       "method": "delete",
@@ -245,6 +382,21 @@
         "device_id"
       ],
       "uri": "/api/devices/{device_id}"
+    },
+    "delete_entry": {
+      "method": "delete",
+      "methods": [
+        "DELETE"
+      ],
+      "parameterTypes": {
+        "entry_id": "UUID",
+        "schedule_id": "UUID"
+      },
+      "parameters": [
+        "entry_id",
+        "schedule_id"
+      ],
+      "uri": "/api/schedules/{schedule_id}/entries/{entry_id}"
     },
     "delete_extension": {
       "method": "delete",
@@ -315,6 +467,19 @@
       ],
       "uri": "/api/voice/extensions/{ext_id}/forwarding/{rule_id}"
     },
+    "delete_ivr_menu": {
+      "method": "delete",
+      "methods": [
+        "DELETE"
+      ],
+      "parameterTypes": {
+        "ivr_menu_id": "UUID"
+      },
+      "parameters": [
+        "ivr_menu_id"
+      ],
+      "uri": "/api/ivr-menus/{ivr_menu_id}"
+    },
     "delete_location": {
       "method": "delete",
       "methods": [
@@ -329,6 +494,36 @@
         "team_id"
       ],
       "uri": "/api/teams/{team_id}/locations/{location_id}"
+    },
+    "delete_member": {
+      "method": "delete",
+      "methods": [
+        "DELETE"
+      ],
+      "parameterTypes": {
+        "call_queue_id": "UUID",
+        "member_id": "UUID"
+      },
+      "parameters": [
+        "call_queue_id",
+        "member_id"
+      ],
+      "uri": "/api/call-queues/{call_queue_id}/members/{member_id}"
+    },
+    "delete_member_api_ring_groups_ring_group_id:uuid_members_member_id:uuid": {
+      "method": "delete",
+      "methods": [
+        "DELETE"
+      ],
+      "parameterTypes": {
+        "member_id": "UUID",
+        "ring_group_id": "UUID"
+      },
+      "parameters": [
+        "member_id",
+        "ring_group_id"
+      ],
+      "uri": "/api/ring-groups/{ring_group_id}/members/{member_id}"
     },
     "delete_message": {
       "method": "delete",
@@ -358,6 +553,21 @@
       ],
       "uri": "/api/notifications/{notification_id}"
     },
+    "delete_option": {
+      "method": "delete",
+      "methods": [
+        "DELETE"
+      ],
+      "parameterTypes": {
+        "ivr_menu_id": "UUID",
+        "option_id": "UUID"
+      },
+      "parameters": [
+        "ivr_menu_id",
+        "option_id"
+      ],
+      "uri": "/api/ivr-menus/{ivr_menu_id}/options/{option_id}"
+    },
     "delete_phone_number": {
       "method": "delete",
       "methods": [
@@ -371,6 +581,32 @@
       ],
       "uri": "/api/voice/phone-numbers/{phone_number_id}"
     },
+    "delete_registration": {
+      "method": "delete",
+      "methods": [
+        "DELETE"
+      ],
+      "parameterTypes": {
+        "registration_id": "UUID"
+      },
+      "parameters": [
+        "registration_id"
+      ],
+      "uri": "/api/e911/{registration_id}"
+    },
+    "delete_ring_group": {
+      "method": "delete",
+      "methods": [
+        "DELETE"
+      ],
+      "parameterTypes": {
+        "ring_group_id": "UUID"
+      },
+      "parameters": [
+        "ring_group_id"
+      ],
+      "uri": "/api/ring-groups/{ring_group_id}"
+    },
     "delete_role": {
       "method": "delete",
       "methods": [
@@ -383,6 +619,19 @@
         "role_id"
       ],
       "uri": "/api/roles/{role_id}"
+    },
+    "delete_schedule": {
+      "method": "delete",
+      "methods": [
+        "DELETE"
+      ],
+      "parameterTypes": {
+        "schedule_id": "UUID"
+      },
+      "parameters": [
+        "schedule_id"
+      ],
+      "uri": "/api/schedules/{schedule_id}"
     },
     "delete_tag": {
       "method": "delete",
@@ -451,6 +700,19 @@
       ],
       "uri": "/api/support/tickets/{ticket_id}"
     },
+    "delete_time_condition": {
+      "method": "delete",
+      "methods": [
+        "DELETE"
+      ],
+      "parameterTypes": {
+        "time_condition_id": "UUID"
+      },
+      "parameters": [
+        "time_condition_id"
+      ],
+      "uri": "/api/time-conditions/{time_condition_id}"
+    },
     "delete_user": {
       "method": "delete",
       "methods": [
@@ -477,6 +739,19 @@
       ],
       "uri": "/api/users/{user_id}"
     },
+    "delete_voicemail_box": {
+      "method": "delete",
+      "methods": [
+        "DELETE"
+      ],
+      "parameterTypes": {
+        "box_id": "UUID"
+      },
+      "parameters": [
+        "box_id"
+      ],
+      "uri": "/api/voicemail/boxes/{box_id}"
+    },
     "delete_voicemail_message": {
       "method": "delete",
       "methods": [
@@ -492,12 +767,38 @@
       ],
       "uri": "/api/voice/extensions/{ext_id}/voicemail/messages/{msg_id}"
     },
+    "delete_voicemail_message_api_voicemail_messages_message_id:uuid": {
+      "method": "delete",
+      "methods": [
+        "DELETE"
+      ],
+      "parameterTypes": {
+        "message_id": "UUID"
+      },
+      "parameters": [
+        "message_id"
+      ],
+      "uri": "/api/voicemail/messages/{message_id}"
+    },
     "disable_mfa": {
       "method": "delete",
       "methods": [
         "DELETE"
       ],
       "uri": "/api/mfa/disable"
+    },
+    "export_call_records": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "queryParameters": {
+        "direction": "string | undefined",
+        "disposition": "string | undefined",
+        "endDate": "DateTime | undefined",
+        "startDate": "DateTime | undefined"
+      },
+      "uri": "/api/analytics/cdrs/export"
     },
     "forgot_password": {
       "method": "post",
@@ -529,6 +830,44 @@
         "attachment_id"
       ],
       "uri": "/api/support/attachments/{attachment_id}"
+    },
+    "get_by_extension": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "queryParameters": {
+        "endDate": "DateTime",
+        "startDate": "DateTime",
+        "teamId": "UUID"
+      },
+      "uri": "/api/analytics/by-extension"
+    },
+    "get_call_queue": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "call_queue_id": "UUID"
+      },
+      "parameters": [
+        "call_queue_id"
+      ],
+      "uri": "/api/call-queues/{call_queue_id}"
+    },
+    "get_call_record": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "cdr_id": "UUID"
+      },
+      "parameters": [
+        "cdr_id"
+      ],
+      "uri": "/api/analytics/cdrs/{cdr_id}"
     },
     "get_connection": {
       "method": "get",
@@ -567,6 +906,9 @@
       "parameters": [
         "mac_address"
       ],
+      "queryParameters": {
+        "refresh": "boolean | undefined"
+      },
       "uri": "/api/gateway/devices/{mac_address}"
     },
     "get_dnd_settings": {
@@ -606,6 +948,9 @@
       "parameters": [
         "extension_number"
       ],
+      "queryParameters": {
+        "refresh": "boolean | undefined"
+      },
       "uri": "/api/gateway/extensions/{extension_number}"
     },
     "get_fax_message": {
@@ -633,6 +978,26 @@
         "fax_number_id"
       ],
       "uri": "/api/fax/numbers/{fax_number_id}"
+    },
+    "get_gateway_settings": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "uri": "/api/admin/gateway/settings"
+    },
+    "get_ivr_menu": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "ivr_menu_id": "UUID"
+      },
+      "parameters": [
+        "ivr_menu_id"
+      ],
+      "uri": "/api/ivr-menus/{ivr_menu_id}"
     },
     "get_location": {
       "method": "get",
@@ -680,6 +1045,9 @@
       "parameters": [
         "phone_number"
       ],
+      "queryParameters": {
+        "refresh": "boolean | undefined"
+      },
       "uri": "/api/gateway/numbers/{phone_number}"
     },
     "get_organization": {
@@ -716,6 +1084,32 @@
       ],
       "uri": "/api/me"
     },
+    "get_registration": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "registration_id": "UUID"
+      },
+      "parameters": [
+        "registration_id"
+      ],
+      "uri": "/api/e911/{registration_id}"
+    },
+    "get_ring_group": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "ring_group_id": "UUID"
+      },
+      "parameters": [
+        "ring_group_id"
+      ],
+      "uri": "/api/ring-groups/{ring_group_id}"
+    },
     "get_role": {
       "method": "get",
       "methods": [
@@ -728,6 +1122,19 @@
         "role_id"
       ],
       "uri": "/api/roles/{role_id}"
+    },
+    "get_schedule": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "schedule_id": "UUID"
+      },
+      "parameters": [
+        "schedule_id"
+      ],
+      "uri": "/api/schedules/{schedule_id}"
     },
     "get_sessions": {
       "method": "get",
@@ -778,6 +1185,18 @@
         "GET"
       ],
       "uri": "/api/admin/voice/stats"
+    },
+    "get_summary": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "queryParameters": {
+        "endDate": "DateTime",
+        "startDate": "DateTime",
+        "teamId": "UUID"
+      },
+      "uri": "/api/analytics/summary"
     },
     "get_system_status": {
       "method": "get",
@@ -870,6 +1289,19 @@
       ],
       "uri": "/api/support/tickets/{ticket_id}"
     },
+    "get_time_condition": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "time_condition_id": "UUID"
+      },
+      "parameters": [
+        "time_condition_id"
+      ],
+      "uri": "/api/time-conditions/{time_condition_id}"
+    },
     "get_trends": {
       "method": "get",
       "methods": [
@@ -883,6 +1315,19 @@
         "GET"
       ],
       "uri": "/api/notifications/unread-count"
+    },
+    "get_unread_count_api_voicemail_boxes_box_id:uuid_unread": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "box_id": "UUID"
+      },
+      "parameters": [
+        "box_id"
+      ],
+      "uri": "/api/voicemail/boxes/{box_id}/unread"
     },
     "get_user": {
       "method": "get",
@@ -953,6 +1398,19 @@
       ],
       "uri": "/api/email-verification/status/{user_id}"
     },
+    "get_voicemail_box": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "box_id": "UUID"
+      },
+      "parameters": [
+        "box_id"
+      ],
+      "uri": "/api/voicemail/boxes/{box_id}"
+    },
     "get_voicemail_message": {
       "method": "get",
       "methods": [
@@ -968,6 +1426,19 @@
       ],
       "uri": "/api/voice/extensions/{ext_id}/voicemail/messages/{msg_id}"
     },
+    "get_voicemail_message_api_voicemail_messages_message_id:uuid": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "message_id": "UUID"
+      },
+      "parameters": [
+        "message_id"
+      ],
+      "uri": "/api/voicemail/messages/{message_id}"
+    },
     "get_voicemail_settings": {
       "method": "get",
       "methods": [
@@ -980,6 +1451,19 @@
         "ext_id"
       ],
       "uri": "/api/voice/extensions/{ext_id}/voicemail"
+    },
+    "get_volume": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "queryParameters": {
+        "endDate": "DateTime",
+        "interval": "string | undefined",
+        "startDate": "DateTime",
+        "teamId": "UUID"
+      },
+      "uri": "/api/analytics/volume"
     },
     "initiate_disable_mfa_oauth": {
       "method": "get",
@@ -1015,6 +1499,80 @@
         "sortOrder": "\"asc\" | \"desc\" | undefined"
       },
       "uri": "/api/profile/oauth/accounts"
+    },
+    "list_box_messages": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "box_id": "UUID"
+      },
+      "parameters": [
+        "box_id"
+      ],
+      "queryParameters": {
+        "createdAfter": "DateTime | undefined",
+        "createdBefore": "DateTime | undefined",
+        "currentPage": "number | undefined",
+        "ids": "string[] | undefined",
+        "is_read": "boolean | undefined",
+        "is_urgent": "boolean | undefined",
+        "orderBy": "string | undefined",
+        "pageSize": "number | undefined",
+        "sortOrder": "\"asc\" | \"desc\" | undefined",
+        "updatedAfter": "DateTime | undefined",
+        "updatedBefore": "DateTime | undefined"
+      },
+      "uri": "/api/voicemail/boxes/{box_id}/messages"
+    },
+    "list_call_queues": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "queryParameters": {
+        "createdAfter": "DateTime | undefined",
+        "createdBefore": "DateTime | undefined",
+        "currentPage": "number | undefined",
+        "ids": "string[] | undefined",
+        "orderBy": "string | undefined",
+        "pageSize": "number | undefined",
+        "searchIgnoreCase": "boolean | undefined",
+        "searchString": "string | undefined",
+        "sortOrder": "\"asc\" | \"desc\" | undefined",
+        "updatedAfter": "DateTime | undefined",
+        "updatedBefore": "DateTime | undefined"
+      },
+      "uri": "/api/call-queues"
+    },
+    "list_call_records": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "queryParameters": {
+        "createdAfter": "DateTime | undefined",
+        "createdBefore": "DateTime | undefined",
+        "currentPage": "number | undefined",
+        "destination": "string | undefined",
+        "direction": "string | undefined",
+        "disposition": "string | undefined",
+        "endDate": "DateTime | undefined",
+        "ids": "string[] | undefined",
+        "maxDuration": "number | undefined",
+        "minDuration": "number | undefined",
+        "orderBy": "string | undefined",
+        "pageSize": "number | undefined",
+        "searchIgnoreCase": "boolean | undefined",
+        "searchString": "string | undefined",
+        "sortOrder": "\"asc\" | \"desc\" | undefined",
+        "source": "string | undefined",
+        "startDate": "DateTime | undefined",
+        "updatedAfter": "DateTime | undefined",
+        "updatedBefore": "DateTime | undefined"
+      },
+      "uri": "/api/analytics/cdrs"
     },
     "list_connections": {
       "method": "get",
@@ -1089,6 +1647,19 @@
         "updatedBefore": "DateTime | undefined"
       },
       "uri": "/api/devices"
+    },
+    "list_entries": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "schedule_id": "UUID"
+      },
+      "parameters": [
+        "schedule_id"
+      ],
+      "uri": "/api/schedules/{schedule_id}/entries"
     },
     "list_extensions": {
       "method": "get",
@@ -1225,6 +1796,26 @@
       },
       "uri": "/api/voice/extensions/{ext_id}/forwarding"
     },
+    "list_ivr_menus": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "queryParameters": {
+        "createdAfter": "DateTime | undefined",
+        "createdBefore": "DateTime | undefined",
+        "currentPage": "number | undefined",
+        "ids": "string[] | undefined",
+        "orderBy": "string | undefined",
+        "pageSize": "number | undefined",
+        "searchIgnoreCase": "boolean | undefined",
+        "searchString": "string | undefined",
+        "sortOrder": "\"asc\" | \"desc\" | undefined",
+        "updatedAfter": "DateTime | undefined",
+        "updatedBefore": "DateTime | undefined"
+      },
+      "uri": "/api/ivr-menus"
+    },
     "list_locations": {
       "method": "get",
       "methods": [
@@ -1277,6 +1868,32 @@
       },
       "uri": "/api/admin/audit"
     },
+    "list_members": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "call_queue_id": "UUID"
+      },
+      "parameters": [
+        "call_queue_id"
+      ],
+      "uri": "/api/call-queues/{call_queue_id}/members"
+    },
+    "list_members_api_ring_groups_ring_group_id:uuid_members": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "ring_group_id": "UUID"
+      },
+      "parameters": [
+        "ring_group_id"
+      ],
+      "uri": "/api/ring-groups/{ring_group_id}/members"
+    },
     "list_messages": {
       "method": "get",
       "methods": [
@@ -1317,6 +1934,19 @@
       },
       "uri": "/api/notifications"
     },
+    "list_options": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "ivr_menu_id": "UUID"
+      },
+      "parameters": [
+        "ivr_menu_id"
+      ],
+      "uri": "/api/ivr-menus/{ivr_menu_id}/options"
+    },
     "list_phone_numbers": {
       "method": "get",
       "methods": [
@@ -1353,6 +1983,47 @@
       },
       "uri": "/api/voice/phone-numbers"
     },
+    "list_registrations": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "queryParameters": {
+        "createdAfter": "DateTime | undefined",
+        "createdBefore": "DateTime | undefined",
+        "currentPage": "number | undefined",
+        "ids": "string[] | undefined",
+        "orderBy": "string | undefined",
+        "pageSize": "number | undefined",
+        "searchIgnoreCase": "boolean | undefined",
+        "searchString": "string | undefined",
+        "sortOrder": "\"asc\" | \"desc\" | undefined",
+        "team_id": "UUID | undefined",
+        "updatedAfter": "DateTime | undefined",
+        "updatedBefore": "DateTime | undefined"
+      },
+      "uri": "/api/e911"
+    },
+    "list_ring_groups": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "queryParameters": {
+        "createdAfter": "DateTime | undefined",
+        "createdBefore": "DateTime | undefined",
+        "currentPage": "number | undefined",
+        "ids": "string[] | undefined",
+        "orderBy": "string | undefined",
+        "pageSize": "number | undefined",
+        "searchIgnoreCase": "boolean | undefined",
+        "searchString": "string | undefined",
+        "sortOrder": "\"asc\" | \"desc\" | undefined",
+        "updatedAfter": "DateTime | undefined",
+        "updatedBefore": "DateTime | undefined"
+      },
+      "uri": "/api/ring-groups"
+    },
     "list_roles": {
       "method": "get",
       "methods": [
@@ -1368,6 +2039,28 @@
         "sortOrder": "\"asc\" | \"desc\" | undefined"
       },
       "uri": "/api/roles"
+    },
+    "list_schedules": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "queryParameters": {
+        "createdAfter": "DateTime | undefined",
+        "createdBefore": "DateTime | undefined",
+        "currentPage": "number | undefined",
+        "ids": "string[] | undefined",
+        "orderBy": "string | undefined",
+        "pageSize": "number | undefined",
+        "schedule_type": "string | undefined",
+        "searchIgnoreCase": "boolean | undefined",
+        "searchString": "string | undefined",
+        "sortOrder": "\"asc\" | \"desc\" | undefined",
+        "team_id": "UUID | undefined",
+        "updatedAfter": "DateTime | undefined",
+        "updatedBefore": "DateTime | undefined"
+      },
+      "uri": "/api/schedules"
     },
     "list_tags": {
       "method": "get",
@@ -1506,6 +2199,36 @@
       },
       "uri": "/api/support/tickets"
     },
+    "list_time_conditions": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "queryParameters": {
+        "createdAfter": "DateTime | undefined",
+        "createdBefore": "DateTime | undefined",
+        "currentPage": "number | undefined",
+        "ids": "string[] | undefined",
+        "orderBy": "string | undefined",
+        "pageSize": "number | undefined",
+        "searchIgnoreCase": "boolean | undefined",
+        "searchString": "string | undefined",
+        "sortOrder": "\"asc\" | \"desc\" | undefined",
+        "updatedAfter": "DateTime | undefined",
+        "updatedBefore": "DateTime | undefined"
+      },
+      "uri": "/api/time-conditions"
+    },
+    "list_unregistered": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "queryParameters": {
+        "team_id": "UUID"
+      },
+      "uri": "/api/e911/unregistered"
+    },
     "list_users": {
       "method": "get",
       "methods": [
@@ -1546,6 +2269,24 @@
       },
       "uri": "/api/users"
     },
+    "list_voicemail_boxes": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "queryParameters": {
+        "createdAfter": "DateTime | undefined",
+        "createdBefore": "DateTime | undefined",
+        "currentPage": "number | undefined",
+        "ids": "string[] | undefined",
+        "orderBy": "string | undefined",
+        "pageSize": "number | undefined",
+        "sortOrder": "\"asc\" | \"desc\" | undefined",
+        "updatedAfter": "DateTime | undefined",
+        "updatedBefore": "DateTime | undefined"
+      },
+      "uri": "/api/voicemail/boxes"
+    },
     "list_voicemail_messages": {
       "method": "get",
       "methods": [
@@ -1569,6 +2310,26 @@
         "updatedBefore": "DateTime | undefined"
       },
       "uri": "/api/voice/extensions/{ext_id}/voicemail/messages"
+    },
+    "list_voicemail_messages_api_voicemail_messages": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "queryParameters": {
+        "createdAfter": "DateTime | undefined",
+        "createdBefore": "DateTime | undefined",
+        "currentPage": "number | undefined",
+        "ids": "string[] | undefined",
+        "is_read": "boolean | undefined",
+        "is_urgent": "boolean | undefined",
+        "orderBy": "string | undefined",
+        "pageSize": "number | undefined",
+        "sortOrder": "\"asc\" | \"desc\" | undefined",
+        "updatedAfter": "DateTime | undefined",
+        "updatedBefore": "DateTime | undefined"
+      },
+      "uri": "/api/voicemail/messages"
     },
     "login": {
       "method": "post",
@@ -1668,6 +2429,21 @@
         "ticket_id"
       ],
       "uri": "/api/support/tickets/{ticket_id}/paste-image"
+    },
+    "pause_member": {
+      "method": "put",
+      "methods": [
+        "PUT"
+      ],
+      "parameterTypes": {
+        "call_queue_id": "UUID",
+        "member_id": "UUID"
+      },
+      "parameters": [
+        "call_queue_id",
+        "member_id"
+      ],
+      "uri": "/api/call-queues/{call_queue_id}/members/{member_id}/pause"
     },
     "reboot_device": {
       "method": "post",
@@ -1860,6 +2636,19 @@
       ],
       "uri": "/api/voice/extensions/{ext_id}/forwarding"
     },
+    "set_override": {
+      "method": "put",
+      "methods": [
+        "PUT"
+      ],
+      "parameterTypes": {
+        "time_condition_id": "UUID"
+      },
+      "parameters": [
+        "time_condition_id"
+      ],
+      "uri": "/api/time-conditions/{time_condition_id}/override"
+    },
     "signup": {
       "method": "post",
       "methods": [
@@ -1958,6 +2747,19 @@
       ],
       "uri": "/api/voice/extensions/{ext_id}/dnd/toggle"
     },
+    "toggle_read_status": {
+      "method": "put",
+      "methods": [
+        "PUT"
+      ],
+      "parameterTypes": {
+        "message_id": "UUID"
+      },
+      "parameters": [
+        "message_id"
+      ],
+      "uri": "/api/voicemail/messages/{message_id}/read"
+    },
     "unlink": {
       "method": "delete",
       "methods": [
@@ -1970,6 +2772,19 @@
         "provider"
       ],
       "uri": "/api/profile/oauth/{provider}"
+    },
+    "update_call_queue": {
+      "method": "patch",
+      "methods": [
+        "PATCH"
+      ],
+      "parameterTypes": {
+        "call_queue_id": "UUID"
+      },
+      "parameters": [
+        "call_queue_id"
+      ],
+      "uri": "/api/call-queues/{call_queue_id}"
     },
     "update_connection": {
       "method": "patch",
@@ -2009,6 +2824,21 @@
         "ext_id"
       ],
       "uri": "/api/voice/extensions/{ext_id}/dnd"
+    },
+    "update_entry": {
+      "method": "patch",
+      "methods": [
+        "PATCH"
+      ],
+      "parameterTypes": {
+        "entry_id": "UUID",
+        "schedule_id": "UUID"
+      },
+      "parameters": [
+        "entry_id",
+        "schedule_id"
+      ],
+      "uri": "/api/schedules/{schedule_id}/entries/{entry_id}"
     },
     "update_extension": {
       "method": "patch",
@@ -2066,6 +2896,26 @@
       ],
       "uri": "/api/voice/extensions/{ext_id}/forwarding/{rule_id}"
     },
+    "update_gateway_settings": {
+      "method": "put",
+      "methods": [
+        "PUT"
+      ],
+      "uri": "/api/admin/gateway/settings"
+    },
+    "update_ivr_menu": {
+      "method": "patch",
+      "methods": [
+        "PATCH"
+      ],
+      "parameterTypes": {
+        "ivr_menu_id": "UUID"
+      },
+      "parameters": [
+        "ivr_menu_id"
+      ],
+      "uri": "/api/ivr-menus/{ivr_menu_id}"
+    },
     "update_location": {
       "method": "patch",
       "methods": [
@@ -2081,6 +2931,36 @@
       ],
       "uri": "/api/teams/{team_id}/locations/{location_id}"
     },
+    "update_member": {
+      "method": "patch",
+      "methods": [
+        "PATCH"
+      ],
+      "parameterTypes": {
+        "call_queue_id": "UUID",
+        "member_id": "UUID"
+      },
+      "parameters": [
+        "call_queue_id",
+        "member_id"
+      ],
+      "uri": "/api/call-queues/{call_queue_id}/members/{member_id}"
+    },
+    "update_member_api_ring_groups_ring_group_id:uuid_members_member_id:uuid": {
+      "method": "patch",
+      "methods": [
+        "PATCH"
+      ],
+      "parameterTypes": {
+        "member_id": "UUID",
+        "ring_group_id": "UUID"
+      },
+      "parameters": [
+        "member_id",
+        "ring_group_id"
+      ],
+      "uri": "/api/ring-groups/{ring_group_id}/members/{member_id}"
+    },
     "update_message": {
       "method": "patch",
       "methods": [
@@ -2095,6 +2975,21 @@
         "ticket_id"
       ],
       "uri": "/api/support/tickets/{ticket_id}/messages/{msg_id}"
+    },
+    "update_option": {
+      "method": "patch",
+      "methods": [
+        "PATCH"
+      ],
+      "parameterTypes": {
+        "ivr_menu_id": "UUID",
+        "option_id": "UUID"
+      },
+      "parameters": [
+        "ivr_menu_id",
+        "option_id"
+      ],
+      "uri": "/api/ivr-menus/{ivr_menu_id}/options/{option_id}"
     },
     "update_organization": {
       "method": "put",
@@ -2137,6 +3032,32 @@
       ],
       "uri": "/api/me"
     },
+    "update_registration": {
+      "method": "patch",
+      "methods": [
+        "PATCH"
+      ],
+      "parameterTypes": {
+        "registration_id": "UUID"
+      },
+      "parameters": [
+        "registration_id"
+      ],
+      "uri": "/api/e911/{registration_id}"
+    },
+    "update_ring_group": {
+      "method": "patch",
+      "methods": [
+        "PATCH"
+      ],
+      "parameterTypes": {
+        "ring_group_id": "UUID"
+      },
+      "parameters": [
+        "ring_group_id"
+      ],
+      "uri": "/api/ring-groups/{ring_group_id}"
+    },
     "update_role": {
       "method": "patch",
       "methods": [
@@ -2149,6 +3070,19 @@
         "role_id"
       ],
       "uri": "/api/roles/{role_id}"
+    },
+    "update_schedule": {
+      "method": "patch",
+      "methods": [
+        "PATCH"
+      ],
+      "parameterTypes": {
+        "schedule_id": "UUID"
+      },
+      "parameters": [
+        "schedule_id"
+      ],
+      "uri": "/api/schedules/{schedule_id}"
     },
     "update_tag": {
       "method": "patch",
@@ -2230,6 +3164,19 @@
       ],
       "uri": "/api/support/tickets/{ticket_id}"
     },
+    "update_time_condition": {
+      "method": "patch",
+      "methods": [
+        "PATCH"
+      ],
+      "parameterTypes": {
+        "time_condition_id": "UUID"
+      },
+      "parameters": [
+        "time_condition_id"
+      ],
+      "uri": "/api/time-conditions/{time_condition_id}"
+    },
     "update_user": {
       "method": "patch",
       "methods": [
@@ -2255,6 +3202,19 @@
         "user_id"
       ],
       "uri": "/api/users/{user_id}"
+    },
+    "update_voicemail_box": {
+      "method": "patch",
+      "methods": [
+        "PATCH"
+      ],
+      "parameterTypes": {
+        "box_id": "UUID"
+      },
+      "parameters": [
+        "box_id"
+      ],
+      "uri": "/api/voicemail/boxes/{box_id}"
     },
     "update_voicemail_message": {
       "method": "patch",
@@ -2312,6 +3272,19 @@
         "ticket_id"
       ],
       "uri": "/api/support/tickets/{ticket_id}/attachments"
+    },
+    "validate_registration": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "parameterTypes": {
+        "registration_id": "UUID"
+      },
+      "parameters": [
+        "registration_id"
+      ],
+      "uri": "/api/e911/{registration_id}/validate"
     },
     "validate_reset_token": {
       "method": "get",
