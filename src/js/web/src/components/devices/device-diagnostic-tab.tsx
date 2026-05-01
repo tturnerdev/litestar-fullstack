@@ -1600,6 +1600,7 @@ export function DeviceDiagnosticTab({
                 className="h-8 w-8"
                 onClick={() => screenshotQuery.refetch()}
                 disabled={screenshotQuery.isFetching}
+                aria-label="Refresh screenshot"
               >
                 <RefreshCw className={`h-4 w-4 ${screenshotQuery.isFetching ? "animate-spin" : ""}`} />
               </Button>

@@ -70,7 +70,7 @@ export function EmailRouteRow({ route, faxNumberId, onDelete, isDeleting, onTest
           <span className="font-mono text-sm">{route.emailAddress}</span>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={handleCopy}>
+              <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={handleCopy} aria-label="Copy email address">
                 {copied ? (
                   <Check className="h-3.5 w-3.5 text-green-500" />
                 ) : (

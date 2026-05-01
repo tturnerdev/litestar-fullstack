@@ -301,7 +301,7 @@ function CdrDetailDialog({
   open: boolean
   onOpenChange: (open: boolean) => void
 }) {
-  const { data: record, isLoading, isError } = useCallRecord(cdrId)
+  const { data: record, isLoading, isError, refetch } = useCallRecord(cdrId)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -318,9 +318,12 @@ function CdrDetailDialog({
         )}
 
         {isError && (
-          <div className="rounded-md bg-destructive/10 px-4 py-3 text-sm text-destructive">
-            Unable to load call record details.
-          </div>
+          <EmptyState
+            icon={AlertCircle}
+            title="Unable to load call record details"
+            description="Something went wrong. Please try again."
+            action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+          />
         )}
 
         {record && (

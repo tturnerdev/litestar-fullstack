@@ -116,9 +116,9 @@ function AdminVoicePage() {
   const [phoneNumberPage, setPhoneNumberPage] = useState(1)
   const [phoneSearch, setPhoneSearch] = useState("")
 
-  const { data: stats, isLoading: statsLoading, isError: statsError } = useAdminVoiceStats()
-  const { data: phoneData, isLoading: phonesLoading, isError: phonesError } = useAdminPhoneNumbers(phoneNumberPage, PAGE_SIZE, phoneSearch || undefined)
-  const { data: extensions, isLoading: extensionsLoading, isError: extensionsError } = useAdminExtensions()
+  const { data: stats, isLoading: statsLoading, isError: statsError, refetch: refetchStats } = useAdminVoiceStats()
+  const { data: phoneData, isLoading: phonesLoading, isError: phonesError, refetch: refetchPhones } = useAdminPhoneNumbers(phoneNumberPage, PAGE_SIZE, phoneSearch || undefined)
+  const { data: extensions, isLoading: extensionsLoading, isError: extensionsError, refetch: refetchExtensions } = useAdminExtensions()
 
   const phoneNumbers = phoneData?.items ?? []
   const phoneTotal = phoneData?.total ?? 0
@@ -152,12 +152,12 @@ function AdminVoicePage() {
             ))}
           </div>
         ) : statsError ? (
-          <Card>
-            <CardContent className="flex items-center gap-3 py-6 text-muted-foreground">
-              <AlertCircle className="h-5 w-5 text-destructive" />
-              <span>Unable to load voice statistics. Please try again later.</span>
-            </CardContent>
-          </Card>
+          <EmptyState
+            icon={AlertCircle}
+            title="Unable to load voice statistics"
+            description="Something went wrong. Please try again."
+            action={<Button variant="outline" size="sm" onClick={() => refetchStats()}>Try again</Button>}
+          />
         ) : (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {statConfig.map((stat) => {
@@ -243,10 +243,12 @@ function AdminVoicePage() {
             {phonesLoading ? (
               <SkeletonTable rows={5} />
             ) : phonesError ? (
-              <div className="flex items-center gap-3 py-8 justify-center text-muted-foreground">
-                <AlertCircle className="h-5 w-5 text-destructive" />
-                <span>Unable to load phone numbers.</span>
-              </div>
+              <EmptyState
+                icon={AlertCircle}
+                title="Unable to load phone numbers"
+                description="Something went wrong. Please try again."
+                action={<Button variant="outline" size="sm" onClick={() => refetchPhones()}>Try again</Button>}
+              />
             ) : phoneNumbers.length === 0 ? (
               <EmptyState
                 icon={Search}
@@ -343,10 +345,12 @@ function AdminVoicePage() {
             {extensionsLoading ? (
               <SkeletonTable rows={5} />
             ) : extensionsError ? (
-              <div className="flex items-center gap-3 py-8 justify-center text-muted-foreground">
-                <AlertCircle className="h-5 w-5 text-destructive" />
-                <span>Unable to load extensions.</span>
-              </div>
+              <EmptyState
+                icon={AlertCircle}
+                title="Unable to load extensions"
+                description="Something went wrong. Please try again."
+                action={<Button variant="outline" size="sm" onClick={() => refetchExtensions()}>Try again</Button>}
+              />
             ) : recentExtensions.length === 0 ? (
               <EmptyState
                 icon={Hash}

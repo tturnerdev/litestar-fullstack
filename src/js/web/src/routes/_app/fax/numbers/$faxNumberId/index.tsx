@@ -419,7 +419,7 @@ function FaxNumberDetailPage() {
                 ) : (
                   <div className="flex items-center gap-2">
                     <p className="font-medium">{data.label || "---"}</p>
-                    <Button variant="ghost" size="sm" onClick={startEditingLabel} className="h-7 w-7 p-0">
+                    <Button variant="ghost" size="sm" onClick={startEditingLabel} className="h-7 w-7 p-0" aria-label="Edit label">
                       <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
                     </Button>
                   </div>

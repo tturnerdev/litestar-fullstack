@@ -763,6 +763,7 @@ function SettingsTab({ deviceId, data }: SettingsTabProps) {
                 className="absolute right-0 top-0 h-full w-10 hover:bg-transparent"
                 onClick={() => setShowPass(!showPass)}
                 tabIndex={-1}
+                aria-label={showPass ? "Hide password" : "Show password"}
               >
                 {showPass ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
               </Button>

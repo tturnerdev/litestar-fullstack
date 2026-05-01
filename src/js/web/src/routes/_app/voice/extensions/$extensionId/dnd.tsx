@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import {
+  AlertCircle,
   ArrowLeft,
   BellOff,
   BellRing,
@@ -19,6 +20,7 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/empty-state"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { DndSettingsForm } from "@/components/voice/dnd-settings-form"
@@ -81,7 +83,7 @@ function DndPage() {
   useDocumentTitle("Do Not Disturb")
   const { extensionId } = Route.useParams()
   const { data: extension, isLoading: extLoading } = useExtension(extensionId)
-  const { data: dnd, isLoading: dndLoading, isError } = useDndSettings(extensionId)
+  const { data: dnd, isLoading: dndLoading, isError, refetch } = useDndSettings(extensionId)
   const toggleMutation = useToggleDnd(extensionId)
 
   const isLoading = extLoading || dndLoading
@@ -138,11 +140,12 @@ function DndPage() {
           }
         />
         <PageSection>
-          <Card>
-            <CardContent className="py-8 text-center text-muted-foreground">
-              Unable to load DND settings for this extension.
-            </CardContent>
-          </Card>
+          <EmptyState
+            icon={AlertCircle}
+            title="Unable to load DND settings"
+            description="Something went wrong. Please try again."
+            action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+          />
         </PageSection>
       </PageContainer>
     )

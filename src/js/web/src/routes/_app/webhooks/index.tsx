@@ -143,7 +143,7 @@ function statusCodeBadge(code: number | null): React.ReactNode {
 // -- Delivery History Panel ---------------------------------------------------
 
 function DeliveryHistoryPanel({ webhookId }: { webhookId: string }) {
-  const { data: deliveries, isLoading, isError } = useWebhookDeliveries(webhookId)
+  const { data: deliveries, isLoading, isError, refetch } = useWebhookDeliveries(webhookId)
 
   if (isLoading) {
     return (
@@ -156,10 +156,12 @@ function DeliveryHistoryPanel({ webhookId }: { webhookId: string }) {
 
   if (isError) {
     return (
-      <div className="flex items-center gap-2 py-4 px-6 text-sm text-destructive">
-        <AlertCircle className="h-4 w-4" />
-        Failed to load delivery history.
-      </div>
+      <EmptyState
+        icon={AlertCircle}
+        title="Failed to load delivery history"
+        description="Something went wrong. Please try again."
+        action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+      />
     )
   }
 
