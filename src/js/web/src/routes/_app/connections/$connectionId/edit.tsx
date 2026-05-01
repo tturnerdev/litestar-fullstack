@@ -100,6 +100,44 @@ const authTypes = [
   { value: "token", label: "Bearer Token" },
 ]
 
+// ── Provider presets ────────────────────────────────────────────────────
+
+interface ProviderPreset {
+  value: string
+  label: string
+  connectionType: string
+  authType: string
+  hint: string
+  defaultSettings: { verify_ssl: boolean; timeout: number }
+}
+
+const providerPresets: ProviderPreset[] = [
+  {
+    value: "freepbx",
+    label: "FreePBX",
+    connectionType: "pbx",
+    authType: "oauth2",
+    hint: "Requires OAuth2 client credentials from FreePBX Admin -> Connectivity -> API -> Applications.",
+    defaultSettings: { verify_ssl: true, timeout: 10 },
+  },
+  {
+    value: "telnyx",
+    label: "Telnyx",
+    connectionType: "carrier",
+    authType: "api_key",
+    hint: "Requires an API key from the Telnyx Mission Control Portal.",
+    defaultSettings: { verify_ssl: true, timeout: 10 },
+  },
+  {
+    value: "unifi",
+    label: "Unifi Network",
+    connectionType: "network",
+    authType: "api_key",
+    hint: "Requires an API key from UniFi Console -> Settings -> API.",
+    defaultSettings: { verify_ssl: false, timeout: 10 },
+  },
+]
+
 /** Returns credential input fields based on the selected auth type. */
 function getCredentialFields(authType: string): { key: string; label: string; type: string; placeholder?: string }[] {
   switch (authType) {
@@ -178,6 +216,7 @@ function EditConnectionPage() {
   const [name, setName] = useState("")
   const [connectionType, setConnectionType] = useState("pbx")
   const [provider, setProvider] = useState("")
+  const [selectedPreset, setSelectedPreset] = useState<string | null>(null)
   const [host, setHost] = useState("")
   const [port, setPort] = useState("")
   const [authType, setAuthType] = useState("none")
@@ -204,6 +243,7 @@ function EditConnectionPage() {
   // Reset form state when navigating to a different connection
   useEffect(() => {
     setInitialized(false)
+    setSelectedPreset(null)
     setErrors({})
     setTouched({})
     setCredentials({})
@@ -224,6 +264,11 @@ function EditConnectionPage() {
       setGatewayTimeout(data.settings?.timeout != null ? String(data.settings.timeout) : "")
       setGatewayCacheTtl(data.settings?.cache_ttl != null ? String(data.settings.cache_ttl) : "")
       setSettingsText(data.settings ? JSON.stringify(data.settings, null, 2) : "")
+      // Detect if the existing provider matches a known preset
+      const matchedPreset = providerPresets.find(
+        (p) => p.value === data.provider.toLowerCase(),
+      )
+      setSelectedPreset(matchedPreset ? matchedPreset.value : "_custom")
       setInitialized(true)
     }
   }, [data, initialized])
@@ -303,6 +348,40 @@ function EditConnectionPage() {
   const handleCredentialChange = (key: string, value: string) => {
     setCredentials((prev) => ({ ...prev, [key]: value }))
   }
+
+  // ── Provider preset selection ───────────────────────────────────────
+
+  const handlePresetChange = useCallback(
+    (value: string) => {
+      if (value === "_custom") {
+        setSelectedPreset("_custom")
+        setProvider("")
+        setErrors((prev) => ({ ...prev, provider: undefined }))
+        return
+      }
+      const preset = providerPresets.find((p) => p.value === value)
+      if (preset) {
+        setSelectedPreset(value)
+        setProvider(preset.label)
+        setConnectionType(preset.connectionType)
+        setVerifySsl(preset.defaultSettings.verify_ssl)
+        setGatewayTimeout(String(preset.defaultSettings.timeout))
+        // Only change auth type if no credentials have been entered
+        if ((hasCredentials || hasExistingCredentials) && preset.authType !== authType) {
+          setPendingAuthType(preset.authType)
+        } else {
+          setAuthType(preset.authType)
+          setCredentials({})
+        }
+        setErrors((prev) => ({ ...prev, provider: undefined }))
+      }
+    },
+    [authType, hasCredentials, hasExistingCredentials],
+  )
+
+  const activePreset = selectedPreset && selectedPreset !== "_custom"
+    ? providerPresets.find((p) => p.value === selectedPreset)
+    : null
 
   // ── Auth type change with confirmation ───────────────────────────────
 
@@ -581,28 +660,49 @@ function EditConnectionPage() {
                 <Label htmlFor="conn-provider">
                   Provider <RequiredMark />
                 </Label>
-                <Input
-                  id="conn-provider"
-                  placeholder="e.g., FreePBX, Zendesk, Twilio"
-                  value={provider}
-                  onChange={(e) => {
-                    if (e.target.value.length <= PROVIDER_MAX) handleFieldChange("provider", e.target.value, setProvider)
-                  }}
-                  onBlur={() => handleFieldBlur("provider", provider)}
-                  aria-invalid={!!errors.provider}
-                  maxLength={PROVIDER_MAX}
-                  required
-                />
-                <div className="flex items-center justify-between">
-                  {errors.provider ? (
-                    <FieldError message={errors.provider} />
-                  ) : (
-                    <FieldHint>The specific software or service provider (e.g., FreePBX, Zendesk).</FieldHint>
-                  )}
-                  <p className={cn("shrink-0 text-xs", provider.length >= PROVIDER_MAX ? "text-red-500" : "text-muted-foreground")}>
-                    {provider.length}/{PROVIDER_MAX}
-                  </p>
-                </div>
+                <Select value={selectedPreset ?? ""} onValueChange={handlePresetChange}>
+                  <SelectTrigger id="conn-provider-preset">
+                    <SelectValue placeholder="Select a provider..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {providerPresets.map((p) => (
+                      <SelectItem key={p.value} value={p.value}>
+                        {p.label}
+                      </SelectItem>
+                    ))}
+                    <SelectItem value="_custom">Custom</SelectItem>
+                  </SelectContent>
+                </Select>
+                {selectedPreset === "_custom" && (
+                  <div className="pt-1">
+                    <Input
+                      id="conn-provider"
+                      placeholder="e.g., Zendesk, Twilio, 3CX"
+                      value={provider}
+                      onChange={(e) => {
+                        if (e.target.value.length <= PROVIDER_MAX) handleFieldChange("provider", e.target.value, setProvider)
+                      }}
+                      onBlur={() => handleFieldBlur("provider", provider)}
+                      aria-invalid={!!errors.provider}
+                      maxLength={PROVIDER_MAX}
+                      required
+                    />
+                    <div className="flex items-center justify-between pt-1">
+                      <p className={cn("shrink-0 text-xs", provider.length >= PROVIDER_MAX ? "text-red-500" : "text-muted-foreground")}>
+                        {provider.length}/{PROVIDER_MAX}
+                      </p>
+                    </div>
+                  </div>
+                )}
+                {errors.provider ? (
+                  <FieldError message={errors.provider} />
+                ) : activePreset ? (
+                  <FieldHint>{activePreset.hint}</FieldHint>
+                ) : selectedPreset === "_custom" ? (
+                  <FieldHint>Enter the name of your provider.</FieldHint>
+                ) : (
+                  <FieldHint>Choose a known provider or select Custom to enter one manually.</FieldHint>
+                )}
               </div>
 
               <div className="space-y-2">

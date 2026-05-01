@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   AlertCircle,
   BarChart3,
@@ -24,8 +24,10 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { BulkActionBar, createExportAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
 import { DateRangeFilter, getPresetDates } from "@/components/ui/date-range-filter"
 import {
   Dialog,
@@ -581,6 +583,9 @@ function CallRecordsTab() {
   const [maxDuration, setMaxDuration] = useState("")
   const [page, setPage] = useState(1)
 
+  // Row selection
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+
   // Detail dialog
   const [selectedCdrId, setSelectedCdrId] = useState<string | null>(null)
 
@@ -610,6 +615,48 @@ function CallRecordsTab() {
       return true
     })
   }, [data?.items, directionFilter, dispositionFilter])
+
+  // Selection helpers
+  const allVisibleIds = useMemo(() => filteredItems.map((r) => r.id), [filteredItems])
+  const allSelected = filteredItems.length > 0 && filteredItems.every((r) => selectedIds.has(r.id))
+  const someSelected = filteredItems.some((r) => selectedIds.has(r.id))
+
+  const toggleAll = useCallback(() => {
+    if (allSelected) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(allVisibleIds))
+    }
+  }, [allSelected, allVisibleIds])
+
+  const toggleOne = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      return next
+    })
+  }, [])
+
+  // Clear selection when filters/search/page change
+  useEffect(() => {
+    setSelectedIds(new Set())
+  }, [debouncedSearch, directionFilter, dispositionFilter, startDate, endDate, minDuration, maxDuration, page])
+
+  // Bulk actions (export only — CDR is audit data, no delete)
+  const bulkActions = useMemo(
+    () => [
+      createExportAction<CallRecord>(
+        "call-records-selected",
+        csvHeaders,
+        (ids) => filteredItems.filter((r) => ids.includes(r.id)),
+      ),
+    ],
+    [filteredItems],
+  )
 
   const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / PAGE_SIZE))
   const hasData = filteredItems.length > 0
@@ -786,6 +833,14 @@ function CallRecordsTab() {
             <Table aria-label="Call Records">
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-10">
+                    <Checkbox
+                      checked={allSelected}
+                      indeterminate={someSelected && !allSelected}
+                      onChange={toggleAll}
+                      aria-label="Select all call records"
+                    />
+                  </TableHead>
                   <TableHead>Date/Time</TableHead>
                   <TableHead>Direction</TableHead>
                   <TableHead>Source</TableHead>
@@ -799,9 +854,24 @@ function CallRecordsTab() {
                 {filteredItems.map((record) => (
                   <TableRow
                     key={record.id}
+                    data-state={selectedIds.has(record.id) ? "selected" : undefined}
                     className="cursor-pointer hover:bg-muted/50"
-                    onClick={() => setSelectedCdrId(record.id)}
+                    onClick={(e) => {
+                      const target = e.target as HTMLElement
+                      if (target.closest("[role=checkbox]")) return
+                      setSelectedCdrId(record.id)
+                    }}
                   >
+                    <TableCell>
+                      <Checkbox
+                        checked={selectedIds.has(record.id)}
+                        onChange={(e) => {
+                          e.stopPropagation()
+                          toggleOne(record.id)
+                        }}
+                        aria-label={`Select call record from ${record.source} to ${record.destination}`}
+                      />
+                    </TableCell>
                     <TableCell>
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -874,6 +944,14 @@ function CallRecordsTab() {
           }}
         />
       )}
+
+      {/* Bulk action bar */}
+      <BulkActionBar
+        selectedCount={selectedIds.size}
+        selectedIds={Array.from(selectedIds)}
+        onClearSelection={() => setSelectedIds(new Set())}
+        actions={bulkActions}
+      />
     </div>
   )
 }

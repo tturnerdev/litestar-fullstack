@@ -1,13 +1,18 @@
 import { useCallback, useEffect, useRef, useState } from "react"
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, Link } from "@tanstack/react-router"
 import {
   Activity,
+  AlertCircle,
+  Cable,
   CheckCircle2,
+  Circle,
   Clock,
   Cpu,
   Database,
+  ExternalLink,
   HardDrive,
   Layers,
+  Loader2,
   RefreshCw,
   Server,
   XCircle,
@@ -24,6 +29,8 @@ import { SkeletonCard } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAdminSystemStatus } from "@/lib/api/hooks/admin"
+import { useConnections, useTestAnyConnection } from "@/lib/api/hooks/connections"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { formatUptime } from "@/lib/format-utils"
 
 export const Route = createFileRoute("/_app/admin/system")({
@@ -340,6 +347,162 @@ function WorkerQueuesCard({
 }
 
 // ---------------------------------------------------------------------------
+// External Connections Overview
+// ---------------------------------------------------------------------------
+
+const connectionStatusConfig: Record<string, { icon: typeof CheckCircle2; colorClass: string; label: string }> = {
+  connected: { icon: CheckCircle2, colorClass: "text-emerald-600 dark:text-emerald-400", label: "Connected" },
+  error: { icon: AlertCircle, colorClass: "text-destructive", label: "Error" },
+  disconnected: { icon: XCircle, colorClass: "text-muted-foreground", label: "Disconnected" },
+  unknown: { icon: Circle, colorClass: "text-muted-foreground", label: "Unknown" },
+}
+
+const typeLabels: Record<string, string> = {
+  pbx: "PBX",
+  helpdesk: "Helpdesk",
+  carrier: "Carrier",
+  network: "Network",
+  other: "Other",
+}
+
+function ExternalConnectionsCard() {
+  const { data, isLoading } = useConnections({ page: 1, pageSize: 100 })
+  const testConnection = useTestAnyConnection()
+  const [testingAll, setTestingAll] = useState(false)
+
+  const connections = data?.items ?? []
+  const connectedCount = connections.filter((c) => c.status === "connected").length
+  const totalCount = connections.length
+
+  const handleTestAll = useCallback(async () => {
+    if (testingAll || connections.length === 0) return
+    setTestingAll(true)
+    try {
+      for (const conn of connections) {
+        await testConnection.mutateAsync(conn.id)
+      }
+    } finally {
+      setTestingAll(false)
+    }
+  }, [testingAll, connections, testConnection])
+
+  if (isLoading) {
+    return <SkeletonCard />
+  }
+
+  if (totalCount === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Cable className="h-4 w-4 text-muted-foreground" />
+            External Connections
+          </CardTitle>
+          <CardDescription>Status overview of configured integrations.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            No connections configured.{" "}
+            <Link to="/connections/new" className="text-primary underline-offset-4 hover:underline">
+              Add one
+            </Link>
+            .
+          </p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Cable className="h-4 w-4 text-muted-foreground" />
+              External Connections
+              <Badge variant="secondary" className="ml-1 text-[10px]">
+                {connectedCount} of {totalCount} connected
+              </Badge>
+            </CardTitle>
+            <CardDescription>Status overview of configured integrations.</CardDescription>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={handleTestAll} disabled={testingAll}>
+              {testingAll ? (
+                <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Zap className="mr-1.5 h-3.5 w-3.5" />
+              )}
+              Test All
+            </Button>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        {connections.map((conn) => {
+          const config = connectionStatusConfig[conn.status] ?? connectionStatusConfig.unknown
+          const StatusIcon = config.icon
+          const isCurrentlyTesting = testConnection.isPending && testConnection.variables === conn.id
+          return (
+            <div
+              key={conn.id}
+              className="flex items-center justify-between rounded-lg border px-4 py-3"
+            >
+              <div className="flex items-center gap-3">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className={`flex items-center ${config.colorClass}`}>
+                      {isCurrentlyTesting ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <StatusIcon className="h-3.5 w-3.5" />
+                      )}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="text-xs">
+                    {isCurrentlyTesting ? "Testing..." : config.label}
+                    {conn.lastError && conn.status === "error" ? `: ${conn.lastError}` : ""}
+                  </TooltipContent>
+                </Tooltip>
+                <div>
+                  <p className="text-sm font-medium">{conn.name}</p>
+                  <p className="text-xs text-muted-foreground">{conn.provider}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="text-[10px]">
+                  {typeLabels[conn.connectionType] ?? conn.connectionType}
+                </Badge>
+                {conn.lastHealthCheck && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="cursor-default text-[10px] text-muted-foreground">
+                        {formatRelativeTimeShort(conn.lastHealthCheck)}
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent className="text-xs">{formatDateTime(conn.lastHealthCheck)}</TooltipContent>
+                  </Tooltip>
+                )}
+              </div>
+            </div>
+          )
+        })}
+        <div className="pt-1">
+          <Link
+            to="/connections"
+            className="inline-flex items-center gap-1 text-xs text-primary underline-offset-4 hover:underline"
+          >
+            Manage connections
+            <ExternalLink className="h-3 w-3" />
+          </Link>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Page
 // ---------------------------------------------------------------------------
 
@@ -470,6 +633,9 @@ function AdminSystemPage() {
                   </Card>
                 )}
               </div>
+
+              {/* External connections overview */}
+              <ExternalConnectionsCard />
             </div>
           )}
         </PageSection>

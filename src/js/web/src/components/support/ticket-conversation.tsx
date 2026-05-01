@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { useTicketMessages } from "@/lib/api/hooks/support"
+import { useAuthStore } from "@/lib/auth"
 import { cn } from "@/lib/utils"
 
 interface TicketConversationProps {
@@ -46,6 +47,7 @@ export function TicketConversation({
   firstUnreadIndex,
 }: TicketConversationProps) {
   const { data: messages, isLoading, isError } = useTicketMessages(ticketId)
+  const isSuperuser = useAuthStore((s) => s.user?.isSuperuser === true)
   const containerRef = useRef<HTMLDivElement>(null)
   const endRef = useRef<HTMLDivElement>(null)
   const topRef = useRef<HTMLDivElement>(null)
@@ -83,11 +85,15 @@ export function TicketConversation({
     }
   }, [messages, scrollToBottom])
 
-  // Filter messages if hiding system messages
+  // Filter messages: hide internal notes for non-superusers, optionally hide system messages
   const visibleMessages = useMemo(() => {
     if (!messages) return []
-    return hideSystem ? messages.filter((m) => !m.isSystemMessage) : messages
-  }, [messages, hideSystem])
+    return messages.filter((m) => {
+      if (m.isInternalNote && !isSuperuser) return false
+      if (m.isSystemMessage && hideSystem) return false
+      return true
+    })
+  }, [messages, hideSystem, isSuperuser])
 
   const scrollToEnd = useCallback(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" })

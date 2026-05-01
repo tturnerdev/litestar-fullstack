@@ -1,4 +1,4 @@
-import { Check, Keyboard, Loader2, Send, X } from "lucide-react"
+import { Check, Eye, Keyboard, Loader2, Send, StickyNote, X } from "lucide-react"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { AttachmentUpload, type PendingFile } from "@/components/support/attachment-upload"
 import { useImagePasteHandler } from "@/components/support/image-paste-handler"
@@ -13,15 +13,20 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Switch } from "@/components/ui/switch"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useCreateTicketMessage, usePasteImage, useUploadAttachment } from "@/lib/api/hooks/support"
 import { useAuthStore } from "@/lib/auth"
+import { cn } from "@/lib/utils"
 
 export function TicketReplyForm({ ticketId }: { ticketId: string }) {
   const [body, setBody] = useState("")
   const [files, setFiles] = useState<PendingFile[]>([])
   const [isUploading, setIsUploading] = useState(false)
+  const [isInternalNote, setIsInternalNote] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
@@ -29,6 +34,7 @@ export function TicketReplyForm({ ticketId }: { ticketId: string }) {
   const pasteImage = usePasteImage(ticketId)
   const uploadAttachment = useUploadAttachment(ticketId)
   const user = useAuthStore((s) => s.user)
+  const isSuperuser = user?.isSuperuser === true
   const userInitial = (user?.name?.[0] ?? user?.email?.[0] ?? "U").toUpperCase()
 
   // Clear success animation after delay
@@ -69,11 +75,12 @@ export function TicketReplyForm({ ticketId }: { ticketId: string }) {
     }
 
     createMessage.mutate(
-      { bodyMarkdown: body },
+      { bodyMarkdown: body, ...(isInternalNote && { isInternalNote: true }) },
       {
         onSuccess: () => {
           setBody("")
           setFiles([])
+          setIsInternalNote(false)
           setShowSuccess(true)
         },
       },
@@ -107,18 +114,74 @@ export function TicketReplyForm({ ticketId }: { ticketId: string }) {
 
   return (
     <>
-      <Card className="border-border/60 border-l-2 border-l-primary/30">
+      <Card
+        className={cn(
+          "border-l-2 transition-colors",
+          isInternalNote
+            ? "border-amber-500/30 border-l-amber-500 bg-amber-500/5"
+            : "border-border/60 border-l-primary/30",
+        )}
+      >
         <CardHeader className="pb-3">
-          <div className="flex items-center gap-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
-              {userInitial}
-            </div>
-            <CardTitle className="text-sm font-medium">Reply</CardTitle>
-            {showSuccess && (
-              <div className="flex items-center gap-1 animate-in fade-in zoom-in duration-200">
-                <Check className="h-4 w-4 text-green-500" />
-                <span className="text-xs text-green-600">Sent</span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div
+                className={cn(
+                  "flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium",
+                  isInternalNote
+                    ? "bg-amber-500/15 text-amber-700 dark:text-amber-400"
+                    : "bg-primary/10 text-primary",
+                )}
+              >
+                {userInitial}
               </div>
+              <CardTitle className="text-sm font-medium">
+                {isInternalNote ? "Internal Note" : "Reply"}
+              </CardTitle>
+              {isInternalNote && (
+                <Badge
+                  variant="outline"
+                  className="border-amber-500/30 bg-amber-500/10 text-[10px] text-amber-700 dark:text-amber-400"
+                >
+                  <Eye className="mr-0.5 h-2.5 w-2.5" />
+                  Staff only
+                </Badge>
+              )}
+              {showSuccess && (
+                <div className="flex items-center gap-1 animate-in fade-in zoom-in duration-200">
+                  <Check className="h-4 w-4 text-green-500" />
+                  <span className="text-xs text-green-600">Sent</span>
+                </div>
+              )}
+            </div>
+            {isSuperuser && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-2">
+                    <label
+                      htmlFor="internal-note-toggle"
+                      className={cn(
+                        "cursor-pointer text-xs font-medium transition-colors",
+                        isInternalNote
+                          ? "text-amber-700 dark:text-amber-400"
+                          : "text-muted-foreground",
+                      )}
+                    >
+                      <StickyNote className="mr-1 inline h-3 w-3" />
+                      Internal Note
+                    </label>
+                    <Switch
+                      id="internal-note-toggle"
+                      checked={isInternalNote}
+                      onCheckedChange={setIsInternalNote}
+                      className="data-[state=checked]:bg-amber-500"
+                    />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  Internal notes are only visible to superusers
+                </TooltipContent>
+              </Tooltip>
             )}
           </div>
         </CardHeader>
@@ -127,7 +190,11 @@ export function TicketReplyForm({ ticketId }: { ticketId: string }) {
             <MarkdownEditor
               value={body}
               onChange={setBody}
-              placeholder="Write your reply... (Markdown supported, paste images with Ctrl+V)"
+              placeholder={
+                isInternalNote
+                  ? "Write an internal note... (only visible to superusers)"
+                  : "Write your reply... (Markdown supported, paste images with Ctrl+V)"
+              }
               minHeight="120px"
               onPaste={handlePaste}
               onDrop={handleDrop}
@@ -164,13 +231,27 @@ export function TicketReplyForm({ ticketId }: { ticketId: string }) {
                   </Button>
                 )}
                 <div className="flex items-center gap-2">
-                  <Button type="submit" disabled={isSending || !body.trim()} className="shrink-0">
+                  <Button
+                    type="submit"
+                    disabled={isSending || !body.trim()}
+                    className={cn(
+                      "shrink-0",
+                      isInternalNote &&
+                        "bg-amber-600 text-white hover:bg-amber-700 dark:bg-amber-600 dark:hover:bg-amber-700",
+                    )}
+                  >
                     {isSending ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : isInternalNote ? (
+                      <StickyNote className="mr-2 h-4 w-4" />
                     ) : (
                       <Send className="mr-2 h-4 w-4" />
                     )}
-                    {isSending ? "Sending..." : "Send Reply"}
+                    {isSending
+                      ? "Sending..."
+                      : isInternalNote
+                        ? "Add Internal Note"
+                        : "Send Reply"}
                   </Button>
                   <span className="hidden items-center gap-1 text-xs text-muted-foreground sm:flex">
                     <Keyboard className="h-3 w-3" />
