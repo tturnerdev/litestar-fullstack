@@ -55,6 +55,7 @@ import {
 } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAdminAuditLogs, useAdminAuditLogsExport } from "@/lib/api/hooks/admin"
+import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { formatDateTime } from "@/lib/date-utils"
 import type { AuditLogEntry } from "@/lib/generated/api"
 
@@ -114,6 +115,16 @@ const TARGET_TYPE_OPTIONS: FilterOption[] = [
   { value: "connection", label: "Connection" },
   { value: "fax_number", label: "Fax Number" },
   { value: "ticket", label: "Ticket" },
+]
+
+const csvHeaders: CsvHeader<AuditLogEntry>[] = [
+  { label: "Timestamp", accessor: (e) => e.createdAt },
+  { label: "Action", accessor: (e) => e.action },
+  { label: "Actor Name", accessor: (e) => e.actorName ?? "" },
+  { label: "Actor Email", accessor: (e) => e.actorEmail ?? "" },
+  { label: "Target Type", accessor: (e) => e.targetType ?? "" },
+  { label: "Target", accessor: (e) => e.targetLabel ?? "" },
+  { label: "IP Address", accessor: (e) => e.ipAddress ?? "" },
 ]
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -797,6 +808,11 @@ export function AuditLogTable() {
     [fetchExport, data?.items],
   )
 
+  const handleQuickExport = useCallback(() => {
+    const allItems = data?.items ?? []
+    exportToCsv("audit-log", csvHeaders, allItems)
+  }, [data?.items])
+
   const handleDatePreset = useCallback(
     (days: number) => {
       const { start, end } = getPresetDates(days)
@@ -920,6 +936,11 @@ export function AuditLogTable() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={handleQuickExport}>
+              <Download className="mr-2 h-4 w-4" />
+              Export CSV
+              <span className="ml-2 text-xs text-muted-foreground">Current page</span>
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => handleExport("basic")}>
               <Download className="mr-2 h-4 w-4" />
               Basic CSV

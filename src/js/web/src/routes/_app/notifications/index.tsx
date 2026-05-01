@@ -33,6 +33,7 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
+import { EmptyState } from "@/components/ui/empty-state"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
@@ -433,15 +434,11 @@ function NotificationsPage() {
 
       <PageSection delay={0.1}>
         {isEmptyUnfiltered ? (
-          <div className="flex animate-in fade-in flex-col items-center justify-center py-24 text-center">
-            <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-muted">
-              <BellOff className="h-10 w-10 text-muted-foreground/40" />
-            </div>
-            <h3 className="text-lg font-semibold text-foreground">No notifications yet</h3>
-            <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-              You'll be notified when important events happen -- like team updates, device alerts, or support ticket replies.
-            </p>
-          </div>
+          <EmptyState
+            icon={BellOff}
+            title="No notifications yet"
+            description="You'll be notified when important events happen — like team updates, device alerts, or support ticket replies."
+          />
         ) : (
           <>
             <div className="flex flex-wrap items-center gap-2">
@@ -490,13 +487,12 @@ function NotificationsPage() {
                   ))}
                 </div>
               ) : isEmptyFiltered ? (
-                <div className="flex animate-in fade-in flex-col items-center justify-center py-16 text-center">
-                  <Bell className="mb-3 h-12 w-12 text-muted-foreground/30" />
-                  <p className="text-lg font-medium text-muted-foreground">No notifications</p>
-                  <p className="text-sm text-muted-foreground/70">
-                    No {activeCategory} notifications found
-                  </p>
-                </div>
+                <EmptyState
+                  icon={Bell}
+                  title="No notifications"
+                  description={`No ${activeCategory} notifications found`}
+                  variant="no-results"
+                />
               ) : (
                 filteredNotifications.map((notification) => (
                   <NotificationCard

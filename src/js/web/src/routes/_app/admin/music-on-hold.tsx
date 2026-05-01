@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { createFileRoute } from "@tanstack/react-router"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
@@ -6,6 +6,7 @@ import {
   AlertCircle,
   AlertTriangle,
   Check,
+  Download,
   Loader2,
   Music,
   Plus,
@@ -61,7 +62,9 @@ import {
 } from "@/lib/api/hooks/music-on-hold"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { formatDateTime } from "@/lib/date-utils"
+import type { MusicOnHoldList } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/admin/music-on-hold")({
   component: AdminMusicOnHoldPage,
@@ -80,6 +83,15 @@ const categoryVariants: Record<string, "default" | "secondary" | "outline"> = {
   custom: "secondary",
   holiday: "outline",
 }
+
+const csvHeaders: CsvHeader<MusicOnHoldList>[] = [
+  { label: "Name", accessor: (m) => m.name },
+  { label: "Category", accessor: (m) => m.category },
+  { label: "Active", accessor: (m) => (m.isActive ? "Yes" : "No") },
+  { label: "Default", accessor: (m) => (m.isDefault ? "Yes" : "No") },
+  { label: "Files", accessor: (m) => String(m.fileCount) },
+  { label: "Created At", accessor: (m) => m.createdAt },
+]
 
 // ---------------------------------------------------------------------------
 // Create / Edit Dialog
@@ -333,6 +345,10 @@ function AdminMusicOnHoldPage() {
   const total = data?.total ?? 0
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
+  const handleExport = useCallback(() => {
+    exportToCsv("music-on-hold", csvHeaders, items)
+  }, [items])
+
   return (
     <PageContainer className="flex-1 space-y-8">
       <PageHeader
@@ -378,6 +394,10 @@ function AdminMusicOnHoldPage() {
                     </button>
                   )}
                 </div>
+                <Button variant="outline" size="sm" onClick={handleExport} disabled={!items.length}>
+                  <Download className="mr-2 h-4 w-4" />
+                  Export
+                </Button>
                 <Button size="sm" onClick={() => setCreateOpen(true)}>
                   <Plus className="mr-2 h-4 w-4" />
                   Add Class

@@ -145,6 +145,9 @@ export function AppLayout() {
     if (pathname === "/voice/extensions") {
       return { eyebrow: "Voice", title: "Extensions" }
     }
+    if (pathname.startsWith("/voice/phone-numbers/")) {
+      return { eyebrow: "Voice", title: "Phone Number" }
+    }
     if (pathname === "/voice/phone-numbers") {
       return { eyebrow: "Voice", title: "Phone Numbers" }
     }

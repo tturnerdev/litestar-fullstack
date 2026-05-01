@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { createFileRoute } from "@tanstack/react-router"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
@@ -7,6 +7,7 @@ import {
   AlertTriangle,
   Check,
   Cpu,
+  Download,
   Loader2,
   Plus,
   Search,
@@ -61,7 +62,9 @@ import {
 } from "@/lib/api/hooks/device-templates"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { formatDateTime } from "@/lib/date-utils"
+import type { DeviceTemplateList } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/admin/device-templates")({
   component: AdminDeviceTemplatesPage,
@@ -84,6 +87,16 @@ const deviceTypeLabels: Record<string, string> = {
   conference: "Conference",
   other: "Other",
 }
+
+const csvHeaders: CsvHeader<DeviceTemplateList>[] = [
+  { label: "Display Name", accessor: (t) => t.displayName },
+  { label: "Manufacturer", accessor: (t) => t.manufacturer },
+  { label: "Model", accessor: (t) => t.model },
+  { label: "Device Type", accessor: (t) => t.deviceType },
+  { label: "Active", accessor: (t) => (t.isActive ? "Yes" : "No") },
+  { label: "Created At", accessor: (t) => t.createdAt },
+  { label: "Updated At", accessor: (t) => t.updatedAt },
+]
 
 // ---------------------------------------------------------------------------
 // Create / Edit Dialog
@@ -390,6 +403,11 @@ function AdminDeviceTemplatesPage() {
   const total = data?.total ?? 0
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
+  const handleExport = useCallback(() => {
+    if (!templates.length) return
+    exportToCsv("device-templates", csvHeaders, templates)
+  }, [templates])
+
   return (
     <PageContainer className="flex-1 space-y-8">
       <PageHeader
@@ -397,6 +415,12 @@ function AdminDeviceTemplatesPage() {
         title="Device Templates"
         description="Manage wireframe layouts and provisioning templates for device models."
         breadcrumbs={<AdminBreadcrumbs />}
+        actions={
+          <Button variant="outline" size="sm" onClick={handleExport} disabled={!templates.length}>
+            <Download className="mr-2 h-4 w-4" />
+            Export
+          </Button>
+        }
       />
       <AdminNav />
 
