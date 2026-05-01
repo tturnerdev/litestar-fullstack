@@ -1,5 +1,6 @@
 """Team schemas."""
 
+from datetime import datetime
 from uuid import UUID
 
 import msgspec
@@ -22,6 +23,8 @@ class Team(CamelizedBaseStruct):
     is_active: bool = True
     members: list[TeamMember] = []
     tags: list[TeamTag] = []
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
 
 
 class TeamCreate(CamelizedBaseStruct):

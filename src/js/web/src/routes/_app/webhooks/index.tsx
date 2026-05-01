@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 import {
   Activity,
@@ -21,6 +21,7 @@ import {
   XCircle,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -30,6 +31,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import {
   Dialog,
@@ -535,6 +537,7 @@ function WebhooksPage() {
   const [createOpen, setCreateOpen] = useState(false)
   const [editWebhook, setEditWebhook] = useState<WebhookList | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<WebhookList | null>(null)
+  const [selected, setSelected] = useState<Set<string>>(new Set())
 
   // Reset page when debounced search changes
   useEffect(() => {
@@ -542,6 +545,7 @@ function WebhooksPage() {
   }, [debouncedSearch])
 
   const { data, isLoading, isError, refetch } = useWebhooks(page, PAGE_SIZE, debouncedSearch || undefined)
+  const deleteWebhook = useDeleteWebhook()
 
   const webhooks = data?.items ?? []
 
@@ -552,6 +556,42 @@ function WebhooksPage() {
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
   const hasActiveFilters = search !== ""
+
+  const allSelected = webhooks.length > 0 && selected.size === webhooks.length
+  const someSelected = selected.size > 0 && selected.size < webhooks.length
+
+  const toggleAll = () => {
+    if (allSelected) {
+      setSelected(new Set())
+    } else {
+      setSelected(new Set(webhooks.map((w) => w.id)))
+    }
+  }
+
+  const toggleOne = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  const bulkActions = useMemo(
+    () => [
+      createBulkDeleteAction(
+        (id) => deleteWebhook.mutateAsync(id),
+        () => refetch(),
+        { label: "Delete Selected" },
+      ),
+      createExportAction<WebhookList>(
+        "webhooks",
+        csvHeaders,
+        (ids) => webhooks.filter((w) => ids.includes(w.id)),
+      ),
+    ],
+    [deleteWebhook, refetch, webhooks],
+  )
 
   const breadcrumbs = (
     <Breadcrumb>
@@ -673,6 +713,14 @@ function WebhooksPage() {
               <Table aria-label="Webhooks">
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-[40px]">
+                      <Checkbox
+                        checked={allSelected}
+                        indeterminate={someSelected}
+                        onChange={toggleAll}
+                        aria-label="Select all webhooks"
+                      />
+                    </TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>URL</TableHead>
                     <TableHead>Events</TableHead>
@@ -688,6 +736,8 @@ function WebhooksPage() {
                       key={webhook.id}
                       webhook={webhook}
                       index={index}
+                      selected={selected.has(webhook.id)}
+                      onToggle={() => toggleOne(webhook.id)}
                       onEdit={() => setEditWebhook(webhook)}
                       onDelete={() => setDeleteTarget(webhook)}
                     />
@@ -741,6 +791,13 @@ function WebhooksPage() {
         }}
         webhook={deleteTarget}
       />
+
+      <BulkActionBar
+        selectedCount={selected.size}
+        selectedIds={Array.from(selected)}
+        onClearSelection={() => setSelected(new Set())}
+        actions={bulkActions}
+      />
     </PageContainer>
   )
 }
@@ -750,11 +807,15 @@ function WebhooksPage() {
 function WebhookRow({
   webhook,
   index,
+  selected,
+  onToggle,
   onEdit,
   onDelete,
 }: {
   webhook: WebhookList
   index: number
+  selected: boolean
+  onToggle: () => void
   onEdit: () => void
   onDelete: () => void
 }) {
@@ -764,7 +825,20 @@ function WebhookRow({
   return (
     <Collapsible open={deliveriesOpen} onOpenChange={setDeliveriesOpen} asChild>
       <>
-        <TableRow className={`transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`}>
+        <TableRow
+          data-state={selected ? "selected" : undefined}
+          className={`transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`}
+        >
+          <TableCell>
+            <Checkbox
+              checked={selected}
+              onChange={(e) => {
+                e.stopPropagation()
+                onToggle()
+              }}
+              aria-label={`Select ${webhook.name}`}
+            />
+          </TableCell>
           <TableCell>
             <div className="flex items-center gap-2">
               <Webhook className="h-4 w-4 text-muted-foreground" />
@@ -873,7 +947,7 @@ function WebhookRow({
         </TableRow>
         <CollapsibleContent asChild>
           <tr>
-            <td colSpan={7} className="p-0">
+            <td colSpan={8} className="p-0">
               <div className="border-t border-border/40 bg-muted/30">
                 <div className="flex items-center gap-2 px-6 pt-3 pb-1">
                   <Activity className="h-4 w-4 text-muted-foreground" />
