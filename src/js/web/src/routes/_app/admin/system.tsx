@@ -220,7 +220,7 @@ function SystemInfoCard({
     },
     {
       label: "Started",
-      value: new Date(startedAt).toLocaleString(),
+      value: formatDateTime(startedAt),
       icon: Zap,
     },
   ]

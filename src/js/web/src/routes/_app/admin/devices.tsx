@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { cn } from "@/lib/utils"
 import {
   AlertCircle,
   ArrowRight,
+  Download,
   HardDrive,
   Monitor,
   Search,
@@ -25,7 +26,9 @@ import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { EmptyState } from "@/components/ui/empty-state"
 import { useAdminDevices, useAdminDeviceStats } from "@/lib/api/hooks/admin"
+import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { formatDateTime } from "@/lib/date-utils"
+import type { AdminDeviceSummary } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/admin/devices")({
   component: AdminDevicesPage,
@@ -83,6 +86,19 @@ const statConfig = [
   },
 ]
 
+const csvHeaders: CsvHeader<AdminDeviceSummary>[] = [
+  { label: "Name", accessor: (d) => d.name },
+  { label: "Type", accessor: (d) => d.deviceType },
+  { label: "Status", accessor: (d) => d.status },
+  { label: "Active", accessor: (d) => (d.isActive ? "Yes" : "No") },
+  { label: "MAC Address", accessor: (d) => d.macAddress ?? "" },
+  { label: "IP Address", accessor: (d) => d.ipAddress ?? "" },
+  { label: "SIP Username", accessor: (d) => d.sipUsername },
+  { label: "Owner", accessor: (d) => d.ownerEmail ?? "" },
+  { label: "Team", accessor: (d) => d.teamName ?? "" },
+  { label: "Created At", accessor: (d) => d.createdAt },
+]
+
 function StatsCardSkeleton() {
   return (
     <Card>
@@ -117,11 +133,26 @@ function AdminDevicesPage() {
   const total = data?.total ?? 0
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
+  const handleExport = useCallback(() => {
+    exportToCsv("admin-devices", csvHeaders, devices)
+  }, [devices])
+
   const recentDevices = devices.slice(0, 8)
 
   return (
     <PageContainer className="flex-1 space-y-8">
-      <PageHeader eyebrow="Administration" title="Devices" description="Manage all devices across the organization." breadcrumbs={<AdminBreadcrumbs />} />
+      <PageHeader
+        eyebrow="Administration"
+        title="Devices"
+        description="Manage all devices across the organization."
+        breadcrumbs={<AdminBreadcrumbs />}
+        actions={
+          <Button variant="outline" size="sm" onClick={handleExport} disabled={!devices.length}>
+            <Download className="mr-2 h-4 w-4" />
+            Export
+          </Button>
+        }
+      />
       <AdminNav />
 
       {/* Stat cards */}

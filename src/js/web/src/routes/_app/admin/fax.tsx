@@ -1,9 +1,10 @@
-import { useState } from "react"
+import { useCallback, useState } from "react"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { cn } from "@/lib/utils"
 import {
   AlertCircle,
   ArrowRight,
+  Download,
   FileText,
   Inbox,
   Printer,
@@ -24,13 +25,24 @@ import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { EmptyState } from "@/components/ui/empty-state"
 import { useAdminFaxMessages, useAdminFaxNumbers, useAdminFaxStats } from "@/lib/api/hooks/admin"
+import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { formatDateTime } from "@/lib/date-utils"
+import type { AdminFaxNumberSummary } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/admin/fax")({
   component: AdminFaxPage,
 })
 
 const PAGE_SIZE = 25
+
+const csvHeaders: CsvHeader<AdminFaxNumberSummary>[] = [
+  { label: "Number", accessor: (f) => f.number },
+  { label: "Label", accessor: (f) => f.label ?? "" },
+  { label: "Active", accessor: (f) => (f.isActive ? "Yes" : "No") },
+  { label: "Owner", accessor: (f) => f.ownerEmail ?? "" },
+  { label: "Team", accessor: (f) => f.teamName ?? "" },
+  { label: "Created At", accessor: (f) => f.createdAt },
+]
 
 const statusVariant: Record<string, "default" | "secondary" | "outline" | "destructive"> = {
   completed: "default",
@@ -115,9 +127,25 @@ function AdminFaxPage() {
   const faxMessages = Array.isArray(messages) ? messages : []
   const recentMessages = faxMessages.slice(0, 10)
 
+  const handleExport = useCallback(() => {
+    if (!faxNumbers.length) return
+    exportToCsv("admin-fax-numbers", csvHeaders, faxNumbers)
+  }, [faxNumbers])
+
   return (
     <PageContainer className="flex-1 space-y-8">
-      <PageHeader eyebrow="Administration" title="Fax" description="Monitor fax numbers, messages, and delivery across the organization." breadcrumbs={<AdminBreadcrumbs />} />
+      <PageHeader
+        eyebrow="Administration"
+        title="Fax"
+        description="Monitor fax numbers, messages, and delivery across the organization."
+        breadcrumbs={<AdminBreadcrumbs />}
+        actions={
+          <Button variant="outline" size="sm" onClick={handleExport} disabled={!faxNumbers.length}>
+            <Download className="mr-2 h-4 w-4" />
+            Export
+          </Button>
+        }
+      />
       <AdminNav />
 
       {/* Stat cards */}

@@ -7,6 +7,7 @@ import {
   Check,
   ChevronDown,
   Clock,
+  Download,
   Home,
   Loader2,
   MoreVertical,
@@ -62,6 +63,7 @@ import {
   useWebhookDeliveries,
 } from "@/lib/api/hooks/webhooks"
 import type { WebhookDelivery } from "@/lib/api/hooks/webhooks"
+import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { formatDateTime } from "@/lib/date-utils"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
@@ -74,6 +76,16 @@ export const Route = createFileRoute("/_app/webhooks/")({
 // -- Constants ----------------------------------------------------------------
 
 const PAGE_SIZE = 25
+
+const csvHeaders: CsvHeader<WebhookList>[] = [
+  { label: "Name", accessor: (w) => w.name },
+  { label: "URL", accessor: (w) => w.url },
+  { label: "Active", accessor: (w) => w.isActive ? "Yes" : "No" },
+  { label: "Events", accessor: (w) => w.events.join(", ") },
+  { label: "Failure Count", accessor: (w) => String(w.failureCount ?? 0) },
+  { label: "Last Triggered", accessor: (w) => w.lastTriggeredAt ?? "" },
+  { label: "Created At", accessor: (w) => w.createdAt ?? "" },
+]
 
 const AVAILABLE_EVENTS = [
   "extension.created",
@@ -530,6 +542,10 @@ function WebhooksPage() {
   const { data, isLoading, isError, refetch } = useWebhooks(page, PAGE_SIZE, debouncedSearch || undefined)
 
   const webhooks = data?.items ?? []
+
+  const handleExport = useCallback(() => {
+    exportToCsv("webhooks", csvHeaders, webhooks)
+  }, [webhooks])
   const total = data?.total ?? 0
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
@@ -561,9 +577,14 @@ function WebhooksPage() {
         description="Manage webhook subscriptions for receiving event notifications."
         breadcrumbs={breadcrumbs}
         actions={
-          <Button size="sm" onClick={() => setCreateOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" /> New webhook
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={handleExport} disabled={webhooks.length === 0}>
+              <Download className="mr-2 h-4 w-4" /> Export
+            </Button>
+            <Button size="sm" onClick={() => setCreateOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" /> New webhook
+            </Button>
+          </div>
         }
       />
 

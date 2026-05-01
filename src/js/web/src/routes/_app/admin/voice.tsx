@@ -1,9 +1,10 @@
-import { useState } from "react"
+import { useCallback, useState } from "react"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { cn } from "@/lib/utils"
 import {
   AlertCircle,
   ArrowRight,
+  Download,
   Hash,
   Phone,
   PhoneOff,
@@ -23,13 +24,33 @@ import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-lay
 import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useAdminExtensions, useAdminPhoneNumbers, useAdminVoiceStats } from "@/lib/api/hooks/admin"
-import type { AdminExtensionSummary } from "@/lib/generated/api"
+import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
+import type { AdminExtensionSummary, AdminPhoneNumberSummary } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/admin/voice")({
   component: AdminVoicePage,
 })
 
 const PAGE_SIZE = 25
+
+const phoneNumberCsvHeaders: CsvHeader<AdminPhoneNumberSummary>[] = [
+  { label: "Number", accessor: (p) => p.number },
+  { label: "Label", accessor: (p) => p.label ?? "" },
+  { label: "Type", accessor: (p) => p.numberType },
+  { label: "Active", accessor: (p) => (p.isActive ? "Yes" : "No") },
+  { label: "Owner", accessor: (p) => p.ownerEmail ?? "" },
+  { label: "Team", accessor: (p) => p.teamName ?? "" },
+  { label: "Created At", accessor: (p) => p.createdAt },
+]
+
+const extensionCsvHeaders: CsvHeader<AdminExtensionSummary>[] = [
+  { label: "Extension #", accessor: (e) => e.extensionNumber },
+  { label: "Display Name", accessor: (e) => e.displayName },
+  { label: "Active", accessor: (e) => (e.isActive ? "Yes" : "No") },
+  { label: "Owner", accessor: (e) => e.ownerEmail ?? "" },
+  { label: "Phone Number", accessor: (e) => e.phoneNumber ?? "" },
+  { label: "Created At", accessor: (e) => e.createdAt },
+]
 
 const statConfig = [
   {
@@ -105,6 +126,16 @@ function AdminVoicePage() {
 
   const typedExtensions = (Array.isArray(extensions) ? extensions : []) as AdminExtensionSummary[]
   const recentExtensions = typedExtensions.slice(0, 8)
+
+  const handleExportPhoneNumbers = useCallback(() => {
+    if (!phoneNumbers.length) return
+    exportToCsv("admin-phone-numbers", phoneNumberCsvHeaders, phoneNumbers)
+  }, [phoneNumbers])
+
+  const handleExportExtensions = useCallback(() => {
+    if (!typedExtensions.length) return
+    exportToCsv("admin-extensions", extensionCsvHeaders, typedExtensions)
+  }, [typedExtensions])
 
   return (
     <PageContainer className="flex-1 space-y-8">
@@ -195,6 +226,10 @@ function AdminVoicePage() {
                     </button>
                   )}
                 </div>
+                <Button variant="outline" size="sm" onClick={handleExportPhoneNumbers} disabled={!phoneNumbers.length} className="gap-1.5">
+                  <Download className="h-3.5 w-3.5" />
+                  Export
+                </Button>
                 <Link to="/voice/phone-numbers">
                   <Button variant="outline" size="sm" className="gap-1.5">
                     Manage
@@ -290,12 +325,18 @@ function AdminVoicePage() {
                   <CardDescription>{typedExtensions.length} extension{typedExtensions.length !== 1 ? "s" : ""} configured</CardDescription>
                 </div>
               </div>
-              <Link to="/voice/extensions">
-                <Button variant="outline" size="sm" className="gap-1.5">
-                  View all
-                  <ArrowRight className="h-3.5 w-3.5" />
+              <div className="flex items-center gap-3">
+                <Button variant="outline" size="sm" onClick={handleExportExtensions} disabled={!typedExtensions.length} className="gap-1.5">
+                  <Download className="h-3.5 w-3.5" />
+                  Export
                 </Button>
-              </Link>
+                <Link to="/voice/extensions">
+                  <Button variant="outline" size="sm" className="gap-1.5">
+                    View all
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Button>
+                </Link>
+              </div>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { cn } from "@/lib/utils"
 import {
@@ -6,6 +6,7 @@ import {
   ArrowRight,
   CheckCircle2,
   Clock,
+  Download,
   Loader2,
   Lock,
   Search,
@@ -26,7 +27,9 @@ import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAdminSupportStats, useAdminTickets } from "@/lib/api/hooks/admin"
+import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
+import type { AdminTicketSummary } from "@/lib/generated/api/types.gen"
 
 export const Route = createFileRoute("/_app/admin/support")({
   component: AdminSupportPage,
@@ -102,6 +105,20 @@ const statConfig = [
   },
 ]
 
+const csvHeaders: CsvHeader<AdminTicketSummary>[] = [
+  { label: "Ticket #", accessor: (t) => t.ticketNumber },
+  { label: "Subject", accessor: (t) => t.subject },
+  { label: "Status", accessor: (t) => t.status },
+  { label: "Priority", accessor: (t) => t.priority },
+  { label: "Category", accessor: (t) => t.category ?? "" },
+  { label: "Creator", accessor: (t) => t.creatorEmail ?? "" },
+  { label: "Assigned To", accessor: (t) => t.assignedToEmail ?? "" },
+  { label: "Read by Agent", accessor: (t) => (t.isReadByAgent ? "Yes" : "No") },
+  { label: "Created At", accessor: (t) => t.createdAt },
+  { label: "Updated At", accessor: (t) => t.updatedAt },
+  { label: "Closed At", accessor: (t) => t.closedAt ?? "" },
+]
+
 function StatsCardSkeleton() {
   return (
     <Card>
@@ -138,9 +155,25 @@ function AdminSupportPage() {
 
   const recentTickets = tickets.slice(0, 8)
 
+  const handleExport = useCallback(() => {
+    if (!tickets.length) return
+    exportToCsv("admin-support-tickets", csvHeaders, tickets)
+  }, [tickets])
+
   return (
     <PageContainer className="flex-1 space-y-8">
-      <PageHeader eyebrow="Administration" title="Support" description="Monitor support tickets and response metrics across the organization." breadcrumbs={<AdminBreadcrumbs />} />
+      <PageHeader
+        eyebrow="Administration"
+        title="Support"
+        description="Monitor support tickets and response metrics across the organization."
+        breadcrumbs={<AdminBreadcrumbs />}
+        actions={
+          <Button variant="outline" size="sm" onClick={handleExport} disabled={!tickets.length}>
+            <Download className="mr-2 h-4 w-4" />
+            Export
+          </Button>
+        }
+      />
       <AdminNav />
 
       {/* Stat cards */}
