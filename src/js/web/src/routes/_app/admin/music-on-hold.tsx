@@ -47,6 +47,7 @@ import {
   useDeleteMusicOnHold,
 } from "@/lib/api/hooks/music-on-hold"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { formatDateTime } from "@/lib/date-utils"
 
 export const Route = createFileRoute("/_app/admin/music-on-hold")({
   component: AdminMusicOnHoldPage,
@@ -426,7 +427,7 @@ function AdminMusicOnHoldPage() {
                           )}
                         </TableCell>
                         <TableCell className="text-muted-foreground text-sm">
-                          {new Date(moh.createdAt).toLocaleDateString()}
+                          {formatDateTime(moh.createdAt)}
                         </TableCell>
                         <TableCell>
                           <Button

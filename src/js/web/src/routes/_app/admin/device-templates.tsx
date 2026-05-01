@@ -47,6 +47,7 @@ import {
   useDeleteDeviceTemplate,
 } from "@/lib/api/hooks/device-templates"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { formatDateTime } from "@/lib/date-utils"
 
 export const Route = createFileRoute("/_app/admin/device-templates")({
   component: AdminDeviceTemplatesPage,
@@ -475,7 +476,7 @@ function AdminDeviceTemplatesPage() {
                           )}
                         </TableCell>
                         <TableCell className="text-muted-foreground text-sm">
-                          {new Date(tmpl.createdAt).toLocaleDateString()}
+                          {formatDateTime(tmpl.createdAt)}
                         </TableCell>
                         <TableCell>
                           <Button

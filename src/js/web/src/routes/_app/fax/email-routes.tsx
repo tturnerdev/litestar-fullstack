@@ -84,6 +84,7 @@ import {
   useUpdateFaxEmailRoute,
 } from "@/lib/api/hooks/fax"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
+import { formatDateTime } from "@/lib/date-utils"
 import { client } from "@/lib/generated/api/client.gen"
 
 export const Route = createFileRoute("/_app/fax/email-routes")({
@@ -102,7 +103,7 @@ const csvHeaders: CsvHeader<FaxEmailRouteWithNumber>[] = [
   { label: "Fax Number Label", accessor: (r) => r.faxNumberLabel ?? "" },
   { label: "Status", accessor: (r) => (r.isActive ? "Active" : "Inactive") },
   { label: "Failure Alerts", accessor: (r) => (r.notifyOnFailure ? "On" : "Off") },
-  { label: "Created", accessor: (r) => (r.createdAt ? new Date(r.createdAt).toLocaleDateString() : "") },
+  { label: "Created", accessor: (r) => formatDateTime(r.createdAt, "") },
 ]
 
 // ---------------------------------------------------------------------------
@@ -672,9 +673,7 @@ function FaxEmailRoutesPage() {
                         )}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
-                        {route.createdAt
-                          ? new Date(route.createdAt).toLocaleDateString()
-                          : "--"}
+                        {formatDateTime(route.createdAt, "--")}
                       </TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>

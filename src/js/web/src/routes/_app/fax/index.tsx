@@ -13,6 +13,7 @@ import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-lay
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useFaxMessages, useFaxNumbers } from "@/lib/api/hooks/fax"
+import { formatDateTime } from "@/lib/date-utils"
 
 export const Route = createFileRoute("/_app/fax/")({
   component: FaxOverviewPage,
@@ -213,9 +214,7 @@ function FaxOverviewPage() {
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {msg.pageCount} page{msg.pageCount !== 1 ? "s" : ""} &middot;{" "}
-                        {msg.receivedAt
-                          ? new Date(msg.receivedAt).toLocaleDateString()
-                          : "--"}
+                        {formatDateTime(msg.receivedAt, "--")}
                       </p>
                     </div>
                     <span

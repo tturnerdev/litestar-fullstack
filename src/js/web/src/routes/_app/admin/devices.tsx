@@ -24,6 +24,7 @@ import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { EmptyState } from "@/components/ui/empty-state"
 import { useAdminDevices, useAdminDeviceStats } from "@/lib/api/hooks/admin"
+import { formatDateTime } from "@/lib/date-utils"
 
 export const Route = createFileRoute("/_app/admin/devices")({
   component: AdminDevicesPage,
@@ -226,7 +227,7 @@ function AdminDevicesPage() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-muted-foreground">
-                        {device.lastSeenAt ? new Date(device.lastSeenAt).toLocaleString() : "Never"}
+                        {formatDateTime(device.lastSeenAt, "Never")}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -329,7 +330,7 @@ function AdminDevicesPage() {
                         </Badge>
                         </TableCell>
                         <TableCell className="text-muted-foreground">
-                          {device.lastSeenAt ? new Date(device.lastSeenAt).toLocaleString() : "Never"}
+                          {formatDateTime(device.lastSeenAt, "Never")}
                         </TableCell>
                       </TableRow>
                     ))}

@@ -25,7 +25,7 @@ import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAdminSupportStats, useAdminTickets } from "@/lib/api/hooks/admin"
-import { formatRelativeTimeShort } from "@/lib/date-utils"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 
 export const Route = createFileRoute("/_app/admin/support")({
   component: AdminSupportPage,
@@ -384,7 +384,7 @@ function AdminSupportPage() {
                           {statusLabel[ticket.status] ?? ticket.status}
                         </Badge>
                         </TableCell>
-                        <TableCell className="text-muted-foreground">{new Date(ticket.createdAt).toLocaleString()}</TableCell>
+                        <TableCell className="text-muted-foreground">{formatDateTime(ticket.createdAt)}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

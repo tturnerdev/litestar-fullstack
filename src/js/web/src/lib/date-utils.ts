@@ -78,5 +78,3 @@ export function formatDateLong(dateStr: string): string {
   }
 }
 
-/** @deprecated Use {@link formatDateTime} instead. */
-export const formatFullDate = formatDateTime

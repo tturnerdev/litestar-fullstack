@@ -191,7 +191,7 @@ function AdminUserDetailPage() {
       enabled: !!data.isVerified,
       icon: BadgeCheck,
       label: "Verified",
-      enabledText: data.verifiedAt ? `Email verified on ${new Date(data.verifiedAt).toLocaleDateString()}` : "Email verified",
+      enabledText: data.verifiedAt ? `Email verified on ${formatDateTime(data.verifiedAt)}` : "Email verified",
       disabledText: "Email not verified",
     },
     {

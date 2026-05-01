@@ -24,6 +24,7 @@ import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { EmptyState } from "@/components/ui/empty-state"
 import { useAdminFaxMessages, useAdminFaxNumbers, useAdminFaxStats } from "@/lib/api/hooks/admin"
+import { formatDateTime } from "@/lib/date-utils"
 
 export const Route = createFileRoute("/_app/admin/fax")({
   component: AdminFaxPage,
@@ -236,7 +237,7 @@ function AdminFaxPage() {
                           {msg.status}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-muted-foreground">{new Date(msg.receivedAt).toLocaleString()}</TableCell>
+                      <TableCell className="text-muted-foreground">{formatDateTime(msg.receivedAt)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
