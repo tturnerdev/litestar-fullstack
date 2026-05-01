@@ -39,7 +39,7 @@ function VerifyEmailPage() {
       })
 
       if (response.error) {
-        throw new Error((response.error as any).detail || "Verification failed")
+        throw new Error((response.error as { detail?: string }).detail || "Verification failed")
       }
 
       return response.data
@@ -174,7 +174,7 @@ export function ResendVerificationPage() {
         body: { email: user.email },
       })
       if (response.error) {
-        throw new Error((response.error as any).detail || "Failed to send verification email")
+        throw new Error((response.error as { detail?: string }).detail || "Failed to send verification email")
       }
       return response.data
     },

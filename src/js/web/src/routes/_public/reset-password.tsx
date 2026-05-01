@@ -81,7 +81,7 @@ function ResetPasswordPage() {
       })
 
       if (response.error) {
-        throw new Error((response.error as any).detail || "Failed to reset password")
+        throw new Error((response.error as { detail?: string }).detail || "Failed to reset password")
       }
 
       return response.data

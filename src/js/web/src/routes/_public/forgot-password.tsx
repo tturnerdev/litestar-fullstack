@@ -44,7 +44,7 @@ function ForgotPasswordPage() {
       })
 
       if (response.error) {
-        throw new Error((response.error as any).detail || "Failed to send reset email")
+        throw new Error((response.error as { detail?: string }).detail || "Failed to send reset email")
       }
 
       return response.data
