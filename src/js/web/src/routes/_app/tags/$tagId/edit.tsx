@@ -162,7 +162,7 @@ function EditTagPage() {
                 <p className="text-xs text-muted-foreground">
                   Current slug: <span className="font-mono">{data.slug}</span>
                 </p>
-                <span className={`text-xs ${name.length >= 50 ? "text-red-500" : name.length > 40 ? "text-amber-500" : "text-muted-foreground"}`}>
+                <span className={`text-xs ${name.length >= 50 ? "text-destructive" : name.length > 40 ? "text-amber-500" : "text-muted-foreground"}`}>
                   {name.length}/50
                 </span>
               </div>

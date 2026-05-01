@@ -511,7 +511,7 @@ function NewConnectionPage() {
                     ) : (
                       <FieldHint>A descriptive name to identify this connection.</FieldHint>
                     )}
-                    <p className={cn("shrink-0 text-xs", name.length >= NAME_MAX ? "text-red-500" : "text-muted-foreground")}>
+                    <p className={cn("shrink-0 text-xs", name.length >= NAME_MAX ? "text-destructive" : "text-muted-foreground")}>
                       {name.length}/{NAME_MAX}
                     </p>
                   </div>
@@ -571,7 +571,7 @@ function NewConnectionPage() {
                       required
                     />
                     <div className="flex items-center justify-between pt-1">
-                      <p className={cn("shrink-0 text-xs", provider.length >= PROVIDER_MAX ? "text-red-500" : "text-muted-foreground")}>
+                      <p className={cn("shrink-0 text-xs", provider.length >= PROVIDER_MAX ? "text-destructive" : "text-muted-foreground")}>
                         {provider.length}/{PROVIDER_MAX}
                       </p>
                     </div>
@@ -602,7 +602,7 @@ function NewConnectionPage() {
                 />
                 <div className="flex items-center justify-between">
                   <FieldHint>Optional notes about the purpose or configuration of this connection.</FieldHint>
-                  <p className={cn("shrink-0 text-xs", description.length >= DESC_MAX ? "text-red-500" : "text-muted-foreground")}>
+                  <p className={cn("shrink-0 text-xs", description.length >= DESC_MAX ? "text-destructive" : "text-muted-foreground")}>
                     {description.length}/{DESC_MAX}
                   </p>
                 </div>

@@ -132,7 +132,7 @@ function NewTagPage() {
                 <p className="text-xs text-muted-foreground">
                   The display name shown when tagging resources.
                 </p>
-                <p className={cn("text-xs", name.length >= NAME_MAX ? "text-red-500" : "text-muted-foreground")}>
+                <p className={cn("text-xs", name.length >= NAME_MAX ? "text-destructive" : "text-muted-foreground")}>
                   {name.length}/{NAME_MAX}
                 </p>
               </div>
@@ -168,7 +168,7 @@ function NewTagPage() {
                 <p className="text-xs text-muted-foreground">
                   Optional notes about when or how to use this tag.
                 </p>
-                <p className={cn("shrink-0 text-xs", description.length >= DESC_MAX ? "text-red-500" : "text-muted-foreground")}>
+                <p className={cn("shrink-0 text-xs", description.length >= DESC_MAX ? "text-destructive" : "text-muted-foreground")}>
                   {description.length}/{DESC_MAX}
                 </p>
               </div>
