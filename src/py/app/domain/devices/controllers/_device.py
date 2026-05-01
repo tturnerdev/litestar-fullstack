@@ -115,7 +115,7 @@ class DeviceController(Controller):
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
-            action="device.create",
+            action="device.created",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -196,7 +196,7 @@ class DeviceController(Controller):
         after = capture_snapshot(fresh_obj)
         await log_audit(
             audit_service,
-            action="device.update",
+            action="device.updated",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -239,7 +239,7 @@ class DeviceController(Controller):
         await devices_service.delete(device_id)
         await log_audit(
             audit_service,
-            action="device.delete",
+            action="device.deleted",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,

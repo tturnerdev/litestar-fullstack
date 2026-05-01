@@ -114,7 +114,7 @@ class LocationController(Controller):
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
-            action="location.create",
+            action="location.created",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -189,7 +189,7 @@ class LocationController(Controller):
         after = capture_snapshot(fresh_obj)
         await log_audit(
             audit_service,
-            action="location.update",
+            action="location.updated",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -232,7 +232,7 @@ class LocationController(Controller):
         await locations_service.delete(location_id)
         await log_audit(
             audit_service,
-            action="location.delete",
+            action="location.deleted",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,

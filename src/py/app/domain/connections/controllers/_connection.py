@@ -122,7 +122,7 @@ class ConnectionController(Controller):
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
-            action="connection.create",
+            action="connection.created",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -197,7 +197,7 @@ class ConnectionController(Controller):
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
-            action="connection.update",
+            action="connection.updated",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -240,7 +240,7 @@ class ConnectionController(Controller):
         await connections_service.delete(connection_id)
         await log_audit(
             audit_service,
-            action="connection.delete",
+            action="connection.deleted",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,

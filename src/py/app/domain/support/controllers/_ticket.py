@@ -107,7 +107,7 @@ class TicketController(Controller):
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
-            action="support.ticket_create",
+            action="support.ticket.created",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -167,7 +167,7 @@ class TicketController(Controller):
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
-            action="support.ticket_update",
+            action="support.ticket.updated",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -200,7 +200,7 @@ class TicketController(Controller):
         await tickets_service.delete(ticket_id)
         await log_audit(
             audit_service,
-            action="support.ticket_delete",
+            action="support.ticket.deleted",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -232,7 +232,7 @@ class TicketController(Controller):
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
-            action="support.ticket_close",
+            action="support.ticket.closed",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -275,7 +275,7 @@ class TicketController(Controller):
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
-            action="support.ticket_reopen",
+            action="support.ticket.reopened",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
