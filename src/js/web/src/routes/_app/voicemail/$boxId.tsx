@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
+import { toast } from "sonner"
 import {
   AlertTriangle,
   ArrowLeft,
@@ -806,10 +807,19 @@ function BoxMessageList({ boxId }: { boxId: string }) {
                   onExpand={() => handleExpand(msg)}
                   onDelete={() => setSingleDeleteId(msg.id)}
                   onToggleRead={() =>
-                    toggleReadMutation.mutate({
-                      messageId: msg.id,
-                      isRead: !msg.isRead,
-                    })
+                    toggleReadMutation.mutate(
+                      {
+                        messageId: msg.id,
+                        isRead: !msg.isRead,
+                      },
+                      {
+                        onSuccess: () => {
+                          toast.success(
+                            msg.isRead ? "Marked as unread" : "Marked as read",
+                          )
+                        },
+                      },
+                    )
                   }
                   onToggleSelect={() => toggleSelect(msg.id)}
                 />

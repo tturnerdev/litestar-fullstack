@@ -1,3 +1,4 @@
+import { toast } from "sonner"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import {
@@ -216,7 +217,12 @@ function E911Row({
             {!reg.validated && (
               <DropdownMenuItem
                 disabled={validateMutation.isPending}
-                onClick={() => validateMutation.mutate()}
+                onClick={() => validateMutation.mutate(undefined, {
+                  onSuccess: () => toast.success("E911 registration validated"),
+                  onError: (err) => toast.error("Failed to validate E911 registration", {
+                    description: err instanceof Error ? err.message : undefined,
+                  }),
+                })}
               >
                 {validateMutation.isPending ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -230,7 +236,12 @@ function E911Row({
             <DropdownMenuItem
               variant="destructive"
               disabled={deleteMutation.isPending}
-              onClick={() => deleteMutation.mutate(reg.id)}
+              onClick={() => deleteMutation.mutate(reg.id, {
+                onSuccess: () => toast.success("E911 registration deleted"),
+                onError: (err) => toast.error("Failed to delete E911 registration", {
+                  description: err instanceof Error ? err.message : undefined,
+                }),
+              })}
             >
               <Trash2 className="mr-2 h-4 w-4" />
               Delete
@@ -301,8 +312,14 @@ function RegisterNumberDialog({ teamId }: { teamId: string }) {
     }
     createMutation.mutate(payload, {
       onSuccess: () => {
+        toast.success("E911 registration created")
         setOpen(false)
         resetForm()
+      },
+      onError: (err) => {
+        toast.error("Failed to create E911 registration", {
+          description: err instanceof Error ? err.message : undefined,
+        })
       },
     })
   }

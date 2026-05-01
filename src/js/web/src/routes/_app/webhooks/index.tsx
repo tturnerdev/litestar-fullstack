@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { useCallback, useState } from "react"
+import { toast } from "sonner"
 import {
   Activity,
   AlertCircle,
@@ -326,7 +327,15 @@ function WebhookFormDialog({
         payload.secret = secret
       }
       updateWebhook.mutate(payload, {
-        onSuccess: () => handleOpenChange(false),
+        onSuccess: () => {
+          toast.success("Webhook updated")
+          handleOpenChange(false)
+        },
+        onError: (err) => {
+          toast.error("Failed to update webhook", {
+            description: err instanceof Error ? err.message : undefined,
+          })
+        },
       })
     } else {
       const payload: WebhookCreate = {
@@ -339,7 +348,15 @@ function WebhookFormDialog({
         description: description.trim(),
       }
       createWebhook.mutate(payload, {
-        onSuccess: () => handleOpenChange(false),
+        onSuccess: () => {
+          toast.success("Webhook created")
+          handleOpenChange(false)
+        },
+        onError: (err) => {
+          toast.error("Failed to create webhook", {
+            description: err instanceof Error ? err.message : undefined,
+          })
+        },
       })
     }
   }
@@ -485,7 +502,15 @@ function DeleteWebhookDialog({
   const handleDelete = () => {
     if (!webhook) return
     deleteWebhook.mutate(webhook.id, {
-      onSuccess: () => onOpenChange(false),
+      onSuccess: () => {
+        toast.success("Webhook deleted")
+        onOpenChange(false)
+      },
+      onError: (err) => {
+        toast.error("Failed to delete webhook", {
+          description: err instanceof Error ? err.message : undefined,
+        })
+      },
     })
   }
 
@@ -812,7 +837,18 @@ function WebhookRow({
                     Edit
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onClick={() => testWebhookMutation.mutate(webhook.id)}
+                    onClick={() =>
+                      testWebhookMutation.mutate(webhook.id, {
+                        onSuccess: () => {
+                          toast.success("Test delivery sent")
+                        },
+                        onError: (err) => {
+                          toast.error("Failed to send test delivery", {
+                            description: err instanceof Error ? err.message : undefined,
+                          })
+                        },
+                      })
+                    }
                     disabled={testWebhookMutation.isPending}
                   >
                     {testWebhookMutation.isPending ? (

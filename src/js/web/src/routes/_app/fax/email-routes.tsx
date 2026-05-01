@@ -1,3 +1,4 @@
+import { toast } from "sonner"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { cn } from "@/lib/utils"
@@ -153,8 +154,14 @@ function CreateEmailRouteDialog({
       { emailAddress: trimmed, isActive, notifyOnFailure },
       {
         onSuccess: () => {
+          toast.success("Email route created")
           resetForm()
           onOpenChange(false)
+        },
+        onError: (err) => {
+          toast.error("Failed to create email route", {
+            description: err instanceof Error ? err.message : undefined,
+          })
         },
       },
     )
@@ -292,7 +299,15 @@ function EditEmailRouteDialog({
     }
 
     updateMutation.mutate(payload, {
-      onSuccess: () => onOpenChange(false),
+      onSuccess: () => {
+        toast.success("Email route updated")
+        onOpenChange(false)
+      },
+      onError: (err) => {
+        toast.error("Failed to update email route", {
+          description: err instanceof Error ? err.message : undefined,
+        })
+      },
     })
   }
 
@@ -416,7 +431,15 @@ function DeleteEmailRouteDialog({
             onClick={() => {
               if (!route) return
               deleteMutation.mutate(route.id, {
-                onSuccess: () => onOpenChange(false),
+                onSuccess: () => {
+                  toast.success("Email route deleted")
+                  onOpenChange(false)
+                },
+                onError: (err) => {
+                  toast.error("Failed to delete email route", {
+                    description: err instanceof Error ? err.message : undefined,
+                  })
+                },
               })
             }}
           >
