@@ -7,13 +7,17 @@ from uuid import UUID
 
 from litestar import Controller, delete, get, patch, post
 from litestar.di import Provide
+from litestar.exceptions import ClientException
 from litestar.params import Dependency, Parameter
 
 from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
+from app.domain.gateway.deps import provide_gateway_connections
+from app.domain.gateway.providers import FreePBXProvider
+from app.domain.gateway.providers._freepbx import _GQL_ALL_EXTENSIONS, _GQL_EXTENSION, _to_bool, _to_int
 from app.domain.notifications.deps import provide_notifications_service
 from app.domain.voice.guards import requires_extension_ownership
-from app.domain.voice.schemas import Extension, ExtensionCreate, ExtensionUpdate
+from app.domain.voice.schemas import Extension, ExtensionCreate, ExtensionSyncResult, ExtensionUpdate
 from app.domain.voice.services import ExtensionService
 from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
@@ -48,6 +52,7 @@ class ExtensionController(Controller):
     ) | {
         "audit_service": Provide(provide_audit_log_service),
         "notifications_service": Provide(provide_notifications_service),
+        "gateway_connections": Provide(provide_gateway_connections),
     }
 
     @get(operation_id="ListExtensions")
@@ -73,8 +78,34 @@ class ExtensionController(Controller):
         notifications_service: NotificationService,
         current_user: m.User,
         data: ExtensionCreate,
+        gateway_connections: list[m.Connection],
     ) -> Extension:
         """Create a new extension."""
+        # Check if extension already exists on PBX
+        pbx_connections = [c for c in gateway_connections if c.provider == "freepbx" and c.is_enabled]
+        if pbx_connections:
+            conn = pbx_connections[0]
+            provider = FreePBXProvider()
+            try:
+                ext_query = _GQL_EXTENSION.format(ext=data.extension_number)
+                resp = await provider._execute_graphql(ext_query, conn)
+                ext_data = resp.get("data", {}).get("fetchExtension", {})
+                ext_status = ext_data.get("status", "")
+                if str(ext_status).lower() in ("true", "ok", "success", "1"):
+                    user_data = ext_data.get("user") or {}
+                    if user_data.get("name"):
+                        raise ClientException(
+                            detail=f"Extension {data.extension_number} already exists on PBX server '{conn.name}' "
+                            f"(assigned to {user_data.get('name', 'unknown')}). "
+                            f"Use the Sync button to import it instead.",
+                            status_code=409,
+                        )
+            except ClientException:
+                raise
+            except Exception:
+                # If PBX check fails, allow creation to proceed
+                pass
+
         obj = data.to_dict()
         obj["user_id"] = current_user.id
         db_obj = await extensions_service.create(obj)
@@ -176,4 +207,94 @@ class ExtensionController(Controller):
             before=before,
             after=None,
             request=request,
+        )
+
+    @post(operation_id="SyncExtensions", path="/sync")
+    async def sync_extensions(
+        self,
+        request: Request[m.User, Token, Any],
+        extensions_service: ExtensionService,
+        audit_service: AuditLogService,
+        current_user: m.User,
+        gateway_connections: list[m.Connection],
+    ) -> ExtensionSyncResult:
+        """Sync extensions from a connected PBX server.
+
+        Fetches all extensions from the first enabled FreePBX connection,
+        creates new portal extensions for unknown ones, and updates existing
+        portal extensions to match PBX data.
+        """
+        pbx_connections = [c for c in gateway_connections if c.provider == "freepbx" and c.is_enabled]
+        if not pbx_connections:
+            return ExtensionSyncResult(created=0, updated=0, errors=[], connection_name=None)
+
+        conn = pbx_connections[0]
+        provider = FreePBXProvider()
+
+        resp = await provider._execute_graphql(_GQL_ALL_EXTENSIONS, conn)
+        ext_data = resp.get("data", {}).get("fetchAllExtensions", {})
+        pbx_extensions: list[dict[str, Any]] = ext_data.get("extension", []) or []
+
+        created = 0
+        updated = 0
+        errors: list[str] = []
+
+        for pbx_ext in pbx_extensions:
+            ext_number = pbx_ext.get("extensionId", "")
+            if not ext_number:
+                continue
+            user = pbx_ext.get("user") or {}
+
+            display_name = user.get("name", "") or f"Extension {ext_number}"
+            dnd_enabled = _to_bool(user.get("donotdisturb"))
+            no_answer_dest = user.get("noanswerDestination", "") or ""
+            ring_timer = _to_int(user.get("ringtimer"))
+
+            try:
+                existing = await extensions_service.get_by_extension_number(ext_number)
+                if existing:
+                    update_data = {
+                        "display_name": display_name,
+                        "dnd_enabled": dnd_enabled,
+                        "forward_no_answer_destination": no_answer_dest or None,
+                        "forward_no_answer_enabled": bool(no_answer_dest),
+                        "forward_no_answer_ring_count": ring_timer if ring_timer > 0 else 4,
+                    }
+                    await extensions_service.update(item_id=existing.id, data=update_data)
+                    updated += 1
+                else:
+                    create_data = {
+                        "extension_number": ext_number,
+                        "display_name": display_name,
+                        "user_id": current_user.id,
+                        "is_active": True,
+                        "dnd_enabled": dnd_enabled,
+                        "forward_no_answer_destination": no_answer_dest or None,
+                        "forward_no_answer_enabled": bool(no_answer_dest),
+                        "forward_no_answer_ring_count": ring_timer if ring_timer > 0 else 4,
+                    }
+                    await extensions_service.create(create_data)
+                    created += 1
+            except Exception as exc:
+                errors.append(f"Extension {ext_number}: {exc!s}")
+
+        await log_audit(
+            audit_service,
+            action="voice.extensions_sync",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            actor_name=current_user.name,
+            target_type="extension",
+            target_id=current_user.id,
+            target_label=f"PBX sync: {conn.name}",
+            before=None,
+            after={"created": created, "updated": updated, "errors": errors},
+            request=request,
+        )
+
+        return ExtensionSyncResult(
+            created=created,
+            updated=updated,
+            errors=errors,
+            connection_name=conn.name,
         )

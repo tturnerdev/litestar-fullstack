@@ -5,12 +5,24 @@ import {
   CheckCircle2,
   Download,
   Home,
+  Loader2,
   Phone,
   Plus,
+  RefreshCw,
   Search,
   X,
   XCircle,
 } from "lucide-react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -37,6 +49,7 @@ import {
   useDeleteExtension,
   useExtensions,
   usePhoneNumbers,
+  useSyncExtensions,
 } from "@/lib/api/hooks/voice"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
@@ -99,10 +112,14 @@ function ExtensionsPage() {
   // Selection state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
+  // Sync dialog state
+  const [showSyncDialog, setShowSyncDialog] = useState(false)
+
   // Queries & mutations
   const { data, isLoading, isError, refetch } = useExtensions(page, PAGE_SIZE)
   const { data: phoneData } = usePhoneNumbers(1, 100)
   const deleteExtension = useDeleteExtension()
+  const syncExtensions = useSyncExtensions()
 
   // Build a phone number lookup map
   const phoneMap = useMemo(() => {
@@ -277,6 +294,19 @@ function ExtensionsPage() {
             <Button variant="outline" size="sm" onClick={handleExportAll} disabled={!hasData}>
               <Download className="mr-2 h-4 w-4" />
               Export
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowSyncDialog(true)}
+              disabled={syncExtensions.isPending}
+            >
+              {syncExtensions.isPending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="mr-2 h-4 w-4" />
+              )}
+              Sync from PBX
             </Button>
             <CreateExtensionDialog
               trigger={
@@ -508,6 +538,26 @@ function ExtensionsPage() {
         onClearSelection={() => setSelectedIds(new Set())}
         actions={bulkActions}
       />
+
+      {/* PBX sync confirmation dialog */}
+      <AlertDialog open={showSyncDialog} onOpenChange={setShowSyncDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Sync Extensions from PBX</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will import all extensions from the connected PBX server. Existing
+              extensions will be updated to match PBX data. New extensions found on
+              the PBX will be created in the portal.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => syncExtensions.mutate()}>
+              Sync Now
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PageContainer>
   )
 }

@@ -77,9 +77,9 @@ function NewExtensionPage() {
       // Reset dirty state before navigating so blocker doesn't fire
       form.reset(data)
       router.navigate({ to: "/voice/extensions" })
-    } catch (_error) {
+    } catch (error) {
       form.setError("root", {
-        message: "Failed to create extension",
+        message: error instanceof Error ? error.message : "Failed to create extension",
       })
     }
   }

@@ -1,7 +1,7 @@
 """Voice domain schemas."""
 
 from app.domain.voice.schemas._dnd import DndSettings, DndSettingsUpdate, DndToggleResponse
-from app.domain.voice.schemas._extension import Extension, ExtensionCreate, ExtensionUpdate
+from app.domain.voice.schemas._extension import Extension, ExtensionCreate, ExtensionSyncResult, ExtensionUpdate
 from app.domain.voice.schemas._forwarding import ForwardingRule, ForwardingRuleCreate, ForwardingRuleUpdate
 from app.domain.voice.schemas._phone_number import PhoneNumber, PhoneNumberCreate, PhoneNumberUpdate
 from app.domain.voice.schemas._voicemail import (
@@ -17,6 +17,7 @@ __all__ = (
     "DndToggleResponse",
     "Extension",
     "ExtensionCreate",
+    "ExtensionSyncResult",
     "ExtensionUpdate",
     "ForwardingRule",
     "ForwardingRuleCreate",

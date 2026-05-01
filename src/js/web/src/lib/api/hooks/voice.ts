@@ -235,6 +235,37 @@ export function useCreateExtension() {
   })
 }
 
+export function useSyncExtensions() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: () =>
+      apiFetch<{ created: number; updated: number; errors: string[]; connectionName: string | null }>(
+        "/api/voice/extensions/sync",
+        { method: "POST" },
+      ),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["voice", "extensions"] })
+      const parts = []
+      if (data.created > 0) parts.push(`${data.created} created`)
+      if (data.updated > 0) parts.push(`${data.updated} updated`)
+      toast.success(
+        `PBX sync complete${data.connectionName ? ` (${data.connectionName})` : ""}`,
+        { description: parts.join(", ") || "No changes needed" },
+      )
+      if (data.errors.length > 0) {
+        toast.warning(`${data.errors.length} error(s) during sync`, {
+          description: data.errors.slice(0, 3).join("; "),
+        })
+      }
+    },
+    onError: (error) => {
+      toast.error("Extension sync failed", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
+    },
+  })
+}
+
 export function useUpdateExtension(id: string) {
   const queryClient = useQueryClient()
   return useMutation({

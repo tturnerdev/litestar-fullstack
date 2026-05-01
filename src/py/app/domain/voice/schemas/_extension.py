@@ -56,3 +56,12 @@ class ExtensionUpdate(CamelizedBaseStruct, omit_defaults=True):
     forward_unreachable_enabled: bool | msgspec.UnsetType = msgspec.UNSET
     forward_unreachable_destination: str | msgspec.UnsetType | None = msgspec.UNSET
     dnd_enabled: bool | msgspec.UnsetType = msgspec.UNSET
+
+
+class ExtensionSyncResult(CamelizedBaseStruct):
+    """Result of a PBX extension sync operation."""
+
+    created: int = 0
+    updated: int = 0
+    errors: list[str] = []
+    connection_name: str | None = None
