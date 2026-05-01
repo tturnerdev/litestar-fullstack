@@ -169,6 +169,9 @@ export function AppLayout() {
     if (pathname === "/fax/send") {
       return { eyebrow: "Communications", title: "Send Fax" }
     }
+    if (pathname === "/fax/email-routes") {
+      return { eyebrow: "Communications", title: "Email Routes" }
+    }
     if (pathname === "/support") {
       return { eyebrow: "Helpdesk", title: "Tickets" }
     }
@@ -195,6 +198,39 @@ export function AppLayout() {
     }
     if (pathname.startsWith("/profile")) {
       return { eyebrow: "Account", title: "Profile" }
+    }
+    if (pathname.startsWith("/call-routing")) {
+      return { eyebrow: "Routing", title: "Call Routing" }
+    }
+    if (pathname.startsWith("/schedules/")) {
+      return { eyebrow: "Routing", title: "Schedule" }
+    }
+    if (pathname === "/schedules") {
+      return { eyebrow: "Routing", title: "Schedules" }
+    }
+    if (pathname.startsWith("/webhooks")) {
+      return { eyebrow: "Integrations", title: "Webhooks" }
+    }
+    if (pathname.startsWith("/analytics")) {
+      return { eyebrow: "Insights", title: "Analytics" }
+    }
+    if (pathname.startsWith("/e911")) {
+      return { eyebrow: "Voice", title: "E911" }
+    }
+    if (pathname.startsWith("/voicemail/")) {
+      return { eyebrow: "Voice", title: "Voicemail" }
+    }
+    if (pathname === "/voicemail") {
+      return { eyebrow: "Voice", title: "Voicemail" }
+    }
+    if (pathname.startsWith("/tags")) {
+      return { eyebrow: "Workspace", title: "Tags" }
+    }
+    if (pathname.startsWith("/organization")) {
+      return { eyebrow: "Operations", title: "Organization" }
+    }
+    if (pathname.startsWith("/gateway")) {
+      return { eyebrow: "Infrastructure", title: "Gateway" }
     }
     return { eyebrow: "Workspace", title: "Dashboard" }
   }, [currentTeam?.name, pathname])

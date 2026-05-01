@@ -16,7 +16,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAdminRecentActivity } from "@/lib/api/hooks/admin"
-import { formatRelativeTimeShort } from "@/lib/date-utils"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 
 function getActionStyle(action: string) {
   const lower = action.toLowerCase()
@@ -100,16 +100,6 @@ function getActionStyle(action: string) {
     label: "Created",
     variant: "outline" as const,
   }
-}
-
-function formatFullTimestamp(dateString: string): string {
-  return new Date(dateString).toLocaleString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  })
 }
 
 /** Format an action string for display (e.g. "user_login" becomes "User Login"). */
@@ -233,7 +223,7 @@ export function RecentActivity() {
                         </span>
                       </TooltipTrigger>
                       <TooltipContent side="left" className="text-xs">
-                        {formatFullTimestamp(activity.createdAt)}
+                        {formatDateTime(activity.createdAt)}
                       </TooltipContent>
                     </Tooltip>
                   </div>

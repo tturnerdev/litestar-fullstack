@@ -46,28 +46,12 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { DirectionBadge, FaxStatusBadge } from "@/components/fax/fax-status-badge"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useDeleteFaxMessage, useDownloadFaxDocument, useFaxMessage } from "@/lib/api/hooks/fax"
-import { formatDateTime } from "@/lib/date-utils"
+import { formatDateTime, formatRelativeTime } from "@/lib/date-utils"
 import { formatBytes } from "@/lib/format-utils"
 
 export const Route = createFileRoute("/_app/fax/messages/$messageId/")({
   component: FaxMessageDetailPage,
 })
-
-// -- Formatting helpers -----------------------------------------------------
-
-function formatRelativeTime(value: string | null | undefined): string {
-  if (!value) return "Never"
-  const date = new Date(value)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffMins = Math.floor(diffMs / 60_000)
-  if (diffMins < 1) return "Just now"
-  if (diffMins < 60) return `${diffMins}m ago`
-  const diffHours = Math.floor(diffMins / 60)
-  if (diffHours < 24) return `${diffHours}h ago`
-  const diffDays = Math.floor(diffHours / 24)
-  return `${diffDays}d ago`
-}
 
 // -- Timestamp with tooltip -------------------------------------------------
 

@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useAdminUserAuditLogs } from "@/lib/api/hooks/admin"
-import { formatRelativeTimeShort } from "@/lib/date-utils"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 
 type FilterType = "all" | "logins" | "changes" | "security"
 
@@ -182,7 +182,7 @@ export function UserActivityTimeline({ userId }: { userId: string }) {
                       <Badge variant={config.variant} className="text-xs">
                         {config.label}
                       </Badge>
-                      <span className="text-xs text-muted-foreground" title={new Date(entry.createdAt).toLocaleString()}>
+                      <span className="text-xs text-muted-foreground" title={formatDateTime(entry.createdAt)}>
                         {formatRelativeTimeShort(entry.createdAt)}
                       </span>
                     </div>

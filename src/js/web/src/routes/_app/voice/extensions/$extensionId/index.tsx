@@ -964,28 +964,6 @@ function SubPageLinks({ extensionId }: { extensionId: string }) {
 
 // -- Extension Voicemail Tab --------------------------------------------------
 
-function formatReceivedAt(dateStr: string): string {
-  const date = new Date(dateStr)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffHours = diffMs / (1000 * 60 * 60)
-
-  if (diffHours < 1) {
-    const mins = Math.floor(diffMs / (1000 * 60))
-    return `${mins}m ago`
-  }
-  if (diffHours < 24) {
-    return `${Math.floor(diffHours)}h ago`
-  }
-
-  return date.toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  })
-}
-
 function ExtensionVoicemailTab({ extensionId }: { extensionId: string }) {
   const { data: vmSettings, isLoading: settingsLoading } = useVoicemailSettings(extensionId)
   const { data: vmMessages, isLoading: msgsLoading } = useVoicemailMessages(extensionId, 1, 5)
@@ -1154,7 +1132,7 @@ function ExtensionVoicemailTab({ extensionId }: { extensionId: string }) {
                     </p>
                     <p className="text-xs text-muted-foreground truncate">
                       {formatDuration(msg.durationSeconds)} &middot;{" "}
-                      {formatReceivedAt(msg.receivedAt)}
+                      {formatDateTime(msg.receivedAt)}
                       {msg.transcription
                         ? ` — ${msg.transcription.slice(0, 50)}${msg.transcription.length > 50 ? "..." : ""}`
                         : ""}

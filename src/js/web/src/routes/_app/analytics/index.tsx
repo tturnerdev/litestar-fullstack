@@ -876,11 +876,7 @@ function CallRecordsTab() {
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <span className="text-sm whitespace-nowrap">
-                            {new Date(record.startedAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
-                            {" "}
-                            <span className="text-muted-foreground">
-                              {new Date(record.startedAt).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}
-                            </span>
+                            {formatDateTime(record.startedAt)}
                           </span>
                         </TooltipTrigger>
                         <TooltipContent>{formatDateTime(record.startedAt)}</TooltipContent>
