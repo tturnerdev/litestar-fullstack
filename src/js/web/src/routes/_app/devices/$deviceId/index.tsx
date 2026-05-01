@@ -333,9 +333,9 @@ function DeviceDetailPage() {
             <TabsTrigger value="lines">Lines</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
             <TabsTrigger value="external">External Data</TabsTrigger>
-            <TabsTrigger value="diagnostic" className="gap-1.5">
+            <TabsTrigger value="remote" className="gap-1.5">
               <Wrench className="h-4 w-4" />
-              Diagnostic
+              Remote
             </TabsTrigger>
             <TabsTrigger value="activity" className="gap-1.5">
               <Activity className="h-4 w-4" />
@@ -572,7 +572,7 @@ function DeviceDetailPage() {
             />
           </TabsContent>
 
-          <TabsContent value="diagnostic" className="mt-6">
+          <TabsContent value="remote" className="mt-6">
             <DeviceDiagnosticTab
               deviceId={deviceId}
               manufacturer={data.manufacturer}

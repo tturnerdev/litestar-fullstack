@@ -1455,11 +1455,10 @@ export function DeviceDiagnosticTab({
   deviceName,
 }: DeviceDiagnosticTabProps) {
   const { data: template, isLoading, isError } = useDeviceTemplateLookup(manufacturer, deviceModel)
-  const actionMutation = useDeviceAction(deviceId)
   const [generatedConfig, setGeneratedConfig] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
   const [liveView, setLiveView] = useState(false)
-  const screenshotQuery = useDeviceScreenshot(deviceId, liveView && !!ipAddress)
+  const screenshotQuery = useDeviceScreenshot(deviceId, !!ipAddress)
   const [screenshotUrl, setScreenshotUrl] = useState<string | null>(null)
 
   useEffect(() => {
@@ -1468,6 +1467,18 @@ export function DeviceDiagnosticTab({
     setScreenshotUrl(url)
     return () => URL.revokeObjectURL(url)
   }, [screenshotQuery.data])
+
+  const actionMutation = useDeviceAction(deviceId)
+
+  function handleAction(key: string) {
+    actionMutation.mutate(key, {
+      onSuccess: () => {
+        if (liveView) {
+          setTimeout(() => screenshotQuery.refetch(), 500)
+        }
+      },
+    })
+  }
 
   const deviceVars = useMemo(
     () => ({
@@ -1565,46 +1576,42 @@ export function DeviceDiagnosticTab({
       {/* Wireframe Card */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <MonitorSmartphone className="h-5 w-5 text-muted-foreground" />
-              {template.displayName} Wireframe
-            </CardTitle>
-            {ipAddress && (
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2">
-                  <Switch
-                    id="live-view"
-                    checked={liveView}
-                    onCheckedChange={setLiveView}
-                  />
-                  <Label htmlFor="live-view" className="text-sm font-medium cursor-pointer">
-                    Live View
-                  </Label>
-                </div>
-                {liveView && (
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => screenshotQuery.refetch()}
-                    disabled={screenshotQuery.isFetching}
-                  >
-                    <RefreshCw className={`h-4 w-4 ${screenshotQuery.isFetching ? "animate-spin" : ""}`} />
-                  </Button>
-                )}
-              </div>
-            )}
-          </div>
+          <CardTitle className="flex items-center gap-2">
+            <MonitorSmartphone className="h-5 w-5 text-muted-foreground" />
+            {template.displayName} Wireframe
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          {liveView && screenshotQuery.isFetching && !screenshotUrl && (
+          {ipAddress && (
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <div className="flex items-center gap-2">
+                <Switch
+                  id="live-view"
+                  checked={liveView}
+                  onCheckedChange={setLiveView}
+                />
+                <Label htmlFor="live-view" className="text-sm font-medium cursor-pointer">
+                  Live View
+                </Label>
+              </div>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => screenshotQuery.refetch()}
+                disabled={screenshotQuery.isFetching}
+              >
+                <RefreshCw className={`h-4 w-4 ${screenshotQuery.isFetching ? "animate-spin" : ""}`} />
+              </Button>
+            </div>
+          )}
+          {screenshotQuery.isFetching && !screenshotUrl && (
             <div className="flex items-center justify-center gap-2 py-2 text-muted-foreground text-sm mb-3">
               <Loader2 className="h-4 w-4 animate-spin" />
               Capturing display...
             </div>
           )}
-          {liveView && screenshotQuery.isError && (
+          {screenshotQuery.isError && (
             <div className="flex items-center justify-center gap-2 py-2 text-destructive text-sm mb-3">
               <AlertCircle className="h-4 w-4" />
               {screenshotQuery.error instanceof Error ? screenshotQuery.error.message : "Failed to capture screenshot"}
@@ -1614,8 +1621,8 @@ export function DeviceDiagnosticTab({
             wireframe.version === "v1" ? (
               <WireframeRendererV1
                 data={wireframe.data}
-                screenshotUrl={liveView ? screenshotUrl : null}
-                onAction={ipAddress ? (key) => actionMutation.mutate(key) : undefined}
+                screenshotUrl={screenshotUrl}
+                onAction={ipAddress ? handleAction : undefined}
               />
             ) : (
               <WireframeRenderer data={wireframe.data} />
