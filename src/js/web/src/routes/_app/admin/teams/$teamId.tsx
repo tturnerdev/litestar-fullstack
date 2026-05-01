@@ -544,7 +544,7 @@ function MembersCard({ members }: MembersCardProps) {
   return (
     <Card>
       <CardContent className="pt-6">
-        <Table>
+        <Table aria-label="Team members">
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
@@ -668,7 +668,7 @@ function InvitationsCard({ teamId }: { teamId: string }) {
         </div>
       </CardHeader>
       <CardContent>
-        <Table>
+        <Table aria-label="Team invitations">
           <TableHeader>
             <TableRow>
               <TableHead>Email</TableHead>

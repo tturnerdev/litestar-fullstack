@@ -273,7 +273,7 @@ function TeamPermissionSummary({
       ) : (
         <>
           <div className="rounded-md border">
-            <Table>
+            <Table aria-label="Feature permissions summary">
               <TableHeader>
                 <TableRow>
                   <TableHead>Feature Area</TableHead>
@@ -422,7 +422,7 @@ function TeamPermissionEditor({
       </div>
 
       <div className="rounded-md border">
-        <Table>
+        <Table aria-label="Edit role permissions">
           <TableHeader>
             <TableRow>
               <TableHead>Feature Area</TableHead>

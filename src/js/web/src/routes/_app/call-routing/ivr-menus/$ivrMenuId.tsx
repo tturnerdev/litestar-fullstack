@@ -418,7 +418,7 @@ function IvrMenuDetailPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {sortedOptions.length > 0 ? (
-                  <Table>
+                  <Table aria-label="IVR menu options">
                     <TableHeader>
                       <TableRow>
                         <TableHead className="w-16">Digit</TableHead>

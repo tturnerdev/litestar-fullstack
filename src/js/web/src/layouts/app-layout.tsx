@@ -13,9 +13,14 @@ import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts"
 import { useAuthStore } from "@/lib/auth"
 
 const NEW_ITEM_ROUTES: Record<string, string> = {
-  "/teams": "/teams/new",
+  "/connections": "/connections/new",
   "/devices": "/devices/new",
+  "/fax/numbers": "/fax/numbers/new",
+  "/locations": "/locations/new",
   "/support": "/support/new",
+  "/tags": "/tags/new",
+  "/teams": "/teams/new",
+  "/voice/extensions": "/voice/extensions/new",
 }
 
 function getNewItemRoute(pathname: string): string | null {
@@ -65,7 +70,11 @@ export function AppLayout() {
       { prefix: "g", key: "n", action: () => goTo("/notifications"), description: "Go to Notifications", category: "navigation" },
       { prefix: "g", key: "o", action: () => goTo("/organization"), description: "Go to Organization", category: "navigation" },
       { prefix: "g", key: "w", action: () => goTo("/webhooks"), description: "Go to Webhooks", category: "navigation" },
+      { prefix: "g", key: "m", action: () => goTo("/voicemail"), description: "Go to Voicemail", category: "navigation" },
+      { prefix: "g", key: "9", action: () => goTo("/e911"), description: "Go to E911", category: "navigation" },
+      { prefix: "g", key: "x", action: () => goTo("/tags"), description: "Go to Tags", category: "navigation" },
       { prefix: "g", key: "p", action: () => goTo("/profile"), description: "Go to Profile", category: "navigation" },
+      { prefix: "g", key: ",", action: () => goTo("/settings"), description: "Go to Settings", category: "navigation" },
     ]
     if (user?.isSuperuser) {
       items.push(
@@ -102,7 +111,11 @@ export function AppLayout() {
       { keys: ["g", "n"], description: "Go to Notifications" },
       { keys: ["g", "o"], description: "Go to Organization" },
       { keys: ["g", "w"], description: "Go to Webhooks" },
+      { keys: ["g", "m"], description: "Go to Voicemail" },
+      { keys: ["g", "9"], description: "Go to E911" },
+      { keys: ["g", "x"], description: "Go to Tags" },
       { keys: ["g", "p"], description: "Go to Profile" },
+      { keys: ["g", ","], description: "Go to Settings" },
     ]
     if (user?.isSuperuser) {
       navigation.push(

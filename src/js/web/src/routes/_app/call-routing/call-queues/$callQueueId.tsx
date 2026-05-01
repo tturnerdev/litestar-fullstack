@@ -475,7 +475,7 @@ function CallQueueDetailPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {members.length > 0 ? (
-                  <Table>
+                  <Table aria-label="Queue members">
                     <TableHeader>
                       <TableRow>
                         <TableHead>Extension</TableHead>

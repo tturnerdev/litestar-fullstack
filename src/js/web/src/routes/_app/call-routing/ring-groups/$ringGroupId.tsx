@@ -419,7 +419,7 @@ function RingGroupDetailPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {sortedMembers.length > 0 ? (
-                  <Table>
+                  <Table aria-label="Ring group members">
                     <TableHeader>
                       <TableRow>
                         <TableHead className="w-20">Order</TableHead>

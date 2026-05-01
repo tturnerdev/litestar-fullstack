@@ -665,7 +665,7 @@ function ScheduleDetailPage() {
                   <CardDescription>Define operating hours for each day of the week.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Table>
+                  <Table aria-label="Weekly schedule entries">
                     <TableHeader>
                       <TableRow>
                         <TableHead className="w-32">Day</TableHead>
@@ -714,7 +714,7 @@ function ScheduleDetailPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {holidayEntries.length > 0 ? (
-                    <Table>
+                    <Table aria-label="Holiday entries">
                       <TableHeader>
                         <TableRow>
                           <TableHead>Date</TableHead>

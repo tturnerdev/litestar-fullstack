@@ -161,7 +161,7 @@ export function EmailRouteEditor({ faxNumberId }: { faxNumberId: string }) {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Table>
+          <Table aria-label="Email routing rules">
             <TableHeader>
               <TableRow>
                 <TableHead>Email Address</TableHead>

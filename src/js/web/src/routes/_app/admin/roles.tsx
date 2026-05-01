@@ -422,7 +422,7 @@ function TeamPermissionCard({
           </div>
         ) : (
           <div className="rounded-md border">
-            <Table>
+            <Table aria-label="Role permissions matrix">
               <TableHeader>
                 <TableRow>
                   <TableHead>Feature Area</TableHead>

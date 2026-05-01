@@ -524,7 +524,7 @@ function DashboardTab() {
             </div>
           ) : (
             <div className="overflow-x-auto rounded-md border border-border/60">
-              <Table>
+              <Table aria-label="Call detail records">
                 <TableHeader>
                   <TableRow>
                     <TableHead>Extension</TableHead>
