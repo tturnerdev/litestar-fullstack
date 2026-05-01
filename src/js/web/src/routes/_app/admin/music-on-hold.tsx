@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { createFileRoute } from "@tanstack/react-router"
+import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import {
   AlertCircle,
@@ -156,11 +157,27 @@ function MohFormDialog({
 
     if (mode === "create") {
       createMutation.mutate(payload as never, {
-        onSuccess: () => handleOpenChange(false),
+        onSuccess: () => {
+          toast.success("Music on hold created")
+          handleOpenChange(false)
+        },
+        onError: (err) => {
+          toast.error("Failed to create music on hold", {
+            description: err instanceof Error ? err.message : undefined,
+          })
+        },
       })
     } else {
       updateMutation.mutate(payload as never, {
-        onSuccess: () => handleOpenChange(false),
+        onSuccess: () => {
+          toast.success("Music on hold updated")
+          handleOpenChange(false)
+        },
+        onError: (err) => {
+          toast.error("Failed to update music on hold", {
+            description: err instanceof Error ? err.message : undefined,
+          })
+        },
       })
     }
   }
@@ -437,7 +454,16 @@ function AdminMusicOnHoldPage() {
                             onClick={(e) => {
                               e.stopPropagation()
                               if (window.confirm(`Delete MOH class "${moh.name}"?`)) {
-                                deleteMutation.mutate(moh.id)
+                                deleteMutation.mutate(moh.id, {
+                                  onSuccess: () => {
+                                    toast.success("Music on hold deleted")
+                                  },
+                                  onError: (err) => {
+                                    toast.error("Failed to delete music on hold", {
+                                      description: err instanceof Error ? err.message : undefined,
+                                    })
+                                  },
+                                })
                               }
                             }}
                           >

@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
 import { useState } from "react"
+import { toast } from "sonner"
 import {
   AlertTriangle,
   ArrowLeft,
@@ -150,12 +151,29 @@ function TimeConditionDetailPage() {
     if (editNoMatchDest !== data?.noMatchDestination) payload.noMatchDestination = editNoMatchDest
     const newScheduleId = editScheduleId || null
     if (newScheduleId !== data?.scheduleId) payload.scheduleId = newScheduleId
-    updateMutation.mutate(payload, { onSuccess: () => setEditing(false) })
+    updateMutation.mutate(payload, {
+      onSuccess: () => {
+        setEditing(false)
+        toast.success("Time condition updated")
+      },
+      onError: (err) => {
+        toast.error("Failed to update time condition", {
+          description: err instanceof Error ? err.message : undefined,
+        })
+      },
+    })
   }
 
   const handleDelete = async () => {
-    await deleteMutation.mutateAsync(timeConditionId)
-    router.navigate({ to: "/call-routing", search: { tab: "time-conditions" } })
+    try {
+      await deleteMutation.mutateAsync(timeConditionId)
+      toast.success("Time condition deleted")
+      router.navigate({ to: "/call-routing", search: { tab: "time-conditions" } })
+    } catch (err) {
+      toast.error("Failed to delete time condition", {
+        description: err instanceof Error ? err.message : undefined,
+      })
+    }
   }
 
   // Loading
@@ -316,7 +334,18 @@ function TimeConditionDetailPage() {
                       key={mode}
                       variant={data.overrideMode === mode ? "default" : "outline"}
                       size="sm"
-                      onClick={() => overrideMutation.mutate(mode)}
+                      onClick={() =>
+                        overrideMutation.mutate(mode, {
+                          onSuccess: () => {
+                            toast.success("Override mode updated")
+                          },
+                          onError: (err) => {
+                            toast.error("Failed to update override mode", {
+                              description: err instanceof Error ? err.message : undefined,
+                            })
+                          },
+                        })
+                      }
                       disabled={overrideMutation.isPending || data.overrideMode === mode}
                     >
                       {overrideMutation.isPending && overrideMutation.variables === mode && <Loader2 className="mr-2 h-3 w-3 animate-spin" />}

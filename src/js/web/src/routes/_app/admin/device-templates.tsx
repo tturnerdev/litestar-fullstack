@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { createFileRoute } from "@tanstack/react-router"
+import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import {
   AlertCircle,
@@ -183,11 +184,27 @@ function TemplateFormDialog({
 
     if (mode === "create") {
       createMutation.mutate(payload as never, {
-        onSuccess: () => handleOpenChange(false),
+        onSuccess: () => {
+          toast.success("Device template created")
+          handleOpenChange(false)
+        },
+        onError: (err) => {
+          toast.error("Failed to create device template", {
+            description: err instanceof Error ? err.message : undefined,
+          })
+        },
       })
     } else {
       updateMutation.mutate(payload as never, {
-        onSuccess: () => handleOpenChange(false),
+        onSuccess: () => {
+          toast.success("Device template updated")
+          handleOpenChange(false)
+        },
+        onError: (err) => {
+          toast.error("Failed to update device template", {
+            description: err instanceof Error ? err.message : undefined,
+          })
+        },
       })
     }
   }
@@ -486,7 +503,16 @@ function AdminDeviceTemplatesPage() {
                             onClick={(e) => {
                               e.stopPropagation()
                               if (window.confirm(`Delete template "${tmpl.displayName}"?`)) {
-                                deleteMutation.mutate(tmpl.id)
+                                deleteMutation.mutate(tmpl.id, {
+                                  onSuccess: () => {
+                                    toast.success("Device template deleted")
+                                  },
+                                  onError: (err) => {
+                                    toast.error("Failed to delete device template", {
+                                      description: err instanceof Error ? err.message : undefined,
+                                    })
+                                  },
+                                })
                               }
                             }}
                           >
