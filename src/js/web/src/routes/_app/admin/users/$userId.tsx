@@ -26,6 +26,7 @@ import { EditUserDialog } from "@/components/admin/edit-user-dialog"
 import { ManageRolesDialog } from "@/components/admin/manage-roles-dialog"
 import { ToggleUserStatusDialog } from "@/components/admin/toggle-user-status-dialog"
 import { UserActivityTimeline } from "@/components/admin/user-activity-timeline"
+import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -37,7 +38,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Separator } from "@/components/ui/separator"
 import { SkeletonCard } from "@/components/ui/skeleton"
@@ -719,8 +720,23 @@ function AdminUserDetailPage() {
 
       <Separator />
 
-      {/* Danger Zone */}
+      {/* Activity History (Audit Trail) */}
       <PageSection delay={0.4}>
+        <Card>
+          <CardHeader>
+            <CardTitle>Activity History</CardTitle>
+            <CardDescription>Audit trail for this user</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <EntityActivityPanel targetType="user" targetId={userId} />
+          </CardContent>
+        </Card>
+      </PageSection>
+
+      <Separator />
+
+      {/* Danger Zone */}
+      <PageSection delay={0.45}>
         <Card className="border-destructive/30">
           <CardHeader>
             <CardTitle className="text-destructive">Danger Zone</CardTitle>

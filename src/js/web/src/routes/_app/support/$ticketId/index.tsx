@@ -6,8 +6,10 @@ import {
   ArrowLeft,
   Calendar,
   ChevronDown,
+  ChevronRight,
   Clock,
   Hash,
+  History,
   Loader2,
   Lock,
   Mail,
@@ -19,6 +21,7 @@ import {
   User,
   Users,
 } from "lucide-react"
+import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { TicketConversation } from "@/components/support/ticket-conversation"
 import { TicketPriorityBadge } from "@/components/support/ticket-priority-badge"
 import { TicketReplyForm } from "@/components/support/ticket-reply-form"
@@ -43,6 +46,11 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -226,6 +234,7 @@ function TicketDetailPage() {
   const updateTicket = useUpdateTicket(ticketId)
   const deleteTicket = useDeleteTicket(ticketId)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [activityOpen, setActivityOpen] = useState(false)
 
   if (isLoading) {
     return <TicketDetailSkeleton />
@@ -643,8 +652,36 @@ function TicketDetailPage() {
             </Card>
           </PageSection>
 
-          {/* Danger zone */}
+          {/* Activity Log — collapsed by default, lazy-loads when expanded */}
           <PageSection delay={0.2}>
+            <Collapsible open={activityOpen} onOpenChange={setActivityOpen}>
+              <Card className="border-border/60 bg-card/80">
+                <CollapsibleTrigger asChild>
+                  <CardHeader className="cursor-pointer select-none pb-3 transition-colors hover:bg-muted/30">
+                    <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                      <History className="h-4 w-4" />
+                      Activity Log
+                      <ChevronRight
+                        className={`ml-auto h-4 w-4 transition-transform duration-200 ${activityOpen ? "rotate-90" : ""}`}
+                      />
+                    </CardTitle>
+                  </CardHeader>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <CardContent className="pt-0">
+                    <EntityActivityPanel
+                      targetType="ticket"
+                      targetId={ticketId}
+                      enabled={activityOpen}
+                    />
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
+          </PageSection>
+
+          {/* Danger zone */}
+          <PageSection delay={0.25}>
             <Card className="border-destructive/30">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium text-destructive">

@@ -10,7 +10,7 @@ import {
   Users,
 } from "lucide-react"
 import { useEffect, useState } from "react"
-import { TeamActivity } from "@/components/teams/team-activity"
+import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { TeamMembers } from "@/components/teams/team-members"
 import { TeamSettings } from "@/components/teams/team-settings"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -328,7 +328,11 @@ function TeamDetail() {
           )}
 
           <TabsContent value="activity" className="mt-6">
-            <TeamActivity team={team} />
+            <EntityActivityPanel
+              targetType="team"
+              targetId={teamId}
+              enabled={activeTab === "activity"}
+            />
           </TabsContent>
         </Tabs>
       </PageSection>

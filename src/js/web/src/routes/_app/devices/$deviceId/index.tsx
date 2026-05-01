@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
 import {
+  Activity,
   AlertTriangle,
   ArrowLeft,
   Cpu,
@@ -12,6 +13,7 @@ import {
   Settings,
   Wrench,
 } from "lucide-react"
+import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { RebootButton, ReprovisionButton, ToggleActiveButton, DeleteButton } from "@/components/devices/device-actions"
 import { DeviceLineConfig } from "@/components/devices/device-line-config"
 import { DeviceStatusBadge } from "@/components/devices/device-status-badge"
@@ -327,6 +329,10 @@ function DeviceDetailPage() {
             <TabsTrigger value="lines">Lines</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
             <TabsTrigger value="external">External Data</TabsTrigger>
+            <TabsTrigger value="activity" className="gap-1.5">
+              <Activity className="h-4 w-4" />
+              Activity
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="mt-6 space-y-6">
@@ -555,6 +561,14 @@ function DeviceDetailPage() {
               isRefetching={gatewayQuery.isRefetching}
               isError={gatewayQuery.isError}
               onRefresh={() => gatewayQuery.refetch()}
+            />
+          </TabsContent>
+
+          <TabsContent value="activity" className="mt-6">
+            <EntityActivityPanel
+              targetType="device"
+              targetId={deviceId}
+              enabled={tab === "activity"}
             />
           </TabsContent>
         </Tabs>
