@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { Bell, Building2, Cable, Clock, Home, LifeBuoy, MapPin, Monitor, Phone, Printer, Search, Settings, ShieldCheck, Tags, Users } from "lucide-react"
+import { BarChart3, Bell, Building2, Cable, Clock, GitBranch, Home, LifeBuoy, MapPin, Monitor, Phone, Printer, Search, Settings, ShieldCheck, Tags, Users } from "lucide-react"
 import type * as React from "react"
 import { useEffect, useMemo } from "react"
 import { NavMain, type NavMainItem } from "@/components/nav-main"
@@ -135,9 +135,29 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         ],
       },
       {
+        title: "Call Routing",
+        to: "/call-routing",
+        icon: GitBranch,
+        items: [
+          { title: "Time Conditions", to: "/call-routing?tab=time-conditions" },
+          { title: "IVR Menus", to: "/call-routing?tab=ivr-menus" },
+          { title: "Call Queues", to: "/call-routing?tab=call-queues" },
+          { title: "Ring Groups", to: "/call-routing?tab=ring-groups" },
+        ],
+      },
+      {
         title: "Gateway",
         to: "/gateway",
         icon: Search,
+      },
+      {
+        title: "Analytics",
+        to: "/analytics",
+        icon: BarChart3,
+        items: [
+          { title: "Dashboard", to: "/analytics" },
+          { title: "Call Records", to: "/analytics?tab=records" },
+        ],
       },
       {
         title: "Support",

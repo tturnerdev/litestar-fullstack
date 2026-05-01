@@ -32,6 +32,8 @@ import { Route as AppLocationsRouteImport } from './routes/_app/locations'
 import { Route as AppHomeRouteImport } from './routes/_app/home'
 import { Route as AppDevicesRouteImport } from './routes/_app/devices'
 import { Route as AppConnectionsRouteImport } from './routes/_app/connections'
+import { Route as AppCallRoutingRouteImport } from './routes/_app/call-routing'
+import { Route as AppAnalyticsRouteImport } from './routes/_app/analytics'
 import { Route as AppAdminRouteImport } from './routes/_app/admin'
 import { Route as AppVoiceIndexRouteImport } from './routes/_app/voice/index'
 import { Route as AppTeamsIndexRouteImport } from './routes/_app/teams/index'
@@ -46,6 +48,8 @@ import { Route as AppGatewayIndexRouteImport } from './routes/_app/gateway/index
 import { Route as AppFaxIndexRouteImport } from './routes/_app/fax/index'
 import { Route as AppDevicesIndexRouteImport } from './routes/_app/devices/index'
 import { Route as AppConnectionsIndexRouteImport } from './routes/_app/connections/index'
+import { Route as AppCallRoutingIndexRouteImport } from './routes/_app/call-routing/index'
+import { Route as AppAnalyticsIndexRouteImport } from './routes/_app/analytics/index'
 import { Route as AppAdminIndexRouteImport } from './routes/_app/admin/index'
 import { Route as AppVoicePhoneNumbersRouteImport } from './routes/_app/voice/phone-numbers'
 import { Route as AppTeamsNewRouteImport } from './routes/_app/teams/new'
@@ -88,6 +92,10 @@ import { Route as AppSupportTicketIdEditRouteImport } from './routes/_app/suppor
 import { Route as AppLocationsLocationIdEditRouteImport } from './routes/_app/locations/$locationId/edit'
 import { Route as AppFaxNumbersNewRouteImport } from './routes/_app/fax/numbers/new'
 import { Route as AppConnectionsConnectionIdEditRouteImport } from './routes/_app/connections/$connectionId/edit'
+import { Route as AppCallRoutingTimeConditionsTimeConditionIdRouteImport } from './routes/_app/call-routing/time-conditions/$timeConditionId'
+import { Route as AppCallRoutingRingGroupsRingGroupIdRouteImport } from './routes/_app/call-routing/ring-groups/$ringGroupId'
+import { Route as AppCallRoutingIvrMenusIvrMenuIdRouteImport } from './routes/_app/call-routing/ivr-menus/$ivrMenuId'
+import { Route as AppCallRoutingCallQueuesCallQueueIdRouteImport } from './routes/_app/call-routing/call-queues/$callQueueId'
 import { Route as AppAdminUsersUserIdRouteImport } from './routes/_app/admin/users/$userId'
 import { Route as AppAdminTeamsTeamIdRouteImport } from './routes/_app/admin/teams/$teamId'
 import { Route as AppVoiceExtensionsExtensionIdIndexRouteImport } from './routes/_app/voice/extensions/$extensionId/index'
@@ -211,6 +219,16 @@ const AppConnectionsRoute = AppConnectionsRouteImport.update({
   path: '/connections',
   getParentRoute: () => AppRoute,
 } as any)
+const AppCallRoutingRoute = AppCallRoutingRouteImport.update({
+  id: '/call-routing',
+  path: '/call-routing',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAnalyticsRoute = AppAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAdminRoute = AppAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -280,6 +298,16 @@ const AppConnectionsIndexRoute = AppConnectionsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppConnectionsRoute,
+} as any)
+const AppCallRoutingIndexRoute = AppCallRoutingIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppCallRoutingRoute,
+} as any)
+const AppAnalyticsIndexRoute = AppAnalyticsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppAnalyticsRoute,
 } as any)
 const AppAdminIndexRoute = AppAdminIndexRouteImport.update({
   id: '/',
@@ -501,6 +529,30 @@ const AppConnectionsConnectionIdEditRoute =
     path: '/edit',
     getParentRoute: () => AppConnectionsConnectionIdRoute,
   } as any)
+const AppCallRoutingTimeConditionsTimeConditionIdRoute =
+  AppCallRoutingTimeConditionsTimeConditionIdRouteImport.update({
+    id: '/time-conditions/$timeConditionId',
+    path: '/time-conditions/$timeConditionId',
+    getParentRoute: () => AppCallRoutingRoute,
+  } as any)
+const AppCallRoutingRingGroupsRingGroupIdRoute =
+  AppCallRoutingRingGroupsRingGroupIdRouteImport.update({
+    id: '/ring-groups/$ringGroupId',
+    path: '/ring-groups/$ringGroupId',
+    getParentRoute: () => AppCallRoutingRoute,
+  } as any)
+const AppCallRoutingIvrMenusIvrMenuIdRoute =
+  AppCallRoutingIvrMenusIvrMenuIdRouteImport.update({
+    id: '/ivr-menus/$ivrMenuId',
+    path: '/ivr-menus/$ivrMenuId',
+    getParentRoute: () => AppCallRoutingRoute,
+  } as any)
+const AppCallRoutingCallQueuesCallQueueIdRoute =
+  AppCallRoutingCallQueuesCallQueueIdRouteImport.update({
+    id: '/call-queues/$callQueueId',
+    path: '/call-queues/$callQueueId',
+    getParentRoute: () => AppCallRoutingRoute,
+  } as any)
 const AppAdminUsersUserIdRoute = AppAdminUsersUserIdRouteImport.update({
   id: '/users/$userId',
   path: '/users/$userId',
@@ -558,6 +610,8 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/admin': typeof AppAdminRouteWithChildren
+  '/analytics': typeof AppAnalyticsRouteWithChildren
+  '/call-routing': typeof AppCallRoutingRouteWithChildren
   '/connections': typeof AppConnectionsRouteWithChildren
   '/devices': typeof AppDevicesRouteWithChildren
   '/home': typeof AppHomeRoute
@@ -597,6 +651,8 @@ export interface FileRoutesByFullPath {
   '/teams/new': typeof AppTeamsNewRoute
   '/voice/phone-numbers': typeof AppVoicePhoneNumbersRouteWithChildren
   '/admin/': typeof AppAdminIndexRoute
+  '/analytics/': typeof AppAnalyticsIndexRoute
+  '/call-routing/': typeof AppCallRoutingIndexRoute
   '/connections/': typeof AppConnectionsIndexRoute
   '/devices/': typeof AppDevicesIndexRoute
   '/fax/': typeof AppFaxIndexRoute
@@ -612,6 +668,10 @@ export interface FileRoutesByFullPath {
   '/voice/': typeof AppVoiceIndexRoute
   '/admin/teams/$teamId': typeof AppAdminTeamsTeamIdRoute
   '/admin/users/$userId': typeof AppAdminUsersUserIdRoute
+  '/call-routing/call-queues/$callQueueId': typeof AppCallRoutingCallQueuesCallQueueIdRoute
+  '/call-routing/ivr-menus/$ivrMenuId': typeof AppCallRoutingIvrMenusIvrMenuIdRoute
+  '/call-routing/ring-groups/$ringGroupId': typeof AppCallRoutingRingGroupsRingGroupIdRoute
+  '/call-routing/time-conditions/$timeConditionId': typeof AppCallRoutingTimeConditionsTimeConditionIdRoute
   '/connections/$connectionId/edit': typeof AppConnectionsConnectionIdEditRoute
   '/fax/numbers/new': typeof AppFaxNumbersNewRoute
   '/locations/$locationId/edit': typeof AppLocationsLocationIdEditRoute
@@ -673,6 +733,8 @@ export interface FileRoutesByTo {
   '/tags/new': typeof AppTagsNewRoute
   '/teams/new': typeof AppTeamsNewRoute
   '/admin': typeof AppAdminIndexRoute
+  '/analytics': typeof AppAnalyticsIndexRoute
+  '/call-routing': typeof AppCallRoutingIndexRoute
   '/connections': typeof AppConnectionsIndexRoute
   '/devices': typeof AppDevicesIndexRoute
   '/fax': typeof AppFaxIndexRoute
@@ -688,6 +750,10 @@ export interface FileRoutesByTo {
   '/voice': typeof AppVoiceIndexRoute
   '/admin/teams/$teamId': typeof AppAdminTeamsTeamIdRoute
   '/admin/users/$userId': typeof AppAdminUsersUserIdRoute
+  '/call-routing/call-queues/$callQueueId': typeof AppCallRoutingCallQueuesCallQueueIdRoute
+  '/call-routing/ivr-menus/$ivrMenuId': typeof AppCallRoutingIvrMenusIvrMenuIdRoute
+  '/call-routing/ring-groups/$ringGroupId': typeof AppCallRoutingRingGroupsRingGroupIdRoute
+  '/call-routing/time-conditions/$timeConditionId': typeof AppCallRoutingTimeConditionsTimeConditionIdRoute
   '/connections/$connectionId/edit': typeof AppConnectionsConnectionIdEditRoute
   '/fax/numbers/new': typeof AppFaxNumbersNewRoute
   '/locations/$locationId/edit': typeof AppLocationsLocationIdEditRoute
@@ -725,6 +791,8 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/_public': typeof PublicRouteWithChildren
   '/_app/admin': typeof AppAdminRouteWithChildren
+  '/_app/analytics': typeof AppAnalyticsRouteWithChildren
+  '/_app/call-routing': typeof AppCallRoutingRouteWithChildren
   '/_app/connections': typeof AppConnectionsRouteWithChildren
   '/_app/devices': typeof AppDevicesRouteWithChildren
   '/_app/home': typeof AppHomeRoute
@@ -764,6 +832,8 @@ export interface FileRoutesById {
   '/_app/teams/new': typeof AppTeamsNewRoute
   '/_app/voice/phone-numbers': typeof AppVoicePhoneNumbersRouteWithChildren
   '/_app/admin/': typeof AppAdminIndexRoute
+  '/_app/analytics/': typeof AppAnalyticsIndexRoute
+  '/_app/call-routing/': typeof AppCallRoutingIndexRoute
   '/_app/connections/': typeof AppConnectionsIndexRoute
   '/_app/devices/': typeof AppDevicesIndexRoute
   '/_app/fax/': typeof AppFaxIndexRoute
@@ -779,6 +849,10 @@ export interface FileRoutesById {
   '/_app/voice/': typeof AppVoiceIndexRoute
   '/_app/admin/teams/$teamId': typeof AppAdminTeamsTeamIdRoute
   '/_app/admin/users/$userId': typeof AppAdminUsersUserIdRoute
+  '/_app/call-routing/call-queues/$callQueueId': typeof AppCallRoutingCallQueuesCallQueueIdRoute
+  '/_app/call-routing/ivr-menus/$ivrMenuId': typeof AppCallRoutingIvrMenusIvrMenuIdRoute
+  '/_app/call-routing/ring-groups/$ringGroupId': typeof AppCallRoutingRingGroupsRingGroupIdRoute
+  '/_app/call-routing/time-conditions/$timeConditionId': typeof AppCallRoutingTimeConditionsTimeConditionIdRoute
   '/_app/connections/$connectionId/edit': typeof AppConnectionsConnectionIdEditRoute
   '/_app/fax/numbers/new': typeof AppFaxNumbersNewRoute
   '/_app/locations/$locationId/edit': typeof AppLocationsLocationIdEditRoute
@@ -815,6 +889,8 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/admin'
+    | '/analytics'
+    | '/call-routing'
     | '/connections'
     | '/devices'
     | '/home'
@@ -854,6 +930,8 @@ export interface FileRouteTypes {
     | '/teams/new'
     | '/voice/phone-numbers'
     | '/admin/'
+    | '/analytics/'
+    | '/call-routing/'
     | '/connections/'
     | '/devices/'
     | '/fax/'
@@ -869,6 +947,10 @@ export interface FileRouteTypes {
     | '/voice/'
     | '/admin/teams/$teamId'
     | '/admin/users/$userId'
+    | '/call-routing/call-queues/$callQueueId'
+    | '/call-routing/ivr-menus/$ivrMenuId'
+    | '/call-routing/ring-groups/$ringGroupId'
+    | '/call-routing/time-conditions/$timeConditionId'
     | '/connections/$connectionId/edit'
     | '/fax/numbers/new'
     | '/locations/$locationId/edit'
@@ -930,6 +1012,8 @@ export interface FileRouteTypes {
     | '/tags/new'
     | '/teams/new'
     | '/admin'
+    | '/analytics'
+    | '/call-routing'
     | '/connections'
     | '/devices'
     | '/fax'
@@ -945,6 +1029,10 @@ export interface FileRouteTypes {
     | '/voice'
     | '/admin/teams/$teamId'
     | '/admin/users/$userId'
+    | '/call-routing/call-queues/$callQueueId'
+    | '/call-routing/ivr-menus/$ivrMenuId'
+    | '/call-routing/ring-groups/$ringGroupId'
+    | '/call-routing/time-conditions/$timeConditionId'
     | '/connections/$connectionId/edit'
     | '/fax/numbers/new'
     | '/locations/$locationId/edit'
@@ -981,6 +1069,8 @@ export interface FileRouteTypes {
     | '/_app'
     | '/_public'
     | '/_app/admin'
+    | '/_app/analytics'
+    | '/_app/call-routing'
     | '/_app/connections'
     | '/_app/devices'
     | '/_app/home'
@@ -1020,6 +1110,8 @@ export interface FileRouteTypes {
     | '/_app/teams/new'
     | '/_app/voice/phone-numbers'
     | '/_app/admin/'
+    | '/_app/analytics/'
+    | '/_app/call-routing/'
     | '/_app/connections/'
     | '/_app/devices/'
     | '/_app/fax/'
@@ -1035,6 +1127,10 @@ export interface FileRouteTypes {
     | '/_app/voice/'
     | '/_app/admin/teams/$teamId'
     | '/_app/admin/users/$userId'
+    | '/_app/call-routing/call-queues/$callQueueId'
+    | '/_app/call-routing/ivr-menus/$ivrMenuId'
+    | '/_app/call-routing/ring-groups/$ringGroupId'
+    | '/_app/call-routing/time-conditions/$timeConditionId'
     | '/_app/connections/$connectionId/edit'
     | '/_app/fax/numbers/new'
     | '/_app/locations/$locationId/edit'
@@ -1236,6 +1332,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppConnectionsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/call-routing': {
+      id: '/_app/call-routing'
+      path: '/call-routing'
+      fullPath: '/call-routing'
+      preLoaderRoute: typeof AppCallRoutingRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/analytics': {
+      id: '/_app/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AppAnalyticsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/admin': {
       id: '/_app/admin'
       path: '/admin'
@@ -1333,6 +1443,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/connections/'
       preLoaderRoute: typeof AppConnectionsIndexRouteImport
       parentRoute: typeof AppConnectionsRoute
+    }
+    '/_app/call-routing/': {
+      id: '/_app/call-routing/'
+      path: '/'
+      fullPath: '/call-routing/'
+      preLoaderRoute: typeof AppCallRoutingIndexRouteImport
+      parentRoute: typeof AppCallRoutingRoute
+    }
+    '/_app/analytics/': {
+      id: '/_app/analytics/'
+      path: '/'
+      fullPath: '/analytics/'
+      preLoaderRoute: typeof AppAnalyticsIndexRouteImport
+      parentRoute: typeof AppAnalyticsRoute
     }
     '/_app/admin/': {
       id: '/_app/admin/'
@@ -1628,6 +1752,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppConnectionsConnectionIdEditRouteImport
       parentRoute: typeof AppConnectionsConnectionIdRoute
     }
+    '/_app/call-routing/time-conditions/$timeConditionId': {
+      id: '/_app/call-routing/time-conditions/$timeConditionId'
+      path: '/time-conditions/$timeConditionId'
+      fullPath: '/call-routing/time-conditions/$timeConditionId'
+      preLoaderRoute: typeof AppCallRoutingTimeConditionsTimeConditionIdRouteImport
+      parentRoute: typeof AppCallRoutingRoute
+    }
+    '/_app/call-routing/ring-groups/$ringGroupId': {
+      id: '/_app/call-routing/ring-groups/$ringGroupId'
+      path: '/ring-groups/$ringGroupId'
+      fullPath: '/call-routing/ring-groups/$ringGroupId'
+      preLoaderRoute: typeof AppCallRoutingRingGroupsRingGroupIdRouteImport
+      parentRoute: typeof AppCallRoutingRoute
+    }
+    '/_app/call-routing/ivr-menus/$ivrMenuId': {
+      id: '/_app/call-routing/ivr-menus/$ivrMenuId'
+      path: '/ivr-menus/$ivrMenuId'
+      fullPath: '/call-routing/ivr-menus/$ivrMenuId'
+      preLoaderRoute: typeof AppCallRoutingIvrMenusIvrMenuIdRouteImport
+      parentRoute: typeof AppCallRoutingRoute
+    }
+    '/_app/call-routing/call-queues/$callQueueId': {
+      id: '/_app/call-routing/call-queues/$callQueueId'
+      path: '/call-queues/$callQueueId'
+      fullPath: '/call-routing/call-queues/$callQueueId'
+      preLoaderRoute: typeof AppCallRoutingCallQueuesCallQueueIdRouteImport
+      parentRoute: typeof AppCallRoutingRoute
+    }
     '/_app/admin/users/$userId': {
       id: '/_app/admin/users/$userId'
       path: '/users/$userId'
@@ -1726,6 +1878,41 @@ const AppAdminRouteChildren: AppAdminRouteChildren = {
 
 const AppAdminRouteWithChildren = AppAdminRoute._addFileChildren(
   AppAdminRouteChildren,
+)
+
+interface AppAnalyticsRouteChildren {
+  AppAnalyticsIndexRoute: typeof AppAnalyticsIndexRoute
+}
+
+const AppAnalyticsRouteChildren: AppAnalyticsRouteChildren = {
+  AppAnalyticsIndexRoute: AppAnalyticsIndexRoute,
+}
+
+const AppAnalyticsRouteWithChildren = AppAnalyticsRoute._addFileChildren(
+  AppAnalyticsRouteChildren,
+)
+
+interface AppCallRoutingRouteChildren {
+  AppCallRoutingIndexRoute: typeof AppCallRoutingIndexRoute
+  AppCallRoutingCallQueuesCallQueueIdRoute: typeof AppCallRoutingCallQueuesCallQueueIdRoute
+  AppCallRoutingIvrMenusIvrMenuIdRoute: typeof AppCallRoutingIvrMenusIvrMenuIdRoute
+  AppCallRoutingRingGroupsRingGroupIdRoute: typeof AppCallRoutingRingGroupsRingGroupIdRoute
+  AppCallRoutingTimeConditionsTimeConditionIdRoute: typeof AppCallRoutingTimeConditionsTimeConditionIdRoute
+}
+
+const AppCallRoutingRouteChildren: AppCallRoutingRouteChildren = {
+  AppCallRoutingIndexRoute: AppCallRoutingIndexRoute,
+  AppCallRoutingCallQueuesCallQueueIdRoute:
+    AppCallRoutingCallQueuesCallQueueIdRoute,
+  AppCallRoutingIvrMenusIvrMenuIdRoute: AppCallRoutingIvrMenusIvrMenuIdRoute,
+  AppCallRoutingRingGroupsRingGroupIdRoute:
+    AppCallRoutingRingGroupsRingGroupIdRoute,
+  AppCallRoutingTimeConditionsTimeConditionIdRoute:
+    AppCallRoutingTimeConditionsTimeConditionIdRoute,
+}
+
+const AppCallRoutingRouteWithChildren = AppCallRoutingRoute._addFileChildren(
+  AppCallRoutingRouteChildren,
 )
 
 interface AppConnectionsConnectionIdRouteChildren {
@@ -1903,6 +2090,8 @@ const AppVoicePhoneNumbersRouteWithChildren =
 
 interface AppRouteChildren {
   AppAdminRoute: typeof AppAdminRouteWithChildren
+  AppAnalyticsRoute: typeof AppAnalyticsRouteWithChildren
+  AppCallRoutingRoute: typeof AppCallRoutingRouteWithChildren
   AppConnectionsRoute: typeof AppConnectionsRouteWithChildren
   AppDevicesRoute: typeof AppDevicesRouteWithChildren
   AppHomeRoute: typeof AppHomeRoute
@@ -1938,6 +2127,8 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppAdminRoute: AppAdminRouteWithChildren,
+  AppAnalyticsRoute: AppAnalyticsRouteWithChildren,
+  AppCallRoutingRoute: AppCallRoutingRouteWithChildren,
   AppConnectionsRoute: AppConnectionsRouteWithChildren,
   AppDevicesRoute: AppDevicesRouteWithChildren,
   AppHomeRoute: AppHomeRoute,

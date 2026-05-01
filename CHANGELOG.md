@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.99.0 (2026-04-30)
+
+### Added
+- **Call routing frontend** — Tabbed list page for time conditions, IVR menus, call queues, and ring groups with URL-persisted tabs. Detail pages with in-place editing, nested member/option management, night mode override toggle, pause/unpause queue agents, and danger zone delete. Sidebar navigation added.
+- **Analytics domain** — New `analytics` domain with `CallRecord` model tracking call date, direction, disposition, duration, cost, and recording URL. Service with SQL-based aggregation queries for summary stats, time-series volume, and per-extension breakdowns. CSV export endpoint. Full CRUD API with 8 filter parameters.
+- **Analytics dashboard** — Frontend dashboard with date range filter, summary stat cards (total/answered/missed/avg duration), stacked bar chart for call volume, and per-extension breakdown table. CDR table with direction/disposition filters, search, duration range, color-coded badges, and CSV export.
+
 ## v0.98.0 (2026-04-30)
 
 ### Added

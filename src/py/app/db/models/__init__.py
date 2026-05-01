@@ -1,6 +1,8 @@
 from app.db.models._audit_log import AuditLog
 from app.db.models._call_queue import CallQueue
 from app.db.models._call_queue_member import CallQueueMember
+from app.db.models._call_record import CallRecord
+from app.db.models._call_record_enums import CallDirection, CallDisposition
 from app.db.models._call_routing_enums import IvrGreetingType, OverrideMode, QueueStrategy, RingGroupStrategy
 from app.db.models._connection import Connection
 from app.db.models._connection_enums import ConnectionAuthType, ConnectionStatus, ConnectionType
@@ -61,8 +63,11 @@ from app.db.models._voicemail_message import VoicemailMessage
 
 __all__ = (
     "AuditLog",
+    "CallDirection",
+    "CallDisposition",
     "CallQueue",
     "CallQueueMember",
+    "CallRecord",
     "Connection",
     "ConnectionAuthType",
     "ConnectionStatus",
