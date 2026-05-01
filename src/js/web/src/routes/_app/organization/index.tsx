@@ -258,7 +258,7 @@ function OrganizationSettingsPage() {
                         <img src={org.logoUrl} alt="Organization logo" className="h-10 w-10 rounded-lg border object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none" }} />
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <span className="text-sm text-muted-foreground truncate max-w-xs">{org.logoUrl}</span>
+                            <span className="text-sm text-muted-foreground truncate max-w-xs" title={org.logoUrl}>{org.logoUrl}</span>
                           </TooltipTrigger>
                           <TooltipContent>{org.logoUrl}</TooltipContent>
                         </Tooltip>

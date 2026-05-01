@@ -96,7 +96,7 @@ export function AttachmentPreview({ attachment, onClose, onPrev, onNext }: Attac
         <div className="flex items-center justify-between border-b px-4 py-3">
           <div className="flex items-center gap-2 min-w-0">
             <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
-            <h3 className="truncate text-sm font-medium">{attachment.fileName}</h3>
+            <h3 className="truncate text-sm font-medium" title={attachment.fileName}>{attachment.fileName}</h3>
           </div>
           <div className="flex items-center gap-2">
             <Tooltip>

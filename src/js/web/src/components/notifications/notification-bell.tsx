@@ -149,12 +149,12 @@ function NotificationRow({
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <p className={cn("truncate text-sm font-medium", !notification.isRead && "text-foreground", notification.isRead && "text-muted-foreground")}>
+          <p className={cn("truncate text-sm font-medium", !notification.isRead && "text-foreground", notification.isRead && "text-muted-foreground")} title={notification.title}>
             {notification.title}
           </p>
           {!notification.isRead && <span className="h-2 w-2 shrink-0 rounded-full bg-primary" />}
         </div>
-        <p className="line-clamp-2 text-xs text-muted-foreground">{notification.message}</p>
+        <p className="line-clamp-2 text-xs text-muted-foreground" title={notification.message}>{notification.message}</p>
         <p className="mt-0.5 text-[0.65rem] text-muted-foreground/70">{relativeTime}</p>
       </div>
       <button

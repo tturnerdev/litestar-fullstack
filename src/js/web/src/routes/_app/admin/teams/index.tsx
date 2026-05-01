@@ -503,7 +503,7 @@ function TeamRow({
             </div>
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="font-medium truncate group-hover:underline">
+                <span className="font-medium truncate group-hover:underline" title={team.name}>
                   {team.name}
                 </span>
               </TooltipTrigger>

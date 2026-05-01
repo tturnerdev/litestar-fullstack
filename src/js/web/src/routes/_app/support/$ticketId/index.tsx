@@ -499,7 +499,7 @@ function TicketDetailPage() {
                     </p>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <p className="mt-0.5 truncate text-sm font-medium">
+                        <p className="mt-0.5 truncate text-sm font-medium" title={ticket.user?.name ?? ticket.user?.email ?? "Unknown"}>
                           {ticket.user?.name ?? ticket.user?.email ?? "Unknown"}
                         </p>
                       </TooltipTrigger>
@@ -508,7 +508,7 @@ function TicketDetailPage() {
                     {ticket.user?.name && ticket.user?.email && (
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <p className="truncate text-xs text-muted-foreground">
+                          <p className="truncate text-xs text-muted-foreground" title={ticket.user.email}>
                             {ticket.user.email}
                           </p>
                         </TooltipTrigger>
@@ -531,7 +531,7 @@ function TicketDetailPage() {
                       <>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <p className="mt-0.5 truncate text-sm font-medium">
+                            <p className="mt-0.5 truncate text-sm font-medium" title={ticket.assignedTo.name ?? ticket.assignedTo.email}>
                               {ticket.assignedTo.name ?? ticket.assignedTo.email}
                             </p>
                           </TooltipTrigger>
@@ -540,7 +540,7 @@ function TicketDetailPage() {
                         {ticket.assignedTo.name && ticket.assignedTo.email && (
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <p className="truncate text-xs text-muted-foreground">
+                              <p className="truncate text-xs text-muted-foreground" title={ticket.assignedTo.email}>
                                 {ticket.assignedTo.email}
                               </p>
                             </TooltipTrigger>

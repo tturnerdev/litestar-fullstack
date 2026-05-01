@@ -619,11 +619,11 @@ function UserRow({
               <AvatarFallback>{getInitials(user.name, user.email)}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col gap-0.5 min-w-0">
-              <span className="font-medium truncate group-hover:underline">
+              <span className="font-medium truncate group-hover:underline" title={user.name ?? user.email}>
                 {user.name ?? user.email}
               </span>
               {user.username && (
-                <span className="text-xs text-muted-foreground truncate">
+                <span className="text-xs text-muted-foreground truncate" title={`@${user.username}`}>
                   @{user.username}
                 </span>
               )}
