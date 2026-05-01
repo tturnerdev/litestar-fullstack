@@ -21,7 +21,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { BulkActionBar, createBulkDeleteAction } from "@/components/ui/bulk-action-bar"
+import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { EmptyState } from "@/components/ui/empty-state"
@@ -172,8 +172,13 @@ function TeamsPage() {
           setSelectedIds(new Set())
         },
       ),
+      createExportAction<Team>(
+        "teams-selected",
+        csvHeaders,
+        (ids) => sortedItems.filter((t) => ids.includes(t.id)),
+      ),
     ],
-    [deleteTeamMutation],
+    [sortedItems, deleteTeamMutation],
   )
 
   const hasData = sortedItems.length > 0

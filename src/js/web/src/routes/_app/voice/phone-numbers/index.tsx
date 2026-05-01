@@ -26,7 +26,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { BulkActionBar, createBulkDeleteAction } from "@/components/ui/bulk-action-bar"
+import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -422,8 +422,13 @@ function PhoneNumbersPage() {
           setSelectedIds(new Set())
         },
       ),
+      createExportAction<PhoneNumber>(
+        "phone-numbers-selected",
+        csvHeaders,
+        (ids) => filteredItems.filter((pn) => ids.includes(pn.id)),
+      ),
     ],
-    [deletePhoneNumber],
+    [deletePhoneNumber, filteredItems],
   )
 
   // Export all visible

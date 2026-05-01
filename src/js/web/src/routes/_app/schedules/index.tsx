@@ -36,7 +36,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { BulkActionBar, createExportAction } from "@/components/ui/bulk-action-bar"
+import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -285,6 +285,8 @@ function SchedulesPage() {
     sortOrder: sortDir ?? undefined,
   })
 
+  const deleteSchedule = useDeleteSchedule()
+
   // Selection state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
@@ -339,13 +341,18 @@ function SchedulesPage() {
   // Bulk actions
   const bulkActions = useMemo(
     () => [
+      createBulkDeleteAction(
+        (id) => deleteSchedule.mutateAsync(id),
+        () => refetch(),
+        { label: "Delete Selected" },
+      ),
       createExportAction<Schedule>(
         "schedules-selected",
         csvHeaders,
         (ids) => filteredItems.filter((s) => ids.includes(s.id)),
       ),
     ],
-    [filteredItems],
+    [deleteSchedule, refetch, filteredItems],
   )
 
   // Export all visible

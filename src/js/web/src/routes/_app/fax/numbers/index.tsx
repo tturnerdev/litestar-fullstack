@@ -28,7 +28,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { BulkActionBar, createBulkDeleteAction } from "@/components/ui/bulk-action-bar"
+import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -203,8 +203,13 @@ function FaxNumbersPage() {
           setSelectedIds(new Set())
         },
       ),
+      createExportAction<FaxNumber>(
+        "fax-numbers-selected",
+        csvHeaders,
+        (ids) => filteredItems.filter((n) => ids.includes(n.id)),
+      ),
     ],
-    [deleteFaxNumber],
+    [filteredItems, deleteFaxNumber],
   )
 
   // Export all visible

@@ -2,7 +2,7 @@ import { Link, useNavigate } from "@tanstack/react-router"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { AlertCircle, Building2, Download, Eye, MapPin, MoreVertical, Pencil, Search, X } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { BulkActionBar, createBulkDeleteAction } from "@/components/ui/bulk-action-bar"
+import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -113,8 +113,13 @@ export function LocationList() {
         },
         { label: "Delete Selected" },
       ),
+      createExportAction<Location>(
+        "locations-selected",
+        csvHeaders,
+        (ids) => locations.filter((loc) => ids.includes(loc.id)),
+      ),
     ],
-    [bulk],
+    [bulk, locations],
   )
 
   // Export all visible

@@ -37,7 +37,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { BulkActionBar, createBulkDeleteAction } from "@/components/ui/bulk-action-bar"
+import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -259,8 +259,13 @@ function ConnectionsPage() {
           setSelectedIds(new Set())
         },
       ),
+      createExportAction<ConnectionList>(
+        "connections-selected",
+        csvHeaders,
+        (ids) => filteredItems.filter((c) => ids.includes(c.id)),
+      ),
     ],
-    [deleteConnection],
+    [filteredItems, deleteConnection],
   )
 
   // Active filter count for display
