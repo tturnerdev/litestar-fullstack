@@ -8,7 +8,7 @@ from uuid import UUID
 
 from litestar import Controller, delete, get, patch, post
 from litestar.di import Provide
-from litestar.exceptions import HTTPException
+from litestar.exceptions import HTTPException, NotFoundException
 from litestar.params import Dependency, Parameter
 
 from app.db import models as m
@@ -233,15 +233,16 @@ class RoleController(Controller):
             A message confirming the assignment.
 
         Raises:
-            HTTPException: If the role or user is not found, or if the user already has the role.
+            NotFoundException: If the role or user is not found.
+            HTTPException: If the user already has the role.
         """
         role = await roles_service.get_one_or_none(slug=role_slug)
         if role is None:
-            raise HTTPException(status_code=404, detail=f"Role '{role_slug}' not found")
+            raise NotFoundException(detail=f"Role '{role_slug}' not found")
 
         user = await users_service.get_one_or_none(email=data.user_name)
         if user is None:
-            raise HTTPException(status_code=404, detail=f"User '{data.user_name}' not found")
+            raise NotFoundException(detail=f"User '{data.user_name}' not found")
 
         existing_role = await user_roles_service.get_one_or_none(user_id=user.id, role_id=role.id)
         if existing_role is not None:
@@ -297,19 +298,19 @@ class RoleController(Controller):
             A message confirming the revocation.
 
         Raises:
-            HTTPException: If the role or user is not found, or if the user doesn't have the role.
+            NotFoundException: If the role or user is not found, or if the user doesn't have the role.
         """
         role = await roles_service.get_one_or_none(slug=role_slug)
         if role is None:
-            raise HTTPException(status_code=404, detail=f"Role '{role_slug}' not found")
+            raise NotFoundException(detail=f"Role '{role_slug}' not found")
 
         user = await users_service.get_one_or_none(email=data.user_name)
         if user is None:
-            raise HTTPException(status_code=404, detail=f"User '{data.user_name}' not found")
+            raise NotFoundException(detail=f"User '{data.user_name}' not found")
 
         existing_role = await user_roles_service.get_one_or_none(user_id=user.id, role_id=role.id)
         if existing_role is None:
-            raise HTTPException(status_code=404, detail=f"User '{data.user_name}' does not have role '{role_slug}'")
+            raise NotFoundException(detail=f"User '{data.user_name}' does not have role '{role_slug}'")
 
         before = capture_snapshot(existing_role)
         await user_roles_service.delete(existing_role.id)

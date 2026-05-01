@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Annotated, Any
 
 from litestar import Controller, delete, get, patch, post
 from litestar.di import Provide
-from litestar.exceptions import HTTPException, PermissionDeniedException
+from litestar.exceptions import HTTPException, NotFoundException, PermissionDeniedException
 from litestar.params import Dependency, Parameter
 from sqlalchemy.orm import selectinload
 
@@ -68,12 +68,12 @@ class FaxEmailRouteController(Controller):
         """Verify the user can access the fax number and return it.
 
         Raises:
-            HTTPException: If the fax number does not exist
+            NotFoundException: If the fax number does not exist
             PermissionDeniedException: If the user cannot access the fax number
         """
         fax_number = await fax_numbers_service.get_one_or_none(id=fax_number_id)
         if fax_number is None:
-            raise HTTPException(status_code=404, detail="Fax number not found.")
+            raise NotFoundException(detail="Fax number not found.")
         if not _can_access_fax_number(current_user, fax_number):
             raise PermissionDeniedException(detail="Insufficient permissions to access this fax number.")
         return fax_number

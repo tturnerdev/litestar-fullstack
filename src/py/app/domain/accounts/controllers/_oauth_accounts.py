@@ -8,9 +8,9 @@ from httpx_oauth.clients.github import GitHubOAuth2
 from httpx_oauth.clients.google import GoogleOAuth2
 from litestar import Controller, delete, get, post
 from litestar.di import Provide
-from litestar.exceptions import HTTPException
+from litestar.exceptions import HTTPException, NotFoundException
 from litestar.params import Dependency, Parameter
-from litestar.status_codes import HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
+from litestar.status_codes import HTTP_400_BAD_REQUEST
 from sqlalchemy.orm import undefer_group
 
 from app.db import models as m
@@ -166,10 +166,7 @@ class OAuthAccountController(Controller):
             raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=reason)
         success = await oauth_account_service.unlink_oauth_account(user_id=current_user.id, provider=provider)
         if not success:
-            raise HTTPException(
-                status_code=HTTP_404_NOT_FOUND,
-                detail=f"No {provider} account linked to your profile",
-            )
+            raise NotFoundException(detail=f"No {provider} account linked to your profile")
 
         await log_audit(
             audit_service,
@@ -252,7 +249,7 @@ def _get_oauth_client(provider: str, settings: AppSettings) -> GoogleOAuth2 | Gi
             client_id=settings.GITHUB_OAUTH2_CLIENT_ID,
             client_secret=settings.GITHUB_OAUTH2_CLIENT_SECRET,
         )
-    raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Unknown OAuth provider: {provider}")
+    raise NotFoundException(detail=f"Unknown OAuth provider: {provider}")
 
 
 __all__ = ("OAuthAccountController",)
