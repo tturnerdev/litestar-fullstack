@@ -1,4 +1,4 @@
-import { Activity, ArrowRight, MonitorSmartphone, RefreshCw, TrendingDown, TrendingUp, Users, UsersRound } from "lucide-react"
+import { Activity, ArrowRight, MonitorSmartphone, RefreshCw, Users, UsersRound } from "lucide-react"
 import { useEffect, useState } from "react"
 import { Link } from "@tanstack/react-router"
 import { useQueryClient } from "@tanstack/react-query"
@@ -19,20 +19,6 @@ function formatLastUpdated(date: Date): string {
   if (diffSec < 60) return `${diffSec}s ago`
   if (diffMin < 60) return `${diffMin}m ago`
   return date.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })
-}
-
-interface StatTrend {
-  value: number
-  direction: "up" | "down" | "flat"
-}
-
-function generateMockTrend(seed: number): StatTrend {
-  // Deterministic pseudo-random based on seed for consistent display
-  const val = ((seed * 17 + 3) % 20) - 5
-  return {
-    value: Math.abs(val),
-    direction: val > 0 ? "up" : val < 0 ? "down" : "flat",
-  }
 }
 
 export function OrganizationStats() {
@@ -113,7 +99,6 @@ export function OrganizationStats() {
       color: "text-blue-600 dark:text-blue-400",
       bgColor: "bg-blue-500/10",
       href: "/admin/users" as const,
-      trend: generateMockTrend(data.totalUsers),
     },
     {
       label: "Total Teams",
@@ -123,7 +108,6 @@ export function OrganizationStats() {
       color: "text-emerald-600 dark:text-emerald-400",
       bgColor: "bg-emerald-500/10",
       href: "/admin/teams" as const,
-      trend: generateMockTrend(data.totalTeams),
     },
     {
       label: "Verified Users",
@@ -133,7 +117,6 @@ export function OrganizationStats() {
       color: "text-purple-600 dark:text-purple-400",
       bgColor: "bg-purple-500/10",
       href: "/admin/users" as const,
-      trend: generateMockTrend(data.verifiedUsers),
       progressPercent: verifiedPercent,
     },
     {
@@ -144,7 +127,6 @@ export function OrganizationStats() {
       color: "text-orange-600 dark:text-orange-400",
       bgColor: "bg-orange-500/10",
       href: "/admin/users" as const,
-      trend: generateMockTrend(data.eventsToday),
     },
   ]
 
@@ -189,24 +171,7 @@ export function OrganizationStats() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-2">
-                <div className="flex items-baseline gap-2">
-                  <div className="text-3xl font-semibold">{stat.value.toLocaleString()}</div>
-                  {stat.trend.direction !== "flat" && (
-                    <span
-                      className={cn(
-                        "flex items-center gap-0.5 text-xs font-medium",
-                        stat.trend.direction === "up" ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400",
-                      )}
-                    >
-                      {stat.trend.direction === "up" ? (
-                        <TrendingUp className="h-3 w-3" />
-                      ) : (
-                        <TrendingDown className="h-3 w-3" />
-                      )}
-                      {stat.trend.value}%
-                    </span>
-                  )}
-                </div>
+                <div className="text-3xl font-semibold">{stat.value.toLocaleString()}</div>
                 {"progressPercent" in stat && stat.progressPercent !== undefined && (
                   <div className="space-y-1">
                     <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">

@@ -3,6 +3,7 @@ import { useCallback, useMemo, useState } from "react"
 import {
   AlertCircle,
   CheckCircle2,
+  Download,
   Eye,
   MoreVertical,
   Pencil,
@@ -25,7 +26,6 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
-import { ExportButton } from "@/components/ui/export-button"
 import { FilterDropdown, type FilterOption } from "@/components/ui/filter-dropdown"
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
@@ -36,6 +36,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { useAdminTeams } from "@/lib/api/hooks/admin"
+import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { adminDeleteTeam } from "@/lib/generated/api"
 import type { AdminTeamSummary } from "@/lib/generated/api"
 
@@ -47,12 +48,12 @@ export const Route = createFileRoute("/_app/admin/teams/")({
 
 const PAGE_SIZE = 25
 
-const TEAM_EXPORT_COLUMNS = [
-  { key: "name", header: "Name" },
-  { key: "slug", header: "Slug" },
-  { key: "memberCount", header: "Members" },
-  { key: "isActive", header: "Active" },
-  { key: "createdAt", header: "Created At" },
+const csvHeaders: CsvHeader<AdminTeamSummary>[] = [
+  { label: "Name", accessor: (t) => t.name },
+  { label: "Slug", accessor: (t) => t.slug },
+  { label: "Members", accessor: (t) => t.memberCount ?? 0 },
+  { label: "Active", accessor: (t) => (t.isActive ? "Yes" : "No") },
+  { label: "Created At", accessor: (t) => formatDateTime(t.createdAt) },
 ]
 
 const statusOptions: FilterOption[] = [
@@ -121,6 +122,12 @@ function AdminTeamsPage() {
     orderBy: sortKey ?? undefined,
     sortOrder: sortDir ?? undefined,
   })
+
+  // Export all visible
+  const handleExportAll = useCallback(() => {
+    if (!data?.items?.length) return
+    exportToCsv("admin-teams", csvHeaders, data.items)
+  }, [data?.items])
 
   // Apply client-side status filters
   const filteredItems = useMemo(() => {
@@ -221,11 +228,10 @@ function AdminTeamsPage() {
         description="View and manage all teams in the system."
         breadcrumbs={<AdminBreadcrumbs />}
         actions={
-          <ExportButton
-            data={(data?.items ?? []) as Record<string, unknown>[]}
-            filename="teams"
-            columns={TEAM_EXPORT_COLUMNS}
-          />
+          <Button variant="outline" size="sm" onClick={handleExportAll} disabled={!data?.items?.length}>
+            <Download className="mr-2 h-4 w-4" />
+            Export
+          </Button>
         }
       />
       <AdminNav />

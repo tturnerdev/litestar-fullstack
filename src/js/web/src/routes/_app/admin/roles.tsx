@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   Clock,
   CreditCard,
+  Download,
   GitBranch,
   Info,
   LifeBuoy,
@@ -35,6 +36,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useAdminTeams } from "@/lib/api/hooks/admin"
+import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import {
   listTeamPermissions,
   updateTeamPermissions,
@@ -65,6 +67,22 @@ const FEATURE_AREAS: readonly { key: FeatureArea; label: string; icon: LucideIco
 ]
 
 const ROLES: TeamRoles[] = ["ADMIN", "MEMBER"]
+
+interface PermissionExportRow {
+  teamName: string
+  role: string
+  featureArea: string
+  canView: string
+  canEdit: string
+}
+
+const csvHeaders: CsvHeader<PermissionExportRow>[] = [
+  { label: "Team", accessor: (r) => r.teamName },
+  { label: "Role", accessor: (r) => r.role },
+  { label: "Feature Area", accessor: (r) => r.featureArea },
+  { label: "Can View", accessor: (r) => r.canView },
+  { label: "Can Edit", accessor: (r) => r.canEdit },
+]
 
 // -- Helpers -----------------------------------------------------------------
 
@@ -141,12 +159,35 @@ function countPermissions(
 function AdminRolesPage() {
   useDocumentTitle("Roles & Permissions")
 
+  const queryClient = useQueryClient()
   const { data, isLoading, isError, refetch } = useAdminTeams({
     page: 1,
     pageSize: 100,
   })
 
   const teams = data?.items ?? []
+
+  const handleExportAll = useCallback(() => {
+    if (!teams.length) return
+    const rows: PermissionExportRow[] = []
+    for (const team of teams) {
+      const cached = queryClient.getQueryData<TeamRolePermission[]>(["team-permissions", team.id])
+      const matrix = cached ? mergeServerPermissions(cached) : buildDefaultPermissions()
+      for (const role of ROLES) {
+        for (const area of FEATURE_AREAS) {
+          const perm = matrix[role]?.[area.key] ?? { canView: false, canEdit: false }
+          rows.push({
+            teamName: team.name,
+            role,
+            featureArea: area.label,
+            canView: perm.canView ? "Yes" : "No",
+            canEdit: perm.canEdit ? "Yes" : "No",
+          })
+        }
+      }
+    }
+    exportToCsv("role-permissions", csvHeaders, rows)
+  }, [teams, queryClient])
 
   return (
     <PageContainer className="flex-1 space-y-8">
@@ -155,6 +196,12 @@ function AdminRolesPage() {
         title="Roles & Permissions"
         description="Configure feature-level permissions for team roles across the system."
         breadcrumbs={<AdminBreadcrumbs />}
+        actions={
+          <Button variant="outline" size="sm" onClick={handleExportAll} disabled={!teams.length}>
+            <Download className="mr-2 h-4 w-4" />
+            Export
+          </Button>
+        }
       />
       <AdminNav />
 

@@ -3,6 +3,7 @@ import { useCallback, useMemo, useState } from "react"
 import {
   AlertCircle,
   CheckCircle2,
+  Download,
   Eye,
   Lock,
   MoreVertical,
@@ -36,7 +37,7 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
-import { ExportButton } from "@/components/ui/export-button"
+import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { FilterDropdown, type FilterOption } from "@/components/ui/filter-dropdown"
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
@@ -58,15 +59,15 @@ export const Route = createFileRoute("/_app/admin/users/")({
 
 const PAGE_SIZE = 25
 
-const USER_EXPORT_COLUMNS = [
-  { key: "name", header: "Name" },
-  { key: "email", header: "Email" },
-  { key: "username", header: "Username" },
-  { key: "isActive", header: "Active" },
-  { key: "isSuperuser", header: "Superuser" },
-  { key: "isVerified", header: "Verified" },
-  { key: "loginCount", header: "Login Count" },
-  { key: "createdAt", header: "Created At" },
+const csvHeaders: CsvHeader<AdminUserSummary>[] = [
+  { label: "Name", accessor: (u) => u.name ?? "" },
+  { label: "Email", accessor: (u) => u.email },
+  { label: "Username", accessor: (u) => u.username ?? "" },
+  { label: "Active", accessor: (u) => (u.isActive ? "Yes" : "No") },
+  { label: "Superuser", accessor: (u) => (u.isSuperuser ? "Yes" : "No") },
+  { label: "Verified", accessor: (u) => (u.isVerified ? "Yes" : "No") },
+  { label: "Login Count", accessor: (u) => u.loginCount ?? 0 },
+  { label: "Created At", accessor: (u) => formatDateTime(u.createdAt) },
 ]
 
 const roleOptions: FilterOption[] = [
@@ -167,6 +168,12 @@ function AdminUsersPage() {
       return true
     })
   }, [data?.items, roleFilter, statusFilter])
+
+  // Export handler
+  const handleExport = useCallback(() => {
+    if (!filteredItems.length) return
+    exportToCsv("admin-users", csvHeaders, filteredItems)
+  }, [filteredItems])
 
   // Selection helpers
   const allVisibleIds = useMemo(() => filteredItems.map((u) => u.id), [filteredItems])
@@ -319,11 +326,10 @@ function AdminUsersPage() {
         description="View and manage all users in the system."
         breadcrumbs={<AdminBreadcrumbs />}
         actions={
-          <ExportButton
-            data={(data?.items ?? []) as Record<string, unknown>[]}
-            filename="users"
-            columns={USER_EXPORT_COLUMNS}
-          />
+          <Button variant="outline" size="sm" onClick={handleExport} disabled={!filteredItems.length}>
+            <Download className="mr-2 h-4 w-4" />
+            Export
+          </Button>
         }
       />
       <AdminNav />
