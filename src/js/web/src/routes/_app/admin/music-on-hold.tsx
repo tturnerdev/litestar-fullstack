@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { createFileRoute } from "@tanstack/react-router"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
@@ -59,6 +59,7 @@ import {
   useUpdateMusicOnHold,
   useDeleteMusicOnHold,
 } from "@/lib/api/hooks/music-on-hold"
+import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { formatDateTime } from "@/lib/date-utils"
 
@@ -316,10 +317,16 @@ function AdminMusicOnHoldPage() {
   useDocumentTitle("Music on Hold - Admin")
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState("")
+  const debouncedSearch = useDebouncedValue(search)
   const [createOpen, setCreateOpen] = useState(false)
   const [editId, setEditId] = useState<string | null>(null)
 
-  const { data, isLoading, isError } = useAdminMusicOnHold(page, PAGE_SIZE, search || undefined)
+  // Reset page when debounced search changes
+  useEffect(() => {
+    setPage(1)
+  }, [debouncedSearch])
+
+  const { data, isLoading, isError } = useAdminMusicOnHold(page, PAGE_SIZE, debouncedSearch || undefined)
   const deleteMutation = useDeleteMusicOnHold()
 
   const items = data?.items ?? []
@@ -357,19 +364,13 @@ function AdminMusicOnHoldPage() {
                   <Input
                     placeholder="Search classes..."
                     value={search}
-                    onChange={(e) => {
-                      setSearch(e.target.value)
-                      setPage(1)
-                    }}
+                    onChange={(e) => setSearch(e.target.value)}
                     className="pl-9 pr-8"
                   />
                   {search && (
                     <button
                       type="button"
-                      onClick={() => {
-                        setSearch("")
-                        setPage(1)
-                      }}
+                      onClick={() => setSearch("")}
                       className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
                     >
                       <X className="h-3.5 w-3.5" />

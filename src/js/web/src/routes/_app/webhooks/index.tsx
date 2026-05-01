@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { toast } from "sonner"
 import {
   Activity,
@@ -62,6 +62,7 @@ import {
   useWebhookDeliveries,
 } from "@/lib/api/hooks/webhooks"
 import type { WebhookDelivery } from "@/lib/api/hooks/webhooks"
+import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import type { WebhookCreate, WebhookList, WebhookUpdate } from "@/lib/generated/api"
 
@@ -544,11 +545,17 @@ function WebhooksPage() {
 
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState("")
+  const debouncedSearch = useDebouncedValue(search)
   const [createOpen, setCreateOpen] = useState(false)
   const [editWebhook, setEditWebhook] = useState<WebhookList | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<WebhookList | null>(null)
 
-  const { data, isLoading, isError, refetch } = useWebhooks(page, PAGE_SIZE, search || undefined)
+  // Reset page when debounced search changes
+  useEffect(() => {
+    setPage(1)
+  }, [debouncedSearch])
+
+  const { data, isLoading, isError, refetch } = useWebhooks(page, PAGE_SIZE, debouncedSearch || undefined)
 
   const webhooks = data?.items ?? []
   const total = data?.total ?? 0
@@ -596,10 +603,7 @@ function WebhooksPage() {
             <Input
               placeholder="Search webhooks..."
               value={search}
-              onChange={(e) => {
-                setSearch(e.target.value)
-                setPage(1)
-              }}
+              onChange={(e) => setSearch(e.target.value)}
               className="pl-9 pr-8"
             />
             {search && (

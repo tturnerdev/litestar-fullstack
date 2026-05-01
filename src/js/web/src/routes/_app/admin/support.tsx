@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { cn } from "@/lib/utils"
 import {
@@ -12,6 +12,7 @@ import {
   TicketCheck,
   X,
 } from "lucide-react"
+import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { EmptyState } from "@/components/ui/empty-state"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
@@ -121,9 +122,15 @@ function AdminSupportPage() {
   const navigate = useNavigate()
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState("")
+  const debouncedSearch = useDebouncedValue(search)
+
+  // Reset page when debounced search changes
+  useEffect(() => {
+    setPage(1)
+  }, [debouncedSearch])
 
   const { data: stats, isLoading: statsLoading, isError: statsError } = useAdminSupportStats()
-  const { data, isLoading, isError } = useAdminTickets(page, PAGE_SIZE, search || undefined)
+  const { data, isLoading, isError } = useAdminTickets(page, PAGE_SIZE, debouncedSearch || undefined)
 
   const tickets = data?.items ?? []
   const total = data?.total ?? 0
@@ -291,19 +298,13 @@ function AdminSupportPage() {
                 <Input
                   placeholder="Search tickets..."
                   value={search}
-                  onChange={(e) => {
-                    setSearch(e.target.value)
-                    setPage(1)
-                  }}
+                  onChange={(e) => setSearch(e.target.value)}
                   className="pl-9 pr-8"
                 />
                 {search && (
                   <button
                     type="button"
-                    onClick={() => {
-                      setSearch("")
-                      setPage(1)
-                    }}
+                    onClick={() => setSearch("")}
                     className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
                   >
                     <X className="h-3.5 w-3.5" />

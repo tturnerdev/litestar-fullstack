@@ -128,7 +128,7 @@ class ScheduleController(Controller):
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
-            action="schedule.create",
+            action="schedule.created",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -199,7 +199,7 @@ class ScheduleController(Controller):
         after = capture_snapshot(fresh_obj)
         await log_audit(
             audit_service,
-            action="schedule.update",
+            action="schedule.updated",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -240,7 +240,7 @@ class ScheduleController(Controller):
         await schedules_service.delete(schedule_id)
         await log_audit(
             audit_service,
-            action="schedule.delete",
+            action="schedule.deleted",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -334,7 +334,7 @@ class ScheduleController(Controller):
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
-            action="schedule_entry.create",
+            action="schedule_entry.created",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -385,7 +385,7 @@ class ScheduleController(Controller):
         after = capture_snapshot(fresh_obj)
         await log_audit(
             audit_service,
-            action="schedule_entry.update",
+            action="schedule_entry.updated",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -428,7 +428,7 @@ class ScheduleController(Controller):
         await entries_service.delete(entry_id)
         await log_audit(
             audit_service,
-            action="schedule_entry.delete",
+            action="schedule_entry.deleted",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,

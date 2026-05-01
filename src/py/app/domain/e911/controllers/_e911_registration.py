@@ -117,7 +117,7 @@ class E911RegistrationController(Controller):
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
-            action="e911.create",
+            action="e911.registration.created",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -188,7 +188,7 @@ class E911RegistrationController(Controller):
         after = capture_snapshot(fresh_obj)
         await log_audit(
             audit_service,
-            action="e911.update",
+            action="e911.registration.updated",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -229,7 +229,7 @@ class E911RegistrationController(Controller):
         await e911_service.delete(registration_id)
         await log_audit(
             audit_service,
-            action="e911.delete",
+            action="e911.registration.deleted",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
@@ -274,7 +274,7 @@ class E911RegistrationController(Controller):
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
-            action="e911.validate",
+            action="e911.registration.validated",
             actor_id=current_user.id,
             actor_email=current_user.email,
             actor_name=current_user.name,
