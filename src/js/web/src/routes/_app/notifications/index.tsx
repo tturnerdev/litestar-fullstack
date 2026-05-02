@@ -1,4 +1,6 @@
+import { useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
+import { AnimatePresence, motion } from "framer-motion"
 import {
   AlertTriangle,
   Bell,
@@ -19,7 +21,7 @@ import {
   Users,
   X,
 } from "lucide-react"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { type PointerEvent as ReactPointerEvent, useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,24 +33,21 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
-import { BulkActionBar, createBulkDeleteAction, type BulkAction } from "@/components/ui/bulk-action-bar"
+import { type BulkAction, BulkActionBar, createBulkDeleteAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
+import { Skeleton, SkeletonCard } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { useDebouncedValue } from "@/hooks/use-debounced-value"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import {
   type NotificationItem,
   useDeleteAllRead,
@@ -60,12 +59,8 @@ import {
   useUnreadCount,
   useUpdateNotificationPreferences,
 } from "@/lib/api/hooks/notifications"
-import { useQueryClient } from "@tanstack/react-query"
-import { Skeleton, SkeletonCard } from "@/components/ui/skeleton"
+import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
-import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
-import { useDebouncedValue } from "@/hooks/use-debounced-value"
-import { useDocumentTitle } from "@/hooks/use-document-title"
 import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/notifications/")({
@@ -142,26 +137,94 @@ function getCategoryColor(category: string) {
   }
 }
 
+// Minimum horizontal drag distance (px) to trigger a swipe action
+const SWIPE_THRESHOLD = 100
+// Maximum vertical movement (px) allowed during a swipe before we cancel it
+const SWIPE_VERTICAL_LIMIT = 30
+
 function NotificationCard({
   notification,
   onRequestDelete,
+  onMarkRead,
   selected,
   onToggleSelect,
 }: {
   notification: NotificationItem
   onRequestDelete: (id: string) => void
+  onMarkRead: (id: string) => void
   selected: boolean
   onToggleSelect: () => void
 }) {
-  const markRead = useMarkRead()
   const navigate = Route.useNavigate()
 
   const Icon = getCategoryIcon(notification.category)
   const colorClass = getCategoryColor(notification.category)
 
+  // --- Swipe-to-dismiss state ---
+  const cardRef = useRef<HTMLDivElement>(null)
+  const [swipeX, setSwipeX] = useState(0)
+  const [isSwiping, setIsSwiping] = useState(false)
+  const pointerStart = useRef<{ x: number; y: number } | null>(null)
+
+  const handlePointerDown = useCallback((e: ReactPointerEvent) => {
+    // Only track single-finger touch or mouse
+    if (e.pointerType === "mouse" && e.button !== 0) return
+    pointerStart.current = { x: e.clientX, y: e.clientY }
+  }, [])
+
+  const handlePointerMove = useCallback((e: ReactPointerEvent) => {
+    if (!pointerStart.current) return
+    const dx = e.clientX - pointerStart.current.x
+    const dy = e.clientY - pointerStart.current.y
+
+    // If vertical movement exceeds limit, cancel the swipe gesture
+    if (Math.abs(dy) > SWIPE_VERTICAL_LIMIT) {
+      pointerStart.current = null
+      setSwipeX(0)
+      setIsSwiping(false)
+      return
+    }
+
+    // Only start tracking after a small horizontal threshold to avoid accidental swipes
+    if (Math.abs(dx) > 10) {
+      setIsSwiping(true)
+      // Dampen the swipe with a square-root curve so it feels elastic
+      const dampenedDx = Math.sign(dx) * Math.min(Math.sqrt(Math.abs(dx)) * 8, 200)
+      setSwipeX(dampenedDx)
+    }
+  }, [])
+
+  const handlePointerUp = useCallback(() => {
+    if (!pointerStart.current) return
+    pointerStart.current = null
+
+    if (Math.abs(swipeX) >= SWIPE_THRESHOLD) {
+      if (swipeX < 0) {
+        // Swipe left -> delete
+        onRequestDelete(notification.id)
+      } else {
+        // Swipe right -> mark as read (or no-op if already read)
+        if (!notification.isRead) {
+          onMarkRead(notification.id)
+        }
+      }
+    }
+
+    setSwipeX(0)
+    setIsSwiping(false)
+  }, [swipeX, notification.id, notification.isRead, onRequestDelete, onMarkRead])
+
+  const handlePointerCancel = useCallback(() => {
+    pointerStart.current = null
+    setSwipeX(0)
+    setIsSwiping(false)
+  }, [])
+
   const handleClick = () => {
+    // Don't fire click if we were swiping
+    if (isSwiping) return
     if (!notification.isRead) {
-      markRead.mutate(notification.id)
+      onMarkRead(notification.id)
     }
     if (notification.actionUrl) {
       navigate({ to: notification.actionUrl as "/" })
@@ -170,86 +233,123 @@ function NotificationCard({
 
   const relativeTime = formatRelativeTimeShort(notification.createdAt)
 
+  // Determine which swipe action is being revealed
+  const swipeDirection = swipeX < -30 ? "delete" : swipeX > 30 ? "mark-read" : null
+
   return (
-    <Card
-      hover
-      className={cn(
-        "group/card transition-all",
-        !notification.isRead && "border-primary/20 bg-accent/30",
-        notification.actionUrl && "cursor-pointer",
+    <div className="relative overflow-hidden rounded-xl">
+      {/* Swipe action reveal layer (behind the card) */}
+      {swipeDirection && (
+        <div
+          className={cn(
+            "absolute inset-0 flex items-center rounded-xl px-6 text-sm font-medium text-white transition-colors",
+            swipeDirection === "delete" ? "justify-end bg-destructive/90" : "justify-start bg-primary/90",
+          )}
+        >
+          {swipeDirection === "delete" ? (
+            <div className="flex items-center gap-2">
+              <Trash2 className="h-4 w-4" />
+              <span>Delete</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <CheckCheck className="h-4 w-4" />
+              <span>{notification.isRead ? "Already read" : "Mark read"}</span>
+            </div>
+          )}
+        </div>
       )}
-      onClick={handleClick}
-      role={notification.actionUrl ? "button" : undefined}
-      tabIndex={notification.actionUrl ? 0 : undefined}
-      onKeyDown={notification.actionUrl ? (e: React.KeyboardEvent) => { if (e.key === "Enter") handleClick() } : undefined}
-    >
-      <CardContent className="flex items-start gap-4 py-4">
-        <div className="flex shrink-0 items-center pt-1">
-          <Checkbox
-            checked={selected}
-            onChange={(e) => {
-              e.stopPropagation()
-              onToggleSelect()
-            }}
-            aria-label={`Select notification: ${notification.title}`}
-          />
-        </div>
-        <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted", colorClass)}>
-          <Icon className="h-5 w-5" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <p className={cn("text-sm font-medium", !notification.isRead ? "text-foreground" : "text-muted-foreground")}>
-              {notification.title}
-            </p>
-            {!notification.isRead && <span className="h-2 w-2 shrink-0 rounded-full bg-primary" />}
-            <Badge variant="outline" className="ml-auto shrink-0 text-[0.6rem] capitalize">
-              {notification.category}
-            </Badge>
-          </div>
-          <p className="mt-0.5 text-sm text-muted-foreground">{notification.message}</p>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <p className="mt-1 cursor-default text-xs text-muted-foreground/70">{relativeTime}</p>
-            </TooltipTrigger>
-            <TooltipContent>{formatDateTime(notification.createdAt)}</TooltipContent>
-          </Tooltip>
-        </div>
-        {notification.actionUrl && (
-          <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground/0 transition-colors group-hover/card:text-muted-foreground" />
+
+      <Card
+        ref={cardRef}
+        hover
+        className={cn(
+          "group/card relative transition-all",
+          // Left border accent for unread -- a solid primary bar
+          !notification.isRead && "border-l-[3px] border-l-primary border-primary/20 bg-accent/30",
+          notification.isRead && "opacity-75",
+          notification.actionUrl && "cursor-pointer",
         )}
-        <div className="flex shrink-0 items-center gap-1">
-          {!notification.isRead && (
+        style={swipeX !== 0 ? { transform: `translateX(${swipeX}px)`, transition: isSwiping ? "none" : "transform 0.3s ease-out" } : undefined}
+        onClick={handleClick}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerCancel}
+        role={notification.actionUrl ? "button" : undefined}
+        tabIndex={notification.actionUrl ? 0 : undefined}
+        onKeyDown={
+          notification.actionUrl
+            ? (e: React.KeyboardEvent) => {
+                if (e.key === "Enter") handleClick()
+              }
+            : undefined
+        }
+      >
+        <CardContent className="flex items-start gap-4 py-4">
+          <div className="flex shrink-0 items-center pt-1">
+            <Checkbox
+              checked={selected}
+              onChange={(e) => {
+                e.stopPropagation()
+                onToggleSelect()
+              }}
+              aria-label={`Select notification: ${notification.title}`}
+            />
+          </div>
+          <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors", !notification.isRead ? "bg-muted" : "bg-muted/60", colorClass)}>
+            <Icon className="h-5 w-5" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <p className={cn("text-sm transition-colors", !notification.isRead ? "font-semibold text-foreground" : "font-medium text-muted-foreground")}>{notification.title}</p>
+              {!notification.isRead && <span className="h-2 w-2 shrink-0 rounded-full bg-primary animate-pulse" />}
+              <Badge variant="outline" className="ml-auto shrink-0 text-[0.6rem] capitalize">
+                {notification.category}
+              </Badge>
+            </div>
+            <p className={cn("mt-0.5 text-sm transition-colors", !notification.isRead ? "text-muted-foreground" : "text-muted-foreground/70")}>{notification.message}</p>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <p className="mt-1 cursor-default text-xs text-muted-foreground/70">{relativeTime}</p>
+              </TooltipTrigger>
+              <TooltipContent>{formatDateTime(notification.createdAt)}</TooltipContent>
+            </Tooltip>
+          </div>
+          {notification.actionUrl && <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground/0 transition-colors group-hover/card:text-muted-foreground" />}
+          <div className="flex shrink-0 items-center gap-1">
+            {!notification.isRead && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onMarkRead(notification.id)
+                }}
+                title="Mark as read"
+                aria-label="Mark as read"
+              >
+                <CheckCheck className="h-4 w-4" />
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 text-muted-foreground hover:text-foreground"
+              className="h-8 w-8 text-muted-foreground hover:text-destructive"
               onClick={(e) => {
                 e.stopPropagation()
-                markRead.mutate(notification.id)
+                onRequestDelete(notification.id)
               }}
-              title="Mark as read"
-              aria-label="Mark as read"
+              title="Delete"
+              aria-label="Delete notification"
             >
-              <CheckCheck className="h-4 w-4" />
+              <Trash2 className="h-4 w-4" />
             </Button>
-          )}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-muted-foreground hover:text-destructive"
-            onClick={(e) => {
-              e.stopPropagation()
-              onRequestDelete(notification.id)
-            }}
-            title="Delete"
-            aria-label="Delete notification"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   )
 }
 
@@ -296,11 +396,7 @@ function NotificationPreferences() {
               <p className="text-xs text-muted-foreground">Receive notification summaries via email</p>
             </div>
           </div>
-          <Switch
-            id="email-toggle"
-            checked={prefs.emailEnabled}
-            onCheckedChange={(checked) => updatePrefs.mutate({ emailEnabled: checked })}
-          />
+          <Switch id="email-toggle" checked={prefs.emailEnabled} onCheckedChange={(checked) => updatePrefs.mutate({ emailEnabled: checked })} />
         </div>
 
         <Separator />
@@ -312,10 +408,7 @@ function NotificationPreferences() {
 
         <div className="grid gap-3 sm:grid-cols-2">
           {PREFERENCE_CATEGORIES.map(({ key, label, description, icon: Icon }) => (
-            <div
-              key={key}
-              className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-accent/50"
-            >
+            <div key={key} className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-accent/50">
               <div className="flex items-center gap-3">
                 <div className={cn("flex h-8 w-8 items-center justify-center rounded-full bg-muted", getCategoryColor(key))}>
                   <Icon className="h-4 w-4" />
@@ -327,13 +420,7 @@ function NotificationPreferences() {
                   <p className="text-xs text-muted-foreground">{description}</p>
                 </div>
               </div>
-              <Switch
-                id={`cat-${key}`}
-                checked={prefs.categories[key] ?? true}
-                onCheckedChange={(checked) =>
-                  updatePrefs.mutate({ categories: { [key]: checked } })
-                }
-              />
+              <Switch id={`cat-${key}`} checked={prefs.categories[key] ?? true} onCheckedChange={(checked) => updatePrefs.mutate({ categories: { [key]: checked } })} />
             </div>
           ))}
         </div>
@@ -496,6 +583,14 @@ function NotificationsPage() {
     [markRead, deleteNotification, queryClient],
   )
 
+  // Stable callback for marking a single notification as read (used by card click + swipe)
+  const handleMarkRead = useCallback(
+    (id: string) => {
+      markRead.mutate(id)
+    },
+    [markRead],
+  )
+
   const hasAnyNotifications = total > 0
   const hasActiveFilters = activeCategory !== "all" || readStatusFilter !== "all" || !!debouncedSearch
   const isEmptyUnfiltered = !isLoading && !hasAnyNotifications
@@ -511,26 +606,14 @@ function NotificationsPage() {
           <div className="flex gap-2">
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={handleExport}
-                  disabled={filteredNotifications.length === 0}
-                  aria-label="Export notifications to CSV"
-                >
+                <Button variant="outline" size="icon" onClick={handleExport} disabled={filteredNotifications.length === 0} aria-label="Export notifications to CSV">
                   <Download className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Export to CSV</TooltipContent>
             </Tooltip>
             {readCount > 0 && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setDeleteConfirmOpen(true)}
-                disabled={deleteAllRead.isPending}
-                className="text-destructive hover:text-destructive"
-              >
+              <Button variant="outline" size="sm" onClick={() => setDeleteConfirmOpen(true)} disabled={deleteAllRead.isPending} className="text-destructive hover:text-destructive">
                 <Trash2 className="mr-2 h-4 w-4" />
                 Delete all read
               </Button>
@@ -559,13 +642,7 @@ function NotificationsPage() {
               <div className="flex flex-wrap items-center gap-3">
                 <div className="relative max-w-sm flex-1">
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    ref={searchInputRef}
-                    placeholder="Search notifications..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="pl-9 pr-8"
-                  />
+                  <Input ref={searchInputRef} placeholder="Search notifications..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 pr-8" />
                   {search ? (
                     <button
                       type="button"
@@ -576,7 +653,9 @@ function NotificationsPage() {
                       <span className="sr-only">Clear search</span>
                     </button>
                   ) : (
-                    <kbd className="pointer-events-none absolute right-8 top-1/2 -translate-y-1/2 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">/</kbd>
+                    <kbd className="pointer-events-none absolute right-8 top-1/2 -translate-y-1/2 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">
+                      /
+                    </kbd>
                   )}
                 </div>
                 <Select
@@ -615,12 +694,7 @@ function NotificationsPage() {
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
-                <Checkbox
-                  checked={allSelected}
-                  indeterminate={someSelected && !allSelected}
-                  onChange={toggleAll}
-                  aria-label="Select all notifications"
-                />
+                <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all notifications" />
                 {CATEGORIES.map(({ value, label }) => {
                   const count = value === "all" ? notifications.length : (categoryCounts[value] ?? 0)
                   const isActive = activeCategory === value
@@ -639,10 +713,7 @@ function NotificationsPage() {
                       {count > 0 && (
                         <Badge
                           variant={isActive ? "secondary" : "outline"}
-                          className={cn(
-                            "ml-0.5 h-5 min-w-5 justify-center px-1.5 text-[0.6rem]",
-                            isActive && "bg-primary-foreground/20 text-primary-foreground",
-                          )}
+                          className={cn("ml-0.5 h-5 min-w-5 justify-center px-1.5 text-[0.6rem]", isActive && "bg-primary-foreground/20 text-primary-foreground")}
                         >
                           {count}
                         </Badge>
@@ -681,15 +752,26 @@ function NotificationsPage() {
                   }
                 />
               ) : (
-                filteredNotifications.map((notification) => (
-                  <NotificationCard
-                    key={notification.id}
-                    notification={notification}
-                    onRequestDelete={setDeleteId}
-                    selected={selectedIds.has(notification.id)}
-                    onToggleSelect={() => toggleOne(notification.id)}
-                  />
-                ))
+                <AnimatePresence mode="popLayout" initial={false}>
+                  {filteredNotifications.map((notification) => (
+                    <motion.div
+                      key={notification.id}
+                      layout
+                      initial={{ opacity: 0, y: -8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, x: -40, transition: { duration: 0.2 } }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <NotificationCard
+                        notification={notification}
+                        onRequestDelete={setDeleteId}
+                        onMarkRead={handleMarkRead}
+                        selected={selectedIds.has(notification.id)}
+                        onToggleSelect={() => toggleOne(notification.id)}
+                      />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
               )}
             </div>
 
@@ -771,9 +853,7 @@ function NotificationsPage() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete notification</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this notification? This action cannot be undone.
-            </AlertDialogDescription>
+            <AlertDialogDescription>Are you sure you want to delete this notification? This action cannot be undone.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setDeleteId(null)} disabled={deleteNotification.isPending}>
@@ -797,12 +877,7 @@ function NotificationsPage() {
       </AlertDialog>
 
       {/* Bulk action bar */}
-      <BulkActionBar
-        selectedCount={selectedIds.size}
-        selectedIds={Array.from(selectedIds)}
-        onClearSelection={() => setSelectedIds(new Set())}
-        actions={bulkActions}
-      />
+      <BulkActionBar selectedCount={selectedIds.size} selectedIds={Array.from(selectedIds)} onClearSelection={() => setSelectedIds(new Set())} actions={bulkActions} />
     </PageContainer>
   )
 }

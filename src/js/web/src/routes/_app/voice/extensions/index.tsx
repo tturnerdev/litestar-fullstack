@@ -49,7 +49,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { SkeletonTable } from "@/components/ui/skeleton"
+import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
@@ -267,6 +267,22 @@ function ExtensionsPage() {
     return items
   }, [data?.items, statusFilter, search, sortKey, sortDir, phoneMap])
 
+  // Extension summary stats (computed from ALL items on the current page)
+  const extensionStats = useMemo(() => {
+    const items = data?.items ?? []
+    let active = 0
+    let inactive = 0
+    let dnd = 0
+    let forwarding = 0
+    for (const ext of items) {
+      if (ext.isActive) active++
+      else inactive++
+      if (ext.dndEnabled) dnd++
+      if (ext.forwardAlwaysEnabled) forwarding++
+    }
+    return { active, inactive, dnd, forwarding, total: data?.total ?? 0 }
+  }, [data?.items, data?.total])
+
   // Selection helpers
   const allVisibleIds = useMemo(() => filteredItems.map((e) => e.id), [filteredItems])
   const allSelected = filteredItems.length > 0 && filteredItems.every((e) => selectedIds.has(e.id))
@@ -460,6 +476,50 @@ function ExtensionsPage() {
           </div>
         }
       />
+
+      {/* Summary stats */}
+      <div className="flex flex-wrap items-center gap-2">
+        {isLoading ? (
+          <>
+            <Skeleton className="h-7 w-24 rounded-full" />
+            <Skeleton className="h-7 w-24 rounded-full" />
+            <Skeleton className="h-7 w-24 rounded-full" />
+            <Skeleton className="h-7 w-28 rounded-full" />
+            <Skeleton className="h-7 w-28 rounded-full" />
+          </>
+        ) : (
+          <>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground">
+              Total
+              <span className="ml-0.5 font-semibold text-foreground">{extensionStats.total}</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              Active
+              <span className="ml-0.5 font-semibold">{extensionStats.active}</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-zinc-400/30 bg-zinc-400/10 px-3 py-1 text-xs font-medium text-zinc-600 dark:text-zinc-400">
+              <span className="h-1.5 w-1.5 rounded-full bg-zinc-400" />
+              Inactive
+              <span className="ml-0.5 font-semibold">{extensionStats.inactive}</span>
+            </span>
+            {extensionStats.dnd > 0 && (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-xs font-medium text-red-700 dark:text-red-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+                DND
+                <span className="ml-0.5 font-semibold">{extensionStats.dnd}</span>
+              </span>
+            )}
+            {extensionStats.forwarding > 0 && (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-700 dark:text-blue-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+                Forwarding
+                <span className="ml-0.5 font-semibold">{extensionStats.forwarding}</span>
+              </span>
+            )}
+          </>
+        )}
+      </div>
 
       {/* Search & filters */}
       <PageSection>

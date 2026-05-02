@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.222.0 (2026-05-02)
+
+### Added
+- **Device status banner** — Prominent color-coded status indicator with pulsing dot, last seen time, IP and MAC address on device detail page
+- **Extension quick stats** — Status distribution pills (total, active, inactive, DND, forwarding) at top of voice extensions list
+- **Notification swipe gestures** — Swipe-left to delete, swipe-right to mark read with elastic physics and animated transitions
+- **Notification visual hierarchy** — Bold left border accent, pulsing unread dot, opacity dimming for read items, AnimatePresence list transitions
+
+## v0.221.0 (2026-05-02)
+
+### Added
+- Committed untracked backend domains (phone_numbers, webhook endpoints), migrations, seed CLI, WireMock fixtures, GitHub workflows, deployment configs
+
 ## v0.220.0 (2026-05-02)
 
 ### Added

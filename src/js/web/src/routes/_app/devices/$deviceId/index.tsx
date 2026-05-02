@@ -7,6 +7,7 @@ import {
   ArrowLeft,
   ChevronRight,
   ClipboardList,
+  Clock,
   Copy,
   Cpu,
   Eye,
@@ -15,6 +16,7 @@ import {
   Link2,
   Loader2,
   MapPin,
+  MonitorSmartphone,
   MoreHorizontal,
   Network,
   Pencil,
@@ -29,7 +31,6 @@ import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { TaskStatusBadge } from "@/components/tasks/task-status-badge"
 import { RebootButton, ReprovisionButton, ToggleActiveButton, DeleteButton } from "@/components/devices/device-actions"
 import { DeviceLineConfig } from "@/components/devices/device-line-config"
-import { DeviceStatusBadge } from "@/components/devices/device-status-badge"
 import { Badge } from "@/components/ui/badge"
 import {
   Breadcrumb,
@@ -99,6 +100,67 @@ export const Route = createFileRoute("/_app/devices/$deviceId/")({
     edit: search.edit === true || search.edit === "true" || undefined,
   }),
 })
+
+// ── Label maps ──────────────────────────────────────────────────────────
+
+// ── Device status config (banner) ──────────────────────────────────────
+
+type DeviceHealthLevel = "online" | "offline" | "active" | "warning" | "error"
+
+function deriveDeviceHealth(status: string): DeviceHealthLevel {
+  if (status === "online") return "online"
+  if (status === "offline") return "offline"
+  if (status === "ringing" || status === "in_use") return "active"
+  if (status === "provisioning") return "warning"
+  if (status === "error") return "error"
+  return "offline"
+}
+
+const deviceHealthConfig: Record<
+  DeviceHealthLevel,
+  { label: string; dotClass: string; bgClass: string; textClass: string }
+> = {
+  online: {
+    label: "Online",
+    dotClass: "bg-emerald-500",
+    bgClass: "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-900/50",
+    textClass: "text-emerald-700 dark:text-emerald-400",
+  },
+  offline: {
+    label: "Offline",
+    dotClass: "bg-red-500",
+    bgClass: "bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-900/50",
+    textClass: "text-red-700 dark:text-red-400",
+  },
+  active: {
+    label: "Active",
+    dotClass: "bg-blue-500",
+    bgClass: "bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-900/50",
+    textClass: "text-blue-700 dark:text-blue-400",
+  },
+  warning: {
+    label: "Provisioning",
+    dotClass: "bg-yellow-500",
+    bgClass: "bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-900/50",
+    textClass: "text-yellow-700 dark:text-yellow-400",
+  },
+  error: {
+    label: "Error",
+    dotClass: "bg-red-500",
+    bgClass: "bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-900/50",
+    textClass: "text-red-700 dark:text-red-400",
+  },
+}
+
+// Status label overrides for specific raw statuses
+const deviceStatusLabels: Record<string, string> = {
+  online: "Online",
+  offline: "Offline",
+  ringing: "Ringing",
+  in_use: "In Use",
+  provisioning: "Provisioning",
+  error: "Error",
+}
 
 // ── Label maps ──────────────────────────────────────────────────────────
 
@@ -370,7 +432,6 @@ function DeviceDetailPage() {
         }
         actions={
           <div className="flex items-center gap-3">
-            <DeviceStatusBadge status={data.status} />
             {!data.isActive && (
               <Badge
                 variant="outline"
@@ -425,6 +486,72 @@ function DeviceDetailPage() {
           </div>
         }
       />
+
+      {/* Device Status Banner */}
+      {(() => {
+        const health = deriveDeviceHealth(data.status)
+        const config = deviceHealthConfig[health]
+        const statusLabel = deviceStatusLabels[data.status] ?? data.status
+        return (
+          <div className={`rounded-lg border px-4 py-3 ${config.bgClass}`}>
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+              {/* Status indicator */}
+              <div className="flex items-center gap-2.5">
+                <span
+                  className={`inline-block h-3 w-3 rounded-full ${config.dotClass} ${health === "online" ? "animate-pulse" : ""}`}
+                />
+                <span className={`text-sm font-semibold ${config.textClass}`}>
+                  {statusLabel}
+                </span>
+              </div>
+
+              <div className="hidden sm:block h-4 w-px bg-border" />
+
+              {/* Last seen */}
+              <div className="flex items-center gap-1.5 text-sm">
+                <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                <span className="text-muted-foreground">Last seen:</span>
+                {data.lastSeenAt ? (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="cursor-default font-medium">
+                        {formatRelativeTimeShort(data.lastSeenAt)}
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent>{formatDateTime(data.lastSeenAt)}</TooltipContent>
+                  </Tooltip>
+                ) : (
+                  <span className="text-muted-foreground">Never</span>
+                )}
+              </div>
+
+              {/* IP Address */}
+              {data.ipAddress && (
+                <>
+                  <div className="hidden sm:block h-4 w-px bg-border" />
+                  <div className="flex items-center gap-1.5 text-sm">
+                    <MonitorSmartphone className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span className="text-muted-foreground">IP:</span>
+                    <span className="font-mono text-xs font-medium">{data.ipAddress}</span>
+                  </div>
+                </>
+              )}
+
+              {/* MAC Address */}
+              {data.macAddress && (
+                <>
+                  <div className="hidden sm:block h-4 w-px bg-border" />
+                  <div className="flex items-center gap-1.5 text-sm">
+                    <Fingerprint className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span className="text-muted-foreground">MAC:</span>
+                    <span className="font-mono text-xs font-medium">{data.macAddress}</span>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )
+      })()}
 
       <PageSection>
         <Tabs value={tab} onValueChange={(value) => navigate({ search: () => ({ tab: value }), replace: true })}>
@@ -536,12 +663,6 @@ function DeviceDetailPage() {
                     <div>
                       <p className="text-muted-foreground">Type</p>
                       <p>{deviceTypeLabels[data.deviceType] ?? data.deviceType}</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Status</p>
-                      <div className="mt-0.5">
-                        <DeviceStatusBadge status={data.status} />
-                      </div>
                     </div>
                     <div>
                       <p className="text-muted-foreground">Model</p>
