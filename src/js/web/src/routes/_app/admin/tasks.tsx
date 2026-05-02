@@ -65,7 +65,22 @@ export const Route = createFileRoute("/_app/admin/tasks")({
 
 // -- Constants ----------------------------------------------------------------
 
-const PAGE_SIZE = 25
+const PAGE_SIZES = [10, 25, 50, 100] as const
+const DEFAULT_PAGE_SIZE = 25
+const PAGE_SIZE_STORAGE_KEY = "admin-tasks-page-size"
+
+function getStoredPageSize(): number {
+  try {
+    const stored = localStorage.getItem(PAGE_SIZE_STORAGE_KEY)
+    if (stored) {
+      const parsed = Number(stored)
+      if ((PAGE_SIZES as readonly number[]).includes(parsed)) return parsed
+    }
+  } catch {
+    // localStorage unavailable
+  }
+  return DEFAULT_PAGE_SIZE
+}
 
 const statusFilterOptions = [
   { value: "all", label: "All Statuses" },
@@ -475,6 +490,19 @@ function AdminTasksPage() {
   const [taskTypeFilter, setTaskTypeFilter] = useState("all")
   const [entityTypeFilter, setEntityTypeFilter] = useState("all")
   const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(getStoredPageSize)
+
+  // Persist page size preference
+  const handlePageSizeChange = useCallback((value: string) => {
+    const size = Number(value)
+    setPageSize(size)
+    setPage(1)
+    try {
+      localStorage.setItem(PAGE_SIZE_STORAGE_KEY, value)
+    } catch {
+      // localStorage unavailable
+    }
+  }, [])
 
   // Column visibility
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(loadColumnVisibility)
@@ -498,14 +526,14 @@ function AdminTasksPage() {
   const queryOptions: AdminTasksParams = useMemo(
     () => ({
       page,
-      pageSize: PAGE_SIZE,
+      pageSize,
       status: statusFilter !== "all" ? statusFilter : undefined,
       taskType: taskTypeFilter !== "all" ? taskTypeFilter : undefined,
       entityType: entityTypeFilter !== "all" ? entityTypeFilter : undefined,
       orderBy: "created_at",
       sortOrder: "desc" as const,
     }),
-    [page, statusFilter, taskTypeFilter, entityTypeFilter],
+    [page, pageSize, statusFilter, taskTypeFilter, entityTypeFilter],
   )
 
   const { data, isLoading, isError, refetch } = useAdminTasks(queryOptions)
@@ -540,7 +568,7 @@ function AdminTasksPage() {
     })
   }, [])
 
-  const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / PAGE_SIZE))
+  const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / pageSize))
   const hasData = items.length > 0
   const hasAnyFilters = statusFilter !== "all" || taskTypeFilter !== "all" || entityTypeFilter !== "all"
 
@@ -840,12 +868,24 @@ function AdminTasksPage() {
             </div>
 
             {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-between pt-2">
-                <p className="text-xs text-muted-foreground">
-                  {data!.total} total task{data!.total === 1 ? "" : "s"}
-                </p>
-                <div className="flex gap-2">
+            <div className="flex items-center justify-end gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Rows per page</span>
+                <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
+                  <SelectTrigger className="h-8 w-[70px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PAGE_SIZES.map((size) => (
+                      <SelectItem key={size} value={String(size)}>
+                        {size}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {totalPages > 1 && (
+                <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
                     size="sm"
@@ -869,8 +909,8 @@ function AdminTasksPage() {
                     Next
                   </Button>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         )}
       </PageSection>

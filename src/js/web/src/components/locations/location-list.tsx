@@ -20,7 +20,22 @@ import { useDebouncedValue } from "@/hooks/use-debounced-value"
 
 const getId = (loc: Location) => loc.id
 
-const PAGE_SIZE = 25
+const PAGE_SIZES = [10, 25, 50, 100] as const
+const DEFAULT_PAGE_SIZE = 25
+const PAGE_SIZE_STORAGE_KEY = "locations-page-size"
+
+function getStoredPageSize(): number {
+  try {
+    const stored = localStorage.getItem(PAGE_SIZE_STORAGE_KEY)
+    if (stored) {
+      const parsed = Number(stored)
+      if ((PAGE_SIZES as readonly number[]).includes(parsed)) return parsed
+    }
+  } catch {
+    // localStorage unavailable
+  }
+  return DEFAULT_PAGE_SIZE
+}
 
 const csvHeaders: CsvHeader<Location>[] = [
   { label: "Name", accessor: (l) => l.name },
@@ -44,6 +59,19 @@ export function LocationList() {
   const [sortDir, setSortDir] = useState<SortDirection>(null)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(getStoredPageSize)
+
+  // Persist page size preference
+  const handlePageSizeChange = useCallback((value: string) => {
+    const size = Number(value)
+    setPageSize(size)
+    setPage(1)
+    try {
+      localStorage.setItem(PAGE_SIZE_STORAGE_KEY, value)
+    } catch {
+      // localStorage unavailable
+    }
+  }, [])
 
   // Reset page when debounced search changes
   useEffect(() => {
@@ -55,7 +83,7 @@ export function LocationList() {
   const { data, isLoading, isError, refetch } = useLocations({
     teamId,
     page,
-    pageSize: PAGE_SIZE,
+    pageSize,
     search: debouncedSearch || undefined,
     locationType: typeFilter !== "all" ? typeFilter : undefined,
     orderBy: sortKey ?? undefined,
@@ -64,7 +92,7 @@ export function LocationList() {
 
   const locations = data?.items ?? []
   const total = data?.total ?? 0
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
+  const totalPages = Math.max(1, Math.ceil(total / pageSize))
 
   const bulk = useBulkDeleteLocations(teamId)
 
@@ -323,26 +351,43 @@ export function LocationList() {
         )}
 
         {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-end gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page <= 1}
-            >
-              Previous
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={page >= totalPages}
-            >
-              Next
-            </Button>
+        <div className="flex items-center justify-end gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Rows per page</span>
+            <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
+              <SelectTrigger className="h-8 w-[70px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {PAGE_SIZES.map((size) => (
+                  <SelectItem key={size} value={String(size)}>
+                    {size}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-        )}
+          {totalPages > 1 && (
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page <= 1}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page >= totalPages}
+              >
+                Next
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Bulk action bar */}
