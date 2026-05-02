@@ -1,5 +1,5 @@
 import { createFileRoute, useBlocker } from "@tanstack/react-router"
-import { Building2, Globe, Hash, Loader2, Mail, MapPin, Pencil, Save, Users, X } from "lucide-react"
+import { Building2, Copy, Globe, Hash, Link2, Loader2, Mail, MapPin, MoreHorizontal, Pencil, Save, Users, X } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   AlertDialog,
@@ -14,6 +14,14 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { DataFreshness } from "@/components/ui/data-freshness"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
@@ -88,9 +96,16 @@ function OrganizationSettingsPage() {
   useDocumentTitle("Organization")
   const user = useAuthStore((s) => s.user)
   const isSuperuser = user?.isSuperuser ?? false
-  const { data: org, isLoading } = useOrganization()
+  const { data: org, isLoading, dataUpdatedAt, refetch: refetchOrg } = useOrganization()
   const { data: stats } = useOrganizationStats()
   const updateOrg = useUpdateOrganization()
+  const [isRefreshingOrg, setIsRefreshingOrg] = useState(false)
+
+  const handleRefreshOrg = useCallback(async () => {
+    setIsRefreshingOrg(true)
+    await refetchOrg()
+    setIsRefreshingOrg(false)
+  }, [refetchOrg])
   const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState<OrgFormData>({
     name: "",
@@ -233,21 +248,69 @@ function OrganizationSettingsPage() {
           }
           description="View and manage your organization profile, contact information, and preferences."
           actions={
-          isSuperuser &&
-          (isEditing ? (
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={handleCancel} disabled={updateOrg.isPending}>
-                <X className="mr-2 h-4 w-4" /> Cancel
-              </Button>
-              <Button size="sm" onClick={handleSave} disabled={updateOrg.isPending}>
-                {updateOrg.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />} {updateOrg.isPending ? "Saving..." : "Save changes"}
-              </Button>
-            </div>
-          ) : (
-            <Button size="sm" onClick={() => setIsEditing(true)}>
-              <Pencil className="mr-2 h-4 w-4" /> Edit settings
-            </Button>
-          ))
+          <div className="flex items-center gap-2">
+            <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={handleRefreshOrg} isRefreshing={isRefreshingOrg} />
+            {isSuperuser &&
+              (isEditing ? (
+                <>
+                  <Button size="sm" variant="outline" onClick={handleCancel} disabled={updateOrg.isPending}>
+                    <X className="mr-2 h-4 w-4" /> Cancel
+                  </Button>
+                  <Button size="sm" onClick={handleSave} disabled={updateOrg.isPending}>
+                    {updateOrg.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />} {updateOrg.isPending ? "Saving..." : "Save changes"}
+                  </Button>
+                </>
+              ) : (
+                <Button size="sm" onClick={() => setIsEditing(true)}>
+                  <Pencil className="mr-2 h-4 w-4" /> Edit settings
+                </Button>
+              ))}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <MoreHorizontal className="h-4 w-4" />
+                  <span className="sr-only">Actions</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={() => {
+                    if (org?.id) {
+                      navigator.clipboard.writeText(org.id)
+                      toast.success("Organization ID copied")
+                    }
+                  }}
+                  disabled={!org?.id}
+                >
+                  <Copy className="mr-2 h-4 w-4" />
+                  Copy Organization ID
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    if (org?.slug) {
+                      navigator.clipboard.writeText(org.slug)
+                      toast.success("Organization slug copied")
+                    }
+                  }}
+                  disabled={!org?.slug}
+                >
+                  <Link2 className="mr-2 h-4 w-4" />
+                  Copy Slug
+                </DropdownMenuItem>
+                {org?.website && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <a href={org.website} target="_blank" rel="noopener noreferrer">
+                        <Globe className="mr-2 h-4 w-4" />
+                        Visit Website
+                      </a>
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         }
       />
       </div>

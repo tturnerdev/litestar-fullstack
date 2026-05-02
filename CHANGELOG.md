@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.197.0 (2026-05-02)
+
+### Added
+- **Audit log stats bar** — Summary cards showing total events, events today, unique users, and top event type above the audit log table
+- **Organization action dropdown** — Copy Org ID, Copy Slug, and Visit Website actions in header menu
+- **Organization DataFreshness** — Shows last-refreshed time with refresh button on org page
+- **Organization expanded stats** — Platform overview now shows 8 stat cards including devices, extensions, open tickets, and voicemails
+- **Organization quick links** — Added Roles & Permissions and System Settings shortcuts
+- **System uptime banner** — Live-ticking uptime display in days/hours/minutes format on admin system page
+- **System worker queue visualization** — Stacked progress bars showing active/pending/scheduled job distribution per worker queue
+
+### Changed
+- System auto-refresh toggle now correctly controls all sub-component polling
+- System health replaced manual refresh state with DataFreshness component
+
 ## v0.196.0 (2026-05-02)
 
 ### Added

@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { useQuery } from "@tanstack/react-query"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import {
   Activity,
   AlertCircle,
+  ArrowUpFromDot,
   Cable,
   CheckCircle2,
   Circle,
@@ -27,6 +28,7 @@ import { AdminNav } from "@/components/admin/admin-nav"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Separator } from "@/components/ui/separator"
 import { EmptyState } from "@/components/ui/empty-state"
@@ -106,6 +108,54 @@ function OverallHealthBanner({ healthy }: { healthy: boolean }) {
   )
 }
 
+function UptimeBanner({ startedAt, uptimeSeconds }: { startedAt: string; uptimeSeconds: number }) {
+  const liveUptime = useTimeSince(startedAt)
+  const display = liveUptime ?? formatUptime(uptimeSeconds, true)
+
+  // Parse into segments for the large display
+  const totalSec = startedAt
+    ? Math.max(0, Math.floor((Date.now() - new Date(startedAt).getTime()) / 1000))
+    : uptimeSeconds
+  const days = Math.floor(totalSec / 86400)
+  const hours = Math.floor((totalSec % 86400) / 3600)
+  const minutes = Math.floor((totalSec % 3600) / 60)
+
+  return (
+    <Card>
+      <CardContent className="flex items-center gap-4 p-4">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+          <ArrowUpFromDot className="h-5 w-5" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-xs font-medium text-muted-foreground">Uptime</p>
+          <div className="flex items-baseline gap-1">
+            {days > 0 && (
+              <>
+                <span className="text-2xl font-bold tabular-nums">{days}</span>
+                <span className="text-sm text-muted-foreground">d</span>
+              </>
+            )}
+            <span className="text-2xl font-bold tabular-nums">{hours}</span>
+            <span className="text-sm text-muted-foreground">h</span>
+            <span className="text-2xl font-bold tabular-nums">{minutes}</span>
+            <span className="text-sm text-muted-foreground">m</span>
+          </div>
+        </div>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="shrink-0 cursor-default text-xs text-muted-foreground">
+              since {formatDateTime(startedAt)}
+            </span>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="text-xs">
+            {display}
+          </TooltipContent>
+        </Tooltip>
+      </CardContent>
+    </Card>
+  )
+}
+
 // ---------------------------------------------------------------------------
 // System Health Indicators
 // ---------------------------------------------------------------------------
@@ -121,14 +171,14 @@ interface HealthIndicator {
   detail: string
 }
 
-function useSystemHealthCheck() {
+function useSystemHealthCheck(autoRefreshEnabled: boolean) {
   return useQuery({
     queryKey: ["system", "health-check"],
     queryFn: async () => {
       const response = await systemHealth()
       return response.data as SystemHealth
     },
-    refetchInterval: HEALTH_CHECK_INTERVAL,
+    refetchInterval: autoRefreshEnabled ? HEALTH_CHECK_INTERVAL : false,
     retry: 1,
   })
 }
@@ -207,8 +257,8 @@ function HealthIndicatorCard({ indicator }: { indicator: HealthIndicator }) {
   )
 }
 
-function SystemHealthIndicators() {
-  const { data: healthData, isError: healthError, dataUpdatedAt, refetch, isFetching } = useSystemHealthCheck()
+function SystemHealthIndicators({ autoRefresh }: { autoRefresh: boolean }) {
+  const { data: healthData, isError: healthError, dataUpdatedAt, refetch, isFetching } = useSystemHealthCheck(autoRefresh)
 
   // Live "last checked X ago" ticker
   const [, setTick] = useState(0)
@@ -515,8 +565,8 @@ function WorkerQueuesCard({
 
         <Separator />
 
-        {/* Per-queue rows */}
-        <div className="space-y-2">
+        {/* Per-queue rows with progress visualization */}
+        <div className="space-y-3">
           {queues.map((queue) => {
             const active = queue.active ?? 0
             const queued = queue.queued ?? 0
@@ -524,35 +574,89 @@ function WorkerQueuesCard({
             const total = active + queued + scheduled
             const isIdle = total === 0
 
+            // Compute segment percentages for the stacked bar
+            const activePct = total > 0 ? (active / total) * 100 : 0
+            const queuedPct = total > 0 ? (queued / total) * 100 : 0
+            const scheduledPct = total > 0 ? (scheduled / total) * 100 : 0
+
             return (
-              <div key={queue.name} className="flex items-center justify-between rounded-lg border px-4 py-3">
-                <div className="flex items-center gap-3">
-                  <StatusDot ok label={isIdle ? "Idle" : `${total} job${total !== 1 ? "s" : ""}`} />
-                  <div>
-                    <p className="text-sm font-medium">{queue.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {isIdle ? "No active jobs" : `${active} active, ${queued} pending, ${scheduled} scheduled`}
-                    </p>
+              <div key={queue.name} className="rounded-lg border px-4 py-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <StatusDot ok label={isIdle ? "Idle" : `${total} job${total !== 1 ? "s" : ""}`} />
+                    <div>
+                      <p className="text-sm font-medium">{queue.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {isIdle ? "No active jobs" : `${active} active, ${queued} pending, ${scheduled} scheduled`}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    {active > 0 && (
+                      <Badge variant="default" className="h-5 px-1.5 text-[10px]">
+                        {active} active
+                      </Badge>
+                    )}
+                    {queued > 0 && (
+                      <Badge variant="secondary" className="h-5 px-1.5 text-[10px]">
+                        {queued} queued
+                      </Badge>
+                    )}
+                    {scheduled > 0 && (
+                      <Badge variant="outline" className="h-5 px-1.5 text-[10px]">
+                        {scheduled} sched
+                      </Badge>
+                    )}
+                    {isIdle && <span className="text-xs text-muted-foreground">idle</span>}
                   </div>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  {active > 0 && (
-                    <Badge variant="default" className="h-5 px-1.5 text-[10px]">
-                      {active} active
-                    </Badge>
-                  )}
-                  {queued > 0 && (
-                    <Badge variant="secondary" className="h-5 px-1.5 text-[10px]">
-                      {queued} queued
-                    </Badge>
-                  )}
-                  {scheduled > 0 && (
-                    <Badge variant="outline" className="h-5 px-1.5 text-[10px]">
-                      {scheduled} sched
-                    </Badge>
-                  )}
-                  {isIdle && <span className="text-xs text-muted-foreground">idle</span>}
-                </div>
+                {/* Stacked progress bar */}
+                {!isIdle && (
+                  <div className="mt-2.5">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="flex h-2 w-full overflow-hidden rounded-full bg-muted">
+                          {activePct > 0 && (
+                            <div
+                              className="h-full bg-primary transition-all duration-300"
+                              style={{ width: `${activePct}%` }}
+                            />
+                          )}
+                          {queuedPct > 0 && (
+                            <div
+                              className="h-full bg-amber-500 transition-all duration-300"
+                              style={{ width: `${queuedPct}%` }}
+                            />
+                          )}
+                          {scheduledPct > 0 && (
+                            <div
+                              className="h-full bg-muted-foreground/30 transition-all duration-300"
+                              style={{ width: `${scheduledPct}%` }}
+                            />
+                          )}
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="text-xs">
+                        {active} active / {queued} pending / {scheduled} scheduled
+                      </TooltipContent>
+                    </Tooltip>
+                    {/* Legend */}
+                    <div className="mt-1.5 flex items-center gap-3">
+                      <div className="flex items-center gap-1">
+                        <span className="inline-block h-2 w-2 rounded-full bg-primary" />
+                        <span className="text-[10px] text-muted-foreground">Active</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="inline-block h-2 w-2 rounded-full bg-amber-500" />
+                        <span className="text-[10px] text-muted-foreground">Pending</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="inline-block h-2 w-2 rounded-full bg-muted-foreground/30" />
+                        <span className="text-[10px] text-muted-foreground">Scheduled</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )
           })}
@@ -727,36 +831,14 @@ const AUTO_REFRESH_INTERVAL = 30_000
 function AdminSystemPage() {
   useDocumentTitle("System Status")
   const [autoRefresh, setAutoRefresh] = useState(false)
-  const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null)
-  const lastRefreshedRef = useRef<Date | null>(null)
 
   const { data, isLoading, isError, refetch, isFetching, dataUpdatedAt } = useAdminSystemStatus({
     refetchInterval: autoRefresh ? AUTO_REFRESH_INTERVAL : false,
   })
 
-  // Track last refresh time
-  useEffect(() => {
-    if (dataUpdatedAt > 0) {
-      const ts = new Date(dataUpdatedAt)
-      lastRefreshedRef.current = ts
-      setLastRefreshed(ts)
-    }
-  }, [dataUpdatedAt])
-
-  // Live "last refreshed X ago" ticker
-  const [, setRefreshTick] = useState(0)
-  useEffect(() => {
-    const id = setInterval(() => setRefreshTick((t) => t + 1), 5000)
-    return () => clearInterval(id)
-  }, [])
-
   const handleRefresh = useCallback(() => {
     refetch()
   }, [refetch])
-
-  const lastRefreshedLabel = lastRefreshed
-    ? `Updated ${formatTimeSince(lastRefreshed)}`
-    : null
 
   return (
     <TooltipProvider>
@@ -802,22 +884,19 @@ function AdminSystemPage() {
             />
           ) : (
             <div className="space-y-6">
-              {/* Overall health banner + last refreshed */}
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              {/* Overall health banner + uptime */}
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex-1">
                   <OverallHealthBanner healthy={data.databaseStatus === "online"} />
                 </div>
-                {lastRefreshedLabel && (
-                  <p className="shrink-0 text-xs text-muted-foreground">
-                    {lastRefreshedLabel}
-                    {autoRefresh && " (auto)"}
-                  </p>
-                )}
+                <div className="shrink-0">
+                  <UptimeBanner startedAt={data.startedAt} uptimeSeconds={data.uptimeSeconds} />
+                </div>
               </div>
 
               {/* System health indicators */}
               <SectionErrorBoundary name="System Health">
-                <SystemHealthIndicators />
+                <SystemHealthIndicators autoRefresh={autoRefresh} />
               </SectionErrorBoundary>
 
               {/* Service status grid */}
@@ -864,6 +943,15 @@ function AdminSystemPage() {
               <SectionErrorBoundary name="External Connections">
                 <ExternalConnectionsCard />
               </SectionErrorBoundary>
+
+              {/* Data freshness footer */}
+              <div className="flex items-center justify-end">
+                <DataFreshness
+                  dataUpdatedAt={dataUpdatedAt > 0 ? dataUpdatedAt : undefined}
+                  onRefresh={handleRefresh}
+                  isRefreshing={isFetching}
+                />
+              </div>
             </div>
           )}
         </PageSection>

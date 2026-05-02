@@ -1,4 +1,4 @@
-import { Activity, AlertCircle, ArrowRight, MonitorSmartphone, RefreshCw, Users, UsersRound } from "lucide-react"
+import { Activity, AlertCircle, ArrowRight, MonitorSmartphone, Phone, RefreshCw, TicketCheck, Users, UsersRound, Voicemail } from "lucide-react"
 import { useEffect, useState } from "react"
 import { Link } from "@tanstack/react-router"
 import { useQueryClient } from "@tanstack/react-query"
@@ -27,7 +27,7 @@ export function OrganizationStats() {
   const queryClient = useQueryClient()
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [lastUpdatedLabel, setLastUpdatedLabel] = useState("")
-  const [visibleCards, setVisibleCards] = useState<boolean[]>([false, false, false, false])
+  const [visibleCards, setVisibleCards] = useState<boolean[]>(Array(8).fill(false))
 
   // Update the "last updated" label periodically
   useEffect(() => {
@@ -42,7 +42,8 @@ export function OrganizationStats() {
   useEffect(() => {
     if (!data) return
     const timers: ReturnType<typeof setTimeout>[] = []
-    for (let i = 0; i < 4; i++) {
+    const cardCount = 8
+    for (let i = 0; i < cardCount; i++) {
       timers.push(
         setTimeout(() => {
           setVisibleCards((prev) => {
@@ -67,7 +68,7 @@ export function OrganizationStats() {
       <div className="space-y-3">
         <h2 className="text-lg font-semibold">Platform Overview</h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, index) => (
+          {Array.from({ length: 8 }).map((_, index) => (
             // biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton placeholders
             <SkeletonCard key={`stat-skeleton-${index}`} />
           ))}
@@ -128,7 +129,43 @@ export function OrganizationStats() {
       icon: Activity,
       color: "text-orange-600 dark:text-orange-400",
       bgColor: "bg-orange-500/10",
-      href: "/admin/users" as const,
+      href: "/admin/audit" as const,
+    },
+    {
+      label: "Devices",
+      value: data.totalDevices,
+      description: `${data.devicesOnline} online`,
+      icon: MonitorSmartphone,
+      color: "text-cyan-600 dark:text-cyan-400",
+      bgColor: "bg-cyan-500/10",
+      href: "/devices" as const,
+    },
+    {
+      label: "Extensions",
+      value: data.totalExtensions,
+      description: "Voice extensions",
+      icon: Phone,
+      color: "text-indigo-600 dark:text-indigo-400",
+      bgColor: "bg-indigo-500/10",
+      href: "/voice/extensions" as const,
+    },
+    {
+      label: "Open Tickets",
+      value: data.openTickets,
+      description: "Pending support",
+      icon: TicketCheck,
+      color: "text-rose-600 dark:text-rose-400",
+      bgColor: "bg-rose-500/10",
+      href: "/support" as const,
+    },
+    {
+      label: "Voicemails",
+      value: data.unreadVoicemails,
+      description: "Unread messages",
+      icon: Voicemail,
+      color: "text-amber-600 dark:text-amber-400",
+      bgColor: "bg-amber-500/10",
+      href: "/voice" as const,
     },
   ]
 

@@ -1,5 +1,5 @@
 import { Link, useLocation } from "@tanstack/react-router"
-import { ChevronRight, Compass, ScrollText, ShieldCheck, Users, UsersRound } from "lucide-react"
+import { ChevronRight, Compass, KeyRound, Monitor, ScrollText, ShieldCheck, Users, UsersRound } from "lucide-react"
 import { Card, CardContent, CardTitle } from "@/components/ui/card"
 import { useAuthStore } from "@/lib/auth"
 
@@ -42,6 +42,24 @@ const quickLinks: QuickLinkItem[] = [
     requiresSuperuser: true,
   },
   {
+    title: "Roles & Permissions",
+    description: "Manage roles and access control",
+    to: "/admin/roles",
+    icon: KeyRound,
+    color: "text-pink-600 dark:text-pink-400",
+    bgColor: "bg-pink-500/10 group-hover:bg-pink-500",
+    requiresSuperuser: true,
+  },
+  {
+    title: "System Settings",
+    description: "Server configuration and health",
+    to: "/admin/system",
+    icon: Monitor,
+    color: "text-slate-600 dark:text-slate-400",
+    bgColor: "bg-slate-500/10 group-hover:bg-slate-500",
+    requiresSuperuser: true,
+  },
+  {
     title: "Admin Console",
     description: "System dashboard and statistics",
     to: "/admin",
@@ -52,7 +70,7 @@ const quickLinks: QuickLinkItem[] = [
   },
 ]
 
-const kbdHints = ["1", "2", "3", "4"]
+const kbdHints = ["1", "2", "3", "4", "5", "6"]
 
 export function OrganizationQuickLinks() {
   const user = useAuthStore((state) => state.user)

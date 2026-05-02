@@ -10,6 +10,7 @@ import {
   FileSpreadsheet,
   FileText,
   Globe,
+  Hash,
   Loader2,
   Minus,
   Monitor,
@@ -19,12 +20,15 @@ import {
   RotateCcw,
   Search,
   Shield,
+  TrendingUp,
   User,
+  Users,
   X,
 } from "lucide-react"
 import { Fragment, useCallback, useMemo, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { DateRangeFilter, getPresetDates } from "@/components/ui/date-range-filter"
 import {
@@ -776,6 +780,152 @@ function AuditLogDetailSheet({
   )
 }
 
+// ── Stats Summary ─────────────────────────────────────────────────────────
+
+interface AuditStats {
+  totalEvents: number
+  eventsToday: number
+  uniqueUsers: number
+  topEventType: string | null
+  topEventCount: number
+}
+
+function computeAuditStats(items: AuditLogEntry[], total: number): AuditStats {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  let eventsToday = 0
+  const actorSet = new Set<string>()
+  const actionCounts = new Map<string, number>()
+
+  for (const entry of items) {
+    // Count today's events
+    const entryDate = new Date(entry.createdAt)
+    if (entryDate >= today) {
+      eventsToday++
+    }
+
+    // Track unique actors
+    const actorKey = entry.actorId ?? entry.actorEmail ?? entry.actorName
+    if (actorKey) {
+      actorSet.add(actorKey)
+    }
+
+    // Count action types
+    const prev = actionCounts.get(entry.action) ?? 0
+    actionCounts.set(entry.action, prev + 1)
+  }
+
+  // Find top event type
+  let topEventType: string | null = null
+  let topEventCount = 0
+  for (const [action, count] of actionCounts) {
+    if (count > topEventCount) {
+      topEventType = action
+      topEventCount = count
+    }
+  }
+
+  return {
+    totalEvents: total,
+    eventsToday,
+    uniqueUsers: actorSet.size,
+    topEventType,
+    topEventCount,
+  }
+}
+
+function AuditLogStatsBar({ stats, isLoading }: { stats: AuditStats; isLoading: boolean }) {
+  const cards = [
+    {
+      label: "Total Events",
+      value: stats.totalEvents.toLocaleString(),
+      subtitle: "Matching current filters",
+      icon: Hash,
+      color: "text-blue-600 dark:text-blue-400",
+      bg: "bg-blue-500/10",
+    },
+    {
+      label: "Events Today",
+      value: stats.eventsToday.toLocaleString(),
+      subtitle: "On current page",
+      icon: CalendarDays,
+      color: "text-emerald-600 dark:text-emerald-400",
+      bg: "bg-emerald-500/10",
+    },
+    {
+      label: "Unique Users",
+      value: stats.uniqueUsers.toLocaleString(),
+      subtitle: "On current page",
+      icon: Users,
+      color: "text-violet-600 dark:text-violet-400",
+      bg: "bg-violet-500/10",
+    },
+    {
+      label: "Top Event Type",
+      value: stats.topEventType ?? "--",
+      subtitle: stats.topEventType ? `${stats.topEventCount} occurrence${stats.topEventCount === 1 ? "" : "s"}` : "No data",
+      icon: TrendingUp,
+      color: "text-amber-600 dark:text-amber-400",
+      bg: "bg-amber-500/10",
+    },
+  ]
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {cards.map((card) => (
+          <Card key={card.label} className="border-border/60 bg-card/80">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground">{card.label}</p>
+                  <div className="h-6 w-16 animate-pulse rounded bg-muted" />
+                  <div className="h-3 w-20 animate-pulse rounded bg-muted" />
+                </div>
+                <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${card.bg}`}>
+                  <card.icon className={`h-4 w-4 ${card.color}`} />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    )
+  }
+
+  return (
+    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      {cards.map((card) => {
+        const Icon = card.icon
+        const isEventType = card.label === "Top Event Type"
+        return (
+          <Card key={card.label} className="border-border/60 bg-card/80">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0 space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground">{card.label}</p>
+                  {isEventType && card.value !== "--" ? (
+                    <Badge variant="outline" className={`${getActionBadgeClasses(card.value)} text-xs`}>
+                      {card.value}
+                    </Badge>
+                  ) : (
+                    <p className="text-2xl font-semibold tracking-tight">{card.value}</p>
+                  )}
+                  <p className="text-xs text-muted-foreground/70">{card.subtitle}</p>
+                </div>
+                <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${card.bg}`}>
+                  <Icon className={`h-4 w-4 ${card.color}`} />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )
+      })}
+    </div>
+  )
+}
+
 // ── Main Component ─────────────────────────────────────────────────────────
 
 export function AuditLogTable() {
@@ -833,6 +983,11 @@ export function AuditLogTable() {
   const totalPages = useMemo(
     () => Math.max(1, Math.ceil((data?.total ?? 0) / PAGE_SIZE)),
     [data?.total],
+  )
+
+  const stats = useMemo(
+    () => computeAuditStats(data?.items ?? [], data?.total ?? 0),
+    [data?.items, data?.total],
   )
 
   // Handlers
@@ -1156,6 +1311,9 @@ export function AuditLogTable() {
           ))}
         </div>
       )}
+
+      {/* Summary stats */}
+      <AuditLogStatsBar stats={stats} isLoading={isLoading} />
 
       {/* Content */}
       {isLoading ? (
