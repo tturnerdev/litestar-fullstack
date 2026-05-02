@@ -9,11 +9,50 @@ from structlog import get_logger
 from app.domain.tasks.jobs import broadcast_entity_event, provide_task_context
 
 if TYPE_CHECKING:
+    from app.db.models._background_task import BackgroundTask
     from saq.types import Context
 
 __all__ = ("device_provision_job", "device_reboot_job", "device_reprovision_job")
 
 logger = get_logger()
+
+
+async def broadcast_device_status(task: BackgroundTask, *, status: str, previous_status: str) -> None:
+    """Publish a device.status_changed SSE event.
+
+    Creates a short-lived Redis connection to broadcast the event.
+    Errors are silently caught so broadcast failures never affect
+    job execution.
+
+    Args:
+        task: The background task with device info in its payload.
+        status: New device status.
+        previous_status: Previous device status.
+    """
+    if not task.entity_id:
+        return
+    try:
+        from redis.asyncio import Redis
+
+        from app.domain.events.services import EventBroadcaster
+        from app.lib.settings import get_settings
+
+        settings = get_settings()
+        redis = Redis.from_url(settings.saq.REDIS_URL)
+        try:
+            broadcaster = EventBroadcaster(redis)
+            device_name = (task.payload or {}).get("device_name", "Device")
+            await broadcaster.publish_device_status_changed(
+                team_id=task.team_id,
+                device_id=task.entity_id,
+                device_name=device_name,
+                status=status,
+                previous_status=previous_status,
+            )
+        finally:
+            await redis.aclose()
+    except Exception:  # noqa: BLE001
+        pass  # Never let SSE broadcast failures affect job execution
 
 
 async def device_reboot_job(ctx: Context, *, task_id: str) -> dict:
@@ -35,11 +74,14 @@ async def device_reboot_job(ctx: Context, *, task_id: str) -> dict:
     async with provide_task_context(ctx, task_id) as (task_service, task):
         device_id = (task.payload or {}).get("device_id", "unknown")
         await task_service.start_task(task.id)
+        await broadcast_device_status(task, status="rebooting", previous_status="online")
         await logger.ainfo("Sending reboot command to device", device_id=device_id)
         await task_service.update_progress(task.id, 50)
         # TODO: Actual device reboot via SIP NOTIFY or provisioning API
+        await broadcast_device_status(task, status="offline", previous_status="rebooting")
         await task_service.update_progress(task.id, 100)
         task = await task_service.complete_task(task.id, result={"device_id": device_id, "action": "reboot"})
+        await broadcast_device_status(task, status="online", previous_status="offline")
         await broadcast_entity_event(task)
     return {"status": "completed"}
 
@@ -59,6 +101,7 @@ async def device_provision_job(ctx: Context, *, task_id: str) -> dict:
     async with provide_task_context(ctx, task_id) as (task_service, task):
         device_id = (task.payload or {}).get("device_id", "unknown")
         await task_service.start_task(task.id)
+        await broadcast_device_status(task, status="provisioning", previous_status="unregistered")
         await logger.ainfo("Starting device provisioning", device_id=device_id)
         await task_service.update_progress(task.id, 25)
         # TODO: Generate SIP credentials
@@ -67,6 +110,7 @@ async def device_provision_job(ctx: Context, *, task_id: str) -> dict:
         await task_service.update_progress(task.id, 75)
         # TODO: Verify device registration
         task = await task_service.complete_task(task.id, result={"device_id": device_id, "action": "provision"})
+        await broadcast_device_status(task, status="online", previous_status="provisioning")
         await broadcast_entity_event(task)
     return {"status": "completed"}
 
@@ -86,9 +130,11 @@ async def device_reprovision_job(ctx: Context, *, task_id: str) -> dict:
     async with provide_task_context(ctx, task_id) as (task_service, task):
         device_id = (task.payload or {}).get("device_id", "unknown")
         await task_service.start_task(task.id)
+        await broadcast_device_status(task, status="provisioning", previous_status="online")
         await logger.ainfo("Starting device reprovisioning", device_id=device_id)
         await task_service.update_progress(task.id, 50)
         # TODO: Push updated configuration to device
         task = await task_service.complete_task(task.id, result={"device_id": device_id, "action": "reprovision"})
+        await broadcast_device_status(task, status="online", previous_status="provisioning")
         await broadcast_entity_event(task)
     return {"status": "completed"}

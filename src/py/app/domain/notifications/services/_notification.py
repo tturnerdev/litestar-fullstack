@@ -22,6 +22,38 @@ class NotificationService(service.SQLAlchemyAsyncRepositoryService[m.Notificatio
     repository_type = Repo
     match_fields = ["user_id", "title"]
 
+    async def _broadcast_notification_event(self, notification: m.Notification) -> None:
+        """Publish a notification creation event to Redis for SSE streaming.
+
+        Creates a short-lived Redis connection to broadcast the event.
+        Errors are silently caught so broadcast failures never affect
+        notification operations.
+
+        Args:
+            notification: The notification to broadcast.
+        """
+        try:
+            from redis.asyncio import Redis
+
+            from app.domain.events.services import EventBroadcaster
+            from app.lib.settings import get_settings
+
+            settings = get_settings()
+            redis = Redis.from_url(settings.saq.REDIS_URL)
+            try:
+                broadcaster = EventBroadcaster(redis)
+                await broadcaster.publish_notification_created(
+                    user_id=notification.user_id,
+                    notification_id=notification.id,
+                    title=notification.title,
+                    category=notification.category,
+                    action_url=notification.action_url,
+                )
+            finally:
+                await redis.aclose()
+        except Exception:  # noqa: BLE001
+            pass  # Never let SSE broadcast failures affect notification operations
+
     async def notify(
         self,
         user_id: UUID,
@@ -44,7 +76,7 @@ class NotificationService(service.SQLAlchemyAsyncRepositoryService[m.Notificatio
         Returns:
             The created notification.
         """
-        return await self.create(
+        notification = await self.create(
             {
                 "user_id": user_id,
                 "title": title,
@@ -54,6 +86,8 @@ class NotificationService(service.SQLAlchemyAsyncRepositoryService[m.Notificatio
                 "metadata_": metadata,
             },
         )
+        await self._broadcast_notification_event(notification)
+        return notification
 
     async def mark_read(self, notification_id: UUID, user_id: UUID) -> m.Notification:
         """Mark a single notification as read.

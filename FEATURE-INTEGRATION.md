@@ -451,14 +451,14 @@ No new hook files. Existing hooks return the enriched schemas automatically afte
 - [x] Update PhoneNumber detail schema: add `e911_registered`, `e911_registration_id`
 - [ ] Update `ExtensionService.get()` to join `phone_number → e911_registration`
 - [x] Update `PhoneNumberService` to check E911 status on detail/list queries
-- [ ] Add `get_unregistered_numbers(team_id)` method to `PhoneNumberService`
-- [ ] Add `GET /api/voice/phone-numbers/unregistered-e911` endpoint
-- [ ] Regenerate TypeScript types (`make types`)
+- [x] Add `get_unregistered_numbers(team_id)` method to `PhoneNumberService`
+- [x] Add `GET /api/voice/phone-numbers/unregistered-e911` endpoint
+- [x] Regenerate TypeScript types (`make types`)
 - [x] Build `E911StatusBadge` shared component — created at `src/js/web/src/components/voice/e911-status-badge.tsx`
 - [x] Add E911 status section to extension detail page — added via `usePhoneNumber` hook, shows Shield/ShieldOff icons with registration link
 - [x] Add E911 badge to phone number list rows — added E911 column with E911StatusBadge
 - [x] Add E911 status section to phone number detail page — added with "View Registration" link
-- [ ] Add "Unregistered Numbers" count to E911 list page header
+- [x] Add "Unregistered Numbers" count to E911 list page header
 
 ### Phase 4: Device ↔ Connection
 

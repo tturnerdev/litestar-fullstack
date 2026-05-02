@@ -151,6 +151,22 @@ class BackgroundTaskService(CompositeServiceMixin, service.SQLAlchemyAsyncReposi
             item_id=task_id,
         )
         await self._broadcast_task_event(updated)
+        try:
+            from app.domain.notifications import deps as notification_deps
+            from app.lib.deps import provide_services
+
+            if updated.initiated_by_id:
+                async with provide_services(notification_deps.provide_notifications_service) as (notification_service,):
+                    task_label = updated.task_type.replace(".", " ").replace("_", " ").title()
+                    await notification_service.notify(
+                        user_id=updated.initiated_by_id,
+                        title=f"{task_label} Complete",
+                        message=f"Your {task_label.lower()} task has completed successfully.",
+                        category="system",
+                        action_url=f"/tasks/{updated.id}",
+                    )
+        except Exception:  # noqa: BLE001
+            pass  # Never let notification failures affect task operations
         return updated
 
     async def fail_task(self, task_id: Any, error_message: str) -> m.BackgroundTask:
@@ -173,6 +189,22 @@ class BackgroundTaskService(CompositeServiceMixin, service.SQLAlchemyAsyncReposi
             item_id=task_id,
         )
         await self._broadcast_task_event(updated)
+        try:
+            from app.domain.notifications import deps as notification_deps
+            from app.lib.deps import provide_services
+
+            if updated.initiated_by_id:
+                async with provide_services(notification_deps.provide_notifications_service) as (notification_service,):
+                    task_label = updated.task_type.replace(".", " ").replace("_", " ").title()
+                    await notification_service.notify(
+                        user_id=updated.initiated_by_id,
+                        title=f"{task_label} Failed",
+                        message=f"Your {task_label.lower()} task has failed: {error_message or 'Unknown error'}",
+                        category="system",
+                        action_url=f"/tasks/{updated.id}",
+                    )
+        except Exception:  # noqa: BLE001
+            pass  # Never let notification failures affect task operations
         return updated
 
     async def cancel_task(self, task_id: Any) -> m.BackgroundTask:
