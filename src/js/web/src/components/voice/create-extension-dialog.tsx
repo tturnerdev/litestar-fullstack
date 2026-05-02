@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { Phone, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
@@ -11,6 +11,7 @@ const DISPLAY_NAME_MAX_LENGTH = 50
 
 export function CreateExtensionDialog({ trigger }: { trigger: React.ReactNode }) {
   const [open, setOpen] = useState(false)
+  const triggerRef = useRef<HTMLButtonElement>(null)
   const [extensionNumber, setExtensionNumber] = useState("")
   const [extensionNumberError, setExtensionNumberError] = useState("")
   const [displayName, setDisplayName] = useState("")
@@ -52,6 +53,7 @@ export function CreateExtensionDialog({ trigger }: { trigger: React.ReactNode })
         onSuccess: () => {
           resetForm()
           setOpen(false)
+          setTimeout(() => triggerRef.current?.focus(), 0)
         },
       },
     )
@@ -61,7 +63,7 @@ export function CreateExtensionDialog({ trigger }: { trigger: React.ReactNode })
 
   return (
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm() }}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <DialogTrigger asChild ref={triggerRef}>{trigger}</DialogTrigger>
       <DialogContent>
         <form onSubmit={handleSubmit}>
           <DialogHeader>

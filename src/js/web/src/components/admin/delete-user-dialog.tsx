@@ -1,6 +1,6 @@
 import { useNavigate } from "@tanstack/react-router"
 import { AlertTriangle, Loader2, ShieldAlert } from "lucide-react"
-import { useState } from "react"
+import { useCallback, useState } from "react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,6 +30,15 @@ export function DeleteUserDialog({ userId, userEmail, open, onOpenChange, naviga
 
   const isConfirmed = confirmText === userEmail
 
+  const restoreFocus = useCallback(() => {
+    setTimeout(() => {
+      const searchInput = document.querySelector<HTMLInputElement>('input[placeholder*="Search"]')
+      if (searchInput) {
+        searchInput.focus()
+      }
+    }, 0)
+  }, [])
+
   function handleDelete() {
     if (!isConfirmed) return
     deleteUser.mutate(userId, {
@@ -38,6 +47,8 @@ export function DeleteUserDialog({ userId, userEmail, open, onOpenChange, naviga
         onOpenChange(false)
         if (navigateOnDelete) {
           navigate({ to: "/admin/users" })
+        } else {
+          restoreFocus()
         }
       },
     })

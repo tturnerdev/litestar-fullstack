@@ -597,7 +597,16 @@ function ScheduleRow({
 
   const handleConfirmDelete = () => {
     if (itemToDelete) {
-      deleteSchedule.mutate(itemToDelete.id)
+      deleteSchedule.mutate(itemToDelete.id, {
+        onSuccess: () => {
+          setTimeout(() => {
+            const searchInput = document.querySelector<HTMLInputElement>('input[placeholder*="Search"]')
+            if (searchInput) {
+              searchInput.focus()
+            }
+          }, 0)
+        },
+      })
       setItemToDelete(null)
     }
   }

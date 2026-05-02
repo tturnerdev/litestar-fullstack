@@ -267,6 +267,9 @@ export function useDeviceAction(deviceId: string) {
         `/api/devices/${deviceId}/action?key=${encodeURIComponent(key)}`,
         { method: "POST" },
       ),
+    onSuccess: (data) => {
+      toast.success(data.message || "Action completed")
+    },
     onError: (error) => {
       toast.error("Action failed", {
         description: error instanceof Error ? error.message : "Could not reach device",

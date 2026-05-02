@@ -218,7 +218,17 @@ function ConnectionsPage() {
 
   const handleConfirmDelete = () => {
     if (itemToDelete) {
-      deleteConnection.mutate(itemToDelete.id)
+      deleteConnection.mutate(itemToDelete.id, {
+        onSuccess: () => {
+          // The deleted row is gone, so restore focus to the search input
+          setTimeout(() => {
+            const searchInput = document.querySelector<HTMLInputElement>('input[placeholder*="Search"]')
+            if (searchInput) {
+              searchInput.focus()
+            }
+          }, 0)
+        },
+      })
       setItemToDelete(null)
     }
   }

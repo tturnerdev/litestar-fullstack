@@ -24,6 +24,7 @@ import {
   XCircle,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { Button } from "@/components/ui/button"
@@ -247,12 +248,13 @@ function AdminRolesPage() {
         ) : (
           <div className="space-y-6">
             {teams.map((team) => (
-              <TeamPermissionCard
-                key={team.id}
-                teamId={team.id}
-                teamName={team.name}
-                memberCount={team.memberCount}
-              />
+              <SectionErrorBoundary key={team.id} name={`${team.name} permissions`}>
+                <TeamPermissionCard
+                  teamId={team.id}
+                  teamName={team.name}
+                  memberCount={team.memberCount}
+                />
+              </SectionErrorBoundary>
             ))}
           </div>
         )}

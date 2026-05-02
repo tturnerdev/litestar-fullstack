@@ -1,3 +1,4 @@
+import { useCallback } from "react"
 import { AlertTriangle, Loader2, Trash2 } from "lucide-react"
 import {
   AlertDialog,
@@ -31,10 +32,20 @@ export function DeleteExtensionDialog({
 }: DeleteExtensionDialogProps) {
   const deleteExtension = useDeleteExtension()
 
+  const restoreFocus = useCallback(() => {
+    setTimeout(() => {
+      const searchInput = document.querySelector<HTMLInputElement>('input[placeholder*="Search"]')
+      if (searchInput) {
+        searchInput.focus()
+      }
+    }, 0)
+  }, [])
+
   const handleDelete = () => {
     deleteExtension.mutate(extensionId, {
       onSuccess: () => {
         onOpenChange(false)
+        restoreFocus()
         onDeleted?.()
       },
     })

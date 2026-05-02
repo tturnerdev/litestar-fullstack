@@ -374,6 +374,13 @@ function WebhookFormDialog({
         onSuccess: () => {
           toast.success("Webhook created")
           handleOpenChange(false)
+          // Restore focus to the search input after dialog closes
+          setTimeout(() => {
+            const searchInput = document.querySelector<HTMLInputElement>('input[placeholder*="Search"]')
+            if (searchInput) {
+              searchInput.focus()
+            }
+          }, 0)
         },
         onError: (err) => {
           toast.error("Failed to create webhook", {
@@ -540,6 +547,13 @@ function DeleteWebhookDialog({
       onSuccess: () => {
         toast.success("Webhook deleted")
         onOpenChange(false)
+        // The deleted row is gone, so restore focus to the search input
+        setTimeout(() => {
+          const searchInput = document.querySelector<HTMLInputElement>('input[placeholder*="Search"]')
+          if (searchInput) {
+            searchInput.focus()
+          }
+        }, 0)
       },
       onError: (err) => {
         toast.error("Failed to delete webhook", {

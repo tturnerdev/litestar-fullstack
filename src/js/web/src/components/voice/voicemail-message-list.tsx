@@ -182,6 +182,15 @@ export function VoicemailMessageList({ extensionId }: VoicemailMessageListProps)
     ).then(() => setSelectedIds(new Set()))
   }
 
+  function restoreFocusToSearch() {
+    setTimeout(() => {
+      const searchInput = document.querySelector<HTMLInputElement>('input[placeholder*="Search"]')
+      if (searchInput) {
+        searchInput.focus()
+      }
+    }, 0)
+  }
+
   function handleBulkDeleteConfirm() {
     const ids = Array.from(selectedIds)
     bulkDeleteMutation.mutate(ids, {
@@ -189,6 +198,7 @@ export function VoicemailMessageList({ extensionId }: VoicemailMessageListProps)
         setSelectedIds(new Set())
         setBulkDeleteOpen(false)
         if (expandedId && ids.includes(expandedId)) setExpandedId(null)
+        restoreFocusToSearch()
       },
     })
   }
@@ -205,6 +215,7 @@ export function VoicemailMessageList({ extensionId }: VoicemailMessageListProps)
           next.delete(messageId)
           return next
         })
+        restoreFocusToSearch()
       },
     })
   }

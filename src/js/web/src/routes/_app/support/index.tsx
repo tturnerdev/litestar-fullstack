@@ -438,6 +438,13 @@ function SupportPage() {
         } as never)
         queryClient.invalidateQueries({ queryKey: ["support", "tickets"] })
         toast.success("Ticket deleted")
+        // The deleted row is gone, so restore focus to the search input
+        setTimeout(() => {
+          const searchInput = document.querySelector<HTMLInputElement>('input[placeholder*="Search"]')
+          if (searchInput) {
+            searchInput.focus()
+          }
+        }, 0)
       } catch {
         toast.error("Unable to delete ticket")
       }

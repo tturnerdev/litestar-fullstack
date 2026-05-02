@@ -21,6 +21,7 @@ import {
   XCircle,
   Zap,
 } from "lucide-react"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { Badge } from "@/components/ui/badge"
@@ -815,44 +816,54 @@ function AdminSystemPage() {
               </div>
 
               {/* System health indicators */}
-              <SystemHealthIndicators />
+              <SectionErrorBoundary name="System Health">
+                <SystemHealthIndicators />
+              </SectionErrorBoundary>
 
               {/* Service status grid */}
-              <ServiceStatusGrid databaseStatus={data.databaseStatus} workerQueues={data.workerQueues} />
+              <SectionErrorBoundary name="Service Status">
+                <ServiceStatusGrid databaseStatus={data.databaseStatus} workerQueues={data.workerQueues} />
+              </SectionErrorBoundary>
 
               {/* Two-column layout: System info + Worker queues */}
               <div className="grid gap-6 lg:grid-cols-2">
-                <SystemInfoCard
-                  appName={data.appName}
-                  appVersion={data.appVersion}
-                  pythonVersion={data.pythonVersion}
-                  uptimeSeconds={data.uptimeSeconds}
-                  startedAt={data.startedAt}
-                  debugMode={data.debugMode}
-                />
+                <SectionErrorBoundary name="System Information">
+                  <SystemInfoCard
+                    appName={data.appName}
+                    appVersion={data.appVersion}
+                    pythonVersion={data.pythonVersion}
+                    uptimeSeconds={data.uptimeSeconds}
+                    startedAt={data.startedAt}
+                    debugMode={data.debugMode}
+                  />
+                </SectionErrorBoundary>
 
-                {data.workerQueues && data.workerQueues.length > 0 ? (
-                  <WorkerQueuesCard queues={data.workerQueues} />
-                ) : (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-base">
-                        <Cpu className="h-4 w-4 text-muted-foreground" />
-                        Worker Queues
-                      </CardTitle>
-                      <CardDescription>Background job processing status.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground">
-                        No worker queue data available. Workers may not be running.
-                      </p>
-                    </CardContent>
-                  </Card>
-                )}
+                <SectionErrorBoundary name="Worker Queues">
+                  {data.workerQueues && data.workerQueues.length > 0 ? (
+                    <WorkerQueuesCard queues={data.workerQueues} />
+                  ) : (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-base">
+                          <Cpu className="h-4 w-4 text-muted-foreground" />
+                          Worker Queues
+                        </CardTitle>
+                        <CardDescription>Background job processing status.</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-muted-foreground">
+                          No worker queue data available. Workers may not be running.
+                        </p>
+                      </CardContent>
+                    </Card>
+                  )}
+                </SectionErrorBoundary>
               </div>
 
               {/* External connections overview */}
-              <ExternalConnectionsCard />
+              <SectionErrorBoundary name="External Connections">
+                <ExternalConnectionsCard />
+              </SectionErrorBoundary>
             </div>
           )}
         </PageSection>

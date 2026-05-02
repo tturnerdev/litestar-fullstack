@@ -611,7 +611,16 @@ function TimeConditionsTab() {
             <AlertDialogAction
               onClick={() => {
                 if (timeConditionToDelete) {
-                  deleteTimeCondition.mutate(timeConditionToDelete.id)
+                  deleteTimeCondition.mutate(timeConditionToDelete.id, {
+                    onSuccess: () => {
+                      setTimeout(() => {
+                        const searchInput = document.querySelector<HTMLInputElement>('input[placeholder*="Search"]')
+                        if (searchInput) {
+                          searchInput.focus()
+                        }
+                      }, 0)
+                    },
+                  })
                   setTimeConditionToDelete(null)
                 }
               }}
@@ -820,7 +829,16 @@ function IvrMenusTab() {
             <AlertDialogAction
               onClick={() => {
                 if (ivrMenuToDelete) {
-                  deleteIvrMenu.mutate(ivrMenuToDelete.id)
+                  deleteIvrMenu.mutate(ivrMenuToDelete.id, {
+                    onSuccess: () => {
+                      setTimeout(() => {
+                        const searchInput = document.querySelector<HTMLInputElement>('input[placeholder*="Search"]')
+                        if (searchInput) {
+                          searchInput.focus()
+                        }
+                      }, 0)
+                    },
+                  })
                   setIvrMenuToDelete(null)
                 }
               }}
@@ -1031,7 +1049,16 @@ function CallQueuesTab() {
             <AlertDialogAction
               onClick={() => {
                 if (callQueueToDelete) {
-                  deleteCallQueue.mutate(callQueueToDelete.id)
+                  deleteCallQueue.mutate(callQueueToDelete.id, {
+                    onSuccess: () => {
+                      setTimeout(() => {
+                        const searchInput = document.querySelector<HTMLInputElement>('input[placeholder*="Search"]')
+                        if (searchInput) {
+                          searchInput.focus()
+                        }
+                      }, 0)
+                    },
+                  })
                   setCallQueueToDelete(null)
                 }
               }}
@@ -1242,7 +1269,16 @@ function RingGroupsTab() {
             <AlertDialogAction
               onClick={() => {
                 if (ringGroupToDelete) {
-                  deleteRingGroup.mutate(ringGroupToDelete.id)
+                  deleteRingGroup.mutate(ringGroupToDelete.id, {
+                    onSuccess: () => {
+                      setTimeout(() => {
+                        const searchInput = document.querySelector<HTMLInputElement>('input[placeholder*="Search"]')
+                        if (searchInput) {
+                          searchInput.focus()
+                        }
+                      }, 0)
+                    },
+                  })
                   setRingGroupToDelete(null)
                 }
               }}

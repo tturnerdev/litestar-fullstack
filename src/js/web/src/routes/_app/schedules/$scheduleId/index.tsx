@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import {
   AlertCircle,
   AlertTriangle,
@@ -65,6 +65,10 @@ import { useDocumentTitle } from "@/hooks/use-document-title"
 
 export const Route = createFileRoute("/_app/schedules/$scheduleId/")({
   component: ScheduleDetailPage,
+  validateSearch: (search: Record<string, unknown>): { tab?: string; edit?: boolean } => ({
+    tab: (search.tab as string) || undefined,
+    edit: search.edit === true || search.edit === "true" || undefined,
+  }),
 })
 
 // -- Constants ----------------------------------------------------------------
@@ -593,6 +597,8 @@ function WeeklyViewGrid({
 
 function ScheduleDetailPage() {
   const { scheduleId } = Route.useParams()
+  const { tab = "list", edit: editParam } = Route.useSearch()
+  const navigate = Route.useNavigate()
   const router = useRouter()
 
   const { data, isLoading, isError, refetch } = useSchedule(scheduleId)
@@ -606,6 +612,13 @@ function ScheduleDetailPage() {
   const [editDefault, setEditDefault] = useState(false)
 
   useDocumentTitle(data?.name ? `${data.name} - Schedule` : "Schedule")
+
+  useEffect(() => {
+    if (editParam && data && !editing) {
+      startEditing(data)
+      navigate({ search: (prev) => ({ ...prev, edit: undefined }), replace: true })
+    }
+  }, [editParam, data])
 
   function startEditing(schedule: Schedule) {
     setEditName(schedule.name)
@@ -869,7 +882,7 @@ function ScheduleDetailPage() {
                   <CardDescription>Define operating hours for each day of the week.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Tabs defaultValue="list">
+                  <Tabs value={tab} onValueChange={(value) => navigate({ search: () => ({ tab: value }), replace: true })}>
                     <TabsList className="mb-4">
                       <TabsTrigger value="list" className="gap-1.5">
                         <List className="h-3.5 w-3.5" />

@@ -1,3 +1,4 @@
+import { useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useDeletePhoneNumber } from "@/lib/api/hooks/voice"
@@ -13,10 +14,20 @@ interface PhoneNumberDeleteDialogProps {
 export function PhoneNumberDeleteDialog({ phoneNumberId, phoneNumber, open, onOpenChange, onDeleted }: PhoneNumberDeleteDialogProps) {
   const deletePhoneNumber = useDeletePhoneNumber()
 
+  const restoreFocus = useCallback(() => {
+    setTimeout(() => {
+      const searchInput = document.querySelector<HTMLInputElement>('input[placeholder*="Search"]')
+      if (searchInput) {
+        searchInput.focus()
+      }
+    }, 0)
+  }, [])
+
   const handleDelete = () => {
     deletePhoneNumber.mutate(phoneNumberId, {
       onSuccess: () => {
         onOpenChange(false)
+        restoreFocus()
         onDeleted?.()
       },
     })

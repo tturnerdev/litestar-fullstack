@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { Hash, Loader2, MapPin, Globe, Flag } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -20,6 +20,7 @@ function getTypeLabel(value: string): string {
 
 export function CreatePhoneNumberDialog({ trigger }: { trigger: React.ReactNode }) {
   const [open, setOpen] = useState(false)
+  const triggerRef = useRef<HTMLButtonElement>(null)
   const [number, setNumber] = useState("")
   const [numberError, setNumberError] = useState("")
   const [label, setLabel] = useState("")
@@ -59,6 +60,7 @@ export function CreatePhoneNumberDialog({ trigger }: { trigger: React.ReactNode 
           toast.success("Phone number created successfully")
           resetForm()
           setOpen(false)
+          setTimeout(() => triggerRef.current?.focus(), 0)
         },
       },
     )
@@ -68,7 +70,7 @@ export function CreatePhoneNumberDialog({ trigger }: { trigger: React.ReactNode 
 
   return (
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm() }}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <DialogTrigger asChild ref={triggerRef}>{trigger}</DialogTrigger>
       <DialogContent>
         <form onSubmit={handleSubmit}>
           <DialogHeader>

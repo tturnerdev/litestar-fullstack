@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useCallback, useState } from "react"
 import { AlertTriangle, Loader2 } from "lucide-react"
 import {
   AlertDialog,
@@ -28,12 +28,22 @@ export function DeleteTeamDialog({ teamId, teamName, open, onOpenChange, onDelet
 
   const confirmed = confirmation === teamName
 
+  const restoreFocus = useCallback(() => {
+    setTimeout(() => {
+      const searchInput = document.querySelector<HTMLInputElement>('input[placeholder*="Search"]')
+      if (searchInput) {
+        searchInput.focus()
+      }
+    }, 0)
+  }, [])
+
   const handleDelete = () => {
     if (!confirmed) return
     deleteTeam.mutate(teamId, {
       onSuccess: () => {
         setConfirmation("")
         onOpenChange(false)
+        restoreFocus()
         onDeleted?.()
       },
     })

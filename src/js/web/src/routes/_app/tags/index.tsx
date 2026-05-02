@@ -161,6 +161,13 @@ function TagsPage() {
           if (tagToDelete) next.delete(tagToDelete.id)
           return next
         })
+        // The deleted row is gone, so restore focus to the search input
+        setTimeout(() => {
+          const searchInput = document.querySelector<HTMLInputElement>('input[placeholder*="Search"]')
+          if (searchInput) {
+            searchInput.focus()
+          }
+        }, 0)
       },
     })
   }

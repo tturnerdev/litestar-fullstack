@@ -351,6 +351,7 @@ export function useDeleteAttachment(ticketId: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["support", "ticket", ticketId, "messages"] })
+      toast.success("Attachment deleted")
     },
     onError: (error) => {
       toast.error("Unable to delete attachment", {

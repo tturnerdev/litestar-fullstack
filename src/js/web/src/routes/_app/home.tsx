@@ -22,6 +22,7 @@ import {
 } from "lucide-react"
 import { useMemo } from "react"
 import { Area, AreaChart, ResponsiveContainer, Tooltip as RechartsTooltip, XAxis, YAxis } from "recharts"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { ConnectionsStatusCard } from "@/components/home/connections-status-card"
 import { FeatureAreasGrid } from "@/components/home/feature-areas-grid"
 import { GettingStarted } from "@/components/home/getting-started"
@@ -225,7 +226,7 @@ function HomePage() {
     },
   })
 
-  const { data: adminStats, isLoading: adminStatsLoading, isError: adminStatsError } = useQuery({
+  const { data: adminStats, isLoading: adminStatsLoading } = useQuery({
     queryKey: ["admin", "stats"],
     queryFn: async () => {
       const response = await getDashboardStats()
@@ -234,7 +235,7 @@ function HomePage() {
     enabled: isSuperuser,
   })
 
-  const { data: activityData, isLoading: activityLoading, isError: activityError } = useQuery({
+  const { data: activityData, isLoading: activityLoading } = useQuery({
     queryKey: ["admin", "activity"],
     queryFn: async () => {
       const response = await getRecentActivity({ query: { limit: 8 } })
@@ -280,7 +281,7 @@ function HomePage() {
 
   const teams = teamsRaw?.items ?? []
 
-  const hasError = teamsError || tagsError || rolesError || adminStatsError || activityError
+  const hasError = teamsError || tagsError || rolesError
 
   if (hasError) {
     return (
@@ -430,7 +431,9 @@ function HomePage() {
       <PageSection delay={0.12}>
         <div className="grid gap-6 md:grid-cols-2">
           <TeamsCard teams={teams} isLoading={teamsLoading} />
-          <RecentNotificationsCard />
+          <SectionErrorBoundary name="Recent Notifications">
+            <RecentNotificationsCard />
+          </SectionErrorBoundary>
         </div>
       </PageSection>
 
@@ -443,66 +446,72 @@ function HomePage() {
       {isSuperuser && (
         <PageSection delay={0.18}>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <ConnectionsStatusCard />
-            <RecentActivityCard
-              activities={activityData?.activities ?? []}
-              isLoading={activityLoading}
-              isAdmin={isSuperuser}
-            />
-            <Card>
-              <CardHeader className="space-y-1 pb-2">
-                <div className="flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                  <CardTitle className="text-lg">7-Day Activity</CardTitle>
-                </div>
-                <CardDescription>Events across the platform this week</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[200px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={chartData} margin={{ top: 8, right: 8, bottom: 0, left: -20 }}>
-                      <defs>
-                        <linearGradient id="activityGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
-                          <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.02} />
-                        </linearGradient>
-                      </defs>
-                      <XAxis
-                        dataKey="label"
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
-                        dy={4}
-                      />
-                      <YAxis
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
-                        allowDecimals={false}
-                      />
-                      <RechartsTooltip
-                        contentStyle={{
-                          backgroundColor: "hsl(var(--popover))",
-                          border: "1px solid hsl(var(--border))",
-                          borderRadius: "var(--radius)",
-                          fontSize: 13,
-                          color: "hsl(var(--popover-foreground))",
-                        }}
-                        formatter={(value) => [String(value), "Events"]}
-                        labelFormatter={(label) => String(label)}
-                      />
-                      <Area
-                        type="monotone"
-                        dataKey="count"
-                        stroke="hsl(var(--primary))"
-                        strokeWidth={2}
-                        fill="url(#activityGradient)"
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
+            <SectionErrorBoundary name="Connections Status">
+              <ConnectionsStatusCard />
+            </SectionErrorBoundary>
+            <SectionErrorBoundary name="Recent Activity">
+              <RecentActivityCard
+                activities={activityData?.activities ?? []}
+                isLoading={activityLoading}
+                isAdmin={isSuperuser}
+              />
+            </SectionErrorBoundary>
+            <SectionErrorBoundary name="Activity Chart">
+              <Card>
+                <CardHeader className="space-y-1 pb-2">
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                    <CardTitle className="text-lg">7-Day Activity</CardTitle>
+                  </div>
+                  <CardDescription>Events across the platform this week</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-[200px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={chartData} margin={{ top: 8, right: 8, bottom: 0, left: -20 }}>
+                        <defs>
+                          <linearGradient id="activityGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                            <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.02} />
+                          </linearGradient>
+                        </defs>
+                        <XAxis
+                          dataKey="label"
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
+                          dy={4}
+                        />
+                        <YAxis
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
+                          allowDecimals={false}
+                        />
+                        <RechartsTooltip
+                          contentStyle={{
+                            backgroundColor: "hsl(var(--popover))",
+                            border: "1px solid hsl(var(--border))",
+                            borderRadius: "var(--radius)",
+                            fontSize: 13,
+                            color: "hsl(var(--popover-foreground))",
+                          }}
+                          formatter={(value) => [String(value), "Events"]}
+                          labelFormatter={(label) => String(label)}
+                        />
+                        <Area
+                          type="monotone"
+                          dataKey="count"
+                          stroke="hsl(var(--primary))"
+                          strokeWidth={2}
+                          fill="url(#activityGradient)"
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            </SectionErrorBoundary>
           </div>
         </PageSection>
       )}

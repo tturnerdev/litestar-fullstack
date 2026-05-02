@@ -195,6 +195,9 @@ export function useUpdateNotificationPreferences() {
       }
       return { previous }
     },
+    onSuccess: () => {
+      toast.success("Notification preferences updated")
+    },
     onError: (_err, _newData, context) => {
       if (context?.previous) {
         queryClient.setQueryData(PREFERENCES_QUERY_KEY, context.previous)

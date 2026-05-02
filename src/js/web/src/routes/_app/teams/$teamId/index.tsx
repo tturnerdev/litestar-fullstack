@@ -11,7 +11,7 @@ import {
   Shield,
   Users,
 } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { TeamMembers } from "@/components/teams/team-members"
 import { TeamSettings } from "@/components/teams/team-settings"
@@ -40,6 +40,9 @@ import { getTeam, type TeamMember } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/teams/$teamId/")({
   component: TeamDetail,
+  validateSearch: (search: Record<string, unknown>): { tab?: string } => ({
+    tab: (search.tab as string) || undefined,
+  }),
 })
 
 // ── Helpers ──────────────────────────────────────────────────────────────
@@ -73,7 +76,8 @@ function getTeamColor(name: string): string {
 function TeamDetail() {
   const { teamId } = useParams({ from: "/_app/teams/$teamId/" as const })
   const { user, currentTeam, setCurrentTeam } = useAuthStore()
-  const [activeTab, setActiveTab] = useState("members")
+  const { tab = "members" } = Route.useSearch()
+  const navigate = Route.useNavigate()
 
   const {
     data: team,
@@ -338,7 +342,7 @@ function TeamDetail() {
 
       {/* Tabs Section */}
       <PageSection delay={0.1}>
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={tab} onValueChange={(value) => navigate({ search: () => ({ tab: value }), replace: true })}>
           <TabsList>
             <TabsTrigger value="members" className="gap-1.5">
               <Users className="h-4 w-4" />
@@ -382,7 +386,7 @@ function TeamDetail() {
             <EntityActivityPanel
               targetType="team"
               targetId={teamId}
-              enabled={activeTab === "activity"}
+              enabled={tab === "activity"}
             />
           </TabsContent>
         </Tabs>

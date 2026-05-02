@@ -67,6 +67,14 @@ export function BulkActionBar({ selectedCount, selectedIds, onClearSelection, ac
       setExecuting(false)
       setProgress("")
       setPendingAction(null)
+      // After bulk action completes, the selected rows may be gone.
+      // Restore focus to the search input or first interactive element on the page.
+      setTimeout(() => {
+        const searchInput = document.querySelector<HTMLInputElement>('input[placeholder*="Search"]')
+        if (searchInput) {
+          searchInput.focus()
+        }
+      }, 0)
     }
   }
 
