@@ -4,11 +4,13 @@ import {
   AlertCircle,
   AlertTriangle,
   ArrowLeft,
+  ArrowRight,
   Calendar,
   CheckCircle2,
   Clock,
   Copy,
   Grid3x3,
+  Link2,
   List,
   Loader2,
   MoreHorizontal,
@@ -70,6 +72,7 @@ import {
   type ScheduleEntryCreate,
 } from "@/lib/api/hooks/schedules"
 import { toast } from "sonner"
+import { useTimeConditions } from "@/lib/api/hooks/call-routing"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 
@@ -1126,6 +1129,9 @@ function ScheduleDetailPage() {
               </CardContent>
             </Card>
 
+            {/* Related Resources */}
+            <RelatedResourcesSection scheduleId={scheduleId} />
+
             {/* Activity History (Audit Trail) */}
             <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
               <CardHeader>
@@ -1142,6 +1148,108 @@ function ScheduleDetailPage() {
         </div>
       </PageSection>
     </PageContainer>
+  )
+}
+
+// -- Related Resources --------------------------------------------------------
+
+function RelatedResourcesSection({ scheduleId }: { scheduleId: string }) {
+  const timeConditionsQuery = useTimeConditions({ pageSize: 100 })
+
+  const linkedTimeConditions = (timeConditionsQuery.data?.items ?? []).filter(
+    (tc) => tc.scheduleId === scheduleId,
+  )
+
+  const isLoading = timeConditionsQuery.isLoading
+  const hasTimeConditions = linkedTimeConditions.length > 0
+
+  if (isLoading) {
+    return (
+      <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Link2 className="h-4 w-4" />
+            Related Resources
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {Array.from({ length: 2 }).map((_, i) => (
+              <div key={i} className="rounded-lg border border-border/40 p-4 space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-36" />
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (!hasTimeConditions) {
+    return (
+      <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Link2 className="h-4 w-4" />
+            Related Resources
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col items-center gap-2 py-6 text-center">
+            <Link2 className="h-8 w-8 text-muted-foreground/50" />
+            <p className="text-sm text-muted-foreground">
+              No time conditions are currently using this schedule.
+            </p>
+            <p className="text-xs text-muted-foreground/70">
+              Schedules are typically referenced by time conditions for call routing rules.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  return (
+    <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Link2 className="h-4 w-4" />
+          Related Resources
+        </CardTitle>
+        <CardDescription>
+          Entities using this schedule for call routing
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            Time Conditions
+          </p>
+          <div className="space-y-2">
+            {linkedTimeConditions.map((tc) => (
+              <Link
+                key={tc.id}
+                to="/call-routing/time-conditions/$timeConditionId"
+                params={{ timeConditionId: tc.id }}
+                className="group flex items-center justify-between rounded-lg border border-border/40 p-3 transition-all hover:bg-muted/30 hover:shadow-sm"
+              >
+                <div className="flex items-center gap-3">
+                  <Clock className="h-4 w-4 text-primary" />
+                  <div>
+                    <p className="text-sm font-medium group-hover:text-primary">{tc.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Override: {tc.overrideMode}
+                    </p>
+                  </div>
+                </div>
+                <ArrowRight className="h-4 w-4 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" />
+              </Link>
+            ))}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 

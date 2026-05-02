@@ -5,8 +5,10 @@ import {
   AlertTriangle,
   ArrowLeft,
   CheckCircle2,
+  ChevronRight,
   Copy,
   Fingerprint,
+  Link2,
   Loader2,
   MapPin,
   MoreHorizontal,
@@ -14,6 +16,7 @@ import {
   Phone,
   ShieldAlert,
   Trash2,
+  Users,
   XCircle,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
@@ -61,6 +64,7 @@ import {
   useDeleteE911Registration,
   useValidateE911Registration,
 } from "@/lib/api/hooks/e911"
+import { useTeam } from "@/lib/api/hooks/teams"
 
 export const Route = createFileRoute("/_app/e911/$registrationId")({
   component: E911DetailPage,
@@ -166,6 +170,7 @@ function E911DetailPage() {
   const updateMutation = useUpdateE911Registration(registrationId)
   const deleteMutation = useDeleteE911Registration()
   const validateMutation = useValidateE911Registration(registrationId)
+  const teamQuery = useTeam(data?.teamId ?? "")
 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [editing, setEditing] = useState(false)
@@ -496,8 +501,113 @@ function E911DetailPage() {
         </Card>
       </PageSection>
 
-      {/* Validation Status */}
+      {/* Related Resources */}
       <PageSection delay={0.2}>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Link2 className="h-5 w-5 text-muted-foreground" />
+              Related Resources
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {/* Phone Number */}
+              {data.phoneNumberId ? (
+                <Link
+                  to="/voice/phone-numbers/$phoneNumberId"
+                  params={{ phoneNumberId: data.phoneNumberId }}
+                  className="group flex items-center gap-3 rounded-lg border border-border/60 px-4 py-3 transition-colors hover:bg-muted/50 hover:border-primary/30"
+                >
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                    <Phone className="h-4.5 w-4.5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs text-muted-foreground">Phone Number</p>
+                    <p className="truncate text-sm font-medium group-hover:text-primary">
+                      {data.phoneNumberDisplay ?? data.phoneNumberLabel ?? data.phoneNumberId.slice(0, 8)}
+                    </p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+                </Link>
+              ) : (
+                <div className="flex items-center gap-3 rounded-lg border border-dashed border-border/60 px-4 py-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground/50">
+                    <Phone className="h-4.5 w-4.5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs text-muted-foreground">Phone Number</p>
+                    <p className="text-sm text-muted-foreground">Not assigned</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Location */}
+              {data.locationId ? (
+                <Link
+                  to="/locations/$locationId"
+                  params={{ locationId: data.locationId }}
+                  className="group flex items-center gap-3 rounded-lg border border-border/60 px-4 py-3 transition-colors hover:bg-muted/50 hover:border-primary/30"
+                >
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                    <MapPin className="h-4.5 w-4.5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs text-muted-foreground">Location</p>
+                    <p className="truncate text-sm font-medium group-hover:text-primary">
+                      {data.locationName ?? data.locationId.slice(0, 8)}
+                    </p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+                </Link>
+              ) : (
+                <div className="flex items-center gap-3 rounded-lg border border-dashed border-border/60 px-4 py-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground/50">
+                    <MapPin className="h-4.5 w-4.5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs text-muted-foreground">Location</p>
+                    <p className="text-sm text-muted-foreground">Not assigned</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Team */}
+              {data.teamId ? (
+                <Link
+                  to="/teams/$teamId"
+                  params={{ teamId: data.teamId }}
+                  className="group flex items-center gap-3 rounded-lg border border-border/60 px-4 py-3 transition-colors hover:bg-muted/50 hover:border-primary/30"
+                >
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                    <Users className="h-4.5 w-4.5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs text-muted-foreground">Team</p>
+                    <p className="truncate text-sm font-medium group-hover:text-primary">
+                      {teamQuery.data?.name ?? "Loading..."}
+                    </p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+                </Link>
+              ) : (
+                <div className="flex items-center gap-3 rounded-lg border border-dashed border-border/60 px-4 py-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground/50">
+                    <Users className="h-4.5 w-4.5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs text-muted-foreground">Team</p>
+                    <p className="text-sm text-muted-foreground">Not assigned</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </PageSection>
+
+      {/* Validation Status */}
+      <PageSection delay={0.25}>
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -537,7 +647,7 @@ function E911DetailPage() {
       </PageSection>
 
       {/* Metadata */}
-      <PageSection delay={0.25}>
+      <PageSection delay={0.3}>
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -569,7 +679,7 @@ function E911DetailPage() {
       </PageSection>
 
       {/* Danger Zone */}
-      <PageSection delay={0.3}>
+      <PageSection delay={0.35}>
         <Card className="border-destructive/30">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-destructive">
@@ -595,7 +705,7 @@ function E911DetailPage() {
         </Card>
       </PageSection>
 
-      <PageSection delay={0.35}>
+      <PageSection delay={0.4}>
         <EntityActivityPanel
           targetType="e911_registration"
           targetId={registrationId}

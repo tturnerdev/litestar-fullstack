@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.212.0 (2026-05-02)
+
+### Added
+- **Schedule related resources** — Shows linked time conditions referencing the schedule on the detail page with clickable cards
+- **E911 related resources** — Shows linked phone number, location, and team on the E911 registration detail page with colored link cards
+
 ## v0.211.0 (2026-05-02)
 
 ### Added
