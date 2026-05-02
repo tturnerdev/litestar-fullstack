@@ -225,6 +225,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         to: "/notifications",
         icon: Bell,
         badge: unreadCount,
+        badgeVariant: "default",
       },
       {
         title: "Webhooks",

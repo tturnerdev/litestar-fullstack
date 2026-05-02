@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { createFileRoute } from "@tanstack/react-router"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
@@ -50,6 +50,7 @@ import {
 } from "@/components/ui/select"
 import { SkeletonTable } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
+import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Textarea } from "@/components/ui/textarea"
 import { EmptyState } from "@/components/ui/empty-state"
@@ -391,6 +392,19 @@ function AdminDeviceTemplatesPage() {
   const [createOpen, setCreateOpen] = useState(false)
   const [editId, setEditId] = useState<string | null>(null)
 
+  // Sort state
+  const [sortKey, setSortKey] = useState<string | null>(null)
+  const [sortDir, setSortDir] = useState<SortDirection>(null)
+
+  const handleSort = useCallback(
+    (key: string) => {
+      const next = nextSortDirection(sortKey, sortDir, key)
+      setSortKey(next.sort)
+      setSortDir(next.direction)
+    },
+    [sortKey, sortDir],
+  )
+
   // Reset page when debounced search changes
   useEffect(() => {
     setPage(1)
@@ -399,9 +413,39 @@ function AdminDeviceTemplatesPage() {
   const { data, isLoading, isError, refetch } = useAdminDeviceTemplates(page, PAGE_SIZE, debouncedSearch || undefined)
   const deleteMutation = useDeleteDeviceTemplate()
 
-  const templates = data?.items ?? []
+  const rawTemplates = data?.items ?? []
   const total = data?.total ?? 0
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
+
+  // Client-side sorting
+  const templates = useMemo(() => {
+    if (!sortKey || !sortDir) return rawTemplates
+    const sorted = [...rawTemplates]
+    sorted.sort((a, b) => {
+      let aVal: string
+      let bVal: string
+      switch (sortKey) {
+        case "displayName":
+          aVal = a.displayName.toLowerCase()
+          bVal = b.displayName.toLowerCase()
+          break
+        case "deviceType":
+          aVal = (deviceTypeLabels[a.deviceType] ?? a.deviceType).toLowerCase()
+          bVal = (deviceTypeLabels[b.deviceType] ?? b.deviceType).toLowerCase()
+          break
+        case "created":
+          aVal = a.createdAt
+          bVal = b.createdAt
+          break
+        default:
+          return 0
+      }
+      if (aVal < bVal) return sortDir === "asc" ? -1 : 1
+      if (aVal > bVal) return sortDir === "asc" ? 1 : -1
+      return 0
+    })
+    return sorted
+  }, [rawTemplates, sortKey, sortDir])
 
   const handleExport = useCallback(() => {
     if (!templates.length) return
@@ -500,12 +544,30 @@ function AdminDeviceTemplatesPage() {
                 <Table aria-label="Device templates">
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Display Name</TableHead>
+                      <SortableHeader
+                        label="Display Name"
+                        sortKey="displayName"
+                        currentSort={sortKey}
+                        currentDirection={sortDir}
+                        onSort={handleSort}
+                      />
                       <TableHead>Manufacturer</TableHead>
                       <TableHead>Model</TableHead>
-                      <TableHead>Type</TableHead>
+                      <SortableHeader
+                        label="Type"
+                        sortKey="deviceType"
+                        currentSort={sortKey}
+                        currentDirection={sortDir}
+                        onSort={handleSort}
+                      />
                       <TableHead>Active</TableHead>
-                      <TableHead>Created</TableHead>
+                      <SortableHeader
+                        label="Created"
+                        sortKey="created"
+                        currentSort={sortKey}
+                        currentDirection={sortDir}
+                        onSort={handleSort}
+                      />
                       <TableHead className="w-[60px]" />
                     </TableRow>
                   </TableHeader>

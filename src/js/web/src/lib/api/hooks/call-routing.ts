@@ -662,6 +662,32 @@ export function usePauseCallQueueMember(queueId: string) {
   })
 }
 
+export function useReorderCallQueueMembers(queueId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ memberA, memberB }: { memberA: { id: string; priority: number }; memberB: { id: string; priority: number } }) => {
+      await Promise.all([
+        apiFetch<CallQueueMember>(`/api/call-queues/${queueId}/members/${memberA.id}`, {
+          method: "PATCH",
+          body: JSON.stringify({ priority: memberB.priority }),
+        }),
+        apiFetch<CallQueueMember>(`/api/call-queues/${queueId}/members/${memberB.id}`, {
+          method: "PATCH",
+          body: JSON.stringify({ priority: memberA.priority }),
+        }),
+      ])
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["call-routing", "call-queue", queueId] })
+    },
+    onError: (error) => {
+      toast.error("Unable to reorder members", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
+    },
+  })
+}
+
 // ===========================================================================
 // Ring Groups
 // ===========================================================================
@@ -772,6 +798,32 @@ export function useDeleteRingGroupMember(groupId: string) {
     },
     onError: (error) => {
       toast.error("Unable to remove member", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
+    },
+  })
+}
+
+export function useReorderRingGroupMembers(groupId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ memberA, memberB }: { memberA: { id: string; sortOrder: number }; memberB: { id: string; sortOrder: number } }) => {
+      await Promise.all([
+        apiFetch<RingGroupMember>(`/api/ring-groups/${groupId}/members/${memberA.id}`, {
+          method: "PATCH",
+          body: JSON.stringify({ sortOrder: memberB.sortOrder }),
+        }),
+        apiFetch<RingGroupMember>(`/api/ring-groups/${groupId}/members/${memberB.id}`, {
+          method: "PATCH",
+          body: JSON.stringify({ sortOrder: memberA.sortOrder }),
+        }),
+      ])
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["call-routing", "ring-group", groupId] })
+    },
+    onError: (error) => {
+      toast.error("Unable to reorder members", {
         description: error instanceof Error ? error.message : "Try again later",
       })
     },

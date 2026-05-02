@@ -71,12 +71,13 @@ export interface UseDevicesOptions {
   search?: string
   orderBy?: string
   sortOrder?: "asc" | "desc"
+  refetchInterval?: number | false
 }
 
 export function useDevices(pageOrOptions: number | UseDevicesOptions = 1, pageSizeArg = 20) {
   const opts: UseDevicesOptions =
     typeof pageOrOptions === "number" ? { page: pageOrOptions, pageSize: pageSizeArg } : pageOrOptions
-  const { page = 1, pageSize = 20, search, orderBy, sortOrder } = opts
+  const { page = 1, pageSize = 20, search, orderBy, sortOrder, refetchInterval } = opts
 
   return useQuery({
     queryKey: ["devices", page, pageSize, search, orderBy, sortOrder],
@@ -94,6 +95,7 @@ export function useDevices(pageOrOptions: number | UseDevicesOptions = 1, pageSi
       const response = await listDevices({ query })
       return response.data as { items: Device[]; total: number }
     },
+    refetchInterval,
   })
 }
 

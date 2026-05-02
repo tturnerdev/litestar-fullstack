@@ -1,9 +1,11 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   AlertCircle,
   AlertTriangle,
+  ArrowDown,
   ArrowLeft,
+  ArrowUp,
   Loader2,
   Pencil,
   Plus,
@@ -54,6 +56,7 @@ import {
   useDeleteRingGroup,
   useCreateRingGroupMember,
   useDeleteRingGroupMember,
+  useReorderRingGroupMembers,
   type RingGroup,
   type RingGroupMember,
 } from "@/lib/api/hooks/call-routing"
@@ -347,7 +350,25 @@ function AddMemberRow({ groupId }: { groupId: string }) {
 
 // -- Member Row ---------------------------------------------------------------
 
-function MemberRow({ member, groupId }: { member: RingGroupMember; groupId: string }) {
+function MemberRow({
+  member,
+  groupId,
+  isFirst,
+  isLast,
+  isHighlighted,
+  onMoveUp,
+  onMoveDown,
+  isReordering,
+}: {
+  member: RingGroupMember
+  groupId: string
+  isFirst: boolean
+  isLast: boolean
+  isHighlighted: boolean
+  onMoveUp: () => void
+  onMoveDown: () => void
+  isReordering: boolean
+}) {
   const deleteMember = useDeleteRingGroupMember(groupId)
 
   const displayValue = member.extensionId
@@ -356,7 +377,7 @@ function MemberRow({ member, groupId }: { member: RingGroupMember; groupId: stri
   const memberType = member.extensionId ? "Extension" : "External"
 
   return (
-    <TableRow>
+    <TableRow className={isHighlighted ? "animate-highlight-row" : ""}>
       <TableCell><span className="text-sm">{member.sortOrder}</span></TableCell>
       <TableCell>
         <Badge variant="outline" className="text-xs">{memberType}</Badge>
@@ -365,15 +386,37 @@ function MemberRow({ member, groupId }: { member: RingGroupMember; groupId: stri
         <span className={member.extensionId ? "font-mono text-xs" : "text-sm"}>{displayValue}</span>
       </TableCell>
       <TableCell className="text-right">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
-          onClick={() => deleteMember.mutate(member.id)}
-          disabled={deleteMember.isPending}
-        >
-          {deleteMember.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
-        </Button>
+        <div className="flex items-center justify-end gap-0.5">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 text-muted-foreground"
+            onClick={onMoveUp}
+            disabled={isFirst || isReordering}
+            aria-label="Move up"
+          >
+            <ArrowUp className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 text-muted-foreground"
+            onClick={onMoveDown}
+            disabled={isLast || isReordering}
+            aria-label="Move down"
+          >
+            <ArrowDown className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
+            onClick={() => deleteMember.mutate(member.id)}
+            disabled={deleteMember.isPending}
+          >
+            {deleteMember.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+          </Button>
+        </div>
       </TableCell>
     </TableRow>
   )
@@ -407,10 +450,39 @@ function RingGroupDetailPage() {
     router.navigate({ to: "/call-routing", search: { tab: "ring-groups" } })
   }
 
+  const [highlightedId, setHighlightedId] = useState<string | null>(null)
+  const highlightTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const reorderMutation = useReorderRingGroupMembers(ringGroupId)
+
   const members = data?.members ?? []
   const sortedMembers = [...members].sort((a, b) => a.sortOrder - b.sortOrder)
   const extensionCount = members.filter((m) => m.extensionId).length
   const externalCount = members.filter((m) => m.externalNumber).length
+
+  const handleReorder = useCallback(
+    (index: number, direction: "up" | "down") => {
+      const swapIndex = direction === "up" ? index - 1 : index + 1
+      if (swapIndex < 0 || swapIndex >= sortedMembers.length) return
+
+      const memA = sortedMembers[index]
+      const memB = sortedMembers[swapIndex]
+
+      reorderMutation.mutate(
+        {
+          memberA: { id: memA.id, sortOrder: memA.sortOrder },
+          memberB: { id: memB.id, sortOrder: memB.sortOrder },
+        },
+        {
+          onSuccess: () => {
+            if (highlightTimer.current) clearTimeout(highlightTimer.current)
+            setHighlightedId(memA.id)
+            highlightTimer.current = setTimeout(() => setHighlightedId(null), 700)
+          },
+        },
+      )
+    },
+    [sortedMembers, reorderMutation],
+  )
 
   // Loading
   if (isLoading) {
@@ -532,12 +604,22 @@ function RingGroupDetailPage() {
                         <TableHead className="w-20">Order</TableHead>
                         <TableHead className="w-28">Type</TableHead>
                         <TableHead>Value</TableHead>
-                        <TableHead className="w-16 text-right">Actions</TableHead>
+                        <TableHead className="w-28 text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {sortedMembers.map((m) => (
-                        <MemberRow key={m.id} member={m} groupId={ringGroupId} />
+                      {sortedMembers.map((m, idx) => (
+                        <MemberRow
+                          key={m.id}
+                          member={m}
+                          groupId={ringGroupId}
+                          isFirst={idx === 0}
+                          isLast={idx === sortedMembers.length - 1}
+                          isHighlighted={highlightedId === m.id}
+                          isReordering={reorderMutation.isPending}
+                          onMoveUp={() => handleReorder(idx, "up")}
+                          onMoveDown={() => handleReorder(idx, "down")}
+                        />
                       ))}
                     </TableBody>
                   </Table>

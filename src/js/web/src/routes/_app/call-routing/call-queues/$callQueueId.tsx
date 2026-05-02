@@ -1,9 +1,11 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   AlertCircle,
   AlertTriangle,
+  ArrowDown,
   ArrowLeft,
+  ArrowUp,
   Loader2,
   Pause,
   Pencil,
@@ -58,6 +60,7 @@ import {
   useCreateCallQueueMember,
   useDeleteCallQueueMember,
   usePauseCallQueueMember,
+  useReorderCallQueueMembers,
   type CallQueue,
   type CallQueueMember,
 } from "@/lib/api/hooks/call-routing"
@@ -411,12 +414,30 @@ function AddMemberRow({ queueId }: { queueId: string }) {
 
 // -- Member Row ---------------------------------------------------------------
 
-function MemberRow({ member, queueId }: { member: CallQueueMember; queueId: string }) {
+function MemberRow({
+  member,
+  queueId,
+  isFirst,
+  isLast,
+  isHighlighted,
+  onMoveUp,
+  onMoveDown,
+  isReordering,
+}: {
+  member: CallQueueMember
+  queueId: string
+  isFirst: boolean
+  isLast: boolean
+  isHighlighted: boolean
+  onMoveUp: () => void
+  onMoveDown: () => void
+  isReordering: boolean
+}) {
   const deleteMember = useDeleteCallQueueMember(queueId)
   const pauseMember = usePauseCallQueueMember(queueId)
 
   return (
-    <TableRow>
+    <TableRow className={isHighlighted ? "animate-highlight-row" : ""}>
       <TableCell>
         <span className="font-mono text-xs">{member.extensionId ? member.extensionId.slice(0, 8) + "..." : "---"}</span>
       </TableCell>
@@ -434,7 +455,27 @@ function MemberRow({ member, queueId }: { member: CallQueueMember; queueId: stri
         )}
       </TableCell>
       <TableCell className="text-right">
-        <div className="flex items-center justify-end gap-1">
+        <div className="flex items-center justify-end gap-0.5">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 text-muted-foreground"
+            onClick={onMoveUp}
+            disabled={isFirst || isReordering}
+            aria-label="Move up"
+          >
+            <ArrowUp className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 text-muted-foreground"
+            onClick={onMoveDown}
+            disabled={isLast || isReordering}
+            aria-label="Move down"
+          >
+            <ArrowDown className="h-3.5 w-3.5" />
+          </Button>
           <Button
             variant="ghost"
             size="sm"
@@ -490,8 +531,38 @@ function CallQueueDetailPage() {
     router.navigate({ to: "/call-routing", search: { tab: "call-queues" } })
   }
 
+  const [highlightedId, setHighlightedId] = useState<string | null>(null)
+  const highlightTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const reorderMutation = useReorderCallQueueMembers(callQueueId)
+
   const members = data?.members ?? []
+  const sortedMembers = [...members].sort((a, b) => a.priority - b.priority)
   const activeMemberCount = members.filter((m) => !m.isPaused).length
+
+  const handleReorder = useCallback(
+    (index: number, direction: "up" | "down") => {
+      const swapIndex = direction === "up" ? index - 1 : index + 1
+      if (swapIndex < 0 || swapIndex >= sortedMembers.length) return
+
+      const memA = sortedMembers[index]
+      const memB = sortedMembers[swapIndex]
+
+      reorderMutation.mutate(
+        {
+          memberA: { id: memA.id, priority: memA.priority },
+          memberB: { id: memB.id, priority: memB.priority },
+        },
+        {
+          onSuccess: () => {
+            if (highlightTimer.current) clearTimeout(highlightTimer.current)
+            setHighlightedId(memA.id)
+            highlightTimer.current = setTimeout(() => setHighlightedId(null), 700)
+          },
+        },
+      )
+    },
+    [sortedMembers, reorderMutation],
+  )
 
   // Loading
   if (isLoading) {
@@ -611,7 +682,7 @@ function CallQueueDetailPage() {
                 <CardDescription>Agents assigned to receive calls from this queue.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {members.length > 0 ? (
+                {sortedMembers.length > 0 ? (
                   <div className="overflow-x-auto">
                   <Table aria-label="Queue members">
                     <TableHeader>
@@ -620,12 +691,22 @@ function CallQueueDetailPage() {
                         <TableHead>Priority</TableHead>
                         <TableHead>Penalty</TableHead>
                         <TableHead>Status</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
+                        <TableHead className="w-40 text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {members.map((m) => (
-                        <MemberRow key={m.id} member={m} queueId={callQueueId} />
+                      {sortedMembers.map((m, idx) => (
+                        <MemberRow
+                          key={m.id}
+                          member={m}
+                          queueId={callQueueId}
+                          isFirst={idx === 0}
+                          isLast={idx === sortedMembers.length - 1}
+                          isHighlighted={highlightedId === m.id}
+                          isReordering={reorderMutation.isPending}
+                          onMoveUp={() => handleReorder(idx, "up")}
+                          onMoveDown={() => handleReorder(idx, "down")}
+                        />
                       ))}
                     </TableBody>
                   </Table>

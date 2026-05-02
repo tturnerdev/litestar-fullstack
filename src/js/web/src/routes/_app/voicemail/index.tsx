@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { z } from "zod"
 import {
   AlertCircle,
@@ -58,6 +58,7 @@ import { FilterDropdown, type FilterOption } from "@/components/ui/filter-dropdo
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Skeleton, SkeletonCard } from "@/components/ui/skeleton"
+import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
@@ -175,6 +176,19 @@ function MessagesTab() {
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false)
   const [singleDeleteId, setSingleDeleteId] = useState<string | null>(null)
 
+  // Sort state
+  const [sortKey, setSortKey] = useState<string | null>(null)
+  const [sortDir, setSortDir] = useState<SortDirection>(null)
+
+  const handleSort = useCallback(
+    (key: string) => {
+      const next = nextSortDirection(sortKey, sortDir, key)
+      setSortKey(next.sort)
+      setSortDir(next.direction)
+    },
+    [sortKey, sortDir],
+  )
+
   const isReadParam =
     readFilter.length === 1
       ? readFilter[0] === "read"
@@ -208,7 +222,38 @@ function MessagesTab() {
         )
       })
     : allItems
-  const items = filteredItems
+
+  // Client-side sorting
+  const sortedItems = useMemo(() => {
+    if (!sortKey || !sortDir) return filteredItems
+    const sorted = [...filteredItems]
+    sorted.sort((a, b) => {
+      let aVal: string | number
+      let bVal: string | number
+      switch (sortKey) {
+        case "caller":
+          aVal = (a.callerName ?? a.callerNumber).toLowerCase()
+          bVal = (b.callerName ?? b.callerNumber).toLowerCase()
+          break
+        case "duration":
+          aVal = a.durationSeconds
+          bVal = b.durationSeconds
+          break
+        case "date":
+          aVal = a.receivedAt
+          bVal = b.receivedAt
+          break
+        default:
+          return 0
+      }
+      if (aVal < bVal) return sortDir === "asc" ? -1 : 1
+      if (aVal > bVal) return sortDir === "asc" ? 1 : -1
+      return 0
+    })
+    return sorted
+  }, [filteredItems, sortKey, sortDir])
+
+  const items = sortedItems
   const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / PAGE_SIZE))
   const allSelected = items.length > 0 && items.every((m) => selectedIds.has(m.id))
   const someSelected = selectedIds.size > 0
@@ -487,9 +532,27 @@ function MessagesTab() {
                     </Button>
                   </TableHead>
                   <TableHead className="w-10" />
-                  <TableHead>Caller</TableHead>
-                  <TableHead>Duration</TableHead>
-                  <TableHead>Date/Time</TableHead>
+                  <SortableHeader
+                    label="Caller"
+                    sortKey="caller"
+                    currentSort={sortKey}
+                    currentDirection={sortDir}
+                    onSort={handleSort}
+                  />
+                  <SortableHeader
+                    label="Duration"
+                    sortKey="duration"
+                    currentSort={sortKey}
+                    currentDirection={sortDir}
+                    onSort={handleSort}
+                  />
+                  <SortableHeader
+                    label="Date/Time"
+                    sortKey="date"
+                    currentSort={sortKey}
+                    currentDirection={sortDir}
+                    onSort={handleSort}
+                  />
                   <TableHead>Status</TableHead>
                   <TableHead className="w-16 text-right">Actions</TableHead>
                 </TableRow>
@@ -873,6 +936,19 @@ function BoxesTab() {
   const [search, setSearch] = useState("")
   const debouncedSearch = useDebouncedValue(search)
 
+  // Sort state
+  const [sortKey, setSortKey] = useState<string | null>(null)
+  const [sortDir, setSortDir] = useState<SortDirection>(null)
+
+  const handleSort = useCallback(
+    (key: string) => {
+      const next = nextSortDirection(sortKey, sortDir, key)
+      setSortKey(next.sort)
+      setSortDir(next.direction)
+    },
+    [sortKey, sortDir],
+  )
+
   useEffect(() => {
     setPage(1)
   }, [debouncedSearch])
@@ -883,7 +959,34 @@ function BoxesTab() {
     search: debouncedSearch || undefined,
   })
 
-  const items = data?.items ?? []
+  const rawItems = data?.items ?? []
+
+  // Client-side sorting
+  const items = useMemo(() => {
+    if (!sortKey || !sortDir) return rawItems
+    const sorted = [...rawItems]
+    sorted.sort((a, b) => {
+      let aVal: string | number
+      let bVal: string | number
+      switch (sortKey) {
+        case "name":
+          aVal = (a.extensionNumber ?? a.mailboxNumber).toLowerCase()
+          bVal = (b.extensionNumber ?? b.mailboxNumber).toLowerCase()
+          break
+        case "unread":
+          aVal = a.unreadCount
+          bVal = b.unreadCount
+          break
+        default:
+          return 0
+      }
+      if (aVal < bVal) return sortDir === "asc" ? -1 : 1
+      if (aVal > bVal) return sortDir === "asc" ? 1 : -1
+      return 0
+    })
+    return sorted
+  }, [rawItems, sortKey, sortDir])
+
   const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / PAGE_SIZE))
 
   // Keyboard shortcuts: ArrowLeft/ArrowRight for pagination
@@ -1018,11 +1121,23 @@ function BoxesTab() {
             <Table aria-label="Voicemail boxes">
               <TableHeader className="sticky top-0 z-10 bg-background">
                 <TableRow>
-                  <TableHead>Extension</TableHead>
+                  <SortableHeader
+                    label="Extension"
+                    sortKey="name"
+                    currentSort={sortKey}
+                    currentDirection={sortDir}
+                    onSort={handleSort}
+                  />
                   <TableHead>Email</TableHead>
                   <TableHead>Enabled</TableHead>
                   <TableHead>Transcription</TableHead>
-                  <TableHead>Unread</TableHead>
+                  <SortableHeader
+                    label="Unread"
+                    sortKey="unread"
+                    currentSort={sortKey}
+                    currentDirection={sortDir}
+                    onSort={handleSort}
+                  />
                 </TableRow>
               </TableHeader>
               <TableBody>

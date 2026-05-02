@@ -6,6 +6,7 @@ import { useCallback, useState } from "react"
 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuBadge, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem } from "@/components/ui/sidebar"
+import { cn } from "@/lib/utils"
 
 const NAV_STORAGE_KEY = "nav-sections-expanded"
 
@@ -35,6 +36,7 @@ export interface NavMainItem {
   icon?: LucideIcon
   isActive?: boolean
   badge?: number | string | null
+  badgeVariant?: "default" | "muted"
   items?: {
     title: string
     to: string
@@ -77,6 +79,7 @@ export function NavMain({ items, label = "Platform" }: { items: NavMainItem[]; l
           const badgeText = formatBadge(item.badge)
 
           if (!item.items || item.items.length === 0) {
+            const variant = item.badgeVariant ?? "muted"
             return (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton asChild tooltip={item.title}>
@@ -91,7 +94,12 @@ export function NavMain({ items, label = "Platform" }: { items: NavMainItem[]; l
                   </Link>
                 </SidebarMenuButton>
                 {badgeText != null && (
-                  <SidebarMenuBadge className="bg-muted text-muted-foreground rounded-full px-1.5 text-[10px] font-semibold leading-tight">
+                  <SidebarMenuBadge className={cn(
+                    "rounded-full px-1.5 text-[10px] font-semibold leading-tight",
+                    variant === "default"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground",
+                  )}>
                     {badgeText}
                   </SidebarMenuBadge>
                 )}
@@ -99,6 +107,7 @@ export function NavMain({ items, label = "Platform" }: { items: NavMainItem[]; l
             )
           }
 
+          const collapsibleVariant = item.badgeVariant ?? "muted"
           return (
             <Collapsible
               key={item.title}
@@ -123,7 +132,12 @@ export function NavMain({ items, label = "Platform" }: { items: NavMainItem[]; l
                   </SidebarMenuButton>
                 </CollapsibleTrigger>
                 {badgeText != null && (
-                  <SidebarMenuBadge className="bg-muted text-muted-foreground rounded-full px-1.5 text-[10px] font-semibold leading-tight">
+                  <SidebarMenuBadge className={cn(
+                    "rounded-full px-1.5 text-[10px] font-semibold leading-tight",
+                    collapsibleVariant === "default"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground",
+                  )}>
                     {badgeText}
                   </SidebarMenuBadge>
                 )}

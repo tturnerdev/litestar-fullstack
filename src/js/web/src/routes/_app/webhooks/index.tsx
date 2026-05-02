@@ -54,6 +54,7 @@ import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
+import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Textarea } from "@/components/ui/textarea"
 import {
@@ -584,6 +585,19 @@ function WebhooksPage() {
   const [deleteTarget, setDeleteTarget] = useState<WebhookList | null>(null)
   const [selected, setSelected] = useState<Set<string>>(new Set())
 
+  // Sort state
+  const [sortKey, setSortKey] = useState<string | null>(null)
+  const [sortDir, setSortDir] = useState<SortDirection>(null)
+
+  const handleSort = useCallback(
+    (key: string) => {
+      const next = nextSortDirection(sortKey, sortDir, key)
+      setSortKey(next.sort)
+      setSortDir(next.direction)
+    },
+    [sortKey, sortDir],
+  )
+
   // Keyboard shortcut: "N" opens the create dialog
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -606,7 +620,41 @@ function WebhooksPage() {
   const { data, isLoading, isError, refetch } = useWebhooks(page, PAGE_SIZE, debouncedSearch || undefined)
   const deleteWebhook = useDeleteWebhook()
 
-  const webhooks = data?.items ?? []
+  const rawWebhooks = data?.items ?? []
+
+  // Client-side sorting
+  const webhooks = useMemo(() => {
+    if (!sortKey || !sortDir) return rawWebhooks
+    const sorted = [...rawWebhooks]
+    sorted.sort((a, b) => {
+      let aVal: string | number
+      let bVal: string | number
+      switch (sortKey) {
+        case "name":
+          aVal = a.name.toLowerCase()
+          bVal = b.name.toLowerCase()
+          break
+        case "url":
+          aVal = a.url.toLowerCase()
+          bVal = b.url.toLowerCase()
+          break
+        case "status":
+          aVal = a.isActive ? 1 : 0
+          bVal = b.isActive ? 1 : 0
+          break
+        case "created":
+          aVal = a.createdAt ?? ""
+          bVal = b.createdAt ?? ""
+          break
+        default:
+          return 0
+      }
+      if (aVal < bVal) return sortDir === "asc" ? -1 : 1
+      if (aVal > bVal) return sortDir === "asc" ? 1 : -1
+      return 0
+    })
+    return sorted
+  }, [rawWebhooks, sortKey, sortDir])
 
   const handleExport = useCallback(() => {
     exportToCsv("webhooks", csvHeaders, webhooks)
@@ -781,10 +829,29 @@ function WebhooksPage() {
                         aria-label="Select all webhooks"
                       />
                     </TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead className="hidden sm:table-cell">URL</TableHead>
+                    <SortableHeader
+                      label="Name"
+                      sortKey="name"
+                      currentSort={sortKey}
+                      currentDirection={sortDir}
+                      onSort={handleSort}
+                    />
+                    <SortableHeader
+                      label="URL"
+                      sortKey="url"
+                      currentSort={sortKey}
+                      currentDirection={sortDir}
+                      onSort={handleSort}
+                      className="hidden sm:table-cell"
+                    />
                     <TableHead className="hidden md:table-cell">Events</TableHead>
-                    <TableHead>Status</TableHead>
+                    <SortableHeader
+                      label="Status"
+                      sortKey="status"
+                      currentSort={sortKey}
+                      currentDirection={sortDir}
+                      onSort={handleSort}
+                    />
                     <TableHead className="hidden lg:table-cell">Last Triggered</TableHead>
                     <TableHead className="hidden md:table-cell">Failures</TableHead>
                     <TableHead className="w-24 text-right">Actions</TableHead>
