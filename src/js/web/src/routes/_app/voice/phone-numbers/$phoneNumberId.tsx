@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
+import { createFileRoute, Link, useBlocker, useNavigate } from "@tanstack/react-router"
 import { AlertCircle, ArrowLeft, Fingerprint, Home, Loader2, Pencil, Phone, PhoneForwarded, Shield, Trash2 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
@@ -19,12 +19,15 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CopyButton } from "@/components/ui/copy-button"
 import { EmptyState } from "@/components/ui/empty-state"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Switch } from "@/components/ui/switch"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useDocumentTitle } from "@/hooks/use-document-title"
-import { usePhoneNumber, useExtensionsByPhoneNumber } from "@/lib/api/hooks/voice"
+import { usePhoneNumber, useUpdatePhoneNumber, useExtensionsByPhoneNumber } from "@/lib/api/hooks/voice"
 import { useGatewayLookupNumber } from "@/lib/api/hooks/gateway"
 import { formatPhoneNumber } from "@/lib/format-utils"
 
@@ -60,14 +63,55 @@ function PhoneNumberDetailPage() {
 
   const { data, isLoading, isError, refetch } = usePhoneNumber(phoneNumberId)
   useDocumentTitle(data ? formatPhoneNumber(data.number) : "Phone Number Details")
+  const updatePhoneNumber = useUpdatePhoneNumber(phoneNumberId)
   const gatewayQuery = useGatewayLookupNumber(data?.number ?? "", tab === "external")
   const extensionsQuery = useExtensionsByPhoneNumber(phoneNumberId)
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
 
+  // Inline editing state
+  const [editing, setEditing] = useState(false)
+  const [editLabel, setEditLabel] = useState("")
+  const [editCallerIdName, setEditCallerIdName] = useState("")
+
+  useBlocker({
+    shouldBlockFn: () => editing,
+    withResolver: true,
+  })
+
+  function startEditing() {
+    if (!data) return
+    setEditLabel(data.label ?? "")
+    setEditCallerIdName(data.callerIdName ?? "")
+    setEditing(true)
+  }
+
+  function cancelEditing() {
+    setEditing(false)
+  }
+
+  function handleSave() {
+    if (!data) return
+    const payload: Record<string, unknown> = {}
+    if (editLabel !== (data.label ?? "")) payload.label = editLabel || null
+    if (editCallerIdName !== (data.callerIdName ?? "")) payload.callerIdName = editCallerIdName || null
+    if (Object.keys(payload).length === 0) {
+      setEditing(false)
+      return
+    }
+    updatePhoneNumber.mutate(payload, {
+      onSuccess: () => setEditing(false),
+    })
+  }
+
+  function handleToggleActive() {
+    if (!data) return
+    updatePhoneNumber.mutate({ isActive: !data.isActive })
+  }
+
   useEffect(() => {
-    if (edit && data && !editOpen) {
-      setEditOpen(true)
+    if (edit && data && !editOpen && !editing) {
+      startEditing()
       navigate({
         to: "/voice/phone-numbers/$phoneNumberId",
         params: { phoneNumberId },
@@ -164,9 +208,11 @@ function PhoneNumberDetailPage() {
             <Badge variant={data.isActive ? "default" : "secondary"}>
               {data.isActive ? "Active" : "Inactive"}
             </Badge>
-            <Button variant="outline" size="sm" onClick={() => setEditOpen(true)}>
-              <Pencil className="mr-2 h-4 w-4" /> Edit
-            </Button>
+            {!editing && (
+              <Button variant="outline" size="sm" onClick={startEditing}>
+                <Pencil className="mr-2 h-4 w-4" /> Edit
+              </Button>
+            )}
             <Button
               variant="outline"
               size="sm"
@@ -194,75 +240,161 @@ function PhoneNumberDetailPage() {
 
           <TabsContent value="details" className="mt-6 space-y-6">
             <Card>
-              <CardHeader>
-                <div className="flex items-center gap-2">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
                   <Phone className="h-5 w-5 text-muted-foreground" />
-                  <CardTitle>Number Info</CardTitle>
-                </div>
+                  Number Info
+                </CardTitle>
+                {editing && (
+                  <div className="flex gap-2">
+                    <Button variant="ghost" size="sm" onClick={cancelEditing}>
+                      Cancel
+                    </Button>
+                    <Button size="sm" onClick={handleSave} disabled={updatePhoneNumber.isPending}>
+                      {updatePhoneNumber.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Save
+                    </Button>
+                  </div>
+                )}
               </CardHeader>
               <CardContent>
-                <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
-                  <div>
-                    <p className="text-muted-foreground">Number</p>
-                    <div className="flex items-center gap-1">
-                      <p className="font-mono text-base font-medium">{formatPhoneNumber(data.number)}</p>
-                      <CopyButton value={data.number} label="phone number" />
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Label</p>
-                    <p className="font-medium">{data.label ?? "---"}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Type</p>
-                    <Badge variant={numberTypeBadgeVariant[data.numberType] ?? "outline"}>
-                      {numberTypeLabel[data.numberType] ?? data.numberType}
-                    </Badge>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Caller ID Name</p>
-                    <p className="font-medium">{data.callerIdName ?? "---"}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Status</p>
-                    <Badge variant={data.isActive ? "default" : "secondary"}>
-                      {data.isActive ? "Active" : "Inactive"}
-                    </Badge>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Team</p>
-                    {data.teamId ? (
+                {editing ? (
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    <div>
+                      <p className="text-muted-foreground text-sm">Number</p>
                       <div className="flex items-center gap-1">
-                        <Link
-                          to="/teams/$teamId"
-                          params={{ teamId: data.teamId }}
-                          className="text-primary hover:underline"
-                        >
-                          {data.teamId.slice(0, 8)}...
-                        </Link>
-                        <CopyButton value={data.teamId} label="team ID" />
+                        <p className="font-mono text-base font-medium">{formatPhoneNumber(data.number)}</p>
+                        <CopyButton value={data.number} label="phone number" />
                       </div>
-                    ) : (
-                      <p>Not assigned</p>
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">E911 Status</p>
-                    <div className="flex items-center gap-2 pt-0.5">
-                      <E911StatusBadge registered={data.e911Registered ?? false} registrationId={data.e911RegistrationId} />
-                      {data.e911Registered && data.e911RegistrationId && (
-                        <Link
-                          to="/e911/$registrationId"
-                          params={{ registrationId: data.e911RegistrationId }}
-                          className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                        >
-                          <Shield className="h-3 w-3" />
-                          View Registration
-                        </Link>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Label</Label>
+                      <Input value={editLabel} onChange={(e) => setEditLabel(e.target.value)} placeholder="e.g. Main Line" />
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground text-sm">Type</p>
+                      <Badge variant={numberTypeBadgeVariant[data.numberType] ?? "outline"}>
+                        {numberTypeLabel[data.numberType] ?? data.numberType}
+                      </Badge>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Caller ID Name</Label>
+                      <Input value={editCallerIdName} onChange={(e) => setEditCallerIdName(e.target.value)} placeholder="e.g. Acme Corp" />
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground text-sm">Status</p>
+                      <div className="flex items-center gap-2 pt-1">
+                        <Switch
+                          checked={data.isActive}
+                          onCheckedChange={handleToggleActive}
+                          disabled={updatePhoneNumber.isPending}
+                          aria-label="Toggle active status"
+                        />
+                        <span className="text-sm">{data.isActive ? "Active" : "Inactive"}</span>
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground text-sm">Team</p>
+                      {data.teamId ? (
+                        <div className="flex items-center gap-1">
+                          <Link to="/teams/$teamId" params={{ teamId: data.teamId }} className="text-primary hover:underline">
+                            {data.teamId.slice(0, 8)}...
+                          </Link>
+                          <CopyButton value={data.teamId} label="team ID" />
+                        </div>
+                      ) : (
+                        <p className="text-sm">Not assigned</p>
                       )}
                     </div>
+                    <div>
+                      <p className="text-muted-foreground text-sm">E911 Status</p>
+                      <div className="flex items-center gap-2 pt-0.5">
+                        <E911StatusBadge registered={data.e911Registered ?? false} registrationId={data.e911RegistrationId} />
+                        {data.e911Registered && data.e911RegistrationId && (
+                          <Link
+                            to="/e911/$registrationId"
+                            params={{ registrationId: data.e911RegistrationId }}
+                            className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                          >
+                            <Shield className="h-3 w-3" />
+                            View Registration
+                          </Link>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
+                    <div>
+                      <p className="text-muted-foreground">Number</p>
+                      <div className="flex items-center gap-1">
+                        <p className="font-mono text-base font-medium">{formatPhoneNumber(data.number)}</p>
+                        <CopyButton value={data.number} label="phone number" />
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Label</p>
+                      <p className="font-medium">{data.label ?? "---"}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Type</p>
+                      <Badge variant={numberTypeBadgeVariant[data.numberType] ?? "outline"}>
+                        {numberTypeLabel[data.numberType] ?? data.numberType}
+                      </Badge>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Caller ID Name</p>
+                      <p className="font-medium">{data.callerIdName ?? "---"}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Status</p>
+                      <div className="flex items-center gap-2">
+                        <Badge variant={data.isActive ? "default" : "secondary"}>
+                          {data.isActive ? "Active" : "Inactive"}
+                        </Badge>
+                        <Switch
+                          checked={data.isActive}
+                          onCheckedChange={handleToggleActive}
+                          disabled={updatePhoneNumber.isPending}
+                          aria-label="Toggle active status"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Team</p>
+                      {data.teamId ? (
+                        <div className="flex items-center gap-1">
+                          <Link
+                            to="/teams/$teamId"
+                            params={{ teamId: data.teamId }}
+                            className="text-primary hover:underline"
+                          >
+                            {data.teamId.slice(0, 8)}...
+                          </Link>
+                          <CopyButton value={data.teamId} label="team ID" />
+                        </div>
+                      ) : (
+                        <p>Not assigned</p>
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">E911 Status</p>
+                      <div className="flex items-center gap-2 pt-0.5">
+                        <E911StatusBadge registered={data.e911Registered ?? false} registrationId={data.e911RegistrationId} />
+                        {data.e911Registered && data.e911RegistrationId && (
+                          <Link
+                            to="/e911/$registrationId"
+                            params={{ registrationId: data.e911RegistrationId }}
+                            className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                          >
+                            <Shield className="h-3 w-3" />
+                            View Registration
+                          </Link>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
 

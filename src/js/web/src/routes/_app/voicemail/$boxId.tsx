@@ -1,25 +1,28 @@
-import { createFileRoute, Link } from "@tanstack/react-router"
-import { useEffect, useState } from "react"
+import { createFileRoute, Link, useBlocker } from "@tanstack/react-router"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 import {
   AlertCircle,
   AlertTriangle,
   ArrowLeft,
   BellRing,
-  CheckCircle2,
   CheckSquare,
+  Eye,
+  EyeOff,
   Inbox,
   Loader2,
   Mail,
   MailOpen,
   Mic,
-  RotateCcw,
+  Pencil,
+  Save,
   Settings2,
   Square,
   Trash2,
   User,
   Volume2,
   Wrench,
+  X,
 } from "lucide-react"
 import {
   AlertDialog,
@@ -80,16 +83,6 @@ const GREETING_TYPE_DESCRIPTIONS: Record<string, string> = {
   custom: "Plays your uploaded custom greeting.",
   name_only: "Plays your name only.",
 }
-
-const DEFAULTS = {
-  isEnabled: true,
-  greetingType: "default",
-  maxLength: "120",
-  emailNotification: true,
-  emailAttachAudio: false,
-  transcriptionEnabled: true,
-  autoDeleteDays: "90",
-} as const
 
 function formatRetention(days: number): string {
   if (days < 7) return `${days} day${days !== 1 ? "s" : ""}`
@@ -237,28 +230,83 @@ function VoicemailBoxDetailPage() {
 
 // -- Box Settings Form --------------------------------------------------------
 
+interface SettingsFormData {
+  isEnabled: boolean
+  email: string
+  pin: string
+  greetingType: string
+  maxLength: string
+  emailNotification: boolean
+  emailAttachAudio: boolean
+  transcriptionEnabled: boolean
+  autoDeleteDays: string
+}
+
+const GREETING_LABELS: Record<string, string> = {
+  default: "Default",
+  custom: "Custom",
+  name_only: "Name only",
+}
+
 function BoxSettingsForm({ boxId }: { boxId: string }) {
   const { data, isLoading, isError, refetch: refetchSettings } = useVoicemailBox(boxId)
   const updateMutation = useUpdateVoicemailBox(boxId)
-  const [dirty, setDirty] = useState(false)
-  const [showSaveSuccess, setShowSaveSuccess] = useState(false)
+
+  const [editing, setEditing] = useState(false)
+  const [showPin, setShowPin] = useState(false)
   const [pinError, setPinError] = useState("")
 
-  const [isEnabled, setIsEnabled] = useState<boolean | null>(null)
-  const [pin, setPin] = useState("")
-  const [email, setEmail] = useState<string | null>(null)
-  const [greetingType, setGreetingType] = useState("")
-  const [maxLength, setMaxLength] = useState("")
-  const [emailNotification, setEmailNotification] = useState<boolean | null>(null)
-  const [emailAttachAudio, setEmailAttachAudio] = useState<boolean | null>(null)
-  const [transcriptionEnabled, setTranscriptionEnabled] = useState<boolean | null>(null)
-  const [autoDeleteDays, setAutoDeleteDays] = useState("")
+  const [formData, setFormData] = useState<SettingsFormData>({
+    isEnabled: true,
+    email: "",
+    pin: "",
+    greetingType: "default",
+    maxLength: "120",
+    emailNotification: true,
+    emailAttachAudio: false,
+    transcriptionEnabled: true,
+    autoDeleteDays: "",
+  })
+
+  const syncFormFromData = useCallback(() => {
+    if (data) {
+      setFormData({
+        isEnabled: data.isEnabled,
+        email: data.email ?? "",
+        pin: "",
+        greetingType: data.greetingType,
+        maxLength: String(data.maxMessageLengthSeconds),
+        emailNotification: data.emailNotification,
+        emailAttachAudio: data.emailAttachAudio,
+        transcriptionEnabled: data.transcriptionEnabled,
+        autoDeleteDays: data.autoDeleteDays != null ? String(data.autoDeleteDays) : "",
+      })
+    }
+  }, [data])
 
   useEffect(() => {
-    if (!showSaveSuccess) return
-    const timer = setTimeout(() => setShowSaveSuccess(false), 1500)
-    return () => clearTimeout(timer)
-  }, [showSaveSuccess])
+    syncFormFromData()
+  }, [syncFormFromData])
+
+  const formDirty = useMemo(() => {
+    if (!editing || !data) return false
+    return (
+      formData.isEnabled !== data.isEnabled ||
+      formData.email !== (data.email ?? "") ||
+      formData.pin !== "" ||
+      formData.greetingType !== data.greetingType ||
+      formData.maxLength !== String(data.maxMessageLengthSeconds) ||
+      formData.emailNotification !== data.emailNotification ||
+      formData.emailAttachAudio !== data.emailAttachAudio ||
+      formData.transcriptionEnabled !== data.transcriptionEnabled ||
+      formData.autoDeleteDays !== (data.autoDeleteDays != null ? String(data.autoDeleteDays) : "")
+    )
+  }, [editing, data, formData])
+
+  const blocker = useBlocker({
+    shouldBlockFn: () => formDirty,
+    withResolver: true,
+  })
 
   if (isLoading) return <SkeletonCard />
 
@@ -273,57 +321,48 @@ function BoxSettingsForm({ boxId }: { boxId: string }) {
     )
   }
 
-  const currentEnabled = isEnabled ?? data.isEnabled
-  const currentEmail = email ?? data.email ?? ""
-  const currentGreeting = greetingType || data.greetingType
-  const currentMaxLength = maxLength || String(data.maxMessageLengthSeconds)
-  const currentEmailNotif = emailNotification ?? data.emailNotification
-  const currentAttachAudio = emailAttachAudio ?? data.emailAttachAudio
-  const currentTranscription = transcriptionEnabled ?? data.transcriptionEnabled
-  const currentAutoDelete =
-    autoDeleteDays || (data.autoDeleteDays != null ? String(data.autoDeleteDays) : "")
-
   function handleSave() {
+    if (!data) return
     const payload: Record<string, unknown> = {}
-    if (isEnabled !== null) payload.isEnabled = isEnabled
-    if (pin) payload.pin = pin
-    if (email !== null) payload.email = email || null
-    if (greetingType) payload.greetingType = greetingType
-    if (maxLength) payload.maxMessageLengthSeconds = Number(maxLength)
-    if (emailNotification !== null) payload.emailNotification = emailNotification
-    if (emailAttachAudio !== null) payload.emailAttachAudio = emailAttachAudio
-    if (transcriptionEnabled !== null) payload.transcriptionEnabled = transcriptionEnabled
-    if (autoDeleteDays) payload.autoDeleteDays = Number(autoDeleteDays) || null
+    if (formData.isEnabled !== data.isEnabled) payload.isEnabled = formData.isEnabled
+    if (formData.pin) payload.pin = formData.pin
+    if (formData.email !== (data.email ?? "")) payload.emailAddress = formData.email || null
+    if (formData.greetingType !== data.greetingType) payload.greetingType = formData.greetingType
+    if (formData.maxLength !== String(data.maxMessageLengthSeconds)) payload.maxMessageLengthSeconds = Number(formData.maxLength)
+    if (formData.emailNotification !== data.emailNotification) payload.emailNotification = formData.emailNotification
+    if (formData.emailAttachAudio !== data.emailAttachAudio) payload.emailAttachAudio = formData.emailAttachAudio
+    if (formData.transcriptionEnabled !== data.transcriptionEnabled) payload.transcriptionEnabled = formData.transcriptionEnabled
+    if (formData.autoDeleteDays !== (data.autoDeleteDays != null ? String(data.autoDeleteDays) : "")) {
+      payload.autoDeleteDays = formData.autoDeleteDays ? Number(formData.autoDeleteDays) : null
+    }
+
+    if (Object.keys(payload).length === 0) {
+      setEditing(false)
+      return
+    }
 
     updateMutation.mutate(payload, {
       onSuccess: () => {
-        setDirty(false)
-        setPin("")
+        setEditing(false)
+        setShowPin(false)
         setPinError("")
-        setEmail(null)
-        setShowSaveSuccess(true)
       },
     })
   }
 
-  function handleResetToDefaults() {
-    setIsEnabled(DEFAULTS.isEnabled)
-    setGreetingType(DEFAULTS.greetingType)
-    setMaxLength(DEFAULTS.maxLength)
-    setEmailNotification(DEFAULTS.emailNotification)
-    setEmailAttachAudio(DEFAULTS.emailAttachAudio)
-    setTranscriptionEnabled(DEFAULTS.transcriptionEnabled)
-    setAutoDeleteDays(DEFAULTS.autoDeleteDays)
-    setPin("")
-    setDirty(true)
+  function handleCancel() {
+    syncFormFromData()
+    setPinError("")
+    setShowPin(false)
+    setEditing(false)
   }
 
-  function toggle(setter: (v: boolean) => void, value: boolean) {
-    setter(value)
-    setDirty(true)
+  function updateField<K extends keyof SettingsFormData>(field: K, value: SettingsFormData[K]) {
+    setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
   return (
+    <>
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
@@ -333,21 +372,38 @@ function BoxSettingsForm({ boxId }: { boxId: string }) {
               Configure mailbox behavior, notifications, and retention.
             </CardDescription>
           </div>
-          {currentEnabled ? (
-            <Badge className="gap-1.5 bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              Enabled
-            </Badge>
-          ) : (
-            <Badge variant="outline" className="gap-1.5 text-muted-foreground">
-              <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
-              Disabled
-            </Badge>
-          )}
+          <div className="flex items-center gap-2">
+            {(editing ? formData.isEnabled : data.isEnabled) ? (
+              <Badge className="gap-1.5 bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                Enabled
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="gap-1.5 text-muted-foreground">
+                <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
+                Disabled
+              </Badge>
+            )}
+            {editing ? (
+              <>
+                <Button size="sm" variant="outline" onClick={handleCancel} disabled={updateMutation.isPending}>
+                  <X className="mr-2 h-4 w-4" /> Cancel
+                </Button>
+                <Button size="sm" onClick={handleSave} disabled={updateMutation.isPending || !!pinError}>
+                  {updateMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                  {updateMutation.isPending ? "Saving..." : "Save changes"}
+                </Button>
+              </>
+            ) : (
+              <Button size="sm" onClick={() => setEditing(true)}>
+                <Pencil className="mr-2 h-4 w-4" /> Edit
+              </Button>
+            )}
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
-        {dirty && (
+        {editing && formDirty && (
           <div className="flex items-center gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-400">
             <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-500" />
             You have unsaved changes
@@ -368,16 +424,29 @@ function BoxSettingsForm({ boxId }: { boxId: string }) {
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
             <Label>Voicemail enabled</Label>
-            <p
-              className={`text-xs text-muted-foreground transition-opacity ${!currentEnabled ? "opacity-50" : ""}`}
-            >
+            <p className="text-xs text-muted-foreground">
               When disabled, callers will not be able to leave voicemails.
             </p>
           </div>
-          <Switch
-            checked={!!currentEnabled}
-            onCheckedChange={(v) => toggle(setIsEnabled, v)}
-          />
+          {editing ? (
+            <Switch
+              checked={formData.isEnabled}
+              onCheckedChange={(v) => updateField("isEnabled", v)}
+            />
+          ) : (
+            <Badge
+              variant={data.isEnabled ? "default" : "outline"}
+              className={cn(
+                "gap-1.5",
+                data.isEnabled
+                  ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400"
+                  : "text-muted-foreground",
+              )}
+            >
+              <span className={cn("h-1.5 w-1.5 rounded-full", data.isEnabled ? "bg-emerald-500" : "bg-muted-foreground")} />
+              {data.isEnabled ? "Yes" : "No"}
+            </Badge>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -385,16 +454,18 @@ function BoxSettingsForm({ boxId }: { boxId: string }) {
           <p className="text-xs text-muted-foreground">
             Email address for voicemail notifications.
           </p>
-          <Input
-            id="vm-email"
-            type="email"
-            placeholder="user@example.com"
-            value={currentEmail}
-            onChange={(e) => {
-              setEmail(e.target.value)
-              setDirty(true)
-            }}
-          />
+          {editing ? (
+            <Input
+              id="vm-email"
+              type="email"
+              placeholder="user@example.com"
+              value={formData.email}
+              onChange={(e) => updateField("email", e.target.value)}
+              disabled={updateMutation.isPending}
+            />
+          ) : (
+            <p className="text-sm">{data.email || <span className="text-muted-foreground italic">Not set</span>}</p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -402,40 +473,44 @@ function BoxSettingsForm({ boxId }: { boxId: string }) {
           <p className="text-xs text-muted-foreground">
             Choose which greeting callers hear before leaving a message.
           </p>
-          <Select
-            value={currentGreeting}
-            onValueChange={(v) => {
-              setGreetingType(v)
-              setDirty(true)
-            }}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="default">
-                <span className="flex items-center gap-2">
-                  <Volume2 className="h-3.5 w-3.5 text-muted-foreground" />
-                  Default
-                </span>
-              </SelectItem>
-              <SelectItem value="custom">
-                <span className="flex items-center gap-2">
-                  <Mic className="h-3.5 w-3.5 text-muted-foreground" />
-                  Custom
-                </span>
-              </SelectItem>
-              <SelectItem value="name_only">
-                <span className="flex items-center gap-2">
-                  <User className="h-3.5 w-3.5 text-muted-foreground" />
-                  Name only
-                </span>
-              </SelectItem>
-            </SelectContent>
-          </Select>
-          <p className="text-xs text-muted-foreground">
-            {GREETING_TYPE_DESCRIPTIONS[currentGreeting ?? "default"]}
-          </p>
+          {editing ? (
+            <>
+              <Select
+                value={formData.greetingType}
+                onValueChange={(v) => updateField("greetingType", v)}
+                disabled={updateMutation.isPending}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="default">
+                    <span className="flex items-center gap-2">
+                      <Volume2 className="h-3.5 w-3.5 text-muted-foreground" />
+                      Default
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="custom">
+                    <span className="flex items-center gap-2">
+                      <Mic className="h-3.5 w-3.5 text-muted-foreground" />
+                      Custom
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="name_only">
+                    <span className="flex items-center gap-2">
+                      <User className="h-3.5 w-3.5 text-muted-foreground" />
+                      Name only
+                    </span>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                {GREETING_TYPE_DESCRIPTIONS[formData.greetingType ?? "default"]}
+              </p>
+            </>
+          ) : (
+            <p className="text-sm">{GREETING_LABELS[data.greetingType] ?? data.greetingType}</p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -443,66 +518,90 @@ function BoxSettingsForm({ boxId }: { boxId: string }) {
           <p className="text-xs text-muted-foreground">
             Maximum recording duration for each voicemail message.
           </p>
-          <div className="flex items-center gap-3">
-            <Input
-              id="vm-max-length"
-              type="number"
-              min={10}
-              max={600}
-              className="max-w-[140px]"
-              value={currentMaxLength}
-              onChange={(e) => {
-                setMaxLength(e.target.value)
-                setDirty(true)
-              }}
-            />
-            {currentMaxLength && Number(currentMaxLength) > 0 && (
-              <span className="text-xs text-muted-foreground">
-                = {formatDurationHuman(Number(currentMaxLength))}
+          {editing ? (
+            <div className="flex items-center gap-3">
+              <Input
+                id="vm-max-length"
+                type="number"
+                min={10}
+                max={600}
+                className="max-w-[140px]"
+                value={formData.maxLength}
+                onChange={(e) => updateField("maxLength", e.target.value)}
+                disabled={updateMutation.isPending}
+              />
+              {formData.maxLength && Number(formData.maxLength) > 0 && (
+                <span className="text-xs text-muted-foreground">
+                  = {formatDurationHuman(Number(formData.maxLength))}
+                </span>
+              )}
+            </div>
+          ) : (
+            <p className="text-sm">
+              {data.maxMessageLengthSeconds}s
+              <span className="ml-1.5 text-muted-foreground">
+                ({formatDurationHuman(data.maxMessageLengthSeconds)})
               </span>
-            )}
-          </div>
+            </p>
+          )}
         </div>
 
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label htmlFor="vm-pin">Access PIN</Label>
-            {pin && (
+            {editing && formData.pin && (
               <span
-                className={`text-xs ${pin.length >= 4 && pin.length <= 6 ? "text-muted-foreground" : "text-destructive"}`}
+                className={`text-xs ${formData.pin.length >= 4 && formData.pin.length <= 6 ? "text-muted-foreground" : "text-destructive"}`}
               >
-                {pin.length}/4-6 digits
+                {formData.pin.length}/4-6 digits
               </span>
             )}
           </div>
           <p className="text-xs text-muted-foreground">
             Used to access voicemail remotely by phone. Must be 4-6 digits.
           </p>
-          <Input
-            id="vm-pin"
-            type="password"
-            inputMode="numeric"
-            placeholder="Enter new PIN"
-            className={
-              pinError ? "border-destructive focus-visible:ring-destructive" : ""
-            }
-            value={pin}
-            onChange={(e) => {
-              const value = e.target.value
-              if (value && !/^\d*$/.test(value)) {
-                setPinError("PIN must contain only digits")
-                return
-              }
-              if (value.length > 6) return
-              setPinError(
-                value.length > 0 && value.length < 4
-                  ? "PIN must be at least 4 digits"
-                  : "",
-              )
-              setPin(value)
-              setDirty(true)
-            }}
-          />
+          {editing ? (
+            <div className="flex items-center gap-2">
+              <Input
+                id="vm-pin"
+                type={showPin ? "text" : "password"}
+                inputMode="numeric"
+                placeholder="Enter new PIN"
+                className={cn(
+                  "max-w-[200px]",
+                  pinError ? "border-destructive focus-visible:ring-destructive" : "",
+                )}
+                value={formData.pin}
+                onChange={(e) => {
+                  const value = e.target.value
+                  if (value && !/^\d*$/.test(value)) {
+                    setPinError("PIN must contain only digits")
+                    return
+                  }
+                  if (value.length > 6) return
+                  setPinError(
+                    value.length > 0 && value.length < 4
+                      ? "PIN must be at least 4 digits"
+                      : "",
+                  )
+                  updateField("pin", value)
+                }}
+                disabled={updateMutation.isPending}
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-9 w-9 p-0"
+                onClick={() => setShowPin((p) => !p)}
+                aria-label={showPin ? "Hide PIN" : "Show PIN"}
+              >
+                {showPin ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
+              </Button>
+            </div>
+          ) : (
+            <p className="text-sm font-mono tracking-widest text-muted-foreground">{data.pin ? "****" : <span className="tracking-normal italic">Not set</span>}</p>
+          )}
           {pinError && <p className="text-xs text-destructive">{pinError}</p>}
         </div>
 
@@ -512,26 +611,41 @@ function BoxSettingsForm({ boxId }: { boxId: string }) {
             Automatically delete voicemails older than this number of days. Leave empty to
             keep messages indefinitely.
           </p>
-          <div className="flex items-center gap-3">
-            <Input
-              id="vm-auto-delete"
-              type="number"
-              min={1}
-              max={365}
-              className="max-w-[140px]"
-              placeholder="Forever"
-              value={currentAutoDelete}
-              onChange={(e) => {
-                setAutoDeleteDays(e.target.value)
-                setDirty(true)
-              }}
-            />
-            {currentAutoDelete && Number(currentAutoDelete) >= 7 && (
-              <span className="text-xs text-muted-foreground">
-                {formatRetention(Number(currentAutoDelete))}
-              </span>
-            )}
-          </div>
+          {editing ? (
+            <div className="flex items-center gap-3">
+              <Input
+                id="vm-auto-delete"
+                type="number"
+                min={1}
+                max={365}
+                className="max-w-[140px]"
+                placeholder="Forever"
+                value={formData.autoDeleteDays}
+                onChange={(e) => updateField("autoDeleteDays", e.target.value)}
+                disabled={updateMutation.isPending}
+              />
+              {formData.autoDeleteDays && Number(formData.autoDeleteDays) >= 7 && (
+                <span className="text-xs text-muted-foreground">
+                  {formatRetention(Number(formData.autoDeleteDays))}
+                </span>
+              )}
+            </div>
+          ) : (
+            <p className="text-sm">
+              {data.autoDeleteDays != null ? (
+                <>
+                  {data.autoDeleteDays} days
+                  {data.autoDeleteDays >= 7 && (
+                    <span className="ml-1.5 text-muted-foreground">
+                      ({formatRetention(data.autoDeleteDays)})
+                    </span>
+                  )}
+                </>
+              ) : (
+                <span className="text-muted-foreground italic">Forever</span>
+              )}
+            </p>
+          )}
         </div>
 
         <Separator />
@@ -549,27 +663,27 @@ function BoxSettingsForm({ boxId }: { boxId: string }) {
           </div>
           <div className="flex items-center gap-1.5">
             <Badge
-              variant={currentEmailNotif ? "default" : "outline"}
+              variant={(editing ? formData.emailNotification : data.emailNotification) ? "default" : "outline"}
               className={cn(
                 "gap-1.5",
-                currentEmailNotif
+                (editing ? formData.emailNotification : data.emailNotification)
                   ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400"
                   : "text-muted-foreground",
               )}
             >
-              <span className={cn("h-1.5 w-1.5 rounded-full", currentEmailNotif ? "bg-emerald-500" : "bg-muted-foreground")} />
+              <span className={cn("h-1.5 w-1.5 rounded-full", (editing ? formData.emailNotification : data.emailNotification) ? "bg-emerald-500" : "bg-muted-foreground")} />
               Email
             </Badge>
             <Badge
-              variant={currentAttachAudio ? "default" : "outline"}
+              variant={(editing ? formData.emailAttachAudio : data.emailAttachAudio) ? "default" : "outline"}
               className={cn(
                 "gap-1.5",
-                currentAttachAudio
+                (editing ? formData.emailAttachAudio : data.emailAttachAudio)
                   ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400"
                   : "text-muted-foreground",
               )}
             >
-              <span className={cn("h-1.5 w-1.5 rounded-full", currentAttachAudio ? "bg-emerald-500" : "bg-muted-foreground")} />
+              <span className={cn("h-1.5 w-1.5 rounded-full", (editing ? formData.emailAttachAudio : data.emailAttachAudio) ? "bg-emerald-500" : "bg-muted-foreground")} />
               Audio
             </Badge>
           </div>
@@ -579,31 +693,57 @@ function BoxSettingsForm({ boxId }: { boxId: string }) {
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label>Email notification</Label>
-              <p
-                className={`text-xs text-muted-foreground transition-opacity ${!currentEmailNotif ? "opacity-50" : ""}`}
-              >
+              <p className="text-xs text-muted-foreground">
                 Send an email alert whenever a new voicemail is received.
               </p>
             </div>
-            <Switch
-              checked={!!currentEmailNotif}
-              onCheckedChange={(v) => toggle(setEmailNotification, v)}
-            />
+            {editing ? (
+              <Switch
+                checked={formData.emailNotification}
+                onCheckedChange={(v) => updateField("emailNotification", v)}
+              />
+            ) : (
+              <Badge
+                variant={data.emailNotification ? "default" : "outline"}
+                className={cn(
+                  "gap-1.5",
+                  data.emailNotification
+                    ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400"
+                    : "text-muted-foreground",
+                )}
+              >
+                <span className={cn("h-1.5 w-1.5 rounded-full", data.emailNotification ? "bg-emerald-500" : "bg-muted-foreground")} />
+                {data.emailNotification ? "On" : "Off"}
+              </Badge>
+            )}
           </div>
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label>Attach audio to email</Label>
-              <p
-                className={`text-xs text-muted-foreground transition-opacity ${!currentAttachAudio ? "opacity-50" : ""}`}
-              >
+              <p className="text-xs text-muted-foreground">
                 Include the voicemail recording as an audio attachment.
               </p>
             </div>
-            <Switch
-              checked={!!currentAttachAudio}
-              onCheckedChange={(v) => toggle(setEmailAttachAudio, v)}
-            />
+            {editing ? (
+              <Switch
+                checked={formData.emailAttachAudio}
+                onCheckedChange={(v) => updateField("emailAttachAudio", v)}
+              />
+            ) : (
+              <Badge
+                variant={data.emailAttachAudio ? "default" : "outline"}
+                className={cn(
+                  "gap-1.5",
+                  data.emailAttachAudio
+                    ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400"
+                    : "text-muted-foreground",
+                )}
+              >
+                <span className={cn("h-1.5 w-1.5 rounded-full", data.emailAttachAudio ? "bg-emerald-500" : "bg-muted-foreground")} />
+                {data.emailAttachAudio ? "On" : "Off"}
+              </Badge>
+            )}
           </div>
         </div>
 
@@ -621,38 +761,50 @@ function BoxSettingsForm({ boxId }: { boxId: string }) {
             </p>
           </div>
           <Badge
-            variant={currentTranscription ? "default" : "outline"}
+            variant={(editing ? formData.transcriptionEnabled : data.transcriptionEnabled) ? "default" : "outline"}
             className={cn(
               "gap-1.5",
-              currentTranscription
+              (editing ? formData.transcriptionEnabled : data.transcriptionEnabled)
                 ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400"
                 : "text-muted-foreground",
             )}
           >
-            <span className={cn("h-1.5 w-1.5 rounded-full", currentTranscription ? "bg-emerald-500" : "bg-muted-foreground")} />
-            {currentTranscription ? "Enabled" : "Disabled"}
+            <span className={cn("h-1.5 w-1.5 rounded-full", (editing ? formData.transcriptionEnabled : data.transcriptionEnabled) ? "bg-emerald-500" : "bg-muted-foreground")} />
+            {(editing ? formData.transcriptionEnabled : data.transcriptionEnabled) ? "Enabled" : "Disabled"}
           </Badge>
         </div>
 
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
             <Label>Transcription</Label>
-            <p
-              className={`text-xs text-muted-foreground transition-opacity ${!currentTranscription ? "opacity-50" : ""}`}
-            >
+            <p className="text-xs text-muted-foreground">
               Automatically convert voicemail audio to text.
             </p>
           </div>
-          <Switch
-            checked={!!currentTranscription}
-            onCheckedChange={(v) => toggle(setTranscriptionEnabled, v)}
-          />
+          {editing ? (
+            <Switch
+              checked={formData.transcriptionEnabled}
+              onCheckedChange={(v) => updateField("transcriptionEnabled", v)}
+            />
+          ) : (
+            <Badge
+              variant={data.transcriptionEnabled ? "default" : "outline"}
+              className={cn(
+                "gap-1.5",
+                data.transcriptionEnabled
+                  ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400"
+                  : "text-muted-foreground",
+              )}
+            >
+              <span className={cn("h-1.5 w-1.5 rounded-full", data.transcriptionEnabled ? "bg-emerald-500" : "bg-muted-foreground")} />
+              {data.transcriptionEnabled ? "On" : "Off"}
+            </Badge>
+          )}
         </div>
 
         <Separator />
 
-        {/* Actions */}
-        <Separator />
+        {/* Timestamps */}
         <div className="grid gap-4 text-sm md:grid-cols-2">
           <div>
             <p className="text-muted-foreground text-sm">Created</p>
@@ -681,38 +833,25 @@ function BoxSettingsForm({ boxId }: { boxId: string }) {
             )}
           </div>
         </div>
-
-        <div className="flex items-center gap-3">
-          <Button
-            onClick={handleSave}
-            disabled={
-              (!dirty && !showSaveSuccess) || updateMutation.isPending || !!pinError
-            }
-            variant={showSaveSuccess ? "outline" : "default"}
-            className={
-              showSaveSuccess
-                ? "border-green-500/50 text-green-600 dark:text-green-400"
-                : ""
-            }
-          >
-            {showSaveSuccess ? (
-              <>
-                <CheckCircle2 className="mr-1.5 h-4 w-4" />
-                Saved
-              </>
-            ) : updateMutation.isPending ? (
-              "Saving..."
-            ) : (
-              "Save changes"
-            )}
-          </Button>
-          <Button variant="outline" onClick={handleResetToDefaults}>
-            <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
-            Reset to defaults
-          </Button>
-        </div>
       </CardContent>
     </Card>
+
+    {/* Unsaved changes dialog */}
+    <AlertDialog open={blocker.status === "blocked"} onOpenChange={() => blocker.reset?.()}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
+          <AlertDialogDescription>
+            You have unsaved changes to voicemail box settings. Are you sure you want to leave? Your changes will be lost.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={() => blocker.reset?.()}>Stay on page</AlertDialogCancel>
+          <AlertDialogAction onClick={() => blocker.proceed?.()}>Discard changes</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   )
 }
 

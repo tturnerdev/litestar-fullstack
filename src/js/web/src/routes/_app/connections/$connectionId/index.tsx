@@ -1,10 +1,11 @@
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
-import { useState } from "react"
+import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import {
   AlertCircle,
   AlertTriangle,
   ArrowLeft,
+  Check,
   CheckCircle2,
   Circle,
   Cpu,
@@ -18,6 +19,7 @@ import {
   Settings,
   ShieldCheck,
   Trash2,
+  X,
   XCircle,
 } from "lucide-react"
 import {
@@ -43,9 +45,11 @@ import {
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { EmptyState } from "@/components/ui/empty-state"
+import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Separator } from "@/components/ui/separator"
+import { Switch } from "@/components/ui/switch"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Textarea } from "@/components/ui/textarea"
@@ -184,6 +188,101 @@ function ConnectionDetailPage() {
   const [settingsText, setSettingsText] = useState<string | null>(null)
   const [settingsError, setSettingsError] = useState<string | null>(null)
   const [settingsDirty, setSettingsDirty] = useState(false)
+
+  // ── Inline editing state ───────────────────────────────────────────────
+  const [editing, setEditing] = useState(false)
+  const [editValues, setEditValues] = useState({
+    name: "",
+    description: "",
+    host: "",
+    port: "",
+    isEnabled: true,
+  })
+  const justSavedRef = useRef(false)
+
+  // Populate edit values when entering edit mode or when data changes
+  useEffect(() => {
+    if (data && editing) {
+      setEditValues({
+        name: data.name,
+        description: data.description ?? "",
+        host: data.host ?? "",
+        port: data.port != null ? String(data.port) : "",
+        isEnabled: data.isEnabled,
+      })
+    }
+  }, [data, editing])
+
+  const editDirty = useMemo(() => {
+    if (!data || !editing) return false
+    return (
+      editValues.name !== data.name ||
+      editValues.description !== (data.description ?? "") ||
+      editValues.host !== (data.host ?? "") ||
+      editValues.port !== (data.port != null ? String(data.port) : "") ||
+      editValues.isEnabled !== data.isEnabled
+    )
+  }, [editValues, data, editing])
+
+  useBlocker({
+    shouldBlockFn: () => editDirty && !justSavedRef.current,
+    withResolver: true,
+  })
+
+  const handleStartEditing = useCallback(() => {
+    if (!data) return
+    setEditValues({
+      name: data.name,
+      description: data.description ?? "",
+      host: data.host ?? "",
+      port: data.port != null ? String(data.port) : "",
+      isEnabled: data.isEnabled,
+    })
+    setEditing(true)
+  }, [data])
+
+  const handleCancelEditing = useCallback(() => {
+    setEditing(false)
+  }, [])
+
+  const handleSaveEditing = useCallback(() => {
+    if (!data) return
+    const payload: Record<string, unknown> = {}
+    if (editValues.name !== data.name) payload.name = editValues.name
+    if (editValues.description !== (data.description ?? "")) {
+      payload.description = editValues.description || null
+    }
+    if (editValues.host !== (data.host ?? "")) {
+      payload.host = editValues.host || null
+    }
+    const newPort = editValues.port.trim() === "" ? null : Number(editValues.port)
+    const oldPort = data.port ?? null
+    if (newPort !== oldPort) payload.port = newPort
+    if (editValues.isEnabled !== data.isEnabled) payload.isEnabled = editValues.isEnabled
+
+    if (Object.keys(payload).length === 0) {
+      setEditing(false)
+      return
+    }
+
+    justSavedRef.current = true
+    updateConnection.mutate(payload, {
+      onSuccess: () => {
+        setEditing(false)
+        justSavedRef.current = false
+      },
+      onError: () => {
+        justSavedRef.current = false
+      },
+    })
+  }, [data, editValues, updateConnection])
+
+  const updateEditValue = useCallback(
+    <K extends keyof typeof editValues>(key: K, value: (typeof editValues)[K]) => {
+      setEditValues((prev) => ({ ...prev, [key]: value }))
+    },
+    [],
+  )
 
   if (isLoading) {
     return (
@@ -352,7 +451,7 @@ function ConnectionDetailPage() {
         actions={
           <div className="flex items-center gap-3">
             <StatusBadge status={data.status} />
-            {!data.isEnabled && (
+            {!editing && !data.isEnabled && (
               <Badge
                 variant="outline"
                 className="border-muted-foreground/30 text-muted-foreground"
@@ -364,7 +463,7 @@ function ConnectionDetailPage() {
               size="sm"
               variant="outline"
               onClick={() => testConnection.mutate()}
-              disabled={testConnection.isPending}
+              disabled={testConnection.isPending || editing}
             >
               {testConnection.isPending ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -373,11 +472,34 @@ function ConnectionDetailPage() {
               )}
               Test
             </Button>
-            <Button variant="outline" size="sm" asChild>
-              <Link to="/connections/$connectionId/edit" params={{ connectionId }}>
+            {editing ? (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleCancelEditing}
+                  disabled={updateConnection.isPending}
+                >
+                  <X className="mr-2 h-4 w-4" /> Cancel
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleSaveEditing}
+                  disabled={!editDirty || updateConnection.isPending}
+                >
+                  {updateConnection.isPending ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Check className="mr-2 h-4 w-4" />
+                  )}
+                  Save
+                </Button>
+              </>
+            ) : (
+              <Button variant="outline" size="sm" onClick={handleStartEditing}>
                 <Pencil className="mr-2 h-4 w-4" /> Edit
-              </Link>
-            </Button>
+              </Button>
+            )}
             <Button variant="outline" size="sm" asChild>
               <Link to="/connections">
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back
@@ -427,7 +549,16 @@ function ConnectionDetailPage() {
                 <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
                   <div>
                     <p className="text-muted-foreground">Name</p>
-                    <p className="font-medium">{data.name}</p>
+                    {editing ? (
+                      <Input
+                        value={editValues.name}
+                        onChange={(e) => updateEditValue("name", e.target.value)}
+                        className="mt-1 h-8"
+                        autoFocus
+                      />
+                    ) : (
+                      <p className="font-medium">{data.name}</p>
+                    )}
                   </div>
                   <div>
                     <p className="text-muted-foreground">Type</p>
@@ -439,7 +570,17 @@ function ConnectionDetailPage() {
                   </div>
                   <div className="md:col-span-2 lg:col-span-3">
                     <p className="text-muted-foreground">Description</p>
-                    <p>{data.description || "---"}</p>
+                    {editing ? (
+                      <Textarea
+                        value={editValues.description}
+                        onChange={(e) => updateEditValue("description", e.target.value)}
+                        className="mt-1"
+                        rows={2}
+                        placeholder="Optional description"
+                      />
+                    ) : (
+                      <p>{data.description || "---"}</p>
+                    )}
                   </div>
                   <div>
                     <p className="text-muted-foreground">Status</p>
@@ -449,7 +590,18 @@ function ConnectionDetailPage() {
                   </div>
                   <div>
                     <p className="text-muted-foreground">Enabled</p>
-                    <p>{data.isEnabled ? "Yes" : "No"}</p>
+                    {editing ? (
+                      <div className="mt-1 flex items-center gap-2">
+                        <Switch
+                          checked={editValues.isEnabled}
+                          onCheckedChange={(checked) => updateEditValue("isEnabled", checked)}
+                          aria-label="Toggle enabled"
+                        />
+                        <span className="text-sm">{editValues.isEnabled ? "Yes" : "No"}</span>
+                      </div>
+                    ) : (
+                      <p>{data.isEnabled ? "Yes" : "No"}</p>
+                    )}
                   </div>
                   <div>
                     <p className="text-muted-foreground">Connection ID</p>
@@ -474,19 +626,40 @@ function ConnectionDetailPage() {
                 <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
                   <div>
                     <p className="text-muted-foreground">Host</p>
-                    <div className="flex items-center gap-1">
-                      <p className="font-mono text-xs">{data.host || "---"}</p>
-                      {data.host && <CopyButton value={data.host} label="host" />}
-                    </div>
+                    {editing ? (
+                      <Input
+                        value={editValues.host}
+                        onChange={(e) => updateEditValue("host", e.target.value)}
+                        className="mt-1 h-8 font-mono text-xs"
+                        placeholder="e.g. 192.168.1.1 or example.com"
+                      />
+                    ) : (
+                      <div className="flex items-center gap-1">
+                        <p className="font-mono text-xs">{data.host || "---"}</p>
+                        {data.host && <CopyButton value={data.host} label="host" />}
+                      </div>
+                    )}
                   </div>
                   <div>
                     <p className="text-muted-foreground">Port</p>
-                    <p className="font-mono text-xs">{data.port != null ? String(data.port) : "---"}</p>
+                    {editing ? (
+                      <Input
+                        type="number"
+                        value={editValues.port}
+                        onChange={(e) => updateEditValue("port", e.target.value)}
+                        className="mt-1 h-8 font-mono text-xs"
+                        placeholder="e.g. 443"
+                        min={1}
+                        max={65535}
+                      />
+                    ) : (
+                      <p className="font-mono text-xs">{data.port != null ? String(data.port) : "---"}</p>
+                    )}
                   </div>
                   <div>
                     <p className="text-muted-foreground">SSL / TLS</p>
                     <div className="flex items-center gap-1.5">
-                      {data.port === 443 ? (
+                      {(editing ? editValues.port === "443" : data.port === 443) ? (
                         <>
                           <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
                           <span>Likely (port 443)</span>

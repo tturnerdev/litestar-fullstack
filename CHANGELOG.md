@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.201.0 (2026-05-02)
+
+### Added
+- **Phone number inline editing** — Edit label, caller ID name, and active status directly on the detail page with view/edit toggle, dirty state warnings, and quick active toggle
+- **Connection inline editing** — Edit name, description, host, port, and enabled status inline on the detail page with save/cancel and navigation blocker
+- **Voicemail box inline editing** — Settings now display as read-only in view mode with an Edit button to toggle into edit mode; includes PIN reveal toggle and unsaved changes warning
+
 ## v0.200.0 (2026-05-02)
 
 ### Added
