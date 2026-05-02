@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
-import { AlertCircle, AlertTriangle, ArrowLeft, Clock, Loader2, MapPin, Pencil, Trash2 } from "lucide-react"
+import { AlertCircle, AlertTriangle, ArrowLeft, Clock, Cpu, Loader2, MapPin, Pencil, Trash2 } from "lucide-react"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { CopyButton } from "@/components/ui/copy-button"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
@@ -28,6 +29,7 @@ import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useAuthStore } from "@/lib/auth"
 import { formatDateTime, formatRelativeTime } from "@/lib/date-utils"
+import { useDevicesByLocation } from "@/lib/api/hooks/devices"
 import { useDeleteLocation, useLocation, useUpdateLocation, type Location } from "@/lib/api/hooks/locations"
 
 export const Route = createFileRoute("/_app/locations/$locationId/")({
@@ -53,6 +55,7 @@ function LocationDetailPage() {
   useDocumentTitle(data?.name ?? "Location")
   const updateLocation = useUpdateLocation(teamId, locationId)
   const deleteLocation = useDeleteLocation(teamId)
+  const { data: locationDevices, isLoading: devicesLoading } = useDevicesByLocation(locationId)
 
   const [editing, setEditing] = useState(false)
   const [editName, setEditName] = useState("")
@@ -360,6 +363,66 @@ function LocationDetailPage() {
                       </>
                     )}
                   </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Devices at this Location */}
+            <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Cpu className="h-5 w-5 text-muted-foreground" />
+                  Devices at this Location
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {devicesLoading ? (
+                  <div className="space-y-3">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <Skeleton key={i} className="h-10 w-full" />
+                    ))}
+                  </div>
+                ) : locationDevices && locationDevices.length > 0 ? (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>MAC Address</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {locationDevices.map((device) => (
+                        <TableRow key={device.id}>
+                          <TableCell>
+                            <Link
+                              to="/devices/$deviceId"
+                              params={{ deviceId: device.id }}
+                              className="font-medium text-primary hover:underline"
+                            >
+                              {device.name}
+                            </Link>
+                          </TableCell>
+                          <TableCell>{device.deviceType}</TableCell>
+                          <TableCell>
+                            <Badge variant={device.status === "online" ? "default" : "secondary"}>
+                              {device.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="font-mono text-xs">
+                            {device.macAddress ?? "---"}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                ) : (
+                  <EmptyState
+                    icon={Cpu}
+                    title="No devices at this location"
+                    description="Devices assigned to this location will appear here."
+                  />
                 )}
               </CardContent>
             </Card>

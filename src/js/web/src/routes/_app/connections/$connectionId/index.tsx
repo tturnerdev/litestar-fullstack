@@ -7,6 +7,7 @@ import {
   ArrowLeft,
   CheckCircle2,
   Circle,
+  Cpu,
   Globe,
   Key,
   Loader2,
@@ -46,6 +47,7 @@ import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Textarea } from "@/components/ui/textarea"
 import { CopyButton } from "@/components/ui/copy-button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -57,6 +59,8 @@ import {
   useTestConnection,
   useUpdateConnection,
 } from "@/lib/api/hooks/connections"
+import { useDevices } from "@/lib/api/hooks/devices"
+import { DeviceStatusBadge } from "@/components/devices/device-status-badge"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 
 export const Route = createFileRoute("/_app/connections/$connectionId/")({
@@ -82,6 +86,15 @@ const authTypeLabels: Record<string, string> = {
   oauth2: "OAuth 2.0",
   token: "Token",
   none: "None",
+}
+
+const deviceTypeLabels: Record<string, string> = {
+  desk_phone: "Desk Phone",
+  softphone: "Softphone",
+  ata: "ATA",
+  conference: "Conference",
+  gateway: "Gateway",
+  other: "Other",
 }
 
 // ── Status badge ────────────────────────────────────────────────────────
@@ -162,6 +175,10 @@ function ConnectionDetailPage() {
   const deleteConnection = useDeleteConnection()
   const testConnection = useTestConnection(connectionId)
   const updateConnection = useUpdateConnection(connectionId)
+  const devicesQuery = useDevices({ pageSize: 200 })
+  const managedDevices = (devicesQuery.data?.items ?? []).filter(
+    (d) => d.connectionId === connectionId,
+  )
 
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [settingsText, setSettingsText] = useState<string | null>(null)
@@ -595,6 +612,66 @@ function ConnectionDetailPage() {
                     Save Settings
                   </Button>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Managed Devices */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Cpu className="h-5 w-5 text-muted-foreground" />
+                  <CardTitle>Managed Devices</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {devicesQuery.isLoading ? (
+                  <div className="space-y-2">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <Skeleton key={i} className="h-8 w-full" />
+                    ))}
+                  </div>
+                ) : managedDevices.length === 0 ? (
+                  <EmptyState
+                    icon={Cpu}
+                    title="No devices managed by this connection"
+                    description="Devices linked to this connection will appear here."
+                  />
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>IP Address</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {managedDevices.map((device) => (
+                        <TableRow key={device.id}>
+                          <TableCell>
+                            <Link
+                              to="/devices/$deviceId"
+                              params={{ deviceId: device.id }}
+                              className="font-medium text-primary hover:underline"
+                            >
+                              {device.name}
+                            </Link>
+                          </TableCell>
+                          <TableCell>
+                            {deviceTypeLabels[device.deviceType] ?? device.deviceType}
+                          </TableCell>
+                          <TableCell>
+                            <DeviceStatusBadge status={device.status} />
+                          </TableCell>
+                          <TableCell className="font-mono text-xs">
+                            {device.ipAddress || "---"}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
               </CardContent>
             </Card>
 

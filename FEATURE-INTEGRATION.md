@@ -424,8 +424,8 @@ No new hook files. Existing hooks return the enriched schemas automatically afte
 - [x] Update `DeviceService` to eager-load location relationship
 - [ ] Update `LocationService` to compute `device_count`
 - [x] Regenerate TypeScript types (`make types`)
-- [ ] Add Location field to device detail page overview section
-- [ ] Add Location dropdown to device create/edit form
+- [x] Add Location field to device detail page overview section — shows as clickable link
+- [x] Add Location dropdown to device create/edit form — Select dropdown with location options
 - [ ] Add "Devices at this location" section to location detail page
 - [ ] Build `RelatedEntitiesSection` shared component
 
@@ -439,7 +439,7 @@ No new hook files. Existing hooks return the enriched schemas automatically afte
 - [ ] Create `DeviceLineAssignmentSummary` schema for extension detail response
 - [x] Update `DeviceService` line loading to eager-load extension
 - [ ] Update `ExtensionService` to support loading assigned devices
-- [ ] Regenerate TypeScript types (`make types`)
+- [x] Regenerate TypeScript types (`make types`) — done in v0.155.0
 - [ ] Show extension number/name in device line configuration UI
 - [ ] Add "Assigned to Devices" section to extension detail page
 
@@ -454,10 +454,10 @@ No new hook files. Existing hooks return the enriched schemas automatically afte
 - [ ] Add `get_unregistered_numbers(team_id)` method to `PhoneNumberService`
 - [ ] Add `GET /api/voice/phone-numbers/unregistered-e911` endpoint
 - [ ] Regenerate TypeScript types (`make types`)
-- [ ] Build `E911StatusBadge` shared component
-- [ ] Add E911 status section to extension detail page
-- [ ] Add E911 badge to phone number list rows
-- [ ] Add E911 status section to phone number detail page
+- [x] Build `E911StatusBadge` shared component — created at `src/js/web/src/components/voice/e911-status-badge.tsx`
+- [x] Add E911 status section to extension detail page — added via `usePhoneNumber` hook, shows Shield/ShieldOff icons with registration link
+- [x] Add E911 badge to phone number list rows — added E911 column with E911StatusBadge
+- [x] Add E911 status section to phone number detail page — added with "View Registration" link
 - [ ] Add "Unregistered Numbers" count to E911 list page header
 
 ### Phase 4: Device ↔ Connection
@@ -473,8 +473,8 @@ No new hook files. Existing hooks return the enriched schemas automatically afte
 - [x] Update `DeviceService` to eager-load connection relationship
 - [ ] Update `ConnectionService` to compute `managed_device_count`
 - [x] Regenerate TypeScript types (`make types`)
-- [ ] Add Connection field to device detail page overview section
-- [ ] Add Connection dropdown to device create/edit form (filtered to type=`pbx`)
+- [x] Add Connection field to device detail page — shows as clickable link
+- [x] Add Connection dropdown to device create/edit form — Select dropdown
 - [ ] Add "Managed Devices" section to connection detail page
 
 ### Phase 5: Review Candidate Links

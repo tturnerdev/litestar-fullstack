@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { Link } from "@tanstack/react-router"
 import { AlertCircle, AlertTriangle, Cable, GripVertical, Loader2, Plus, Save, Trash2 } from "lucide-react"
 import type { DeviceLineAssignment } from "@/lib/generated/api"
 import {
@@ -41,6 +42,8 @@ interface LineRow {
   label: string
   lineType: string
   extensionId: string
+  extensionNumber: string | null
+  extensionDisplayName: string | null
   isActive: boolean
 }
 
@@ -50,6 +53,8 @@ function toLineRow(line: DeviceLineAssignment): LineRow {
     label: line.label,
     lineType: line.lineType,
     extensionId: line.extensionId ?? "",
+    extensionNumber: line.extensionNumber ?? null,
+    extensionDisplayName: line.extensionDisplayName ?? null,
     isActive: line.isActive ?? true,
   }
 }
@@ -60,6 +65,8 @@ function emptyLine(lineNumber: number): LineRow {
     label: `Line ${lineNumber}`,
     lineType: "private",
     extensionId: "",
+    extensionNumber: null,
+    extensionDisplayName: null,
     isActive: true,
   }
 }
@@ -178,7 +185,7 @@ export function DeviceLineConfig({ deviceId }: DeviceLineConfigProps) {
                   <TableHead className="w-16">Line</TableHead>
                   <TableHead>Label</TableHead>
                   <TableHead>Type</TableHead>
-                  <TableHead>Extension ID</TableHead>
+                  <TableHead>Extension</TableHead>
                   <TableHead className="w-20">Active</TableHead>
                   <TableHead className="w-16" />
                 </TableRow>
@@ -218,12 +225,34 @@ export function DeviceLineConfig({ deviceId }: DeviceLineConfigProps) {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Input
-                        value={line.extensionId}
-                        onChange={(e) => updateLine(index, "extensionId", e.target.value)}
-                        className="h-8 font-mono text-xs"
-                        placeholder="Optional extension ID"
-                      />
+                      <div className="space-y-1">
+                        <Input
+                          value={line.extensionId}
+                          onChange={(e) => updateLine(index, "extensionId", e.target.value)}
+                          className="h-8 font-mono text-xs"
+                          placeholder="Optional extension ID"
+                        />
+                        {line.extensionId && (
+                          <Link
+                            to="/voice/extensions/$extensionId"
+                            params={{ extensionId: line.extensionId }}
+                            className="inline-flex flex-col text-xs hover:underline"
+                          >
+                            {line.extensionNumber ? (
+                              <>
+                                <span className="font-mono font-semibold">{line.extensionNumber}</span>
+                                {line.extensionDisplayName && (
+                                  <span className="text-muted-foreground">{line.extensionDisplayName}</span>
+                                )}
+                              </>
+                            ) : (
+                              <span className="font-mono text-muted-foreground">
+                                {line.extensionId.slice(0, 8)}&hellip;
+                              </span>
+                            )}
+                          </Link>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell>
                       <Switch

@@ -303,6 +303,23 @@ export function useDevicesByExtension(extensionId: string | undefined) {
 }
 
 // ---------------------------------------------------------------------------
+// Devices by Location (client-side filter)
+// ---------------------------------------------------------------------------
+
+export function useDevicesByLocation(locationId: string | undefined) {
+  return useQuery({
+    queryKey: ["devices", "by-location", locationId],
+    queryFn: async () => {
+      const query: ListDevicesData["query"] = { pageSize: 200 }
+      const response = await listDevices({ query })
+      const data = response.data as { items: Device[]; total: number }
+      return (data.items ?? []).filter((d) => d.locationId === locationId)
+    },
+    enabled: !!locationId,
+  })
+}
+
+// ---------------------------------------------------------------------------
 // Device Screenshot (LCD live view)
 // ---------------------------------------------------------------------------
 
