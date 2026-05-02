@@ -61,7 +61,7 @@ class LocationController(Controller):
         current_user: m.User,
         filters: Annotated[list[FilterTypes], Dependency(skip_validation=True)],
         team_id: Annotated[UUID, Parameter(title="Team ID", description="The team to list locations for.")],
-        location_type: Annotated[str | None, Parameter(title="Location Type", description="Filter by location type.", required=False)] = None,
+        location_type: Annotated[str | None, Parameter(title="Location Type", description="Filter by location type.", query="locationType", required=False)] = None,
     ) -> OffsetPagination[Location]:
         """List locations for a team.
 

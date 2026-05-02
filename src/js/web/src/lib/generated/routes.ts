@@ -163,6 +163,7 @@ export type RouteName =
   | 'list_call_queues'
   | 'list_call_records'
   | 'list_connections'
+  | 'list_deliveries'
   | 'list_device_lines'
   | 'list_devices'
   | 'list_devices_api_devices'
@@ -655,6 +656,9 @@ export interface RoutePathParams {
   'list_call_queues': Record<string, never>;
   'list_call_records': Record<string, never>;
   'list_connections': Record<string, never>;
+  'list_deliveries': {
+    webhook_id: UUID;
+  };
   'list_device_lines': {
     device_id: UUID;
   };
@@ -1281,6 +1285,7 @@ export interface RouteQueryParams {
     updatedAfter?: DateTime;
     updatedBefore?: DateTime;
   };
+  'list_deliveries': Record<string, never>;
   'list_device_lines': Record<string, never>;
   'list_devices': {
     createdAfter?: DateTime;
@@ -1394,7 +1399,7 @@ export interface RouteQueryParams {
     createdBefore?: DateTime;
     currentPage?: number;
     ids?: string[];
-    location_type?: string;
+    locationType?: string;
     orderBy?: string;
     pageSize?: number;
     searchIgnoreCase?: boolean;
@@ -1489,7 +1494,7 @@ export interface RouteQueryParams {
     searchIgnoreCase?: boolean;
     searchString?: string;
     sortOrder?: "asc" | "desc";
-    team_id?: UUID;
+    teamId?: UUID;
     updatedAfter?: DateTime;
     updatedBefore?: DateTime;
   };
@@ -1522,11 +1527,11 @@ export interface RouteQueryParams {
     ids?: string[];
     orderBy?: string;
     pageSize?: number;
-    schedule_type?: string;
+    scheduleType?: string;
     searchIgnoreCase?: boolean;
     searchString?: string;
     sortOrder?: "asc" | "desc";
-    team_id?: UUID;
+    teamId?: UUID;
     updatedAfter?: DateTime;
     updatedBefore?: DateTime;
   };
@@ -1633,7 +1638,7 @@ export interface RouteQueryParams {
     updatedBefore?: DateTime;
   };
   'list_unregistered': {
-    team_id: UUID;
+    teamId: UUID;
   };
   'list_users': {
     createdAfter?: DateTime;
@@ -2869,6 +2874,13 @@ export const routeDefinitions = {
     pathParams: [] as const,
     queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'teamId', 'updatedAfter', 'updatedBefore'] as const,
   },
+  'list_deliveries': {
+    path: '/api/webhooks/{webhook_id}/deliveries',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['webhook_id'] as const,
+    queryParams: [] as const,
+  },
   'list_device_lines': {
     path: '/api/devices/{device_id}/lines',
     methods: ['GET'] as const,
@@ -2967,7 +2979,7 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: ['team_id'] as const,
-    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'location_type', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'locationType', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
   },
   'list_logs': {
     path: '/api/admin/audit',
@@ -3037,7 +3049,7 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: [] as const,
-    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'team_id', 'updatedAfter', 'updatedBefore'] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'teamId', 'updatedAfter', 'updatedBefore'] as const,
   },
   'list_ring_groups': {
     path: '/api/ring-groups',
@@ -3058,7 +3070,7 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: [] as const,
-    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'schedule_type', 'searchIgnoreCase', 'searchString', 'sortOrder', 'team_id', 'updatedAfter', 'updatedBefore'] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'scheduleType', 'searchIgnoreCase', 'searchString', 'sortOrder', 'teamId', 'updatedAfter', 'updatedBefore'] as const,
   },
   'list_tags': {
     path: '/api/tags',
@@ -3129,7 +3141,7 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: [] as const,
-    queryParams: ['team_id'] as const,
+    queryParams: ['teamId'] as const,
   },
   'list_users': {
     path: '/api/admin/users',

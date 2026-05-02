@@ -7550,6 +7550,17 @@ export const TagUpdateSchema = {
 
 export const TeamSchema = {
   properties: {
+    createdAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     description: {
       oneOf: [
         {
@@ -7585,6 +7596,17 @@ export const TeamSchema = {
         $ref: "#/components/schemas/TeamTag",
       },
       type: "array",
+    },
+    updatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
     },
   },
   required: ["id", "name", "slug"],
@@ -9221,6 +9243,64 @@ export const WebhookCreateSchema = {
   },
   required: ["name", "url"],
   title: "WebhookCreate",
+  type: "object",
+} as const;
+
+export const WebhookDeliveryListSchema = {
+  properties: {
+    createdAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    error: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    event: {
+      type: "string",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    responseTimeMs: {
+      default: 0,
+      type: "integer",
+    },
+    statusCode: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    success: {
+      default: false,
+      type: "boolean",
+    },
+    webhookId: {
+      format: "uuid",
+      type: "string",
+    },
+  },
+  required: ["event", "id", "webhookId"],
+  title: "WebhookDeliveryList",
   type: "object",
 } as const;
 

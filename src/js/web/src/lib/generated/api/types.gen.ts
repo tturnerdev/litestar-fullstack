@@ -2076,6 +2076,7 @@ export type TagUpdate = {
  * Team
  */
 export type Team = {
+  createdAt?: string | null;
   description?: string | null;
   id: string;
   isActive?: boolean;
@@ -2083,6 +2084,7 @@ export type Team = {
   name: string;
   slug: string;
   tags?: Array<TeamTag>;
+  updatedAt?: string | null;
 };
 
 /**
@@ -2557,6 +2559,20 @@ export type WebhookCreate = {
 };
 
 /**
+ * WebhookDeliveryList
+ */
+export type WebhookDeliveryList = {
+  createdAt?: string | null;
+  error?: string | null;
+  event: string;
+  id: string;
+  responseTimeMs?: number;
+  statusCode?: number | null;
+  success?: boolean;
+  webhookId: string;
+};
+
+/**
  * WebhookDetail
  */
 export type WebhookDetail = {
@@ -3015,10 +3031,10 @@ export type AdminListAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetTypeIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
-    targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3094,10 +3110,10 @@ export type AdminExportAuditLogData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetTypeIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
-    targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3162,10 +3178,10 @@ export type AdminGetTargetAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetTypeIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
-    targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -3242,10 +3258,10 @@ export type AdminGetUserAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetTypeIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
-    targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -6591,7 +6607,7 @@ export type ListE911RegistrationsData = {
      *
      * Filter by team.
      */
-    team_id?: string | null;
+    teamId?: string | null;
   };
   url: "/api/e911";
 };
@@ -6684,7 +6700,7 @@ export type ListUnregisteredPhoneNumbersData = {
      *
      * The team to check for unregistered numbers.
      */
-    team_id: string;
+    teamId: string;
   };
   url: "/api/e911/unregistered";
 };
@@ -9757,13 +9773,13 @@ export type ListSchedulesData = {
      *
      * Filter by team.
      */
-    team_id?: string | null;
+    teamId?: string | null;
     /**
      * Schedule Type
      *
      * Filter by schedule type.
      */
-    schedule_type?: string | null;
+    scheduleType?: string | null;
   };
   url: "/api/schedules";
 };
@@ -11726,7 +11742,7 @@ export type ListLocationsData = {
      *
      * Filter by location type.
      */
-    location_type?: string | null;
+    locationType?: string | null;
   };
   url: "/api/teams/{team_id}/locations";
 };
@@ -14726,6 +14742,49 @@ export type UpdateWebhookResponses = {
 
 export type UpdateWebhookResponse =
   UpdateWebhookResponses[keyof UpdateWebhookResponses];
+
+export type ListWebhookDeliveriesData = {
+  body?: never;
+  path: {
+    /**
+     * Webhook ID
+     *
+     * The webhook to list deliveries for.
+     */
+    webhook_id: string;
+  };
+  query?: never;
+  url: "/api/webhooks/{webhook_id}/deliveries";
+};
+
+export type ListWebhookDeliveriesErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type ListWebhookDeliveriesError =
+  ListWebhookDeliveriesErrors[keyof ListWebhookDeliveriesErrors];
+
+export type ListWebhookDeliveriesResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: Array<WebhookDeliveryList>;
+};
+
+export type ListWebhookDeliveriesResponse =
+  ListWebhookDeliveriesResponses[keyof ListWebhookDeliveriesResponses];
 
 export type TestWebhookData = {
   body?: never;

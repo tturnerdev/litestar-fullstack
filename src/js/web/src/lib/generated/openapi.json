@@ -7799,6 +7799,17 @@
       },
       "Team": {
         "properties": {
+          "createdAt": {
+            "oneOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "description": {
             "oneOf": [
               {
@@ -7834,6 +7845,17 @@
               "$ref": "#/components/schemas/TeamTag"
             },
             "type": "array"
+          },
+          "updatedAt": {
+            "oneOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -9546,6 +9568,67 @@
         "title": "WebhookCreate",
         "type": "object"
       },
+      "WebhookDeliveryList": {
+        "properties": {
+          "createdAt": {
+            "oneOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "event": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "responseTimeMs": {
+            "default": 0,
+            "type": "integer"
+          },
+          "statusCode": {
+            "oneOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "success": {
+            "default": false,
+            "type": "boolean"
+          },
+          "webhookId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "event",
+          "id",
+          "webhookId"
+        ],
+        "title": "WebhookDeliveryList",
+        "type": "object"
+      },
       "WebhookDetail": {
         "properties": {
           "createdAt": {
@@ -10894,7 +10977,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -10915,7 +10998,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actorIdIn",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -10957,7 +11040,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
+            "name": "actorIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -11283,7 +11366,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -11304,7 +11387,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actorIdIn",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -11346,7 +11429,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
+            "name": "actorIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -11670,7 +11753,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -11691,7 +11774,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actorIdIn",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -11733,7 +11816,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
+            "name": "actorIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -12051,7 +12134,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -12072,7 +12155,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actorIdIn",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -12114,7 +12197,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
+            "name": "actorIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -20644,7 +20727,7 @@
             "deprecated": false,
             "description": "Filter by team.",
             "in": "query",
-            "name": "team_id",
+            "name": "teamId",
             "required": false,
             "schema": {
               "description": "Filter by team.",
@@ -20818,7 +20901,7 @@
             "deprecated": false,
             "description": "The team to check for unregistered numbers.",
             "in": "query",
-            "name": "team_id",
+            "name": "teamId",
             "required": true,
             "schema": {
               "description": "The team to check for unregistered numbers.",
@@ -27606,7 +27689,7 @@
             "deprecated": false,
             "description": "Filter by team.",
             "in": "query",
-            "name": "team_id",
+            "name": "teamId",
             "required": false,
             "schema": {
               "description": "Filter by team.",
@@ -27628,7 +27711,7 @@
             "deprecated": false,
             "description": "Filter by schedule type.",
             "in": "query",
-            "name": "schedule_type",
+            "name": "scheduleType",
             "required": false,
             "schema": {
               "description": "Filter by schedule type.",
@@ -32168,7 +32251,7 @@
             "deprecated": false,
             "description": "Filter by location type.",
             "in": "query",
-            "name": "location_type",
+            "name": "locationType",
             "required": false,
             "schema": {
               "description": "Filter by location type.",
@@ -39129,6 +39212,85 @@
           }
         },
         "summary": "UpdateWebhook",
+        "tags": [
+          "Webhooks"
+        ]
+      }
+    },
+    "/api/webhooks/{webhook_id}/deliveries": {
+      "get": {
+        "deprecated": false,
+        "operationId": "ListWebhookDeliveries",
+        "parameters": [
+          {
+            "deprecated": false,
+            "description": "The webhook to list deliveries for.",
+            "in": "path",
+            "name": "webhook_id",
+            "required": true,
+            "schema": {
+              "description": "The webhook to list deliveries for.",
+              "format": "uuid",
+              "title": "Webhook ID",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/WebhookDeliveryList"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Request fulfilled, document follows",
+            "headers": {}
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "detail": "Bad Request",
+                      "extra": {},
+                      "status_code": 400
+                    }
+                  ],
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    },
+                    "status_code": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Bad request syntax or unsupported method"
+          }
+        },
+        "summary": "ListDeliveries",
         "tags": [
           "Webhooks"
         ]

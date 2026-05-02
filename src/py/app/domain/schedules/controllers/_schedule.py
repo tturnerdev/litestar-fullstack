@@ -75,8 +75,8 @@ class ScheduleController(Controller):
         schedules_service: ScheduleService,
         current_user: m.User,
         filters: Annotated[list[FilterTypes], Dependency(skip_validation=True)],
-        team_id: Annotated[UUID | None, Parameter(title="Team ID", description="Filter by team.", required=False)] = None,
-        schedule_type: Annotated[str | None, Parameter(title="Schedule Type", description="Filter by schedule type.", required=False)] = None,
+        team_id: Annotated[UUID | None, Parameter(title="Team ID", description="Filter by team.", query="teamId", required=False)] = None,
+        schedule_type: Annotated[str | None, Parameter(title="Schedule Type", description="Filter by schedule type.", query="scheduleType", required=False)] = None,
     ) -> OffsetPagination[ScheduleList]:
         """List schedules.
 

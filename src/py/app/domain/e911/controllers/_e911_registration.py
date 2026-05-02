@@ -68,7 +68,7 @@ class E911RegistrationController(Controller):
         e911_service: E911RegistrationService,
         current_user: m.User,
         filters: Annotated[list[FilterTypes], Dependency(skip_validation=True)],
-        team_id: Annotated[UUID | None, Parameter(title="Team ID", description="Filter by team.", required=False)] = None,
+        team_id: Annotated[UUID | None, Parameter(title="Team ID", description="Filter by team.", query="teamId", required=False)] = None,
     ) -> OffsetPagination[E911Registration]:
         """List E911 registrations.
 
@@ -296,7 +296,7 @@ class E911RegistrationController(Controller):
         self,
         e911_service: E911RegistrationService,
         current_user: m.User,
-        team_id: Annotated[UUID, Parameter(title="Team ID", description="The team to check for unregistered numbers.")],
+        team_id: Annotated[UUID, Parameter(title="Team ID", description="The team to check for unregistered numbers.", query="teamId")],
     ) -> list[UnregisteredPhoneNumber]:
         """List phone numbers without E911 registrations.
 

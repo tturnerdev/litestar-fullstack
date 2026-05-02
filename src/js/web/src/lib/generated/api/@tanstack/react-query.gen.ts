@@ -212,6 +212,7 @@ import {
   listVoicemailBoxes,
   listVoicemailBoxMessages,
   listVoicemailMessages,
+  listWebhookDeliveries,
   listWebhooks,
   lookupDeviceTemplate,
   markAllNotificationsRead,
@@ -877,6 +878,9 @@ import type {
   ListVoicemailMessagesData,
   ListVoicemailMessagesError,
   ListVoicemailMessagesResponse,
+  ListWebhookDeliveriesData,
+  ListWebhookDeliveriesError,
+  ListWebhookDeliveriesResponse,
   ListWebhooksData,
   ListWebhooksError,
   ListWebhooksResponse,
@@ -8548,6 +8552,34 @@ export const updateWebhookMutation = (
   };
   return mutationOptions;
 };
+
+export const listWebhookDeliveriesQueryKey = (
+  options: Options<ListWebhookDeliveriesData>,
+) => createQueryKey("listWebhookDeliveries", options);
+
+/**
+ * ListDeliveries
+ */
+export const listWebhookDeliveriesOptions = (
+  options: Options<ListWebhookDeliveriesData>,
+) =>
+  queryOptions<
+    ListWebhookDeliveriesResponse,
+    ListWebhookDeliveriesError,
+    ListWebhookDeliveriesResponse,
+    ReturnType<typeof listWebhookDeliveriesQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listWebhookDeliveries({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listWebhookDeliveriesQueryKey(options),
+  });
 
 /**
  * TestWebhook

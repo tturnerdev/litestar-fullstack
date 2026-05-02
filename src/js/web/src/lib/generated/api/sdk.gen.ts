@@ -601,6 +601,9 @@ import type {
   ListVoicemailMessagesData,
   ListVoicemailMessagesErrors,
   ListVoicemailMessagesResponses,
+  ListWebhookDeliveriesData,
+  ListWebhookDeliveriesErrors,
+  ListWebhookDeliveriesResponses,
   ListWebhooksData,
   ListWebhooksErrors,
   ListWebhooksResponses,
@@ -5657,6 +5660,22 @@ export const updateWebhook = <ThrowOnError extends boolean = false>(
       "Content-Type": "application/json",
       ...options.headers,
     },
+  });
+
+/**
+ * ListDeliveries
+ */
+export const listWebhookDeliveries = <ThrowOnError extends boolean = false>(
+  options: Options<ListWebhookDeliveriesData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    ListWebhookDeliveriesResponses,
+    ListWebhookDeliveriesErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/webhooks/{webhook_id}/deliveries",
+    ...options,
   });
 
 /**
