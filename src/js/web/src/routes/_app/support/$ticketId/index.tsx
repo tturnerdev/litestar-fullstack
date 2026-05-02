@@ -22,6 +22,7 @@ import {
   Pencil,
   Plus,
   Tag,
+  Timer,
   Trash2,
   Unlock,
   User,
@@ -335,6 +336,202 @@ function TicketTagManager({
         <p className="pl-7 text-sm text-muted-foreground/70">No tags</p>
       )}
     </div>
+  )
+}
+
+// ── SLA Indicators ─────────────────────────────────────────────────────
+
+function formatDuration(ms: number): string {
+  const seconds = Math.floor(ms / 1000)
+  const minutes = Math.floor(seconds / 60)
+  const hours = Math.floor(minutes / 60)
+  const days = Math.floor(hours / 24)
+
+  if (days > 0) {
+    const remHours = hours % 24
+    return remHours > 0 ? `${days}d ${remHours}h` : `${days}d`
+  }
+  if (hours > 0) {
+    const remMinutes = minutes % 60
+    return remMinutes > 0 ? `${hours}h ${remMinutes}m` : `${hours}h`
+  }
+  if (minutes > 0) return `${minutes}m`
+  return "< 1m"
+}
+
+type SlaColor = "green" | "yellow" | "red"
+
+function getSlaColorClasses(color: SlaColor): string {
+  switch (color) {
+    case "green":
+      return "text-green-600 dark:text-green-400"
+    case "yellow":
+      return "text-yellow-600 dark:text-yellow-400"
+    case "red":
+      return "text-red-600 dark:text-red-400"
+  }
+}
+
+function getSlaIndicatorClasses(color: SlaColor): string {
+  switch (color) {
+    case "green":
+      return "bg-green-500/15 text-green-600 dark:text-green-400"
+    case "yellow":
+      return "bg-yellow-500/15 text-yellow-600 dark:text-yellow-400"
+    case "red":
+      return "bg-red-500/15 text-red-600 dark:text-red-400"
+  }
+}
+
+function getFirstResponseColor(ms: number): SlaColor {
+  const hours = ms / (1000 * 60 * 60)
+  if (hours < 1) return "green"
+  if (hours < 4) return "yellow"
+  return "red"
+}
+
+function getResolutionColor(ms: number): SlaColor {
+  const hours = ms / (1000 * 60 * 60)
+  if (hours < 24) return "green"
+  if (hours < 72) return "yellow"
+  return "red"
+}
+
+function getAgeColor(ms: number, isResolved: boolean): SlaColor {
+  if (isResolved) return "green"
+  const hours = ms / (1000 * 60 * 60)
+  if (hours < 24) return "green"
+  if (hours < 72) return "yellow"
+  return "red"
+}
+
+function SlaIndicatorRow({
+  label,
+  value,
+  color,
+}: {
+  label: string
+  value: string
+  color: SlaColor
+}) {
+  return (
+    <div className="flex items-center justify-between gap-2">
+      <span className="text-xs text-muted-foreground">{label}</span>
+      <span
+        className={`rounded-md px-1.5 py-0.5 text-xs font-semibold tabular-nums ${getSlaIndicatorClasses(color)}`}
+      >
+        {value}
+      </span>
+    </div>
+  )
+}
+
+function SlaIndicators({
+  ticket,
+  messages,
+}: {
+  ticket: TicketType
+  messages: TicketMessageType[]
+}) {
+  const { age, ageColor, firstResponse, firstResponseColor, resolution, resolutionColor } =
+    useMemo(() => {
+      if (!ticket.createdAt) {
+        return {
+          age: null,
+          ageColor: "green" as SlaColor,
+          firstResponse: null,
+          firstResponseColor: "green" as SlaColor,
+          resolution: null,
+          resolutionColor: "green" as SlaColor,
+        }
+      }
+
+      const createdMs = new Date(ticket.createdAt).getTime()
+      const nowMs = Date.now()
+      const isResolved = ticket.status === "resolved" || ticket.status === "closed"
+
+      // Age: time since creation (or until resolution/close)
+      const endMs = ticket.resolvedAt
+        ? new Date(ticket.resolvedAt).getTime()
+        : ticket.closedAt
+          ? new Date(ticket.closedAt).getTime()
+          : nowMs
+      const ageMs = endMs - createdMs
+      const computedAge = ageMs > 0 ? ageMs : 0
+      const computedAgeColor = getAgeColor(computedAge, isResolved)
+
+      // First response: first non-system message after ticket creation
+      let computedFirstResponse: number | null = null
+      let computedFirstResponseColor: SlaColor = "green"
+      const nonSystemMessages = messages.filter((m) => !m.isSystemMessage && m.createdAt)
+      if (nonSystemMessages.length > 1) {
+        // The first message is the ticket body itself; the second is the first response
+        const firstReply = nonSystemMessages
+          .slice(1)
+          .sort(
+            (a, b) =>
+              new Date(a.createdAt!).getTime() - new Date(b.createdAt!).getTime(),
+          )[0]
+        if (firstReply?.createdAt) {
+          const replyMs = new Date(firstReply.createdAt).getTime() - createdMs
+          if (replyMs > 0) {
+            computedFirstResponse = replyMs
+            computedFirstResponseColor = getFirstResponseColor(replyMs)
+          }
+        }
+      }
+
+      // Resolution time
+      let computedResolution: number | null = null
+      let computedResolutionColor: SlaColor = "green"
+      if (ticket.resolvedAt) {
+        const resMs = new Date(ticket.resolvedAt).getTime() - createdMs
+        if (resMs > 0) {
+          computedResolution = resMs
+          computedResolutionColor = getResolutionColor(resMs)
+        }
+      }
+
+      return {
+        age: computedAge,
+        ageColor: computedAgeColor,
+        firstResponse: computedFirstResponse,
+        firstResponseColor: computedFirstResponseColor,
+        resolution: computedResolution,
+        resolutionColor: computedResolutionColor,
+      }
+    }, [ticket, messages])
+
+  if (age === null) return null
+
+  const isResolved = ticket.status === "resolved" || ticket.status === "closed"
+
+  return (
+    <Card className="border-border/60 bg-card/80">
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+          <Timer className={`h-4 w-4 ${getSlaColorClasses(ageColor)}`} />
+          SLA Metrics
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        <SlaIndicatorRow
+          label={isResolved ? "Total age" : "Time open"}
+          value={formatDuration(age)}
+          color={ageColor}
+        />
+        <SlaIndicatorRow
+          label="First response"
+          value={firstResponse !== null ? formatDuration(firstResponse) : "--"}
+          color={firstResponse !== null ? firstResponseColor : "green"}
+        />
+        <SlaIndicatorRow
+          label="Resolution time"
+          value={resolution !== null ? formatDuration(resolution) : "--"}
+          color={resolution !== null ? resolutionColor : "green"}
+        />
+      </CardContent>
+    </Card>
   )
 }
 
@@ -1127,6 +1324,11 @@ function TicketDetailPage() {
                 />
               </CardContent>
             </Card>
+          </PageSection>
+
+          {/* SLA Metrics */}
+          <PageSection delay={0.12}>
+            <SlaIndicators ticket={ticket} messages={messagesData ?? []} />
           </PageSection>
 
           {/* Timestamps & ID */}

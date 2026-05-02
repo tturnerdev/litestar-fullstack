@@ -1,13 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import {
   AlertTriangle,
-  ChevronRight,
   FileText,
   Hash,
   Inbox,
   Mail,
   Send,
   TrendingUp,
+  type LucideIcon,
 } from "lucide-react"
 import { useMemo } from "react"
 import { Area, AreaChart, ResponsiveContainer, Tooltip as RechartsTooltip, XAxis, YAxis } from "recharts"
@@ -17,6 +17,50 @@ import { SkeletonCard } from "@/components/ui/skeleton"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useFaxMessages, useFaxNumbers } from "@/lib/api/hooks/fax"
 import { formatDateTime } from "@/lib/date-utils"
+
+interface FaxShortcut {
+  key: string
+  label: string
+  to: string
+  icon: LucideIcon
+  iconBg: string
+  iconText: string
+}
+
+const faxShortcuts: FaxShortcut[] = [
+  {
+    key: "send-fax",
+    label: "Send Fax",
+    to: "/fax/send",
+    icon: Send,
+    iconBg: "bg-emerald-500/10 group-hover:bg-emerald-500",
+    iconText: "text-emerald-600 dark:text-emerald-400 group-hover:text-white dark:group-hover:text-white",
+  },
+  {
+    key: "manage-numbers",
+    label: "Manage Numbers",
+    to: "/fax/numbers",
+    icon: Hash,
+    iconBg: "bg-primary/10 group-hover:bg-primary",
+    iconText: "text-primary group-hover:text-primary-foreground",
+  },
+  {
+    key: "view-messages",
+    label: "View Messages",
+    to: "/fax/messages",
+    icon: Mail,
+    iconBg: "bg-blue-500/10 group-hover:bg-blue-500",
+    iconText: "text-blue-600 dark:text-blue-400 group-hover:text-white dark:group-hover:text-white",
+  },
+  {
+    key: "email-routes",
+    label: "Email Routes",
+    to: "/fax/email-routes",
+    icon: Mail,
+    iconBg: "bg-amber-500/10 group-hover:bg-amber-500",
+    iconText: "text-amber-600 dark:text-amber-400 group-hover:text-white dark:group-hover:text-white",
+  },
+]
 
 export const Route = createFileRoute("/_app/fax/")({
   component: FaxOverviewPage,
@@ -133,6 +177,27 @@ function FaxOverviewPage() {
         )}
       </PageSection>
 
+      <PageSection delay={0.12}>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {faxShortcuts.map((shortcut) => (
+            <Link key={shortcut.key} to={shortcut.to}>
+              <Card className="group cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-md">
+                <CardContent className="flex flex-col items-center gap-2.5 px-3 py-4">
+                  <div
+                    className={`flex h-10 w-10 items-center justify-center rounded-lg transition-colors ${shortcut.iconBg} ${shortcut.iconText}`}
+                  >
+                    <shortcut.icon className="h-5 w-5" />
+                  </div>
+                  <span className="text-center text-xs font-medium text-muted-foreground group-hover:text-foreground">
+                    {shortcut.label}
+                  </span>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      </PageSection>
+
       <PageSection delay={0.15}>
         <Card>
           <CardHeader className="space-y-1 pb-2">
@@ -200,77 +265,6 @@ function FaxOverviewPage() {
                 </AreaChart>
               </ResponsiveContainer>
             </div>
-          </CardContent>
-        </Card>
-      </PageSection>
-
-      <PageSection delay={0.25}>
-        <Card className="border-border/40 bg-linear-to-br from-muted/30 to-muted/10">
-          <CardHeader className="space-y-1 pb-3">
-            <CardTitle className="text-lg">Quick Actions</CardTitle>
-            <CardDescription>Common fax tasks</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-1.5">
-            <Link
-              to="/fax/numbers"
-              className="group flex items-center gap-3 rounded-lg bg-background/60 p-3 transition-all hover:bg-background hover:shadow-sm"
-            >
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-                <Hash className="h-4 w-4" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm">Fax Numbers</p>
-                <p className="text-xs text-muted-foreground">
-                  Manage numbers and email routes
-                </p>
-              </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" />
-            </Link>
-            <Link
-              to="/fax/messages"
-              className="group flex items-center gap-3 rounded-lg bg-background/60 p-3 transition-all hover:bg-background hover:shadow-sm"
-            >
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-600 transition-colors group-hover:bg-blue-500 group-hover:text-white dark:text-blue-400">
-                <FileText className="h-4 w-4" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm">Message History</p>
-                <p className="text-xs text-muted-foreground">
-                  View sent and received faxes
-                </p>
-              </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" />
-            </Link>
-            <Link
-              to="/fax/email-routes"
-              className="group flex items-center gap-3 rounded-lg bg-background/60 p-3 transition-all hover:bg-background hover:shadow-sm"
-            >
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 transition-colors group-hover:bg-amber-500 group-hover:text-white dark:text-amber-400">
-                <Mail className="h-4 w-4" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm">Email Routes</p>
-                <p className="text-xs text-muted-foreground">
-                  Manage fax-to-email delivery rules
-                </p>
-              </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" />
-            </Link>
-            <Link
-              to="/fax/send"
-              className="group flex items-center gap-3 rounded-lg bg-background/60 p-3 transition-all hover:bg-background hover:shadow-sm"
-            >
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 transition-colors group-hover:bg-emerald-500 group-hover:text-white dark:text-emerald-400">
-                <Send className="h-4 w-4" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm">Send a Fax</p>
-                <p className="text-xs text-muted-foreground">
-                  Upload a PDF and send
-                </p>
-              </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" />
-            </Link>
           </CardContent>
         </Card>
       </PageSection>

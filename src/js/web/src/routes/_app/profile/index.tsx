@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query"
 import { Link, createFileRoute, useNavigate, useSearch } from "@tanstack/react-router"
-import { AlertCircle, ArrowRight, Bell, Calendar, CheckCircle2, ChevronRight, Circle, Download, KeyRound, Link2, Mail, Monitor, Palette, Phone, Shield, ShieldAlert, ShieldCheck, Sparkles, User as UserIcon, Users } from "lucide-react"
+import { AlertCircle, ArrowRight, Bell, Calendar, CheckCircle2, ChevronRight, Circle, Download, KeyRound, Link2, Mail, Monitor, Palette, Phone, Shield, ShieldAlert, ShieldCheck, Sparkles, User as UserIcon, Users, KeySquare } from "lucide-react"
 import { useEffect, useMemo } from "react"
 import { toast } from "sonner"
 import { z } from "zod"
@@ -359,6 +359,43 @@ function ProfileCompletenessCard({ user }: { user: User }) {
   )
 }
 
+function ApiKeysCard() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <KeySquare className="h-4 w-4 text-muted-foreground" />
+          API Keys
+        </CardTitle>
+        <CardDescription>
+          Generate API keys for programmatic access to the admin portal. Use keys to integrate with external tools, scripts, and automation workflows.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-col items-center gap-4 rounded-lg border border-dashed py-8">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+            <KeySquare className="h-6 w-6 text-muted-foreground" />
+          </div>
+          <div className="text-center">
+            <p className="text-sm font-medium">No API keys yet</p>
+            <p className="mt-1 max-w-sm text-xs text-muted-foreground">
+              API keys allow you to authenticate requests to the admin portal API without using your browser session.
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => toast.info("API key management coming soon")}
+          >
+            <KeySquare className="mr-2 h-4 w-4" />
+            Generate API Key
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
 function downloadJson(data: unknown, filename: string) {
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" })
   const url = URL.createObjectURL(blob)
@@ -536,6 +573,13 @@ function ProfilePage() {
           <ConnectedAccounts />
           <ActiveSessions />
         </div>
+      </PageSection>
+
+      <Separator />
+
+      {/* API Keys */}
+      <PageSection delay={0.35}>
+        <ApiKeysCard />
       </PageSection>
 
       <Separator />

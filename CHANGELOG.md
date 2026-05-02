@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.219.0 (2026-05-02)
+
+### Added
+- **Profile API keys placeholder** — API Keys card on profile page with empty state and "Generate API Key" button (coming soon)
+- **Support SLA metrics** — Color-coded SLA indicator card in ticket sidebar showing time open, first response time, and resolution time with green/yellow/red thresholds
+- **Fax overview quick actions** — Compact shortcut cards (Send Fax, Manage Numbers, View Messages, Email Routes) replacing the old vertical action list
+
 ## v0.218.0 (2026-05-02)
 
 ### Fixed
