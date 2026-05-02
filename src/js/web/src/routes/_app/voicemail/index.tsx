@@ -73,6 +73,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { VoicemailPlayer } from "@/components/voice/voicemail-player"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { formatDateTime, formatFullDateTime } from "@/lib/date-utils"
@@ -175,11 +176,15 @@ function VoicemailInboxPage() {
           </TabsList>
 
           <TabsContent value="messages" className="mt-6">
-            <MessagesTab />
+            <SectionErrorBoundary name="Voicemail Messages">
+              <MessagesTab />
+            </SectionErrorBoundary>
           </TabsContent>
 
           <TabsContent value="boxes" className="mt-6">
-            <BoxesTab />
+            <SectionErrorBoundary name="Voicemail Boxes">
+              <BoxesTab />
+            </SectionErrorBoundary>
           </TabsContent>
         </Tabs>
       </PageSection>

@@ -58,6 +58,7 @@ import {
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { useSettingsStore } from "@/lib/settings-store"
 import { cn } from "@/lib/utils"
 
@@ -723,6 +724,7 @@ function PhoneNumbersPage() {
       )}
 
       {/* Summary stats */}
+      <SectionErrorBoundary name="Phone Numbers Summary">
       <div className="flex flex-wrap items-center gap-2">
         {isLoading ? (
           <>
@@ -749,6 +751,7 @@ function PhoneNumbersPage() {
           </>
         )}
       </div>
+      </SectionErrorBoundary>
 
       {/* Search & filters */}
       <PageSection>
@@ -827,6 +830,7 @@ function PhoneNumbersPage() {
 
       {/* Content */}
       <PageSection delay={0.1}>
+        <SectionErrorBoundary name="Phone Numbers Table">
         {isLoading ? (
           <SkeletonTable rows={6} />
         ) : isError ? (
@@ -1034,6 +1038,7 @@ function PhoneNumbersPage() {
             </div>
           </div>
         )}
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Bulk action bar */}

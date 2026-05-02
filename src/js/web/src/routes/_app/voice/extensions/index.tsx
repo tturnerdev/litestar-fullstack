@@ -67,6 +67,7 @@ import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { useSettingsStore } from "@/lib/settings-store"
 import { cn } from "@/lib/utils"
 
@@ -592,6 +593,7 @@ function ExtensionsPage() {
       />
 
       {/* Summary stats */}
+      <SectionErrorBoundary name="Extensions Summary">
       <div className="flex flex-wrap items-center gap-2">
         {isLoading ? (
           <>
@@ -634,6 +636,7 @@ function ExtensionsPage() {
           </>
         )}
       </div>
+      </SectionErrorBoundary>
 
       {/* Search & filters */}
       <PageSection>
@@ -697,6 +700,7 @@ function ExtensionsPage() {
 
       {/* Content */}
       <PageSection delay={0.1}>
+        <SectionErrorBoundary name="Extensions Table">
         {isLoading ? (
           <SkeletonTable rows={6} />
         ) : isError ? (
@@ -898,6 +902,7 @@ function ExtensionsPage() {
             </div>
           </div>
         )}
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Bulk action bar */}

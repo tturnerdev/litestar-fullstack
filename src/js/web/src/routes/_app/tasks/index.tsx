@@ -48,6 +48,7 @@ import type { BackgroundTaskList } from "@/lib/generated/api/types.gen"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 
 export const Route = createFileRoute("/_app/tasks/")({
   validateSearch: (
@@ -599,6 +600,7 @@ function TasksPage() {
       />
 
       {/* Summary stats */}
+      <SectionErrorBoundary name="Task Summary Stats">
       <div className="flex flex-wrap items-center gap-2">
         {isLoading ? (
           <>
@@ -645,6 +647,7 @@ function TasksPage() {
           </>
         )}
       </div>
+      </SectionErrorBoundary>
 
       {/* Filters */}
       <PageSection>
@@ -710,6 +713,7 @@ function TasksPage() {
 
       {/* Content */}
       <PageSection delay={0.1}>
+        <SectionErrorBoundary name="Tasks Table">
         {isLoading ? (
           <SkeletonTable rows={6} />
         ) : isError ? (
@@ -849,6 +853,7 @@ function TasksPage() {
             </div>
           </div>
         )}
+        </SectionErrorBoundary>
       </PageSection>
 
       <BulkActionBar

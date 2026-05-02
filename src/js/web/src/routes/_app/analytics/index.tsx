@@ -73,6 +73,7 @@ import {
 } from "@/lib/api/hooks/analytics"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { formatDateTime } from "@/lib/date-utils"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 
@@ -660,6 +661,7 @@ function DashboardTab() {
       </div>
 
       {/* Summary stat cards */}
+      <SectionErrorBoundary name="Analytics Summary Stats">
       {summaryLoading ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -694,8 +696,10 @@ function DashboardTab() {
           />
         </div>
       ) : null}
+      </SectionErrorBoundary>
 
       {/* Call volume chart */}
+      <SectionErrorBoundary name="Call Volume Chart">
       <Card className="print:break-inside-avoid print:shadow-none print:border">
         <CardHeader>
           <CardTitle className="text-base">Call Volume</CardTitle>
@@ -710,6 +714,7 @@ function DashboardTab() {
           )}
         </CardContent>
       </Card>
+      </SectionErrorBoundary>
 
       {/* Per-extension table */}
       <Card className="print:break-inside-avoid print:shadow-none print:border">
@@ -1344,6 +1349,7 @@ function CallRecordsTab() {
       </div>
 
       {/* Table */}
+      <SectionErrorBoundary name="Call Records Table">
       {isLoading ? (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 3 }).map((_, i) => (
@@ -1481,6 +1487,7 @@ function CallRecordsTab() {
           )}
         </>
       )}
+      </SectionErrorBoundary>
 
       {/* CDR Detail Dialog */}
       {selectedCdrId && (

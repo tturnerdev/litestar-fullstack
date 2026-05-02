@@ -59,6 +59,7 @@ import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { useSettingsStore } from "@/lib/settings-store"
 import { cn } from "@/lib/utils"
 
@@ -514,6 +515,7 @@ function FaxNumbersPage() {
       />
 
       {/* Summary stats */}
+      <SectionErrorBoundary name="Fax Numbers Summary">
       <div className="flex flex-wrap items-center gap-2">
         {isLoading ? (
           <>
@@ -540,6 +542,7 @@ function FaxNumbersPage() {
           </>
         )}
       </div>
+      </SectionErrorBoundary>
 
       {/* Search & filters */}
       <PageSection>
@@ -603,6 +606,7 @@ function FaxNumbersPage() {
 
       {/* Content */}
       <PageSection delay={0.1}>
+        <SectionErrorBoundary name="Fax Numbers Table">
         {isLoading ? (
           viewMode === "table" ? (
             <div className="space-y-3">
@@ -882,6 +886,7 @@ function FaxNumbersPage() {
             </div>
           </div>
         )}
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Bulk action bar */}

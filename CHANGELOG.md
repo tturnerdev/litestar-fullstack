@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.247.0 (2026-05-03)
+
+### Added
+- **SectionErrorBoundary on all remaining list pages** — e911, tags, schedules, analytics, voice/extensions, voice/phone-numbers, fax/numbers, fax/messages, tasks, voicemail, call-routing all wrapped
+- **Global mutation error handler** — `MutationCache` on `QueryClient` catches unhandled mutation errors with a generic toast, avoiding silent failures
+
 ## v0.246.0 (2026-05-03)
 
 ### Fixed

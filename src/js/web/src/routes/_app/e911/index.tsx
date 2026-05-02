@@ -65,6 +65,7 @@ import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { useAuthStore } from "@/lib/auth"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { useSettingsStore } from "@/lib/settings-store"
 import { cn } from "@/lib/utils"
 
@@ -574,6 +575,7 @@ function E911Page() {
       />
 
       {/* Summary stats */}
+      <SectionErrorBoundary name="E911 Registration Summary">
       <div className="flex flex-wrap items-center gap-2">
         {isLoading ? (
           <>
@@ -600,6 +602,7 @@ function E911Page() {
           </>
         )}
       </div>
+      </SectionErrorBoundary>
 
       {/* Search */}
       <PageSection>
@@ -656,6 +659,7 @@ function E911Page() {
 
       {/* Registrations table */}
       <PageSection delay={0.1}>
+        <SectionErrorBoundary name="E911 Registrations Table">
         {isLoading ? (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 3 }).map((_, i) => (
@@ -837,6 +841,7 @@ function E911Page() {
             </div>
           </div>
         )}
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Bulk action bar */}

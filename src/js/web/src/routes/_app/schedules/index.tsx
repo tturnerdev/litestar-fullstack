@@ -69,6 +69,7 @@ import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { formatDateTime } from "@/lib/date-utils"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { useSettingsStore } from "@/lib/settings-store"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
@@ -438,6 +439,7 @@ function SchedulesPage() {
       />
 
       {/* Summary stats */}
+      <SectionErrorBoundary name="Schedule Status Summary">
       <div className="flex flex-wrap items-center gap-2">
         {isLoading ? (
           <>
@@ -466,6 +468,7 @@ function SchedulesPage() {
           </>
         )}
       </div>
+      </SectionErrorBoundary>
 
       {/* Search */}
       <PageSection>
@@ -494,6 +497,7 @@ function SchedulesPage() {
 
       {/* Content */}
       <PageSection delay={0.1}>
+        <SectionErrorBoundary name="Schedules Table">
         {isLoading ? (
           <SkeletonTable rows={6} />
         ) : isError ? (
@@ -674,6 +678,7 @@ function SchedulesPage() {
             </div>
           </div>
         )}
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Bulk action bar */}

@@ -86,6 +86,7 @@ import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { client } from "@/lib/generated/api/client.gen"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 
 // ---------------------------------------------------------------------------
 // Route definition
@@ -1418,6 +1419,7 @@ function CallRoutingPage() {
       />
 
       <PageSection>
+        <SectionErrorBoundary name="Call Routing Summary">
         <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
           <StatCard
             label="Time Conditions"
@@ -1452,6 +1454,7 @@ function CallRoutingPage() {
             index={3}
           />
         </div>
+        </SectionErrorBoundary>
       </PageSection>
 
       <PageSection>
@@ -1476,16 +1479,24 @@ function CallRoutingPage() {
           </TabsList>
 
           <TabsContent value="time-conditions" className="mt-6">
-            <TimeConditionsTab />
+            <SectionErrorBoundary name="Time Conditions">
+              <TimeConditionsTab />
+            </SectionErrorBoundary>
           </TabsContent>
           <TabsContent value="ivr-menus" className="mt-6">
-            <IvrMenusTab />
+            <SectionErrorBoundary name="IVR Menus">
+              <IvrMenusTab />
+            </SectionErrorBoundary>
           </TabsContent>
           <TabsContent value="call-queues" className="mt-6">
-            <CallQueuesTab />
+            <SectionErrorBoundary name="Call Queues">
+              <CallQueuesTab />
+            </SectionErrorBoundary>
           </TabsContent>
           <TabsContent value="ring-groups" className="mt-6">
-            <RingGroupsTab />
+            <SectionErrorBoundary name="Ring Groups">
+              <RingGroupsTab />
+            </SectionErrorBoundary>
           </TabsContent>
         </Tabs>
       </PageSection>

@@ -48,6 +48,7 @@ import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { useSettingsStore } from "@/lib/settings-store"
 import { cn } from "@/lib/utils"
 
@@ -571,6 +572,7 @@ function FaxMessagesPage() {
       />
 
       {/* Status distribution summary */}
+      <SectionErrorBoundary name="Fax Messages Summary">
       {filteredItems.length > 0 && (
         <div className="flex flex-wrap items-center gap-2">
           {STATUS_DISPLAY_ORDER.filter((s) => statusCounts.has(s)).map((status) => {
@@ -588,6 +590,7 @@ function FaxMessagesPage() {
           })}
         </div>
       )}
+      </SectionErrorBoundary>
 
       {/* Search & filters */}
       <PageSection>
@@ -671,6 +674,7 @@ function FaxMessagesPage() {
 
       {/* Content */}
       <PageSection delay={0.1}>
+        <SectionErrorBoundary name="Fax Messages Table">
         {isLoading ? (
           <SkeletonTable rows={6} />
         ) : isError ? (
@@ -858,6 +862,7 @@ function FaxMessagesPage() {
             </div>
           </div>
         )}
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Bulk action bar */}
