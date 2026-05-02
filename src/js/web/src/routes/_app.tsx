@@ -1,8 +1,9 @@
 import type { ErrorComponentProps } from "@tanstack/react-router"
 import { createFileRoute, Link, redirect, useRouter } from "@tanstack/react-router"
 import { motion } from "framer-motion"
-import { AlertCircle, ArrowLeft, Home, Loader2, RefreshCw, Search } from "lucide-react"
+import { AlertCircle, ArrowLeft, Home, RefreshCw, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 import { AppLayout } from "@/layouts/app-layout"
 import { useAuthStore } from "@/lib/auth"
 
@@ -87,11 +88,44 @@ function AppError({ error, reset }: ErrorComponentProps) {
 
 function AppPending() {
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center">
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }} className="flex flex-col items-center gap-3">
-        <Loader2 className="h-6 w-6 animate-spin text-primary" />
-        <p className="text-sm text-muted-foreground">Loading...</p>
-      </motion.div>
+    <div className="flex min-h-screen animate-in fade-in duration-300">
+      {/* Sidebar skeleton */}
+      <div className="hidden w-64 shrink-0 border-r border-border/60 bg-muted/30 md:block">
+        <div className="space-y-4 p-4">
+          <Skeleton className="h-8 w-32" />
+          <div className="space-y-1.5">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-4 w-5/6" />
+          </div>
+          <div className="space-y-1.5 pt-4">
+            <Skeleton className="h-8 w-full rounded-md" />
+            <Skeleton className="h-8 w-full rounded-md" />
+            <Skeleton className="h-8 w-full rounded-md" />
+            <Skeleton className="h-8 w-full rounded-md" />
+            <Skeleton className="h-8 w-full rounded-md" />
+          </div>
+        </div>
+      </div>
+      {/* Main content skeleton */}
+      <div className="flex flex-1 flex-col">
+        <div className="flex h-16 shrink-0 items-center gap-4 border-b border-border/60 px-4">
+          <Skeleton className="h-4 w-16" />
+          <Skeleton className="h-5 w-32" />
+          <div className="flex-1" />
+          <Skeleton className="h-8 w-8 rounded-md" />
+          <Skeleton className="h-8 w-8 rounded-md" />
+        </div>
+        <div className="space-y-6 p-6">
+          <Skeleton className="h-8 w-64" />
+          <div className="grid gap-4 md:grid-cols-3">
+            <Skeleton className="h-32 rounded-lg" />
+            <Skeleton className="h-32 rounded-lg" />
+            <Skeleton className="h-32 rounded-lg" />
+          </div>
+          <Skeleton className="h-64 rounded-lg" />
+        </div>
+      </div>
     </div>
   )
 }

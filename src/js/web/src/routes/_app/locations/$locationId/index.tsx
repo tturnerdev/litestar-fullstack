@@ -484,7 +484,7 @@ function LocationDetailPage() {
                 </div>
                 {!devicesLoading && locationDevices && locationDevices.length > 0 && (
                   <Button variant="outline" size="sm" asChild>
-                    <Link to="/devices" search={{ search: data.name }}>
+                    <Link to="/devices" search={{ q: data.name }}>
                       View all
                       <ExternalLink className="ml-2 h-3 w-3" />
                     </Link>

@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.232.0 (2026-05-03)
+
+### Added
+- **URL filter state persistence** on devices and support tickets list pages — filters, sort, and page are now reflected in the URL for bookmarkable/shareable filtered views with browser back/forward support
+- **App-level skeleton loading** — replaced generic spinner with a proper skeleton layout matching the app shell (sidebar, header, content placeholders)
+
 ## v0.231.0 (2026-05-03)
 
 ### Added

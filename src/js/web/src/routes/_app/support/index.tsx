@@ -1,6 +1,5 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { useQueryClient } from "@tanstack/react-query"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { createFileRoute, Link } from "@tanstack/react-router"
 import {
   AlertCircle,
   ArrowDown,
@@ -23,25 +22,19 @@ import {
   UserX,
   X,
 } from "lucide-react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
-import { DataFreshness } from "@/components/ui/data-freshness"
 import { TicketPriorityBadge } from "@/components/support/ticket-priority-badge"
 import { TicketStatusBadge } from "@/components/support/ticket-status-badge"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { BulkActionBar, type BulkAction } from "@/components/ui/bulk-action-bar"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
+import { type BulkAction, BulkActionBar } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { DateRangeFilter, getPresetDates, isDateInRange } from "@/components/ui/date-range-filter"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { FilterDropdown, type FilterOption } from "@/components/ui/filter-dropdown"
 import { Input } from "@/components/ui/input"
@@ -52,16 +45,41 @@ import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { useAuthStore } from "@/lib/auth"
-import { type Ticket, useTickets } from "@/lib/api/hooks/support"
-import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
-import { client } from "@/lib/generated/api/client.gen"
-import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { type Ticket, useTickets } from "@/lib/api/hooks/support"
+import { useAuthStore } from "@/lib/auth"
+import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
+import { client } from "@/lib/generated/api/client.gen"
 import { cn } from "@/lib/utils"
 
+interface SupportSearchParams {
+  q?: string
+  page?: number
+  status?: string
+  priority?: string
+  category?: string
+  from?: string
+  to?: string
+  sort?: string
+  order?: string
+  assignee?: string
+}
+
 export const Route = createFileRoute("/_app/support/")({
+  validateSearch: (search: Record<string, unknown>): SupportSearchParams => ({
+    q: (search.q as string) || undefined,
+    page: Number(search.page) || undefined,
+    status: (search.status as string) || undefined,
+    priority: (search.priority as string) || undefined,
+    category: (search.category as string) || undefined,
+    from: (search.from as string) || undefined,
+    to: (search.to as string) || undefined,
+    sort: (search.sort as string) || undefined,
+    order: (search.order as string) || undefined,
+    assignee: (search.assignee as string) || undefined,
+  }),
   component: SupportPage,
 })
 
@@ -212,15 +230,52 @@ function getInitials(name?: string | null, email?: string): string {
 function SupportPage() {
   useDocumentTitle("Support Tickets")
   const searchInputRef = useRef<HTMLInputElement>(null)
-  // Filter & search state
-  const [search, setSearch] = useState("")
+
+  // URL-backed filter state
+  const searchParams = Route.useSearch()
+  const navigate = Route.useNavigate()
+
+  // Derive filter state from URL search params
+  const search = searchParams.q ?? ""
+  const page = searchParams.page ?? 1
+  const statusFilter = useMemo(() => (searchParams.status ? searchParams.status.split(",") : []), [searchParams.status])
+  const priorityFilter = useMemo(() => (searchParams.priority ? searchParams.priority.split(",") : []), [searchParams.priority])
+  const categoryFilter = useMemo(() => (searchParams.category ? searchParams.category.split(",") : []), [searchParams.category])
+  const startDate = searchParams.from ?? ""
+  const endDate = searchParams.to ?? ""
+  const sortKey = searchParams.sort ?? null
+  const sortDir = (searchParams.order ?? null) as SortDirection
+  const assigneeQuickFilter = (searchParams.assignee ?? null) as "my-tickets" | "unassigned" | null
+
   const debouncedSearch = useDebouncedValue(search)
-  const [statusFilter, setStatusFilter] = useState<string[]>([])
-  const [priorityFilter, setPriorityFilter] = useState<string[]>([])
-  const [categoryFilter, setCategoryFilter] = useState<string[]>([])
-  const [startDate, setStartDate] = useState("")
-  const [endDate, setEndDate] = useState("")
-  const [page, setPage] = useState(1)
+
+  // Helper to update URL search params (strips empty/default values to keep URL clean)
+  const updateSearch = useCallback(
+    (updates: SupportSearchParams) => {
+      navigate({
+        search: (prev: SupportSearchParams) => {
+          const next = { ...prev, ...updates }
+          // Strip falsy values so they don't clutter the URL
+          const cleaned: SupportSearchParams = {}
+          if (next.q) cleaned.q = next.q
+          if (next.page && next.page > 1) cleaned.page = next.page
+          if (next.status) cleaned.status = next.status
+          if (next.priority) cleaned.priority = next.priority
+          if (next.category) cleaned.category = next.category
+          if (next.from) cleaned.from = next.from
+          if (next.to) cleaned.to = next.to
+          if (next.sort) cleaned.sort = next.sort
+          if (next.order) cleaned.order = next.order
+          if (next.assignee) cleaned.assignee = next.assignee
+          return cleaned
+        },
+        replace: true,
+      })
+    },
+    [navigate],
+  )
+
+  // Local-only state (preferences & ephemeral UI)
   const [pageSize, setPageSize] = useState(getStoredPageSize)
 
   // Current user (for "My Tickets" quick filter)
@@ -232,33 +287,33 @@ function SupportPage() {
   const [isNamingPreset, setIsNamingPreset] = useState(false)
   const [presetName, setPresetName] = useState("")
 
-  // Assignee quick filter: "my-tickets" | "unassigned" | null
-  const [assigneeQuickFilter, setAssigneeQuickFilter] = useState<"my-tickets" | "unassigned" | null>(null)
-
-  // Track manual filter changes to clear active preset
-  const manualFilterChangeRef = useRef(false)
-
-  useEffect(() => {
-    if (manualFilterChangeRef.current) {
-      setActivePresetId(null)
-      manualFilterChangeRef.current = false
-    }
-  }, [statusFilter, priorityFilter, categoryFilter, search])
+  // Manual filter changes clear the active preset. This is called directly
+  // from the filter change handlers rather than via an effect.
+  const clearActivePresetOnManualChange = useCallback(() => {
+    setActivePresetId(null)
+  }, [])
 
   const applyPreset = useCallback(
     (preset: FilterPreset) => {
       // Apply filters without triggering the manual-change detector
-      setSearch(preset.filters.search ?? "")
-      setStatusFilter(preset.filters.status ?? [])
-      setPriorityFilter(preset.filters.priority ?? [])
-      setCategoryFilter(preset.filters.category ?? [])
-      setStartDate("")
-      setEndDate("")
-      setAssigneeQuickFilter(null)
-      setPage(1)
+      navigate({
+        search: {
+          q: preset.filters.search || undefined,
+          page: undefined,
+          status: preset.filters.status?.join(",") || undefined,
+          priority: preset.filters.priority?.join(",") || undefined,
+          category: preset.filters.category?.join(",") || undefined,
+          from: undefined,
+          to: undefined,
+          sort: searchParams.sort,
+          order: searchParams.order,
+          assignee: undefined,
+        },
+        replace: true,
+      })
       setActivePresetId(preset.id)
     },
-    [],
+    [navigate, searchParams.sort, searchParams.order],
   )
 
   const handleSavePreset = useCallback(() => {
@@ -298,31 +353,34 @@ function SupportPage() {
     [customPresets, activePresetId],
   )
 
-  // Reset page when debounced search changes
+  // Reset page when debounced search diverges from the raw search value
+  // (i.e. user is actively typing — page should reset once debounce settles)
+  const prevDebouncedSearchRef = useRef(debouncedSearch)
   useEffect(() => {
-    setPage(1)
-  }, [debouncedSearch])
+    if (prevDebouncedSearchRef.current !== debouncedSearch && page !== 1) {
+      updateSearch({ page: undefined })
+    }
+    prevDebouncedSearchRef.current = debouncedSearch
+  }, [debouncedSearch, page, updateSearch])
 
   // Persist page size preference
-  const handlePageSizeChange = useCallback((value: string) => {
-    const size = Number(value)
-    setPageSize(size)
-    setPage(1)
-    try {
-      localStorage.setItem(PAGE_SIZE_STORAGE_KEY, value)
-    } catch {
-      // localStorage unavailable
-    }
-  }, [])
-
-  // Sort state
-  const [sortKey, setSortKey] = useState<string | null>(null)
-  const [sortDir, setSortDir] = useState<SortDirection>(null)
+  const handlePageSizeChange = useCallback(
+    (value: string) => {
+      const size = Number(value)
+      setPageSize(size)
+      updateSearch({ page: undefined })
+      try {
+        localStorage.setItem(PAGE_SIZE_STORAGE_KEY, value)
+      } catch {
+        // localStorage unavailable
+      }
+    },
+    [updateSearch],
+  )
 
   // Selection state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
-  const navigate = useNavigate()
   const queryClient = useQueryClient()
 
   // Build server-side filters (status/priority/category are single-value on backend,
@@ -346,10 +404,8 @@ function SupportPage() {
     return data.items.filter((ticket) => {
       if (statusFilter.length > 1 && !statusFilter.includes(ticket.status)) return false
       if (priorityFilter.length > 1 && !priorityFilter.includes(ticket.priority)) return false
-      if (categoryFilter.length > 1 && ticket.category && !categoryFilter.includes(ticket.category))
-        return false
-      if ((startDate || endDate) && !isDateInRange(ticket.createdAt, startDate, endDate))
-        return false
+      if (categoryFilter.length > 1 && ticket.category && !categoryFilter.includes(ticket.category)) return false
+      if ((startDate || endDate) && !isDateInRange(ticket.createdAt, startDate, endDate)) return false
       // Assignee quick filters
       if (assigneeQuickFilter === "my-tickets" && currentUser) {
         if (ticket.assignedTo?.id !== currentUser.id) return false
@@ -404,55 +460,63 @@ function SupportPage() {
   const handleSort = useCallback(
     (key: string) => {
       const next = nextSortDirection(sortKey, sortDir, key)
-      setSortKey(next.sort)
-      setSortDir(next.direction)
-      setPage(1)
+      updateSearch({
+        sort: next.sort ?? undefined,
+        order: next.direction ?? undefined,
+        page: undefined,
+      })
     },
-    [sortKey, sortDir],
+    [sortKey, sortDir, updateSearch],
   )
 
   // Date range handler
   const handleDatePreset = useCallback(
     (days: number) => {
       const { start, end } = getPresetDates(days)
-      setStartDate(start)
-      setEndDate(end)
-      setPage(1)
+      updateSearch({ from: start || undefined, to: end || undefined, page: undefined })
     },
-    [],
+    [updateSearch],
   )
 
   // Filter helpers
-  const activeFilterCount =
-    statusFilter.length + priorityFilter.length + categoryFilter.length + (startDate || endDate ? 1 : 0) + (assigneeQuickFilter ? 1 : 0)
+  const activeFilterCount = statusFilter.length + priorityFilter.length + categoryFilter.length + (startDate || endDate ? 1 : 0) + (assigneeQuickFilter ? 1 : 0)
   const hasAnyFilters = activeFilterCount > 0 || !!search
 
   const toggleAssigneeQuickFilter = useCallback(
     (filter: "my-tickets" | "unassigned") => {
-      setAssigneeQuickFilter((prev) => (prev === filter ? null : filter))
+      updateSearch({
+        assignee: assigneeQuickFilter === filter ? undefined : filter,
+        page: undefined,
+      })
       setActivePresetId(null)
-      setPage(1)
     },
-    [],
+    [assigneeQuickFilter, updateSearch],
   )
 
   const clearAllFilters = useCallback(() => {
-    setSearch("")
-    setStatusFilter([])
-    setPriorityFilter([])
-    setCategoryFilter([])
-    setStartDate("")
-    setEndDate("")
-    setAssigneeQuickFilter(null)
-    setPage(1)
-  }, [])
+    navigate({
+      search: {
+        q: undefined,
+        page: undefined,
+        status: undefined,
+        priority: undefined,
+        category: undefined,
+        from: undefined,
+        to: undefined,
+        sort: searchParams.sort,
+        order: searchParams.order,
+        assignee: undefined,
+      },
+      replace: true,
+    })
+  }, [navigate, searchParams.sort, searchParams.order])
 
   const handleSearchChange = useCallback(
     (value: string) => {
-      manualFilterChangeRef.current = true
-      setSearch(value)
+      clearActivePresetOnManualChange()
+      updateSearch({ q: value || undefined })
     },
-    [],
+    [updateSearch, clearActivePresetOnManualChange],
   )
 
   // Export
@@ -504,8 +568,7 @@ function SupportPage() {
         variant: "outline",
         confirm: {
           title: "Resolve selected tickets?",
-          description:
-            "The selected tickets will be marked as resolved.",
+          description: "The selected tickets will be marked as resolved.",
         },
         onExecute: async (ids) => {
           const errors: string[] = []
@@ -536,8 +599,7 @@ function SupportPage() {
         variant: "outline",
         confirm: {
           title: "Close selected tickets?",
-          description:
-            "The selected tickets will be marked as closed. You can reopen them later.",
+          description: "The selected tickets will be marked as closed. You can reopen them later.",
         },
         onExecute: async (ids) => {
           const errors: string[] = []
@@ -567,8 +629,7 @@ function SupportPage() {
         variant: "outline",
         confirm: {
           title: "Reopen selected tickets?",
-          description:
-            "The selected tickets will be reopened and set back to an open status.",
+          description: "The selected tickets will be reopened and set back to an open status.",
         },
         onExecute: async (ids) => {
           const errors: string[] = []
@@ -652,8 +713,7 @@ function SupportPage() {
         variant: "destructive",
         confirm: {
           title: "Delete selected tickets?",
-          description:
-            "This action cannot be undone. All selected tickets and their messages will be permanently deleted.",
+          description: "This action cannot be undone. All selected tickets and their messages will be permanently deleted.",
         },
         onExecute: async (ids) => {
           const errors: string[] = []
@@ -684,9 +744,7 @@ function SupportPage() {
         onExecute: async (ids) => {
           const selected = filteredItems.filter((t) => ids.includes(t.id))
           exportToCsv("tickets-selected", csvHeaders, selected)
-          toast.success(
-            `Exported ${selected.length} ticket${selected.length === 1 ? "" : "s"}`,
-          )
+          toast.success(`Exported ${selected.length} ticket${selected.length === 1 ? "" : "s"}`)
         },
       },
     ],
@@ -708,16 +766,16 @@ function SupportPage() {
       }
       if (e.key === "ArrowLeft" && page > 1) {
         e.preventDefault()
-        setPage((p) => Math.max(1, p - 1))
+        updateSearch({ page: Math.max(1, page - 1) })
       }
       if (e.key === "ArrowRight" && page < totalPages) {
         e.preventDefault()
-        setPage((p) => Math.min(totalPages, p + 1))
+        updateSearch({ page: Math.min(totalPages, page + 1) })
       }
     }
     document.addEventListener("keydown", handleKeyDown)
     return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [page, totalPages])
+  }, [page, totalPages, updateSearch])
 
   const breadcrumbs = (
     <Breadcrumb>
@@ -746,11 +804,7 @@ function SupportPage() {
         breadcrumbs={breadcrumbs}
         actions={
           <div className="flex items-center gap-2">
-            <DataFreshness
-              dataUpdatedAt={dataUpdatedAt}
-              onRefresh={() => refetch()}
-              isRefreshing={isRefetching}
-            />
+            <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
             <Button variant="outline" size="sm" onClick={handleExportAll} disabled={!hasData}>
               <Download className="mr-1.5 h-3.5 w-3.5" />
               Export
@@ -769,50 +823,27 @@ function SupportPage() {
         <div className="flex flex-wrap items-center gap-2">
           <Bookmark className="h-4 w-4 text-muted-foreground shrink-0" />
           {BUILTIN_PRESETS.map((preset) => (
-            <Button
-              key={preset.id}
-              variant={activePresetId === preset.id ? "default" : "outline"}
-              size="sm"
-              className="h-7 text-xs"
-              onClick={() => applyPreset(preset)}
-            >
+            <Button key={preset.id} variant={activePresetId === preset.id ? "default" : "outline"} size="sm" className="h-7 text-xs" onClick={() => applyPreset(preset)}>
               {preset.name}
             </Button>
           ))}
 
           <Separator orientation="vertical" className="mx-1 h-5" />
 
-          <Button
-            variant={assigneeQuickFilter === "my-tickets" ? "default" : "outline"}
-            size="sm"
-            className="h-7 text-xs"
-            onClick={() => toggleAssigneeQuickFilter("my-tickets")}
-          >
+          <Button variant={assigneeQuickFilter === "my-tickets" ? "default" : "outline"} size="sm" className="h-7 text-xs" onClick={() => toggleAssigneeQuickFilter("my-tickets")}>
             <User className="mr-1.5 h-3.5 w-3.5" />
             My Tickets
           </Button>
-          <Button
-            variant={assigneeQuickFilter === "unassigned" ? "default" : "outline"}
-            size="sm"
-            className="h-7 text-xs"
-            onClick={() => toggleAssigneeQuickFilter("unassigned")}
-          >
+          <Button variant={assigneeQuickFilter === "unassigned" ? "default" : "outline"} size="sm" className="h-7 text-xs" onClick={() => toggleAssigneeQuickFilter("unassigned")}>
             <UserX className="mr-1.5 h-3.5 w-3.5" />
             Unassigned
           </Button>
 
-          {customPresets.length > 0 && (
-            <Separator orientation="vertical" className="mx-1 h-5" />
-          )}
+          {customPresets.length > 0 && <Separator orientation="vertical" className="mx-1 h-5" />}
 
           {customPresets.map((preset) => (
             <div key={preset.id} className="flex items-center gap-0">
-              <Button
-                variant={activePresetId === preset.id ? "default" : "outline"}
-                size="sm"
-                className="h-7 rounded-r-none text-xs"
-                onClick={() => applyPreset(preset)}
-              >
+              <Button variant={activePresetId === preset.id ? "default" : "outline"} size="sm" className="h-7 rounded-r-none text-xs" onClick={() => applyPreset(preset)}>
                 {preset.name}
               </Button>
               <Button
@@ -845,13 +876,7 @@ function SupportPage() {
                 }}
                 className="h-7 w-40 text-xs"
               />
-              <Button
-                variant="default"
-                size="sm"
-                className="h-7 text-xs"
-                onClick={handleSavePreset}
-                disabled={!presetName.trim()}
-              >
+              <Button variant="default" size="sm" className="h-7 text-xs" onClick={handleSavePreset} disabled={!presetName.trim()}>
                 Save
               </Button>
               <Button
@@ -868,12 +893,7 @@ function SupportPage() {
               </Button>
             </div>
           ) : (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 text-xs text-muted-foreground"
-              onClick={() => setIsNamingPreset(true)}
-            >
+            <Button variant="ghost" size="sm" className="h-7 text-xs text-muted-foreground" onClick={() => setIsNamingPreset(true)}>
               <Save className="mr-1.5 h-3.5 w-3.5" />
               Save filters
             </Button>
@@ -937,7 +957,9 @@ function SupportPage() {
                 <span className="sr-only">Clear search</span>
               </button>
             ) : (
-              <kbd className="pointer-events-none absolute right-8 top-1/2 -translate-y-1/2 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">/</kbd>
+              <kbd className="pointer-events-none absolute right-8 top-1/2 -translate-y-1/2 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">
+                /
+              </kbd>
             )}
           </div>
           <FilterDropdown
@@ -945,9 +967,8 @@ function SupportPage() {
             options={statusOptions}
             selected={statusFilter}
             onChange={(v) => {
-              manualFilterChangeRef.current = true
-              setStatusFilter(v)
-              setPage(1)
+              clearActivePresetOnManualChange()
+              updateSearch({ status: v.join(",") || undefined, page: undefined })
             }}
           />
           <FilterDropdown
@@ -955,9 +976,8 @@ function SupportPage() {
             options={priorityOptions}
             selected={priorityFilter}
             onChange={(v) => {
-              manualFilterChangeRef.current = true
-              setPriorityFilter(v)
-              setPage(1)
+              clearActivePresetOnManualChange()
+              updateSearch({ priority: v.join(",") || undefined, page: undefined })
             }}
           />
           <FilterDropdown
@@ -965,32 +985,24 @@ function SupportPage() {
             options={categoryOptions}
             selected={categoryFilter}
             onChange={(v) => {
-              manualFilterChangeRef.current = true
-              setCategoryFilter(v)
-              setPage(1)
+              clearActivePresetOnManualChange()
+              updateSearch({ category: v.join(",") || undefined, page: undefined })
             }}
           />
           <DateRangeFilter
             startDate={startDate}
             endDate={endDate}
             onStartDateChange={(v) => {
-              setStartDate(v)
-              setPage(1)
+              updateSearch({ from: v || undefined, page: undefined })
             }}
             onEndDateChange={(v) => {
-              setEndDate(v)
-              setPage(1)
+              updateSearch({ to: v || undefined, page: undefined })
             }}
             onPreset={handleDatePreset}
             label="Created"
           />
           {hasAnyFilters && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-xs text-muted-foreground"
-              onClick={clearAllFilters}
-            >
+            <Button variant="ghost" size="sm" className="text-xs text-muted-foreground" onClick={clearAllFilters}>
               Clear all filters
             </Button>
           )}
@@ -1059,53 +1071,15 @@ function SupportPage() {
                 <TableHeader className="sticky top-0 z-10 bg-background">
                   <TableRow>
                     <TableHead className="w-10">
-                      <Checkbox
-                        checked={allSelected}
-                        indeterminate={someSelected && !allSelected}
-                        onChange={toggleAll}
-                        aria-label="Select all tickets"
-                      />
+                      <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all tickets" />
                     </TableHead>
                     <TableHead className="w-[100px]">Ticket</TableHead>
-                    <SortableHeader
-                      label="Subject"
-                      sortKey="subject"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                    />
-                    <SortableHeader
-                      label="Status"
-                      sortKey="status"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                    />
-                    <SortableHeader
-                      label="Priority"
-                      sortKey="priority"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                      className="hidden md:table-cell"
-                    />
+                    <SortableHeader label="Subject" sortKey="subject" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                    <SortableHeader label="Status" sortKey="status" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                    <SortableHeader label="Priority" sortKey="priority" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
                     <TableHead className="hidden md:table-cell">Category</TableHead>
-                    <SortableHeader
-                      label="Created"
-                      sortKey="created_at"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                      className="hidden md:table-cell"
-                    />
-                    <SortableHeader
-                      label="Updated"
-                      sortKey="updated_at"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                      className="hidden md:table-cell"
-                    />
+                    <SortableHeader label="Created" sortKey="created_at" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
+                    <SortableHeader label="Updated" sortKey="updated_at" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
                     <TableHead className="w-16 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -1144,21 +1118,11 @@ function SupportPage() {
               </div>
               {totalPages > 1 && (
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    disabled={page <= 1}
-                  >
+                  <Button variant="outline" size="sm" onClick={() => updateSearch({ page: Math.max(1, page - 1) })} disabled={page <= 1}>
                     Previous
                     <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&larr;</kbd>
                   </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                    disabled={page >= totalPages}
-                  >
+                  <Button variant="outline" size="sm" onClick={() => updateSearch({ page: Math.min(totalPages, page + 1) })} disabled={page >= totalPages}>
                     Next
                     <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&rarr;</kbd>
                   </Button>
@@ -1170,12 +1134,7 @@ function SupportPage() {
       </PageSection>
 
       {/* Bulk action bar */}
-      <BulkActionBar
-        selectedCount={selectedIds.size}
-        selectedIds={Array.from(selectedIds)}
-        onClearSelection={() => setSelectedIds(new Set())}
-        actions={bulkActions}
-      />
+      <BulkActionBar selectedCount={selectedIds.size} selectedIds={Array.from(selectedIds)} onClearSelection={() => setSelectedIds(new Set())} actions={bulkActions} />
     </PageContainer>
   )
 }
@@ -1226,32 +1185,14 @@ function TicketRow({
       </TableCell>
       <TableCell className="font-mono text-xs text-muted-foreground">
         <div className="flex items-center gap-1.5">
-          {!ticket.isReadByUser && (
-            <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-          )}
+          {!ticket.isReadByUser && <span className="h-1.5 w-1.5 rounded-full bg-primary" />}
           {ticket.ticketNumber}
         </div>
       </TableCell>
       <TableCell>
-        <Link
-          to="/support/$ticketId"
-          params={{ ticketId: ticket.id }}
-          className={cn(
-            "group flex flex-col gap-0.5",
-          )}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <span className={cn(
-            "group-hover:underline",
-            ticket.isReadByUser ? "font-medium" : "font-semibold",
-          )}>
-            {ticket.subject}
-          </span>
-          {ticket.latestMessagePreview && (
-            <span className="text-xs text-muted-foreground line-clamp-1">
-              {ticket.latestMessagePreview}
-            </span>
-          )}
+        <Link to="/support/$ticketId" params={{ ticketId: ticket.id }} className={cn("group flex flex-col gap-0.5")} onClick={(e) => e.stopPropagation()}>
+          <span className={cn("group-hover:underline", ticket.isReadByUser ? "font-medium" : "font-semibold")}>{ticket.subject}</span>
+          {ticket.latestMessagePreview && <span className="text-xs text-muted-foreground line-clamp-1">{ticket.latestMessagePreview}</span>}
         </Link>
       </TableCell>
       <TableCell>
@@ -1262,21 +1203,13 @@ function TicketRow({
               <TooltipTrigger asChild>
                 <div className="flex items-center gap-1.5">
                   <Avatar className="size-4">
-                    {ticket.assignedTo.avatarUrl ? (
-                      <AvatarImage src={ticket.assignedTo.avatarUrl} alt={ticket.assignedTo.name ?? ticket.assignedTo.email} />
-                    ) : null}
-                    <AvatarFallback className="text-[8px] font-medium bg-muted">
-                      {getInitials(ticket.assignedTo.name, ticket.assignedTo.email)}
-                    </AvatarFallback>
+                    {ticket.assignedTo.avatarUrl ? <AvatarImage src={ticket.assignedTo.avatarUrl} alt={ticket.assignedTo.name ?? ticket.assignedTo.email} /> : null}
+                    <AvatarFallback className="text-[8px] font-medium bg-muted">{getInitials(ticket.assignedTo.name, ticket.assignedTo.email)}</AvatarFallback>
                   </Avatar>
-                  <span className="text-xs text-muted-foreground truncate max-w-[100px]">
-                    {ticket.assignedTo.name ?? ticket.assignedTo.email}
-                  </span>
+                  <span className="text-xs text-muted-foreground truncate max-w-[100px]">{ticket.assignedTo.name ?? ticket.assignedTo.email}</span>
                 </div>
               </TooltipTrigger>
-              <TooltipContent>
-                Assigned to {ticket.assignedTo.name ?? ticket.assignedTo.email}
-              </TooltipContent>
+              <TooltipContent>Assigned to {ticket.assignedTo.name ?? ticket.assignedTo.email}</TooltipContent>
             </Tooltip>
           )}
         </div>
@@ -1296,9 +1229,7 @@ function TicketRow({
       <TableCell className="hidden md:table-cell">
         <Tooltip>
           <TooltipTrigger asChild>
-            <span className="cursor-default text-xs text-muted-foreground">
-              {formatRelativeTimeShort(ticket.createdAt)}
-            </span>
+            <span className="cursor-default text-xs text-muted-foreground">{formatRelativeTimeShort(ticket.createdAt)}</span>
           </TooltipTrigger>
           <TooltipContent>{formatDateTime(ticket.createdAt)}</TooltipContent>
         </Tooltip>
@@ -1306,9 +1237,7 @@ function TicketRow({
       <TableCell className="hidden md:table-cell">
         <Tooltip>
           <TooltipTrigger asChild>
-            <span className="cursor-default text-xs text-muted-foreground">
-              {formatRelativeTimeShort(ticket.updatedAt)}
-            </span>
+            <span className="cursor-default text-xs text-muted-foreground">{formatRelativeTimeShort(ticket.updatedAt)}</span>
           </TooltipTrigger>
           <TooltipContent>{formatDateTime(ticket.updatedAt)}</TooltipContent>
         </Tooltip>
@@ -1316,13 +1245,7 @@ function TicketRow({
       <TableCell className="text-right">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0"
-              data-slot="dropdown"
-              onClick={(e) => e.stopPropagation()}
-            >
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" data-slot="dropdown" onClick={(e) => e.stopPropagation()}>
               <MoreVertical className="h-4 w-4" />
               <span className="sr-only">Actions for {ticket.ticketNumber}</span>
             </Button>
@@ -1341,10 +1264,7 @@ function TicketRow({
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem
-              className="text-destructive focus:text-destructive"
-              onClick={onDelete}
-            >
+            <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={onDelete}>
               <Trash2 className="mr-2 h-4 w-4" />
               Delete
             </DropdownMenuItem>
