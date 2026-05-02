@@ -7,12 +7,15 @@ import {
   Clock,
   Download,
   Eye,
+  Globe,
   Home,
   Loader2,
   MoreVertical,
   Pencil,
   Plus,
   Search,
+  SlidersHorizontal,
+  Star,
   Trash2,
   X,
   XCircle,
@@ -93,6 +96,12 @@ const scheduleTypeVariant: Record<string, "default" | "secondary" | "outline"> =
   business_hours: "default",
   holiday: "secondary",
   custom: "outline",
+}
+
+const scheduleTypeIcons: Record<string, typeof Clock> = {
+  business_hours: Clock,
+  holiday: Calendar,
+  custom: SlidersHorizontal,
 }
 
 const COMMON_TIMEZONES = [
@@ -508,7 +517,7 @@ function SchedulesPage() {
                       currentDirection={sortDir}
                       onSort={handleSort}
                     />
-                    <TableHead>Default</TableHead>
+                    <TableHead>Entries</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="w-16 text-right">Actions</TableHead>
                   </TableRow>
@@ -619,23 +628,39 @@ function ScheduleRow({
           className="group flex items-center gap-2"
           onClick={(e) => e.stopPropagation()}
         >
-          <Clock className="h-4 w-4 text-muted-foreground" />
+          {(() => {
+            const TypeIcon = scheduleTypeIcons[schedule.scheduleType] ?? Clock
+            return <TypeIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
+          })()}
           <span className="font-medium group-hover:underline">{schedule.name}</span>
+          {schedule.isDefault && (
+            <Badge className="ml-1 gap-1 bg-amber-100 text-amber-700 hover:bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400" variant="secondary">
+              <Star className="h-3 w-3 fill-current" />
+              Default
+            </Badge>
+          )}
         </Link>
       </TableCell>
       <TableCell>
-        <Badge variant={scheduleTypeVariant[schedule.scheduleType] ?? "outline"}>
+        <Badge variant={scheduleTypeVariant[schedule.scheduleType] ?? "outline"} className="gap-1">
+          {(() => {
+            const TypeIcon = scheduleTypeIcons[schedule.scheduleType] ?? Clock
+            return <TypeIcon className="h-3 w-3" />
+          })()}
           {scheduleTypeLabels[schedule.scheduleType] ?? schedule.scheduleType}
         </Badge>
       </TableCell>
       <TableCell>
-        <span className="text-sm text-muted-foreground">{schedule.timezone.replace(/_/g, " ")}</span>
+        <Badge variant="outline" className="gap-1 font-normal text-muted-foreground">
+          <Globe className="h-3 w-3" />
+          {schedule.timezone.replace(/_/g, " ")}
+        </Badge>
       </TableCell>
       <TableCell>
-        {schedule.isDefault ? (
-          <Badge className="gap-1 bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400">
-            Default
-          </Badge>
+        {schedule.entries && schedule.entries.length > 0 ? (
+          <span className="text-sm text-muted-foreground">
+            {schedule.entries.length} {schedule.entries.length === 1 ? "entry" : "entries"}
+          </span>
         ) : (
           <span className="text-sm text-muted-foreground">--</span>
         )}

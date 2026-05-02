@@ -26,6 +26,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { BulkActionBar, type BulkAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
@@ -93,6 +94,25 @@ const csvHeaders: CsvHeader<Ticket>[] = [
 ]
 
 // ── Helpers ──────────────────────────────────────────────────────────────
+
+const priorityRowAccent: Record<string, string> = {
+  urgent: "border-l-red-500",
+  high: "border-l-amber-500",
+  medium: "border-l-blue-300 dark:border-l-blue-500/50",
+  low: "border-l-transparent",
+}
+
+function getInitials(name?: string | null, email?: string): string {
+  if (name) {
+    const parts = name.trim().split(/\s+/)
+    return parts
+      .slice(0, 2)
+      .map((p) => p[0])
+      .join("")
+      .toUpperCase()
+  }
+  return email ? email[0].toUpperCase() : "?"
+}
 
 // ── Main page ────────────────────────────────────────────────────────────
 
@@ -644,7 +664,8 @@ function TicketRow({
   return (
     <TableRow
       className={cn(
-        "cursor-pointer hover:bg-muted/50 transition-colors",
+        "cursor-pointer hover:bg-muted/50 transition-colors border-l-2",
+        priorityRowAccent[ticket.priority] ?? "border-l-transparent",
         index % 2 === 1 ? "bg-muted/20" : "",
         !ticket.isReadByUser && "bg-primary/[0.02]",
       )}
@@ -698,7 +719,31 @@ function TicketRow({
         </Link>
       </TableCell>
       <TableCell>
-        <TicketStatusBadge status={ticket.status} />
+        <div className="flex flex-col gap-1.5">
+          <TicketStatusBadge status={ticket.status} />
+          {ticket.assignedTo && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center gap-1.5">
+                  <Avatar className="size-4">
+                    {ticket.assignedTo.avatarUrl ? (
+                      <AvatarImage src={ticket.assignedTo.avatarUrl} alt={ticket.assignedTo.name ?? ticket.assignedTo.email} />
+                    ) : null}
+                    <AvatarFallback className="text-[8px] font-medium bg-muted">
+                      {getInitials(ticket.assignedTo.name, ticket.assignedTo.email)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-xs text-muted-foreground truncate max-w-[100px]">
+                    {ticket.assignedTo.name ?? ticket.assignedTo.email}
+                  </span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                Assigned to {ticket.assignedTo.name ?? ticket.assignedTo.email}
+              </TooltipContent>
+            </Tooltip>
+          )}
+        </div>
       </TableCell>
       <TableCell className="hidden md:table-cell">
         <TicketPriorityBadge priority={ticket.priority} />

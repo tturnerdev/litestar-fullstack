@@ -109,6 +109,10 @@ interface ProviderPreset {
   connectionType: string
   authType: string
   hint: string
+  hostPlaceholder: string
+  hostHint: string
+  portPlaceholder: string
+  credentialsHint: string
   defaultSettings: { verify_ssl: boolean; timeout: number }
 }
 
@@ -119,6 +123,10 @@ const providerPresets: ProviderPreset[] = [
     connectionType: "pbx",
     authType: "oauth2",
     hint: "Requires OAuth2 client credentials from FreePBX Admin -> Connectivity -> API -> Applications.",
+    hostPlaceholder: "e.g., admin.example.com",
+    hostHint: "Enter the FreePBX admin URL. Authentication requires OAuth2 client ID and secret.",
+    portPlaceholder: "e.g., 443",
+    credentialsHint: "Find credentials in FreePBX Admin -> Connectivity -> API -> Applications.",
     defaultSettings: { verify_ssl: true, timeout: 10 },
   },
   {
@@ -127,6 +135,10 @@ const providerPresets: ProviderPreset[] = [
     connectionType: "carrier",
     authType: "api_key",
     hint: "Requires an API key from the Telnyx Mission Control Portal.",
+    hostPlaceholder: "e.g., api.telnyx.com",
+    hostHint: "Uses API key authentication from your Telnyx portal.",
+    portPlaceholder: "e.g., 443",
+    credentialsHint: "Generate an API key at portal.telnyx.com under Auth -> API Keys.",
     defaultSettings: { verify_ssl: true, timeout: 10 },
   },
   {
@@ -135,6 +147,10 @@ const providerPresets: ProviderPreset[] = [
     connectionType: "network",
     authType: "api_key",
     hint: "Requires an API key from UniFi Console -> Settings -> API.",
+    hostPlaceholder: "e.g., unifi.example.com",
+    hostHint: "Enter the UniFi controller address. Uses API token authentication.",
+    portPlaceholder: "e.g., 443",
+    credentialsHint: "Create an API key in UniFi Console -> Settings -> API.",
     defaultSettings: { verify_ssl: false, timeout: 10 },
   },
 ]
@@ -614,7 +630,7 @@ function NewConnectionPage() {
                   <Label htmlFor="conn-host">Host / URL</Label>
                   <Input
                     id="conn-host"
-                    placeholder={connectionType === "network" ? "e.g., 192.168.1.1 or unifi.local" : "e.g., pbx.example.com or https://api.example.com"}
+                    placeholder={activePreset ? activePreset.hostPlaceholder : connectionType === "network" ? "e.g., 192.168.1.1 or unifi.local" : "e.g., pbx.example.com or https://api.example.com"}
                     value={host}
                     onChange={(e) => handleFieldChange("host", e.target.value, setHost)}
                     onBlur={() => handleFieldBlur("host", host)}
@@ -622,6 +638,8 @@ function NewConnectionPage() {
                   />
                   {errors.host ? (
                     <FieldError message={errors.host} />
+                  ) : activePreset ? (
+                    <FieldHint>{activePreset.hostHint}</FieldHint>
                   ) : (
                     <FieldHint>The hostname, IP address, or full URL of the remote service.</FieldHint>
                   )}
@@ -631,7 +649,7 @@ function NewConnectionPage() {
                   <Input
                     id="conn-port"
                     type="number"
-                    placeholder="e.g., 443"
+                    placeholder={activePreset ? activePreset.portPlaceholder : "e.g., 443"}
                     value={port}
                     onChange={(e) => handleFieldChange("port", e.target.value, setPort)}
                     onBlur={() => handleFieldBlur("port", port)}
@@ -679,6 +697,9 @@ function NewConnectionPage() {
                       can update them.
                     </p>
                   </div>
+                  {activePreset && (
+                    <p className="text-xs text-muted-foreground mt-1">{activePreset.credentialsHint}</p>
+                  )}
                   <div className="grid gap-4 md:grid-cols-2">
                     {credentialFields.map((field) => (
                       <div key={field.key} className={`space-y-2 ${field.key === "scopes" ? "md:col-span-2" : ""}`}>

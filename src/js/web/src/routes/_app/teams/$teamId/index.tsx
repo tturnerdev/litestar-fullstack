@@ -214,7 +214,16 @@ function TeamDetail() {
               </Badge>
             )}
             {userRole && (
-              <Badge variant="outline" className="gap-1 text-[10px]">
+              <Badge
+                variant={userRole === "Member" ? "outline" : undefined}
+                className={
+                  userRole === "Owner"
+                    ? "gap-1 bg-amber-500/15 text-amber-700 hover:bg-amber-500/20 dark:text-amber-400 text-[10px]"
+                    : userRole === "Admin"
+                      ? "gap-1 border border-purple-500/30 bg-purple-500/10 text-purple-700 hover:bg-purple-500/15 dark:text-purple-400 text-[10px]"
+                      : "gap-1 text-[10px]"
+                }
+              >
                 {userRole === "Owner" && <Crown className="h-2.5 w-2.5" />}
                 {userRole === "Admin" && <Shield className="h-2.5 w-2.5" />}
                 {userRole}
@@ -274,9 +283,22 @@ function TeamDetail() {
                 </div>
                 <Separator orientation="vertical" className="hidden h-12 sm:block" />
                 {owner && (
-                  <div className="text-center">
-                    <p className="text-sm font-medium text-foreground">{owner.name ?? owner.email}</p>
-                    <p className="text-xs text-muted-foreground">Owner</p>
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-500/15 text-sm font-medium text-amber-700 dark:text-amber-400">
+                      {owner.name?.charAt(0)?.toUpperCase() ?? owner.email.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="text-left">
+                      <p className="text-sm font-medium text-foreground">{owner.name ?? owner.email}</p>
+                      <div className="flex items-center gap-1.5">
+                        <Badge className="h-4 gap-0.5 bg-amber-500/15 px-1.5 text-[10px] text-amber-700 hover:bg-amber-500/20 dark:text-amber-400">
+                          <Crown className="h-2.5 w-2.5" />
+                          Owner
+                        </Badge>
+                        {owner.name && (
+                          <span className="text-xs text-muted-foreground">{owner.email}</span>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>

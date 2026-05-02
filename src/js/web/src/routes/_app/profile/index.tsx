@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query"
 import { Link, createFileRoute, useNavigate, useSearch } from "@tanstack/react-router"
-import { AlertCircle, ArrowRight, Bell, ChevronRight, Link2, Monitor, Palette, Shield, User as UserIcon } from "lucide-react"
+import { AlertCircle, ArrowRight, Bell, Calendar, CheckCircle2, ChevronRight, KeyRound, Link2, Mail, Monitor, Palette, Phone, Shield, ShieldAlert, ShieldCheck, User as UserIcon, Users } from "lucide-react"
 import { useEffect } from "react"
 import { toast } from "sonner"
 import { z } from "zod"
@@ -11,6 +11,7 @@ import { PasswordChangeCard } from "@/components/profile/password-change-card"
 import { RecentSecurityActivity } from "@/components/profile/recent-security-activity"
 import { PersonalInfoForm } from "@/components/profile/personal-info-form"
 import { ProfileHero } from "@/components/profile/profile-hero"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { EmptyState } from "@/components/ui/empty-state"
@@ -18,10 +19,13 @@ import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-lay
 import { Separator } from "@/components/ui/separator"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { SkeletonCard } from "@/components/ui/skeleton"
+import { useMfaStatus } from "@/lib/api/hooks/auth"
 import { useProfile } from "@/lib/api/hooks/profile"
 import { profileOAuthAccountsQueryKey } from "@/lib/generated/api/@tanstack/react-query.gen"
+import type { User } from "@/lib/generated/api/types.gen"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useAuthStore } from "@/lib/auth"
+import { formatDateLong } from "@/lib/date-utils"
 
 const profileSearchSchema = z
   .object({
@@ -47,6 +51,163 @@ function SectionHeading({ icon: Icon, title, description }: { icon: React.Compon
       </h3>
       {description && <p className="text-sm text-muted-foreground">{description}</p>}
     </div>
+  )
+}
+
+function InfoRow({ icon: Icon, label, children }: { icon: React.ComponentType<{ className?: string }>; label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex items-start gap-3 py-2.5">
+      <Icon className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+      <div className="min-w-0 flex-1">
+        <p className="text-xs font-medium text-muted-foreground">{label}</p>
+        <div className="mt-0.5 text-sm">{children}</div>
+      </div>
+    </div>
+  )
+}
+
+function AccountInfoCard({ user }: { user: User }) {
+  const roleNames = user.roles?.map((r) => r.roleName) ?? []
+  const teamNames = user.teams?.map((t) => t.teamName) ?? []
+  const earliestRole = user.roles?.reduce<string | null>((earliest, r) => {
+    if (!earliest) return r.assignedAt
+    return r.assignedAt < earliest ? r.assignedAt : earliest
+  }, null)
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <UserIcon className="h-4 w-4 text-muted-foreground" />
+          Account information
+        </CardTitle>
+        <CardDescription>Your account details and membership.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-0 divide-y">
+        <InfoRow icon={Mail} label="Email">
+          {user.email}
+        </InfoRow>
+        {user.username && (
+          <InfoRow icon={UserIcon} label="Username">
+            @{user.username}
+          </InfoRow>
+        )}
+        {user.phone && (
+          <InfoRow icon={Phone} label="Phone">
+            {user.phone}
+          </InfoRow>
+        )}
+        <InfoRow icon={KeyRound} label="Role">
+          {roleNames.length > 0 ? (
+            <div className="flex flex-wrap gap-1.5">
+              {roleNames.map((role) => (
+                <Badge key={role} variant="outline" className="capitalize">
+                  {role}
+                </Badge>
+              ))}
+            </div>
+          ) : (
+            <span className="text-muted-foreground">No roles assigned</span>
+          )}
+        </InfoRow>
+        {teamNames.length > 0 && (
+          <InfoRow icon={Users} label="Teams">
+            <div className="flex flex-wrap gap-1.5">
+              {teamNames.map((name) => (
+                <Badge key={name} variant="secondary">
+                  {name}
+                </Badge>
+              ))}
+            </div>
+          </InfoRow>
+        )}
+        <InfoRow icon={CheckCircle2} label="Account status">
+          <Badge variant={user.isActive ? "default" : "destructive"} className="gap-1">
+            {user.isActive ? "Active" : "Inactive"}
+          </Badge>
+        </InfoRow>
+        {earliestRole && (
+          <InfoRow icon={Calendar} label="Member since">
+            {formatDateLong(earliestRole)}
+          </InfoRow>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
+function MfaSummaryCard() {
+  const { data, isLoading } = useMfaStatus()
+
+  if (isLoading) {
+    return <SkeletonCard />
+  }
+
+  const enabled = data?.enabled ?? false
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Shield className="h-4 w-4 text-muted-foreground" />
+          Security status
+        </CardTitle>
+        <CardDescription>Multi-factor authentication overview.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {enabled ? (
+          <div className="flex items-start gap-4 rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-900 dark:bg-green-950/30">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/50">
+              <ShieldCheck className="h-6 w-6 text-green-600 dark:text-green-400" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="font-medium text-green-800 dark:text-green-300">
+                Two-factor authentication is enabled
+              </p>
+              <p className="mt-1 text-sm text-green-600 dark:text-green-400">
+                Your account is protected with an authenticator app.
+                {data?.confirmedAt && (
+                  <span className="block mt-1 text-xs">
+                    Enabled on {formatDateLong(data.confirmedAt)}.
+                  </span>
+                )}
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-start gap-4 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950/30">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/50">
+              <ShieldAlert className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="font-medium text-amber-800 dark:text-amber-300">
+                Two-factor authentication is not enabled
+              </p>
+              <p className="mt-1 text-sm text-amber-600 dark:text-amber-400">
+                We strongly recommend enabling MFA to add an extra layer of security to your account.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {enabled && data?.backupCodesRemaining != null && (
+          <div className="rounded-md border bg-muted/30 px-4 py-3">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Backup codes remaining</span>
+              <span className={`font-medium tabular-nums ${data.backupCodesRemaining > 5 ? "text-green-600" : data.backupCodesRemaining > 2 ? "text-amber-600" : "text-red-600"}`}>
+                {data.backupCodesRemaining} of 10
+              </span>
+            </div>
+          </div>
+        )}
+
+        {!enabled && (
+          <p className="text-xs text-muted-foreground">
+            Scroll to the Security section below to set up MFA.
+          </p>
+        )}
+      </CardContent>
+    </Card>
   )
 }
 
@@ -177,6 +338,16 @@ function ProfilePage() {
       <PageSection>
         <ProfileHero user={user} />
       </PageSection>
+
+      {/* Account overview cards */}
+      <PageSection delay={0.05}>
+        <div className="grid gap-6 lg:grid-cols-2">
+          <AccountInfoCard user={user} />
+          <MfaSummaryCard />
+        </div>
+      </PageSection>
+
+      <Separator />
 
       {/* Personal information */}
       <PageSection delay={0.1}>
