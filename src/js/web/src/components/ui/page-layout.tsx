@@ -29,7 +29,7 @@ export function PageContainer({ children, className, maxWidth = "2xl" }: PageCon
 interface PageHeaderProps {
   eyebrow?: string
   title: React.ReactNode
-  description?: string
+  description?: React.ReactNode
   actions?: React.ReactNode
   breadcrumbs?: React.ReactNode
   className?: string

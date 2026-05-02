@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.223.0 (2026-05-02)
+
+### Added
+- **Home system status indicator** — Compact admin-only status card on home dashboard showing database, cache, uptime, and health with auto-refresh
+- **Ticket number quick-copy** — Hover-to-reveal copy button next to ticket number in support detail header
+- **Device list status pills** — Status distribution summary (total, online, offline, provisioning, error) at top of devices list page
+
 ## v0.222.0 (2026-05-02)
 
 ### Added

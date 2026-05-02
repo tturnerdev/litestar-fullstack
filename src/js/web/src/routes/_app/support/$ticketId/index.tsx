@@ -932,7 +932,17 @@ function TicketDetailPage() {
             autoFocus
           />
         ) : ticket.subject}
-        description={`${ticket.ticketNumber} · Created ${formatDateTime(ticket.createdAt, "")}`}
+        description={
+          <span className="inline-flex items-center gap-1">
+            <span className="group/tktcopy inline-flex items-center gap-0.5">
+              {ticket.ticketNumber}
+              <span className="opacity-0 transition-opacity group-hover/tktcopy:opacity-100">
+                <CopyButton value={ticket.ticketNumber} label="ticket number" />
+              </span>
+            </span>
+            <span>· Created {formatDateTime(ticket.createdAt, "")}</span>
+          </span>
+        }
         breadcrumbs={
           <Breadcrumb>
             <BreadcrumbList>

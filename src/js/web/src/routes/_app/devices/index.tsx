@@ -37,7 +37,7 @@ import { FilterDropdown, type FilterOption } from "@/components/ui/filter-dropdo
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { SkeletonCard } from "@/components/ui/skeleton"
+import { Skeleton, SkeletonCard } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
@@ -205,6 +205,34 @@ function DevicesPage() {
     })
   }, [data?.items, typeFilter, statusFilter, startDate, endDate])
 
+  // Device status summary stats (computed from ALL items on the current page)
+  const deviceStats = useMemo(() => {
+    const items = data?.items ?? []
+    let online = 0
+    let offline = 0
+    let provisioning = 0
+    let error = 0
+    for (const device of items) {
+      switch (device.status) {
+        case "online":
+        case "ringing":
+        case "in_use":
+          online++
+          break
+        case "offline":
+          offline++
+          break
+        case "provisioning":
+          provisioning++
+          break
+        case "error":
+          error++
+          break
+      }
+    }
+    return { online, offline, provisioning, error, total: data?.total ?? 0 }
+  }, [data?.items, data?.total])
+
   // Selection helpers
   const allVisibleIds = useMemo(() => filteredItems.map((d) => d.id), [filteredItems])
   const allSelected = filteredItems.length > 0 && filteredItems.every((d) => selectedIds.has(d.id))
@@ -369,6 +397,48 @@ function DevicesPage() {
           </div>
         }
       />
+
+      {/* Status summary pills */}
+      <div className="flex flex-wrap items-center gap-2">
+        {isLoading ? (
+          <>
+            <Skeleton className="h-7 w-24 rounded-full" />
+            <Skeleton className="h-7 w-24 rounded-full" />
+            <Skeleton className="h-7 w-24 rounded-full" />
+          </>
+        ) : (
+          <>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground">
+              Total
+              <span className="ml-0.5 font-semibold text-foreground">{deviceStats.total}</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              Online
+              <span className="ml-0.5 font-semibold">{deviceStats.online}</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-xs font-medium text-red-700 dark:text-red-400">
+              <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+              Offline
+              <span className="ml-0.5 font-semibold">{deviceStats.offline}</span>
+            </span>
+            {deviceStats.provisioning > 0 && (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-700 dark:text-amber-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                Provisioning
+                <span className="ml-0.5 font-semibold">{deviceStats.provisioning}</span>
+              </span>
+            )}
+            {deviceStats.error > 0 && (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-rose-500/30 bg-rose-500/10 px-3 py-1 text-xs font-medium text-rose-700 dark:text-rose-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
+                Error
+                <span className="ml-0.5 font-semibold">{deviceStats.error}</span>
+              </span>
+            )}
+          </>
+        )}
+      </div>
 
       {/* Search & filters */}
       <PageSection>

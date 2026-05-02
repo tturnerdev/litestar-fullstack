@@ -1,10 +1,12 @@
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import {
+  Activity,
   AlertCircle,
   ArrowRight,
   Bell,
   BellOff,
+  Database,
   Laptop,
   ListTodo,
   MessageSquare,
@@ -12,6 +14,7 @@ import {
   Phone,
   Plus,
   Printer,
+  Server,
   Settings,
   ShieldCheck,
   Tag,
@@ -39,6 +42,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { EmptyState } from "@/components/ui/empty-state"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { useAdminSystemStatus } from "@/lib/api/hooks/admin"
 import { useDevices } from "@/lib/api/hooks/devices"
 import { useNotifications, useUnreadCount } from "@/lib/api/hooks/notifications"
 import { useTickets } from "@/lib/api/hooks/support"
@@ -193,6 +198,114 @@ function RecentNotificationsCard() {
         </div>
       </CardContent>
     </Card>
+  )
+}
+
+// --- System Status Indicator (admin only) ---
+
+function SystemStatusIndicator() {
+  const { data: status, isLoading } = useAdminSystemStatus({ refetchInterval: 30_000 })
+
+  if (isLoading) {
+    return (
+      <Card className="border-dashed">
+        <CardContent className="flex items-center gap-3 py-3 px-4">
+          <Skeleton className="h-2.5 w-2.5 rounded-full" />
+          <Skeleton className="h-4 w-48" />
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (!status) return null
+
+  const dbOnline = status.databaseStatus === "online"
+  const hasWorkers = (status.workerQueues?.length ?? 0) > 0
+  const allHealthy = dbOnline && hasWorkers
+  const partiallyHealthy = dbOnline || hasWorkers
+
+  const overallColor = allHealthy
+    ? "bg-emerald-500"
+    : partiallyHealthy
+      ? "bg-amber-500"
+      : "bg-red-500"
+
+  const overallLabel = allHealthy ? "All systems operational" : partiallyHealthy ? "Degraded" : "Outage"
+
+  const formatUptime = (seconds: number) => {
+    const days = Math.floor(seconds / 86400)
+    const hours = Math.floor((seconds % 86400) / 3600)
+    if (days > 0) return `${days}d ${hours}h`
+    const mins = Math.floor((seconds % 3600) / 60)
+    return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`
+  }
+
+  return (
+    <TooltipProvider>
+      <Card className="border-dashed">
+        <CardContent className="flex items-center gap-4 py-3 px-4">
+          {/* Overall health dot + label */}
+          <div className="flex items-center gap-2">
+            <span className={`inline-block h-2.5 w-2.5 rounded-full ${overallColor}`} />
+            <span className="text-sm font-medium">{overallLabel}</span>
+          </div>
+
+          <span className="text-border">|</span>
+
+          {/* Database */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center gap-1.5">
+                <Database className="h-3.5 w-3.5 text-muted-foreground" />
+                <span className={`h-1.5 w-1.5 rounded-full ${dbOnline ? "bg-emerald-500" : "bg-red-500"}`} />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">
+              <p>Database: {dbOnline ? "Online" : "Offline"}</p>
+            </TooltipContent>
+          </Tooltip>
+
+          {/* Cache / Workers */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center gap-1.5">
+                <Server className="h-3.5 w-3.5 text-muted-foreground" />
+                <span className={`h-1.5 w-1.5 rounded-full ${hasWorkers ? "bg-emerald-500" : "bg-red-500"}`} />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">
+              <p>Cache/Workers: {hasWorkers ? `${status.workerQueues?.length} queue(s) active` : "Unavailable"}</p>
+            </TooltipContent>
+          </Tooltip>
+
+          <span className="text-border">|</span>
+
+          {/* Uptime */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center gap-1.5">
+                <Activity className="h-3.5 w-3.5 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">Up {formatUptime(status.uptimeSeconds)}</span>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">
+              <p>v{status.appVersion} &middot; Python {status.pythonVersion}</p>
+            </TooltipContent>
+          </Tooltip>
+
+          {/* Spacer + View details link */}
+          <div className="ml-auto">
+            <Link
+              to="/admin/system"
+              className="text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              View details
+              <ArrowRight className="ml-1 inline-block h-3 w-3" />
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+    </TooltipProvider>
   )
 }
 
@@ -482,9 +595,16 @@ function HomePage() {
         </SectionErrorBoundary>
       </PageSection>
 
-      {/* Admin Section: Recent Activity + Chart */}
+      {/* System Status Indicator (admin only) */}
       {isSuperuser && (
         <PageSection delay={0.18}>
+          <SystemStatusIndicator />
+        </PageSection>
+      )}
+
+      {/* Admin Section: Recent Activity + Chart */}
+      {isSuperuser && (
+        <PageSection delay={0.19}>
           <div className="grid gap-6 md:grid-cols-2">
             <SectionErrorBoundary name="Recent Activity">
               <RecentActivityCard
