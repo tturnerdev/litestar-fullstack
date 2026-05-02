@@ -2,6 +2,7 @@ import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-route
 import { useCallback, useMemo, useState } from "react"
 import { toast } from "sonner"
 import { AppSidebar } from "@/components/app-sidebar"
+import { SessionTimeoutWarning } from "@/components/session-timeout-warning"
 import { ActiveTaskIndicator } from "@/components/tasks/active-task-indicator"
 import { HelpMenu } from "@/components/help/help-menu"
 import { KeyboardShortcutsDialog } from "@/components/keyboard-shortcuts-dialog"
@@ -132,7 +133,7 @@ export function AppLayout() {
     }
     return [
       { category: "Navigation", shortcuts: navigation },
-      { category: "Actions", shortcuts: [{ keys: [`${modKey}+K`], description: "Open search" }, { keys: [`${modKey}+B`], description: "Toggle sidebar" }, { keys: [`${modKey}+Shift+N`], description: "New ticket" }, { keys: ["n"], description: "Create new item (context-dependent)" }] },
+      { category: "Actions", shortcuts: [{ keys: [`${modKey}+K`], description: "Open search" }, { keys: [`${modKey}+B`], description: "Toggle sidebar" }, { keys: [`${modKey}+Shift+N`], description: "New ticket" }, { keys: ["n"], description: "Create new item (context-dependent)" }, { keys: ["/"], description: "Focus search input" }, { keys: ["←"], description: "Previous page" }, { keys: ["→"], description: "Next page" }] },
       { category: "Help", shortcuts: [{ keys: ["?"], description: "Show keyboard shortcuts" }] },
     ]
   }, [modKey, user?.isSuperuser])
@@ -311,6 +312,7 @@ export function AppLayout() {
         </SidebarProvider>
       </div>
       <KeyboardShortcutsDialog open={shortcutsOpen} onOpenChange={setShortcutsOpen} groups={shortcutGroups} />
+      <SessionTimeoutWarning />
     </div>
   )
 }
