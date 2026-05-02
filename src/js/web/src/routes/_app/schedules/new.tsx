@@ -29,6 +29,7 @@ import { Switch } from "@/components/ui/switch"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useCreateSchedule, type ScheduleCreate } from "@/lib/api/hooks/schedules"
 import { useAuthStore } from "@/lib/auth"
+import { toast } from "sonner"
 
 export const Route = createFileRoute("/_app/schedules/new")({
   component: NewSchedulePage,
@@ -128,6 +129,7 @@ function NewSchedulePage() {
 
     createSchedule.mutate(payload, {
       onSuccess: (data) => {
+        toast.success("Schedule created successfully")
         router.navigate({ to: "/schedules/$scheduleId", params: { scheduleId: data.id } })
       },
       onSettled: () => {

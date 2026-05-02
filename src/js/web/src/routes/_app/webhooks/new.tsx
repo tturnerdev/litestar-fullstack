@@ -39,6 +39,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useCreateWebhook } from "@/lib/api/hooks/webhooks"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
 import type { WebhookCreate } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/webhooks/new")({
@@ -227,6 +228,7 @@ function NewWebhookPage() {
 
     createWebhook.mutate(payload, {
       onSuccess: (data) => {
+        toast.success("Webhook created successfully")
         router.navigate({
           to: "/webhooks/$webhookId",
           params: { webhookId: data.id },

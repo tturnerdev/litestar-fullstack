@@ -25,6 +25,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
 import { useCreateExtension, usePhoneNumbers } from "@/lib/api/hooks/voice"
+import { toast } from "sonner"
 
 const PHONE_NONE = "__none__"
 
@@ -78,6 +79,7 @@ function NewExtensionPage() {
       await createExtension.mutateAsync(payload)
       // Reset dirty state before navigating so blocker doesn't fire
       form.reset(data)
+      toast.success("Extension created successfully")
       router.navigate({ to: "/voice/extensions" })
     } catch (error) {
       form.setError("root", {
@@ -120,7 +122,7 @@ function NewExtensionPage() {
                   <FormItem>
                     <FormLabel>Extension Number</FormLabel>
                     <FormControl>
-                      <Input placeholder="1001" {...field} />
+                      <Input placeholder="1001" autoFocus {...field} />
                     </FormControl>
                     <FormDescription>A unique number used to dial this extension internally.</FormDescription>
                     <FormMessage />

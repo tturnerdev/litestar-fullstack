@@ -24,6 +24,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAuthStore } from "@/lib/auth"
 import { useCreateLocation, useLocations } from "@/lib/api/hooks/locations"
+import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 
 const NAME_MAX = 100
@@ -149,6 +150,7 @@ export function CreateLocationForm() {
       })
       // Reset dirty state before navigating so blocker doesn't fire
       form.reset(data)
+      toast.success("Location created successfully")
       router.invalidate()
       router.navigate({ to: "/locations/$locationId", params: { locationId: location.id } })
     } catch (_error) {
@@ -181,7 +183,7 @@ export function CreateLocationForm() {
                   <RequiredIndicator />
                 </FormLabel>
                 <FormControl>
-                  <Input placeholder="Main Office" maxLength={NAME_MAX} {...field} />
+                  <Input placeholder="Main Office" maxLength={NAME_MAX} autoFocus {...field} />
                 </FormControl>
                 <div className="flex items-center justify-between">
                   <FormDescription>A descriptive name for this location.</FormDescription>

@@ -24,6 +24,7 @@ import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
 import { createTeam, listTags } from "@/lib/generated/api"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
 
 // ── Field limits ──────────────────────────────────────────────────────
 
@@ -89,6 +90,7 @@ export function CreateTeamForm() {
           tags: selectedTags.length > 0 ? selectedTags : undefined,
         },
       })
+      toast.success("Team created successfully")
       router.invalidate()
       router.navigate({ to: "/teams" })
     } catch (_error) {
@@ -131,7 +133,7 @@ export function CreateTeamForm() {
                 Team Name <span className="text-destructive">*</span>
               </FormLabel>
               <FormControl>
-                <Input placeholder="e.g., Engineering, Sales, Support" maxLength={NAME_MAX} {...field} />
+                <Input placeholder="e.g., Engineering, Sales, Support" maxLength={NAME_MAX} autoFocus {...field} />
               </FormControl>
               <div className="flex items-center justify-between">
                 <FormDescription>

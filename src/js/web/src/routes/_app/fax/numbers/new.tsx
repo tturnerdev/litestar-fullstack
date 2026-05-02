@@ -22,6 +22,7 @@ import { Switch } from "@/components/ui/switch"
 import { useAuth } from "@/hooks/use-auth"
 import { useCreateFaxNumber } from "@/lib/api/hooks/fax"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
 
 export const Route = createFileRoute("/_app/fax/numbers/new")({
   component: NewFaxNumberPage,
@@ -88,6 +89,7 @@ function NewFaxNumberPage() {
 
     createFaxNumber.mutate(payload, {
       onSuccess: () => {
+        toast.success("Fax number created successfully")
         router.navigate({ to: "/fax/numbers" })
       },
       onSettled: () => {

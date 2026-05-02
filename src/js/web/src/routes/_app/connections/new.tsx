@@ -44,6 +44,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { useAuth } from "@/hooks/use-auth"
 import { useCreateConnection, type ConnectionCreate } from "@/lib/api/hooks/connections"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
 
 export const Route = createFileRoute("/_app/connections/new")({
   component: NewConnectionPage,
@@ -445,6 +446,7 @@ function NewConnectionPage() {
     justSubmittedRef.current = true
     createConnection.mutate(payload, {
       onSuccess: () => {
+        toast.success("Connection created successfully")
         router.navigate({ to: "/connections" })
       },
       onError: () => {
@@ -520,6 +522,7 @@ function NewConnectionPage() {
                     aria-invalid={!!errors.name}
                     maxLength={NAME_MAX}
                     required
+                    autoFocus
                   />
                   <div className="flex items-center justify-between">
                     {errors.name ? (

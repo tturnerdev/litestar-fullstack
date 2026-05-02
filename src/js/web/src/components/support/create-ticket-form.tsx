@@ -39,6 +39,7 @@ import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { useCreateTicket } from "@/lib/api/hooks/support"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
 
 // ── Field limits ──────────────────────────────────────────────────────
 
@@ -159,6 +160,7 @@ export function CreateTicketForm() {
         category: data.category || null,
       })
       // Reset dirty state before navigating so blocker doesn't fire
+      toast.success("Ticket created successfully")
       form.reset(data)
       setAttachments([])
       router.navigate({
@@ -188,7 +190,7 @@ export function CreateTicketForm() {
                   Subject <RequiredIndicator />
                 </FormLabel>
                 <FormControl>
-                  <Input placeholder="Brief summary of your issue" maxLength={SUBJECT_MAX} {...field} />
+                  <Input placeholder="Brief summary of your issue" maxLength={SUBJECT_MAX} autoFocus {...field} />
                 </FormControl>
                 <div className="flex items-center justify-between">
                   <FormDescription>A clear, concise title helps our team triage faster.</FormDescription>

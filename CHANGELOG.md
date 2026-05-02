@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.237.0 (2026-05-03)
+
+### Added
+- **"My Assignments" dashboard widget** — shows tickets and tasks assigned to the current user with status badges, click-through links, and "view all" navigation
+- **Autofocus on create forms** — first input field auto-focused on devices, tickets, teams, locations, connections, and extensions create pages
+- **Success toasts on creation** for all 12 create forms — devices, tickets, teams, tags, webhooks, E911, locations, connections, schedules, extensions, phone numbers, fax numbers
+
 ## v0.236.0 (2026-05-03)
 
 ### Added

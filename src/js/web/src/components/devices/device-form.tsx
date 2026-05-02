@@ -39,6 +39,7 @@ import { useLocations } from "@/lib/api/hooks/locations"
 import { useAuthStore } from "@/lib/auth"
 import { formatMacAddress } from "@/lib/format-utils"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -162,6 +163,7 @@ export function CreateDeviceForm() {
         locationId: data.locationId || undefined,
         connectionId: data.connectionId || undefined,
       })
+      toast.success("Device created successfully")
       router.invalidate()
       router.navigate({ to: "/devices/$deviceId", params: { deviceId: device.id } })
     } catch (_error) {
@@ -185,7 +187,7 @@ export function CreateDeviceForm() {
               <FormItem>
                 <RequiredLabel>Device Name</RequiredLabel>
                 <FormControl>
-                  <Input placeholder="Desk Phone - Office" maxLength={NAME_MAX} {...field} />
+                  <Input placeholder="Desk Phone - Office" maxLength={NAME_MAX} autoFocus {...field} />
                 </FormControl>
                 <div className="flex items-center justify-between">
                   <FormDescription>A friendly label to identify this device.</FormDescription>

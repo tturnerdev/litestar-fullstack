@@ -21,6 +21,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { PageContainer, PageHeader } from "@/components/ui/page-layout"
 import { useCreateTag, type TagCreate } from "@/lib/api/hooks/tags"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
 
 export const Route = createFileRoute("/_app/tags/new")({
   component: NewTagPage,
@@ -86,6 +87,7 @@ function NewTagPage() {
 
     createTag.mutate(payload, {
       onSuccess: () => {
+        toast.success("Tag created successfully")
         router.navigate({ to: "/tags" })
       },
       onSettled: () => {

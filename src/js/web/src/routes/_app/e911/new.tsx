@@ -39,6 +39,7 @@ import {
   type E911RegistrationCreate,
   type UnregisteredPhoneNumber,
 } from "@/lib/api/hooks/e911"
+import { toast } from "sonner"
 import { useLocations, type Location } from "@/lib/api/hooks/locations"
 
 export const Route = createFileRoute("/_app/e911/new")({
@@ -175,6 +176,7 @@ function NewE911RegistrationPage() {
 
     createMutation.mutate(payload, {
       onSuccess: (data) => {
+        toast.success("E911 registration created successfully")
         router.navigate({ to: "/e911/$registrationId", params: { registrationId: data.id } })
       },
       onSettled: () => {

@@ -47,6 +47,7 @@ import { Switch } from "@/components/ui/switch"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useCreatePhoneNumber } from "@/lib/api/hooks/voice"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
 
 export const Route = createFileRoute("/_app/voice/phone-numbers/new")({
   component: NewPhoneNumberPage,
@@ -153,6 +154,7 @@ function NewPhoneNumberPage() {
       },
       {
         onSuccess: (data) => {
+          toast.success("Phone number created successfully")
           router.navigate({
             to: "/voice/phone-numbers/$phoneNumberId",
             params: { phoneNumberId: data.id },

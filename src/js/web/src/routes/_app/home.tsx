@@ -6,9 +6,12 @@ import {
   ArrowRight,
   Bell,
   BellOff,
+  ClipboardList,
   Database,
+  Inbox,
   Laptop,
   ListTodo,
+  type LucideIcon,
   MessageSquare,
   Monitor,
   Phone,
@@ -21,11 +24,9 @@ import {
   TicketCheck,
   TrendingUp,
   Users,
-  type LucideIcon,
 } from "lucide-react"
 import { useMemo } from "react"
-import { Area, AreaChart, ResponsiveContainer, Tooltip as RechartsTooltip, XAxis, YAxis } from "recharts"
-import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
+import { Area, AreaChart, Tooltip as RechartsTooltip, ResponsiveContainer, XAxis, YAxis } from "recharts"
 import { ConnectionsStatusCard } from "@/components/home/connections-status-card"
 import { FeatureAreasGrid } from "@/components/home/feature-areas-grid"
 import { GettingStarted } from "@/components/home/getting-started"
@@ -36,30 +37,25 @@ import { RecentActivityCard } from "@/components/home/recent-activity-card"
 import { RecentActivityFeed } from "@/components/home/recent-activity-feed"
 import { StatCard } from "@/components/home/stat-card"
 import { TeamsCard } from "@/components/home/teams-card"
+import { TicketStatusBadge } from "@/components/support/ticket-status-badge"
+import { TaskStatusBadge } from "@/components/tasks/task-status-badge"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { EmptyState } from "@/components/ui/empty-state"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useAdminSystemStatus } from "@/lib/api/hooks/admin"
 import { useDevices } from "@/lib/api/hooks/devices"
 import { useNotifications, useUnreadCount } from "@/lib/api/hooks/notifications"
 import { useTickets } from "@/lib/api/hooks/support"
-import { useActiveTasks } from "@/lib/api/hooks/tasks"
+import { useActiveTasks, useTasks } from "@/lib/api/hooks/tasks"
 import { useAuthStore } from "@/lib/auth"
 import { formatRelativeTimeShort } from "@/lib/date-utils"
-import { useDocumentTitle } from "@/hooks/use-document-title"
-import {
-  type DashboardStats,
-  type RecentActivity,
-  getDashboardStats,
-  getRecentActivity,
-  listRoles,
-  listTags,
-  listTeams,
-} from "@/lib/generated/api"
+import { type DashboardStats, getDashboardStats, getRecentActivity, listRoles, listTags, listTeams, type RecentActivity } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/home")({
   component: HomePage,
@@ -179,23 +175,188 @@ function RecentNotificationsCard() {
                     </div>
                     <p className="truncate text-xs text-muted-foreground">{notification.message}</p>
                   </div>
-                  <span className="shrink-0 pt-0.5 text-xs text-muted-foreground">
-                    {formatRelativeTimeShort(notification.createdAt)}
-                  </span>
+                  <span className="shrink-0 pt-0.5 text-xs text-muted-foreground">{formatRelativeTimeShort(notification.createdAt)}</span>
                 </button>
               )
             })}
           </div>
         )}
         <div className="mt-4 border-t pt-3">
-          <Link
-            to="/notifications"
-            className="flex items-center justify-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-          >
+          <Link to="/notifications" className="flex items-center justify-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
             View all notifications
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+// --- My Assignments Card ---
+
+const MAX_ASSIGNMENT_ITEMS = 5
+
+function formatTaskType(taskType: string): string {
+  return taskType.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+}
+
+function MyAssignmentsCard() {
+  const user = useAuthStore((state) => state.user)
+
+  // Fetch recent non-closed tickets (enough to find user's assignments)
+  const { data: ticketsData, isLoading: ticketsLoading } = useTickets(1, 50, {
+    orderBy: "updated_at",
+    sortOrder: "desc",
+  })
+
+  // Fetch recent non-completed tasks
+  const { data: tasksData, isLoading: tasksLoading } = useTasks({
+    page: 1,
+    pageSize: 50,
+    orderBy: "created_at",
+    sortOrder: "desc",
+  })
+
+  const isLoading = ticketsLoading || tasksLoading
+
+  // Filter tickets assigned to current user or created by current user
+  const myTickets = useMemo(() => {
+    if (!ticketsData?.items || !user) return []
+    return ticketsData.items
+      .filter((ticket) => {
+        const isAssigned = ticket.assignedTo?.id === user.id
+        const isAuthor = ticket.user?.id === user.id
+        const isActive = ticket.status !== "closed" && ticket.status !== "resolved"
+        return (isAssigned || isAuthor) && isActive
+      })
+      .slice(0, MAX_ASSIGNMENT_ITEMS)
+  }, [ticketsData, user])
+
+  // Filter tasks initiated by current user that are still active
+  const myTasks = useMemo(() => {
+    if (!tasksData?.items || !user) return []
+    return tasksData.items
+      .filter((task) => {
+        const isActive = task.status === "pending" || task.status === "running"
+        const isInitiator = task.initiatedByName === user.name || task.initiatedByName === user.email
+        return isActive && isInitiator
+      })
+      .slice(0, MAX_ASSIGNMENT_ITEMS)
+  }, [tasksData, user])
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader className="space-y-1 pb-4">
+          <div className="flex items-center gap-2">
+            <ClipboardList className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-lg">My Assignments</CardTitle>
+          </div>
+          <CardDescription>Tickets and tasks assigned to you</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton placeholders
+            <div key={`assignment-skeleton-${i}`} className="flex items-center gap-3">
+              <Skeleton className="h-5 w-5 shrink-0 rounded" />
+              <div className="flex-1 space-y-1">
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-3 w-1/2" />
+              </div>
+              <Skeleton className="h-5 w-16" />
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+    )
+  }
+
+  const hasTickets = myTickets.length > 0
+  const hasTasks = myTasks.length > 0
+  const isEmpty = !hasTickets && !hasTasks
+
+  return (
+    <Card>
+      <CardHeader className="space-y-1 pb-4">
+        <div className="flex items-center gap-2">
+          <ClipboardList className="h-4 w-4 text-muted-foreground" />
+          <CardTitle className="text-lg">My Assignments</CardTitle>
+        </div>
+        <CardDescription>Tickets and tasks assigned to you</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {isEmpty ? (
+          <div className="flex flex-col items-center justify-center py-8 text-center">
+            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+              <Inbox className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <p className="text-sm font-medium text-muted-foreground">No active assignments</p>
+            <p className="mt-1 text-xs text-muted-foreground/70">Tickets and tasks assigned to you will appear here.</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {/* Tickets Section */}
+            {hasTickets && (
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 px-3 pb-1">
+                  <TicketCheck className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Tickets</span>
+                </div>
+                {myTickets.map((ticket) => (
+                  <Link
+                    key={ticket.id}
+                    to="/support/$ticketId"
+                    params={{ ticketId: ticket.id }}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-muted/50"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">{ticket.subject}</p>
+                      <p className="text-xs text-muted-foreground">#{ticket.ticketNumber}</p>
+                    </div>
+                    <TicketStatusBadge status={ticket.status} />
+                  </Link>
+                ))}
+                <div className="pt-1 px-3">
+                  <Link to="/support" className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground">
+                    View all tickets
+                    <ArrowRight className="h-3 w-3" />
+                  </Link>
+                </div>
+              </div>
+            )}
+
+            {/* Tasks Section */}
+            {hasTasks && (
+              <div className="space-y-1">
+                {hasTickets && <div className="border-t my-2" />}
+                <div className="flex items-center gap-2 px-3 pb-1">
+                  <ListTodo className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Tasks</span>
+                </div>
+                {myTasks.map((task) => (
+                  <Link
+                    key={task.id}
+                    to="/tasks/$taskId"
+                    params={{ taskId: task.id }}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-muted/50"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">{formatTaskType(task.taskType)}</p>
+                      {task.updatedAt && <p className="text-xs text-muted-foreground">{formatRelativeTimeShort(task.updatedAt)}</p>}
+                    </div>
+                    <TaskStatusBadge status={task.status} />
+                  </Link>
+                ))}
+                <div className="pt-1 px-3">
+                  <Link to="/tasks" className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground">
+                    View all tasks
+                    <ArrowRight className="h-3 w-3" />
+                  </Link>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </CardContent>
     </Card>
   )
@@ -224,11 +385,7 @@ function SystemStatusIndicator() {
   const allHealthy = dbOnline && hasWorkers
   const partiallyHealthy = dbOnline || hasWorkers
 
-  const overallColor = allHealthy
-    ? "bg-emerald-500"
-    : partiallyHealthy
-      ? "bg-amber-500"
-      : "bg-red-500"
+  const overallColor = allHealthy ? "bg-emerald-500" : partiallyHealthy ? "bg-amber-500" : "bg-red-500"
 
   const overallLabel = allHealthy ? "All systems operational" : partiallyHealthy ? "Degraded" : "Outage"
 
@@ -289,16 +446,15 @@ function SystemStatusIndicator() {
               </div>
             </TooltipTrigger>
             <TooltipContent side="bottom">
-              <p>v{status.appVersion} &middot; Python {status.pythonVersion}</p>
+              <p>
+                v{status.appVersion} &middot; Python {status.pythonVersion}
+              </p>
             </TooltipContent>
           </Tooltip>
 
           {/* Spacer + View details link */}
           <div className="ml-auto">
-            <Link
-              to="/admin/system"
-              className="text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
+            <Link to="/admin/system" className="text-xs font-medium text-muted-foreground transition-colors hover:text-foreground">
               View details
               <ArrowRight className="ml-1 inline-block h-3 w-3" />
             </Link>
@@ -315,7 +471,11 @@ function HomePage() {
   const isSuperuser = user?.isSuperuser ?? false
   const greeting = useGreeting()
 
-  const { data: teamsRaw, isLoading: teamsLoading, isError: teamsError } = useQuery({
+  const {
+    data: teamsRaw,
+    isLoading: teamsLoading,
+    isError: teamsError,
+  } = useQuery({
     queryKey: ["home", "teams"],
     queryFn: async () => {
       const response = await listTeams()
@@ -325,7 +485,11 @@ function HomePage() {
     },
   })
 
-  const { data: tagsData, isLoading: tagsLoading, isError: tagsError } = useQuery({
+  const {
+    data: tagsData,
+    isLoading: tagsLoading,
+    isError: tagsError,
+  } = useQuery({
     queryKey: ["home", "tags-count"],
     queryFn: async () => {
       const response = await listTags({ query: { currentPage: 1, pageSize: 1 } })
@@ -333,7 +497,11 @@ function HomePage() {
     },
   })
 
-  const { data: rolesData, isLoading: rolesLoading, isError: rolesError } = useQuery({
+  const {
+    data: rolesData,
+    isLoading: rolesLoading,
+    isError: rolesError,
+  } = useQuery({
     queryKey: ["home", "roles-count"],
     queryFn: async () => {
       const response = await listRoles({ query: { currentPage: 1, pageSize: 1 } })
@@ -414,11 +582,7 @@ function HomePage() {
   if (hasError) {
     return (
       <PageContainer className="flex-1 space-y-8">
-        <PageHeader
-          eyebrow="Dashboard"
-          title={greeting}
-          description="Manage your teams, devices, and services from one place."
-        />
+        <PageHeader eyebrow="Dashboard" title={greeting} description="Manage your teams, devices, and services from one place." />
         <EmptyState
           icon={AlertCircle}
           title="Unable to load dashboard"
@@ -454,6 +618,13 @@ function HomePage() {
           <h2 className="text-lg font-semibold tracking-tight">Quick Actions</h2>
           <QuickShortcutsRow />
         </div>
+      </PageSection>
+
+      {/* My Assignments */}
+      <PageSection delay={0.04}>
+        <SectionErrorBoundary name="My Assignments">
+          <MyAssignmentsCard />
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Operational Stats Row */}
@@ -607,11 +778,7 @@ function HomePage() {
         <PageSection delay={0.19}>
           <div className="grid gap-6 md:grid-cols-2">
             <SectionErrorBoundary name="Recent Activity">
-              <RecentActivityCard
-                activities={activityData?.activities ?? []}
-                isLoading={activityLoading}
-                isAdmin={isSuperuser}
-              />
+              <RecentActivityCard activities={activityData?.activities ?? []} isLoading={activityLoading} isAdmin={isSuperuser} />
             </SectionErrorBoundary>
             <SectionErrorBoundary name="Activity Chart">
               <Card>
@@ -632,19 +799,8 @@ function HomePage() {
                             <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.02} />
                           </linearGradient>
                         </defs>
-                        <XAxis
-                          dataKey="label"
-                          axisLine={false}
-                          tickLine={false}
-                          tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
-                          dy={4}
-                        />
-                        <YAxis
-                          axisLine={false}
-                          tickLine={false}
-                          tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
-                          allowDecimals={false}
-                        />
+                        <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} dy={4} />
+                        <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} allowDecimals={false} />
                         <RechartsTooltip
                           contentStyle={{
                             backgroundColor: "hsl(var(--popover))",
@@ -656,13 +812,7 @@ function HomePage() {
                           formatter={(value) => [String(value), "Events"]}
                           labelFormatter={(label) => String(label)}
                         />
-                        <Area
-                          type="monotone"
-                          dataKey="count"
-                          stroke="hsl(var(--primary))"
-                          strokeWidth={2}
-                          fill="url(#activityGradient)"
-                        />
+                        <Area type="monotone" dataKey="count" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#activityGradient)" />
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
