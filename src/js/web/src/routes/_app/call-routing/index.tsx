@@ -302,7 +302,7 @@ function NewCallQueueDialog({ open, onOpenChange }: { open: boolean; onOpenChang
           <div className="space-y-2">
             <Label htmlFor="cq-strategy">Strategy</Label>
             <Select value={strategy} onValueChange={setStrategy}>
-              <SelectTrigger id="cq-strategy"><SelectValue /></SelectTrigger>
+              <SelectTrigger id="cq-strategy"><SelectValue placeholder="Select strategy" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="ring_all">Ring All</SelectItem>
                 <SelectItem value="round_robin">Round Robin</SelectItem>
@@ -369,7 +369,7 @@ function NewRingGroupDialog({ open, onOpenChange }: { open: boolean; onOpenChang
           <div className="space-y-2">
             <Label htmlFor="rg-strategy">Strategy</Label>
             <Select value={strategy} onValueChange={setStrategy}>
-              <SelectTrigger id="rg-strategy"><SelectValue /></SelectTrigger>
+              <SelectTrigger id="rg-strategy"><SelectValue placeholder="Select strategy" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="ring_all">Ring All</SelectItem>
                 <SelectItem value="round_robin">Round Robin</SelectItem>

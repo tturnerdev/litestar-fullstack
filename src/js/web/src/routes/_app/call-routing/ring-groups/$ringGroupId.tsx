@@ -139,7 +139,7 @@ function AddMemberRow({ groupId }: { groupId: string }) {
       <div className="space-y-2">
         <Label>Member Type</Label>
         <Select value={memberType} onValueChange={(v) => setMemberType(v as "extension" | "external")}>
-          <SelectTrigger><SelectValue /></SelectTrigger>
+          <SelectTrigger><SelectValue placeholder="Select member type" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="extension">Extension</SelectItem>
             <SelectItem value="external">External Number</SelectItem>
@@ -386,7 +386,7 @@ function RingGroupDetailPage() {
                     <div className="space-y-2">
                       <Label>Strategy</Label>
                       <Select value={editStrategy} onValueChange={setEditStrategy}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectTrigger><SelectValue placeholder="Select strategy" /></SelectTrigger>
                         <SelectContent>
                           {Object.entries(strategyLabels).map(([k, v]) => (
                             <SelectItem key={k} value={k}>{v}</SelectItem>

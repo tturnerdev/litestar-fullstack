@@ -522,7 +522,7 @@ function NewConnectionPage() {
                   </Label>
                   <Select value={connectionType} onValueChange={setConnectionType}>
                     <SelectTrigger id="conn-type">
-                      <SelectValue />
+                      <SelectValue placeholder="Select type" />
                     </SelectTrigger>
                     <SelectContent>
                       {connectionTypes.map((t) => (
@@ -652,7 +652,7 @@ function NewConnectionPage() {
                 <Label htmlFor="conn-auth">Authentication Type</Label>
                 <Select value={authType} onValueChange={handleAuthTypeChange}>
                   <SelectTrigger id="conn-auth">
-                    <SelectValue />
+                    <SelectValue placeholder="Select auth type" />
                   </SelectTrigger>
                   <SelectContent>
                     {authTypes.map((t) => (

@@ -631,5 +631,5 @@ When `entity_type` and `entity_id` are set on a task, the frontend can render a 
 - [x] Add `/admin/tasks` management page (all tasks across all teams) — done in v0.161.0 at /admin/tasks
 - [x] Add admin filters: team, user, date range, status — done in v0.161.0, has status/taskType/entityType filters
 - [x] Add bulk actions: retry failed tasks, cancel pending tasks, purge old tasks — done in v0.161.0, cancel/delete/export bulk actions
-- [ ] Add task statistics dashboard (counts by status, average duration by type)
-- [ ] Add audit log entries for task cancellations
+- [x] Add task statistics dashboard (counts by status, average duration by type) — done in v0.162.0, admin tasks page has stats summary cards
+- [x] Add audit log entries for task cancellations — done in v0.162.0, both user and admin cancel/delete endpoints write audit entries

@@ -616,7 +616,7 @@ function ScheduleDetailPage() {
                       <Label>Type</Label>
                       <Select value={editType} onValueChange={(v) => setEditType(v as Schedule["scheduleType"])}>
                         <SelectTrigger>
-                          <SelectValue />
+                          <SelectValue placeholder="Select type" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="business_hours">Business Hours</SelectItem>
@@ -629,7 +629,7 @@ function ScheduleDetailPage() {
                       <Label>Timezone</Label>
                       <Select value={editTimezone} onValueChange={setEditTimezone}>
                         <SelectTrigger>
-                          <SelectValue />
+                          <SelectValue placeholder="Select timezone" />
                         </SelectTrigger>
                         <SelectContent>
                           {COMMON_TIMEZONES.map((tz) => (

@@ -132,7 +132,7 @@ export function AppLayout() {
     }
     return [
       { category: "Navigation", shortcuts: navigation },
-      { category: "Actions", shortcuts: [{ keys: [`${modKey}+K`], description: "Open search" }, { keys: [`${modKey}+Shift+N`], description: "New ticket" }, { keys: ["n"], description: "Create new item (context-dependent)" }] },
+      { category: "Actions", shortcuts: [{ keys: [`${modKey}+K`], description: "Open search" }, { keys: [`${modKey}+B`], description: "Toggle sidebar" }, { keys: [`${modKey}+Shift+N`], description: "New ticket" }, { keys: ["n"], description: "Create new item (context-dependent)" }] },
       { category: "Help", shortcuts: [{ keys: ["?"], description: "Show keyboard shortcuts" }] },
     ]
   }, [modKey, user?.isSuperuser])

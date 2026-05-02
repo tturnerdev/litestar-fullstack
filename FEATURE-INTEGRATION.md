@@ -446,10 +446,10 @@ No new hook files. Existing hooks return the enriched schemas automatically afte
 ### Phase 3: Extension ↔ E911 and Phone Number ↔ E911 (surfacing)
 
 - [x] Add reverse `e911_registration` relationship to `PhoneNumber` model
-- [ ] Update Extension detail schema: add `e911_status`, `e911_registration_id`, `e911_address_summary`
+- [x] Update Extension detail schema: add `e911_status`, `e911_registration_id`, `e911_address_summary` — done in v0.162.0
 - [x] Update PhoneNumber list schema: add `e911_registered`
 - [x] Update PhoneNumber detail schema: add `e911_registered`, `e911_registration_id`
-- [ ] Update `ExtensionService.get()` to join `phone_number → e911_registration`
+- [x] Update `ExtensionService.get()` to join `phone_number → e911_registration` — done in v0.162.0, joinedload chain added to controller dependencies
 - [x] Update `PhoneNumberService` to check E911 status on detail/list queries
 - [x] Add `get_unregistered_numbers(team_id)` method to `PhoneNumberService`
 - [x] Add `GET /api/voice/phone-numbers/unregistered-e911` endpoint

@@ -456,7 +456,7 @@ function AddRuleDialog({
                 <Label htmlFor="rule-type">When</Label>
                 <Select value={ruleType} onValueChange={setRuleType}>
                   <SelectTrigger id="rule-type">
-                    <SelectValue />
+                    <SelectValue placeholder="Select condition" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="always">Always</SelectItem>
@@ -470,7 +470,7 @@ function AddRuleDialog({
                 <Label htmlFor="dest-type">Forward to</Label>
                 <Select value={destType} onValueChange={setDestType}>
                   <SelectTrigger id="dest-type">
-                    <SelectValue />
+                    <SelectValue placeholder="Select destination" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="extension">Extension</SelectItem>

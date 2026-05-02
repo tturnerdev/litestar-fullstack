@@ -33,6 +33,7 @@ const DEFAULT_FORM_DATA: ReportFormData = {
 
 const KEYBOARD_SHORTCUTS = [
   { keys: ["Cmd/Ctrl", "K"], description: "Global search" },
+  { keys: ["Cmd/Ctrl", "B"], description: "Toggle sidebar" },
   { keys: ["?"], description: "Show keyboard shortcuts" },
   { keys: ["Esc"], description: "Close dialogs" },
 ] as const

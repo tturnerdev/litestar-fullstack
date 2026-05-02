@@ -1,4 +1,4 @@
-import { Compass, Keyboard, Layout, Search, Zap } from "lucide-react"
+import { CircleHelp, Compass, Keyboard, Layout, Search, Zap } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { useMemo, useState } from "react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -27,6 +27,7 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
   Navigation: Compass,
   General: Layout,
   Actions: Zap,
+  Help: CircleHelp,
 }
 
 function Kbd({ children, className }: { children: React.ReactNode; className?: string }) {
