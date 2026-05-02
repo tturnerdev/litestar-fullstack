@@ -5,8 +5,10 @@ import {
   AlertTriangle,
   ArrowLeft,
   ArrowUpRight,
+  ChevronRight,
   Copy,
   Eye,
+  Link2,
   Loader2,
   MessageSquare,
   MoreHorizontal,
@@ -14,7 +16,9 @@ import {
   Phone,
   Save,
   Send,
+  ShieldAlert,
   Trash2,
+  Users,
   X,
 } from "lucide-react"
 import { DirectionBadge, FaxStatusBadge } from "@/components/fax/fax-status-badge"
@@ -63,6 +67,7 @@ import {
   useFaxNumber,
   useUpdateFaxNumber,
 } from "@/lib/api/hooks/fax"
+import { useTeam } from "@/lib/api/hooks/teams"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { formatDateTime, formatRelativeTime } from "@/lib/date-utils"
 import { formatPhoneNumber } from "@/lib/format-utils"
@@ -127,6 +132,7 @@ function FaxNumberDetailPage() {
   const { data, isLoading, isError, refetch } = useFaxNumber(faxNumberId)
   useDocumentTitle(data?.number ? `${data.number} - Fax Number` : "Fax Number")
   const deleteFaxNumber = useDeleteFaxNumber()
+  const teamQuery = useTeam(data?.teamId ?? "")
 
   // Fetch recent messages (last 5) -- filter client-side by faxNumberId
   const { data: messagesData } = useFaxMessages({
@@ -438,8 +444,70 @@ function FaxNumberDetailPage() {
         </Card>
       </PageSection>
 
-      {/* Activity History */}
+      {/* Related Resources */}
       <PageSection delay={0.2}>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Link2 className="h-5 w-5 text-muted-foreground" />
+              Related Resources
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {/* Team */}
+              {data.teamId ? (
+                <Link
+                  to="/teams/$teamId"
+                  params={{ teamId: data.teamId }}
+                  className="group flex items-center gap-3 rounded-lg border border-border/60 px-4 py-3 transition-colors hover:bg-muted/50 hover:border-primary/30"
+                >
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                    <Users className="h-4.5 w-4.5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs text-muted-foreground">Team</p>
+                    <p className="truncate text-sm font-medium group-hover:text-primary">
+                      {teamQuery.data?.name ?? "Loading..."}
+                    </p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+                </Link>
+              ) : (
+                <div className="flex items-center gap-3 rounded-lg border border-dashed border-border/60 px-4 py-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground/50">
+                    <Users className="h-4.5 w-4.5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs text-muted-foreground">Team</p>
+                    <p className="text-sm text-muted-foreground">Not assigned</p>
+                  </div>
+                </div>
+              )}
+
+              {/* E911 Registration */}
+              <Link
+                to="/e911"
+                className="group flex items-center gap-3 rounded-lg border border-border/60 px-4 py-3 transition-colors hover:bg-muted/50 hover:border-primary/30"
+              >
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-red-500/10 text-red-600 dark:text-red-400">
+                  <ShieldAlert className="h-4.5 w-4.5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs text-muted-foreground">E911 Registrations</p>
+                  <p className="truncate text-sm font-medium group-hover:text-primary">
+                    View registrations
+                  </p>
+                </div>
+                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      </PageSection>
+
+      {/* Activity History */}
+      <PageSection delay={0.25}>
         <Card>
           <CardHeader>
             <CardTitle>Activity History</CardTitle>
@@ -454,7 +522,7 @@ function FaxNumberDetailPage() {
       </PageSection>
 
       {/* Danger Zone */}
-      <PageSection delay={0.25}>
+      <PageSection delay={0.3}>
         <Card className="border-destructive/30">
           <CardHeader>
             <CardTitle className="text-destructive">Danger Zone</CardTitle>

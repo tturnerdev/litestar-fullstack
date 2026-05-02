@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useBlocker, useNavigate } from "@tanstack/react-router"
-import { AlertCircle, ArrowLeft, Copy, Fingerprint, Home, Loader2, MoreHorizontal, Pencil, Phone, PhoneForwarded, Shield, Trash2 } from "lucide-react"
+import { AlertCircle, ArrowLeft, ChevronRight, Copy, Fingerprint, Home, Link2, Loader2, MoreHorizontal, Pencil, Phone, PhoneForwarded, Shield, Trash2, Users } from "lucide-react"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
@@ -37,6 +37,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { usePhoneNumber, useUpdatePhoneNumber, useExtensionsByPhoneNumber } from "@/lib/api/hooks/voice"
 import { useGatewayLookupNumber } from "@/lib/api/hooks/gateway"
+import { useTeam } from "@/lib/api/hooks/teams"
 import { formatPhoneNumber } from "@/lib/format-utils"
 
 type PhoneNumberDetailSearch = {
@@ -74,6 +75,7 @@ function PhoneNumberDetailPage() {
   const updatePhoneNumber = useUpdatePhoneNumber(phoneNumberId)
   const gatewayQuery = useGatewayLookupNumber(data?.number ?? "", tab === "external")
   const extensionsQuery = useExtensionsByPhoneNumber(phoneNumberId)
+  const teamQuery = useTeam(data?.teamId ?? "")
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
 
@@ -547,6 +549,108 @@ function PhoneNumberDetailPage() {
                     No extensions are currently assigned to this phone number.
                   </p>
                 )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Link2 className="h-5 w-5 text-muted-foreground" />
+                  Related Resources
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {/* Extension */}
+                  {extensionsQuery.data && extensionsQuery.data.length > 0 ? (
+                    <Link
+                      to="/voice/extensions/$extensionId"
+                      params={{ extensionId: extensionsQuery.data[0].id }}
+                      className="group flex items-center gap-3 rounded-lg border border-border/60 px-4 py-3 transition-colors hover:bg-muted/50 hover:border-primary/30"
+                    >
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-violet-500/10 text-violet-600 dark:text-violet-400">
+                        <PhoneForwarded className="h-4.5 w-4.5" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs text-muted-foreground">Extension</p>
+                        <p className="truncate text-sm font-medium group-hover:text-primary">
+                          {extensionsQuery.data[0].displayName ?? extensionsQuery.data[0].extensionNumber}
+                        </p>
+                      </div>
+                      <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+                    </Link>
+                  ) : (
+                    <div className="flex items-center gap-3 rounded-lg border border-dashed border-border/60 px-4 py-3">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground/50">
+                        <PhoneForwarded className="h-4.5 w-4.5" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs text-muted-foreground">Extension</p>
+                        <p className="text-sm text-muted-foreground">Not assigned</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Team */}
+                  {data.teamId ? (
+                    <Link
+                      to="/teams/$teamId"
+                      params={{ teamId: data.teamId }}
+                      className="group flex items-center gap-3 rounded-lg border border-border/60 px-4 py-3 transition-colors hover:bg-muted/50 hover:border-primary/30"
+                    >
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                        <Users className="h-4.5 w-4.5" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs text-muted-foreground">Team</p>
+                        <p className="truncate text-sm font-medium group-hover:text-primary">
+                          {teamQuery.data?.name ?? "Loading..."}
+                        </p>
+                      </div>
+                      <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+                    </Link>
+                  ) : (
+                    <div className="flex items-center gap-3 rounded-lg border border-dashed border-border/60 px-4 py-3">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground/50">
+                        <Users className="h-4.5 w-4.5" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs text-muted-foreground">Team</p>
+                        <p className="text-sm text-muted-foreground">Not assigned</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* E911 Registration */}
+                  {data.e911Registered && data.e911RegistrationId ? (
+                    <Link
+                      to="/e911/$registrationId"
+                      params={{ registrationId: data.e911RegistrationId }}
+                      className="group flex items-center gap-3 rounded-lg border border-border/60 px-4 py-3 transition-colors hover:bg-muted/50 hover:border-primary/30"
+                    >
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                        <Shield className="h-4.5 w-4.5" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs text-muted-foreground">E911 Registration</p>
+                        <p className="truncate text-sm font-medium group-hover:text-primary">
+                          {data.e911RegistrationId.slice(0, 8)}...
+                        </p>
+                      </div>
+                      <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+                    </Link>
+                  ) : (
+                    <div className="flex items-center gap-3 rounded-lg border border-dashed border-border/60 px-4 py-3">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground/50">
+                        <Shield className="h-4.5 w-4.5" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs text-muted-foreground">E911 Registration</p>
+                        <p className="text-sm text-muted-foreground">Not registered</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

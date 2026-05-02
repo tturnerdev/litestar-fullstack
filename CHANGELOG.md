@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.215.0 (2026-05-02)
+
+### Added
+- **Fax number related resources** — Team link card and E911 navigation shortcut on fax number detail page
+- **Phone number related resources** — Extension, team, and E911 registration link cards on voice phone number detail page
+- **Admin dashboard summary stats** — Quick stats row showing total users, teams, active connections, and system health at top of admin page
+
 ## v0.214.0 (2026-05-02)
 
 ### Added

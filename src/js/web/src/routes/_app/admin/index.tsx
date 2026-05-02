@@ -3,6 +3,7 @@ import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminCharts } from "@/components/admin/admin-charts"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { AdminQuickActions } from "@/components/admin/admin-quick-actions"
+import { AdminSummaryStats } from "@/components/admin/admin-summary-stats"
 import { RecentActivity } from "@/components/admin/recent-activity"
 import { StatsCards } from "@/components/admin/stats-cards"
 import { SystemHealthCard } from "@/components/admin/system-health-card"
@@ -21,6 +22,9 @@ function AdminDashboardPage() {
       <PageHeader eyebrow="Administration" title="Admin Console" description="Review activity, manage users, and oversee teams." breadcrumbs={<AdminBreadcrumbs />} />
       <AdminNav />
       <PageSection>
+        <AdminSummaryStats />
+      </PageSection>
+      <PageSection delay={0.05}>
         <StatsCards />
       </PageSection>
       <PageSection delay={0.1}>
