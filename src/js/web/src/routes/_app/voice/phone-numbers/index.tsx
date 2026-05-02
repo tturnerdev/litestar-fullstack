@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { useCallback, useMemo, useState } from "react"
 import {
   AlertCircle,
+  AlertTriangle,
   CheckCircle2,
   Circle,
   Download,
@@ -444,6 +445,12 @@ function PhoneNumbersPage() {
   // Active filter count
   const activeFilterCount = typeFilter.length + statusFilter.length
 
+  // E911 unregistered count
+  const unregisteredCount = useMemo(() => {
+    if (!data?.items) return 0
+    return data.items.filter((pn) => !pn.e911Registered).length
+  }, [data?.items])
+
   const hasData = filteredItems.length > 0
   const hasAnyNumbers = (data?.items.length ?? 0) > 0
   const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / PAGE_SIZE))
@@ -496,6 +503,26 @@ function PhoneNumbersPage() {
           </div>
         }
       />
+
+      {/* E911 unregistered warning */}
+      {unregisteredCount > 0 && (
+        <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-4">
+          <div className="flex items-center gap-3">
+            <AlertTriangle className="h-5 w-5 shrink-0 text-amber-500" />
+            <p className="flex-1 text-sm">
+              <span className="font-medium">
+                {unregisteredCount} phone number{unregisteredCount === 1 ? " is" : "s are"} not registered for E911.
+              </span>{" "}
+              <span className="text-muted-foreground">
+                Emergency services may not be able to locate callers using unregistered numbers.
+              </span>
+            </p>
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/e911">Register now</Link>
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Search & filters */}
       <PageSection>

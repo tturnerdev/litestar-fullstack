@@ -18,6 +18,16 @@ import {
   Search,
   Trash2,
 } from "lucide-react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { FaxNumberCard } from "@/components/fax/fax-number-card"
 import { FaxNumberEditDialog } from "@/components/fax/fax-number-edit-dialog"
 import {
@@ -108,6 +118,14 @@ function FaxNumbersPage() {
   // Queries & mutations
   const { data, isLoading, isError, refetch } = useFaxNumbers(page, PAGE_SIZE)
   const deleteFaxNumber = useDeleteFaxNumber()
+  const [numberToDelete, setNumberToDelete] = useState<{ id: string; number: string } | null>(null)
+
+  const handleConfirmDelete = () => {
+    if (numberToDelete) {
+      deleteFaxNumber.mutate(numberToDelete.id)
+      setNumberToDelete(null)
+    }
+  }
 
   // Apply client-side search & filters
   const filteredItems = useMemo(() => {
@@ -472,7 +490,7 @@ function FaxNumbersPage() {
                       selected={selectedIds.has(faxNumber.id)}
                       onToggle={() => toggleOne(faxNumber.id)}
                       onRowClick={() => handleRowClick(faxNumber.id)}
-                      onDelete={() => deleteFaxNumber.mutate(faxNumber.id)}
+                      onDelete={() => setNumberToDelete({ id: faxNumber.id, number: faxNumber.number })}
                     />
                   ))}
                 </TableBody>
@@ -545,6 +563,23 @@ function FaxNumbersPage() {
         onClearSelection={() => setSelectedIds(new Set())}
         actions={bulkActions}
       />
+
+      <AlertDialog open={!!numberToDelete} onOpenChange={(open) => !open && setNumberToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete fax number?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete <span className="font-medium text-foreground">{numberToDelete?.number}</span>. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PageContainer>
   )
 }

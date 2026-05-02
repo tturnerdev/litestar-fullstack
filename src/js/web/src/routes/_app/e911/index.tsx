@@ -270,6 +270,9 @@ function RegisterNumberDialog({ teamId }: { teamId: string }) {
   const [postalCode, setPostalCode] = useState("")
   const [country, setCountry] = useState("US")
 
+  const [touched, setTouched] = useState<Record<string, boolean>>({})
+  const [submitAttempted, setSubmitAttempted] = useState(false)
+
   const locations = locationsData?.items ?? []
 
   function handleLocationSelect(locId: string) {
@@ -296,9 +299,41 @@ function RegisterNumberDialog({ teamId }: { teamId: string }) {
     setState("")
     setPostalCode("")
     setCountry("US")
+    setTouched({})
+    setSubmitAttempted(false)
   }
 
+  function handleBlur(field: string) {
+    setTouched((prev) => ({ ...prev, [field]: true }))
+  }
+
+  function showError(field: string, value: string): boolean {
+    return (touched[field] || submitAttempted) && !value.trim()
+  }
+
+  const postalCodeFormatError =
+    (touched.postalCode || submitAttempted) &&
+    postalCode.trim() !== "" &&
+    !/^\d{5}(-\d{4})?$/.test(postalCode.trim())
+
+  const stateFormatError =
+    (touched.state || submitAttempted) &&
+    state.trim() !== "" &&
+    !/^[A-Za-z]{2}$/.test(state.trim())
+
+  const isValid =
+    addressLine1.trim() &&
+    city.trim() &&
+    state.trim() &&
+    /^[A-Za-z]{2}$/.test(state.trim()) &&
+    postalCode.trim() &&
+    /^\d{5}(-\d{4})?$/.test(postalCode.trim())
+
   function handleSubmit() {
+    if (!isValid) {
+      setSubmitAttempted(true)
+      return
+    }
     const payload: E911RegistrationCreate = {
       teamId,
       phoneNumberId: phoneNumberId || undefined,
@@ -323,8 +358,6 @@ function RegisterNumberDialog({ teamId }: { teamId: string }) {
       },
     })
   }
-
-  const isValid = addressLine1.trim() && city.trim() && state.trim() && postalCode.trim()
 
   return (
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm() }}>
@@ -384,7 +417,16 @@ function RegisterNumberDialog({ teamId }: { teamId: string }) {
           {/* Address fields */}
           <div className="space-y-2">
             <Label>Address Line 1 *</Label>
-            <Input value={addressLine1} onChange={(e) => setAddressLine1(e.target.value)} placeholder="123 Main St" />
+            <Input
+              value={addressLine1}
+              onChange={(e) => setAddressLine1(e.target.value)}
+              onBlur={() => handleBlur("addressLine1")}
+              placeholder="123 Main St"
+              className={showError("addressLine1", addressLine1) ? "border-destructive" : ""}
+            />
+            {showError("addressLine1", addressLine1) && (
+              <p className="text-sm text-destructive mt-1">Address line 1 is required</p>
+            )}
           </div>
           <div className="space-y-2">
             <Label>Address Line 2</Label>
@@ -393,17 +435,50 @@ function RegisterNumberDialog({ teamId }: { teamId: string }) {
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
               <Label>City *</Label>
-              <Input value={city} onChange={(e) => setCity(e.target.value)} placeholder="Springfield" />
+              <Input
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                onBlur={() => handleBlur("city")}
+                placeholder="Springfield"
+                className={showError("city", city) ? "border-destructive" : ""}
+              />
+              {showError("city", city) && (
+                <p className="text-sm text-destructive mt-1">City is required</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label>State *</Label>
-              <Input value={state} onChange={(e) => setState(e.target.value)} placeholder="IL" />
+              <Input
+                value={state}
+                onChange={(e) => setState(e.target.value)}
+                onBlur={() => handleBlur("state")}
+                placeholder="IL"
+                className={showError("state", state) || stateFormatError ? "border-destructive" : ""}
+              />
+              {showError("state", state) && (
+                <p className="text-sm text-destructive mt-1">State is required</p>
+              )}
+              {stateFormatError && (
+                <p className="text-sm text-destructive mt-1">Enter a valid 2-letter state code</p>
+              )}
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
               <Label>Postal Code *</Label>
-              <Input value={postalCode} onChange={(e) => setPostalCode(e.target.value)} placeholder="62701" />
+              <Input
+                value={postalCode}
+                onChange={(e) => setPostalCode(e.target.value)}
+                onBlur={() => handleBlur("postalCode")}
+                placeholder="62701"
+                className={showError("postalCode", postalCode) || postalCodeFormatError ? "border-destructive" : ""}
+              />
+              {showError("postalCode", postalCode) && (
+                <p className="text-sm text-destructive mt-1">Postal code is required</p>
+              )}
+              {postalCodeFormatError && (
+                <p className="text-sm text-destructive mt-1">Enter a valid ZIP code (e.g. 62701 or 62701-1234)</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label>Country</Label>
@@ -415,7 +490,7 @@ function RegisterNumberDialog({ teamId }: { teamId: string }) {
           <Button variant="outline" onClick={() => { setOpen(false); resetForm() }}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit} disabled={!isValid || createMutation.isPending}>
+          <Button onClick={handleSubmit} disabled={createMutation.isPending}>
             {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Register
           </Button>

@@ -60,7 +60,7 @@ function TagsPage() {
   const navigate = useNavigate()
   const [search, setSearch] = useState("")
   const debouncedSearch = useDebouncedValue(search)
-  const [deleteId, setDeleteId] = useState<string | null>(null)
+  const [tagToDelete, setTagToDelete] = useState<Tag | null>(null)
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [sortField, setSortField] = useState<SortField>("name")
   const [sortDir, setSortDir] = useState<SortDir>("asc")
@@ -133,13 +133,13 @@ function TagsPage() {
   }
 
   const handleDelete = () => {
-    if (!deleteId) return
-    deleteTag.mutate(deleteId, {
+    if (!tagToDelete) return
+    deleteTag.mutate(tagToDelete.id, {
       onSuccess: () => {
-        setDeleteId(null)
+        setTagToDelete(null)
         setSelected((prev) => {
           const next = new Set(prev)
-          next.delete(deleteId)
+          if (tagToDelete) next.delete(tagToDelete.id)
           return next
         })
       },
@@ -343,7 +343,7 @@ function TagsPage() {
                     selected={selected.has(tag.id)}
                     onToggle={() => toggleOne(tag.id)}
                     onRowClick={() => handleRowClick(tag.id)}
-                    onDelete={() => setDeleteId(tag.id)}
+                    onDelete={() => setTagToDelete(tag)}
                   />
                 ))}
               </TableBody>
@@ -376,16 +376,16 @@ function TagsPage() {
       </PageSection>
 
       {/* Delete single tag confirmation */}
-      <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
+      <AlertDialog open={!!tagToDelete} onOpenChange={(open) => !open && setTagToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete tag</AlertDialogTitle>
+            <AlertDialogTitle>Delete tag '{tagToDelete?.name}'?</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete this tag? This action cannot be undone. Any resources currently using this tag will have it removed.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setDeleteId(null)} disabled={deleteTag.isPending}>
+            <AlertDialogCancel onClick={() => setTagToDelete(null)} disabled={deleteTag.isPending}>
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
