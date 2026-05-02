@@ -28,6 +28,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { EmptyState } from "@/components/ui/empty-state"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import {
@@ -52,7 +53,22 @@ export const Route = createFileRoute("/_app/tasks/")({
 
 // -- Constants ----------------------------------------------------------------
 
-const PAGE_SIZE = 25
+const PAGE_SIZES = [10, 25, 50, 100] as const
+const DEFAULT_PAGE_SIZE = 25
+const PAGE_SIZE_STORAGE_KEY = "tasks-page-size"
+
+function getStoredPageSize(): number {
+  try {
+    const stored = localStorage.getItem(PAGE_SIZE_STORAGE_KEY)
+    if (stored) {
+      const parsed = Number(stored)
+      if ((PAGE_SIZES as readonly number[]).includes(parsed)) return parsed
+    }
+  } catch {
+    // localStorage unavailable
+  }
+  return DEFAULT_PAGE_SIZE
+}
 
 const statusFilterOptions = [
   { value: "all", label: "All Statuses" },
@@ -98,6 +114,28 @@ function formatEntityType(entityType: string | null | undefined): string {
   return entityType
     .replace(/_/g, " ")
     .replace(/\b\w/g, (c) => c.toUpperCase())
+}
+
+function formatDuration(
+  startedAt: string | null | undefined,
+  completedAt: string | null | undefined,
+  status: string,
+): string {
+  if (!startedAt) return "--"
+  const start = new Date(startedAt).getTime()
+  const end = completedAt
+    ? new Date(completedAt).getTime()
+    : status === "running"
+      ? Date.now()
+      : start
+  const ms = end - start
+  if (ms < 1000) return "<1s"
+  const seconds = Math.floor(ms / 1000) % 60
+  const minutes = Math.floor(ms / 60000) % 60
+  const hours = Math.floor(ms / 3600000)
+  if (hours > 0) return `${hours}h ${minutes}m`
+  if (minutes > 0) return `${minutes}m ${seconds}s`
+  return `${seconds}s`
 }
 
 // -- Task Row -----------------------------------------------------------------
@@ -199,6 +237,11 @@ function TaskRow({
         )}
       </TableCell>
       <TableCell className="hidden md:table-cell">
+        <span className="text-xs text-muted-foreground tabular-nums">
+          {formatDuration(task.startedAt, task.completedAt, task.status)}
+        </span>
+      </TableCell>
+      <TableCell className="hidden md:table-cell">
         {task.completedAt ? (
           <Tooltip>
             <TooltipTrigger asChild>
@@ -263,25 +306,49 @@ function TasksPage() {
   const [statusFilter, setStatusFilter] = useState("all")
   const [taskTypeFilter, setTaskTypeFilter] = useState("all")
   const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(getStoredPageSize)
 
   // Reset page when filters change
   useEffect(() => {
     setPage(1)
   }, [statusFilter, taskTypeFilter])
 
+  // Persist page size preference
+  const handlePageSizeChange = useCallback((value: string) => {
+    const size = Number(value)
+    setPageSize(size)
+    setPage(1)
+    try {
+      localStorage.setItem(PAGE_SIZE_STORAGE_KEY, value)
+    } catch {
+      // localStorage unavailable
+    }
+  }, [])
+
+  // Track whether active tasks exist for auto-refresh (avoids circular dep)
+  const [hasActiveTasks, setHasActiveTasks] = useState(false)
+
   const queryOptions: UseTasksOptions = useMemo(
     () => ({
       page,
-      pageSize: PAGE_SIZE,
+      pageSize,
       status: statusFilter !== "all" ? statusFilter : undefined,
       taskType: taskTypeFilter !== "all" ? taskTypeFilter : undefined,
       orderBy: "created_at",
       sortOrder: "desc" as const,
+      refetchInterval: hasActiveTasks ? 15000 : false,
     }),
-    [page, statusFilter, taskTypeFilter],
+    [page, pageSize, statusFilter, taskTypeFilter, hasActiveTasks],
   )
 
-  const { data, isLoading, isError, refetch } = useTasks(queryOptions)
+  const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useTasks(queryOptions)
+
+  // Update active-tasks flag when data changes
+  useEffect(() => {
+    const items = data?.items ?? []
+    const active = items.some((t) => t.status === "pending" || t.status === "running")
+    setHasActiveTasks(active)
+  }, [data?.items])
 
   // Selection state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -313,7 +380,7 @@ function TasksPage() {
     })
   }, [])
 
-  const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / PAGE_SIZE))
+  const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / pageSize))
   const hasData = items.length > 0
   const hasAnyFilters = statusFilter !== "all" || taskTypeFilter !== "all"
 
@@ -363,6 +430,11 @@ function TasksPage() {
         breadcrumbs={breadcrumbs}
         actions={
           <div className="flex items-center gap-2">
+            <DataFreshness
+              dataUpdatedAt={dataUpdatedAt}
+              onRefresh={() => refetch()}
+              isRefreshing={isRefetching}
+            />
             <Button variant="outline" size="sm" onClick={handleExportAll} disabled={!hasData}>
               <Download className="mr-1.5 h-3.5 w-3.5" />
               Export
@@ -477,6 +549,7 @@ function TasksPage() {
                     <TableHead>Progress</TableHead>
                     <TableHead className="hidden md:table-cell">Entity</TableHead>
                     <TableHead className="hidden md:table-cell">Started</TableHead>
+                    <TableHead className="hidden md:table-cell">Duration</TableHead>
                     <TableHead className="hidden md:table-cell">Completed</TableHead>
                     <TableHead className="w-16 text-right">Actions</TableHead>
                   </TableRow>
@@ -497,12 +570,24 @@ function TasksPage() {
             </div>
 
             {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-between pt-2">
-                <p className="text-xs text-muted-foreground">
-                  {data!.total} total task{data!.total === 1 ? "" : "s"}
-                </p>
-                <div className="flex gap-2">
+            <div className="flex items-center justify-end gap-4 pt-2">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Rows per page</span>
+                <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
+                  <SelectTrigger className="h-8 w-[70px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PAGE_SIZES.map((size) => (
+                      <SelectItem key={size} value={String(size)}>
+                        {size}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {totalPages > 1 && (
+                <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
                     size="sm"
@@ -520,8 +605,8 @@ function TasksPage() {
                     Next
                   </Button>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         )}
       </PageSection>

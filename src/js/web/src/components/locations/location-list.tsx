@@ -1,20 +1,31 @@
 import { Link, useNavigate } from "@tanstack/react-router"
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { AlertCircle, Building2, Download, Eye, MapPin, MoreVertical, Pencil, Search, X } from "lucide-react"
+import { AlertCircle, Building2, Download, Eye, MapPin, MoreVertical, Pencil, Search, Trash2, X } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { SkeletonTable } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { buttonVariants } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAuthStore } from "@/lib/auth"
-import { type Location, useBulkDeleteLocations, useLocations } from "@/lib/api/hooks/locations"
+import { type Location, useBulkDeleteLocations, useDeleteLocation, useLocations } from "@/lib/api/hooks/locations"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 
@@ -342,6 +353,7 @@ export function LocationList() {
                     selected={selectedIds.has(location.id)}
                     onToggle={() => toggleOne(location.id)}
                     onRowClick={() => handleRowClick(location.id)}
+                    teamId={teamId}
                   />
                 ))}
               </TableBody>
@@ -431,13 +443,24 @@ function LocationRow({
   selected,
   onToggle,
   onRowClick,
+  teamId,
 }: {
   location: Location
   index: number
   selected: boolean
   onToggle: () => void
   onRowClick: () => void
+  teamId: string
 }) {
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const deleteMutation = useDeleteLocation(teamId)
+
+  const handleDelete = useCallback(() => {
+    deleteMutation.mutate(location.id, {
+      onSettled: () => setShowDeleteConfirm(false),
+    })
+  }, [deleteMutation, location.id])
+
   const isAddressed = location.locationType === "ADDRESSED"
   const childCount = location.children?.length ?? 0
 
@@ -451,6 +474,7 @@ function LocationRow({
   const isAddressLong = addressSummary.length > 50
 
   return (
+    <>
     <TableRow
       data-state={selected ? "selected" : undefined}
       className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`}
@@ -569,9 +593,37 @@ function LocationRow({
                 Edit
               </Link>
             </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={() => setShowDeleteConfirm(true)}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </TableCell>
     </TableRow>
+    <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete location</AlertDialogTitle>
+          <AlertDialogDescription>
+            Are you sure you want to delete &quot;{location.name}&quot;? This action cannot be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            className={buttonVariants({ variant: "destructive" })}
+            onClick={handleDelete}
+          >
+            Delete
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   )
 }

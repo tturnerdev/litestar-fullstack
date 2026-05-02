@@ -2,22 +2,36 @@ import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, Link, useParams } from "@tanstack/react-router"
 import {
   Activity,
+  AlertTriangle,
   ArrowLeft,
   Calendar,
   Clock,
+  Copy,
   Crown,
   HardDrive,
+  MoreHorizontal,
   Pencil,
   Phone,
   Settings,
   Shield,
+  Trash2,
   Users,
 } from "lucide-react"
-import { useEffect, useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { TeamMembers } from "@/components/teams/team-members"
 import { TeamSettings } from "@/components/teams/team-settings"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
 import {
   Breadcrumb,
@@ -27,8 +41,15 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Separator } from "@/components/ui/separator"
@@ -39,6 +60,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { CopyButton } from "@/components/ui/copy-button"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useDevicesByTeam } from "@/lib/api/hooks/devices"
+import { useDeleteTeam } from "@/lib/api/hooks/teams"
 import { useExtensionsByTeam } from "@/lib/api/hooks/voice"
 import { useAuthStore } from "@/lib/auth"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
@@ -85,6 +107,8 @@ function TeamDetail() {
   const { tab = "members" } = Route.useSearch()
   const navigate = Route.useNavigate()
 
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+
   const {
     data: team,
     isLoading: isTeamLoading,
@@ -96,6 +120,8 @@ function TeamDetail() {
       return response.data
     },
   })
+
+  const deleteTeamMutation = useDeleteTeam()
 
   useDocumentTitle(team?.name ?? "Team Details")
 
@@ -257,6 +283,28 @@ function TeamDetail() {
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back
               </Link>
             </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <MoreHorizontal className="h-4 w-4" />
+                  <span className="sr-only">Actions</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => navigator.clipboard.writeText(team.id)}>
+                  <Copy className="mr-2 h-4 w-4" />
+                  Copy Team ID
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-destructive focus:text-destructive"
+                  onClick={() => setShowDeleteDialog(true)}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete Team
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         }
       />
@@ -531,6 +579,41 @@ function TeamDetail() {
           </CardContent>
         </Card>
       </PageSection>
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Delete team?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete <strong>{team.name}</strong> and remove all
+              member associations. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteTeamMutation.isPending}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className={buttonVariants({ variant: "destructive" })}
+              disabled={deleteTeamMutation.isPending}
+              onClick={() => {
+                deleteTeamMutation.mutate(teamId, {
+                  onSuccess: () => {
+                    setShowDeleteDialog(false)
+                    navigate({ to: "/teams" })
+                  },
+                })
+              }}
+            >
+              {deleteTeamMutation.isPending ? "Deleting..." : "Delete team"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PageContainer>
   )
 }

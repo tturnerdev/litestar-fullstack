@@ -4,13 +4,27 @@ import {
   Check,
   Crown,
   Download,
+  Eye,
   Home,
+  MoreVertical,
+  Pencil,
   Plus,
   Search,
   Shield,
+  Trash2,
   Users,
   X,
 } from "lucide-react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -24,6 +38,7 @@ import {
 import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
@@ -350,6 +365,7 @@ function TeamsPage() {
                     <TableHead className="hidden md:table-cell">Your Role</TableHead>
                     <TableHead className="hidden md:table-cell">Tags</TableHead>
                     <TableHead className="hidden md:table-cell">Status</TableHead>
+                    <TableHead className="w-16 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -399,6 +415,10 @@ function TeamRow({
   onSwitchTeam: () => void
   currentUserId?: string
 }) {
+  const navigate = useNavigate()
+  const deleteTeamMutation = useDeleteTeam()
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+
   const members = team.members ?? []
   const memberCount = members.length
   const tags = team.tags ?? []
@@ -407,101 +427,172 @@ function TeamRow({
   const isAdmin = userMembership?.role === "ADMIN"
 
   return (
-    <TableRow className="hover:bg-muted/50 transition-colors" data-state={selected ? "selected" : undefined}>
-      <TableCell>
-        <Checkbox
-          checked={selected}
-          onChange={(e) => {
-            e.stopPropagation()
-            onToggle()
-          }}
-          aria-label={`Select ${team.name}`}
-        />
-      </TableCell>
-      <TableCell>
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={onSwitchTeam}
-            className="group/avatar relative shrink-0"
-            title={isActiveTeam ? "Current team" : "Click to switch to this team"}
-          >
-            <Avatar className={`h-9 w-9 transition-all ${getTeamColor(team.name)} ${!isActiveTeam && "group-hover/avatar:ring-2 group-hover/avatar:ring-primary/30"}`}>
-              <AvatarFallback className={`text-xs font-semibold ${getTeamColor(team.name)}`}>
-                {getTeamInitials(team.name)}
-              </AvatarFallback>
-            </Avatar>
-            {isActiveTeam && (
-              <div className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-primary-foreground ring-2 ring-background">
-                <Check className="h-2.5 w-2.5" />
-              </div>
-            )}
-          </button>
-          <Link
-            to="/teams/$teamId"
-            params={{ teamId: team.id }}
-            className="group flex flex-col gap-0.5"
-          >
-            <span className="font-medium group-hover:underline">{team.name}</span>
-            {team.description && (
-              <span className="text-xs text-muted-foreground line-clamp-1">{team.description}</span>
-            )}
-          </Link>
-        </div>
-      </TableCell>
-      <TableCell>
-        <span className="flex items-center gap-1.5 text-sm">
-          <Users className="h-3.5 w-3.5 text-muted-foreground" />
-          {memberCount}
-        </span>
-      </TableCell>
-      <TableCell className="hidden md:table-cell">
-        {isOwner ? (
-          <Badge className="gap-1 bg-amber-500/15 text-amber-700 hover:bg-amber-500/20 dark:text-amber-400">
-            <Crown className="h-3 w-3" />
-            Owner
-          </Badge>
-        ) : isAdmin ? (
-          <Badge variant="outline" className="gap-1 border-blue-500/30 text-blue-600 dark:text-blue-400">
-            <Shield className="h-3 w-3" />
-            Admin
-          </Badge>
-        ) : userMembership ? (
-          <Badge variant="outline" className="gap-1">
-            Member
-          </Badge>
-        ) : (
-          <span className="text-xs text-muted-foreground">--</span>
-        )}
-      </TableCell>
-      <TableCell className="hidden md:table-cell">
-        {tags.length > 0 ? (
-          <div className="flex flex-wrap gap-1">
-            {tags.slice(0, 2).map((tag) => (
-              <Badge key={tag.id} variant="secondary" className="text-[10px] px-2 py-0.5">
-                {tag.name}
-              </Badge>
-            ))}
-            {tags.length > 2 && (
-              <Badge variant="outline" className="text-[10px] px-2 py-0.5">
-                +{tags.length - 2}
-              </Badge>
-            )}
+    <>
+      <TableRow
+        className="cursor-pointer hover:bg-muted/50 transition-colors"
+        data-state={selected ? "selected" : undefined}
+        onClick={(e) => {
+          const target = e.target as HTMLElement
+          if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) {
+            return
+          }
+          navigate({ to: "/teams/$teamId", params: { teamId: team.id } })
+        }}
+      >
+        <TableCell>
+          <Checkbox
+            checked={selected}
+            onChange={(e) => {
+              e.stopPropagation()
+              onToggle()
+            }}
+            aria-label={`Select ${team.name}`}
+          />
+        </TableCell>
+        <TableCell>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={onSwitchTeam}
+              className="group/avatar relative shrink-0"
+              title={isActiveTeam ? "Current team" : "Click to switch to this team"}
+            >
+              <Avatar className={`h-9 w-9 transition-all ${getTeamColor(team.name)} ${!isActiveTeam && "group-hover/avatar:ring-2 group-hover/avatar:ring-primary/30"}`}>
+                <AvatarFallback className={`text-xs font-semibold ${getTeamColor(team.name)}`}>
+                  {getTeamInitials(team.name)}
+                </AvatarFallback>
+              </Avatar>
+              {isActiveTeam && (
+                <div className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-primary-foreground ring-2 ring-background">
+                  <Check className="h-2.5 w-2.5" />
+                </div>
+              )}
+            </button>
+            <Link
+              to="/teams/$teamId"
+              params={{ teamId: team.id }}
+              className="group flex flex-col gap-0.5"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <span className="font-medium group-hover:underline">{team.name}</span>
+              {team.description && (
+                <span className="text-xs text-muted-foreground line-clamp-1">{team.description}</span>
+              )}
+            </Link>
           </div>
-        ) : (
-          <span className="text-xs text-muted-foreground">--</span>
-        )}
-      </TableCell>
-      <TableCell className="hidden md:table-cell">
-        {team.isActive === false ? (
-          <Badge variant="destructive" className="text-[10px]">Inactive</Badge>
-        ) : (
-          <span className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400">
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
-            Active
+        </TableCell>
+        <TableCell>
+          <span className="flex items-center gap-1.5 text-sm">
+            <Users className="h-3.5 w-3.5 text-muted-foreground" />
+            {memberCount}
           </span>
-        )}
-      </TableCell>
-    </TableRow>
+        </TableCell>
+        <TableCell className="hidden md:table-cell">
+          {isOwner ? (
+            <Badge className="gap-1 bg-amber-500/15 text-amber-700 hover:bg-amber-500/20 dark:text-amber-400">
+              <Crown className="h-3 w-3" />
+              Owner
+            </Badge>
+          ) : isAdmin ? (
+            <Badge variant="outline" className="gap-1 border-blue-500/30 text-blue-600 dark:text-blue-400">
+              <Shield className="h-3 w-3" />
+              Admin
+            </Badge>
+          ) : userMembership ? (
+            <Badge variant="outline" className="gap-1">
+              Member
+            </Badge>
+          ) : (
+            <span className="text-xs text-muted-foreground">--</span>
+          )}
+        </TableCell>
+        <TableCell className="hidden md:table-cell">
+          {tags.length > 0 ? (
+            <div className="flex flex-wrap gap-1">
+              {tags.slice(0, 2).map((tag) => (
+                <Badge key={tag.id} variant="secondary" className="text-[10px] px-2 py-0.5">
+                  {tag.name}
+                </Badge>
+              ))}
+              {tags.length > 2 && (
+                <Badge variant="outline" className="text-[10px] px-2 py-0.5">
+                  +{tags.length - 2}
+                </Badge>
+              )}
+            </div>
+          ) : (
+            <span className="text-xs text-muted-foreground">--</span>
+          )}
+        </TableCell>
+        <TableCell className="hidden md:table-cell">
+          {team.isActive === false ? (
+            <Badge variant="destructive" className="text-[10px]">Inactive</Badge>
+          ) : (
+            <span className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              Active
+            </span>
+          )}
+        </TableCell>
+        <TableCell className="text-right">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0"
+                data-slot="dropdown"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <MoreVertical className="h-4 w-4" />
+                <span className="sr-only">Actions for {team.name}</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild>
+                <Link to="/teams/$teamId" params={{ teamId: team.id }}>
+                  <Eye className="mr-2 h-4 w-4" />
+                  View details
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/teams/$teamId/edit" params={{ teamId: team.id }}>
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Edit
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive"
+                onClick={() => setShowDeleteConfirm(true)}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </TableCell>
+      </TableRow>
+
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete team?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete <span className="font-medium text-foreground">{team.name}</span> and remove all member associations. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => deleteTeamMutation.mutate(team.id)}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }

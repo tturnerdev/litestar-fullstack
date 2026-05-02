@@ -49,6 +49,8 @@ export interface UseTasksOptions {
   entityId?: string
   orderBy?: string
   sortOrder?: "asc" | "desc"
+  /** When set, the query will automatically refetch on this interval (ms). */
+  refetchInterval?: number | false
 }
 
 // ---------------------------------------------------------------------------
@@ -96,7 +98,7 @@ export const taskKeys = {
 // ---------------------------------------------------------------------------
 
 export function useTasks(options: UseTasksOptions = {}) {
-  const { page = 1, pageSize = 20, taskType, status, entityType, entityId, orderBy, sortOrder } = options
+  const { page = 1, pageSize = 20, taskType, status, entityType, entityId, orderBy, sortOrder, refetchInterval } = options
 
   return useQuery({
     queryKey: taskKeys.list(options),
@@ -112,6 +114,7 @@ export function useTasks(options: UseTasksOptions = {}) {
       if (sortOrder) params.set("sortOrder", sortOrder)
       return apiFetch<PaginatedResponse<BackgroundTaskList>>(`/api/tasks?${params.toString()}`)
     },
+    ...(refetchInterval !== undefined ? { refetchInterval } : {}),
   })
 }
 
