@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
-import { AlertCircle, AlertTriangle, ArrowLeft, Clock, Cpu, ExternalLink, Loader2, MapPin, Pencil, Trash2 } from "lucide-react"
+import { AlertCircle, AlertTriangle, ArrowLeft, Clock, Cpu, ExternalLink, Loader2, MapPin, Pencil, RefreshCw, Trash2 } from "lucide-react"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -239,7 +239,16 @@ function LocationDetailPage() {
             icon={AlertCircle}
             title="Unable to load location"
             description="Something went wrong. Please try again."
-            action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+            action={
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => refetch()}>
+                  <RefreshCw className="mr-2 h-4 w-4" /> Try again
+                </Button>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/locations">Back to locations</Link>
+                </Button>
+              </div>
+            }
           />
         </PageSection>
       </PageContainer>

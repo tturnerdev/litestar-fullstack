@@ -6,6 +6,7 @@ import {
   CheckCheck,
   ChevronLeft,
   ChevronRight,
+  Download,
   Laptop,
   Loader2,
   Mail,
@@ -62,6 +63,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query"
 import { Skeleton, SkeletonCard } from "@/components/ui/skeleton"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
+import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { cn } from "@/lib/utils"
@@ -369,6 +371,23 @@ function NotificationsPage() {
     return acc
   }, {})
 
+  // CSV export
+  const csvHeaders = useMemo<CsvHeader<NotificationItem>[]>(
+    () => [
+      { label: "Title", accessor: (n) => n.title },
+      { label: "Category", accessor: (n) => n.category },
+      { label: "Message", accessor: (n) => n.message },
+      { label: "Status", accessor: (n) => (n.isRead ? "Read" : "Unread") },
+      { label: "Date", accessor: (n) => formatDateTime(n.createdAt) },
+    ],
+    [],
+  )
+
+  const handleExport = useCallback(() => {
+    if (!filteredNotifications.length) return
+    exportToCsv("notifications", csvHeaders, filteredNotifications)
+  }, [filteredNotifications, csvHeaders])
+
   // Selection helpers
   const allVisibleIds = useMemo(() => filteredNotifications.map((n) => n.id), [filteredNotifications])
   const allSelected = filteredNotifications.length > 0 && filteredNotifications.every((n) => selectedIds.has(n.id))
@@ -446,6 +465,20 @@ function NotificationsPage() {
         description={unreadCount > 0 ? `You have ${unreadCount} unread notification${unreadCount !== 1 ? "s" : ""}` : "You're all caught up"}
         actions={
           <div className="flex gap-2">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleExport}
+                  disabled={filteredNotifications.length === 0}
+                  aria-label="Export notifications to CSV"
+                >
+                  <Download className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Export to CSV</TooltipContent>
+            </Tooltip>
             {readCount > 0 && (
               <Button
                 variant="outline"
@@ -473,7 +506,7 @@ function NotificationsPage() {
           <EmptyState
             icon={BellOff}
             title="No notifications yet"
-            description="You'll be notified when important events happen — like team updates, device alerts, or support ticket replies."
+            description="You'll see notifications here when events happen — like team updates, device alerts, or support ticket replies."
           />
         ) : (
           <>
@@ -582,9 +615,9 @@ function NotificationsPage() {
                 </div>
               ) : isEmptyFiltered ? (
                 <EmptyState
-                  icon={Bell}
-                  title="No notifications found"
-                  description="No notifications match your current filters. Try adjusting your search or filter criteria."
+                  icon={BellOff}
+                  title="No notifications match your filters"
+                  description="Try adjusting your search or filter criteria to find what you're looking for."
                   variant="no-results"
                   action={
                     <Button
@@ -596,7 +629,7 @@ function NotificationsPage() {
                         setReadStatusFilter("all")
                       }}
                     >
-                      Clear all filters
+                      Clear filters
                     </Button>
                   }
                 />

@@ -1,5 +1,7 @@
 import {
   AlertCircle,
+  AlertTriangle,
+  CalendarDays,
   ChevronDown,
   ChevronRight,
   Clock,
@@ -11,9 +13,12 @@ import {
   Loader2,
   Minus,
   Monitor,
+  Pencil,
   Plus,
   RefreshCw,
+  RotateCcw,
   Search,
+  Shield,
   User,
   X,
 } from "lucide-react"
@@ -115,6 +120,91 @@ const TARGET_TYPE_OPTIONS: FilterOption[] = [
   { value: "connection", label: "Connection" },
   { value: "fax_number", label: "Fax Number" },
   { value: "ticket", label: "Ticket" },
+]
+
+// ── Quick filter presets ──────────────────────────────────────────────────
+
+/** Action values for authentication-related events. */
+const AUTH_ACTIONS = [
+  "login.success",
+  "login.failed",
+  "password.changed",
+  "mfa.enabled",
+  "mfa.disabled",
+]
+
+/** Action values for create/update/delete mutations. */
+const CHANGE_ACTIONS = [
+  "account.created",
+  "account.updated",
+  "account.deleted",
+  "team.created",
+  "team.updated",
+  "team.deleted",
+  "team.member_added",
+  "team.member_removed",
+  "user.created",
+  "user.updated",
+  "user.deleted",
+  "user.role_changed",
+  "device.created",
+  "device.updated",
+  "device.deleted",
+  "extension.created",
+  "extension.updated",
+  "extension.deleted",
+  "phone_number.created",
+  "phone_number.updated",
+  "phone_number.deleted",
+  "system.config_changed",
+]
+
+/** Action values for failures / errors. */
+const FAILURE_ACTIONS = ["login.failed"]
+
+interface QuickFilterPreset {
+  id: string
+  label: string
+  icon: React.ComponentType<{ className?: string }>
+  apply: () => {
+    actions?: string[]
+    targetTypes?: string[]
+    dateDays?: number
+    search?: string
+  }
+}
+
+const QUICK_FILTER_PRESETS: QuickFilterPreset[] = [
+  {
+    id: "last-24h",
+    label: "Last 24h",
+    icon: CalendarDays,
+    apply: () => ({ dateDays: 1 }),
+  },
+  {
+    id: "last-7d",
+    label: "Last 7 days",
+    icon: CalendarDays,
+    apply: () => ({ dateDays: 7 }),
+  },
+  {
+    id: "failures",
+    label: "Failures",
+    icon: AlertTriangle,
+    apply: () => ({ actions: FAILURE_ACTIONS }),
+  },
+  {
+    id: "auth-events",
+    label: "Auth Events",
+    icon: Shield,
+    apply: () => ({ actions: AUTH_ACTIONS }),
+  },
+  {
+    id: "changes",
+    label: "Changes",
+    icon: Pencil,
+    apply: () => ({ actions: CHANGE_ACTIONS }),
+  },
 ]
 
 const csvHeaders: CsvHeader<AuditLogEntry>[] = [
@@ -716,6 +806,9 @@ export function AuditLogTable() {
   const [startDate, setStartDate] = useState("")
   const [endDate, setEndDate] = useState("")
 
+  // Quick filter preset
+  const [activePreset, setActivePreset] = useState<string | null>(null)
+
   // Sort
   const [sortKey, setSortKey] = useState<string | null>(null)
   const [sortDir, setSortDir] = useState<SortDirection>(null)
@@ -818,6 +911,7 @@ export function AuditLogTable() {
       const { start, end } = getPresetDates(days)
       setStartDate(start)
       setEndDate(end)
+      setActivePreset(null)
       resetPage()
     },
     [resetPage],
@@ -826,6 +920,7 @@ export function AuditLogTable() {
   const handleActionsChange = useCallback(
     (actions: string[]) => {
       setSelectedActions(actions)
+      setActivePreset(null)
       resetPage()
     },
     [resetPage],
@@ -834,6 +929,7 @@ export function AuditLogTable() {
   const handleTargetTypesChange = useCallback(
     (types: string[]) => {
       setSelectedTargetTypes(types)
+      setActivePreset(null)
       resetPage()
     },
     [resetPage],
@@ -842,6 +938,7 @@ export function AuditLogTable() {
   const handleSearchChange = useCallback(
     (value: string) => {
       setSearch(value)
+      setActivePreset(null)
       resetPage()
     },
     [resetPage],
@@ -861,8 +958,43 @@ export function AuditLogTable() {
     setEndDate("")
     setSortKey(null)
     setSortDir(null)
+    setActivePreset(null)
     resetPage()
   }, [resetPage])
+
+  const handlePresetClick = useCallback(
+    (preset: QuickFilterPreset) => {
+      if (activePreset === preset.id) {
+        // Toggle off: clear all filters
+        handleClearAll()
+        return
+      }
+
+      // Reset everything first
+      setSearch("")
+      setSelectedActions([])
+      setSelectedTargetTypes([])
+      setStartDate("")
+      setEndDate("")
+      setSortKey(null)
+      setSortDir(null)
+
+      // Apply preset values
+      const values = preset.apply()
+      if (values.actions) setSelectedActions(values.actions)
+      if (values.targetTypes) setSelectedTargetTypes(values.targetTypes)
+      if (values.search) setSearch(values.search)
+      if (values.dateDays !== undefined) {
+        const { start, end } = getPresetDates(values.dateDays)
+        setStartDate(start)
+        setEndDate(end)
+      }
+
+      setActivePreset(preset.id)
+      resetPage()
+    },
+    [activePreset, handleClearAll, resetPage],
+  )
 
   const items = data?.items ?? []
   const totalCount = data?.total ?? 0
@@ -908,10 +1040,12 @@ export function AuditLogTable() {
           endDate={endDate}
           onStartDateChange={(v) => {
             setStartDate(v)
+            setActivePreset(null)
             resetPage()
           }}
           onEndDateChange={(v) => {
             setEndDate(v)
+            setActivePreset(null)
             resetPage()
           }}
           onPreset={handleDatePreset}
@@ -966,6 +1100,38 @@ export function AuditLogTable() {
           >
             <X className="mr-1 h-3 w-3" />
             Clear all filters
+          </Button>
+        )}
+      </div>
+
+      {/* Quick filter presets */}
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs font-medium text-muted-foreground">Quick filters:</span>
+        {QUICK_FILTER_PRESETS.map((preset) => {
+          const isActive = activePreset === preset.id
+          const Icon = preset.icon
+          return (
+            <Button
+              key={preset.id}
+              variant={isActive ? "default" : "outline"}
+              size="sm"
+              className="h-7 rounded-full text-xs"
+              onClick={() => handlePresetClick(preset)}
+            >
+              <Icon className="mr-1 h-3 w-3" />
+              {preset.label}
+            </Button>
+          )
+        })}
+        {activePreset && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 rounded-full text-xs text-muted-foreground"
+            onClick={handleClearAll}
+          >
+            <RotateCcw className="mr-1 h-3 w-3" />
+            Clear
           </Button>
         )}
       </div>
