@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { AlertCircle, Download, Eye, Home, Loader2, MoreVertical, Pencil, Plus, Search, Tags, Trash2, X } from "lucide-react"
+import { AlertCircle, Download, Eye, Home, Loader2, MoreVertical, Pencil, Plus, Search, SlidersHorizontal, Tags, Trash2, X } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,8 +25,10 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
@@ -47,6 +49,9 @@ import { useTags, useDeleteTag } from "@/lib/api/hooks/tags"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { useSettingsStore } from "@/lib/settings-store"
+import { cn } from "@/lib/utils"
+import { formatDateTime } from "@/lib/date-utils"
 import type { Tag } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/tags/")({
@@ -86,6 +91,26 @@ function getStoredPageSize(): number {
   return DEFAULT_PAGE_SIZE
 }
 
+// -- Column visibility ---------------------------------------------------------
+
+const COLUMN_VISIBILITY_KEY = "tags-columns"
+
+const TOGGLEABLE_COLUMNS = [
+  { key: "slug", label: "Slug" },
+  { key: "created", label: "Created" },
+  { key: "updated", label: "Updated" },
+] as const
+
+type ColumnVisibility = Record<string, boolean>
+
+function loadColumnVisibility(): ColumnVisibility {
+  try {
+    return JSON.parse(localStorage.getItem(COLUMN_VISIBILITY_KEY) ?? "{}")
+  } catch {
+    return {}
+  }
+}
+
 const csvHeaders: CsvHeader<Tag>[] = [
   { label: "Name", accessor: (t) => t.name },
   { label: "Slug", accessor: (t) => t.slug },
@@ -93,6 +118,8 @@ const csvHeaders: CsvHeader<Tag>[] = [
 
 function TagsPage() {
   useDocumentTitle("Tags")
+  const compactMode = useSettingsStore((s) => s.compactMode)
+  const cellClass = compactMode ? "py-1 px-2 text-xs" : ""
   const {
     q: searchParam,
     page: pageParam,
@@ -101,6 +128,20 @@ function TagsPage() {
   } = Route.useSearch()
   const navigate = Route.useNavigate()
   const searchInputRef = useRef<HTMLInputElement>(null)
+
+  // Column visibility
+  const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(loadColumnVisibility)
+  const isColumnVisible = useCallback(
+    (col: string) => columnVisibility[col] !== false,
+    [columnVisibility],
+  )
+  const toggleColumn = useCallback((col: string) => {
+    setColumnVisibility((prev) => {
+      const updated = { ...prev, [col]: prev[col] !== false ? false : true }
+      localStorage.setItem(COLUMN_VISIBILITY_KEY, JSON.stringify(updated))
+      return updated
+    })
+  }, [])
 
   // Derive filter state from URL search params
   const search = searchParam ?? ""
@@ -311,6 +352,27 @@ function TagsPage() {
         breadcrumbs={breadcrumbs}
         actions={
           <div className="flex items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <SlidersHorizontal className="mr-1.5 h-3.5 w-3.5" />
+                  Columns
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-44">
+                <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {TOGGLEABLE_COLUMNS.map((col) => (
+                  <DropdownMenuCheckboxItem
+                    key={col.key}
+                    checked={isColumnVisible(col.key)}
+                    onCheckedChange={() => toggleColumn(col.key)}
+                  >
+                    {col.label}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button variant="outline" size="sm" onClick={handleExportAll} disabled={!sortedItems.length}>
               <Download className="mr-2 h-4 w-4" />
               Export
@@ -450,7 +512,15 @@ function TagsPage() {
                     />
                   </TableHead>
                   <SortableHeader label="Name" sortKey="name" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
-                  <SortableHeader label="Slug" sortKey="slug" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
+                  {isColumnVisible("slug") && (
+                    <SortableHeader label="Slug" sortKey="slug" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
+                  )}
+                  {isColumnVisible("created") && (
+                    <SortableHeader label="Created" sortKey="created_at" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
+                  )}
+                  {isColumnVisible("updated") && (
+                    <SortableHeader label="Updated" sortKey="updated_at" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
+                  )}
                   <TableHead className="w-16 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -464,6 +534,8 @@ function TagsPage() {
                     onToggle={() => toggleOne(tag.id)}
                     onRowClick={() => handleRowClick(tag.id)}
                     onDelete={() => setTagToDelete(tag)}
+                    cellClass={cellClass}
+                    isColumnVisible={isColumnVisible}
                   />
                 ))}
               </TableBody>
@@ -569,6 +641,8 @@ function TagRow({
   onToggle,
   onRowClick,
   onDelete,
+  cellClass,
+  isColumnVisible,
 }: {
   tag: Tag
   index: number
@@ -576,6 +650,8 @@ function TagRow({
   onToggle: () => void
   onRowClick: () => void
   onDelete: () => void
+  cellClass: string
+  isColumnVisible: (col: string) => boolean
 }) {
   return (
     <TableRow
@@ -589,7 +665,7 @@ function TagRow({
         onRowClick()
       }}
     >
-      <TableCell>
+      <TableCell className={cellClass}>
         <Checkbox
           checked={selected}
           onChange={(e) => {
@@ -599,7 +675,7 @@ function TagRow({
           aria-label={`Select ${tag.name}`}
         />
       </TableCell>
-      <TableCell className="font-medium">
+      <TableCell className={cn("font-medium", cellClass)}>
         <Link
           to="/tags/$tagId"
           params={{ tagId: tag.id }}
@@ -609,8 +685,20 @@ function TagRow({
           <Badge variant="secondary">{tag.name}</Badge>
         </Link>
       </TableCell>
-      <TableCell className="hidden md:table-cell font-mono text-xs text-muted-foreground">{tag.slug}</TableCell>
-      <TableCell className="text-right">
+      {isColumnVisible("slug") && (
+        <TableCell className={cn("hidden md:table-cell font-mono text-xs text-muted-foreground", cellClass)}>{tag.slug}</TableCell>
+      )}
+      {isColumnVisible("created") && (
+        <TableCell className={cn("hidden md:table-cell text-xs text-muted-foreground", cellClass)}>
+          {tag.createdAt ? formatDateTime(tag.createdAt) : "--"}
+        </TableCell>
+      )}
+      {isColumnVisible("updated") && (
+        <TableCell className={cn("hidden md:table-cell text-xs text-muted-foreground", cellClass)}>
+          {tag.updatedAt ? formatDateTime(tag.updatedAt) : "--"}
+        </TableCell>
+      )}
+      <TableCell className={cn("text-right", cellClass)}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button

@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { AlertCircle, Building2, Download, Eye, MapPin, MoreVertical, Pencil, Search, Trash2, X } from "lucide-react"
+import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
@@ -77,9 +78,13 @@ type NavigateFn = (opts: {
 export function LocationList({
   searchParams,
   navigate,
+  cellClass = "",
+  isColumnVisible = () => true,
 }: {
   searchParams: LocationSearchParams
   navigate: NavigateFn
+  cellClass?: string
+  isColumnVisible?: (col: string) => boolean
 }) {
   const { currentTeam } = useAuthStore()
 
@@ -405,16 +410,24 @@ export function LocationList({
                     currentDirection={sortDir}
                     onSort={handleSort}
                   />
-                  <SortableHeader
-                    label="Type"
-                    sortKey="location_type"
-                    currentSort={sortKey}
-                    currentDirection={sortDir}
-                    onSort={handleSort}
-                  />
-                  <TableHead>Address</TableHead>
-                  <TableHead>Sub-locations</TableHead>
-                  <TableHead>Description</TableHead>
+                  {isColumnVisible("type") && (
+                    <SortableHeader
+                      label="Type"
+                      sortKey="location_type"
+                      currentSort={sortKey}
+                      currentDirection={sortDir}
+                      onSort={handleSort}
+                    />
+                  )}
+                  {isColumnVisible("address") && (
+                    <TableHead>Address</TableHead>
+                  )}
+                  {isColumnVisible("subLocations") && (
+                    <TableHead>Sub-locations</TableHead>
+                  )}
+                  {isColumnVisible("description") && (
+                    <TableHead>Description</TableHead>
+                  )}
                   <TableHead className="w-16 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -428,6 +441,8 @@ export function LocationList({
                     onToggle={() => toggleOne(location.id)}
                     onRowClick={() => handleRowClick(location.id)}
                     teamId={teamId}
+                    cellClass={cellClass}
+                    isColumnVisible={isColumnVisible}
                   />
                 ))}
               </TableBody>
@@ -537,6 +552,8 @@ function LocationRow({
   onToggle,
   onRowClick,
   teamId,
+  cellClass = "",
+  isColumnVisible = () => true,
 }: {
   location: Location
   index: number
@@ -544,6 +561,8 @@ function LocationRow({
   onToggle: () => void
   onRowClick: () => void
   teamId: string
+  cellClass?: string
+  isColumnVisible?: (col: string) => boolean
 }) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const deleteMutation = useDeleteLocation(teamId)
@@ -580,7 +599,7 @@ function LocationRow({
         onRowClick()
       }}
     >
-      <TableCell>
+      <TableCell className={cellClass}>
         <Checkbox
           checked={selected}
           onChange={(e) => {
@@ -590,7 +609,7 @@ function LocationRow({
           aria-label={`Select ${location.name}`}
         />
       </TableCell>
-      <TableCell>
+      <TableCell className={cellClass}>
         <Link
           to="/locations/$locationId"
           params={{ locationId: location.id }}
@@ -600,66 +619,74 @@ function LocationRow({
           {location.name}
         </Link>
       </TableCell>
-      <TableCell>
-        <Badge variant={isAddressed ? "default" : "secondary"} className="inline-flex items-center gap-1 text-[10px]">
-          {isAddressed ? (
-            <>
-              <Building2 className="h-3 w-3" />
-              Addressed
-            </>
+      {isColumnVisible("type") && (
+        <TableCell className={cellClass}>
+          <Badge variant={isAddressed ? "default" : "secondary"} className="inline-flex items-center gap-1 text-[10px]">
+            {isAddressed ? (
+              <>
+                <Building2 className="h-3 w-3" />
+                Addressed
+              </>
+            ) : (
+              <>
+                <MapPin className="h-3 w-3" />
+                Physical
+              </>
+            )}
+          </Badge>
+        </TableCell>
+      )}
+      {isColumnVisible("address") && (
+        <TableCell className={cellClass}>
+          {addressSummary ? (
+            <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+              <MapPin className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70" />
+              {isAddressLong ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="truncate max-w-[200px]">{addressSummary}</span>
+                  </TooltipTrigger>
+                  <TooltipContent>{addressSummary}</TooltipContent>
+                </Tooltip>
+              ) : (
+                <span>{addressSummary}</span>
+              )}
+            </span>
           ) : (
-            <>
-              <MapPin className="h-3 w-3" />
-              Physical
-            </>
+            <span className="text-sm text-muted-foreground/50">--</span>
           )}
-        </Badge>
-      </TableCell>
-      <TableCell>
-        {addressSummary ? (
-          <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
-            <MapPin className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70" />
-            {isAddressLong ? (
+        </TableCell>
+      )}
+      {isColumnVisible("subLocations") && (
+        <TableCell className={cellClass}>
+          {isAddressed ? (
+            <span className="text-sm text-muted-foreground">
+              {childCount > 0 ? `${childCount} sub-location${childCount !== 1 ? "s" : ""}` : "--"}
+            </span>
+          ) : (
+            <span className="text-sm text-muted-foreground/50">--</span>
+          )}
+        </TableCell>
+      )}
+      {isColumnVisible("description") && (
+        <TableCell className={cellClass}>
+          {truncatedDescription ? (
+            isDescriptionTruncated ? (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span className="truncate max-w-[200px]">{addressSummary}</span>
+                  <span className="text-sm text-muted-foreground cursor-default">{truncatedDescription}</span>
                 </TooltipTrigger>
-                <TooltipContent>{addressSummary}</TooltipContent>
+                <TooltipContent className="max-w-xs">{description}</TooltipContent>
               </Tooltip>
             ) : (
-              <span>{addressSummary}</span>
-            )}
-          </span>
-        ) : (
-          <span className="text-sm text-muted-foreground/50">--</span>
-        )}
-      </TableCell>
-      <TableCell>
-        {isAddressed ? (
-          <span className="text-sm text-muted-foreground">
-            {childCount > 0 ? `${childCount} sub-location${childCount !== 1 ? "s" : ""}` : "--"}
-          </span>
-        ) : (
-          <span className="text-sm text-muted-foreground/50">--</span>
-        )}
-      </TableCell>
-      <TableCell>
-        {truncatedDescription ? (
-          isDescriptionTruncated ? (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span className="text-sm text-muted-foreground cursor-default">{truncatedDescription}</span>
-              </TooltipTrigger>
-              <TooltipContent className="max-w-xs">{description}</TooltipContent>
-            </Tooltip>
+              <span className="text-sm text-muted-foreground">{truncatedDescription}</span>
+            )
           ) : (
-            <span className="text-sm text-muted-foreground">{truncatedDescription}</span>
-          )
-        ) : (
-          <span className="text-sm text-muted-foreground/50">--</span>
-        )}
-      </TableCell>
-      <TableCell className="text-right">
+            <span className="text-sm text-muted-foreground/50">--</span>
+          )}
+        </TableCell>
+      )}
+      <TableCell className={cn("text-right", cellClass)}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button

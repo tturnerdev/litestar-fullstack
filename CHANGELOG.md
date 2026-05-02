@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.236.0 (2026-05-03)
+
+### Added
+- **Compact table mode** extended to connections, webhooks, E911, tags, locations, schedules, phone numbers, fax numbers, and fax messages — all list pages now respect the compact mode setting
+- **Column visibility toggle** on connections, webhooks, E911, tags, locations, schedules, phone numbers, fax numbers, and fax messages — completing column visibility across all list pages with localStorage persistence
+
 ## v0.235.0 (2026-05-03)
 
 ### Added

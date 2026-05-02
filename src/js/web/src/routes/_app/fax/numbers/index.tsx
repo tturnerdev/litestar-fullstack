@@ -16,6 +16,7 @@ import {
   Plus,
   Printer,
   Search,
+  SlidersHorizontal,
   Trash2,
   X,
 } from "lucide-react"
@@ -43,7 +44,7 @@ import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/com
 import { DataFreshness } from "@/components/ui/data-freshness"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { FilterDropdown, type FilterOption } from "@/components/ui/filter-dropdown"
 import { Input } from "@/components/ui/input"
@@ -58,6 +59,8 @@ import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { useSettingsStore } from "@/lib/settings-store"
+import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/fax/numbers/")({
   validateSearch: (
@@ -111,6 +114,27 @@ const statusOptions: FilterOption[] = [
   { value: "inactive", label: "Inactive" },
 ]
 
+// -- Column visibility ---------------------------------------------------------
+
+const COLUMN_VISIBILITY_KEY = "fax-numbers-columns"
+
+const TOGGLEABLE_COLUMNS = [
+  { key: "status", label: "Status" },
+  { key: "label", label: "Label" },
+  { key: "emailRoutes", label: "Email Routes" },
+  { key: "created", label: "Created" },
+] as const
+
+type ColumnVisibility = Record<string, boolean>
+
+function loadColumnVisibility(): ColumnVisibility {
+  try {
+    return JSON.parse(localStorage.getItem(COLUMN_VISIBILITY_KEY) ?? "{}")
+  } catch {
+    return {}
+  }
+}
+
 // -- Helpers ------------------------------------------------------------------
 
 function StatusIndicator({ isActive }: { isActive: boolean }) {
@@ -135,6 +159,8 @@ function StatusIndicator({ isActive }: { isActive: boolean }) {
 
 function FaxNumbersPage() {
   useDocumentTitle("Fax Numbers")
+  const compactMode = useSettingsStore((s) => s.compactMode)
+  const cellClass = compactMode ? "py-1 px-2 text-xs" : ""
   const {
     q: searchParam,
     page: pageParam,
@@ -178,6 +204,20 @@ function FaxNumbersPage() {
   useEffect(() => {
     setSearchInput(search)
   }, [search])
+
+  // Column visibility
+  const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(loadColumnVisibility)
+  const isColumnVisible = useCallback(
+    (col: string) => columnVisibility[col] !== false,
+    [columnVisibility],
+  )
+  const toggleColumn = useCallback((col: string) => {
+    setColumnVisibility((prev) => {
+      const updated = { ...prev, [col]: prev[col] !== false ? false : true }
+      localStorage.setItem(COLUMN_VISIBILITY_KEY, JSON.stringify(updated))
+      return updated
+    })
+  }, [])
 
   const [pageSize, setPageSize] = useState(getStoredPageSize)
 
@@ -421,6 +461,27 @@ function FaxNumbersPage() {
               onRefresh={() => refetch()}
               isRefreshing={isRefetching}
             />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <SlidersHorizontal className="mr-1.5 h-3.5 w-3.5" />
+                  Columns
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-44">
+                <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {TOGGLEABLE_COLUMNS.map((col) => (
+                  <DropdownMenuCheckboxItem
+                    key={col.key}
+                    checked={isColumnVisible(col.key)}
+                    onCheckedChange={() => toggleColumn(col.key)}
+                  >
+                    {col.label}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button variant="outline" size="sm" onClick={handleExportAll} disabled={!hasData}>
               <Download className="mr-2 h-4 w-4" />
               Export
@@ -649,28 +710,36 @@ function FaxNumbersPage() {
                       currentDirection={sortDir}
                       onSort={handleSort}
                     />
-                    <SortableHeader
-                      label="Label"
-                      sortKey="label"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                    />
-                    <SortableHeader
-                      label="Status"
-                      sortKey="is_active"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                    />
-                    <TableHead>Email Routes</TableHead>
-                    <SortableHeader
-                      label="Created"
-                      sortKey="created_at"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                    />
+                    {isColumnVisible("label") && (
+                      <SortableHeader
+                        label="Label"
+                        sortKey="label"
+                        currentSort={sortKey}
+                        currentDirection={sortDir}
+                        onSort={handleSort}
+                      />
+                    )}
+                    {isColumnVisible("status") && (
+                      <SortableHeader
+                        label="Status"
+                        sortKey="is_active"
+                        currentSort={sortKey}
+                        currentDirection={sortDir}
+                        onSort={handleSort}
+                      />
+                    )}
+                    {isColumnVisible("emailRoutes") && (
+                      <TableHead>Email Routes</TableHead>
+                    )}
+                    {isColumnVisible("created") && (
+                      <SortableHeader
+                        label="Created"
+                        sortKey="created_at"
+                        currentSort={sortKey}
+                        currentDirection={sortDir}
+                        onSort={handleSort}
+                      />
+                    )}
                     <TableHead className="w-16 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -684,6 +753,8 @@ function FaxNumbersPage() {
                       onToggle={() => toggleOne(faxNumber.id)}
                       onRowClick={() => handleRowClick(faxNumber.id)}
                       onDelete={() => setNumberToDelete({ id: faxNumber.id, number: faxNumber.number })}
+                      cellClass={cellClass}
+                      isColumnVisible={isColumnVisible}
                     />
                   ))}
                 </TableBody>
@@ -846,6 +917,8 @@ function FaxNumberRow({
   onToggle,
   onRowClick,
   onDelete,
+  cellClass,
+  isColumnVisible,
 }: {
   faxNumber: FaxNumber
   index: number
@@ -853,6 +926,8 @@ function FaxNumberRow({
   onToggle: () => void
   onRowClick: () => void
   onDelete: () => void
+  cellClass: string
+  isColumnVisible: (col: string) => boolean
 }) {
   const [editOpen, setEditOpen] = useState(false)
 
@@ -868,7 +943,7 @@ function FaxNumberRow({
         onRowClick()
       }}
     >
-      <TableCell>
+      <TableCell className={cellClass}>
         <Checkbox
           checked={selected}
           onChange={(e) => {
@@ -878,7 +953,7 @@ function FaxNumberRow({
           aria-label={`Select ${faxNumber.number}`}
         />
       </TableCell>
-      <TableCell>
+      <TableCell className={cellClass}>
         <Link
           to="/fax/numbers/$faxNumberId"
           params={{ faxNumberId: faxNumber.id }}
@@ -890,29 +965,37 @@ function FaxNumberRow({
           </span>
         </Link>
       </TableCell>
-      <TableCell>
-        <span className="text-muted-foreground">{faxNumber.label ?? "--"}</span>
-      </TableCell>
-      <TableCell>
-        <StatusIndicator isActive={faxNumber.isActive} />
-      </TableCell>
-      <TableCell>
-        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <Mail className="h-3.5 w-3.5" />
-          <span>Configured</span>
-        </div>
-      </TableCell>
-      <TableCell>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="text-xs text-muted-foreground">
-              {formatRelativeTimeShort(faxNumber.createdAt)}
-            </span>
-          </TooltipTrigger>
-          <TooltipContent>{formatDateTime(faxNumber.createdAt)}</TooltipContent>
-        </Tooltip>
-      </TableCell>
-      <TableCell className="text-right">
+      {isColumnVisible("label") && (
+        <TableCell className={cellClass}>
+          <span className="text-muted-foreground">{faxNumber.label ?? "--"}</span>
+        </TableCell>
+      )}
+      {isColumnVisible("status") && (
+        <TableCell className={cellClass}>
+          <StatusIndicator isActive={faxNumber.isActive} />
+        </TableCell>
+      )}
+      {isColumnVisible("emailRoutes") && (
+        <TableCell className={cellClass}>
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Mail className="h-3.5 w-3.5" />
+            <span>Configured</span>
+          </div>
+        </TableCell>
+      )}
+      {isColumnVisible("created") && (
+        <TableCell className={cellClass}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="text-xs text-muted-foreground">
+                {formatRelativeTimeShort(faxNumber.createdAt)}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>{formatDateTime(faxNumber.createdAt)}</TooltipContent>
+          </Tooltip>
+        </TableCell>
+      )}
+      <TableCell className={cn("text-right", cellClass)}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button

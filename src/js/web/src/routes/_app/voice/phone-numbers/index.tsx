@@ -14,11 +14,12 @@ import {
   Phone,
   Plus,
   Search,
+  SlidersHorizontal,
   Trash2,
   X,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -57,6 +58,8 @@ import {
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
+import { useSettingsStore } from "@/lib/settings-store"
+import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/voice/phone-numbers/")({
   validateSearch: (
@@ -130,6 +133,27 @@ const statusFilterOptions: FilterOption[] = [
   { value: "active", label: "Active" },
   { value: "inactive", label: "Inactive" },
 ]
+
+// -- Column visibility ---------------------------------------------------------
+
+const COLUMN_VISIBILITY_KEY = "phone-numbers-columns"
+
+const TOGGLEABLE_COLUMNS = [
+  { key: "status", label: "Status" },
+  { key: "type", label: "Type" },
+  { key: "callerId", label: "Caller ID" },
+  { key: "e911", label: "E911" },
+] as const
+
+type ColumnVisibility = Record<string, boolean>
+
+function loadColumnVisibility(): ColumnVisibility {
+  try {
+    return JSON.parse(localStorage.getItem(COLUMN_VISIBILITY_KEY) ?? "{}")
+  } catch {
+    return {}
+  }
+}
 
 // -- Helpers ------------------------------------------------------------------
 
@@ -237,12 +261,16 @@ function PhoneNumberRow({
   onToggle,
   onEdit,
   onRowClick,
+  cellClass,
+  isColumnVisible,
 }: {
   pn: PhoneNumber
   selected: boolean
   onToggle: () => void
   onEdit: () => void
   onRowClick: () => void
+  cellClass: string
+  isColumnVisible: (col: string) => boolean
 }) {
   return (
     <TableRow
@@ -256,7 +284,7 @@ function PhoneNumberRow({
         onRowClick()
       }}
     >
-      <TableCell>
+      <TableCell className={cellClass}>
         <Checkbox
           checked={selected}
           onChange={(e) => {
@@ -266,27 +294,35 @@ function PhoneNumberRow({
           aria-label={`Select ${pn.number}`}
         />
       </TableCell>
-      <TableCell>
+      <TableCell className={cellClass}>
         <span className="font-mono text-sm">{pn.number}</span>
       </TableCell>
-      <TableCell className="hidden md:table-cell">
+      <TableCell className={cn("hidden md:table-cell", cellClass)}>
         <span className="text-sm">{pn.label ?? <span className="text-muted-foreground">--</span>}</span>
       </TableCell>
-      <TableCell className="hidden md:table-cell">
-        <Badge variant={typeBadgeVariant[pn.numberType] ?? "outline"}>
-          {typeLabels[pn.numberType] ?? pn.numberType}
-        </Badge>
-      </TableCell>
-      <TableCell className="hidden md:table-cell">
-        <span className="text-sm">{pn.callerIdName ?? <span className="text-muted-foreground">--</span>}</span>
-      </TableCell>
-      <TableCell>
-        <StatusIndicator isActive={pn.isActive} />
-      </TableCell>
-      <TableCell className="hidden md:table-cell">
-        <E911StatusBadge registered={pn.e911Registered ?? false} registrationId={pn.e911RegistrationId} />
-      </TableCell>
-      <TableCell className="text-right">
+      {isColumnVisible("type") && (
+        <TableCell className={cn("hidden md:table-cell", cellClass)}>
+          <Badge variant={typeBadgeVariant[pn.numberType] ?? "outline"}>
+            {typeLabels[pn.numberType] ?? pn.numberType}
+          </Badge>
+        </TableCell>
+      )}
+      {isColumnVisible("callerId") && (
+        <TableCell className={cn("hidden md:table-cell", cellClass)}>
+          <span className="text-sm">{pn.callerIdName ?? <span className="text-muted-foreground">--</span>}</span>
+        </TableCell>
+      )}
+      {isColumnVisible("status") && (
+        <TableCell className={cellClass}>
+          <StatusIndicator isActive={pn.isActive} />
+        </TableCell>
+      )}
+      {isColumnVisible("e911") && (
+        <TableCell className={cn("hidden md:table-cell", cellClass)}>
+          <E911StatusBadge registered={pn.e911Registered ?? false} registrationId={pn.e911RegistrationId} />
+        </TableCell>
+      )}
+      <TableCell className={cn("text-right", cellClass)}>
         <div onClick={(e) => e.stopPropagation()}>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -328,6 +364,8 @@ function PhoneNumberRow({
 
 function PhoneNumbersPage() {
   useDocumentTitle("Phone Numbers")
+  const compactMode = useSettingsStore((s) => s.compactMode)
+  const cellClass = compactMode ? "py-1 px-2 text-xs" : ""
   const {
     q: searchParam,
     page: pageParam,
@@ -373,6 +411,20 @@ function PhoneNumbersPage() {
   useEffect(() => {
     setSearchInput(search)
   }, [search])
+
+  // Column visibility
+  const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(loadColumnVisibility)
+  const isColumnVisible = useCallback(
+    (col: string) => columnVisibility[col] !== false,
+    [columnVisibility],
+  )
+  const toggleColumn = useCallback((col: string) => {
+    setColumnVisibility((prev) => {
+      const updated = { ...prev, [col]: prev[col] !== false ? false : true }
+      localStorage.setItem(COLUMN_VISIBILITY_KEY, JSON.stringify(updated))
+      return updated
+    })
+  }, [])
 
   const [pageSize, setPageSize] = useState(getStoredPageSize)
 
@@ -615,6 +667,27 @@ function PhoneNumbersPage() {
         breadcrumbs={breadcrumbs}
         actions={
           <div className="flex items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <SlidersHorizontal className="mr-1.5 h-3.5 w-3.5" />
+                  Columns
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-44">
+                <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {TOGGLEABLE_COLUMNS.map((col) => (
+                  <DropdownMenuCheckboxItem
+                    key={col.key}
+                    checked={isColumnVisible(col.key)}
+                    onCheckedChange={() => toggleColumn(col.key)}
+                  >
+                    {col.label}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button variant="outline" size="sm" onClick={handleExportAll} disabled={!hasData}>
               <Download className="mr-2 h-4 w-4" />
               Export
@@ -852,30 +925,38 @@ function PhoneNumbersPage() {
                       onSort={handleSort}
                       className="hidden md:table-cell"
                     />
-                    <SortableHeader
-                      label="Type"
-                      sortKey="number_type"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                      className="hidden md:table-cell"
-                    />
-                    <SortableHeader
-                      label="Caller ID"
-                      sortKey="caller_id_name"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                      className="hidden md:table-cell"
-                    />
-                    <SortableHeader
-                      label="Status"
-                      sortKey="is_active"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                    />
-                    <TableHead className="hidden md:table-cell">E911</TableHead>
+                    {isColumnVisible("type") && (
+                      <SortableHeader
+                        label="Type"
+                        sortKey="number_type"
+                        currentSort={sortKey}
+                        currentDirection={sortDir}
+                        onSort={handleSort}
+                        className="hidden md:table-cell"
+                      />
+                    )}
+                    {isColumnVisible("callerId") && (
+                      <SortableHeader
+                        label="Caller ID"
+                        sortKey="caller_id_name"
+                        currentSort={sortKey}
+                        currentDirection={sortDir}
+                        onSort={handleSort}
+                        className="hidden md:table-cell"
+                      />
+                    )}
+                    {isColumnVisible("status") && (
+                      <SortableHeader
+                        label="Status"
+                        sortKey="is_active"
+                        currentSort={sortKey}
+                        currentDirection={sortDir}
+                        onSort={handleSort}
+                      />
+                    )}
+                    {isColumnVisible("e911") && (
+                      <TableHead className="hidden md:table-cell">E911</TableHead>
+                    )}
                     <TableHead className="w-20 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -888,6 +969,8 @@ function PhoneNumbersPage() {
                       onToggle={() => toggleOne(pn.id)}
                       onEdit={() => handleEdit(pn)}
                       onRowClick={() => navigate({ to: "/voice/phone-numbers/$phoneNumberId", params: { phoneNumberId: pn.id } })}
+                      cellClass={cellClass}
+                      isColumnVisible={isColumnVisible}
                     />
                   ))}
                 </TableBody>

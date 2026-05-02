@@ -16,6 +16,7 @@ import {
   Play,
   Plus,
   Search,
+  SlidersHorizontal,
   Trash2,
   Webhook,
   X,
@@ -44,8 +45,10 @@ import {
 } from "@/components/ui/dialog"
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
@@ -78,6 +81,8 @@ import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { formatDateTime } from "@/lib/date-utils"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { useSettingsStore } from "@/lib/settings-store"
+import { cn } from "@/lib/utils"
 import type { WebhookCreate, WebhookList, WebhookUpdate } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/webhooks/")({
@@ -145,6 +150,28 @@ const AVAILABLE_EVENTS = [
   "user.updated",
   "voicemail.received",
 ] as const
+
+// -- Column visibility ---------------------------------------------------------
+
+const COLUMN_VISIBILITY_KEY = "webhooks-columns"
+
+const TOGGLEABLE_COLUMNS = [
+  { key: "status", label: "Status" },
+  { key: "events", label: "Events" },
+  { key: "lastTriggered", label: "Last Triggered" },
+  { key: "failures", label: "Failures" },
+  { key: "url", label: "URL" },
+] as const
+
+type ColumnVisibility = Record<string, boolean>
+
+function loadColumnVisibility(): ColumnVisibility {
+  try {
+    return JSON.parse(localStorage.getItem(COLUMN_VISIBILITY_KEY) ?? "{}")
+  } catch {
+    return {}
+  }
+}
 
 // -- Helpers ------------------------------------------------------------------
 
@@ -629,6 +656,8 @@ function DeleteWebhookDialog({
 
 function WebhooksPage() {
   useDocumentTitle("Webhooks")
+  const compactMode = useSettingsStore((s) => s.compactMode)
+  const cellClass = compactMode ? "py-1 px-2 text-xs" : ""
   const {
     q: searchParam,
     page: pageParam,
@@ -637,6 +666,20 @@ function WebhooksPage() {
   } = Route.useSearch()
   const navigate = Route.useNavigate()
   const searchInputRef = useRef<HTMLInputElement>(null)
+
+  // Column visibility
+  const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(loadColumnVisibility)
+  const isColumnVisible = useCallback(
+    (col: string) => columnVisibility[col] !== false,
+    [columnVisibility],
+  )
+  const toggleColumn = useCallback((col: string) => {
+    setColumnVisibility((prev) => {
+      const updated = { ...prev, [col]: prev[col] !== false ? false : true }
+      localStorage.setItem(COLUMN_VISIBILITY_KEY, JSON.stringify(updated))
+      return updated
+    })
+  }, [])
 
   // Derive filter state from URL search params
   const search = searchParam ?? ""
@@ -840,6 +883,27 @@ function WebhooksPage() {
         breadcrumbs={breadcrumbs}
         actions={
           <div className="flex items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <SlidersHorizontal className="mr-1.5 h-3.5 w-3.5" />
+                  Columns
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-44">
+                <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {TOGGLEABLE_COLUMNS.map((col) => (
+                  <DropdownMenuCheckboxItem
+                    key={col.key}
+                    checked={isColumnVisible(col.key)}
+                    onCheckedChange={() => toggleColumn(col.key)}
+                  >
+                    {col.label}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button variant="outline" size="sm" onClick={handleExport} disabled={webhooks.length === 0}>
               <Download className="mr-2 h-4 w-4" /> Export
             </Button>
@@ -994,24 +1058,34 @@ function WebhooksPage() {
                       currentDirection={sortDir}
                       onSort={handleSort}
                     />
-                    <SortableHeader
-                      label="URL"
-                      sortKey="url"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                      className="hidden sm:table-cell"
-                    />
-                    <TableHead className="hidden md:table-cell">Events</TableHead>
-                    <SortableHeader
-                      label="Status"
-                      sortKey="status"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                    />
-                    <TableHead className="hidden lg:table-cell">Last Triggered</TableHead>
-                    <TableHead className="hidden md:table-cell">Failures</TableHead>
+                    {isColumnVisible("url") && (
+                      <SortableHeader
+                        label="URL"
+                        sortKey="url"
+                        currentSort={sortKey}
+                        currentDirection={sortDir}
+                        onSort={handleSort}
+                        className="hidden sm:table-cell"
+                      />
+                    )}
+                    {isColumnVisible("events") && (
+                      <TableHead className="hidden md:table-cell">Events</TableHead>
+                    )}
+                    {isColumnVisible("status") && (
+                      <SortableHeader
+                        label="Status"
+                        sortKey="status"
+                        currentSort={sortKey}
+                        currentDirection={sortDir}
+                        onSort={handleSort}
+                      />
+                    )}
+                    {isColumnVisible("lastTriggered") && (
+                      <TableHead className="hidden lg:table-cell">Last Triggered</TableHead>
+                    )}
+                    {isColumnVisible("failures") && (
+                      <TableHead className="hidden md:table-cell">Failures</TableHead>
+                    )}
                     <TableHead className="w-24 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -1025,6 +1099,8 @@ function WebhooksPage() {
                       onToggle={() => toggleOne(webhook.id)}
                       onEdit={() => setEditWebhook(webhook)}
                       onDelete={() => setDeleteTarget(webhook)}
+                      cellClass={cellClass}
+                      isColumnVisible={isColumnVisible}
                     />
                   ))}
                 </TableBody>
@@ -1121,6 +1197,8 @@ function WebhookRow({
   onToggle,
   onEdit,
   onDelete,
+  cellClass,
+  isColumnVisible,
 }: {
   webhook: WebhookList
   index: number
@@ -1128,6 +1206,8 @@ function WebhookRow({
   onToggle: () => void
   onEdit: () => void
   onDelete: () => void
+  cellClass: string
+  isColumnVisible: (col: string) => boolean
 }) {
   const testWebhookMutation = useTestWebhook()
   const [deliveriesOpen, setDeliveriesOpen] = useState(false)
@@ -1147,7 +1227,7 @@ function WebhookRow({
             navigate({ to: "/webhooks/$webhookId", params: { webhookId: webhook.id } })
           }}
         >
-          <TableCell>
+          <TableCell className={cellClass}>
             <Checkbox
               checked={selected}
               onChange={(e) => {
@@ -1157,7 +1237,7 @@ function WebhookRow({
               aria-label={`Select ${webhook.name}`}
             />
           </TableCell>
-          <TableCell>
+          <TableCell className={cellClass}>
             <div className="flex items-center gap-2">
               <Webhook className="h-4 w-4 text-muted-foreground shrink-0" />
               <div className="min-w-0">
@@ -1175,44 +1255,54 @@ function WebhookRow({
               </div>
             </div>
           </TableCell>
-          <TableCell className="hidden sm:table-cell">
-            <span className="text-sm text-muted-foreground font-mono" title={webhook.url}>
-              {truncateUrl(webhook.url)}
-            </span>
-          </TableCell>
-          <TableCell className="hidden md:table-cell">
-            <Badge variant="secondary" className="gap-1">
-              {webhook.events.length} event{webhook.events.length === 1 ? "" : "s"}
-            </Badge>
-          </TableCell>
-          <TableCell>
-            {webhook.isActive ? (
-              <Badge className="gap-1 bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400">
-                <Check className="h-3 w-3" />
-                Active
+          {isColumnVisible("url") && (
+            <TableCell className={cn("hidden sm:table-cell", cellClass)}>
+              <span className="text-sm text-muted-foreground font-mono" title={webhook.url}>
+                {truncateUrl(webhook.url)}
+              </span>
+            </TableCell>
+          )}
+          {isColumnVisible("events") && (
+            <TableCell className={cn("hidden md:table-cell", cellClass)}>
+              <Badge variant="secondary" className="gap-1">
+                {webhook.events.length} event{webhook.events.length === 1 ? "" : "s"}
               </Badge>
-            ) : (
-              <Badge variant="outline" className="gap-1 text-muted-foreground">
-                <XCircle className="h-3 w-3" />
-                Inactive
-              </Badge>
-            )}
-          </TableCell>
-          <TableCell className="hidden lg:table-cell">
-            <span className="text-sm text-muted-foreground">
-              {formatDateTime(webhook.lastTriggeredAt as string | null | undefined, "Never")}
-            </span>
-          </TableCell>
-          <TableCell className="hidden md:table-cell">
-            {(webhook.failureCount ?? 0) > 0 ? (
-              <Badge variant="destructive" className="gap-1">
-                {webhook.failureCount}
-              </Badge>
-            ) : (
-              <span className="text-sm text-muted-foreground">0</span>
-            )}
-          </TableCell>
-          <TableCell className="text-right">
+            </TableCell>
+          )}
+          {isColumnVisible("status") && (
+            <TableCell className={cellClass}>
+              {webhook.isActive ? (
+                <Badge className="gap-1 bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400">
+                  <Check className="h-3 w-3" />
+                  Active
+                </Badge>
+              ) : (
+                <Badge variant="outline" className="gap-1 text-muted-foreground">
+                  <XCircle className="h-3 w-3" />
+                  Inactive
+                </Badge>
+              )}
+            </TableCell>
+          )}
+          {isColumnVisible("lastTriggered") && (
+            <TableCell className={cn("hidden lg:table-cell", cellClass)}>
+              <span className="text-sm text-muted-foreground">
+                {formatDateTime(webhook.lastTriggeredAt as string | null | undefined, "Never")}
+              </span>
+            </TableCell>
+          )}
+          {isColumnVisible("failures") && (
+            <TableCell className={cn("hidden md:table-cell", cellClass)}>
+              {(webhook.failureCount ?? 0) > 0 ? (
+                <Badge variant="destructive" className="gap-1">
+                  {webhook.failureCount}
+                </Badge>
+              ) : (
+                <span className="text-sm text-muted-foreground">0</span>
+              )}
+            </TableCell>
+          )}
+          <TableCell className={cn("text-right", cellClass)}>
             <div className="flex items-center justify-end gap-1">
               <CollapsibleTrigger asChild>
                 <Button
@@ -1283,7 +1373,7 @@ function WebhookRow({
         </TableRow>
         <CollapsibleContent asChild>
           <tr>
-            <td colSpan={8} className="p-0">
+            <td colSpan={99} className="p-0">
               <div className="border-t border-border/40 bg-muted/30">
                 <div className="flex items-center gap-2 px-6 pt-3 pb-1">
                   <Activity className="h-4 w-4 text-muted-foreground" />

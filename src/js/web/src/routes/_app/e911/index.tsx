@@ -15,6 +15,7 @@ import {
   Plus,
   Search,
   ShieldAlert,
+  SlidersHorizontal,
   Trash2,
   X,
   XCircle,
@@ -33,8 +34,10 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
@@ -62,6 +65,8 @@ import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { useAuthStore } from "@/lib/auth"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { useSettingsStore } from "@/lib/settings-store"
+import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/e911/")({
   validateSearch: (
@@ -117,6 +122,27 @@ const csvHeaders: CsvHeader<E911Registration>[] = [
   { label: "Location", accessor: (r) => r.locationName ?? "" },
 ]
 
+// -- Column visibility ---------------------------------------------------------
+
+const COLUMN_VISIBILITY_KEY = "e911-columns"
+
+const TOGGLEABLE_COLUMNS = [
+  { key: "address", label: "Address" },
+  { key: "cityState", label: "City / State" },
+  { key: "validated", label: "Validated" },
+  { key: "carrierRegId", label: "Carrier Reg ID" },
+] as const
+
+type ColumnVisibility = Record<string, boolean>
+
+function loadColumnVisibility(): ColumnVisibility {
+  try {
+    return JSON.parse(localStorage.getItem(COLUMN_VISIBILITY_KEY) ?? "{}")
+  } catch {
+    return {}
+  }
+}
+
 // -- E911 Row -----------------------------------------------------------------
 
 function E911Row({
@@ -125,12 +151,16 @@ function E911Row({
   selected,
   onToggle,
   onRowClick,
+  cellClass,
+  isColumnVisible,
 }: {
   reg: E911Registration
   index: number
   selected: boolean
   onToggle: () => void
   onRowClick: () => void
+  cellClass: string
+  isColumnVisible: (col: string) => boolean
 }) {
   const validateMutation = useValidateE911Registration(reg.id)
   const deleteMutation = useDeleteE911Registration()
@@ -147,7 +177,7 @@ function E911Row({
         onRowClick()
       }}
     >
-      <TableCell>
+      <TableCell className={cellClass}>
         <Checkbox
           checked={selected}
           onChange={(e) => {
@@ -157,7 +187,7 @@ function E911Row({
           aria-label={`Select ${reg.phoneNumberDisplay ?? reg.id}`}
         />
       </TableCell>
-      <TableCell>
+      <TableCell className={cellClass}>
         <Link
           to="/e911/$registrationId"
           params={{ registrationId: reg.id }}
@@ -172,41 +202,49 @@ function E911Row({
           )}
         </Link>
       </TableCell>
-      <TableCell>
-        <Link
-          to="/e911/$registrationId"
-          params={{ registrationId: reg.id }}
-          className="group-hover:underline text-sm"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {reg.addressLine1}
-          {reg.addressLine2 ? `, ${reg.addressLine2}` : ""}
-        </Link>
-      </TableCell>
-      <TableCell className="hidden md:table-cell">
-        <span className="text-sm">{reg.city}, {reg.state} {reg.postalCode}</span>
-      </TableCell>
-      <TableCell>
-        {reg.validated ? (
-          <Badge className="bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/30">
-            <CheckCircle2 className="mr-1 h-3 w-3" />
-            Validated
-          </Badge>
-        ) : (
-          <Badge variant="outline" className="border-red-500/30 text-red-600 dark:text-red-400">
-            <XCircle className="mr-1 h-3 w-3" />
-            Pending
-          </Badge>
-        )}
-      </TableCell>
-      <TableCell className="hidden md:table-cell">
-        {reg.carrierRegistrationId ? (
-          <span className="font-mono text-xs text-muted-foreground">{reg.carrierRegistrationId}</span>
-        ) : (
-          <span className="text-xs text-muted-foreground">--</span>
-        )}
-      </TableCell>
-      <TableCell className="text-right">
+      {isColumnVisible("address") && (
+        <TableCell className={cellClass}>
+          <Link
+            to="/e911/$registrationId"
+            params={{ registrationId: reg.id }}
+            className="group-hover:underline text-sm"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {reg.addressLine1}
+            {reg.addressLine2 ? `, ${reg.addressLine2}` : ""}
+          </Link>
+        </TableCell>
+      )}
+      {isColumnVisible("cityState") && (
+        <TableCell className={cn("hidden md:table-cell", cellClass)}>
+          <span className="text-sm">{reg.city}, {reg.state} {reg.postalCode}</span>
+        </TableCell>
+      )}
+      {isColumnVisible("validated") && (
+        <TableCell className={cellClass}>
+          {reg.validated ? (
+            <Badge className="bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/30">
+              <CheckCircle2 className="mr-1 h-3 w-3" />
+              Validated
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="border-red-500/30 text-red-600 dark:text-red-400">
+              <XCircle className="mr-1 h-3 w-3" />
+              Pending
+            </Badge>
+          )}
+        </TableCell>
+      )}
+      {isColumnVisible("carrierRegId") && (
+        <TableCell className={cn("hidden md:table-cell", cellClass)}>
+          {reg.carrierRegistrationId ? (
+            <span className="font-mono text-xs text-muted-foreground">{reg.carrierRegistrationId}</span>
+          ) : (
+            <span className="text-xs text-muted-foreground">--</span>
+          )}
+        </TableCell>
+      )}
+      <TableCell className={cn("text-right", cellClass)}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -278,6 +316,8 @@ function E911Row({
 
 function E911Page() {
   useDocumentTitle("E911 Addresses")
+  const compactMode = useSettingsStore((s) => s.compactMode)
+  const cellClass = compactMode ? "py-1 px-2 text-xs" : ""
 
   const { currentTeam } = useAuthStore()
   const {
@@ -288,6 +328,20 @@ function E911Page() {
   } = Route.useSearch()
   const navigate = Route.useNavigate()
   const teamId = currentTeam?.id ?? ""
+
+  // Column visibility
+  const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(loadColumnVisibility)
+  const isColumnVisible = useCallback(
+    (col: string) => columnVisibility[col] !== false,
+    [columnVisibility],
+  )
+  const toggleColumn = useCallback((col: string) => {
+    setColumnVisibility((prev) => {
+      const updated = { ...prev, [col]: prev[col] !== false ? false : true }
+      localStorage.setItem(COLUMN_VISIBILITY_KEY, JSON.stringify(updated))
+      return updated
+    })
+  }, [])
 
   // Derive filter state from URL search params
   const search = searchParam ?? ""
@@ -483,6 +537,27 @@ function E911Page() {
         breadcrumbs={breadcrumbs}
         actions={
           <div className="flex items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <SlidersHorizontal className="mr-1.5 h-3.5 w-3.5" />
+                  Columns
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-44">
+                <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {TOGGLEABLE_COLUMNS.map((col) => (
+                  <DropdownMenuCheckboxItem
+                    key={col.key}
+                    checked={isColumnVisible(col.key)}
+                    onCheckedChange={() => toggleColumn(col.key)}
+                  >
+                    {col.label}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button variant="outline" size="sm" onClick={handleExportAll} disabled={!hasData}>
               <Download className="mr-2 h-4 w-4" />
               Export
@@ -657,29 +732,37 @@ function E911Page() {
                       currentDirection={sortDir}
                       onSort={handleSort}
                     />
-                    <SortableHeader
-                      label="Address"
-                      sortKey="address_line1"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                    />
-                    <SortableHeader
-                      label="City / State"
-                      sortKey="city"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                      className="hidden md:table-cell"
-                    />
-                    <SortableHeader
-                      label="Validated"
-                      sortKey="validated"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                    />
-                    <TableHead className="hidden md:table-cell">Carrier Reg ID</TableHead>
+                    {isColumnVisible("address") && (
+                      <SortableHeader
+                        label="Address"
+                        sortKey="address_line1"
+                        currentSort={sortKey}
+                        currentDirection={sortDir}
+                        onSort={handleSort}
+                      />
+                    )}
+                    {isColumnVisible("cityState") && (
+                      <SortableHeader
+                        label="City / State"
+                        sortKey="city"
+                        currentSort={sortKey}
+                        currentDirection={sortDir}
+                        onSort={handleSort}
+                        className="hidden md:table-cell"
+                      />
+                    )}
+                    {isColumnVisible("validated") && (
+                      <SortableHeader
+                        label="Validated"
+                        sortKey="validated"
+                        currentSort={sortKey}
+                        currentDirection={sortDir}
+                        onSort={handleSort}
+                      />
+                    )}
+                    {isColumnVisible("carrierRegId") && (
+                      <TableHead className="hidden md:table-cell">Carrier Reg ID</TableHead>
+                    )}
                     <TableHead className="w-16 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -692,6 +775,8 @@ function E911Page() {
                       selected={selectedIds.has(reg.id)}
                       onToggle={() => toggleOne(reg.id)}
                       onRowClick={() => handleRowClick(reg.id)}
+                      cellClass={cellClass}
+                      isColumnVisible={isColumnVisible}
                     />
                   ))}
                 </TableBody>
