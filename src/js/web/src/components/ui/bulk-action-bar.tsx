@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion"
-import { Download, Loader2, Trash2, X } from "lucide-react"
+import { Download, Loader2, ToggleLeft, ToggleRight, Trash2, X } from "lucide-react"
 import { useState } from "react"
 import {
   AlertDialog,
@@ -223,4 +223,69 @@ export function createExportAction<T>(
       toast.success(`Exported ${items.length} item${items.length === 1 ? "" : "s"}`)
     },
   }
+}
+
+/**
+ * Creates a pair of bulk enable/disable toggle actions.
+ *
+ * @param updateFn     - Function that updates a single item by ID with a boolean flag.
+ * @param invalidateFn - Called once after all updates complete.
+ * @param opts         - Optional overrides for labels and the payload field name.
+ */
+export function createBulkToggleActions(
+  updateFn: (id: string, enabled: boolean) => Promise<void>,
+  invalidateFn: () => void,
+  opts?: { enableLabel?: string; disableLabel?: string; entityName?: string },
+): [BulkAction, BulkAction] {
+  const entityName = opts?.entityName ?? "item"
+
+  const enableAction: BulkAction = {
+    key: "enable",
+    label: opts?.enableLabel ?? "Enable Selected",
+    icon: <ToggleRight className="h-4 w-4" />,
+    variant: "outline",
+    onExecute: async (ids) => {
+      const errors: string[] = []
+      for (const id of ids) {
+        try {
+          await updateFn(id, true)
+        } catch {
+          errors.push(id)
+        }
+      }
+      invalidateFn()
+      const { toast } = await import("sonner")
+      if (errors.length > 0) {
+        toast.error(`Failed to enable ${errors.length} of ${ids.length} ${entityName}s`)
+      } else {
+        toast.success(`Enabled ${ids.length} ${entityName}${ids.length === 1 ? "" : "s"}`)
+      }
+    },
+  }
+
+  const disableAction: BulkAction = {
+    key: "disable",
+    label: opts?.disableLabel ?? "Disable Selected",
+    icon: <ToggleLeft className="h-4 w-4" />,
+    variant: "outline",
+    onExecute: async (ids) => {
+      const errors: string[] = []
+      for (const id of ids) {
+        try {
+          await updateFn(id, false)
+        } catch {
+          errors.push(id)
+        }
+      }
+      invalidateFn()
+      const { toast } = await import("sonner")
+      if (errors.length > 0) {
+        toast.error(`Failed to disable ${errors.length} of ${ids.length} ${entityName}s`)
+      } else {
+        toast.success(`Disabled ${ids.length} ${entityName}${ids.length === 1 ? "" : "s"}`)
+      }
+    },
+  }
+
+  return [enableAction, disableAction]
 }

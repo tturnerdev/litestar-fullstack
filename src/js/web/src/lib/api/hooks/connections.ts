@@ -192,6 +192,32 @@ export function useDeleteConnection() {
   })
 }
 
+/**
+ * Update any connection by passing connectionId as part of the mutation argument.
+ * Useful for bulk operations where the target connection is not known at hook call time.
+ */
+export function useUpdateAnyConnection() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ connectionId, payload }: { connectionId: string; payload: ConnectionUpdate }) => {
+      const response = await client.patch({
+        url: `/api/connections/${connectionId}`,
+        body: payload,
+        security: [{ scheme: "bearer", type: "http" }],
+      } as never)
+      return (response as { data: unknown }).data as ConnectionDetail
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["connections"] })
+    },
+    onError: (error) => {
+      toast.error("Unable to update connection", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
+    },
+  })
+}
+
 export function useTestConnection(connectionId: string) {
   const queryClient = useQueryClient()
   return useMutation({

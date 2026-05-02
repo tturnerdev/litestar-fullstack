@@ -325,6 +325,29 @@ export function useDeleteExtension() {
   })
 }
 
+/**
+ * Update any extension by passing extensionId as part of the mutation argument.
+ * Useful for bulk operations where the target extension is not known at hook call time.
+ */
+export function useUpdateAnyExtension() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ extensionId, payload }: { extensionId: string; payload: Record<string, unknown> }) =>
+      apiFetch<Extension>(`/api/voice/extensions/${extensionId}`, {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["voice", "extensions"] })
+    },
+    onError: (error) => {
+      toast.error("Unable to update extension", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
+    },
+  })
+}
+
 // ---------------------------------------------------------------------------
 // Voicemail Settings
 // ---------------------------------------------------------------------------

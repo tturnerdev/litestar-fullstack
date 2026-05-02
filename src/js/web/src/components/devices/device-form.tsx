@@ -4,6 +4,7 @@ import {
   AlertCircle,
   Cable,
   Headset,
+  Info,
   Loader2,
   type LucideIcon,
   MapPin,
@@ -31,6 +32,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useConnections } from "@/lib/api/hooks/connections"
 import { useCreateDevice } from "@/lib/api/hooks/devices"
 import { useLocations } from "@/lib/api/hooks/locations"
@@ -237,7 +239,17 @@ export function CreateDeviceForm() {
             name="macAddress"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>MAC Address</FormLabel>
+                <div className="flex items-center gap-1.5">
+                  <FormLabel>MAC Address</FormLabel>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Format: XX:XX:XX:XX:XX:XX or XX-XX-XX-XX-XX-XX</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
                 <FormControl>
                   <Input
                     placeholder="AA:BB:CC:DD:EE:FF"
@@ -262,7 +274,17 @@ export function CreateDeviceForm() {
             name="ipAddress"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>IP Address</FormLabel>
+                <div className="flex items-center gap-1.5">
+                  <FormLabel>IP Address</FormLabel>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>IPv4 address for static assignment. Leave empty for DHCP.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
                 <FormControl>
                   <Input placeholder="192.168.1.100" {...field} />
                 </FormControl>

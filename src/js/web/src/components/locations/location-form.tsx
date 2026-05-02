@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Link, useBlocker, useRouter } from "@tanstack/react-router"
-import { AlertCircle, AlertTriangle, Loader2 } from "lucide-react"
+import { AlertCircle, AlertTriangle, Info, Loader2 } from "lucide-react"
 import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAuthStore } from "@/lib/auth"
 import { useCreateLocation, useLocations } from "@/lib/api/hooks/locations"
 import { cn } from "@/lib/utils"
@@ -198,10 +199,20 @@ export function CreateLocationForm() {
             name="locationType"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  Location Type
-                  <RequiredIndicator />
-                </FormLabel>
+                <div className="flex items-center gap-1.5">
+                  <FormLabel>
+                    Location Type
+                    <RequiredIndicator />
+                  </FormLabel>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Addressed = office/building with a mailing address, Physical = specific room or area within a location</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
@@ -249,10 +260,20 @@ export function CreateLocationForm() {
               name="parentId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    Parent Location
-                    <RequiredIndicator />
-                  </FormLabel>
+                  <div className="flex items-center gap-1.5">
+                    <FormLabel>
+                      Parent Location
+                      <RequiredIndicator />
+                    </FormLabel>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Nest this location under an existing one for hierarchy</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>

@@ -299,3 +299,65 @@
     @apply bg-card/60 backdrop-blur-md border-border/40 shadow-xl;
   }
 }
+
+/* Print styles — hide chrome, reset layout, clean output */
+@media print {
+  /* Hide non-content elements */
+  [data-sidebar],
+  nav,
+  .no-print,
+  button:not(td button):not(th button),
+  [role="dialog"],
+  [data-radix-popper-content-wrapper] {
+    display: none !important;
+  }
+
+  /* Reset layout — full width without sidebar */
+  main {
+    margin-left: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
+  /* Clean card styling */
+  .card {
+    border: 1px solid #ddd !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+
+  /* Table improvements */
+  table {
+    width: 100% !important;
+  }
+
+  th,
+  td {
+    padding: 4px 8px !important;
+  }
+
+  /* Remove hover/transition effects */
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  /* Ensure text is readable */
+  body {
+    color: #000 !important;
+    background: #fff !important;
+  }
+
+  /* Show full URLs for external links */
+  a[href]:after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    color: #666;
+  }
+
+  /* Avoid internal links showing full paths */
+  a[href^="/"]:after,
+  a[href^="#"]:after {
+    content: none;
+  }
+}

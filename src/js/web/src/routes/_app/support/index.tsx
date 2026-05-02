@@ -3,8 +3,11 @@ import { useQueryClient } from "@tanstack/react-query"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   AlertCircle,
+  ArrowDown,
+  ArrowUp,
   Bookmark,
   CheckCircle,
+  CheckCircle2,
   Download,
   Eye,
   Home,
@@ -12,6 +15,7 @@ import {
   MoreVertical,
   Pencil,
   Plus,
+  RotateCcw,
   Save,
   Search,
   Trash2,
@@ -444,6 +448,38 @@ function SupportPage() {
   const bulkActions: BulkAction[] = useMemo(
     () => [
       {
+        key: "resolve",
+        label: "Resolve Selected",
+        icon: <CheckCircle2 className="h-4 w-4" />,
+        variant: "outline",
+        confirm: {
+          title: "Resolve selected tickets?",
+          description:
+            "The selected tickets will be marked as resolved.",
+        },
+        onExecute: async (ids) => {
+          const errors: string[] = []
+          for (const id of ids) {
+            try {
+              await client.patch({
+                url: `/api/support/tickets/${id}`,
+                body: { status: "resolved" },
+                security: [{ scheme: "bearer", type: "http" }],
+              } as never)
+            } catch {
+              errors.push(id)
+            }
+          }
+          queryClient.invalidateQueries({ queryKey: ["support", "tickets"] })
+          setSelectedIds(new Set())
+          if (errors.length > 0) {
+            toast.error(`Failed to resolve ${errors.length} of ${ids.length} tickets`)
+          } else {
+            toast.success(`Resolved ${ids.length} ticket${ids.length === 1 ? "" : "s"}`)
+          }
+        },
+      },
+      {
         key: "close",
         label: "Close Selected",
         icon: <CheckCircle className="h-4 w-4" />,
@@ -471,6 +507,91 @@ function SupportPage() {
             toast.error(`Failed to close ${errors.length} of ${ids.length} tickets`)
           } else {
             toast.success(`Closed ${ids.length} ticket${ids.length === 1 ? "" : "s"}`)
+          }
+        },
+      },
+      {
+        key: "reopen",
+        label: "Reopen Selected",
+        icon: <RotateCcw className="h-4 w-4" />,
+        variant: "outline",
+        confirm: {
+          title: "Reopen selected tickets?",
+          description:
+            "The selected tickets will be reopened and set back to an open status.",
+        },
+        onExecute: async (ids) => {
+          const errors: string[] = []
+          for (const id of ids) {
+            try {
+              await client.post({
+                url: `/api/support/tickets/${id}/reopen`,
+                security: [{ scheme: "bearer", type: "http" }],
+              } as never)
+            } catch {
+              errors.push(id)
+            }
+          }
+          queryClient.invalidateQueries({ queryKey: ["support", "tickets"] })
+          setSelectedIds(new Set())
+          if (errors.length > 0) {
+            toast.error(`Failed to reopen ${errors.length} of ${ids.length} tickets`)
+          } else {
+            toast.success(`Reopened ${ids.length} ticket${ids.length === 1 ? "" : "s"}`)
+          }
+        },
+      },
+      {
+        key: "set-high-priority",
+        label: "Set High Priority",
+        icon: <ArrowUp className="h-4 w-4" />,
+        variant: "outline",
+        onExecute: async (ids) => {
+          const errors: string[] = []
+          for (const id of ids) {
+            try {
+              await client.patch({
+                url: `/api/support/tickets/${id}`,
+                body: { priority: "high" },
+                security: [{ scheme: "bearer", type: "http" }],
+              } as never)
+            } catch {
+              errors.push(id)
+            }
+          }
+          queryClient.invalidateQueries({ queryKey: ["support", "tickets"] })
+          setSelectedIds(new Set())
+          if (errors.length > 0) {
+            toast.error(`Failed to update priority for ${errors.length} of ${ids.length} tickets`)
+          } else {
+            toast.success(`Set high priority on ${ids.length} ticket${ids.length === 1 ? "" : "s"}`)
+          }
+        },
+      },
+      {
+        key: "set-low-priority",
+        label: "Set Low Priority",
+        icon: <ArrowDown className="h-4 w-4" />,
+        variant: "outline",
+        onExecute: async (ids) => {
+          const errors: string[] = []
+          for (const id of ids) {
+            try {
+              await client.patch({
+                url: `/api/support/tickets/${id}`,
+                body: { priority: "low" },
+                security: [{ scheme: "bearer", type: "http" }],
+              } as never)
+            } catch {
+              errors.push(id)
+            }
+          }
+          queryClient.invalidateQueries({ queryKey: ["support", "tickets"] })
+          setSelectedIds(new Set())
+          if (errors.length > 0) {
+            toast.error(`Failed to update priority for ${errors.length} of ${ids.length} tickets`)
+          } else {
+            toast.success(`Set low priority on ${ids.length} ticket${ids.length === 1 ? "" : "s"}`)
           }
         },
       },

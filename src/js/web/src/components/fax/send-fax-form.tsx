@@ -5,6 +5,7 @@ import {
   Clock,
   FileText,
   FileUp,
+  Info,
   Loader2,
   Phone,
   Send,
@@ -491,6 +492,14 @@ export function SendFaxForm() {
                   <legend className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
                     <FileText className="h-4 w-4" />
                     Content <span className="text-destructive">*</span>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Supported formats: PDF, TIFF. Maximum file size: 20MB.</p>
+                      </TooltipContent>
+                    </Tooltip>
                   </legend>
 
                   <Tabs

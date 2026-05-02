@@ -34,7 +34,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
+import { BulkActionBar, createBulkDeleteAction, createBulkToggleActions, createExportAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { EmptyState } from "@/components/ui/empty-state"
@@ -60,6 +60,7 @@ import {
   useExtensions,
   usePhoneNumbers,
   useSyncExtensions,
+  useUpdateAnyExtension,
 } from "@/lib/api/hooks/voice"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
@@ -190,6 +191,7 @@ function ExtensionsPage() {
   const { data, isLoading, isError, refetch } = useExtensions(page, pageSize)
   const { data: phoneData } = usePhoneNumbers(1, 100)
   const deleteExtension = useDeleteExtension()
+  const updateAnyExtension = useUpdateAnyExtension()
   const syncExtensions = useSyncExtensions()
 
   // Build a phone number lookup map
@@ -299,8 +301,21 @@ function ExtensionsPage() {
   )
 
   // Bulk actions
+  const [bulkEnableAction, bulkDisableAction] = useMemo(
+    () =>
+      createBulkToggleActions(
+        (id, enabled) =>
+          updateAnyExtension.mutateAsync({ extensionId: id, payload: { isActive: enabled } }).then(() => {}),
+        () => {},
+        { entityName: "extension" },
+      ),
+    [updateAnyExtension],
+  )
+
   const bulkActions = useMemo(
     () => [
+      bulkEnableAction,
+      bulkDisableAction,
       createBulkDeleteAction(
         (id) => deleteExtension.mutateAsync(id),
         () => {
@@ -313,7 +328,7 @@ function ExtensionsPage() {
         (ids) => filteredItems.filter((e) => ids.includes(e.id)),
       ),
     ],
-    [deleteExtension, filteredItems],
+    [bulkEnableAction, bulkDisableAction, deleteExtension, filteredItems],
   )
 
   // Export all visible

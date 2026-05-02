@@ -37,7 +37,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
+import { BulkActionBar, createBulkDeleteAction, createBulkToggleActions, createExportAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -61,6 +61,7 @@ import {
   useConnections,
   useDeleteConnection,
   useTestAnyConnection,
+  useUpdateAnyConnection,
 } from "@/lib/api/hooks/connections"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
@@ -210,6 +211,7 @@ function ConnectionsPage() {
     sortOrder: sortDir ?? undefined,
   })
   const deleteConnection = useDeleteConnection()
+  const updateAnyConnection = useUpdateAnyConnection()
   const testConnection = useTestAnyConnection()
   const [itemToDelete, setItemToDelete] = useState<{ id: string; name: string } | null>(null)
 
@@ -280,8 +282,21 @@ function ConnectionsPage() {
   )
 
   // Bulk actions
+  const [bulkEnableAction, bulkDisableAction] = useMemo(
+    () =>
+      createBulkToggleActions(
+        (id, enabled) =>
+          updateAnyConnection.mutateAsync({ connectionId: id, payload: { isEnabled: enabled } }).then(() => {}),
+        () => {},
+        { entityName: "connection" },
+      ),
+    [updateAnyConnection],
+  )
+
   const bulkActions = useMemo(
     () => [
+      bulkEnableAction,
+      bulkDisableAction,
       createBulkDeleteAction(
         (id) => deleteConnection.mutateAsync(id),
         () => {
@@ -294,7 +309,7 @@ function ConnectionsPage() {
         (ids) => filteredItems.filter((c) => ids.includes(c.id)),
       ),
     ],
-    [filteredItems, deleteConnection],
+    [bulkEnableAction, bulkDisableAction, filteredItems, deleteConnection],
   )
 
   // Active filter count for display
