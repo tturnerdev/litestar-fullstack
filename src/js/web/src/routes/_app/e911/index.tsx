@@ -409,7 +409,7 @@ function E911Page() {
     return () => document.removeEventListener("keydown", handleKeyDown)
   }, [])
 
-  const { data, isLoading, isError, refetch } = useE911Registrations({
+  const { data, isLoading, isRefetching, isError, refetch } = useE911Registrations({
     page,
     pageSize,
     search: debouncedSearch || undefined,
@@ -714,7 +714,7 @@ function E911Page() {
             </div>
 
             <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
-              <Table aria-label="E911 Registrations">
+              <Table aria-label="E911 Registrations" aria-busy={isLoading || isRefetching}>
                 <TableHeader className="sticky top-0 z-10 bg-background">
                   <TableRow>
                     <TableHead className="w-10">
@@ -781,6 +781,9 @@ function E911Page() {
                   ))}
                 </TableBody>
               </Table>
+            </div>
+            <div className="sr-only" aria-live="polite" aria-atomic="true">
+              {!isLoading && `Showing ${items.length} of ${data?.total ?? items.length} results, page ${page}`}
             </div>
 
             {/* Pagination */}

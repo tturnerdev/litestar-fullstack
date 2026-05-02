@@ -789,7 +789,7 @@ function DevicesPage() {
 
             {/* Table */}
             <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
-              <Table aria-label="Devices">
+              <Table aria-label="Devices" aria-busy={isLoading || isRefetching}>
                 <TableHeader className="sticky top-0 z-10 bg-background">
                   <TableRow>
                     <TableHead className="w-10">
@@ -868,6 +868,9 @@ function DevicesPage() {
                   ))}
                 </TableBody>
               </Table>
+            </div>
+            <div className="sr-only" aria-live="polite" aria-atomic="true">
+              {!isLoading && `Showing ${filteredItems.length} of ${data?.total ?? 0} results, page ${page}`}
             </div>
 
             {/* Pagination */}

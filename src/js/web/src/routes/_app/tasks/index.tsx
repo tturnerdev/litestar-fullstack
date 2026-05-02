@@ -723,9 +723,13 @@ function TasksPage() {
               )}
             </div>
 
+            <div className="sr-only" aria-live="polite" aria-atomic="true">
+              {!isLoading && `Showing ${items.length} of ${data?.total ?? 0} tasks, page ${page}`}
+            </div>
+
             {/* Table */}
             <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
-              <Table aria-label="Background tasks">
+              <Table aria-label="Background tasks" aria-busy={isLoading || isRefetching}>
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-10">

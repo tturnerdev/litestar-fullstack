@@ -221,7 +221,7 @@ function TagsPage() {
     [sortKey, sortDir, navigate],
   )
 
-  const { data, isLoading, isError, refetch } = useTags({
+  const { data, isLoading, isRefetching, isError, refetch } = useTags({
     search: debouncedSearch || undefined,
     page,
     pageSize,
@@ -500,7 +500,7 @@ function TagsPage() {
             </div>
 
             <div className="overflow-x-auto rounded-lg border">
-            <Table aria-label="Tags">
+            <Table aria-label="Tags" aria-busy={isLoading || isRefetching}>
               <TableHeader className="sticky top-0 z-10 bg-background">
                 <TableRow>
                   <TableHead className="w-[40px]">
@@ -541,6 +541,9 @@ function TagsPage() {
               </TableBody>
             </Table>
           </div>
+            <div className="sr-only" aria-live="polite" aria-atomic="true">
+              {!isLoading && `Showing ${sortedItems.length} of ${totalCount} results, page ${page}`}
+            </div>
 
             {/* Pagination */}
             <div className="flex items-center justify-end gap-4 pt-2">

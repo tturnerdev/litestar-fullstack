@@ -792,7 +792,11 @@ function NotificationsPage() {
               </div>
             </div>
 
-            <div className="mt-4 space-y-3">
+            <div className="sr-only" aria-live="polite" aria-atomic="true">
+              {!isLoading && `Showing ${filteredNotifications.length} of ${total} notifications, page ${page}`}
+            </div>
+
+            <div className="mt-4 space-y-3" aria-busy={isLoading}>
               {isLoading ? (
                 <div className="space-y-3">
                   {Array.from({ length: 5 }).map((_, i) => (

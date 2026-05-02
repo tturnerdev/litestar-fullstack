@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.238.0 (2026-05-03)
+
+### Added
+- **Table accessibility** — `aria-busy` during loading and `aria-live` screen reader announcements for results count and page on all 15 list pages
+
 ## v0.237.0 (2026-05-03)
 
 ### Added
