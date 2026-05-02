@@ -33,6 +33,7 @@ import { CopyButton } from "@/components/ui/copy-button"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { toast } from "sonner"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useAuthStore } from "@/lib/auth"
@@ -341,6 +342,7 @@ function LocationDetailPage() {
         <div className="grid gap-6 md:grid-cols-[1.1fr_0.9fr]">
           {/* Main information card */}
           <div className="space-y-6">
+            <SectionErrorBoundary name="Location Information">
             <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
@@ -465,8 +467,10 @@ function LocationDetailPage() {
                 )}
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
 
             {/* Devices at this Location */}
+            <SectionErrorBoundary name="Devices">
             <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
               <CardHeader className="flex flex-row items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -540,8 +544,10 @@ function LocationDetailPage() {
                 )}
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
 
             {/* E911 Registrations */}
+            <SectionErrorBoundary name="E911 Registrations">
             <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
               <CardHeader className="flex flex-row items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -612,8 +618,10 @@ function LocationDetailPage() {
                 )}
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
 
             {/* Danger Zone */}
+            <SectionErrorBoundary name="Danger Zone">
             <Card className="border-destructive/30 bg-card/80 shadow-md">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-destructive">
@@ -643,11 +651,13 @@ function LocationDetailPage() {
                 </div>
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
           </div>
 
           {/* Sidebar */}
           <div className="space-y-4">
             {/* Metadata card */}
+            <SectionErrorBoundary name="Metadata">
             <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -697,8 +707,10 @@ function LocationDetailPage() {
                 )}
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
 
             {/* Activity */}
+            <SectionErrorBoundary name="Activity">
             <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -710,8 +722,10 @@ function LocationDetailPage() {
                 <EntityActivityPanel targetType="location" targetId={locationId} />
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
 
             {/* Sub-locations card */}
+            <SectionErrorBoundary name="Sub-locations">
             <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -753,6 +767,7 @@ function LocationDetailPage() {
                 )}
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
           </div>
         </div>
       </PageSection>

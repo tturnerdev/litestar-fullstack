@@ -60,6 +60,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
@@ -576,6 +577,7 @@ function DeviceDetailPage() {
 
           <TabsContent value="overview" className="mt-6 space-y-6">
             {/* Device Info */}
+            <SectionErrorBoundary name="Device Info">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
@@ -726,8 +728,10 @@ function DeviceDetailPage() {
                 )}
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
 
             {/* Network */}
+            <SectionErrorBoundary name="Network">
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2">
@@ -770,8 +774,10 @@ function DeviceDetailPage() {
                 </div>
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
 
             {/* Lines / Extensions */}
+            <SectionErrorBoundary name="Lines / Extensions">
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2">
@@ -815,8 +821,10 @@ function DeviceDetailPage() {
                 )}
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
 
             {/* Related Resources */}
+            <SectionErrorBoundary name="Related Resources">
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2">
@@ -959,8 +967,10 @@ function DeviceDetailPage() {
                 })()}
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
 
             {/* Recent Tasks */}
+            <SectionErrorBoundary name="Recent Tasks">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -1057,8 +1067,10 @@ function DeviceDetailPage() {
                 )}
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
 
             {/* Metadata */}
+            <SectionErrorBoundary name="Metadata">
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2">
@@ -1095,6 +1107,7 @@ function DeviceDetailPage() {
                 </div>
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
           </TabsContent>
 
           <TabsContent value="lines" className="mt-6">
@@ -1142,6 +1155,7 @@ function DeviceDetailPage() {
 
       {/* Danger Zone */}
       <PageSection delay={0.25}>
+        <SectionErrorBoundary name="Danger Zone">
         <Card className="border-destructive/30">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-destructive">
@@ -1167,6 +1181,7 @@ function DeviceDetailPage() {
             </div>
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
     </PageContainer>

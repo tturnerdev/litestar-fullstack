@@ -57,6 +57,7 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -407,6 +408,7 @@ function TeamDetail() {
 
       {/* Team Info Card */}
       <PageSection>
+        <SectionErrorBoundary name="Team Info">
         <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
           <CardContent className="p-6">
             {editing && formDirty && (
@@ -539,10 +541,12 @@ function TeamDetail() {
             </div>
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Tabs Section */}
       <PageSection delay={0.1}>
+        <SectionErrorBoundary name="Team Tabs">
         <Tabs value={tab} onValueChange={(value) => navigate({ search: () => ({ tab: value }), replace: true })}>
           <TabsList>
             <TabsTrigger value="members" className="gap-1.5">
@@ -591,10 +595,12 @@ function TeamDetail() {
             />
           </TabsContent>
         </Tabs>
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Team Devices */}
       <PageSection delay={0.2}>
+        <SectionErrorBoundary name="Team Devices">
         <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
           <CardHeader className="flex flex-row items-center justify-between">
             <div className="flex items-center gap-2">
@@ -658,10 +664,12 @@ function TeamDetail() {
             )}
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Team Extensions */}
       <PageSection delay={0.3}>
+        <SectionErrorBoundary name="Team Extensions">
         <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
           <CardHeader className="flex flex-row items-center justify-between">
             <div className="flex items-center gap-2">
@@ -721,10 +729,12 @@ function TeamDetail() {
             )}
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Danger Zone */}
       <PageSection delay={0.4}>
+        <SectionErrorBoundary name="Danger Zone">
         <Card className="border-destructive/30 bg-card/80 shadow-md">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-destructive">
@@ -752,6 +762,7 @@ function TeamDetail() {
             </div>
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Delete confirmation dialog */}

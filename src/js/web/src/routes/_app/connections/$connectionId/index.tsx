@@ -52,6 +52,7 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
@@ -570,6 +571,7 @@ function ConnectionDetailPage() {
 
       {/* Connection Health */}
       <PageSection>
+        <SectionErrorBoundary name="Connection Health">
         {(() => {
           const health = deriveHealthLevel(data.status, data.lastError, data.isEnabled)
           const config = healthConfig[health]
@@ -663,6 +665,7 @@ function ConnectionDetailPage() {
             </Card>
           )
         })()}
+        </SectionErrorBoundary>
       </PageSection>
 
       <PageSection>
@@ -674,6 +677,7 @@ function ConnectionDetailPage() {
 
           <TabsContent value="overview" className="mt-6 space-y-6">
             {/* Connection Info */}
+            <SectionErrorBoundary name="Connection Info">
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2">
@@ -740,8 +744,10 @@ function ConnectionDetailPage() {
                 </div>
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
 
             {/* Server Configuration */}
+            <SectionErrorBoundary name="Server Configuration">
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2">
@@ -799,8 +805,10 @@ function ConnectionDetailPage() {
                 </div>
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
 
             {/* Authentication */}
+            <SectionErrorBoundary name="Authentication">
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2">
@@ -830,8 +838,10 @@ function ConnectionDetailPage() {
                 </div>
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
 
             {/* Settings */}
+            <SectionErrorBoundary name="Settings">
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2">
@@ -895,8 +905,10 @@ function ConnectionDetailPage() {
                 </div>
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
 
             {/* Managed Devices */}
+            <SectionErrorBoundary name="Managed Devices">
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2">
@@ -943,8 +955,10 @@ function ConnectionDetailPage() {
                 )}
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
 
             {/* Metadata */}
+            <SectionErrorBoundary name="Metadata">
             <Card>
               <CardHeader>
                 <CardTitle>Metadata</CardTitle>
@@ -975,6 +989,7 @@ function ConnectionDetailPage() {
                 )}
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
           </TabsContent>
 
           <TabsContent value="activity" className="mt-6">
@@ -992,6 +1007,7 @@ function ConnectionDetailPage() {
 
       {/* Danger Zone */}
       <PageSection delay={0.3}>
+        <SectionErrorBoundary name="Danger Zone">
         <Card className="border-destructive/30">
           <CardHeader>
             <CardTitle className="text-destructive">Danger Zone</CardTitle>
@@ -1008,6 +1024,7 @@ function ConnectionDetailPage() {
             </div>
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Delete confirmation dialog */}

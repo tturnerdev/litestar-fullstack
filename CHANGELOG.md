@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.229.0 (2026-05-03)
+
+### Added
+- **SectionErrorBoundary** on teams, devices, connections, schedules, tags, and locations detail pages — each card/section wrapped independently for resilience
+
+### Fixed
+- **Responsive grids** on admin system, admin bulk-import, and E911 new form — multi-column layouts now stack on mobile
+
 ## v0.228.0 (2026-05-02)
 
 ### Added

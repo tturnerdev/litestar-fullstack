@@ -51,6 +51,7 @@ import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-lay
 import { Skeleton, SkeletonCard } from "@/components/ui/skeleton"
 import { CopyButton } from "@/components/ui/copy-button"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { formatRelativeTime, formatDateTime } from "@/lib/date-utils"
 import { useTag, useUpdateTag, useDeleteTag } from "@/lib/api/hooks/tags"
@@ -257,6 +258,7 @@ function TagDetailPage() {
 
         {/* Tag Details Card */}
         <PageSection>
+          <SectionErrorBoundary name="Tag Details">
           <Card className="max-w-xl">
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -354,10 +356,12 @@ function TagDetailPage() {
               </div>
             </CardContent>
           </Card>
+          </SectionErrorBoundary>
         </PageSection>
 
         {/* Activity Section */}
         <PageSection>
+          <SectionErrorBoundary name="Activity">
           <Card className="max-w-xl">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -387,9 +391,11 @@ function TagDetailPage() {
               </div>
             </CardContent>
           </Card>
+          </SectionErrorBoundary>
         </PageSection>
         {/* Danger Zone */}
         <PageSection delay={0.3}>
+          <SectionErrorBoundary name="Danger Zone">
           <Card className="max-w-xl border-destructive/30">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-destructive">
@@ -409,6 +415,7 @@ function TagDetailPage() {
               </div>
             </CardContent>
           </Card>
+          </SectionErrorBoundary>
         </PageSection>
       </PageContainer>
 

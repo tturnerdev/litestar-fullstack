@@ -500,7 +500,7 @@ function ValidationSummary({ preview }: ValidationSummaryProps) {
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Stats row */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="rounded-lg border bg-muted/30 px-4 py-3 text-center">
             <p className="text-2xl font-semibold">{preview.totalRows}</p>
             <p className="text-xs text-muted-foreground">Total Rows</p>
@@ -790,7 +790,7 @@ function ResultSummary({ result }: ResultSummaryProps) {
       </Alert>
 
       {/* Result breakdown */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div className="rounded-lg border bg-emerald-50 px-3 py-2 text-center dark:bg-emerald-950">
           <p className="text-lg font-semibold text-emerald-600 dark:text-emerald-400">{result.created}</p>
           <p className="text-xs text-emerald-600 dark:text-emerald-400">Created</p>

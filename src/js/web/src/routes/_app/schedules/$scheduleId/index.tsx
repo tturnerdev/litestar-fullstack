@@ -74,6 +74,7 @@ import {
 import { toast } from "sonner"
 import { useTimeConditions } from "@/lib/api/hooks/call-routing"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 
 export const Route = createFileRoute("/_app/schedules/$scheduleId/")({
@@ -853,6 +854,7 @@ function ScheduleDetailPage() {
           {/* Main column */}
           <div className="space-y-6">
             {/* Schedule Information */}
+            <SectionErrorBoundary name="Schedule Information">
             <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
@@ -921,9 +923,11 @@ function ScheduleDetailPage() {
                 )}
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
 
             {/* Weekly Hours */}
             {(data.scheduleType === "business_hours" || data.scheduleType === "custom") && (
+              <SectionErrorBoundary name="Weekly Hours">
               <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -989,10 +993,12 @@ function ScheduleDetailPage() {
                   </Tabs>
                 </CardContent>
               </Card>
+              </SectionErrorBoundary>
             )}
 
             {/* Holidays */}
             {showHolidays && (
+              <SectionErrorBoundary name="Holidays">
               <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -1026,9 +1032,11 @@ function ScheduleDetailPage() {
                   <AddHolidayEntry scheduleId={scheduleId} />
                 </CardContent>
               </Card>
+              </SectionErrorBoundary>
             )}
 
             {/* Danger Zone */}
+            <SectionErrorBoundary name="Danger Zone">
             <Card className="border-destructive/30 bg-card/80 shadow-md">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-destructive">
@@ -1053,11 +1061,13 @@ function ScheduleDetailPage() {
                 </div>
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
           </div>
 
           {/* Sidebar */}
           <div className="space-y-4">
             {/* Metadata card */}
+            <SectionErrorBoundary name="Metadata">
             <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -1098,8 +1108,10 @@ function ScheduleDetailPage() {
                 </div>
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
 
             {/* Quick Stats card */}
+            <SectionErrorBoundary name="Summary">
             <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -1128,11 +1140,15 @@ function ScheduleDetailPage() {
                 </div>
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
 
             {/* Related Resources */}
-            <RelatedResourcesSection scheduleId={scheduleId} />
+            <SectionErrorBoundary name="Related Resources">
+              <RelatedResourcesSection scheduleId={scheduleId} />
+            </SectionErrorBoundary>
 
             {/* Activity History (Audit Trail) */}
+            <SectionErrorBoundary name="Activity History">
             <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -1144,6 +1160,7 @@ function ScheduleDetailPage() {
                 <EntityActivityPanel targetType="schedule" targetId={scheduleId} />
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
           </div>
         </div>
       </PageSection>

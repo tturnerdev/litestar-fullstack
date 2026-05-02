@@ -551,7 +551,7 @@ function WorkerQueuesCard({
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Summary counters */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="rounded-lg border bg-muted/30 px-4 py-3 text-center">
             <p className="text-2xl font-bold tabular-nums">{totalActive}</p>
             <p className="text-xs text-muted-foreground">Active</p>

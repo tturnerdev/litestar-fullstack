@@ -303,7 +303,7 @@ function NewE911RegistrationPage() {
                 </div>
 
                 {/* City / State row */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="city">City *</Label>
                     <Input
@@ -340,7 +340,7 @@ function NewE911RegistrationPage() {
                 </div>
 
                 {/* Postal Code / Country row */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="postal-code">Postal Code *</Label>
                     <Input
