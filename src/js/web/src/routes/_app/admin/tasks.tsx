@@ -2,10 +2,17 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   AlertCircle,
+  Calendar,
+  CalendarDays,
+  CheckCircle2,
+  Clock,
   Download,
   Eye,
   ListTodo,
+  Loader2,
   MoreVertical,
+  Pause,
+  Timer,
   Trash2,
   XCircle,
 } from "lucide-react"
@@ -16,6 +23,7 @@ import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { type BulkAction, BulkActionBar } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
   DropdownMenu,
@@ -38,6 +46,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import {
   useAdminTasks,
+  useAdminTaskStats,
   useAdminCancelTask,
   useAdminDeleteTask,
   type AdminTaskSummary,
@@ -112,6 +121,138 @@ function formatEntityType(entityType: string | null | undefined): string {
   return entityType
     .replace(/_/g, " ")
     .replace(/\b\w/g, (c) => c.toUpperCase())
+}
+
+// -- Stats Summary ------------------------------------------------------------
+
+const STATUS_CONFIG: Record<string, { label: string; icon: React.ReactNode; className: string }> = {
+  pending: { label: "Pending", icon: <Pause className="h-3.5 w-3.5" />, className: "text-yellow-600 dark:text-yellow-400" },
+  running: { label: "Running", icon: <Loader2 className="h-3.5 w-3.5 animate-spin" />, className: "text-blue-600 dark:text-blue-400" },
+  completed: { label: "Completed", icon: <CheckCircle2 className="h-3.5 w-3.5" />, className: "text-green-600 dark:text-green-400" },
+  failed: { label: "Failed", icon: <AlertCircle className="h-3.5 w-3.5" />, className: "text-red-600 dark:text-red-400" },
+  cancelled: { label: "Cancelled", icon: <XCircle className="h-3.5 w-3.5" />, className: "text-muted-foreground" },
+}
+
+function formatDuration(seconds: number): string {
+  if (seconds < 60) return `${seconds.toFixed(1)}s`
+  const mins = Math.floor(seconds / 60)
+  const secs = Math.round(seconds % 60)
+  return secs > 0 ? `${mins}m ${secs}s` : `${mins}m`
+}
+
+function TaskStatsSummary() {
+  const { data: stats, isLoading } = useAdminTaskStats()
+
+  if (isLoading) {
+    return (
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Card key={i}>
+            <CardHeader className="pb-2">
+              <div className="h-4 w-20 animate-pulse rounded bg-muted" />
+            </CardHeader>
+            <CardContent>
+              <div className="h-7 w-12 animate-pulse rounded bg-muted" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    )
+  }
+
+  if (!stats) return null
+
+  const totalAll = Object.values(stats.byStatus).reduce((sum, n) => sum + n, 0)
+  const topDurations = Object.entries(stats.avgDurationSeconds)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 3)
+
+  return (
+    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Total tasks card */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium text-muted-foreground">Total Tasks</CardTitle>
+          <ListTodo className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{totalAll.toLocaleString()}</div>
+          <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <Calendar className="h-3 w-3" />
+              {stats.totalToday} today
+            </span>
+            <span className="flex items-center gap-1">
+              <CalendarDays className="h-3 w-3" />
+              {stats.totalThisWeek} this week
+            </span>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Status breakdown card */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium text-muted-foreground">By Status</CardTitle>
+          <Clock className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-x-3 gap-y-1">
+            {Object.entries(STATUS_CONFIG).map(([key, cfg]) => {
+              const count = stats.byStatus[key] ?? 0
+              if (count === 0 && key !== "running" && key !== "pending") return null
+              return (
+                <span key={key} className={`flex items-center gap-1 text-sm ${cfg.className}`}>
+                  {cfg.icon}
+                  <span className="font-semibold">{count}</span>
+                  <span className="text-xs">{cfg.label}</span>
+                </span>
+              )
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Active tasks card */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium text-muted-foreground">Active</CardTitle>
+          <Loader2 className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">
+            {((stats.byStatus.pending ?? 0) + (stats.byStatus.running ?? 0)).toLocaleString()}
+          </div>
+          <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
+            <span>{stats.byStatus.pending ?? 0} pending</span>
+            <span>{stats.byStatus.running ?? 0} running</span>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Avg duration card */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium text-muted-foreground">Avg Duration</CardTitle>
+          <Timer className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          {topDurations.length > 0 ? (
+            <div className="space-y-1">
+              {topDurations.map(([taskType, seconds]) => (
+                <div key={taskType} className="flex items-center justify-between text-sm">
+                  <span className="truncate text-muted-foreground">{formatTaskType(taskType)}</span>
+                  <span className="ml-2 font-medium tabular-nums">{formatDuration(seconds)}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">No data yet</p>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  )
 }
 
 // -- Task Row -----------------------------------------------------------------
@@ -483,6 +624,11 @@ function AdminTasksPage() {
         }
       />
       <AdminNav />
+
+      {/* Stats Summary */}
+      <PageSection>
+        <TaskStatsSummary />
+      </PageSection>
 
       {/* Filters */}
       <PageSection>

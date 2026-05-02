@@ -675,6 +675,32 @@ export const AdminSystemStatusSchema = {
   type: "object",
 } as const;
 
+export const AdminTaskStatsSchema = {
+  properties: {
+    avgDurationSeconds: {
+      additionalProperties: {
+        type: "number",
+      },
+      type: "object",
+    },
+    byStatus: {
+      additionalProperties: {
+        type: "integer",
+      },
+      type: "object",
+    },
+    totalThisWeek: {
+      type: "integer",
+    },
+    totalToday: {
+      type: "integer",
+    },
+  },
+  required: ["avgDurationSeconds", "byStatus", "totalThisWeek", "totalToday"],
+  title: "AdminTaskStats",
+  type: "object",
+} as const;
+
 export const AdminTaskSummarySchema = {
   properties: {
     completedAt: {
@@ -4385,6 +4411,21 @@ export const ExtensionSchema = {
     dndEnabled: {
       default: false,
       type: "boolean",
+    },
+    e911RegistrationId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    e911Status: {
+      default: "unknown",
+      type: "string",
     },
     extensionNumber: {
       type: "string",

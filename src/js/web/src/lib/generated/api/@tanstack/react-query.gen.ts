@@ -140,6 +140,7 @@ import {
   getActiveSessions,
   getAdminGatewaySettings,
   getAdminSystemStatus,
+  getAdminTaskStats,
   getAttachment,
   getCallQueue,
   getCallRecord,
@@ -678,6 +679,8 @@ import type {
   GetAdminGatewaySettingsResponse,
   GetAdminSystemStatusData,
   GetAdminSystemStatusResponse,
+  GetAdminTaskStatsData,
+  GetAdminTaskStatsResponse,
   GetAttachmentData,
   GetAttachmentError,
   GetAttachmentResponse,
@@ -2347,6 +2350,34 @@ export const adminListTasksOptions = (options?: Options<AdminListTasksData>) =>
       return data;
     },
     queryKey: adminListTasksQueryKey(options),
+  });
+
+export const getAdminTaskStatsQueryKey = (
+  options?: Options<GetAdminTaskStatsData>,
+) => createQueryKey("getAdminTaskStats", options);
+
+/**
+ * GetTaskStats
+ */
+export const getAdminTaskStatsOptions = (
+  options?: Options<GetAdminTaskStatsData>,
+) =>
+  queryOptions<
+    GetAdminTaskStatsResponse,
+    DefaultError,
+    GetAdminTaskStatsResponse,
+    ReturnType<typeof getAdminTaskStatsQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getAdminTaskStats({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getAdminTaskStatsQueryKey(options),
   });
 
 /**

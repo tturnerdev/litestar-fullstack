@@ -705,6 +705,36 @@
         "title": "AdminSystemStatus",
         "type": "object"
       },
+      "AdminTaskStats": {
+        "properties": {
+          "avgDurationSeconds": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object"
+          },
+          "byStatus": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object"
+          },
+          "totalThisWeek": {
+            "type": "integer"
+          },
+          "totalToday": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "avgDurationSeconds",
+          "byStatus",
+          "totalThisWeek",
+          "totalToday"
+        ],
+        "title": "AdminTaskStats",
+        "type": "object"
+      },
       "AdminTaskSummary": {
         "properties": {
           "completedAt": {
@@ -4491,6 +4521,21 @@
           "dndEnabled": {
             "default": false,
             "type": "boolean"
+          },
+          "e911RegistrationId": {
+            "oneOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "e911Status": {
+            "default": "unknown",
+            "type": "string"
           },
           "extensionNumber": {
             "type": "string"
@@ -11518,7 +11563,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetIdIn",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -11560,7 +11605,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
+            "name": "targetIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -11907,7 +11952,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetIdIn",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -11949,7 +11994,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
+            "name": "targetIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -12294,7 +12339,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetIdIn",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -12336,7 +12381,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
+            "name": "targetIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -12675,7 +12720,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetIdIn",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -12717,7 +12762,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
+            "name": "targetIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -15892,6 +15937,29 @@
           }
         },
         "summary": "ListTasks",
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/api/admin/tasks/stats": {
+      "get": {
+        "deprecated": false,
+        "operationId": "GetAdminTaskStats",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminTaskStats"
+                }
+              }
+            },
+            "description": "Request fulfilled, document follows",
+            "headers": {}
+          }
+        },
+        "summary": "GetTaskStats",
         "tags": [
           "Admin"
         ]

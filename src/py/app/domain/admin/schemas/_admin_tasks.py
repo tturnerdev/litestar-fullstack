@@ -23,3 +23,12 @@ class AdminTaskSummary(CamelizedBaseStruct, kw_only=True):
     completed_at: datetime | None = None
     created_at: datetime | None = None
     updated_at: datetime | None = None
+
+
+class AdminTaskStats(CamelizedBaseStruct):
+    """Aggregate task statistics for admin overview."""
+
+    by_status: dict[str, int]
+    avg_duration_seconds: dict[str, float]
+    total_today: int
+    total_this_week: int

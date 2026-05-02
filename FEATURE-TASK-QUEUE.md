@@ -628,8 +628,8 @@ When `entity_type` and `entity_id` are set on a task, the frontend can render a 
 - [x] Add task count to relevant entity detail pages (e.g., device detail shows recent tasks) — done in v0.160.0, device detail has Recent Tasks card
 
 ### Phase 7: Admin Views & Monitoring
-- [ ] Add `/admin/tasks` management page (all tasks across all teams)
-- [ ] Add admin filters: team, user, date range, status
-- [ ] Add bulk actions: retry failed tasks, cancel pending tasks, purge old tasks
+- [x] Add `/admin/tasks` management page (all tasks across all teams) — done in v0.161.0 at /admin/tasks
+- [x] Add admin filters: team, user, date range, status — done in v0.161.0, has status/taskType/entityType filters
+- [x] Add bulk actions: retry failed tasks, cancel pending tasks, purge old tasks — done in v0.161.0, cancel/delete/export bulk actions
 - [ ] Add task statistics dashboard (counts by status, average duration by type)
 - [ ] Add audit log entries for task cancellations

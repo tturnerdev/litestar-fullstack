@@ -1434,6 +1434,13 @@
       ],
       "uri": "/api/tasks/{task_id}"
     },
+    "get_task_stats": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "uri": "/api/admin/tasks/stats"
+    },
     "get_team": {
       "method": "get",
       "methods": [

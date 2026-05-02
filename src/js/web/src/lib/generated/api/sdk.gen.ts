@@ -393,6 +393,8 @@ import type {
   GetAdminGatewaySettingsResponses,
   GetAdminSystemStatusData,
   GetAdminSystemStatusResponses,
+  GetAdminTaskStatsData,
+  GetAdminTaskStatsResponses,
   GetAttachmentData,
   GetAttachmentErrors,
   GetAttachmentResponses,
@@ -1605,6 +1607,22 @@ export const adminListTasks = <ThrowOnError extends boolean = false>(
   >({
     security: [{ scheme: "bearer", type: "http" }],
     url: "/api/admin/tasks",
+    ...options,
+  });
+
+/**
+ * GetTaskStats
+ */
+export const getAdminTaskStats = <ThrowOnError extends boolean = false>(
+  options?: Options<GetAdminTaskStatsData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    GetAdminTaskStatsResponses,
+    unknown,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/admin/tasks/stats",
     ...options,
   });
 

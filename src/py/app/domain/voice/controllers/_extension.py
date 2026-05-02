@@ -10,6 +10,7 @@ from litestar import Controller, delete, get, patch, post
 from litestar.di import Provide
 from litestar.exceptions import ClientException
 from litestar.params import Dependency, Parameter
+from sqlalchemy.orm import joinedload
 
 from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
@@ -45,6 +46,7 @@ class ExtensionController(Controller):
     dependencies = create_service_dependencies(
         ExtensionService,
         key="extensions_service",
+        load=[joinedload(m.Extension.phone_number).joinedload(m.PhoneNumber.e911_registration)],
         filters={
             "id_filter": UUID,
             "pagination_type": "limit_offset",
@@ -165,7 +167,7 @@ class ExtensionController(Controller):
     ) -> Extension:
         """Get extension details."""
         db_obj = await extensions_service.get_one(id=ext_id, user_id=current_user.id)
-        return extensions_service.to_schema(db_obj, schema_type=Extension)
+        return extensions_service.to_schema_enriched(db_obj)
 
     @patch(
         operation_id="UpdateExtension",

@@ -2,21 +2,28 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Annotated
+from typing import TYPE_CHECKING, Annotated, Any
 from uuid import UUID
 
 from litestar import Controller, get, post
+from litestar.di import Provide
 from litestar.params import Dependency, Parameter
 
 from app.db import models as m
+from app.domain.admin.deps import provide_audit_log_service
 from app.domain.tasks.guards import requires_task_access
 from app.domain.tasks.schemas import BackgroundTaskDetail, BackgroundTaskList
 from app.domain.tasks.services import BackgroundTaskService
+from app.lib.audit import log_audit
 from app.lib.deps import create_service_dependencies
 
 if TYPE_CHECKING:
     from advanced_alchemy.filters import FilterTypes
     from advanced_alchemy.service.pagination import OffsetPagination
+    from litestar import Request
+    from litestar.security.jwt import Token
+
+    from app.domain.admin.services import AuditLogService
 
 
 class BackgroundTaskController(Controller):
@@ -37,7 +44,9 @@ class BackgroundTaskController(Controller):
             "sort_field": "created_at",
             "sort_order": "desc",
         },
-    )
+    ) | {
+        "audit_service": Provide(provide_audit_log_service),
+    }
 
     @get(
         operation_id="ListTasks",
@@ -102,10 +111,31 @@ class BackgroundTaskController(Controller):
     )
     async def cancel_task(
         self,
+        request: Request[m.User, Token, Any],
         task_service: BackgroundTaskService,
+        audit_service: AuditLogService,
         current_user: m.User,
         task_id: Annotated[UUID, Parameter(title="Task ID", description="The task to cancel.")],
     ) -> BackgroundTaskDetail:
         """Cancel a pending or running task."""
+        existing = await task_service.get(task_id)
+        previous_status = existing.status
         db_obj = await task_service.cancel_task(task_id)
+        await log_audit(
+            audit_service,
+            action="task.cancelled",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            actor_name=current_user.name,
+            target_type="background_task",
+            target_id=task_id,
+            target_label=db_obj.task_type,
+            metadata={
+                "task_type": db_obj.task_type,
+                "previous_status": previous_status,
+                "entity_type": db_obj.entity_type,
+                "entity_id": str(db_obj.entity_id) if db_obj.entity_id else None,
+            },
+            request=request,
+        )
         return task_service.to_schema(db_obj, schema_type=BackgroundTaskDetail)

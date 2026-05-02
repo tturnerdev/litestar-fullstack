@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING, Any
 
+import sqlalchemy as sa
 from advanced_alchemy.extensions.litestar import repository, service
 
 from app.db import models as m
@@ -279,6 +280,59 @@ class BackgroundTaskService(CompositeServiceMixin, service.SQLAlchemyAsyncReposi
         for task in results:
             await self.delete(task.id)
         return count
+
+    async def get_stats(self) -> dict[str, Any]:
+        """Compute aggregate task statistics.
+
+        Returns a dict with status counts, average duration per task type,
+        today's total, and this week's total.
+        """
+        from sqlalchemy import case, extract, func, select
+
+        now = datetime.now(UTC)
+        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        week_start = today_start - timedelta(days=today_start.weekday())
+
+        # Count by status
+        status_stmt = select(
+            m.BackgroundTask.status,
+            func.count(),
+        ).group_by(m.BackgroundTask.status)
+        status_rows = await self.repository.session.execute(status_stmt)
+        by_status: dict[str, int] = {row[0]: row[1] for row in status_rows}
+
+        # Average duration by task_type (completed tasks with both timestamps)
+        duration_expr = extract(
+            "epoch",
+            m.BackgroundTask.completed_at - m.BackgroundTask.started_at,
+        )
+        avg_stmt = (
+            select(
+                m.BackgroundTask.task_type,
+                func.round(func.avg(duration_expr).cast(sa.Numeric), 1),
+            )
+            .where(
+                m.BackgroundTask.status == m.BackgroundTaskStatus.COMPLETED,
+                m.BackgroundTask.started_at.is_not(None),
+                m.BackgroundTask.completed_at.is_not(None),
+            )
+            .group_by(m.BackgroundTask.task_type)
+        )
+        avg_rows = await self.repository.session.execute(avg_stmt)
+        avg_duration: dict[str, float] = {row[0]: float(row[1]) for row in avg_rows if row[1] is not None}
+
+        # Total today
+        total_today = await self.count(m.BackgroundTask.created_at >= today_start)
+
+        # Total this week
+        total_this_week = await self.count(m.BackgroundTask.created_at >= week_start)
+
+        return {
+            "by_status": by_status,
+            "avg_duration_seconds": avg_duration,
+            "total_today": total_today,
+            "total_this_week": total_this_week,
+        }
 
     async def enqueue_tracked_task(
         self,

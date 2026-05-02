@@ -141,6 +141,7 @@ export type RouteName =
   | 'get_tag'
   | 'get_target_logs'
   | 'get_task'
+  | 'get_task_stats'
   | 'get_team'
   | 'get_team_api_teams_team_id:uuid'
   | 'get_template'
@@ -616,6 +617,7 @@ export interface RoutePathParams {
   'get_task': {
     task_id: UUID;
   };
+  'get_task_stats': Record<string, never>;
   'get_team': {
     team_id: UUID;
   };
@@ -1204,6 +1206,7 @@ export interface RouteQueryParams {
     targetTypeIn?: string[];
   };
   'get_task': Record<string, never>;
+  'get_task_stats': Record<string, never>;
   'get_team': Record<string, never>;
   'get_team_api_teams_team_id:uuid': Record<string, never>;
   'get_template': Record<string, never>;
@@ -2786,6 +2789,13 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: ['task_id'] as const,
+    queryParams: [] as const,
+  },
+  'get_task_stats': {
+    path: '/api/admin/tasks/stats',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
     queryParams: [] as const,
   },
   'get_team': {

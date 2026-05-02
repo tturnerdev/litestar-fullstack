@@ -27,6 +27,8 @@ class Extension(CamelizedBaseStruct):
     forward_unreachable_enabled: bool = False
     forward_unreachable_destination: str | None = None
     dnd_enabled: bool = False
+    e911_status: str = "unknown"
+    e911_registration_id: UUID | None = None
     created_at: datetime | None = None
     updated_at: datetime | None = None
 

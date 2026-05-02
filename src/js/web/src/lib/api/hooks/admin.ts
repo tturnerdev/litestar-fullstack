@@ -493,6 +493,36 @@ export interface AdminTaskSummary {
   updatedAt: string | null
 }
 
+export interface AdminTaskStats {
+  byStatus: Record<string, number>
+  avgDurationSeconds: Record<string, number>
+  totalToday: number
+  totalThisWeek: number
+}
+
+export function useAdminTaskStats() {
+  return useQuery({
+    queryKey: ["admin", "tasks", "stats"],
+    queryFn: async () => {
+      const config = client.getConfig()
+      const baseUrl = config.baseUrl ?? ""
+      const token = typeof window !== "undefined" ? window.localStorage.getItem("access_token") : null
+      const response = await fetch(`${baseUrl}/api/admin/tasks/stats`, {
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      })
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}))
+        throw new Error(body.detail ?? `Request failed (${response.status})`)
+      }
+      return response.json() as Promise<AdminTaskStats>
+    },
+  })
+}
+
 export function useAdminTasks(params?: AdminTasksParams) {
   const { page = 1, pageSize = 25, taskType, status, entityType, orderBy, sortOrder } = params ?? {}
   return useQuery({

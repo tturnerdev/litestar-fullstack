@@ -679,6 +679,6 @@ The `useEventStream()` hook implements reconnect with exponential backoff:
 - [x] Increment unread notification badge count in real time — done in v0.158.0, SSE notification.created event invalidates unread-count query
 - [x] Remove `refetchInterval` from `useActiveTasks()` (replace with SSE-driven invalidation)
 - [x] Remove `refetchInterval` from `useTask()` for active tasks
-- [ ] Implement polling fallback: re-enable 30s polling after 60s of SSE disconnection
-- [ ] Disable fallback polling on SSE reconnect
+- [x] Implement polling fallback: re-enable 30s polling after 60s of SSE disconnection — done in v0.161.0, sseStatus.disconnectedSince tracking with getPollingInterval() helper
+- [x] Disable fallback polling on SSE reconnect — done in v0.161.0, sseStatus.connected resets to true on reconnect
 - [ ] End-to-end test: create notification via backend, verify badge updates in browser without refresh

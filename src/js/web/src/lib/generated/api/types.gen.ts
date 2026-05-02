@@ -200,6 +200,20 @@ export type AdminSystemStatus = {
 };
 
 /**
+ * AdminTaskStats
+ */
+export type AdminTaskStats = {
+  avgDurationSeconds: {
+    [key: string]: number;
+  };
+  byStatus: {
+    [key: string]: number;
+  };
+  totalThisWeek: number;
+  totalToday: number;
+};
+
+/**
  * AdminTaskSummary
  */
 export type AdminTaskSummary = {
@@ -1067,6 +1081,8 @@ export type Extension = {
   createdAt?: string | null;
   displayName?: string;
   dndEnabled?: boolean;
+  e911RegistrationId?: string | null;
+  e911Status?: string;
   extensionNumber: string;
   forwardAlwaysDestination?: string | null;
   forwardAlwaysEnabled?: boolean;
@@ -3104,9 +3120,9 @@ export type AdminListAuditLogsData = {
      */
     sortOrder?: "asc" | "desc" | null;
     actorIdIn?: Array<string> | null;
-    targetIdIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
     actionIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3183,9 +3199,9 @@ export type AdminExportAuditLogData = {
      */
     sortOrder?: "asc" | "desc" | null;
     actorIdIn?: Array<string> | null;
-    targetIdIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
     actionIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3251,9 +3267,9 @@ export type AdminGetTargetAuditLogsData = {
      */
     sortOrder?: "asc" | "desc" | null;
     actorIdIn?: Array<string> | null;
-    targetIdIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
     actionIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -3331,9 +3347,9 @@ export type AdminGetUserAuditLogsData = {
      */
     sortOrder?: "asc" | "desc" | null;
     actorIdIn?: Array<string> | null;
-    targetIdIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
     actionIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -4573,6 +4589,23 @@ export type AdminListTasksResponses = {
 
 export type AdminListTasksResponse =
   AdminListTasksResponses[keyof AdminListTasksResponses];
+
+export type GetAdminTaskStatsData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/api/admin/tasks/stats";
+};
+
+export type GetAdminTaskStatsResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: AdminTaskStats;
+};
+
+export type GetAdminTaskStatsResponse =
+  GetAdminTaskStatsResponses[keyof GetAdminTaskStatsResponses];
 
 export type AdminDeleteTaskData = {
   body?: never;
