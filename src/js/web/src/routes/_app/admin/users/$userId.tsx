@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router"
+import { createFileRoute, Link, useBlocker } from "@tanstack/react-router"
 import {
   AlertCircle,
   ArrowLeft,
@@ -8,12 +8,14 @@ import {
   Copy,
   KeyRound,
   Link2,
+  Loader2,
   Lock,
   LogIn,
   Mail,
   MoreHorizontal,
   Pencil,
   Phone,
+  Save,
   Shield,
   ShieldAlert,
   Trash2,
@@ -21,16 +23,25 @@ import {
   UserCheck,
   UserX,
   Users,
+  X,
 } from "lucide-react"
-import { useState } from "react"
+import { useCallback, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { DeleteUserDialog } from "@/components/admin/delete-user-dialog"
-import { EditUserDialog } from "@/components/admin/edit-user-dialog"
 import { ManageRolesDialog } from "@/components/admin/manage-roles-dialog"
-import { ToggleUserStatusDialog } from "@/components/admin/toggle-user-status-dialog"
 import { UserActivityTimeline } from "@/components/admin/user-activity-timeline"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -44,6 +55,8 @@ import {
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { EmptyState } from "@/components/ui/empty-state"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Separator } from "@/components/ui/separator"
 import { SkeletonCard } from "@/components/ui/skeleton"
@@ -147,10 +160,60 @@ function AdminUserDetailPage() {
   const { data, isLoading, isError, refetch } = useAdminUser(userId)
   useDocumentTitle(data?.name || data?.email ? `Admin - ${data.name || data.email}` : "Admin - User Details")
   const updateUser = useAdminUpdateUser(userId)
-  const [editOpen, setEditOpen] = useState(false)
   const [rolesOpen, setRolesOpen] = useState(false)
-  const [statusOpen, setStatusOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
+
+  // -- Inline editing state ---------------------------------------------------
+
+  const [editing, setEditing] = useState(false)
+  const [editName, setEditName] = useState("")
+  const [editUsername, setEditUsername] = useState("")
+  const justSavedRef = useRef(false)
+
+  const formDirty = useMemo(() => {
+    if (!editing || !data) return false
+    return (
+      editName !== (data.name ?? "") ||
+      editUsername !== (data.username ?? "")
+    )
+  }, [editing, data, editName, editUsername])
+
+  const blocker = useBlocker({
+    shouldBlockFn: () => formDirty && !justSavedRef.current,
+    withResolver: true,
+  })
+
+  const handleStartEditing = useCallback(() => {
+    if (!data) return
+    setEditName(data.name ?? "")
+    setEditUsername(data.username ?? "")
+    setEditing(true)
+  }, [data])
+
+  const handleCancelEditing = useCallback(() => {
+    setEditing(false)
+  }, [])
+
+  const handleSaveEditing = useCallback(() => {
+    if (!data) return
+    justSavedRef.current = true
+    const payload: Record<string, unknown> = {}
+    if (editName !== (data.name ?? "")) payload.name = editName || null
+    if (editUsername !== (data.username ?? "")) payload.username = editUsername || null
+    if (Object.keys(payload).length === 0) {
+      setEditing(false)
+      justSavedRef.current = false
+      return
+    }
+    updateUser.mutate(payload, {
+      onSuccess: () => {
+        setEditing(false)
+      },
+      onSettled: () => {
+        justSavedRef.current = false
+      },
+    })
+  }, [data, editName, editUsername, updateUser])
 
   if (isLoading) {
     return (
@@ -262,10 +325,22 @@ function AdminUserDetailPage() {
         }
         actions={
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => setEditOpen(true)}>
-              <Pencil className="mr-2 h-4 w-4" />
-              Edit
-            </Button>
+            {editing ? (
+              <>
+                <Button variant="outline" size="sm" onClick={handleCancelEditing} disabled={updateUser.isPending}>
+                  <X className="mr-2 h-4 w-4" /> Cancel
+                </Button>
+                <Button size="sm" onClick={handleSaveEditing} disabled={updateUser.isPending || !formDirty}>
+                  {updateUser.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                  {updateUser.isPending ? "Saving..." : "Save changes"}
+                </Button>
+              </>
+            ) : (
+              <Button variant="outline" size="sm" onClick={handleStartEditing}>
+                <Pencil className="mr-2 h-4 w-4" />
+                Edit
+              </Button>
+            )}
             <Button variant="outline" size="sm" asChild>
               <Link to="/admin/users">
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back
@@ -279,6 +354,12 @@ function AdminUserDetailPage() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                {!editing && (
+                  <DropdownMenuItem onClick={handleStartEditing}>
+                    <Pencil className="mr-2 h-4 w-4" />
+                    Edit
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem
                   onClick={() => {
                     navigator.clipboard.writeText(userId)
@@ -436,6 +517,12 @@ function AdminUserDetailPage() {
               </div>
             </CardHeader>
             <CardContent>
+              {editing && formDirty && (
+                <div className="mb-4 flex items-center gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-400">
+                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-500" />
+                  You have unsaved changes
+                </div>
+              )}
               <div className="grid gap-4 text-sm sm:grid-cols-2">
                 <div>
                   <p className="text-muted-foreground">Email</p>
@@ -445,12 +532,34 @@ function AdminUserDetailPage() {
                   </div>
                 </div>
                 <div>
-                  <p className="text-muted-foreground">Username</p>
-                  <p>{data.username ?? "---"}</p>
+                  <Label className="text-muted-foreground" htmlFor="edit-user-username">Username</Label>
+                  {editing ? (
+                    <Input
+                      id="edit-user-username"
+                      value={editUsername}
+                      onChange={(e) => setEditUsername(e.target.value)}
+                      placeholder="Username"
+                      className="mt-1"
+                      disabled={updateUser.isPending}
+                    />
+                  ) : (
+                    <p>{data.username ?? "---"}</p>
+                  )}
                 </div>
                 <div>
-                  <p className="text-muted-foreground">Name</p>
-                  <p>{data.name ?? "---"}</p>
+                  <Label className="text-muted-foreground" htmlFor="edit-user-name">Name</Label>
+                  {editing ? (
+                    <Input
+                      id="edit-user-name"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      placeholder="Full name"
+                      className="mt-1"
+                      disabled={updateUser.isPending}
+                    />
+                  ) : (
+                    <p>{data.name ?? "---"}</p>
+                  )}
                 </div>
                 <div>
                   <p className="text-muted-foreground">Phone</p>
@@ -554,7 +663,7 @@ function AdminUserDetailPage() {
                 </Badge>
                 <Switch
                   checked={data.isActive ?? false}
-                  onCheckedChange={() => setStatusOpen(true)}
+                  onCheckedChange={() => updateUser.mutate({ is_active: !data.isActive })}
                   disabled={updateUser.isPending}
                 />
               </div>
@@ -811,10 +920,24 @@ function AdminUserDetailPage() {
       </PageSection>
 
       {/* Dialogs */}
-      <EditUserDialog user={data} open={editOpen} onOpenChange={setEditOpen} />
       <ManageRolesDialog userId={userId} userEmail={data.email} open={rolesOpen} onOpenChange={setRolesOpen} />
-      <ToggleUserStatusDialog userId={userId} userEmail={data.email} userName={data.name ?? undefined} isActive={data.isActive ?? true} open={statusOpen} onOpenChange={setStatusOpen} />
       <DeleteUserDialog userId={userId} userEmail={data.email} open={deleteOpen} onOpenChange={setDeleteOpen} navigateOnDelete />
+
+      {/* Unsaved changes dialog */}
+      <AlertDialog open={blocker.status === "blocked"} onOpenChange={() => blocker.reset?.()}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
+            <AlertDialogDescription>
+              You have unsaved changes to this user. Are you sure you want to leave? Your changes will be lost.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => blocker.reset?.()}>Stay on page</AlertDialogCancel>
+            <AlertDialogAction onClick={() => blocker.proceed?.()}>Discard changes</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PageContainer>
   )
 }

@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
+import { createFileRoute, Link, useBlocker, useNavigate } from "@tanstack/react-router"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   AlertCircle,
@@ -7,20 +7,32 @@ import {
   Clock,
   Copy,
   Hash,
+  Loader2,
   Mail,
   MoreHorizontal,
   Pencil,
+  Save,
   Shield,
   Trash2,
   UserCheck,
   UserX,
   Users,
+  X,
 } from "lucide-react"
-import { useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { DeleteTeamDialog } from "@/components/admin/delete-team-dialog"
-import { EditTeamDialog } from "@/components/admin/edit-team-dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -34,11 +46,14 @@ import {
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { EmptyState } from "@/components/ui/empty-state"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Separator } from "@/components/ui/separator"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Textarea } from "@/components/ui/textarea"
 import { CopyButton } from "@/components/ui/copy-button"
 import {
   DropdownMenu,
@@ -144,8 +159,73 @@ function AdminTeamDetailPage() {
   const { data, isLoading, isError, refetch } = useAdminTeam(teamId)
   useDocumentTitle(data?.name ? `Admin - ${data.name}` : "Admin - Team Details")
   const updateTeam = useAdminUpdateTeam(teamId)
-  const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
+
+  // Inline editing state
+  const [editing, setEditing] = useState(false)
+  const [editName, setEditName] = useState("")
+  const [editDescription, setEditDescription] = useState("")
+
+  // Sync edit fields from current data
+  const syncEditFields = useCallback(() => {
+    if (data) {
+      setEditName(data.name)
+      setEditDescription(data.description ?? "")
+    }
+  }, [data])
+
+  useEffect(() => {
+    syncEditFields()
+  }, [syncEditFields])
+
+  // Dirty check
+  const formDirty = useMemo(() => {
+    if (!editing || !data) return false
+    return (
+      editName !== data.name ||
+      editDescription !== (data.description ?? "")
+    )
+  }, [editing, data, editName, editDescription])
+
+  // Block navigation when dirty
+  const blocker = useBlocker({
+    shouldBlockFn: () => formDirty,
+    withResolver: true,
+  })
+
+  function handleStartEditing() {
+    syncEditFields()
+    setEditing(true)
+  }
+
+  function handleCancelEditing() {
+    syncEditFields()
+    setEditing(false)
+  }
+
+  function handleSaveEditing() {
+    if (!data) return
+    const trimmedName = editName.trim()
+    if (!trimmedName) return
+
+    const payload: Record<string, unknown> = {}
+
+    if (trimmedName !== data.name) payload.name = trimmedName
+    if (editDescription !== (data.description ?? "")) {
+      payload.description = editDescription || null
+    }
+
+    if (Object.keys(payload).length === 0) {
+      setEditing(false)
+      return
+    }
+
+    updateTeam.mutate(payload, {
+      onSuccess: () => {
+        setEditing(false)
+      },
+    })
+  }
 
   if (isLoading) {
     return (
@@ -187,7 +267,6 @@ function AdminTeamDetailPage() {
     )
   }
 
-  const initials = getTeamInitials(data.name)
   const members = data.members ?? []
   const memberCount = data.memberCount ?? members.length
 
@@ -226,10 +305,21 @@ function AdminTeamDetailPage() {
         }
         actions={
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => setEditOpen(true)}>
-              <Pencil className="mr-2 h-4 w-4" />
-              Edit
-            </Button>
+            {editing ? (
+              <>
+                <Button variant="outline" size="sm" onClick={handleCancelEditing} disabled={updateTeam.isPending}>
+                  <X className="mr-2 h-4 w-4" /> Cancel
+                </Button>
+                <Button size="sm" onClick={handleSaveEditing} disabled={updateTeam.isPending || !editName.trim()}>
+                  {updateTeam.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                  {updateTeam.isPending ? "Saving..." : "Save"}
+                </Button>
+              </>
+            ) : (
+              <Button variant="outline" size="sm" onClick={handleStartEditing}>
+                <Pencil className="mr-2 h-4 w-4" /> Edit
+              </Button>
+            )}
             <Button variant="outline" size="sm" asChild>
               <Link to="/admin/teams">
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back
@@ -243,6 +333,12 @@ function AdminTeamDetailPage() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                {!editing && (
+                  <DropdownMenuItem onClick={handleStartEditing}>
+                    <Pencil className="mr-2 h-4 w-4" />
+                    Edit Team
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem
                   onClick={() => {
                     navigator.clipboard.writeText(teamId)
@@ -272,63 +368,99 @@ function AdminTeamDetailPage() {
         <Card className="overflow-hidden">
           <div className="h-24 bg-gradient-to-r from-primary/20 via-primary/10 to-transparent" />
           <CardContent className="relative -mt-12 pb-6">
+            {editing && formDirty && (
+              <div className="mb-4 mt-14 flex items-center gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-400">
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-500" />
+                You have unsaved changes
+              </div>
+            )}
             <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-end">
               <div className="rounded-full bg-background p-1 shadow-md ring-2 ring-background">
                 <Avatar className="h-24 w-24 text-3xl">
                   <AvatarFallback className="bg-primary/10 text-primary text-3xl font-semibold">
-                    {initials}
+                    {getTeamInitials(editing ? editName || data.name : data.name)}
                   </AvatarFallback>
                 </Avatar>
               </div>
 
               <div className="flex-1 space-y-1.5 text-center sm:pb-1 sm:text-left">
-                <div className="flex flex-col items-center gap-2 sm:flex-row sm:flex-wrap">
-                  <h2 className="text-2xl font-semibold tracking-tight">{data.name}</h2>
-                  <Badge
-                    variant={data.isActive ? "default" : "secondary"}
-                    className={
-                      data.isActive
-                        ? "gap-1 bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400"
-                        : "gap-1"
-                    }
-                  >
-                    {data.isActive ? (
-                      <>
-                        <UserCheck className="h-3 w-3" />
-                        Active
-                      </>
-                    ) : (
-                      <>
-                        <UserX className="h-3 w-3" />
-                        Inactive
-                      </>
+                {editing ? (
+                  <div className="space-y-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-team-name">Name</Label>
+                      <Input
+                        id="edit-team-name"
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        placeholder="Team name"
+                        disabled={updateTeam.isPending}
+                        maxLength={100}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-team-description">Description</Label>
+                      <Textarea
+                        id="edit-team-description"
+                        value={editDescription}
+                        onChange={(e) => setEditDescription(e.target.value)}
+                        placeholder="Optional description"
+                        disabled={updateTeam.isPending}
+                        maxLength={500}
+                        rows={3}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex flex-col items-center gap-2 sm:flex-row sm:flex-wrap">
+                      <h2 className="text-2xl font-semibold tracking-tight">{data.name}</h2>
+                      <Badge
+                        variant={data.isActive ? "default" : "secondary"}
+                        className={
+                          data.isActive
+                            ? "gap-1 bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400"
+                            : "gap-1"
+                        }
+                      >
+                        {data.isActive ? (
+                          <>
+                            <UserCheck className="h-3 w-3" />
+                            Active
+                          </>
+                        ) : (
+                          <>
+                            <UserX className="h-3 w-3" />
+                            Inactive
+                          </>
+                        )}
+                      </Badge>
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-sm text-muted-foreground sm:justify-start">
+                      {data.slug && (
+                        <span className="inline-flex items-center gap-1.5">
+                          <Hash className="h-3.5 w-3.5" />
+                          {data.slug}
+                          <CopyButton value={data.slug} label="slug" />
+                        </span>
+                      )}
+                      {data.ownerEmail && (
+                        <span className="inline-flex items-center gap-1.5">
+                          <Mail className="h-3.5 w-3.5" />
+                          {data.ownerEmail}
+                          <CopyButton value={data.ownerEmail} label="owner email" />
+                        </span>
+                      )}
+                      <span className="inline-flex items-center gap-1.5">
+                        <Users className="h-3.5 w-3.5" />
+                        {memberCount} member{memberCount !== 1 ? "s" : ""}
+                      </span>
+                    </div>
+
+                    {data.description && (
+                      <p className="text-sm text-muted-foreground">{data.description}</p>
                     )}
-                  </Badge>
-                </div>
-
-                <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-sm text-muted-foreground sm:justify-start">
-                  {data.slug && (
-                    <span className="inline-flex items-center gap-1.5">
-                      <Hash className="h-3.5 w-3.5" />
-                      {data.slug}
-                      <CopyButton value={data.slug} label="slug" />
-                    </span>
-                  )}
-                  {data.ownerEmail && (
-                    <span className="inline-flex items-center gap-1.5">
-                      <Mail className="h-3.5 w-3.5" />
-                      {data.ownerEmail}
-                      <CopyButton value={data.ownerEmail} label="owner email" />
-                    </span>
-                  )}
-                  <span className="inline-flex items-center gap-1.5">
-                    <Users className="h-3.5 w-3.5" />
-                    {memberCount} member{memberCount !== 1 ? "s" : ""}
-                  </span>
-                </div>
-
-                {data.description && (
-                  <p className="text-sm text-muted-foreground">{data.description}</p>
+                  </>
                 )}
               </div>
             </div>
@@ -359,7 +491,18 @@ function AdminTeamDetailPage() {
               <div className="grid gap-4 text-sm sm:grid-cols-2">
                 <div>
                   <p className="text-muted-foreground">Name</p>
-                  <p className="font-medium">{data.name}</p>
+                  {editing ? (
+                    <Input
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      placeholder="Team name"
+                      disabled={updateTeam.isPending}
+                      maxLength={100}
+                      className="mt-1"
+                    />
+                  ) : (
+                    <p className="font-medium">{data.name}</p>
+                  )}
                 </div>
                 <div>
                   <p className="text-muted-foreground">Slug</p>
@@ -390,7 +533,19 @@ function AdminTeamDetailPage() {
                 </div>
                 <div className="sm:col-span-2">
                   <p className="text-muted-foreground">Description</p>
-                  <p className="text-sm">{data.description || "No description provided."}</p>
+                  {editing ? (
+                    <Textarea
+                      value={editDescription}
+                      onChange={(e) => setEditDescription(e.target.value)}
+                      placeholder="Optional description"
+                      disabled={updateTeam.isPending}
+                      maxLength={500}
+                      rows={3}
+                      className="mt-1"
+                    />
+                  ) : (
+                    <p className="text-sm">{data.description || "No description provided."}</p>
+                  )}
                 </div>
                 <div>
                   <p className="text-muted-foreground">Team ID</p>
@@ -539,15 +694,6 @@ function AdminTeamDetailPage() {
       </PageSection>
 
       {/* Dialogs */}
-      <EditTeamDialog
-        teamId={teamId}
-        currentName={data.name}
-        currentDescription={data.description}
-        currentIsActive={data.isActive}
-        open={editOpen}
-        onOpenChange={setEditOpen}
-      />
-
       <DeleteTeamDialog
         teamId={teamId}
         teamName={data.name}
@@ -555,6 +701,22 @@ function AdminTeamDetailPage() {
         onOpenChange={setDeleteOpen}
         onDeleted={() => navigate({ to: "/admin/teams" })}
       />
+
+      {/* Unsaved changes dialog */}
+      <AlertDialog open={blocker.status === "blocked"} onOpenChange={() => blocker.reset?.()}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
+            <AlertDialogDescription>
+              You have unsaved changes to team details. Are you sure you want to leave? Your changes will be lost.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => blocker.reset?.()}>Stay on page</AlertDialogCancel>
+            <AlertDialogAction onClick={() => blocker.proceed?.()}>Discard changes</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PageContainer>
   )
 }

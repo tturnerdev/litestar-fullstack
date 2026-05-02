@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.217.0 (2026-05-02)
+
+### Changed
+- **Admin team detail** — Replaced EditTeamDialog modal with inline editing for name and description, with unsaved changes protection and Save/Cancel buttons
+- **Admin user detail** — Replaced EditUserDialog modal with inline editing for name and username, direct active toggle, and unsaved changes protection
+
 ## v0.216.0 (2026-05-02)
 
 ### Added
