@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.249.0 (2026-05-03)
+
+### Fixed
+- **Biome lint fixes** across 14 components — button types, semantic elements, useless fragments, template literals, exhaustive deps, array index keys, accessibility improvements
+- **QueryClient defaults** — 30s staleTime, single retry, disabled refetch-on-focus for better UX and reduced network overhead
+- **React Query DevTools** added for development debugging
+
 ## v0.248.0 (2026-05-03)
 
 ### Fixed

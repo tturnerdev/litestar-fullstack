@@ -158,6 +158,7 @@ export function AdminQuickActions() {
         })}
         {allActions.length > COMPACT_LIMIT && (
           <button
+            type="button"
             onClick={() => setExpanded((prev) => !prev)}
             className="w-full rounded-md px-3 py-1.5 text-center text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
           >

@@ -47,7 +47,7 @@ export function TicketReplyForm({ ticketId }: { ticketId: string }) {
   const insertImageMarkdown = useCallback((markdown: string) => {
     setBody((prev) => {
       const suffix = prev.endsWith("\n") || prev === "" ? "" : "\n"
-      return prev + suffix + markdown + "\n"
+      return `${prev}${suffix}${markdown}\n`
     })
   }, [])
 

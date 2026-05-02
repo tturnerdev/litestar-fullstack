@@ -189,6 +189,7 @@ function EmailNotificationPreferences() {
         </CardHeader>
         <CardContent className="space-y-3">
           {Array.from({ length: 4 }).map((_, i) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton placeholders
             <div key={i} className="flex items-center justify-between rounded-lg border border-border/60 p-4">
               <div className="flex items-center gap-3">
                 <Skeleton className="h-8 w-8 rounded-lg" />

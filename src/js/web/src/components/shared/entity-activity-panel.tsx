@@ -151,6 +151,7 @@ function ActivitySkeleton() {
   return (
     <div className="space-y-4">
       {Array.from({ length: 4 }).map((_, i) => (
+        // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton placeholders
         <div key={i} className="flex gap-3">
           <Skeleton className="h-6 w-6 shrink-0 rounded-full" />
           <div className="flex-1 space-y-2">

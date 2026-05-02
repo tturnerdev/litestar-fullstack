@@ -42,17 +42,15 @@ export function FaxNumberCard({ faxNumber }: FaxNumberCardProps) {
         <div className="flex items-center gap-4 text-xs text-muted-foreground">
           <div className="flex items-center gap-1.5">
             {emailRouteCount === 0 ? (
-              <>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
-                      <AlertTriangle className="h-3.5 w-3.5" />
-                      <span>No email routes</span>
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent>Incoming faxes will not be forwarded to any email address</TooltipContent>
-                </Tooltip>
-              </>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
+                    <AlertTriangle className="h-3.5 w-3.5" />
+                    <span>No email routes</span>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>Incoming faxes will not be forwarded to any email address</TooltipContent>
+              </Tooltip>
             ) : (
               <>
                 <Mail className="h-3.5 w-3.5" />

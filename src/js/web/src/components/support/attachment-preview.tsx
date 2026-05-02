@@ -70,12 +70,15 @@ export function AttachmentPreview({ attachment, onClose, onPrev, onNext }: Attac
   }, [handleKeyDown])
 
   // Reset loaded state and zoom when attachment changes
+  // biome-ignore lint/correctness/useExhaustiveDependencies: attachment.id is a prop value we must react to
   useEffect(() => {
     setIsLoaded(false)
     setZoom(DEFAULT_ZOOM)
   }, [attachment.id])
 
   return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: modal backdrop closes on click outside
+    // biome-ignore lint/a11y/useKeyWithClickEvents: keyboard dismiss handled by Escape key listener
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
       onClick={(e) => {

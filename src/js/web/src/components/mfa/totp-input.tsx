@@ -87,6 +87,7 @@ export function TotpInput({ value, onChange, disabled, autoFocus }: TotpInputPro
   return (
     <div className="flex items-center justify-center gap-2">
       {digits.map((digit, index) => (
+        // biome-ignore lint/suspicious/noArrayIndexKey: fixed-length OTP digit slots
         <div key={index} className="contents">
           <input
             ref={(el) => {

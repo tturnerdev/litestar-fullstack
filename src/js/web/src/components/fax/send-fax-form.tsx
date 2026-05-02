@@ -73,7 +73,7 @@ export function SendFaxForm() {
   })
   const sendFax = useSendFax()
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const dropZoneRef = useRef<HTMLDivElement>(null)
+  const dropZoneRef = useRef<HTMLButtonElement>(null)
 
   // Form state
   const [faxNumberId, setFaxNumberId] = useState("")
@@ -178,6 +178,7 @@ export function SendFaxForm() {
     e.stopPropagation()
   }, [])
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: validateAndSetFile is a stable inner function using only setters
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
@@ -186,7 +187,6 @@ export function SendFaxForm() {
     if (droppedFile) {
       validateAndSetFile(droppedFile)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // ---- Phone formatting ----
@@ -507,23 +507,16 @@ export function SendFaxForm() {
                           </div>
                         </>
                       ) : (
-                        <div
+                        <button
+                          type="button"
                           ref={dropZoneRef}
                           onDragEnter={handleDragEnter}
                           onDragLeave={handleDragLeave}
                           onDragOver={handleDragOver}
                           onDrop={handleDrop}
                           onClick={() => fileInputRef.current?.click()}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" || e.key === " ") {
-                              e.preventDefault()
-                              fileInputRef.current?.click()
-                            }
-                          }}
-                          role="button"
-                          tabIndex={0}
                           className={`
-                            flex cursor-pointer flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed p-8
+                            flex w-full cursor-pointer flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed p-8
                             transition-colors duration-150
                             ${isDragging ? "border-primary bg-primary/5 text-primary" : "border-border/60 text-muted-foreground hover:border-primary/40 hover:bg-muted/30"}
                             ${fileError ? "border-destructive/60" : ""}
@@ -534,7 +527,7 @@ export function SendFaxForm() {
                             <p className="text-sm font-medium">{isDragging ? "Drop file here" : "Drag and drop a file, or click to browse"}</p>
                             <p className="mt-1 text-xs text-muted-foreground">PDF or TIFF, max 20 MB</p>
                           </div>
-                        </div>
+                        </button>
                       )}
                       <input ref={fileInputRef} type="file" accept={ACCEPTED_EXTENSIONS} className="hidden" onChange={handleFileChange} />
                       {fileError && (

@@ -16,6 +16,7 @@ function PeriodToggle({ value, onChange }: { value: Period; onChange: (p: Period
     <div className="flex gap-0.5 rounded-md border border-border bg-muted/40 p-0.5">
       {(["7d", "30d", "90d"] as const).map((p) => (
         <button
+          type="button"
           key={p}
           onClick={() => onChange(p)}
           className={`rounded px-2 py-0.5 text-[11px] font-medium transition-colors ${

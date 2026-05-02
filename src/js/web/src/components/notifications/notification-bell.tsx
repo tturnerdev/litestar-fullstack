@@ -98,17 +98,11 @@ function NotificationRow({ notification, onClose }: { notification: Notification
   const relativeTime = formatRelativeTimeShort(notification.createdAt)
 
   return (
-    <div
-      role="button"
-      tabIndex={0}
+    <button
+      type="button"
       onClick={handleClick}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          handleClick()
-        }
-      }}
       className={cn(
-        "group flex items-start gap-3 rounded-md px-3 py-2.5 text-left transition-colors hover:bg-accent",
+        "group flex w-full items-start gap-3 rounded-md px-3 py-2.5 text-left transition-colors hover:bg-accent",
         !notification.isRead && "bg-accent/40",
         notification.actionUrl && "cursor-pointer",
       )}
@@ -136,7 +130,7 @@ function NotificationRow({ notification, onClose }: { notification: Notification
       >
         <X className="h-3 w-3" />
       </button>
-    </div>
+    </button>
   )
 }
 
@@ -164,6 +158,7 @@ export function NotificationBell() {
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       {/* Inject animation keyframes */}
+      {/* biome-ignore lint/security/noDangerouslySetInnerHtml: injecting CSS keyframes for bell animation */}
       <style dangerouslySetInnerHTML={{ __html: bellAnimationStyles }} />
 
       <DropdownMenuTrigger asChild>

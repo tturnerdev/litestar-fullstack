@@ -310,6 +310,7 @@ function TeamPermissionEditor({ teamId, teamName, onBack, onSaved }: { teamId: s
   }, [serverPermissions, initialized])
 
   // Reset initialized when teamId changes
+  // biome-ignore lint/correctness/useExhaustiveDependencies: teamId is a prop we must react to
   useEffect(() => {
     setInitialized(false)
   }, [teamId])

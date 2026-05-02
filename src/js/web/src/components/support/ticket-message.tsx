@@ -207,6 +207,7 @@ export function TicketMessage({ message, ticketId, isFirstMessage = false, onRep
           </div>
         </CardHeader>
         <CardContent className="space-y-3">
+          {/* biome-ignore lint/security/noDangerouslySetInnerHtml: rendering sanitized HTML message content */}
           <div className="prose prose-sm dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: message.bodyHtml }} />
           {message.attachments && message.attachments.length > 0 && <AttachmentList attachments={message.attachments} className="pt-2" />}
           <div className="flex items-center gap-1 pt-1">

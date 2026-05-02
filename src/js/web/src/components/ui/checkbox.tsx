@@ -17,7 +17,6 @@ function Checkbox({ className, indeterminate, ref, ...props }: CheckboxProps & {
   return (
     <input
       type="checkbox"
-      role="checkbox"
       ref={innerRef}
       className={cn(
         "h-4 w-4 shrink-0 rounded border border-input bg-background shadow-xs transition-colors",

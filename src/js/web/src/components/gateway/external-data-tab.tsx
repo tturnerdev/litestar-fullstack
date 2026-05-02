@@ -122,6 +122,7 @@ function ExternalDataSkeleton() {
   return (
     <div className="space-y-4">
       {Array.from({ length: 2 }).map((_, i) => (
+        // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton placeholders
         <Card key={i}>
           <CardHeader className="flex flex-row items-center justify-between pb-3">
             <Skeleton className="h-5 w-32" />
@@ -130,6 +131,7 @@ function ExternalDataSkeleton() {
           <CardContent>
             <div className="grid gap-x-6 gap-y-3 md:grid-cols-2 lg:grid-cols-3">
               {Array.from({ length: 6 }).map((_, j) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton placeholders
                 <div key={j} className="space-y-1.5">
                   <Skeleton className="h-3.5 w-20" />
                   <Skeleton className="h-4 w-32" />
