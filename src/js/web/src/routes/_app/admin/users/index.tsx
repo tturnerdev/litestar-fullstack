@@ -36,6 +36,7 @@ import { type BulkAction, BulkActionBar } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { EmptyState } from "@/components/ui/empty-state"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { FilterDropdown, type FilterOption } from "@/components/ui/filter-dropdown"
@@ -448,186 +449,188 @@ function AdminUsersPage() {
 
       {/* Content */}
       <PageSection delay={0.1}>
-        {isLoading ? (
-          <SkeletonTable rows={6} />
-        ) : isError ? (
-          <EmptyState
-            icon={AlertCircle}
-            title="Unable to load users"
-            description="Something went wrong while fetching user data. Please try refreshing the page."
-            action={
-              <Button variant="outline" size="sm" onClick={() => refetch()}>
-                Refresh
-              </Button>
-            }
-          />
-        ) : !hasAnyUsers && !search ? (
-          <EmptyState
-            icon={Users}
-            title="No users yet"
-            description="Users will appear here once they register or are added to the system."
-          />
-        ) : !hasData ? (
-          <EmptyState
-            icon={Users}
-            variant="no-results"
-            title="No results found"
-            description="No users match your current filters. Try adjusting your search or filters."
-            action={
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setSearch("")
-                  setRoleFilter([])
-                  setStatusFilter([])
-                }}
-              >
-                Clear all filters
-              </Button>
-            }
-          />
-        ) : (
-          <div className="space-y-3">
-            {/* Result count & pagination info */}
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">
-                {filteredItems.length} user{filteredItems.length === 1 ? "" : "s"}
-                {(roleFilter.length > 0 || statusFilter.length > 0) && " (filtered)"}
-                {data && data.total > pageSize && (
-                  <span>
-                    {" "}
-                    &middot; Page {page} of {totalPages}
-                  </span>
-                )}
-              </p>
-            </div>
-
-            {/* Table */}
-            <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
-              <Table aria-label="Users">
-                <TableHeader className="sticky top-0 z-10 bg-background">
-                  <TableRow>
-                    <TableHead className="w-10">
-                      <Checkbox
-                        checked={allSelected}
-                        indeterminate={someSelected && !allSelected}
-                        onChange={toggleAll}
-                        aria-label="Select all users"
-                      />
-                    </TableHead>
-                    <SortableHeader
-                      label="User"
-                      sortKey="name"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                    />
-                    <SortableHeader
-                      label="Email"
-                      sortKey="email"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                      className="hidden sm:table-cell"
-                    />
-                    <SortableHeader
-                      label="Role"
-                      sortKey="is_superuser"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                      className="hidden sm:table-cell"
-                    />
-                    <SortableHeader
-                      label="Status"
-                      sortKey="is_active"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                    />
-                    <SortableHeader
-                      label="Logins"
-                      sortKey="login_count"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                      className="hidden md:table-cell"
-                    />
-                    <SortableHeader
-                      label="Created"
-                      sortKey="created_at"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                      className="hidden md:table-cell"
-                    />
-                    <TableHead className="w-16 text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredItems.map((user, index) => (
-                    <UserRow
-                      key={user.id}
-                      user={user}
-                      index={index}
-                      selected={selectedIds.has(user.id)}
-                      onToggle={() => toggleOne(user.id)}
-                      onRowClick={() => handleRowClick(user.id)}
-                    />
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-
-            {/* Pagination */}
-            <div className="flex items-center justify-end gap-4">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Rows per page</span>
-                <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
-                  <SelectTrigger className="h-8 w-[70px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PAGE_SIZES.map((size) => (
-                      <SelectItem key={size} value={String(size)}>
-                        {size}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+        <SectionErrorBoundary name="Users List">
+          {isLoading ? (
+            <SkeletonTable rows={6} />
+          ) : isError ? (
+            <EmptyState
+              icon={AlertCircle}
+              title="Unable to load users"
+              description="Something went wrong while fetching user data. Please try refreshing the page."
+              action={
+                <Button variant="outline" size="sm" onClick={() => refetch()}>
+                  Refresh
+                </Button>
+              }
+            />
+          ) : !hasAnyUsers && !search ? (
+            <EmptyState
+              icon={Users}
+              title="No users yet"
+              description="Users will appear here once they register or are added to the system."
+            />
+          ) : !hasData ? (
+            <EmptyState
+              icon={Users}
+              variant="no-results"
+              title="No results found"
+              description="No users match your current filters. Try adjusting your search or filters."
+              action={
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSearch("")
+                    setRoleFilter([])
+                    setStatusFilter([])
+                  }}
+                >
+                  Clear all filters
+                </Button>
+              }
+            />
+          ) : (
+            <div className="space-y-3">
+              {/* Result count & pagination info */}
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">
+                  {filteredItems.length} user{filteredItems.length === 1 ? "" : "s"}
+                  {(roleFilter.length > 0 || statusFilter.length > 0) && " (filtered)"}
+                  {data && data.total > pageSize && (
+                    <span>
+                      {" "}
+                      &middot; Page {page} of {totalPages}
+                    </span>
+                  )}
+                </p>
               </div>
-              {totalPages > 1 && (
+
+              {/* Table */}
+              <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
+                <Table aria-label="Users">
+                  <TableHeader className="sticky top-0 z-10 bg-background">
+                    <TableRow>
+                      <TableHead className="w-10">
+                        <Checkbox
+                          checked={allSelected}
+                          indeterminate={someSelected && !allSelected}
+                          onChange={toggleAll}
+                          aria-label="Select all users"
+                        />
+                      </TableHead>
+                      <SortableHeader
+                        label="User"
+                        sortKey="name"
+                        currentSort={sortKey}
+                        currentDirection={sortDir}
+                        onSort={handleSort}
+                      />
+                      <SortableHeader
+                        label="Email"
+                        sortKey="email"
+                        currentSort={sortKey}
+                        currentDirection={sortDir}
+                        onSort={handleSort}
+                        className="hidden sm:table-cell"
+                      />
+                      <SortableHeader
+                        label="Role"
+                        sortKey="is_superuser"
+                        currentSort={sortKey}
+                        currentDirection={sortDir}
+                        onSort={handleSort}
+                        className="hidden sm:table-cell"
+                      />
+                      <SortableHeader
+                        label="Status"
+                        sortKey="is_active"
+                        currentSort={sortKey}
+                        currentDirection={sortDir}
+                        onSort={handleSort}
+                      />
+                      <SortableHeader
+                        label="Logins"
+                        sortKey="login_count"
+                        currentSort={sortKey}
+                        currentDirection={sortDir}
+                        onSort={handleSort}
+                        className="hidden md:table-cell"
+                      />
+                      <SortableHeader
+                        label="Created"
+                        sortKey="created_at"
+                        currentSort={sortKey}
+                        currentDirection={sortDir}
+                        onSort={handleSort}
+                        className="hidden md:table-cell"
+                      />
+                      <TableHead className="w-16 text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredItems.map((user, index) => (
+                      <UserRow
+                        key={user.id}
+                        user={user}
+                        index={index}
+                        selected={selectedIds.has(user.id)}
+                        onToggle={() => toggleOne(user.id)}
+                        onRowClick={() => handleRowClick(user.id)}
+                      />
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Pagination */}
+              <div className="flex items-center justify-end gap-4">
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setPage((p) => Math.max(1, p - 1))
-                      setSelectedIds(new Set())
-                    }}
-                    disabled={page <= 1}
-                  >
-                    Previous
-                    <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&larr;</kbd>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setPage((p) => Math.min(totalPages, p + 1))
-                      setSelectedIds(new Set())
-                    }}
-                    disabled={page >= totalPages}
-                  >
-                    Next
-                    <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&rarr;</kbd>
-                  </Button>
+                  <span className="text-sm text-muted-foreground">Rows per page</span>
+                  <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
+                    <SelectTrigger className="h-8 w-[70px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PAGE_SIZES.map((size) => (
+                        <SelectItem key={size} value={String(size)}>
+                          {size}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-              )}
+                {totalPages > 1 && (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setPage((p) => Math.max(1, p - 1))
+                        setSelectedIds(new Set())
+                      }}
+                      disabled={page <= 1}
+                    >
+                      Previous
+                      <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&larr;</kbd>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setPage((p) => Math.min(totalPages, p + 1))
+                        setSelectedIds(new Set())
+                      }}
+                      disabled={page >= totalPages}
+                    >
+                      Next
+                      <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&rarr;</kbd>
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Bulk action bar */}

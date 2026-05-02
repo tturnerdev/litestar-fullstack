@@ -16,6 +16,7 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Separator } from "@/components/ui/separator"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
@@ -267,6 +268,7 @@ function EditLocationPage() {
       />
 
       <PageSection>
+        <SectionErrorBoundary name="Edit Location Form">
         <Card className="max-w-2xl">
           <CardHeader>
             <CardTitle className="text-lg">Location Details</CardTitle>
@@ -411,6 +413,7 @@ function EditLocationPage() {
             </form>
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Unsaved changes alert */}

@@ -52,6 +52,7 @@ import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import type { Team } from "@/lib/generated/api"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { useSettingsStore } from "@/lib/settings-store"
 import { cn } from "@/lib/utils"
 
@@ -375,6 +376,7 @@ function TeamsPage() {
       />
 
       {/* Summary stats */}
+      <SectionErrorBoundary name="Team Statistics">
       <div className="flex flex-wrap items-center gap-2">
         {isLoading ? (
           <>
@@ -409,6 +411,7 @@ function TeamsPage() {
           </>
         )}
       </div>
+      </SectionErrorBoundary>
 
       {/* Search */}
       <PageSection>
@@ -440,6 +443,7 @@ function TeamsPage() {
 
       {/* Content */}
       <PageSection delay={0.1}>
+        <SectionErrorBoundary name="Teams List">
         {isLoading ? (
           <SkeletonTable rows={4} />
         ) : isError ? (
@@ -630,6 +634,7 @@ function TeamsPage() {
             </div>
           </div>
         )}
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Bulk action bar */}

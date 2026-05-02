@@ -20,6 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -221,6 +222,7 @@ function EditTicketForm({ ticketId }: { ticketId: string }) {
         }
       />
 
+      <SectionErrorBoundary name="Edit Ticket Form">
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">Ticket Details</CardTitle>
@@ -384,6 +386,7 @@ function EditTicketForm({ ticketId }: { ticketId: string }) {
           </Form>
         </CardContent>
       </Card>
+      </SectionErrorBoundary>
     </PageContainer>
 
       {/* Unsaved changes dialog */}

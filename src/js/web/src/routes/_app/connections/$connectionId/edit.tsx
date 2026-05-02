@@ -39,6 +39,7 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
@@ -612,6 +613,7 @@ function EditConnectionPage() {
 
       <div className="flex gap-6">
         {/* Main form */}
+        <SectionErrorBoundary name="Edit Connection Form">
         <Card className="min-w-0 flex-1">
           <CardHeader>
             <CardTitle className="text-lg">Connection Details</CardTitle>
@@ -939,10 +941,12 @@ function EditConnectionPage() {
             </form>
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
 
         {/* Sidebar */}
         <div className="flex h-fit w-72 shrink-0 flex-col gap-4">
           {/* Connection Types tip card */}
+          <SectionErrorBoundary name="Connection Types">
           <Card className="border-border/40 bg-linear-to-br from-muted/30 to-muted/10">
             <CardHeader className="space-y-1 pb-3">
               <CardTitle className="text-lg">Connection Types</CardTitle>
@@ -963,8 +967,10 @@ function EditConnectionPage() {
               ))}
             </CardContent>
           </Card>
+          </SectionErrorBoundary>
 
           {/* Security Note */}
+          <SectionErrorBoundary name="Security Note">
           <Card className="border-border/40">
             <CardHeader className="space-y-1 pb-3">
               <div className="flex items-center gap-2">
@@ -984,6 +990,7 @@ function EditConnectionPage() {
               </p>
             </CardContent>
           </Card>
+          </SectionErrorBoundary>
         </div>
       </div>
 

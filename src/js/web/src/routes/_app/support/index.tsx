@@ -61,6 +61,7 @@ import { useAuthStore } from "@/lib/auth"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { client } from "@/lib/generated/api/client.gen"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { useSettingsStore } from "@/lib/settings-store"
 import { cn } from "@/lib/utils"
 
@@ -1004,6 +1005,7 @@ function SupportPage() {
       </PageSection>
 
       {/* Summary stats */}
+      <SectionErrorBoundary name="Ticket Statistics">
       <div className="flex flex-wrap items-center gap-2">
         {isLoading ? (
           <>
@@ -1036,6 +1038,7 @@ function SupportPage() {
           </>
         )}
       </div>
+      </SectionErrorBoundary>
 
       {/* Search & filters */}
       <PageSection>
@@ -1113,6 +1116,7 @@ function SupportPage() {
 
       {/* Content */}
       <PageSection delay={0.1}>
+        <SectionErrorBoundary name="Tickets Table">
         {isLoading ? (
           <SkeletonTable rows={6} />
         ) : isError ? (
@@ -1261,6 +1265,7 @@ function SupportPage() {
             </div>
           </div>
         )}
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Bulk action bar */}

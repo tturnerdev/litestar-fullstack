@@ -18,6 +18,7 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useTag, useUpdateTag, type TagUpdate } from "@/lib/api/hooks/tags"
@@ -138,6 +139,7 @@ function EditTagPage() {
         }
       />
 
+      <SectionErrorBoundary name="Edit Tag Form">
       <Card className="max-w-xl">
         <CardHeader>
           <CardTitle className="text-lg">Tag Details</CardTitle>
@@ -184,6 +186,7 @@ function EditTagPage() {
           </form>
         </CardContent>
       </Card>
+      </SectionErrorBoundary>
     </PageContainer>
 
     {/* -- Unsaved changes dialog ---------------------------------------- */}

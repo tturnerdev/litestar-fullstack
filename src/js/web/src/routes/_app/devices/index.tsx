@@ -63,6 +63,7 @@ import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { useSettingsStore } from "@/lib/settings-store"
 import { cn } from "@/lib/utils"
 
@@ -558,6 +559,7 @@ function DevicesPage() {
       />
 
       {/* Status summary pills */}
+      <SectionErrorBoundary name="Device Status Summary">
       <div className="flex flex-wrap items-center gap-2">
         {isLoading ? (
           <>
@@ -598,6 +600,7 @@ function DevicesPage() {
           </>
         )}
       </div>
+      </SectionErrorBoundary>
 
       {/* Quick filter chips */}
       <div className="flex flex-wrap items-center gap-2">
@@ -712,6 +715,7 @@ function DevicesPage() {
 
       {/* Content */}
       <PageSection delay={0.1}>
+        <SectionErrorBoundary name="Devices Table">
         {isLoading ? (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 3 }).map((_, i) => (
@@ -939,6 +943,7 @@ function DevicesPage() {
             </div>
           </div>
         )}
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Bulk action bar */}

@@ -3,6 +3,7 @@ import { useDocumentTitle } from "@/hooks/use-document-title"
 import { Building2, ChevronRight, MapPin, Navigation, Tag } from "lucide-react"
 import { CreateLocationForm } from "@/components/locations/location-form"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PageContainer, PageHeader } from "@/components/ui/page-layout"
 
@@ -41,36 +42,40 @@ function NewLocationPage() {
 
       <div className="flex gap-6">
         {/* Main form */}
-        <Card className="min-w-0 flex-1">
-          <CardHeader>
-            <CardTitle className="text-lg">Location Details</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <CreateLocationForm />
-          </CardContent>
-        </Card>
+        <SectionErrorBoundary name="Location Form">
+          <Card className="min-w-0 flex-1">
+            <CardHeader>
+              <CardTitle className="text-lg">Location Details</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CreateLocationForm />
+            </CardContent>
+          </Card>
+        </SectionErrorBoundary>
 
         {/* Sidebar tips */}
-        <Card className="h-fit w-72 shrink-0 border-border/40 bg-linear-to-br from-muted/30 to-muted/10">
-          <CardHeader className="space-y-1 pb-3">
-            <CardTitle className="text-lg">Getting Started</CardTitle>
-            <CardDescription>Tips for adding locations</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-1.5">
-            {tips.map((tip) => (
-              <div key={tip.title} className="group flex items-center gap-3 rounded-lg bg-background/60 p-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  <tip.icon className="h-4 w-4" />
+        <SectionErrorBoundary name="Getting Started Tips">
+          <Card className="h-fit w-72 shrink-0 border-border/40 bg-linear-to-br from-muted/30 to-muted/10">
+            <CardHeader className="space-y-1 pb-3">
+              <CardTitle className="text-lg">Getting Started</CardTitle>
+              <CardDescription>Tips for adding locations</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-1.5">
+              {tips.map((tip) => (
+                <div key={tip.title} className="group flex items-center gap-3 rounded-lg bg-background/60 p-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <tip.icon className="h-4 w-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-sm">{tip.title}</p>
+                    <p className="text-xs text-muted-foreground">{tip.description}</p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground/30" />
                 </div>
-                <div className="min-w-0 flex-1">
-                  <p className="font-medium text-sm">{tip.title}</p>
-                  <p className="text-xs text-muted-foreground">{tip.description}</p>
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground/30" />
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+              ))}
+            </CardContent>
+          </Card>
+        </SectionErrorBoundary>
       </div>
     </PageContainer>
   )

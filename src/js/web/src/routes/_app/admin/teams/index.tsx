@@ -25,6 +25,7 @@ import { type BulkAction, BulkActionBar } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { EmptyState } from "@/components/ui/empty-state"
 import { FilterDropdown, type FilterOption } from "@/components/ui/filter-dropdown"
 import { Input } from "@/components/ui/input"
@@ -343,177 +344,179 @@ function AdminTeamsPage() {
 
       {/* Content */}
       <PageSection delay={0.1}>
-        {isLoading ? (
-          <SkeletonTable rows={6} />
-        ) : isError ? (
-          <EmptyState
-            icon={AlertCircle}
-            title="Unable to load teams"
-            description="Something went wrong while fetching team data. Please try refreshing the page."
-            action={
-              <Button variant="outline" size="sm" onClick={() => refetch()}>
-                Refresh
-              </Button>
-            }
-          />
-        ) : !hasAnyTeams && !search ? (
-          <EmptyState
-            icon={Users2}
-            title="No teams yet"
-            description="Teams will appear here once they are created in the system."
-          />
-        ) : !hasData ? (
-          <EmptyState
-            icon={Users2}
-            variant="no-results"
-            title="No results found"
-            description="No teams match your current filters. Try adjusting your search or filters."
-            action={
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setSearch("")
-                  setStatusFilter([])
-                }}
-              >
-                Clear all filters
-              </Button>
-            }
-          />
-        ) : (
-          <div className="space-y-3">
-            {/* Result count & pagination info */}
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">
-                {filteredItems.length} team{filteredItems.length === 1 ? "" : "s"}
-                {statusFilter.length > 0 && " (filtered)"}
-                {data && data.total > pageSize && (
-                  <span>
-                    {" "}
-                    &middot; Page {page} of {totalPages}
-                  </span>
-                )}
-              </p>
-            </div>
-
-            {/* Table */}
-            <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
-              <Table aria-label="Teams">
-                <TableHeader className="sticky top-0 z-10 bg-background">
-                  <TableRow>
-                    <TableHead className="w-10">
-                      <Checkbox
-                        checked={allSelected}
-                        indeterminate={someSelected && !allSelected}
-                        onChange={toggleAll}
-                        aria-label="Select all teams"
-                      />
-                    </TableHead>
-                    <SortableHeader
-                      label="Team"
-                      sortKey="name"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                    />
-                    <SortableHeader
-                      label="Slug"
-                      sortKey="slug"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                      className="hidden md:table-cell"
-                    />
-                    <SortableHeader
-                      label="Members"
-                      sortKey="member_count"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                    />
-                    <SortableHeader
-                      label="Status"
-                      sortKey="is_active"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                      className="hidden md:table-cell"
-                    />
-                    <SortableHeader
-                      label="Created"
-                      sortKey="created_at"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                      className="hidden lg:table-cell"
-                    />
-                    <TableHead className="w-16 text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredItems.map((team, index) => (
-                    <TeamRow
-                      key={team.id}
-                      team={team}
-                      index={index}
-                      selected={selectedIds.has(team.id)}
-                      onToggle={() => toggleOne(team.id)}
-                      onRowClick={() => handleRowClick(team.id)}
-                    />
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-
-            {/* Pagination */}
-            <div className="flex items-center justify-end gap-4">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Rows per page</span>
-                <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
-                  <SelectTrigger className="h-8 w-[70px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PAGE_SIZES.map((size) => (
-                      <SelectItem key={size} value={String(size)}>
-                        {size}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+        <SectionErrorBoundary name="Teams List">
+          {isLoading ? (
+            <SkeletonTable rows={6} />
+          ) : isError ? (
+            <EmptyState
+              icon={AlertCircle}
+              title="Unable to load teams"
+              description="Something went wrong while fetching team data. Please try refreshing the page."
+              action={
+                <Button variant="outline" size="sm" onClick={() => refetch()}>
+                  Refresh
+                </Button>
+              }
+            />
+          ) : !hasAnyTeams && !search ? (
+            <EmptyState
+              icon={Users2}
+              title="No teams yet"
+              description="Teams will appear here once they are created in the system."
+            />
+          ) : !hasData ? (
+            <EmptyState
+              icon={Users2}
+              variant="no-results"
+              title="No results found"
+              description="No teams match your current filters. Try adjusting your search or filters."
+              action={
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSearch("")
+                    setStatusFilter([])
+                  }}
+                >
+                  Clear all filters
+                </Button>
+              }
+            />
+          ) : (
+            <div className="space-y-3">
+              {/* Result count & pagination info */}
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">
+                  {filteredItems.length} team{filteredItems.length === 1 ? "" : "s"}
+                  {statusFilter.length > 0 && " (filtered)"}
+                  {data && data.total > pageSize && (
+                    <span>
+                      {" "}
+                      &middot; Page {page} of {totalPages}
+                    </span>
+                  )}
+                </p>
               </div>
-              {totalPages > 1 && (
+
+              {/* Table */}
+              <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
+                <Table aria-label="Teams">
+                  <TableHeader className="sticky top-0 z-10 bg-background">
+                    <TableRow>
+                      <TableHead className="w-10">
+                        <Checkbox
+                          checked={allSelected}
+                          indeterminate={someSelected && !allSelected}
+                          onChange={toggleAll}
+                          aria-label="Select all teams"
+                        />
+                      </TableHead>
+                      <SortableHeader
+                        label="Team"
+                        sortKey="name"
+                        currentSort={sortKey}
+                        currentDirection={sortDir}
+                        onSort={handleSort}
+                      />
+                      <SortableHeader
+                        label="Slug"
+                        sortKey="slug"
+                        currentSort={sortKey}
+                        currentDirection={sortDir}
+                        onSort={handleSort}
+                        className="hidden md:table-cell"
+                      />
+                      <SortableHeader
+                        label="Members"
+                        sortKey="member_count"
+                        currentSort={sortKey}
+                        currentDirection={sortDir}
+                        onSort={handleSort}
+                      />
+                      <SortableHeader
+                        label="Status"
+                        sortKey="is_active"
+                        currentSort={sortKey}
+                        currentDirection={sortDir}
+                        onSort={handleSort}
+                        className="hidden md:table-cell"
+                      />
+                      <SortableHeader
+                        label="Created"
+                        sortKey="created_at"
+                        currentSort={sortKey}
+                        currentDirection={sortDir}
+                        onSort={handleSort}
+                        className="hidden lg:table-cell"
+                      />
+                      <TableHead className="w-16 text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredItems.map((team, index) => (
+                      <TeamRow
+                        key={team.id}
+                        team={team}
+                        index={index}
+                        selected={selectedIds.has(team.id)}
+                        onToggle={() => toggleOne(team.id)}
+                        onRowClick={() => handleRowClick(team.id)}
+                      />
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Pagination */}
+              <div className="flex items-center justify-end gap-4">
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setPage((p) => Math.max(1, p - 1))
-                      setSelectedIds(new Set())
-                    }}
-                    disabled={page <= 1}
-                  >
-                    Previous
-                    <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&larr;</kbd>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setPage((p) => Math.min(totalPages, p + 1))
-                      setSelectedIds(new Set())
-                    }}
-                    disabled={page >= totalPages}
-                  >
-                    Next
-                    <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&rarr;</kbd>
-                  </Button>
+                  <span className="text-sm text-muted-foreground">Rows per page</span>
+                  <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
+                    <SelectTrigger className="h-8 w-[70px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PAGE_SIZES.map((size) => (
+                        <SelectItem key={size} value={String(size)}>
+                          {size}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-              )}
+                {totalPages > 1 && (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setPage((p) => Math.max(1, p - 1))
+                        setSelectedIds(new Set())
+                      }}
+                      disabled={page <= 1}
+                    >
+                      Previous
+                      <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&larr;</kbd>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setPage((p) => Math.min(totalPages, p + 1))
+                        setSelectedIds(new Set())
+                      }}
+                      disabled={page >= totalPages}
+                    >
+                      Next
+                      <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&rarr;</kbd>
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Bulk action bar */}

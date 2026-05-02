@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.245.0 (2026-05-03)
+
+### Added
+- **SectionErrorBoundary on all 5 edit pages** — connections, locations, support, teams, and tags edit forms wrapped
+- **SectionErrorBoundary on 6 main list pages** — devices, support, teams, connections, webhooks, and notifications list pages wrapped
+- **SectionErrorBoundary on gateway, fax overview, locations/new, admin teams, and admin users pages**
+
 ## v0.244.0 (2026-05-03)
 
 ### Added

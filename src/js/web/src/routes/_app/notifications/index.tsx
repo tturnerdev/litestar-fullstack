@@ -70,6 +70,7 @@ import {
 } from "@/lib/api/hooks/notifications"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/notifications/")({
@@ -745,6 +746,7 @@ function NotificationsPage() {
       />
 
       <PageSection delay={0.1}>
+        <SectionErrorBoundary name="Notifications List">
         {isEmptyUnfiltered ? (
           <EmptyState
             icon={BellOff}
@@ -971,10 +973,13 @@ function NotificationsPage() {
             </div>
           </>
         )}
+        </SectionErrorBoundary>
       </PageSection>
 
       <PageSection delay={0.2}>
+        <SectionErrorBoundary name="Notification Preferences">
         <NotificationPreferences />
+        </SectionErrorBoundary>
       </PageSection>
 
       <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>

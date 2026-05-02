@@ -71,6 +71,7 @@ import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { useSettingsStore } from "@/lib/settings-store"
 import { cn } from "@/lib/utils"
 
@@ -572,6 +573,7 @@ function ConnectionsPage() {
       />
 
       {/* Summary distribution pills */}
+      <SectionErrorBoundary name="Connection Statistics">
       <div className="flex flex-wrap items-center gap-2">
         {isLoading ? (
           <>
@@ -608,6 +610,7 @@ function ConnectionsPage() {
           </>
         )}
       </div>
+      </SectionErrorBoundary>
 
       {/* Search & filters */}
       <PageSection>
@@ -686,6 +689,7 @@ function ConnectionsPage() {
 
       {/* Content */}
       <PageSection delay={0.1}>
+        <SectionErrorBoundary name="Connections Table">
         {isLoading ? (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 3 }).map((_, i) => (
@@ -900,6 +904,7 @@ function ConnectionsPage() {
             </div>
           </div>
         )}
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Bulk action bar */}

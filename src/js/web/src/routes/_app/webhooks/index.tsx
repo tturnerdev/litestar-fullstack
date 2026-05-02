@@ -81,6 +81,7 @@ import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { formatDateTime } from "@/lib/date-utils"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { useSettingsStore } from "@/lib/settings-store"
 import { cn } from "@/lib/utils"
 import type { WebhookCreate, WebhookList, WebhookUpdate } from "@/lib/generated/api"
@@ -918,6 +919,7 @@ function WebhooksPage() {
       />
 
       {/* Summary pills */}
+      <SectionErrorBoundary name="Webhook Statistics">
       <div className="flex flex-wrap items-center gap-2">
         {isLoading ? (
           <>
@@ -944,6 +946,7 @@ function WebhooksPage() {
           </>
         )}
       </div>
+      </SectionErrorBoundary>
 
       {/* Search */}
       <PageSection>
@@ -975,6 +978,7 @@ function WebhooksPage() {
 
       {/* Content */}
       <PageSection delay={0.1}>
+        <SectionErrorBoundary name="Webhooks Table">
         {isLoading ? (
           <SkeletonTable rows={6} />
         ) : isError ? (
@@ -1161,6 +1165,7 @@ function WebhooksPage() {
             </div>
           </div>
         )}
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Edit dialog */}

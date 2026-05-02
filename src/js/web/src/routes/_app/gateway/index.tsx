@@ -17,6 +17,7 @@ import {
   XCircle,
 } from "lucide-react"
 import { useCallback, useRef, useState } from "react"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Badge } from "@/components/ui/badge"
 import {
   Breadcrumb,
@@ -957,19 +958,27 @@ function GatewayPage() {
           </TabsList>
 
           <TabsContent value="phone" className="mt-6">
-            <PhoneNumberTab />
+            <SectionErrorBoundary name="Phone Number Lookup">
+              <PhoneNumberTab />
+            </SectionErrorBoundary>
           </TabsContent>
 
           <TabsContent value="extension" className="mt-6">
-            <ExtensionTab />
+            <SectionErrorBoundary name="Extension Lookup">
+              <ExtensionTab />
+            </SectionErrorBoundary>
           </TabsContent>
 
           <TabsContent value="device" className="mt-6">
-            <DeviceTab />
+            <SectionErrorBoundary name="Device Lookup">
+              <DeviceTab />
+            </SectionErrorBoundary>
           </TabsContent>
 
           <TabsContent value="batch" className="mt-6">
-            <BatchTab />
+            <SectionErrorBoundary name="Batch Lookup">
+              <BatchTab />
+            </SectionErrorBoundary>
           </TabsContent>
         </Tabs>
       </PageSection>
