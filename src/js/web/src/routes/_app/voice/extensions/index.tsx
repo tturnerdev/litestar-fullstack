@@ -25,6 +25,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { Badge } from "@/components/ui/badge"
 import {
   Breadcrumb,
@@ -189,7 +190,7 @@ function ExtensionsPage() {
   const [showSyncDialog, setShowSyncDialog] = useState(false)
 
   // Queries & mutations
-  const { data, isLoading, isError, refetch } = useExtensions(page, pageSize)
+  const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useExtensions(page, pageSize)
   const { data: phoneData } = usePhoneNumbers(1, 100)
   const deleteExtension = useDeleteExtension()
   const updateAnyExtension = useUpdateAnyExtension()
@@ -426,6 +427,11 @@ function ExtensionsPage() {
         breadcrumbs={breadcrumbs}
         actions={
           <div className="flex items-center gap-2">
+            <DataFreshness
+              dataUpdatedAt={dataUpdatedAt}
+              onRefresh={() => refetch()}
+              isRefreshing={isRefetching}
+            />
             <Button variant="outline" size="sm" onClick={handleExportAll} disabled={!hasData}>
               <Download className="mr-2 h-4 w-4" />
               Export

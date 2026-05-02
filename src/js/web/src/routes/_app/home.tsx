@@ -429,10 +429,13 @@ function HomePage() {
 
       {/* Main Content Grid */}
       <PageSection delay={0.12}>
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <TeamsCard teams={teams} isLoading={teamsLoading} />
           <SectionErrorBoundary name="Recent Notifications">
             <RecentNotificationsCard />
+          </SectionErrorBoundary>
+          <SectionErrorBoundary name="Integration Status">
+            <ConnectionsStatusCard />
           </SectionErrorBoundary>
         </div>
       </PageSection>
@@ -442,13 +445,10 @@ function HomePage() {
         <QuickActionsCard isSuperuser={isSuperuser} teamCount={teams.length} />
       </PageSection>
 
-      {/* Admin Section: Connections + Recent Activity */}
+      {/* Admin Section: Recent Activity + Chart */}
       {isSuperuser && (
         <PageSection delay={0.18}>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <SectionErrorBoundary name="Connections Status">
-              <ConnectionsStatusCard />
-            </SectionErrorBoundary>
+          <div className="grid gap-6 md:grid-cols-2">
             <SectionErrorBoundary name="Recent Activity">
               <RecentActivityCard
                 activities={activityData?.activities ?? []}

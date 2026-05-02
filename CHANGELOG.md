@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.198.0 (2026-05-02)
+
+### Added
+- **DataFreshness on list pages** — Added "Updated Xs ago" refresh indicator to devices, extensions, connections, support tickets, fax numbers, and voicemail list pages
+- **Voice resource charts** — Stacked bar chart showing active/inactive status by resource type and donut chart for resource distribution on voice dashboard
+- **Dashboard connections card** — Integration status card promoted from admin-only to main dashboard, now visible to all users with syncing animation and last health check timestamps
+
 ## v0.197.0 (2026-05-02)
 
 ### Added

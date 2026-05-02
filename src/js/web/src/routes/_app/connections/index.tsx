@@ -31,6 +31,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { Badge } from "@/components/ui/badge"
 import {
   Breadcrumb,
@@ -209,7 +210,7 @@ function ConnectionsPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
   // Queries & mutations
-  const { data, isLoading, isError, refetch } = useConnections({
+  const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useConnections({
     page,
     pageSize,
     search: debouncedSearch || undefined,
@@ -401,6 +402,11 @@ function ConnectionsPage() {
         breadcrumbs={breadcrumbs}
         actions={
           <div className="flex items-center gap-2">
+            <DataFreshness
+              dataUpdatedAt={dataUpdatedAt}
+              onRefresh={() => refetch()}
+              isRefreshing={isRefetching}
+            />
             <Button variant="outline" size="sm" onClick={handleExportAll} disabled={!hasData}>
               <Download className="mr-2 h-4 w-4" />
               Export

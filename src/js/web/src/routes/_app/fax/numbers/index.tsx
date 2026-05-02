@@ -39,6 +39,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -146,7 +147,7 @@ function FaxNumbersPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
   // Queries & mutations
-  const { data, isLoading, isError, refetch } = useFaxNumbers(page, pageSize)
+  const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useFaxNumbers(page, pageSize)
   const deleteFaxNumber = useDeleteFaxNumber()
   const [numberToDelete, setNumberToDelete] = useState<{ id: string; number: string } | null>(null)
 
@@ -345,6 +346,11 @@ function FaxNumbersPage() {
         breadcrumbs={breadcrumbs}
         actions={
           <div className="flex items-center gap-3">
+            <DataFreshness
+              dataUpdatedAt={dataUpdatedAt}
+              onRefresh={() => refetch()}
+              isRefreshing={isRefetching}
+            />
             <Button variant="outline" size="sm" onClick={handleExportAll} disabled={!hasData}>
               <Download className="mr-2 h-4 w-4" />
               Export

@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useConnections, type ConnectionList } from "@/lib/api/hooks/connections"
+import { formatRelativeTimeShort } from "@/lib/date-utils"
 
 const MAX_VISIBLE = 5
 
@@ -18,6 +19,9 @@ function getStatusColor(status: string): string {
   if (lower === "error" || lower === "failed") {
     return "bg-red-500"
   }
+  if (lower === "syncing" || lower === "pending" || lower === "testing") {
+    return "bg-amber-500"
+  }
   return "bg-muted-foreground/40"
 }
 
@@ -25,11 +29,20 @@ function getStatusLabel(status: string): string {
   const lower = status.toLowerCase()
   if (lower === "connected" || lower === "healthy" || lower === "active") return "Connected"
   if (lower === "error" || lower === "failed") return "Error"
+  if (lower === "syncing") return "Syncing"
+  if (lower === "pending" || lower === "testing") return "Pending"
   if (lower === "disconnected") return "Disconnected"
   return "Unknown"
 }
 
+function getStatusPulse(status: string): boolean {
+  const lower = status.toLowerCase()
+  return lower === "syncing" || lower === "pending" || lower === "testing"
+}
+
 function ConnectionRow({ connection, index }: { connection: ConnectionList; index: number }) {
+  const isPulsing = getStatusPulse(connection.status)
+
   return (
     <motion.div
       initial={{ opacity: 0, x: -8 }}
@@ -44,7 +57,10 @@ function ConnectionRow({ connection, index }: { connection: ConnectionList; inde
         <Tooltip>
           <TooltipTrigger asChild>
             <span className="relative flex h-2.5 w-2.5 shrink-0">
-              <span className={`absolute inline-flex h-full w-full rounded-full ${getStatusColor(connection.status)}`} />
+              {isPulsing && (
+                <span className={`absolute inline-flex h-full w-full animate-ping rounded-full ${getStatusColor(connection.status)} opacity-75`} />
+              )}
+              <span className={`relative inline-flex h-2.5 w-2.5 rounded-full ${getStatusColor(connection.status)}`} />
             </span>
           </TooltipTrigger>
           <TooltipContent side="left">{getStatusLabel(connection.status)}</TooltipContent>
@@ -55,9 +71,21 @@ function ConnectionRow({ connection, index }: { connection: ConnectionList; inde
           </TooltipTrigger>
           <TooltipContent>{connection.name}</TooltipContent>
         </Tooltip>
-        <Badge variant="secondary" className="h-5 shrink-0 px-1.5 py-0 text-[10px] font-medium">
-          {connection.provider}
-        </Badge>
+        <div className="flex shrink-0 items-center gap-2">
+          <Badge variant="secondary" className="h-5 px-1.5 py-0 text-[10px] font-medium">
+            {connection.provider}
+          </Badge>
+          {connection.lastHealthCheck && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="text-[10px] text-muted-foreground/70">
+                  {formatRelativeTimeShort(connection.lastHealthCheck)}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>Last checked {formatRelativeTimeShort(connection.lastHealthCheck)}</TooltipContent>
+            </Tooltip>
+          )}
+        </div>
       </Link>
     </motion.div>
   )

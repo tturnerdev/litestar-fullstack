@@ -22,6 +22,7 @@ import {
   X,
 } from "lucide-react"
 import { toast } from "sonner"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { TicketPriorityBadge } from "@/components/support/ticket-priority-badge"
 import { TicketStatusBadge } from "@/components/support/ticket-status-badge"
 import {
@@ -327,7 +328,7 @@ function SupportPage() {
     }
   }, [debouncedSearch, statusFilter, priorityFilter, categoryFilter, sortKey, sortDir])
 
-  const { data, isLoading, isError, refetch } = useTickets(page, pageSize, serverFilters)
+  const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useTickets(page, pageSize, serverFilters)
 
   // Apply client-side multi-value filters
   const filteredItems = useMemo(() => {
@@ -704,6 +705,11 @@ function SupportPage() {
         breadcrumbs={breadcrumbs}
         actions={
           <div className="flex items-center gap-2">
+            <DataFreshness
+              dataUpdatedAt={dataUpdatedAt}
+              onRefresh={() => refetch()}
+              isRefreshing={isRefetching}
+            />
             <Button variant="outline" size="sm" onClick={handleExportAll} disabled={!hasData}>
               <Download className="mr-1.5 h-3.5 w-3.5" />
               Export

@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { ArrowRight, BellOff, Home, Mail, Phone, PhoneForwarded, PhoneOff, Voicemail } from "lucide-react"
+import { ArrowRight, BellOff, Home, Mail, Phone, PhoneForwarded, PhoneOff, TrendingUp, Voicemail } from "lucide-react"
+import { useMemo } from "react"
+import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip as RechartsTooltip, XAxis, YAxis } from "recharts"
 import { Badge } from "@/components/ui/badge"
 import {
   Breadcrumb,
@@ -22,6 +24,7 @@ import {
   useVoicemailMessages,
   useVoicemailSettings,
 } from "@/lib/api/hooks/voice"
+import { useCallQueues, useRingGroups } from "@/lib/api/hooks/call-routing"
 
 export const Route = createFileRoute("/_app/voice/")({
   component: VoiceOverviewPage,
@@ -41,16 +44,19 @@ function VoiceOverviewPage() {
         <SummaryCards />
       </PageSection>
       <PageSection delay={0.1}>
+        <VoiceResourceCharts />
+      </PageSection>
+      <PageSection delay={0.15}>
         <StatusOverview />
       </PageSection>
-      <PageSection delay={0.2}>
+      <PageSection delay={0.25}>
         <div className="space-y-2">
           <h2 className="text-lg font-semibold tracking-tight">Quick Actions</h2>
           <p className="text-sm text-muted-foreground">Jump to the section you need</p>
         </div>
         <QuickLinks />
       </PageSection>
-      <PageSection delay={0.3}>
+      <PageSection delay={0.35}>
         <RecentExtensions />
       </PageSection>
     </PageContainer>
@@ -230,6 +236,193 @@ function DndSummaryCard({ extensionId }: { extensionId: string }) {
         <p className="text-xs text-muted-foreground">{modeLabels[mode] ?? mode}</p>
       </CardContent>
     </Card>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Voice Resource Charts
+// ---------------------------------------------------------------------------
+
+const PIE_COLORS = [
+  "hsl(var(--primary))",
+  "hsl(var(--chart-2, 220 70% 50%))",
+  "hsl(var(--chart-3, 30 80% 55%))",
+  "hsl(var(--chart-4, 280 65% 60%))",
+  "hsl(var(--chart-5, 160 60% 45%))",
+]
+
+function VoiceResourceCharts() {
+  const { data: phoneData, isLoading: phonesLoading } = usePhoneNumbers(1, 100)
+  const { data: extData, isLoading: extsLoading } = useExtensions(1, 100)
+  const { data: queueData, isLoading: queuesLoading } = useCallQueues({ page: 1, pageSize: 100 })
+  const { data: ringGroupData, isLoading: ringsLoading } = useRingGroups({ page: 1, pageSize: 100 })
+
+  const isLoading = phonesLoading || extsLoading || queuesLoading || ringsLoading
+
+  const resourceBarData = useMemo(() => {
+    if (isLoading) return []
+    return [
+      {
+        name: "Phone Numbers",
+        active: phoneData?.items.filter((p) => p.isActive).length ?? 0,
+        inactive: (phoneData?.total ?? 0) - (phoneData?.items.filter((p) => p.isActive).length ?? 0),
+      },
+      {
+        name: "Extensions",
+        active: extData?.items.filter((e) => e.isActive).length ?? 0,
+        inactive: (extData?.total ?? 0) - (extData?.items.filter((e) => e.isActive).length ?? 0),
+      },
+      {
+        name: "Call Queues",
+        active: queueData?.total ?? 0,
+        inactive: 0,
+      },
+      {
+        name: "Ring Groups",
+        active: ringGroupData?.total ?? 0,
+        inactive: 0,
+      },
+    ]
+  }, [isLoading, phoneData, extData, queueData, ringGroupData])
+
+  const distributionData = useMemo(() => {
+    if (isLoading) return []
+    const items = [
+      { name: "Phone Numbers", value: phoneData?.total ?? 0 },
+      { name: "Extensions", value: extData?.total ?? 0 },
+      { name: "Call Queues", value: queueData?.total ?? 0 },
+      { name: "Ring Groups", value: ringGroupData?.total ?? 0 },
+    ]
+    return items.filter((item) => item.value > 0)
+  }, [isLoading, phoneData, extData, queueData, ringGroupData])
+
+  const totalResources = distributionData.reduce((sum, d) => sum + d.value, 0)
+
+  if (isLoading) {
+    return (
+      <div className="grid gap-4 lg:grid-cols-2">
+        <SkeletonCard className="h-[320px]" />
+        <SkeletonCard className="h-[320px]" />
+      </div>
+    )
+  }
+
+  if (totalResources === 0) return null
+
+  return (
+    <div className="grid gap-4 lg:grid-cols-2">
+      <Card>
+        <CardHeader className="space-y-1 pb-2">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-lg">Resource Status</CardTitle>
+          </div>
+          <CardDescription>Active vs. inactive count across voice resource types</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[220px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={resourceBarData} layout="vertical" margin={{ top: 4, right: 12, bottom: 0, left: 0 }}>
+                <CartesianGrid horizontal={false} strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis
+                  type="number"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
+                  allowDecimals={false}
+                />
+                <YAxis
+                  dataKey="name"
+                  type="category"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
+                  width={100}
+                />
+                <RechartsTooltip
+                  contentStyle={{
+                    backgroundColor: "hsl(var(--popover))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "var(--radius)",
+                    fontSize: 13,
+                    color: "hsl(var(--popover-foreground))",
+                  }}
+                />
+                <Legend
+                  verticalAlign="top"
+                  align="right"
+                  iconType="circle"
+                  iconSize={8}
+                  wrapperStyle={{ fontSize: 12, paddingBottom: 8 }}
+                />
+                <Bar dataKey="active" name="Active" stackId="status" fill="hsl(142 71% 45%)" radius={[0, 0, 0, 0]} />
+                <Bar dataKey="inactive" name="Inactive" stackId="status" fill="hsl(var(--muted-foreground) / 0.3)" radius={[0, 4, 4, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="space-y-1 pb-2">
+          <div className="flex items-center gap-2">
+            <Phone className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-lg">Resource Distribution</CardTitle>
+          </div>
+          <CardDescription>
+            {totalResources} total resource{totalResources !== 1 ? "s" : ""} provisioned
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-6">
+            <div className="h-[200px] w-[200px] shrink-0">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={distributionData}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={55}
+                    outerRadius={85}
+                    paddingAngle={2}
+                    strokeWidth={0}
+                  >
+                    {distributionData.map((_entry, index) => (
+                      // biome-ignore lint/suspicious/noArrayIndexKey: Static pie segments
+                      <Cell key={`pie-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <RechartsTooltip
+                    contentStyle={{
+                      backgroundColor: "hsl(var(--popover))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "var(--radius)",
+                      fontSize: 13,
+                      color: "hsl(var(--popover-foreground))",
+                    }}
+                    formatter={(value) => [String(value), ""]}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="flex flex-col gap-2.5">
+              {distributionData.map((entry, index) => (
+                <div key={entry.name} className="flex items-center gap-2.5">
+                  <span
+                    className="inline-block h-3 w-3 shrink-0 rounded-full"
+                    style={{ backgroundColor: PIE_COLORS[index % PIE_COLORS.length] }}
+                  />
+                  <span className="text-sm text-muted-foreground">{entry.name}</span>
+                  <span className="ml-auto text-sm font-semibold tabular-nums">{entry.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   )
 }
 

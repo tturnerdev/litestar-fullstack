@@ -16,6 +16,7 @@ import {
   Trash2,
   X,
 } from "lucide-react"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { DeviceStatusBadge } from "@/components/devices/device-status-badge"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -182,7 +183,7 @@ function DevicesPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
   // Queries & mutations
-  const { data, isLoading, isError, refetch } = useDevices({
+  const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useDevices({
     page,
     pageSize,
     search: debouncedSearch || undefined,
@@ -341,6 +342,11 @@ function DevicesPage() {
         breadcrumbs={breadcrumbs}
         actions={
           <div className="flex items-center gap-2">
+            <DataFreshness
+              dataUpdatedAt={dataUpdatedAt}
+              onRefresh={() => refetch()}
+              isRefreshing={isRefetching}
+            />
             <Button
               variant={autoRefresh ? "default" : "outline"}
               size="sm"

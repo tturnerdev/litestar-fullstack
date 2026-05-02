@@ -29,6 +29,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { Badge } from "@/components/ui/badge"
 import {
   Breadcrumb,
@@ -232,7 +233,7 @@ function MessagesTab() {
           : null
       : null
 
-  const { data, isLoading, isError, refetch } = useVoicemailMessages({
+  const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useVoicemailMessages({
     page,
     pageSize,
     isRead: isReadParam,
@@ -472,7 +473,12 @@ function MessagesTab() {
             Clear filters
           </Button>
         )}
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-2">
+          <DataFreshness
+            dataUpdatedAt={dataUpdatedAt}
+            onRefresh={() => refetch()}
+            isRefreshing={isRefetching}
+          />
           <Button variant="outline" size="sm" onClick={handleExportAll} disabled={items.length === 0}>
             <Download className="mr-2 h-4 w-4" />
             Export
