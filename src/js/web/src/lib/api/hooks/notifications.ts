@@ -27,7 +27,10 @@ interface UnreadCountResponse {
 export const notificationsQueryKey = (page = 1, pageSize = 20) => ["notifications", page, pageSize] as const
 export const unreadCountQueryKey = () => ["notifications", "unread-count"] as const
 
-export function useNotifications(page = 1, pageSize = 20) {
+export function useNotifications(page = 1, pageSize = 20, options?: {
+  /** When set, the query will automatically refetch on this interval (ms). */
+  refetchInterval?: number | false
+}) {
   return useQuery({
     queryKey: notificationsQueryKey(page, pageSize),
     queryFn: async () => {
@@ -41,6 +44,7 @@ export function useNotifications(page = 1, pageSize = 20) {
       })
       return response.data as NotificationListResponse
     },
+    ...(options?.refetchInterval !== undefined ? { refetchInterval: options.refetchInterval } : {}),
   })
 }
 

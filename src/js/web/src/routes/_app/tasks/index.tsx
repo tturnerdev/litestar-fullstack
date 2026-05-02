@@ -82,6 +82,8 @@ export const Route = createFileRoute("/_app/tasks/")({
 const PAGE_SIZES = [10, 25, 50, 100] as const
 const DEFAULT_PAGE_SIZE = 25
 const PAGE_SIZE_STORAGE_KEY = "tasks-page-size"
+const AUTO_REFRESH_STORAGE_KEY = "tasks-auto-refresh"
+const AUTO_REFRESH_INTERVAL = 30_000
 
 function getStoredPageSize(): number {
   try {
@@ -345,6 +347,27 @@ function TasksPage() {
 
   const [pageSize, setPageSize] = useState(getStoredPageSize)
 
+  // Auto-refresh state
+  const [autoRefresh, setAutoRefresh] = useState(() => {
+    try {
+      return localStorage.getItem(AUTO_REFRESH_STORAGE_KEY) === "true"
+    } catch {
+      return false
+    }
+  })
+
+  const toggleAutoRefresh = useCallback(() => {
+    setAutoRefresh((prev) => {
+      const next = !prev
+      try {
+        localStorage.setItem(AUTO_REFRESH_STORAGE_KEY, String(next))
+      } catch {
+        // localStorage unavailable
+      }
+      return next
+    })
+  }, [])
+
   const handleSort = useCallback(
     (key: string) => {
       const next = nextSortDirection(sortKey, sortDir, key)
@@ -388,9 +411,9 @@ function TasksPage() {
       taskType: taskTypeFilter !== "all" ? taskTypeFilter : undefined,
       orderBy: sortKey ?? "created_at",
       sortOrder: sortDir ?? "desc",
-      refetchInterval: hasActiveTasks ? 15000 : false,
+      refetchInterval: autoRefresh ? AUTO_REFRESH_INTERVAL : hasActiveTasks ? 15000 : false,
     }),
-    [page, pageSize, statusFilter, taskTypeFilter, sortKey, sortDir, hasActiveTasks],
+    [page, pageSize, statusFilter, taskTypeFilter, sortKey, sortDir, autoRefresh, hasActiveTasks],
   )
 
   const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useTasks(queryOptions)
@@ -557,6 +580,16 @@ function TasksPage() {
               onRefresh={() => refetch()}
               isRefreshing={isRefetching}
             />
+            <Button
+              variant={autoRefresh ? "default" : "outline"}
+              size="sm"
+              onClick={toggleAutoRefresh}
+            >
+              {autoRefresh && (
+                <span className="mr-2 h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
+              )}
+              Live
+            </Button>
             <Button variant="outline" size="sm" onClick={handleExportAll} disabled={!hasData}>
               <Download className="mr-1.5 h-3.5 w-3.5" />
               Export

@@ -99,6 +99,8 @@ const CATEGORIES = [
 const PAGE_SIZES = [10, 25, 50, 100] as const
 const DEFAULT_PAGE_SIZE = 20
 const PAGE_SIZE_STORAGE_KEY = "notifications-page-size"
+const AUTO_REFRESH_STORAGE_KEY = "notifications-auto-refresh"
+const AUTO_REFRESH_INTERVAL = 30_000
 
 function getStoredPageSize(): number {
   try {
@@ -492,6 +494,27 @@ function NotificationsPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [pageSize, setPageSize] = useState(getStoredPageSize)
 
+  // Auto-refresh state
+  const [autoRefresh, setAutoRefresh] = useState(() => {
+    try {
+      return localStorage.getItem(AUTO_REFRESH_STORAGE_KEY) === "true"
+    } catch {
+      return false
+    }
+  })
+
+  const toggleAutoRefresh = useCallback(() => {
+    setAutoRefresh((prev) => {
+      const next = !prev
+      try {
+        localStorage.setItem(AUTO_REFRESH_STORAGE_KEY, String(next))
+      } catch {
+        // localStorage unavailable
+      }
+      return next
+    })
+  }, [])
+
   // Selection state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
@@ -525,7 +548,9 @@ function NotificationsPage() {
   }, [])
 
   const { data: unreadData } = useUnreadCount()
-  const { data, isLoading } = useNotifications(page, pageSize)
+  const { data, isLoading } = useNotifications(page, pageSize, {
+    refetchInterval: autoRefresh ? AUTO_REFRESH_INTERVAL : false,
+  })
   const markAllRead = useMarkAllRead()
   const markRead = useMarkRead()
   const deleteAllRead = useDeleteAllRead()
@@ -657,6 +682,16 @@ function NotificationsPage() {
         description={unreadCount > 0 ? `You have ${unreadCount} unread notification${unreadCount !== 1 ? "s" : ""}` : "You're all caught up"}
         actions={
           <div className="flex gap-2">
+            <Button
+              variant={autoRefresh ? "default" : "outline"}
+              size="sm"
+              onClick={toggleAutoRefresh}
+            >
+              {autoRefresh && (
+                <span className="mr-2 h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
+              )}
+              Live
+            </Button>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button variant="outline" size="icon" onClick={handleExport} disabled={filteredNotifications.length === 0} aria-label="Export notifications to CSV">

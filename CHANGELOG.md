@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.239.0 (2026-05-03)
+
+### Added
+- **Analytics print support** — "Print Report" button on Dashboard and Call Records tabs with print-optimized styles that hide navigation and prevent card splitting
+- **Analytics data freshness** — DataFreshness indicator on both analytics tabs showing last refresh time
+- **Keyboard shortcut hints** on devices, support, and teams list pages — subtle key badges near pagination showing available shortcuts
+- **Auto-refresh toggle** on tasks, fax messages, and notifications list pages with "Live" button and animated indicator
+
 ## v0.238.0 (2026-05-03)
 
 ### Added

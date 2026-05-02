@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Badge } from "@/components/ui/badge"
 import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { DateRangeFilter, getPresetDates, isDateInRange } from "@/components/ui/date-range-filter"
@@ -95,6 +96,8 @@ const statusOptions: FilterOption[] = [
 const PAGE_SIZES = [10, 25, 50, 100] as const
 const DEFAULT_PAGE_SIZE = 25
 const PAGE_SIZE_STORAGE_KEY = "fax-messages-page-size"
+const AUTO_REFRESH_STORAGE_KEY = "fax-messages-auto-refresh"
+const AUTO_REFRESH_INTERVAL = 30_000
 
 function getStoredPageSize(): number {
   try {
@@ -264,6 +267,27 @@ function FaxMessagesPage() {
     })
   }, [])
 
+  // Auto-refresh state
+  const [autoRefresh, setAutoRefresh] = useState(() => {
+    try {
+      return localStorage.getItem(AUTO_REFRESH_STORAGE_KEY) === "true"
+    } catch {
+      return false
+    }
+  })
+
+  const toggleAutoRefresh = useCallback(() => {
+    setAutoRefresh((prev) => {
+      const next = !prev
+      try {
+        localStorage.setItem(AUTO_REFRESH_STORAGE_KEY, String(next))
+      } catch {
+        // localStorage unavailable
+      }
+      return next
+    })
+  }, [])
+
   // Date range state (client-side only, not in URL)
   const [startDate, setStartDate] = useState("")
   const [endDate, setEndDate] = useState("")
@@ -289,7 +313,7 @@ function FaxMessagesPage() {
 
   // Queries & mutations
   const { data: faxNumbers } = useFaxNumbers(1, 200)
-  const { data, isLoading, isError, refetch, isRefetching } = useFaxMessages({
+  const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useFaxMessages({
     page,
     pageSize,
     search: debouncedSearch || undefined,
@@ -297,6 +321,7 @@ function FaxMessagesPage() {
     status: statusFilter.length === 1 ? statusFilter[0] : undefined,
     orderBy: sortKey ?? undefined,
     sortOrder: sortDir ?? undefined,
+    refetchInterval: autoRefresh ? AUTO_REFRESH_INTERVAL : false,
   })
   const deleteMessage = useDeleteFaxMessage()
 
@@ -496,6 +521,21 @@ function FaxMessagesPage() {
         breadcrumbs={breadcrumbs}
         actions={
           <div className="flex items-center gap-2">
+            <DataFreshness
+              dataUpdatedAt={dataUpdatedAt}
+              onRefresh={() => refetch()}
+              isRefreshing={isRefetching}
+            />
+            <Button
+              variant={autoRefresh ? "default" : "outline"}
+              size="sm"
+              onClick={toggleAutoRefresh}
+            >
+              {autoRefresh && (
+                <span className="mr-2 h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
+              )}
+              Live
+            </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm">

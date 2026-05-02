@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   Check,
   Crown,
@@ -139,21 +139,8 @@ function TeamsPage() {
     order: orderParam,
   } = Route.useSearch()
   const navigate = Route.useNavigate()
+  const searchInputRef = useRef<HTMLInputElement>(null)
   const { user, currentTeam, setCurrentTeam, setTeams } = useAuthStore()
-
-  // Keyboard shortcut: "N" opens the create page
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "n" && !e.ctrlKey && !e.metaKey && !e.altKey) {
-        const target = e.target as HTMLElement
-        if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return
-        e.preventDefault()
-        navigate({ to: "/teams/new" })
-      }
-    }
-    document.addEventListener("keydown", handleKeyDown)
-    return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [navigate])
 
   // Derive filter state from URL search params
   const search = searchParam ?? ""
@@ -320,6 +307,32 @@ function TeamsPage() {
   const hasData = sortedItems.length > 0
   const hasAnyTeams = (data?.items.length ?? 0) > 0
 
+  // Keyboard shortcuts: "N" new team, "/" to focus search, ArrowLeft/ArrowRight for pagination
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return
+      if (e.key === "n" && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault()
+        navigate({ to: "/teams/new" })
+      }
+      if (e.key === "/" && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault()
+        searchInputRef.current?.focus()
+      }
+      if (e.key === "ArrowLeft" && page > 1) {
+        e.preventDefault()
+        navigate({ search: (prev) => ({ ...prev, page: page - 1 > 1 ? page - 1 : undefined }) })
+      }
+      if (e.key === "ArrowRight" && page < totalPages) {
+        e.preventDefault()
+        navigate({ search: (prev) => ({ ...prev, page: page + 1 }) })
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [navigate, page, totalPages])
+
   const breadcrumbs = (
     <Breadcrumb>
       <BreadcrumbList>
@@ -403,12 +416,13 @@ function TeamsPage() {
           <div className="relative max-w-sm flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
+              ref={searchInputRef}
               placeholder="Search teams by name..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               className="pl-9 pr-8"
             />
-            {searchInput && (
+            {searchInput ? (
               <button
                 type="button"
                 onClick={() => setSearchInput("")}
@@ -417,6 +431,8 @@ function TeamsPage() {
                 <X className="h-3.5 w-3.5" />
                 <span className="sr-only">Clear search</span>
               </button>
+            ) : (
+              <kbd className="pointer-events-none absolute right-8 top-1/2 -translate-y-1/2 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">/</kbd>
             )}
           </div>
         </div>
@@ -577,6 +593,7 @@ function TeamsPage() {
                     disabled={page <= 1}
                   >
                     Previous
+                    <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&larr;</kbd>
                   </Button>
                   <Button
                     variant="outline"
@@ -589,9 +606,27 @@ function TeamsPage() {
                     disabled={page >= totalPages}
                   >
                     Next
+                    <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&rarr;</kbd>
                   </Button>
                 </div>
               )}
+            </div>
+
+            {/* Keyboard shortcut hints */}
+            <div className="hidden items-center justify-center gap-4 pt-1 text-[11px] text-muted-foreground/60 lg:flex">
+              <span className="inline-flex items-center gap-1.5">
+                <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded border border-border/50 bg-muted/50 px-1 font-mono text-[10px] font-medium">/</kbd>
+                Search
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded border border-border/50 bg-muted/50 px-1 font-mono text-[10px] font-medium">N</kbd>
+                New team
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded border border-border/50 bg-muted/50 px-1 font-mono text-[10px] font-medium">&larr;</kbd>
+                <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded border border-border/50 bg-muted/50 px-1 font-mono text-[10px] font-medium">&rarr;</kbd>
+                Navigate pages
+              </span>
             </div>
           </div>
         )}

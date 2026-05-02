@@ -13,6 +13,7 @@ import {
   PhoneIncoming,
   PhoneMissed,
   PhoneOutgoing,
+  Printer,
   Search,
   TrendingUp,
   X,
@@ -31,6 +32,7 @@ import {
 } from "recharts"
 
 import { Badge } from "@/components/ui/badge"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -212,7 +214,7 @@ function StatCard({
   icon: typeof Phone
 }) {
   return (
-    <Card>
+    <Card className="print:break-inside-avoid print:shadow-none print:border">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
         <Icon className="h-4 w-4 text-muted-foreground" />
@@ -615,7 +617,7 @@ function DashboardTab() {
   const [startDate, setStartDate] = useState(defaultDates.start)
   const [endDate, setEndDate] = useState(defaultDates.end)
 
-  const { data: summary, isLoading: summaryLoading } = useAnalyticsSummary(startDate, endDate)
+  const { data: summary, isLoading: summaryLoading, dataUpdatedAt, isRefetching, refetch } = useAnalyticsSummary(startDate, endDate)
   const { data: volumeData, isLoading: volumeLoading } = useAnalyticsVolume(startDate, endDate, "day")
   const { data: hourlyVolumeData, isLoading: hourlyVolumeLoading } = useAnalyticsVolume(startDate, endDate, "hour")
   const { data: extensionData, isLoading: extensionLoading } = useAnalyticsByExtension(startDate, endDate)
@@ -637,7 +639,7 @@ function DashboardTab() {
   return (
     <div className="space-y-6">
       {/* Date filter */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 print:hidden">
         <DateRangePresets startDate={startDate} endDate={endDate} onPreset={handleDatePreset} />
         <div className="h-5 w-px bg-border" />
         <DateRangeFilter
@@ -648,6 +650,13 @@ function DashboardTab() {
           onPreset={handleDatePreset}
           label="Date range"
         />
+        <div className="ml-auto flex items-center gap-2">
+          <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
+          <Button variant="outline" size="sm" onClick={() => window.print()}>
+            <Printer className="mr-2 h-4 w-4" />
+            Print Report
+          </Button>
+        </div>
       </div>
 
       {/* Summary stat cards */}
@@ -687,7 +696,7 @@ function DashboardTab() {
       ) : null}
 
       {/* Call volume chart */}
-      <Card>
+      <Card className="print:break-inside-avoid print:shadow-none print:border">
         <CardHeader>
           <CardTitle className="text-base">Call Volume</CardTitle>
         </CardHeader>
@@ -703,7 +712,7 @@ function DashboardTab() {
       </Card>
 
       {/* Per-extension table */}
-      <Card>
+      <Card className="print:break-inside-avoid print:shadow-none print:border">
         <CardHeader>
           <CardTitle className="text-base">By Extension</CardTitle>
         </CardHeader>
@@ -760,7 +769,7 @@ function DashboardTab() {
       </Card>
 
       {/* Call Activity Heatmap */}
-      <Card>
+      <Card className="print:break-inside-avoid print:shadow-none print:border">
         <CardHeader>
           <CardTitle className="text-base">Call Activity Heatmap</CardTitle>
           <p className="text-sm text-muted-foreground">
@@ -852,7 +861,7 @@ function CostAnalysisSection({
 
       <div className="grid gap-4 lg:grid-cols-2">
         {/* Cost by extension - horizontal bar chart */}
-        <Card>
+        <Card className="print:break-inside-avoid print:shadow-none print:border">
           <CardHeader>
             <CardTitle className="text-base">Top Extensions by Cost</CardTitle>
           </CardHeader>
@@ -909,7 +918,7 @@ function CostAnalysisSection({
         </Card>
 
         {/* Daily cost trend - area chart */}
-        <Card>
+        <Card className="print:break-inside-avoid print:shadow-none print:border">
           <CardHeader>
             <CardTitle className="text-base">Daily Cost Trend</CardTitle>
           </CardHeader>
@@ -1126,7 +1135,7 @@ function CallRecordsTab() {
   const sourceSearch = debouncedSearch || undefined
   const destinationSearch = debouncedSearch || undefined
 
-  const { data, isLoading, isError, refetch } = useCallRecords({
+  const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useCallRecords({
     page,
     pageSize: PAGE_SIZE,
     startDate: startDate || undefined,
@@ -1230,7 +1239,7 @@ function CallRecordsTab() {
       <CallVolumeSection items={filteredItems} />
 
       {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3 print:hidden">
         <div className="relative max-w-sm flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -1311,17 +1320,22 @@ function CallRecordsTab() {
       </div>
 
       {/* Export button */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between print:hidden">
         <p className="text-xs text-muted-foreground">
           {data?.total ?? 0} record{(data?.total ?? 0) === 1 ? "" : "s"}
           {activeFilterCount > 0 && " (filtered)"}
         </p>
         <div className="flex items-center gap-2">
+          <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
           {totalPages > 1 && (
             <p className="text-xs text-muted-foreground">
               Page {page} of {totalPages}
             </p>
           )}
+          <Button variant="outline" size="sm" onClick={() => window.print()}>
+            <Printer className="mr-2 h-4 w-4" />
+            Print Report
+          </Button>
           <Button variant="outline" size="sm" onClick={handleExportAll} disabled={!hasData}>
             <Download className="mr-2 h-4 w-4" />
             Export CSV
@@ -1367,7 +1381,7 @@ function CallRecordsTab() {
         />
       ) : (
         <>
-          <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
+          <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80 print:shadow-none">
             <Table aria-label="Call Records">
               <TableHeader>
                 <TableRow>
@@ -1446,7 +1460,7 @@ function CallRecordsTab() {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-end gap-2">
+            <div className="flex items-center justify-end gap-2 print:hidden">
               <Button
                 variant="outline"
                 size="sm"
@@ -1515,6 +1529,34 @@ function AnalyticsPage() {
 
   return (
     <PageContainer className="flex-1 space-y-8">
+      {/* Print styles: hide navigation chrome, expand content to full width */}
+      <style>{`
+        @media print {
+          /* Hide sidebar, top nav, breadcrumbs, and tab list when printing */
+          aside, nav, [data-sidebar], [data-topbar], header {
+            display: none !important;
+          }
+          /* Remove page container padding/margin constraints */
+          main, [data-page-container] {
+            margin: 0 !important;
+            padding: 0 !important;
+            max-width: 100% !important;
+            width: 100% !important;
+          }
+          /* Cards should not split across pages */
+          .recharts-responsive-container {
+            break-inside: avoid;
+          }
+          /* Ensure charts/grids use full width */
+          [role="tabpanel"] {
+            width: 100% !important;
+          }
+          /* Pagination controls hidden */
+          [data-pagination] {
+            display: none !important;
+          }
+        }
+      `}</style>
       <PageHeader
         eyebrow="Insights"
         title="Analytics"
@@ -1527,7 +1569,7 @@ function AnalyticsPage() {
           value={tab}
           onValueChange={(value) => navigate({ search: () => ({ tab: value }), replace: true })}
         >
-          <TabsList>
+          <TabsList className="print:hidden">
             <TabsTrigger value="dashboard" className="gap-1.5">
               <BarChart3 className="h-4 w-4" />
               Dashboard

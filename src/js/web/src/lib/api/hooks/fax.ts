@@ -244,8 +244,10 @@ export function useFaxMessages(params: {
   search?: string
   orderBy?: string
   sortOrder?: string
+  /** When set, the query will automatically refetch on this interval (ms). */
+  refetchInterval?: number | false
 }) {
-  const { page = 1, pageSize = 25, direction, status, search, orderBy, sortOrder } = params
+  const { page = 1, pageSize = 25, direction, status, search, orderBy, sortOrder, refetchInterval } = params
   return useQuery({
     queryKey: ["fax", "messages", page, pageSize, direction, status, search, orderBy, sortOrder],
     queryFn: async () => {
@@ -261,6 +263,7 @@ export function useFaxMessages(params: {
         `/api/fax/messages?${searchParams.toString()}`,
       )
     },
+    ...(refetchInterval !== undefined ? { refetchInterval } : {}),
   })
 }
 

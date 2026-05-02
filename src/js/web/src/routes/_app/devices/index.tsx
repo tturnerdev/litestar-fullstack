@@ -924,6 +924,19 @@ function DevicesPage() {
                 </div>
               )}
             </div>
+
+            {/* Keyboard shortcut hints */}
+            <div className="hidden items-center justify-center gap-4 pt-1 text-[11px] text-muted-foreground/60 lg:flex">
+              <span className="inline-flex items-center gap-1.5">
+                <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded border border-border/50 bg-muted/50 px-1 font-mono text-[10px] font-medium">/</kbd>
+                Search
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded border border-border/50 bg-muted/50 px-1 font-mono text-[10px] font-medium">&larr;</kbd>
+                <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded border border-border/50 bg-muted/50 px-1 font-mono text-[10px] font-medium">&rarr;</kbd>
+                Navigate pages
+              </span>
+            </div>
           </div>
         )}
       </PageSection>
