@@ -224,3 +224,115 @@ export function useAnalyticsByExtension(startDate?: string, endDate?: string) {
     enabled: !!startDate && !!endDate,
   })
 }
+
+// ---------------------------------------------------------------------------
+// Cost Analysis (aggregated from CDR data)
+// ---------------------------------------------------------------------------
+
+export interface CostSummary {
+  totalCost: number
+  avgCostPerCall: number
+  inboundCost: number
+  outboundCost: number
+  internalCost: number
+  callsWithCost: number
+  totalCalls: number
+}
+
+export interface CostByExtension {
+  extension: string
+  totalCost: number
+  callCount: number
+}
+
+export interface DailyCost {
+  date: string
+  cost: number
+  label: string
+}
+
+export function useAnalyticsCostBreakdown(startDate?: string, endDate?: string) {
+  return useQuery({
+    queryKey: ["analytics", "cost-breakdown", startDate, endDate],
+    queryFn: async () => {
+      // Fetch a large page of CDRs to aggregate cost data
+      const data = await apiFetch<PaginatedResponse<CallRecord>>(
+        `/api/analytics/cdrs${buildQueryString({
+          currentPage: 1,
+          pageSize: 1000,
+          start_date: startDate,
+          end_date: endDate,
+        })}`,
+      )
+
+      const items = data.items ?? []
+
+      // Cost summary
+      let totalCost = 0
+      let inboundCost = 0
+      let outboundCost = 0
+      let internalCost = 0
+      let callsWithCost = 0
+
+      // Cost by extension
+      const extensionCosts = new Map<string, { totalCost: number; callCount: number }>()
+
+      // Daily cost
+      const dailyCosts = new Map<string, number>()
+
+      for (const record of items) {
+        const cost = record.cost ?? 0
+        if (cost > 0) {
+          callsWithCost++
+          totalCost += cost
+
+          if (record.direction === "inbound") inboundCost += cost
+          else if (record.direction === "outbound") outboundCost += cost
+          else internalCost += cost
+
+          // By extension
+          const ext = record.extensionNumber ?? "Unknown"
+          const existing = extensionCosts.get(ext) ?? { totalCost: 0, callCount: 0 }
+          existing.totalCost += cost
+          existing.callCount++
+          extensionCosts.set(ext, existing)
+        }
+
+        // Daily cost (include zero-cost days for continuity)
+        if (record.startedAt) {
+          const dateKey = record.startedAt.split("T")[0]
+          dailyCosts.set(dateKey, (dailyCosts.get(dateKey) ?? 0) + cost)
+        }
+      }
+
+      const summary: CostSummary = {
+        totalCost,
+        avgCostPerCall: items.length > 0 ? totalCost / items.length : 0,
+        inboundCost,
+        outboundCost,
+        internalCost,
+        callsWithCost,
+        totalCalls: items.length,
+      }
+
+      const byExtension: CostByExtension[] = Array.from(extensionCosts.entries())
+        .map(([extension, stats]) => ({ extension, ...stats }))
+        .sort((a, b) => b.totalCost - a.totalCost)
+        .slice(0, 10)
+
+      const dailyTrend: DailyCost[] = Array.from(dailyCosts.entries())
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([date, cost]) => {
+          const d = new Date(date)
+          return {
+            date,
+            cost,
+            label: d.toLocaleDateString(undefined, { month: "short", day: "numeric" }),
+          }
+        })
+
+      return { summary, byExtension, dailyTrend }
+    },
+    enabled: !!startDate && !!endDate,
+  })
+}

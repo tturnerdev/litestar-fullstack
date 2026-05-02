@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { useQuery } from "@tanstack/react-query"
 import { useDocumentTitle } from "@/hooks/use-document-title"
@@ -6,6 +6,7 @@ import {
   Activity,
   AlertCircle,
   ArrowUpFromDot,
+  BarChart3,
   Cable,
   CheckCircle2,
   Circle,
@@ -13,6 +14,7 @@ import {
   Cpu,
   Database,
   ExternalLink,
+  Gauge,
   HardDrive,
   Layers,
   Loader2,
@@ -22,6 +24,7 @@ import {
   XCircle,
   Zap,
 } from "lucide-react"
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip, XAxis, YAxis } from "recharts"
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
@@ -823,6 +826,467 @@ function ExternalConnectionsCard() {
 }
 
 // ---------------------------------------------------------------------------
+// Worker Queue History Chart
+// ---------------------------------------------------------------------------
+
+interface QueueSnapshot {
+  time: string
+  active: number
+  queued: number
+  scheduled: number
+}
+
+const MAX_HISTORY_POINTS = 20
+
+function useQueueHistory(
+  queues: Array<{ name: string; active?: number; queued?: number; scheduled?: number }> | undefined,
+) {
+  const historyRef = useRef<QueueSnapshot[]>([])
+  const lastUpdateRef = useRef<number>(0)
+
+  useEffect(() => {
+    if (!queues) return
+    const now = Date.now()
+    // Throttle: only add a point every 10 seconds minimum
+    if (now - lastUpdateRef.current < 10_000 && historyRef.current.length > 0) return
+    lastUpdateRef.current = now
+
+    const totalActive = queues.reduce((sum, q) => sum + (q.active ?? 0), 0)
+    const totalQueued = queues.reduce((sum, q) => sum + (q.queued ?? 0), 0)
+    const totalScheduled = queues.reduce((sum, q) => sum + (q.scheduled ?? 0), 0)
+
+    const snapshot: QueueSnapshot = {
+      time: new Date(now).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" }),
+      active: totalActive,
+      queued: totalQueued,
+      scheduled: totalScheduled,
+    }
+    historyRef.current = [...historyRef.current.slice(-(MAX_HISTORY_POINTS - 1)), snapshot]
+  }, [queues])
+
+  return historyRef.current
+}
+
+function WorkerQueueHistoryChart({
+  queues,
+}: {
+  queues?: Array<{ name: string; active?: number; queued?: number; scheduled?: number }>
+}) {
+  const history = useQueueHistory(queues)
+
+  // Calculate throughput estimate from snapshot deltas
+  const throughputEstimate = useMemo(() => {
+    if (!queues) return null
+    const totalActive = queues.reduce((sum, q) => sum + (q.active ?? 0), 0)
+    const totalQueued = queues.reduce((sum, q) => sum + (q.queued ?? 0), 0)
+    const totalScheduled = queues.reduce((sum, q) => sum + (q.scheduled ?? 0), 0)
+    const total = totalActive + totalQueued + totalScheduled
+    if (total === 0 && totalActive === 0) return { rate: 0, label: "Idle" }
+    // Estimate: active jobs are processing, so throughput ~ active jobs per refresh cycle
+    return {
+      rate: totalActive,
+      label: totalActive > 0 ? `~${totalActive} jobs/cycle` : "Idle",
+    }
+  }, [queues])
+
+  const hasHistory = history.length >= 2
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <BarChart3 className="h-4 w-4 text-muted-foreground" />
+          Queue Activity
+        </CardTitle>
+        <CardDescription>
+          {hasHistory
+            ? "Job counts sampled over recent refreshes."
+            : "Live throughput estimate based on current queue state."}
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {hasHistory ? (
+          <div className="h-[200px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={history} margin={{ top: 8, right: 8, bottom: 0, left: -20 }}>
+                <defs>
+                  <linearGradient id="activeGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.02} />
+                  </linearGradient>
+                  <linearGradient id="queuedGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="hsl(38 92% 50%)" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="hsl(38 92% 50%)" stopOpacity={0.02} />
+                  </linearGradient>
+                  <linearGradient id="scheduledGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="hsl(var(--muted-foreground))" stopOpacity={0.2} />
+                    <stop offset="95%" stopColor="hsl(var(--muted-foreground))" stopOpacity={0.02} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.5} />
+                <XAxis
+                  dataKey="time"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                  dy={4}
+                />
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                  allowDecimals={false}
+                  width={35}
+                />
+                <RechartsTooltip
+                  contentStyle={{
+                    backgroundColor: "hsl(var(--popover))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "6px",
+                    fontSize: "12px",
+                  }}
+                  labelStyle={{ color: "hsl(var(--popover-foreground))", fontWeight: 500 }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="active"
+                  name="Active"
+                  stroke="hsl(var(--primary))"
+                  fill="url(#activeGradient)"
+                  strokeWidth={2}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="queued"
+                  name="Pending"
+                  stroke="hsl(38 92% 50%)"
+                  fill="url(#queuedGradient)"
+                  strokeWidth={2}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="scheduled"
+                  name="Scheduled"
+                  stroke="hsl(var(--muted-foreground))"
+                  fill="url(#scheduledGradient)"
+                  strokeWidth={1.5}
+                  strokeDasharray="4 2"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-8 text-center">
+            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+              <BarChart3 className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <p className="text-sm font-medium">
+              {throughputEstimate?.rate ?? 0 > 0 ? "Processing" : "No Active Jobs"}
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {throughputEstimate?.label ?? "Idle"}
+            </p>
+            <p className="mt-3 text-[11px] text-muted-foreground">
+              Enable auto-refresh to build a history chart of queue activity over time.
+            </p>
+          </div>
+        )}
+
+        {/* Chart legend */}
+        {hasHistory && (
+          <div className="mt-3 flex items-center justify-center gap-4">
+            <div className="flex items-center gap-1.5">
+              <span className="inline-block h-2 w-2 rounded-full bg-primary" />
+              <span className="text-[10px] text-muted-foreground">Active</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: "hsl(38 92% 50%)" }} />
+              <span className="text-[10px] text-muted-foreground">Pending</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="inline-block h-2 w-2 rounded-full bg-muted-foreground/50" />
+              <span className="text-[10px] text-muted-foreground">Scheduled</span>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// System Status Timeline
+// ---------------------------------------------------------------------------
+
+type TimelineSegmentStatus = "up" | "down" | "degraded" | "unknown"
+
+interface TimelineSegment {
+  startHour: number
+  status: TimelineSegmentStatus
+  label: string
+}
+
+function useStatusTimeline(startedAt: string, databaseStatus: "online" | "offline") {
+  return useMemo(() => {
+    const now = new Date()
+    const segments: TimelineSegment[] = []
+    const serverStart = new Date(startedAt)
+    const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000)
+
+    for (let i = 0; i < 24; i++) {
+      const segmentStart = new Date(twentyFourHoursAgo.getTime() + i * 60 * 60 * 1000)
+      const segmentEnd = new Date(segmentStart.getTime() + 60 * 60 * 1000)
+
+      let status: TimelineSegmentStatus
+      if (segmentEnd <= serverStart) {
+        // Before server started -- unknown/down
+        status = "unknown"
+      } else if (segmentStart >= serverStart) {
+        // Server was running during this entire segment
+        status = databaseStatus === "online" ? "up" : "degraded"
+      } else {
+        // Server started partway through this segment
+        status = "degraded"
+      }
+
+      const hourLabel = segmentStart.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+      segments.push({
+        startHour: i,
+        status,
+        label: hourLabel,
+      })
+    }
+
+    return segments
+  }, [startedAt, databaseStatus])
+}
+
+const timelineStatusColors: Record<TimelineSegmentStatus, string> = {
+  up: "bg-emerald-500",
+  down: "bg-destructive",
+  degraded: "bg-amber-500",
+  unknown: "bg-muted-foreground/20",
+}
+
+const timelineStatusLabels: Record<TimelineSegmentStatus, string> = {
+  up: "Operational",
+  down: "Down",
+  degraded: "Degraded",
+  unknown: "No data",
+}
+
+function SystemStatusTimeline({
+  startedAt,
+  databaseStatus,
+}: {
+  startedAt: string
+  databaseStatus: "online" | "offline"
+}) {
+  const segments = useStatusTimeline(startedAt, databaseStatus)
+
+  const uptimePercent = useMemo(() => {
+    const upCount = segments.filter((s) => s.status === "up").length
+    return Math.round((upCount / segments.length) * 100)
+  }, [segments])
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              Uptime Timeline
+            </CardTitle>
+            <CardDescription>System availability over the last 24 hours.</CardDescription>
+          </div>
+          <Badge
+            variant="outline"
+            className={`text-xs ${uptimePercent >= 99 ? "text-emerald-600 dark:text-emerald-400" : uptimePercent >= 90 ? "text-amber-600 dark:text-amber-400" : "text-destructive"}`}
+          >
+            {uptimePercent}% uptime
+          </Badge>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {/* Timeline bar */}
+        <div className="space-y-3">
+          <div className="flex h-8 w-full gap-[2px] overflow-hidden rounded-md">
+            {segments.map((seg) => (
+              <Tooltip key={seg.startHour}>
+                <TooltipTrigger asChild>
+                  <div
+                    className={`flex-1 cursor-default transition-opacity hover:opacity-80 ${timelineStatusColors[seg.status]}`}
+                  />
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="text-xs">
+                  <p className="font-medium">{seg.label}</p>
+                  <p className="text-muted-foreground">{timelineStatusLabels[seg.status]}</p>
+                </TooltipContent>
+              </Tooltip>
+            ))}
+          </div>
+
+          {/* Time labels */}
+          <div className="flex justify-between text-[10px] text-muted-foreground">
+            <span>{segments[0]?.label ?? ""}</span>
+            <span>{segments[Math.floor(segments.length / 4)]?.label ?? ""}</span>
+            <span>{segments[Math.floor(segments.length / 2)]?.label ?? ""}</span>
+            <span>{segments[Math.floor((segments.length * 3) / 4)]?.label ?? ""}</span>
+            <span>Now</span>
+          </div>
+
+          {/* Legend */}
+          <div className="flex items-center gap-4">
+            {(["up", "degraded", "down", "unknown"] as const).map((status) => (
+              <div key={status} className="flex items-center gap-1.5">
+                <span className={`inline-block h-2 w-2 rounded-sm ${timelineStatusColors[status]}`} />
+                <span className="text-[10px] text-muted-foreground">{timelineStatusLabels[status]}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Resource Utilization Gauges
+// ---------------------------------------------------------------------------
+
+function CircularGauge({
+  value,
+  max,
+  label,
+  sublabel,
+  size = 96,
+  strokeWidth = 8,
+}: {
+  value: number
+  max: number
+  label: string
+  sublabel?: string
+  size?: number
+  strokeWidth?: number
+}) {
+  const percentage = max > 0 ? Math.min((value / max) * 100, 100) : 0
+  const radius = (size - strokeWidth) / 2
+  const circumference = 2 * Math.PI * radius
+  const offset = circumference - (percentage / 100) * circumference
+
+  // Color based on utilization
+  const getColor = (pct: number) => {
+    if (pct >= 90) return "text-destructive"
+    if (pct >= 70) return "text-amber-500"
+    return "text-emerald-500"
+  }
+  const getStroke = (pct: number) => {
+    if (pct >= 90) return "stroke-destructive"
+    if (pct >= 70) return "stroke-amber-500"
+    return "stroke-emerald-500"
+  }
+
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <div className="relative" style={{ width: size, height: size }}>
+        <svg width={size} height={size} className="-rotate-90">
+          {/* Background ring */}
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            fill="none"
+            stroke="hsl(var(--muted))"
+            strokeWidth={strokeWidth}
+          />
+          {/* Progress ring */}
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            fill="none"
+            className={getStroke(percentage)}
+            strokeWidth={strokeWidth}
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            style={{ transition: "stroke-dashoffset 0.5s ease-in-out" }}
+          />
+        </svg>
+        {/* Center text */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className={`text-lg font-bold tabular-nums ${getColor(percentage)}`}>
+            {Math.round(percentage)}%
+          </span>
+        </div>
+      </div>
+      <div className="text-center">
+        <p className="text-xs font-medium">{label}</p>
+        {sublabel && <p className="text-[10px] text-muted-foreground">{sublabel}</p>}
+      </div>
+    </div>
+  )
+}
+
+function QueueUtilizationGauges({
+  queues,
+}: {
+  queues: Array<{ name: string; active?: number; queued?: number; scheduled?: number }>
+}) {
+  // Compute utilization metrics from queue data
+  const metrics = useMemo(() => {
+    const totalActive = queues.reduce((sum, q) => sum + (q.active ?? 0), 0)
+    const totalQueued = queues.reduce((sum, q) => sum + (q.queued ?? 0), 0)
+    const totalScheduled = queues.reduce((sum, q) => sum + (q.scheduled ?? 0), 0)
+    const totalJobs = totalActive + totalQueued + totalScheduled
+
+    // Derive a capacity estimate: each queue can reasonably handle ~100 jobs
+    const estimatedCapacity = Math.max(queues.length * 100, totalJobs, 1)
+    // Worker load: active as portion of total pipeline
+    const pipelineTotal = totalActive + totalQueued
+    const workerLoad = pipelineTotal > 0 ? (totalActive / pipelineTotal) * 100 : 0
+
+    return {
+      queueDepth: { value: totalJobs, max: estimatedCapacity, label: "Queue Depth", sublabel: `${totalJobs} total jobs` },
+      workerLoad: { value: Math.round(workerLoad), max: 100, label: "Worker Load", sublabel: `${totalActive} active` },
+      pendingRatio: {
+        value: totalQueued,
+        max: Math.max(totalQueued + totalActive, 1),
+        label: "Backlog",
+        sublabel: `${totalQueued} pending`,
+      },
+      scheduledLoad: {
+        value: totalScheduled,
+        max: Math.max(estimatedCapacity, 1),
+        label: "Scheduled",
+        sublabel: `${totalScheduled} upcoming`,
+      },
+    }
+  }, [queues])
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Gauge className="h-4 w-4 text-muted-foreground" />
+          Queue Utilization
+        </CardTitle>
+        <CardDescription>Worker and queue capacity utilization gauges.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
+          <CircularGauge {...metrics.queueDepth} />
+          <CircularGauge {...metrics.workerLoad} />
+          <CircularGauge {...metrics.pendingRatio} />
+          <CircularGauge {...metrics.scheduledLoad} />
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Page
 // ---------------------------------------------------------------------------
 
@@ -904,6 +1368,11 @@ function AdminSystemPage() {
                 <ServiceStatusGrid databaseStatus={data.databaseStatus} workerQueues={data.workerQueues} />
               </SectionErrorBoundary>
 
+              {/* System status timeline */}
+              <SectionErrorBoundary name="Uptime Timeline">
+                <SystemStatusTimeline startedAt={data.startedAt} databaseStatus={data.databaseStatus} />
+              </SectionErrorBoundary>
+
               {/* Two-column layout: System info + Worker queues */}
               <div className="grid gap-6 lg:grid-cols-2">
                 <SectionErrorBoundary name="System Information">
@@ -932,6 +1401,34 @@ function AdminSystemPage() {
                       <CardContent>
                         <p className="text-sm text-muted-foreground">
                           No worker queue data available. Workers may not be running.
+                        </p>
+                      </CardContent>
+                    </Card>
+                  )}
+                </SectionErrorBoundary>
+              </div>
+
+              {/* Queue activity chart + utilization gauges */}
+              <div className="grid gap-6 lg:grid-cols-2">
+                <SectionErrorBoundary name="Queue Activity">
+                  <WorkerQueueHistoryChart queues={data.workerQueues} />
+                </SectionErrorBoundary>
+
+                <SectionErrorBoundary name="Queue Utilization">
+                  {data.workerQueues && data.workerQueues.length > 0 ? (
+                    <QueueUtilizationGauges queues={data.workerQueues} />
+                  ) : (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-base">
+                          <Gauge className="h-4 w-4 text-muted-foreground" />
+                          Queue Utilization
+                        </CardTitle>
+                        <CardDescription>Worker and queue capacity gauges.</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-muted-foreground">
+                          No queue data available. Workers may not be running.
                         </p>
                       </CardContent>
                     </Card>

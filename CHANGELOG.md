@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.207.0 (2026-05-02)
+
+### Added
+- **System uptime timeline** — 24-hour color-coded bar visualization showing operational, degraded, and down periods on the admin system page
+- **Queue activity chart** — Live area chart tracking active, pending, and scheduled jobs over time with auto-refresh history sampling
+- **Queue utilization gauges** — Four circular progress gauges showing queue depth, worker load, backlog, and scheduled job capacity
+- **Analytics cost breakdown hook** — Client-side CDR aggregation for cost analysis (total, per-call, by direction, by extension, daily trends)
+
 ## v0.206.0 (2026-05-02)
 
 ### Added
