@@ -205,7 +205,7 @@ function TagsPage() {
 
   const handleRowClick = useCallback(
     (tagId: string) => {
-      navigate({ to: "/tags/$tagId/edit", params: { tagId } })
+      navigate({ to: "/tags/$tagId", params: { tagId } })
     },
     [navigate],
   )
@@ -513,9 +513,10 @@ function TagRow({
       </TableCell>
       <TableCell className="font-medium">
         <Link
-          to="/tags/$tagId/edit"
+          to="/tags/$tagId"
           params={{ tagId: tag.id }}
           onClick={(e) => e.stopPropagation()}
+          className="hover:underline"
         >
           <Badge variant="secondary">{tag.name}</Badge>
         </Link>
@@ -537,7 +538,7 @@ function TagRow({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem asChild>
-              <Link to="/tags/$tagId/edit" params={{ tagId: tag.id }}>
+              <Link to="/tags/$tagId" params={{ tagId: tag.id }}>
                 <Eye className="mr-2 h-4 w-4" />
                 View details
               </Link>

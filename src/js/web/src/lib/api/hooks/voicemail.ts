@@ -127,6 +127,25 @@ export function useUpdateVoicemailBox(boxId: string) {
   })
 }
 
+export function useDeleteVoicemailBox() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (boxId: string) =>
+      apiFetch<void>(`/api/voicemail/boxes/${boxId}`, {
+        method: "DELETE",
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["voicemail", "boxes"] })
+      toast.success("Voicemail box deleted")
+    },
+    onError: (error) => {
+      toast.error("Unable to delete voicemail box", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
+    },
+  })
+}
+
 // ---------------------------------------------------------------------------
 // Voicemail Messages
 // ---------------------------------------------------------------------------

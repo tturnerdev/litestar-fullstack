@@ -91,6 +91,7 @@ import { Route as AppVoicePhoneNumbersIndexRouteImport } from './routes/_app/voi
 import { Route as AppVoiceExtensionsIndexRouteImport } from './routes/_app/voice/extensions/index'
 import { Route as AppTeamsTeamIdIndexRouteImport } from './routes/_app/teams/$teamId/index'
 import { Route as AppTasksTaskIdIndexRouteImport } from './routes/_app/tasks/$taskId/index'
+import { Route as AppTagsTagIdIndexRouteImport } from './routes/_app/tags/$tagId/index'
 import { Route as AppSupportTicketIdIndexRouteImport } from './routes/_app/support/$ticketId/index'
 import { Route as AppSchedulesScheduleIdIndexRouteImport } from './routes/_app/schedules/$scheduleId/index'
 import { Route as AppLocationsLocationIdIndexRouteImport } from './routes/_app/locations/$locationId/index'
@@ -534,6 +535,11 @@ const AppTasksTaskIdIndexRoute = AppTasksTaskIdIndexRouteImport.update({
   path: '/tasks/$taskId/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppTagsTagIdIndexRoute = AppTagsTagIdIndexRouteImport.update({
+  id: '/tags/$tagId/',
+  path: '/tags/$tagId/',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppSupportTicketIdIndexRoute = AppSupportTicketIdIndexRouteImport.update({
   id: '/$ticketId/',
   path: '/$ticketId/',
@@ -816,6 +822,7 @@ export interface FileRoutesByFullPath {
   '/locations/$locationId/': typeof AppLocationsLocationIdIndexRoute
   '/schedules/$scheduleId/': typeof AppSchedulesScheduleIdIndexRoute
   '/support/$ticketId/': typeof AppSupportTicketIdIndexRoute
+  '/tags/$tagId/': typeof AppTagsTagIdIndexRoute
   '/tasks/$taskId/': typeof AppTasksTaskIdIndexRoute
   '/teams/$teamId/': typeof AppTeamsTeamIdIndexRoute
   '/voice/extensions/': typeof AppVoiceExtensionsIndexRoute
@@ -914,6 +921,7 @@ export interface FileRoutesByTo {
   '/locations/$locationId': typeof AppLocationsLocationIdIndexRoute
   '/schedules/$scheduleId': typeof AppSchedulesScheduleIdIndexRoute
   '/support/$ticketId': typeof AppSupportTicketIdIndexRoute
+  '/tags/$tagId': typeof AppTagsTagIdIndexRoute
   '/tasks/$taskId': typeof AppTasksTaskIdIndexRoute
   '/teams/$teamId': typeof AppTeamsTeamIdIndexRoute
   '/voice/extensions': typeof AppVoiceExtensionsIndexRoute
@@ -1031,6 +1039,7 @@ export interface FileRoutesById {
   '/_app/locations/$locationId/': typeof AppLocationsLocationIdIndexRoute
   '/_app/schedules/$scheduleId/': typeof AppSchedulesScheduleIdIndexRoute
   '/_app/support/$ticketId/': typeof AppSupportTicketIdIndexRoute
+  '/_app/tags/$tagId/': typeof AppTagsTagIdIndexRoute
   '/_app/tasks/$taskId/': typeof AppTasksTaskIdIndexRoute
   '/_app/teams/$teamId/': typeof AppTeamsTeamIdIndexRoute
   '/_app/voice/extensions/': typeof AppVoiceExtensionsIndexRoute
@@ -1147,6 +1156,7 @@ export interface FileRouteTypes {
     | '/locations/$locationId/'
     | '/schedules/$scheduleId/'
     | '/support/$ticketId/'
+    | '/tags/$tagId/'
     | '/tasks/$taskId/'
     | '/teams/$teamId/'
     | '/voice/extensions/'
@@ -1245,6 +1255,7 @@ export interface FileRouteTypes {
     | '/locations/$locationId'
     | '/schedules/$scheduleId'
     | '/support/$ticketId'
+    | '/tags/$tagId'
     | '/tasks/$taskId'
     | '/teams/$teamId'
     | '/voice/extensions'
@@ -1361,6 +1372,7 @@ export interface FileRouteTypes {
     | '/_app/locations/$locationId/'
     | '/_app/schedules/$scheduleId/'
     | '/_app/support/$ticketId/'
+    | '/_app/tags/$tagId/'
     | '/_app/tasks/$taskId/'
     | '/_app/teams/$teamId/'
     | '/_app/voice/extensions/'
@@ -1957,6 +1969,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppTasksTaskIdIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/tags/$tagId/': {
+      id: '/_app/tags/$tagId/'
+      path: '/tags/$tagId'
+      fullPath: '/tags/$tagId/'
+      preLoaderRoute: typeof AppTagsTagIdIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/support/$ticketId/': {
       id: '/_app/support/$ticketId/'
       path: '/$ticketId'
@@ -2501,6 +2520,7 @@ interface AppRouteChildren {
   AppVoiceExtensionsNewRoute: typeof AppVoiceExtensionsNewRoute
   AppFaxMessagesIndexRoute: typeof AppFaxMessagesIndexRoute
   AppFaxNumbersIndexRoute: typeof AppFaxNumbersIndexRoute
+  AppTagsTagIdIndexRoute: typeof AppTagsTagIdIndexRoute
   AppTasksTaskIdIndexRoute: typeof AppTasksTaskIdIndexRoute
   AppVoiceExtensionsIndexRoute: typeof AppVoiceExtensionsIndexRoute
   AppVoiceExtensionsExtensionIdDndRoute: typeof AppVoiceExtensionsExtensionIdDndRoute
@@ -2545,6 +2565,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppVoiceExtensionsNewRoute: AppVoiceExtensionsNewRoute,
   AppFaxMessagesIndexRoute: AppFaxMessagesIndexRoute,
   AppFaxNumbersIndexRoute: AppFaxNumbersIndexRoute,
+  AppTagsTagIdIndexRoute: AppTagsTagIdIndexRoute,
   AppTasksTaskIdIndexRoute: AppTasksTaskIdIndexRoute,
   AppVoiceExtensionsIndexRoute: AppVoiceExtensionsIndexRoute,
   AppVoiceExtensionsExtensionIdDndRoute: AppVoiceExtensionsExtensionIdDndRoute,

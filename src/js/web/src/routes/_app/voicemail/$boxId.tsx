@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useBlocker } from "@tanstack/react-router"
+import { createFileRoute, Link, useBlocker, useNavigate } from "@tanstack/react-router"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 import {
@@ -7,6 +7,7 @@ import {
   ArrowLeft,
   BellRing,
   CheckSquare,
+  Copy,
   Eye,
   EyeOff,
   Inbox,
@@ -14,6 +15,7 @@ import {
   Mail,
   MailOpen,
   Mic,
+  MoreHorizontal,
   Pencil,
   Save,
   Settings2,
@@ -45,6 +47,13 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -62,6 +71,7 @@ import { formatDateTime, formatFullDateTime, formatRelativeTimeShort } from "@/l
 import { formatDuration, formatDurationHuman } from "@/lib/format-utils"
 import { cn } from "@/lib/utils"
 import {
+  useDeleteVoicemailBox,
   useDeleteVoicemailMessage,
   useToggleVoicemailRead,
   useUpdateVoicemailBox,
@@ -98,7 +108,10 @@ function formatRetention(days: number): string {
 
 function VoicemailBoxDetailPage() {
   const { boxId } = Route.useParams()
+  const navigate = useNavigate()
   const { data: box, isLoading, isError, refetch } = useVoicemailBox(boxId)
+  const deleteBoxMutation = useDeleteVoicemailBox()
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const boxLabel = box?.extensionNumber
     ? `Ext. ${box.extensionNumber}`
@@ -203,6 +216,33 @@ function VoicemailBoxDetailPage() {
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back to Voicemail
               </Link>
             </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                  <MoreHorizontal className="h-4 w-4" />
+                  <span className="sr-only">More actions</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={() => {
+                    navigator.clipboard.writeText(boxId)
+                    toast.success("Box ID copied to clipboard")
+                  }}
+                >
+                  <Copy className="mr-2 h-4 w-4" />
+                  Copy Box ID
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  variant="destructive"
+                  onClick={() => setShowDeleteConfirm(true)}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         }
       />
@@ -224,6 +264,55 @@ function VoicemailBoxDetailPage() {
           targetId={boxId}
         />
       </PageSection>
+
+      {/* Delete box confirmation */}
+      <AlertDialog
+        open={showDeleteConfirm}
+        onOpenChange={(open) => {
+          if (!deleteBoxMutation.isPending) setShowDeleteConfirm(open)
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="size-5" />
+              Delete voicemail box
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the voicemail box for{" "}
+              <span className="font-medium text-foreground">{boxLabel}</span>
+              {" "}and all associated messages. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteBoxMutation.isPending}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteBoxMutation.mutate(boxId, {
+                onSuccess: () => {
+                  setShowDeleteConfirm(false)
+                  navigate({ to: "/voicemail" })
+                },
+              })}
+              disabled={deleteBoxMutation.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteBoxMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-1 size-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="mr-1 size-4" />
+                  Delete
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PageContainer>
   )
 }

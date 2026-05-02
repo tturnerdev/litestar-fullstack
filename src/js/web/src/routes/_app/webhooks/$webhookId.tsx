@@ -1,5 +1,5 @@
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
-import { useState } from "react"
+import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
+import { useCallback, useMemo, useRef, useState } from "react"
 import {
   Activity,
   AlertCircle,
@@ -14,8 +14,11 @@ import {
   Globe,
   Loader2,
   MoreHorizontal,
+  Pencil,
   Play,
+  Save,
   Trash2,
+  X,
   XCircle,
 } from "lucide-react"
 import {
@@ -47,6 +50,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
+import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -59,6 +63,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { Textarea } from "@/components/ui/textarea"
 import { CopyButton } from "@/components/ui/copy-button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDocumentTitle } from "@/hooks/use-document-title"
@@ -75,6 +80,52 @@ import type { WebhookDelivery } from "@/lib/api/hooks/webhooks"
 export const Route = createFileRoute("/_app/webhooks/$webhookId")({
   component: WebhookDetailPage,
 })
+
+// -- Constants ----------------------------------------------------------------
+
+const AVAILABLE_EVENTS = [
+  "extension.created",
+  "extension.updated",
+  "extension.deleted",
+  "device.created",
+  "device.updated",
+  "device.deleted",
+  "phone_number.created",
+  "phone_number.updated",
+  "ticket.created",
+  "ticket.updated",
+  "ticket.closed",
+  "user.created",
+  "user.updated",
+  "voicemail.received",
+] as const
+
+const EVENT_CATEGORIES: { label: string; events: string[] }[] = [
+  {
+    label: "Extensions",
+    events: ["extension.created", "extension.updated", "extension.deleted"],
+  },
+  {
+    label: "Devices",
+    events: ["device.created", "device.updated", "device.deleted"],
+  },
+  {
+    label: "Phone Numbers",
+    events: ["phone_number.created", "phone_number.updated"],
+  },
+  {
+    label: "Tickets",
+    events: ["ticket.created", "ticket.updated", "ticket.closed"],
+  },
+  {
+    label: "Users",
+    events: ["user.created", "user.updated"],
+  },
+  {
+    label: "Voicemail",
+    events: ["voicemail.received"],
+  },
+]
 
 // -- Helpers ------------------------------------------------------------------
 
@@ -151,6 +202,86 @@ function WebhookDetailPage() {
 
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [showSecret, setShowSecret] = useState(false)
+
+  // -- Inline editing state ---------------------------------------------------
+
+  const [editing, setEditing] = useState(false)
+  const [editName, setEditName] = useState("")
+  const [editUrl, setEditUrl] = useState("")
+  const [editDescription, setEditDescription] = useState("")
+  const [editActive, setEditActive] = useState(true)
+  const [editEvents, setEditEvents] = useState<string[]>([])
+  const justSavedRef = useRef(false)
+
+  const formDirty = useMemo(() => {
+    if (!editing || !data) return false
+    return (
+      editName !== data.name ||
+      editUrl !== data.url ||
+      editDescription !== (data.description ?? "") ||
+      editActive !== data.isActive ||
+      JSON.stringify([...editEvents].sort()) !== JSON.stringify([...data.events].sort())
+    )
+  }, [editing, data, editName, editUrl, editDescription, editActive, editEvents])
+
+  const blocker = useBlocker({
+    shouldBlockFn: () => formDirty && !justSavedRef.current,
+    withResolver: true,
+  })
+
+  const handleStartEditing = useCallback(() => {
+    if (!data) return
+    setEditName(data.name)
+    setEditUrl(data.url)
+    setEditDescription(data.description ?? "")
+    setEditActive(data.isActive)
+    setEditEvents([...data.events])
+    setEditing(true)
+  }, [data])
+
+  const handleCancelEditing = useCallback(() => {
+    setEditing(false)
+  }, [])
+
+  const handleSaveEditing = useCallback(() => {
+    if (!data) return
+    justSavedRef.current = true
+    const payload: Record<string, unknown> = {}
+    if (editName !== data.name) payload.name = editName
+    if (editUrl !== data.url) payload.url = editUrl
+    if (editDescription !== (data.description ?? "")) payload.description = editDescription || undefined
+    if (editActive !== data.isActive) payload.isActive = editActive
+    if (JSON.stringify([...editEvents].sort()) !== JSON.stringify([...data.events].sort())) {
+      payload.events = editEvents
+    }
+    if (Object.keys(payload).length === 0) {
+      setEditing(false)
+      justSavedRef.current = false
+      return
+    }
+    updateWebhook.mutate(payload as Parameters<typeof updateWebhook.mutate>[0], {
+      onSuccess: () => {
+        setEditing(false)
+      },
+      onSettled: () => {
+        justSavedRef.current = false
+      },
+    })
+  }, [data, editName, editUrl, editDescription, editActive, editEvents, updateWebhook])
+
+  const toggleEvent = useCallback((event: string) => {
+    setEditEvents((prev) =>
+      prev.includes(event) ? prev.filter((e) => e !== event) : [...prev, event],
+    )
+  }, [])
+
+  const selectAllEvents = useCallback(() => {
+    setEditEvents([...AVAILABLE_EVENTS])
+  }, [])
+
+  const clearAllEvents = useCallback(() => {
+    setEditEvents([])
+  }, [])
 
   // -- Loading state ----------------------------------------------------------
 
@@ -287,7 +418,7 @@ function WebhookDetailPage() {
         }
         actions={
           <div className="flex items-center gap-3">
-            {data.isActive ? (
+            {(editing ? editActive : data.isActive) ? (
               <Badge className="gap-1 bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400">
                 <Check className="h-3 w-3" />
                 Active
@@ -298,39 +429,60 @@ function WebhookDetailPage() {
                 Inactive
               </Badge>
             )}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <MoreHorizontal className="h-4 w-4" />
-                  <span className="sr-only">Actions</span>
+            {editing ? (
+              <>
+                <Button size="sm" variant="outline" onClick={handleCancelEditing} disabled={updateWebhook.isPending}>
+                  <X className="mr-2 h-4 w-4" /> Cancel
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => navigator.clipboard.writeText(webhookId)}>
-                  <Copy className="mr-2 h-4 w-4" />
-                  Copy Webhook ID
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={handleTest}
-                  disabled={testWebhookMutation.isPending}
-                >
-                  {testWebhookMutation.isPending ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Play className="mr-2 h-4 w-4" />
-                  )}
-                  Send Test
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="text-destructive focus:text-destructive"
-                  onClick={() => setDeleteOpen(true)}
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete Webhook
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                <Button size="sm" onClick={handleSaveEditing} disabled={updateWebhook.isPending}>
+                  {updateWebhook.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                  {updateWebhook.isPending ? "Saving..." : "Save changes"}
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button size="sm" onClick={handleStartEditing}>
+                  <Pencil className="mr-2 h-4 w-4" /> Edit
+                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <MoreHorizontal className="h-4 w-4" />
+                      <span className="sr-only">Actions</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={handleStartEditing}>
+                      <Pencil className="mr-2 h-4 w-4" />
+                      Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigator.clipboard.writeText(webhookId)}>
+                      <Copy className="mr-2 h-4 w-4" />
+                      Copy Webhook ID
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={handleTest}
+                      disabled={testWebhookMutation.isPending}
+                    >
+                      {testWebhookMutation.isPending ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Play className="mr-2 h-4 w-4" />
+                      )}
+                      Send Test
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="text-destructive focus:text-destructive"
+                      onClick={() => setDeleteOpen(true)}
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete Webhook
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            )}
           </div>
         }
       />
@@ -345,55 +497,176 @@ function WebhookDetailPage() {
             </div>
           </CardHeader>
           <CardContent>
+            {editing && formDirty && (
+              <div className="mb-4 flex items-center gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-400">
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-500" />
+                You have unsaved changes
+              </div>
+            )}
+
             <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
+              {/* Name */}
               <div>
                 <p className="text-muted-foreground">Name</p>
-                <p className="font-medium">{data.name}</p>
+                {editing ? (
+                  <Input
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    placeholder="Webhook name"
+                    className="mt-1"
+                    disabled={updateWebhook.isPending}
+                  />
+                ) : (
+                  <p className="font-medium">{data.name}</p>
+                )}
               </div>
+
+              {/* URL */}
               <div className="md:col-span-2 lg:col-span-2">
                 <p className="text-muted-foreground">URL</p>
-                <div className="flex items-center gap-1">
-                  <p className="font-mono text-xs break-all">{data.url}</p>
-                  <CopyButton value={data.url} label="URL" />
-                </div>
+                {editing ? (
+                  <Input
+                    type="url"
+                    value={editUrl}
+                    onChange={(e) => setEditUrl(e.target.value)}
+                    placeholder="https://example.com/webhook"
+                    className="mt-1 font-mono text-xs"
+                    disabled={updateWebhook.isPending}
+                  />
+                ) : (
+                  <div className="flex items-center gap-1">
+                    <p className="font-mono text-xs break-all">{data.url}</p>
+                    <CopyButton value={data.url} label="URL" />
+                  </div>
+                )}
               </div>
-              {data.description && (
-                <div className="md:col-span-2 lg:col-span-3">
-                  <p className="text-muted-foreground">Description</p>
-                  <p>{data.description}</p>
-                </div>
-              )}
+
+              {/* Description */}
+              <div className="md:col-span-2 lg:col-span-3">
+                <p className="text-muted-foreground">Description</p>
+                {editing ? (
+                  <Textarea
+                    value={editDescription}
+                    onChange={(e) => setEditDescription(e.target.value)}
+                    placeholder="What is this webhook used for?"
+                    className="mt-1 resize-none"
+                    rows={2}
+                    disabled={updateWebhook.isPending}
+                  />
+                ) : (
+                  <p>{data.description || <span className="text-muted-foreground italic">Not set</span>}</p>
+                )}
+              </div>
+
+              {/* Status / Active toggle */}
               <div>
                 <p className="text-muted-foreground">Status</p>
-                <div className="mt-1 flex items-center gap-3">
-                  <Switch
-                    id="webhook-active-toggle"
-                    checked={data.isActive}
-                    onCheckedChange={handleToggleActive}
-                    disabled={updateWebhook.isPending}
-                    aria-label={data.isActive ? "Disable webhook" : "Enable webhook"}
-                  />
-                  <Label htmlFor="webhook-active-toggle" className="cursor-pointer">
-                    {data.isActive ? "Active" : "Inactive"}
-                  </Label>
-                  {updateWebhook.isPending && (
-                    <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
-                  )}
-                </div>
+                {editing ? (
+                  <div className="mt-1 flex items-center gap-3">
+                    <Switch
+                      id="webhook-active-toggle"
+                      checked={editActive}
+                      onCheckedChange={setEditActive}
+                      disabled={updateWebhook.isPending}
+                      aria-label={editActive ? "Disable webhook" : "Enable webhook"}
+                    />
+                    <Label htmlFor="webhook-active-toggle" className="cursor-pointer">
+                      {editActive ? "Active" : "Inactive"}
+                    </Label>
+                  </div>
+                ) : (
+                  <div className="mt-1 flex items-center gap-3">
+                    <Switch
+                      id="webhook-active-toggle"
+                      checked={data.isActive}
+                      onCheckedChange={handleToggleActive}
+                      disabled={updateWebhook.isPending}
+                      aria-label={data.isActive ? "Disable webhook" : "Enable webhook"}
+                    />
+                    <Label htmlFor="webhook-active-toggle" className="cursor-pointer">
+                      {data.isActive ? "Active" : "Inactive"}
+                    </Label>
+                    {updateWebhook.isPending && !editing && (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
+                    )}
+                  </div>
+                )}
               </div>
+
+              {/* Events */}
               <div className="md:col-span-2 lg:col-span-2">
                 <p className="text-muted-foreground">Events</p>
-                <div className="mt-1 flex flex-wrap gap-1.5">
-                  {data.events.length > 0 ? (
-                    data.events.map((event) => (
-                      <Badge key={event} variant="secondary" className="font-mono text-xs">
-                        {event}
-                      </Badge>
-                    ))
-                  ) : (
-                    <span className="text-muted-foreground text-sm">All events</span>
-                  )}
-                </div>
+                {editing ? (
+                  <div className="mt-1 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 px-2 text-xs"
+                        onClick={selectAllEvents}
+                      >
+                        Select all
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 px-2 text-xs"
+                        onClick={clearAllEvents}
+                        disabled={editEvents.length === 0}
+                      >
+                        Clear
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Select which events should trigger this webhook. If none are selected, all events will be sent.
+                    </p>
+                    <div className="space-y-3 rounded-md border p-4">
+                      {EVENT_CATEGORIES.map((category) => (
+                        <div key={category.label}>
+                          <p className="mb-1.5 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                            {category.label}
+                          </p>
+                          <div className="grid grid-cols-2 gap-1.5">
+                            {category.events.map((event) => (
+                              <label
+                                key={event}
+                                className="flex items-center gap-2 cursor-pointer text-sm hover:bg-muted/50 rounded px-2 py-1"
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={editEvents.includes(event)}
+                                  onChange={() => toggleEvent(event)}
+                                  className="rounded border-input"
+                                  disabled={updateWebhook.isPending}
+                                />
+                                <span className="text-xs font-mono">{event}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    {editEvents.length > 0 && (
+                      <p className="text-xs text-muted-foreground">
+                        {editEvents.length} event{editEvents.length === 1 ? "" : "s"} selected
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="mt-1 flex flex-wrap gap-1.5">
+                    {data.events.length > 0 ? (
+                      data.events.map((event) => (
+                        <Badge key={event} variant="secondary" className="font-mono text-xs">
+                          {event}
+                        </Badge>
+                      ))
+                    ) : (
+                      <span className="text-muted-foreground text-sm">All events</span>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -667,6 +940,22 @@ function WebhookDetailPage() {
               )}
               Delete
             </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Unsaved changes dialog */}
+      <AlertDialog open={blocker.status === "blocked"} onOpenChange={() => blocker.reset?.()}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
+            <AlertDialogDescription>
+              You have unsaved changes to this webhook. Are you sure you want to leave? Your changes will be lost.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => blocker.reset?.()}>Stay on page</AlertDialogCancel>
+            <AlertDialogAction onClick={() => blocker.proceed?.()}>Discard changes</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router"
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { z } from "zod"
 import {
@@ -6,6 +6,7 @@ import {
   AlertTriangle,
   CheckSquare,
   Download,
+  Eye,
   Home,
   Inbox,
   Loader2,
@@ -79,6 +80,7 @@ import { formatDuration } from "@/lib/format-utils"
 import {
   useBulkDeleteVoicemailMessages,
   useBulkMarkVoicemailRead,
+  useDeleteVoicemailBox,
   useDeleteVoicemailMessage,
   useToggleVoicemailRead,
   useVoicemailBoxes,
@@ -1128,6 +1130,7 @@ function BoxesTab() {
                   <TableHead>Enabled</TableHead>
                   <TableHead>Transcription</TableHead>
                   <TableHead>Unread</TableHead>
+                  <TableHead className="w-16 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -1148,6 +1151,9 @@ function BoxesTab() {
                     </TableCell>
                     <TableCell>
                       <Skeleton className="h-5 w-8" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-8 w-8 ml-auto" />
                     </TableCell>
                   </TableRow>
                 ))}
@@ -1207,6 +1213,7 @@ function BoxesTab() {
                     currentDirection={sortDir}
                     onSort={handleSort}
                   />
+                  <TableHead className="w-16 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -1263,54 +1270,144 @@ function BoxesTab() {
 }
 
 function BoxRow({ box }: { box: VoicemailBox }) {
+  const navigate = useNavigate()
+  const deleteBoxMutation = useDeleteVoicemailBox()
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+
   return (
-    <TableRow className="cursor-pointer transition-colors hover:bg-muted/50">
-      <TableCell>
-        <Link
-          to="/voicemail/$boxId"
-          params={{ boxId: box.id }}
-          className="group flex flex-col gap-0.5"
-        >
-          <span className="font-mono font-medium group-hover:underline">
-            {box.extensionNumber ?? box.mailboxNumber}
-          </span>
-        </Link>
-      </TableCell>
-      <TableCell>
-        <span className="text-sm text-muted-foreground">{box.email ?? "---"}</span>
-      </TableCell>
-      <TableCell>
-        {box.isEnabled ? (
-          <Badge variant="default" className="text-xs">
-            Enabled
-          </Badge>
-        ) : (
-          <Badge variant="outline" className="text-xs">
-            Disabled
-          </Badge>
-        )}
-      </TableCell>
-      <TableCell>
-        {box.transcriptionEnabled ? (
-          <Badge variant="secondary" className="text-xs">
-            On
-          </Badge>
-        ) : (
-          <Badge variant="outline" className="text-xs">
-            Off
-          </Badge>
-        )}
-      </TableCell>
-      <TableCell>
-        {box.unreadCount > 0 ? (
-          <Badge variant="secondary" className="gap-1">
-            <Mail className="h-3 w-3" />
-            {box.unreadCount}
-          </Badge>
-        ) : (
-          <span className="text-xs text-muted-foreground">0</span>
-        )}
-      </TableCell>
-    </TableRow>
+    <>
+      <TableRow
+        className="cursor-pointer transition-colors hover:bg-muted/50"
+        onClick={(e) => {
+          const target = e.target as HTMLElement
+          if (target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) {
+            return
+          }
+          navigate({ to: "/voicemail/$boxId", params: { boxId: box.id } })
+        }}
+      >
+        <TableCell>
+          <Link
+            to="/voicemail/$boxId"
+            params={{ boxId: box.id }}
+            className="group flex flex-col gap-0.5"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <span className="font-mono font-medium group-hover:underline">
+              {box.extensionNumber ?? box.mailboxNumber}
+            </span>
+          </Link>
+        </TableCell>
+        <TableCell>
+          <span className="text-sm text-muted-foreground">{box.email ?? "---"}</span>
+        </TableCell>
+        <TableCell>
+          {box.isEnabled ? (
+            <Badge variant="default" className="text-xs">
+              Enabled
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="text-xs">
+              Disabled
+            </Badge>
+          )}
+        </TableCell>
+        <TableCell>
+          {box.transcriptionEnabled ? (
+            <Badge variant="secondary" className="text-xs">
+              On
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="text-xs">
+              Off
+            </Badge>
+          )}
+        </TableCell>
+        <TableCell>
+          {box.unreadCount > 0 ? (
+            <Badge variant="secondary" className="gap-1">
+              <Mail className="h-3 w-3" />
+              {box.unreadCount}
+            </Badge>
+          ) : (
+            <span className="text-xs text-muted-foreground">0</span>
+          )}
+        </TableCell>
+        <TableCell className="text-right">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0"
+                data-slot="dropdown"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <MoreVertical className="h-4 w-4" />
+                <span className="sr-only">Actions for {box.extensionNumber ?? box.mailboxNumber}</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild>
+                <Link to="/voicemail/$boxId" params={{ boxId: box.id }}>
+                  <Eye className="mr-2 h-4 w-4" />
+                  View details
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={() => setShowDeleteConfirm(true)}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </TableCell>
+      </TableRow>
+
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="size-5" />
+              Delete voicemail box
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the voicemail box for{" "}
+              <span className="font-medium text-foreground">
+                {box.extensionNumber ?? box.mailboxNumber}
+              </span>
+              {" "}and all associated messages. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteBoxMutation.isPending}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteBoxMutation.mutate(box.id, {
+                onSuccess: () => setShowDeleteConfirm(false),
+              })}
+              disabled={deleteBoxMutation.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteBoxMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-1 size-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="mr-1 size-4" />
+                  Delete
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }

@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.203.0 (2026-05-02)
+
+### Added
+- **Tags detail page** — New view page at `/tags/$tagId` with inline editing for name, action dropdown (Copy ID, Edit, Delete), breadcrumbs, and document title
+- **Voicemail list row actions** — Row-level dropdown (View Details, Delete) and clickable rows on voicemail boxes list
+- **Voicemail detail action dropdown** — MoreHorizontal menu with Copy Box ID and Delete on voicemail box detail page
+- **Webhooks detail inline editing** — View/edit toggle for name, URL, description, active status, and event subscriptions with dirty state warning
+- **Tags list row navigation** — Row clicks and tag name links now navigate to the new detail view page
+
 ## v0.202.0 (2026-05-02)
 
 ### Added
