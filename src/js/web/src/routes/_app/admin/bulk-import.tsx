@@ -20,6 +20,7 @@ import {
   X,
 } from "lucide-react"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -1189,86 +1190,96 @@ function BulkImportPage() {
           </TabsList>
 
           <TabsContent value="devices" className="mt-4">
-            <ImportSection
-              title="Import Devices"
-              description="Upload a CSV file to create or update devices in bulk."
-              icon={HardDrive}
-              iconColor="text-blue-600 dark:text-blue-400"
-              iconBg="bg-blue-500/10"
-              columns={DEVICE_COLUMNS}
-              expectedColumns={DEVICE_EXPECTED_COLUMNS}
-              templateCsv={DEVICE_CSV_TEMPLATE}
-              templateFilename="devices_template.csv"
-              usePreview={usePreviewDeviceImport}
-              useImport={useImportDevices}
-            />
+            <SectionErrorBoundary name="Device Import">
+              <ImportSection
+                title="Import Devices"
+                description="Upload a CSV file to create or update devices in bulk."
+                icon={HardDrive}
+                iconColor="text-blue-600 dark:text-blue-400"
+                iconBg="bg-blue-500/10"
+                columns={DEVICE_COLUMNS}
+                expectedColumns={DEVICE_EXPECTED_COLUMNS}
+                templateCsv={DEVICE_CSV_TEMPLATE}
+                templateFilename="devices_template.csv"
+                usePreview={usePreviewDeviceImport}
+                useImport={useImportDevices}
+              />
+            </SectionErrorBoundary>
           </TabsContent>
 
           <TabsContent value="extensions" className="mt-4">
-            <ImportSection
-              title="Import Extensions"
-              description="Upload a CSV file to create or update extensions in bulk."
-              icon={Phone}
-              iconColor="text-violet-600 dark:text-violet-400"
-              iconBg="bg-violet-500/10"
-              columns={EXTENSION_COLUMNS}
-              expectedColumns={EXTENSION_EXPECTED_COLUMNS}
-              templateCsv={EXTENSION_CSV_TEMPLATE}
-              templateFilename="extensions_template.csv"
-              usePreview={usePreviewExtensionImport}
-              useImport={useImportExtensions}
-            />
+            <SectionErrorBoundary name="Extension Import">
+              <ImportSection
+                title="Import Extensions"
+                description="Upload a CSV file to create or update extensions in bulk."
+                icon={Phone}
+                iconColor="text-violet-600 dark:text-violet-400"
+                iconBg="bg-violet-500/10"
+                columns={EXTENSION_COLUMNS}
+                expectedColumns={EXTENSION_EXPECTED_COLUMNS}
+                templateCsv={EXTENSION_CSV_TEMPLATE}
+                templateFilename="extensions_template.csv"
+                usePreview={usePreviewExtensionImport}
+                useImport={useImportExtensions}
+              />
+            </SectionErrorBoundary>
           </TabsContent>
 
           <TabsContent value="users" className="mt-4">
-            <ImportSection
-              title="Import Users"
-              description="Upload a CSV file to create or update user accounts in bulk."
-              icon={Users}
-              iconColor="text-amber-600 dark:text-amber-400"
-              iconBg="bg-amber-500/10"
-              columns={USER_COLUMNS}
-              expectedColumns={USER_EXPECTED_COLUMNS}
-              templateCsv={USER_CSV_TEMPLATE}
-              templateFilename="users_template.csv"
-              usePreview={usePreviewDeviceImport}
-              useImport={useImportDevices}
-              available={false}
-            />
+            <SectionErrorBoundary name="User Import">
+              <ImportSection
+                title="Import Users"
+                description="Upload a CSV file to create or update user accounts in bulk."
+                icon={Users}
+                iconColor="text-amber-600 dark:text-amber-400"
+                iconBg="bg-amber-500/10"
+                columns={USER_COLUMNS}
+                expectedColumns={USER_EXPECTED_COLUMNS}
+                templateCsv={USER_CSV_TEMPLATE}
+                templateFilename="users_template.csv"
+                usePreview={usePreviewDeviceImport}
+                useImport={useImportDevices}
+                available={false}
+              />
+            </SectionErrorBoundary>
           </TabsContent>
 
           <TabsContent value="locations" className="mt-4">
-            <ImportSection
-              title="Import Locations"
-              description="Upload a CSV file to create or update office locations in bulk."
-              icon={MapPin}
-              iconColor="text-teal-600 dark:text-teal-400"
-              iconBg="bg-teal-500/10"
-              columns={LOCATION_COLUMNS}
-              expectedColumns={LOCATION_EXPECTED_COLUMNS}
-              templateCsv={LOCATION_CSV_TEMPLATE}
-              templateFilename="locations_template.csv"
-              usePreview={usePreviewDeviceImport}
-              useImport={useImportDevices}
-              available={false}
-            />
+            <SectionErrorBoundary name="Location Import">
+              <ImportSection
+                title="Import Locations"
+                description="Upload a CSV file to create or update office locations in bulk."
+                icon={MapPin}
+                iconColor="text-teal-600 dark:text-teal-400"
+                iconBg="bg-teal-500/10"
+                columns={LOCATION_COLUMNS}
+                expectedColumns={LOCATION_EXPECTED_COLUMNS}
+                templateCsv={LOCATION_CSV_TEMPLATE}
+                templateFilename="locations_template.csv"
+                usePreview={usePreviewDeviceImport}
+                useImport={useImportDevices}
+                available={false}
+              />
+            </SectionErrorBoundary>
           </TabsContent>
 
           <TabsContent value="phone-numbers" className="mt-4">
-            <ImportSection
-              title="Import Phone Numbers"
-              description="Upload a CSV file to provision and assign phone numbers in bulk."
-              icon={Hash}
-              iconColor="text-rose-600 dark:text-rose-400"
-              iconBg="bg-rose-500/10"
-              columns={PHONE_NUMBER_COLUMNS}
-              expectedColumns={PHONE_NUMBER_EXPECTED_COLUMNS}
-              templateCsv={PHONE_NUMBER_CSV_TEMPLATE}
-              templateFilename="phone_numbers_template.csv"
-              usePreview={usePreviewDeviceImport}
-              useImport={useImportDevices}
-              available={false}
-            />
+            <SectionErrorBoundary name="Phone Number Import">
+              <ImportSection
+                title="Import Phone Numbers"
+                description="Upload a CSV file to provision and assign phone numbers in bulk."
+                icon={Hash}
+                iconColor="text-rose-600 dark:text-rose-400"
+                iconBg="bg-rose-500/10"
+                columns={PHONE_NUMBER_COLUMNS}
+                expectedColumns={PHONE_NUMBER_EXPECTED_COLUMNS}
+                templateCsv={PHONE_NUMBER_CSV_TEMPLATE}
+                templateFilename="phone_numbers_template.csv"
+                usePreview={usePreviewDeviceImport}
+                useImport={useImportDevices}
+                available={false}
+              />
+            </SectionErrorBoundary>
           </TabsContent>
         </Tabs>
       </PageSection>

@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query"
 import { Link, createFileRoute, useNavigate, useSearch } from "@tanstack/react-router"
-import { AlertCircle, ArrowRight, Bell, Calendar, CheckCircle2, ChevronRight, Circle, Download, KeyRound, Link2, Mail, Monitor, Palette, Phone, Shield, ShieldAlert, ShieldCheck, Sparkles, User as UserIcon, Users, KeySquare } from "lucide-react"
+import { AlertCircle, ArrowRight, Bell, Calendar, CheckCircle2, ChevronRight, Circle, Download, Home, KeyRound, Link2, Mail, Monitor, Palette, Phone, Shield, ShieldAlert, ShieldCheck, Sparkles, User as UserIcon, Users, KeySquare } from "lucide-react"
 import { useEffect, useMemo } from "react"
 import { toast } from "sonner"
 import { z } from "zod"
@@ -12,10 +12,19 @@ import { RecentSecurityActivity } from "@/components/profile/recent-security-act
 import { PersonalInfoForm } from "@/components/profile/personal-info-form"
 import { ProfileHero } from "@/components/profile/profile-hero"
 import { Badge } from "@/components/ui/badge"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { EmptyState } from "@/components/ui/empty-state"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Separator } from "@/components/ui/separator"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { SkeletonCard } from "@/components/ui/skeleton"
@@ -524,23 +533,52 @@ function ProfilePage() {
 
   return (
     <PageContainer className="flex-1 space-y-10" maxWidth="4xl">
-      <PageHeader eyebrow="Account" title="Profile" description="Manage your personal information, security, and connected accounts." />
+      <PageHeader
+        eyebrow="Account"
+        title="Profile"
+        description="Manage your personal information, security, and connected accounts."
+        breadcrumbs={
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/">
+                    <Home className="h-3.5 w-3.5" />
+                  </Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Profile</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        }
+      />
 
       {/* Profile completeness indicator */}
       <PageSection>
-        <ProfileCompletenessCard user={user} />
+        <SectionErrorBoundary name="Profile Completeness">
+          <ProfileCompletenessCard user={user} />
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Hero / avatar section */}
       <PageSection>
-        <ProfileHero user={user} />
+        <SectionErrorBoundary name="Profile Hero">
+          <ProfileHero user={user} />
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Account overview cards */}
       <PageSection delay={0.05}>
         <div className="grid gap-6 lg:grid-cols-2">
-          <AccountInfoCard user={user} />
-          <MfaSummaryCard />
+          <SectionErrorBoundary name="Account Information">
+            <AccountInfoCard user={user} />
+          </SectionErrorBoundary>
+          <SectionErrorBoundary name="Security Status">
+            <MfaSummaryCard />
+          </SectionErrorBoundary>
         </div>
       </PageSection>
 
@@ -549,7 +587,9 @@ function ProfilePage() {
       {/* Personal information */}
       <PageSection delay={0.1} id="personal-info">
         <SectionHeading icon={UserIcon} title="Personal information" description="Update your name, username, and contact details." />
-        <PersonalInfoForm user={user} />
+        <SectionErrorBoundary name="Personal Information">
+          <PersonalInfoForm user={user} />
+        </SectionErrorBoundary>
       </PageSection>
 
       <Separator />
@@ -558,10 +598,16 @@ function ProfilePage() {
       <PageSection delay={0.2} id="security">
         <SectionHeading icon={Shield} title="Security" description="Manage your password and multi-factor authentication." />
         <div className="grid gap-6 lg:grid-cols-2">
-          <PasswordChangeCard />
-          <MfaSection />
+          <SectionErrorBoundary name="Password">
+            <PasswordChangeCard />
+          </SectionErrorBoundary>
+          <SectionErrorBoundary name="Multi-Factor Authentication">
+            <MfaSection />
+          </SectionErrorBoundary>
         </div>
-        <RecentSecurityActivity />
+        <SectionErrorBoundary name="Recent Security Activity">
+          <RecentSecurityActivity />
+        </SectionErrorBoundary>
       </PageSection>
 
       <Separator />
@@ -570,8 +616,12 @@ function ProfilePage() {
       <PageSection delay={0.3}>
         <SectionHeading icon={Link2} title="Connected accounts" description="Manage linked OAuth providers and active sessions." />
         <div className="grid gap-6 lg:grid-cols-2">
-          <ConnectedAccounts />
-          <ActiveSessions />
+          <SectionErrorBoundary name="Connected Accounts">
+            <ConnectedAccounts />
+          </SectionErrorBoundary>
+          <SectionErrorBoundary name="Active Sessions">
+            <ActiveSessions />
+          </SectionErrorBoundary>
         </div>
       </PageSection>
 
@@ -579,21 +629,27 @@ function ProfilePage() {
 
       {/* API Keys */}
       <PageSection delay={0.35}>
-        <ApiKeysCard />
+        <SectionErrorBoundary name="API Keys">
+          <ApiKeysCard />
+        </SectionErrorBoundary>
       </PageSection>
 
       <Separator />
 
       {/* Data export */}
       <PageSection delay={0.4}>
-        <DataExportCard user={user} />
+        <SectionErrorBoundary name="Data Export">
+          <DataExportCard user={user} />
+        </SectionErrorBoundary>
       </PageSection>
 
       <Separator />
 
       {/* Quick links to Settings */}
       <PageSection delay={0.5}>
-        <QuickLinksCard />
+        <SectionErrorBoundary name="Quick Links">
+          <QuickLinksCard />
+        </SectionErrorBoundary>
       </PageSection>
     </PageContainer>
   )

@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { toast } from "sonner"
 import { useQueryClient } from "@tanstack/react-query"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { TaskStatusBadge } from "@/components/tasks/task-status-badge"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
@@ -763,7 +764,9 @@ function AdminTasksPage() {
 
       {/* Stats Summary */}
       <PageSection>
-        <TaskStatsSummary />
+        <SectionErrorBoundary name="Task Statistics">
+          <TaskStatsSummary />
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Filters */}
@@ -827,6 +830,7 @@ function AdminTasksPage() {
 
       {/* Content */}
       <PageSection delay={0.1}>
+        <SectionErrorBoundary name="Task List">
         {isLoading ? (
           <SkeletonTable rows={6} />
         ) : isError ? (
@@ -958,6 +962,7 @@ function AdminTasksPage() {
             </div>
           </div>
         )}
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Bulk action bar */}

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, Link } from "@tanstack/react-router"
 import { AnimatePresence, motion } from "framer-motion"
 import {
   Accessibility,
@@ -7,6 +7,7 @@ import {
   Check,
   Globe,
   Hash,
+  Home,
   Keyboard,
   Laptop,
   Layout,
@@ -25,10 +26,19 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 import { NotificationPreferences } from "@/components/settings/notification-preferences"
 import { Badge } from "@/components/ui/badge"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
@@ -84,6 +94,23 @@ function SettingsPage() {
         eyebrow="Preferences"
         title="Settings"
         description="Customize the look and behavior of the application."
+        breadcrumbs={
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/">
+                    <Home className="h-3.5 w-3.5" />
+                  </Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Settings</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        }
         actions={
           <Button variant="outline" size="sm" onClick={handleReset}>
             <RotateCcw className="h-4 w-4" />
@@ -128,37 +155,49 @@ function SettingsPage() {
         <div className="min-w-0 flex-1 space-y-8 pb-16">
           <PageSection delay={0.1}>
             <div ref={(el) => { sectionRefs.current.appearance = el }} className="scroll-mt-24">
-              <AppearanceSection onNavigate={() => setActiveSection("appearance")} />
+              <SectionErrorBoundary name="Appearance">
+                <AppearanceSection onNavigate={() => setActiveSection("appearance")} />
+              </SectionErrorBoundary>
             </div>
           </PageSection>
 
           <PageSection delay={0.15}>
             <div ref={(el) => { sectionRefs.current.notifications = el }} className="scroll-mt-24">
-              <NotificationPreferences />
+              <SectionErrorBoundary name="Notifications">
+                <NotificationPreferences />
+              </SectionErrorBoundary>
             </div>
           </PageSection>
 
           <PageSection delay={0.2}>
             <div ref={(el) => { sectionRefs.current.display = el }} className="scroll-mt-24">
-              <DisplaySection />
+              <SectionErrorBoundary name="Display Preferences">
+                <DisplaySection />
+              </SectionErrorBoundary>
             </div>
           </PageSection>
 
           <PageSection delay={0.25}>
             <div ref={(el) => { sectionRefs.current.accessibility = el }} className="scroll-mt-24">
-              <AccessibilitySection />
+              <SectionErrorBoundary name="Accessibility">
+                <AccessibilitySection />
+              </SectionErrorBoundary>
             </div>
           </PageSection>
 
           <PageSection delay={0.3}>
             <div ref={(el) => { sectionRefs.current.sessions = el }} className="scroll-mt-24">
-              <ActiveSessionsSection />
+              <SectionErrorBoundary name="Active Sessions">
+                <ActiveSessionsSection />
+              </SectionErrorBoundary>
             </div>
           </PageSection>
 
           <PageSection delay={0.35}>
             <div ref={(el) => { sectionRefs.current.shortcuts = el }} className="scroll-mt-24">
-              <KeyboardShortcutsSection />
+              <SectionErrorBoundary name="Keyboard Shortcuts">
+                <KeyboardShortcutsSection />
+              </SectionErrorBoundary>
             </div>
           </PageSection>
         </div>

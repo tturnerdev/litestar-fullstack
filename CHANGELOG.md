@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.243.0 (2026-05-03)
+
+### Added
+- **SectionErrorBoundary on profile page** — 12 sections wrapped with error boundaries, breadcrumbs added
+- **SectionErrorBoundary on settings page** — 6 sections wrapped, breadcrumbs added
+- **SectionErrorBoundary on 9 admin pages** — bulk import, device templates, tasks, music on hold, devices, fax, support, voice, and gateway admin pages all wrapped with error boundaries
+
 ## v0.242.0 (2026-05-03)
 
 ### Added

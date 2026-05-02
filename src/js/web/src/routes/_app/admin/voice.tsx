@@ -15,6 +15,7 @@ import {
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { DataFreshness } from "@/components/ui/data-freshness"
 import { EmptyState } from "@/components/ui/empty-state"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { Badge } from "@/components/ui/badge"
@@ -163,50 +164,53 @@ function AdminVoicePage() {
 
       {/* Stat cards */}
       <PageSection>
-        {statsLoading ? (
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {Array.from({ length: 4 }).map((_, i) => (
-              // biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton placeholders
-              <StatsCardSkeleton key={`voice-stat-skeleton-${i}`} />
-            ))}
-          </div>
-        ) : statsError ? (
-          <EmptyState
-            icon={AlertCircle}
-            title="Unable to load voice statistics"
-            description="Something went wrong. Please try again."
-            action={<Button variant="outline" size="sm" onClick={() => refetchStats()}>Try again</Button>}
-          />
-        ) : (
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {statConfig.map((stat) => {
-              const Icon = stat.icon
-              const value = stats?.[stat.key] ?? 0
-              return (
-                <Link key={stat.key} to={stat.to} className="group">
-                  <Card className="transition-all duration-200 group-hover:shadow-md group-hover:border-primary/30 group-hover:-translate-y-0.5">
-                    <CardHeader className="flex flex-row items-center justify-between pb-2">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">{stat.label}</CardTitle>
-                      <div
-                        className={`flex h-9 w-9 items-center justify-center rounded-lg ${stat.bg} ${stat.color} transition-colors ${stat.hoverBg} group-hover:text-primary-foreground`}
-                      >
-                        <Icon className="h-4 w-4" />
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <span className="text-3xl font-semibold tracking-tight">{value}</span>
-                      <p className="mt-1.5 text-xs text-muted-foreground">{stat.subtitle}</p>
-                    </CardContent>
-                  </Card>
-                </Link>
-              )
-            })}
-          </div>
-        )}
+        <SectionErrorBoundary name="Voice Statistics">
+          {statsLoading ? (
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton placeholders
+                <StatsCardSkeleton key={`voice-stat-skeleton-${i}`} />
+              ))}
+            </div>
+          ) : statsError ? (
+            <EmptyState
+              icon={AlertCircle}
+              title="Unable to load voice statistics"
+              description="Something went wrong. Please try again."
+              action={<Button variant="outline" size="sm" onClick={() => refetchStats()}>Try again</Button>}
+            />
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              {statConfig.map((stat) => {
+                const Icon = stat.icon
+                const value = stats?.[stat.key] ?? 0
+                return (
+                  <Link key={stat.key} to={stat.to} className="group">
+                    <Card className="transition-all duration-200 group-hover:shadow-md group-hover:border-primary/30 group-hover:-translate-y-0.5">
+                      <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-sm font-medium text-muted-foreground">{stat.label}</CardTitle>
+                        <div
+                          className={`flex h-9 w-9 items-center justify-center rounded-lg ${stat.bg} ${stat.color} transition-colors ${stat.hoverBg} group-hover:text-primary-foreground`}
+                        >
+                          <Icon className="h-4 w-4" />
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <span className="text-3xl font-semibold tracking-tight">{value}</span>
+                        <p className="mt-1.5 text-xs text-muted-foreground">{stat.subtitle}</p>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                )
+              })}
+            </div>
+          )}
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Phone numbers */}
       <PageSection delay={0.1}>
+        <SectionErrorBoundary name="Phone Numbers">
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between gap-4">
@@ -332,10 +336,12 @@ function AdminVoicePage() {
             )}
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Extensions */}
       <PageSection delay={0.2}>
+        <SectionErrorBoundary name="Extensions">
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between gap-4">
@@ -411,6 +417,7 @@ function AdminVoicePage() {
             )}
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
     </PageContainer>
   )

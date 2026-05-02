@@ -25,6 +25,7 @@ import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { DataFreshness } from "@/components/ui/data-freshness"
 import { EmptyState } from "@/components/ui/empty-state"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { useAdminDevices, useAdminDeviceStats } from "@/lib/api/hooks/admin"
 import type { AdminDeviceSummary } from "@/lib/generated/api/types.gen"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
@@ -159,52 +160,55 @@ function AdminDevicesPage() {
 
       {/* Stat cards */}
       <PageSection>
-        {statsLoading ? (
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {Array.from({ length: 4 }).map((_, i) => (
-              // biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton placeholders
-              <StatsCardSkeleton key={`device-stat-skeleton-${i}`} />
-            ))}
-          </div>
-        ) : statsError ? (
-          <Card>
-            <CardContent className="py-6">
-              <EmptyState
-                icon={AlertCircle}
-                title="Unable to load device statistics"
-                description="Something went wrong. Please try again."
-                action={<Button variant="outline" size="sm" onClick={() => refetchStats()}>Try again</Button>}
-              />
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {statConfig.map((stat) => {
-              const Icon = stat.icon
-              const value = stats?.[stat.key] ?? 0
-              return (
-                <Card key={stat.key} className="transition-all duration-200 hover:shadow-md hover:border-primary/30 hover:-translate-y-0.5">
-                  <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">{stat.label}</CardTitle>
-                    <div
-                      className={`flex h-9 w-9 items-center justify-center rounded-lg ${stat.bg} ${stat.color}`}
-                    >
-                      <Icon className="h-4 w-4" />
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <span className="text-3xl font-semibold tracking-tight">{value}</span>
-                    <p className="mt-1.5 text-xs text-muted-foreground">{stat.subtitle}</p>
-                  </CardContent>
-                </Card>
-              )
-            })}
-          </div>
-        )}
+        <SectionErrorBoundary name="Device Statistics">
+          {statsLoading ? (
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton placeholders
+                <StatsCardSkeleton key={`device-stat-skeleton-${i}`} />
+              ))}
+            </div>
+          ) : statsError ? (
+            <Card>
+              <CardContent className="py-6">
+                <EmptyState
+                  icon={AlertCircle}
+                  title="Unable to load device statistics"
+                  description="Something went wrong. Please try again."
+                  action={<Button variant="outline" size="sm" onClick={() => refetchStats()}>Try again</Button>}
+                />
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              {statConfig.map((stat) => {
+                const Icon = stat.icon
+                const value = stats?.[stat.key] ?? 0
+                return (
+                  <Card key={stat.key} className="transition-all duration-200 hover:shadow-md hover:border-primary/30 hover:-translate-y-0.5">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                      <CardTitle className="text-sm font-medium text-muted-foreground">{stat.label}</CardTitle>
+                      <div
+                        className={`flex h-9 w-9 items-center justify-center rounded-lg ${stat.bg} ${stat.color}`}
+                      >
+                        <Icon className="h-4 w-4" />
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <span className="text-3xl font-semibold tracking-tight">{value}</span>
+                      <p className="mt-1.5 text-xs text-muted-foreground">{stat.subtitle}</p>
+                    </CardContent>
+                  </Card>
+                )
+              })}
+            </div>
+          )}
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Recent devices */}
       <PageSection delay={0.1}>
+        <SectionErrorBoundary name="Recent Devices">
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between gap-4">
@@ -276,10 +280,12 @@ function AdminDevicesPage() {
             )}
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Full device list */}
       <PageSection delay={0.2}>
+        <SectionErrorBoundary name="All Devices">
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between gap-4">
@@ -399,6 +405,7 @@ function AdminDevicesPage() {
             )}
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
     </PageContainer>
   )

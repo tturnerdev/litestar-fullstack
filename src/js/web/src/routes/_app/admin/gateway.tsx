@@ -12,6 +12,7 @@ import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-lay
 import { Separator } from "@/components/ui/separator"
 import { DataFreshness } from "@/components/ui/data-freshness"
 import { EmptyState } from "@/components/ui/empty-state"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { useAdminGatewaySettings, useUpdateAdminGatewaySettings } from "@/lib/api/hooks/gateway"
 
@@ -171,6 +172,7 @@ function AdminGatewayPage() {
         ) : (
           <div className="grid gap-6 lg:grid-cols-3">
             {/* Settings form */}
+            <SectionErrorBoundary name="Gateway Settings">
             <Card className="lg:col-span-2">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
@@ -261,8 +263,10 @@ function AdminGatewayPage() {
                 </form>
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
 
             {/* Info sidebar */}
+            <SectionErrorBoundary name="Gateway Information">
             <div className="flex h-fit flex-col gap-4">
               <Card className="border-border/40 bg-linear-to-br from-muted/30 to-muted/10">
                 <CardHeader className="space-y-1 pb-3">
@@ -334,6 +338,7 @@ function AdminGatewayPage() {
                 </CardContent>
               </Card>
             </div>
+            </SectionErrorBoundary>
           </div>
         )}
       </PageSection>

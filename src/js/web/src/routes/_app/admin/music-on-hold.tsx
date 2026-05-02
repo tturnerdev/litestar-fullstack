@@ -14,6 +14,7 @@ import {
   Trash2,
   X,
 } from "lucide-react"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { Badge } from "@/components/ui/badge"
@@ -368,6 +369,7 @@ function AdminMusicOnHoldPage() {
       <AdminNav />
 
       <PageSection>
+        <SectionErrorBoundary name="Music on Hold Classes">
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between gap-4">
@@ -577,6 +579,7 @@ function AdminMusicOnHoldPage() {
             )}
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Create dialog */}
