@@ -184,7 +184,7 @@ function FileDropZone({ file, onFileSelect, disabled }: FileDropZoneProps) {
       setIsDragging(false)
       if (disabled) return
       const dropped = e.dataTransfer.files[0]
-      if (dropped && dropped.name.toLowerCase().endsWith(".csv")) {
+      if (dropped?.name.toLowerCase().endsWith(".csv")) {
         onFileSelect(dropped)
       } else if (dropped) {
         toast.error("Invalid file type", { description: "Please upload a .csv file" })
@@ -202,6 +202,7 @@ function FileDropZone({ file, onFileSelect, disabled }: FileDropZoneProps) {
   )
 
   return (
+    // biome-ignore lint/a11y/useSemanticElements: drop zone needs div for drag events
     <div
       className={cn(
         "relative flex flex-col items-center justify-center rounded-lg border-2 border-dashed px-6 py-10 transition-colors",

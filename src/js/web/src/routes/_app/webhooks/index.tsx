@@ -148,7 +148,7 @@ function loadColumnVisibility(): ColumnVisibility {
 
 function truncateUrl(url: string, maxLen = 40): string {
   if (url.length <= maxLen) return url
-  return url.slice(0, maxLen) + "..."
+  return `${url.slice(0, maxLen)}...`
 }
 
 function statusCodeBadge(code: number | null): React.ReactNode {
@@ -574,7 +574,7 @@ function WebhooksPage() {
   const isColumnVisible = useCallback((col: string) => columnVisibility[col] !== false, [columnVisibility])
   const toggleColumn = useCallback((col: string) => {
     setColumnVisibility((prev) => {
-      const updated = { ...prev, [col]: prev[col] !== false ? false : true }
+      const updated = { ...prev, [col]: prev[col] === false }
       localStorage.setItem(COLUMN_VISIBILITY_KEY, JSON.stringify(updated))
       return updated
     })
@@ -1076,158 +1076,156 @@ function WebhookRow({
 
   return (
     <Collapsible open={deliveriesOpen} onOpenChange={setDeliveriesOpen} asChild>
-      <>
-        <TableRow
-          data-state={selected ? "selected" : undefined}
-          className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`}
-          onClick={(e) => {
-            const target = e.target as HTMLElement
-            if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) {
-              return
-            }
-            navigate({ to: "/webhooks/$webhookId", params: { webhookId: webhook.id } })
-          }}
-        >
-          <TableCell className={cellClass}>
-            <Checkbox
-              checked={selected}
-              onChange={(e) => {
-                e.stopPropagation()
-                onToggle()
-              }}
-              aria-label={`Select ${webhook.name}`}
-            />
-          </TableCell>
-          <TableCell className={cellClass}>
-            <div className="flex items-center gap-2">
-              <Webhook className="h-4 w-4 text-muted-foreground shrink-0" />
-              <div className="min-w-0">
-                <Link to="/webhooks/$webhookId" params={{ webhookId: webhook.id }} className="font-medium hover:underline" onClick={(e) => e.stopPropagation()}>
-                  {webhook.name}
-                </Link>
-                <span className="block sm:hidden text-xs text-muted-foreground font-mono truncate" title={webhook.url}>
-                  {truncateUrl(webhook.url, 30)}
-                </span>
-              </div>
-            </div>
-          </TableCell>
-          {isColumnVisible("url") && (
-            <TableCell className={cn("hidden sm:table-cell", cellClass)}>
-              <span className="text-sm text-muted-foreground font-mono" title={webhook.url}>
-                {truncateUrl(webhook.url)}
+      <TableRow
+        data-state={selected ? "selected" : undefined}
+        className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`}
+        onClick={(e) => {
+          const target = e.target as HTMLElement
+          if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) {
+            return
+          }
+          navigate({ to: "/webhooks/$webhookId", params: { webhookId: webhook.id } })
+        }}
+      >
+        <TableCell className={cellClass}>
+          <Checkbox
+            checked={selected}
+            onChange={(e) => {
+              e.stopPropagation()
+              onToggle()
+            }}
+            aria-label={`Select ${webhook.name}`}
+          />
+        </TableCell>
+        <TableCell className={cellClass}>
+          <div className="flex items-center gap-2">
+            <Webhook className="h-4 w-4 text-muted-foreground shrink-0" />
+            <div className="min-w-0">
+              <Link to="/webhooks/$webhookId" params={{ webhookId: webhook.id }} className="font-medium hover:underline" onClick={(e) => e.stopPropagation()}>
+                {webhook.name}
+              </Link>
+              <span className="block sm:hidden text-xs text-muted-foreground font-mono truncate" title={webhook.url}>
+                {truncateUrl(webhook.url, 30)}
               </span>
-            </TableCell>
-          )}
-          {isColumnVisible("events") && (
-            <TableCell className={cn("hidden md:table-cell", cellClass)}>
-              <Badge variant="secondary" className="gap-1">
-                {webhook.events.length} event{webhook.events.length === 1 ? "" : "s"}
-              </Badge>
-            </TableCell>
-          )}
-          {isColumnVisible("status") && (
-            <TableCell className={cellClass}>
-              {webhook.isActive ? (
-                <Badge className="gap-1 bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400">
-                  <Check className="h-3 w-3" />
-                  Active
-                </Badge>
-              ) : (
-                <Badge variant="outline" className="gap-1 text-muted-foreground">
-                  <XCircle className="h-3 w-3" />
-                  Inactive
-                </Badge>
-              )}
-            </TableCell>
-          )}
-          {isColumnVisible("lastTriggered") && (
-            <TableCell className={cn("hidden lg:table-cell", cellClass)}>
-              <span className="text-sm text-muted-foreground">{formatDateTime(webhook.lastTriggeredAt as string | null | undefined, "Never")}</span>
-            </TableCell>
-          )}
-          {isColumnVisible("failures") && (
-            <TableCell className={cn("hidden md:table-cell", cellClass)}>
-              {(webhook.failureCount ?? 0) > 0 ? (
-                <Badge variant="destructive" className="gap-1">
-                  {webhook.failureCount}
-                </Badge>
-              ) : (
-                <span className="text-sm text-muted-foreground">0</span>
-              )}
-            </TableCell>
-          )}
-          <TableCell className={cn("text-right", cellClass)}>
-            <div className="flex items-center justify-end gap-1">
-              <CollapsibleTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8" title="Delivery history">
-                  <ChevronDown className={`h-4 w-4 transition-transform ${deliveriesOpen ? "rotate-180" : ""}`} />
-                  <span className="sr-only">Toggle deliveries</span>
-                </Button>
-              </CollapsibleTrigger>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8" data-slot="dropdown">
-                    <MoreVertical className="h-4 w-4" />
-                    <span className="sr-only">Actions</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem asChild>
-                    <Link to="/webhooks/$webhookId" params={{ webhookId: webhook.id }}>
-                      <Eye className="mr-2 h-4 w-4" />
-                      View details
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={onEdit}>
-                    <Pencil className="mr-2 h-4 w-4" />
-                    Edit
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() =>
-                      testWebhookMutation.mutate(webhook.id, {
-                        onSuccess: () => {
-                          toast.success("Test delivery sent")
-                        },
-                        onError: (err) => {
-                          toast.error("Failed to send test delivery", {
-                            description: err instanceof Error ? err.message : undefined,
-                          })
-                        },
-                      })
-                    }
-                    disabled={testWebhookMutation.isPending}
-                  >
-                    {testWebhookMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Play className="mr-2 h-4 w-4" />}
-                    Test
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setDeliveriesOpen((prev) => !prev)}>
-                    <Activity className="mr-2 h-4 w-4" />
-                    Deliveries
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={onDelete}>
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Delete
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
             </div>
+          </div>
+        </TableCell>
+        {isColumnVisible("url") && (
+          <TableCell className={cn("hidden sm:table-cell", cellClass)}>
+            <span className="text-sm text-muted-foreground font-mono" title={webhook.url}>
+              {truncateUrl(webhook.url)}
+            </span>
           </TableCell>
-        </TableRow>
-        <CollapsibleContent asChild>
-          <tr>
-            <td colSpan={99} className="p-0">
-              <div className="border-t border-border/40 bg-muted/30">
-                <div className="flex items-center gap-2 px-6 pt-3 pb-1">
-                  <Activity className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-xs font-medium text-muted-foreground">Recent Deliveries</span>
-                </div>
-                <DeliveryHistoryPanel webhookId={webhook.id} />
+        )}
+        {isColumnVisible("events") && (
+          <TableCell className={cn("hidden md:table-cell", cellClass)}>
+            <Badge variant="secondary" className="gap-1">
+              {webhook.events.length} event{webhook.events.length === 1 ? "" : "s"}
+            </Badge>
+          </TableCell>
+        )}
+        {isColumnVisible("status") && (
+          <TableCell className={cellClass}>
+            {webhook.isActive ? (
+              <Badge className="gap-1 bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400">
+                <Check className="h-3 w-3" />
+                Active
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="gap-1 text-muted-foreground">
+                <XCircle className="h-3 w-3" />
+                Inactive
+              </Badge>
+            )}
+          </TableCell>
+        )}
+        {isColumnVisible("lastTriggered") && (
+          <TableCell className={cn("hidden lg:table-cell", cellClass)}>
+            <span className="text-sm text-muted-foreground">{formatDateTime(webhook.lastTriggeredAt as string | null | undefined, "Never")}</span>
+          </TableCell>
+        )}
+        {isColumnVisible("failures") && (
+          <TableCell className={cn("hidden md:table-cell", cellClass)}>
+            {(webhook.failureCount ?? 0) > 0 ? (
+              <Badge variant="destructive" className="gap-1">
+                {webhook.failureCount}
+              </Badge>
+            ) : (
+              <span className="text-sm text-muted-foreground">0</span>
+            )}
+          </TableCell>
+        )}
+        <TableCell className={cn("text-right", cellClass)}>
+          <div className="flex items-center justify-end gap-1">
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8" title="Delivery history">
+                <ChevronDown className={`h-4 w-4 transition-transform ${deliveriesOpen ? "rotate-180" : ""}`} />
+                <span className="sr-only">Toggle deliveries</span>
+              </Button>
+            </CollapsibleTrigger>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8" data-slot="dropdown">
+                  <MoreVertical className="h-4 w-4" />
+                  <span className="sr-only">Actions</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <Link to="/webhooks/$webhookId" params={{ webhookId: webhook.id }}>
+                    <Eye className="mr-2 h-4 w-4" />
+                    View details
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={onEdit}>
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() =>
+                    testWebhookMutation.mutate(webhook.id, {
+                      onSuccess: () => {
+                        toast.success("Test delivery sent")
+                      },
+                      onError: (err) => {
+                        toast.error("Failed to send test delivery", {
+                          description: err instanceof Error ? err.message : undefined,
+                        })
+                      },
+                    })
+                  }
+                  disabled={testWebhookMutation.isPending}
+                >
+                  {testWebhookMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Play className="mr-2 h-4 w-4" />}
+                  Test
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setDeliveriesOpen((prev) => !prev)}>
+                  <Activity className="mr-2 h-4 w-4" />
+                  Deliveries
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={onDelete}>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </TableCell>
+      </TableRow>
+      <CollapsibleContent asChild>
+        <tr>
+          <td colSpan={99} className="p-0">
+            <div className="border-t border-border/40 bg-muted/30">
+              <div className="flex items-center gap-2 px-6 pt-3 pb-1">
+                <Activity className="h-4 w-4 text-muted-foreground" />
+                <span className="text-xs font-medium text-muted-foreground">Recent Deliveries</span>
               </div>
-            </td>
-          </tr>
-        </CollapsibleContent>
-      </>
+              <DeliveryHistoryPanel webhookId={webhook.id} />
+            </div>
+          </td>
+        </tr>
+      </CollapsibleContent>
     </Collapsible>
   )
 }

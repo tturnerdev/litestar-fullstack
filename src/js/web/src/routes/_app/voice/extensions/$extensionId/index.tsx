@@ -824,7 +824,7 @@ function ForwardingRuleRow({
                 value={ringCount ?? 4}
                 onChange={(e) => {
                   const v = parseInt(e.target.value, 10)
-                  if (!isNaN(v) && v >= 1 && v <= 10) onRingCountChange(v)
+                  if (!Number.isNaN(v) && v >= 1 && v <= 10) onRingCountChange(v)
                 }}
                 min={1}
                 max={10}

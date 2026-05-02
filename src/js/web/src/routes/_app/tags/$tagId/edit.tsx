@@ -39,6 +39,7 @@ function EditTagPage() {
   const justSubmittedRef = useRef(false)
 
   // Reset form state when navigating to a different tag
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional trigger dependency
   useEffect(() => {
     setInitialized(false)
   }, [tagId])

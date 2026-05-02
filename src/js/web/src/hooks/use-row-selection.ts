@@ -14,7 +14,7 @@ interface UseRowSelectionReturn {
 export function useRowSelection(page: number): UseRowSelectionReturn {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
-  // Clear selection when page changes
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional — clear selection when page changes
   useEffect(() => {
     setSelectedIds(new Set())
   }, [page])

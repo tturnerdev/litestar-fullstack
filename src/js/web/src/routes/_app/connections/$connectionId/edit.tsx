@@ -241,6 +241,7 @@ function EditConnectionPage() {
   const credentialFields = getCredentialFields(authType)
 
   // Reset form state when navigating to a different connection
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional trigger dependency
   useEffect(() => {
     setInitialized(false)
     setSelectedPreset(null)

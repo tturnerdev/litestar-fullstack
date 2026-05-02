@@ -114,7 +114,7 @@ function TagsPage() {
   const isColumnVisible = useCallback((col: string) => columnVisibility[col] !== false, [columnVisibility])
   const toggleColumn = useCallback((col: string) => {
     setColumnVisibility((prev) => {
-      const updated = { ...prev, [col]: prev[col] !== false ? false : true }
+      const updated = { ...prev, [col]: prev[col] === false }
       localStorage.setItem(COLUMN_VISIBILITY_KEY, JSON.stringify(updated))
       return updated
     })
@@ -364,16 +364,12 @@ function TagsPage() {
       <SectionErrorBoundary name="Tags Summary">
         <div className="flex flex-wrap items-center gap-2">
           {isLoading ? (
-            <>
-              <Skeleton className="h-7 w-24 rounded-full" />
-            </>
+            <Skeleton className="h-7 w-24 rounded-full" />
           ) : (
-            <>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground">
-                Total
-                <span className="ml-0.5 font-semibold text-foreground">{totalCount}</span>
-              </span>
-            </>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground">
+              Total
+              <span className="ml-0.5 font-semibold text-foreground">{totalCount}</span>
+            </span>
           )}
         </div>
       </SectionErrorBoundary>

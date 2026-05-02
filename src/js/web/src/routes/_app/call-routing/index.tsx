@@ -396,6 +396,7 @@ function TimeConditionsTab() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [timeConditionToDelete, setTimeConditionToDelete] = useState<{ id: string; name: string } | null>(null)
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional trigger dependency
   useEffect(() => {
     setPage(1)
   }, [debouncedSearch])
@@ -674,6 +675,7 @@ function IvrMenusTab() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [ivrMenuToDelete, setIvrMenuToDelete] = useState<{ id: string; name: string } | null>(null)
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional trigger dependency
   useEffect(() => {
     setPage(1)
   }, [debouncedSearch])
@@ -947,6 +949,7 @@ function CallQueuesTab() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [callQueueToDelete, setCallQueueToDelete] = useState<{ id: string; name: string } | null>(null)
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional trigger dependency
   useEffect(() => {
     setPage(1)
   }, [debouncedSearch])
@@ -1227,6 +1230,7 @@ function RingGroupsTab() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [ringGroupToDelete, setRingGroupToDelete] = useState<{ id: string; name: string } | null>(null)
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional trigger dependency
   useEffect(() => {
     setPage(1)
   }, [debouncedSearch])

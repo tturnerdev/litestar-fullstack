@@ -60,6 +60,7 @@ function EditTeamPage() {
   const [nameTouched, setNameTouched] = useState(false)
 
   // Reset form state when navigating to a different team
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional trigger dependency
   useEffect(() => {
     setInitialized(false)
     setNameTouched(false)

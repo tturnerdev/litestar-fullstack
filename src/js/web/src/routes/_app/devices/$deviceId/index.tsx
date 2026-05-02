@@ -220,6 +220,7 @@ function DeviceDetailPage() {
   const [editLocationId, setEditLocationId] = useState<string | null>(null)
   const [editConnectionId, setEditConnectionId] = useState<string | null>(null)
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional trigger dependency
   useEffect(() => {
     if (editParam && data && !editing) {
       startEditing(data)

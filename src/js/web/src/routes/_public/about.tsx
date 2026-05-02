@@ -380,9 +380,11 @@ function AboutPage() {
             </div>
 
             <nav className="flex flex-wrap items-center gap-6 text-sm">
+              {/** biome-ignore lint/a11y/useValidAnchor: anchor used as external link trigger */}
               <a href="#" className="text-muted-foreground transition-colors hover:text-foreground">
                 Terms of Service
               </a>
+              {/** biome-ignore lint/a11y/useValidAnchor: anchor used as external link trigger */}
               <a href="#" className="text-muted-foreground transition-colors hover:text-foreground">
                 Privacy Policy
               </a>

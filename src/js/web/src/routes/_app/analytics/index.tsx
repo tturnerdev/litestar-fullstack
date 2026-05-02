@@ -387,6 +387,7 @@ function CdrDetailDialog({ cdrId, open, onOpenChange }: { cdrId: string; open: b
               <div className="space-y-2 rounded-md border p-3">
                 <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Recording</h4>
                 <div className="flex items-center gap-3">
+                  {/** biome-ignore lint/a11y/useMediaCaption: audio player without captions */}
                   <audio controls preload="none" className="h-8 flex-1">
                     <source src={record.recordingUrl} />
                     Your browser does not support audio playback.
@@ -984,6 +985,7 @@ function CallRecordsTab() {
   }, [])
 
   // Clear selection when filters/search/page change
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional trigger dependency
   useEffect(() => {
     setSelectedIds(new Set())
   }, [debouncedSearch, directionFilter, dispositionFilter, startDate, endDate, minDuration, maxDuration, page])

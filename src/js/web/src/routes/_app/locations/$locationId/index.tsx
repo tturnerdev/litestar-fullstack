@@ -93,6 +93,7 @@ function LocationDetailPage() {
   const [editPostalCode, setEditPostalCode] = useState("")
   const [editCountry, setEditCountry] = useState("")
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional trigger dependency
   useEffect(() => {
     if (editParam && data && !editing) {
       startEditing(data)

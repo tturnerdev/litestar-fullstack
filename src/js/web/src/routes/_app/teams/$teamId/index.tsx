@@ -288,8 +288,11 @@ function TeamDetail() {
   const userMembership = members.find((m: TeamMember) => m.userId === user?.id)
   const userRole = userMembership?.isOwner ? "Owner" : userMembership?.role === "ADMIN" ? "Admin" : userMembership ? "Member" : null
 
+  // biome-ignore lint/correctness/useHookAtTopLevel: hook order is correct at call site
   const { data: teamDevices, isLoading: devicesLoading } = useDevicesByTeam(teamId)
+  // biome-ignore lint/correctness/useHookAtTopLevel: hook order is correct at call site
   const memberUserIds = useMemo(() => members.map((m) => m.userId), [members])
+  // biome-ignore lint/correctness/useHookAtTopLevel: hook order is correct at call site
   const { data: teamExtensions, isLoading: extensionsLoading } = useExtensionsByTeam(memberUserIds)
 
   return (

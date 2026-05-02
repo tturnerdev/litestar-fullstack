@@ -222,9 +222,7 @@ function MessagesTab() {
   const filteredItems = debouncedSearch
     ? allItems.filter((m) => {
         const q = debouncedSearch.toLowerCase()
-        return (
-          m.callerNumber.toLowerCase().includes(q) || (m.callerName && m.callerName.toLowerCase().includes(q)) || (m.transcription && m.transcription.toLowerCase().includes(q))
-        )
+        return m.callerNumber.toLowerCase().includes(q) || m.callerName?.toLowerCase().includes(q) || m.transcription?.toLowerCase().includes(q)
       })
     : allItems
 
@@ -876,6 +874,7 @@ function BoxesTab() {
     [sortKey, sortDir],
   )
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional trigger dependency
   useEffect(() => {
     setPage(1)
   }, [debouncedSearch])

@@ -70,6 +70,7 @@ function EditLocationPage() {
   const [nameTouched, setNameTouched] = useState(false)
 
   // Reset form state when navigating to a different location
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional trigger dependency
   useEffect(() => {
     setInitialized(false)
     setNameTouched(false)

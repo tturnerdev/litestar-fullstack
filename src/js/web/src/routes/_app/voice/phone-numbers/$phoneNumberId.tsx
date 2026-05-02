@@ -124,6 +124,7 @@ function PhoneNumberDetailPage() {
     updatePhoneNumber.mutate({ isActive: !data.isActive })
   }
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional trigger dependency
   useEffect(() => {
     if (edit && data && !editOpen && !editing) {
       startEditing()

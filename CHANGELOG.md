@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.251.0 (2026-05-03)
+
+### Fixed
+- **Biome lint errors reduced to zero** — from 142 errors to 0 errors across 332 frontend files
+- **Auto-fixed** useOptionalChain, noUselessTernary, noUselessFragments, useLiteralKeys, useTemplate, noGlobalIsNan, noSelfCompare issues across 19 files
+- **Suppressed intentional patterns** — 36 useExhaustiveDependencies (intentional trigger deps like debounced search reset), 3 useHookAtTopLevel, SVG tooltip triggers, audio player captions
+- **Fixed operator precedence bug** in admin system page — `?? 0 > 0` was comparing 0 to itself instead of checking rate > 0
+- **Only 10 style warnings remain** (noNonNullAssertion) — zero errors, zero infos
+
 ## v0.250.0 (2026-05-03)
 
 ### Fixed

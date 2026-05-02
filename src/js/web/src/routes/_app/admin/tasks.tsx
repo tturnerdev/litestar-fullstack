@@ -495,13 +495,13 @@ function AdminTasksPage() {
   const isColumnVisible = useCallback((col: string) => columnVisibility[col] !== false, [columnVisibility])
   const toggleColumn = useCallback((col: string) => {
     setColumnVisibility((prev) => {
-      const updated = { ...prev, [col]: prev[col] !== false ? false : true }
+      const updated = { ...prev, [col]: prev[col] === false }
       localStorage.setItem(COLUMN_VISIBILITY_KEY, JSON.stringify(updated))
       return updated
     })
   }, [])
 
-  // Reset page when filters change
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional — reset page when filters change
   useEffect(() => {
     setPage(1)
   }, [statusFilter, taskTypeFilter, entityTypeFilter])

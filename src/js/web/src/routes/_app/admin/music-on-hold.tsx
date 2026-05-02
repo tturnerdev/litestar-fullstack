@@ -273,7 +273,7 @@ function AdminMusicOnHoldPage() {
   const [createOpen, setCreateOpen] = useState(false)
   const [editId, setEditId] = useState<string | null>(null)
 
-  // Reset page when debounced search changes
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional — reset page when search changes
   useEffect(() => {
     setPage(1)
   }, [debouncedSearch])

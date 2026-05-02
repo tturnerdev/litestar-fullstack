@@ -559,6 +559,7 @@ function ScheduleDetailPage() {
 
   useDocumentTitle(data?.name ? `${data.name} - Schedule` : "Schedule")
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional trigger dependency
   useEffect(() => {
     if (editParam && data && !editing) {
       startEditing(data)

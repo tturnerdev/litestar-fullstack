@@ -247,6 +247,7 @@ export function useEventStream() {
 
   // ----- connect / reconnect -----
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional trigger dependency
   const connect = useCallback(() => {
     if (!mountedRef.current) return
 

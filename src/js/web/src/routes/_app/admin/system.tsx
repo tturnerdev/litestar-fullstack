@@ -861,7 +861,7 @@ function WorkerQueueHistoryChart({ queues }: { queues?: Array<{ name: string; ac
             <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
               <BarChart3 className="h-5 w-5 text-muted-foreground" />
             </div>
-            <p className="text-sm font-medium">{(throughputEstimate?.rate ?? 0 > 0) ? "Processing" : "No Active Jobs"}</p>
+            <p className="text-sm font-medium">{(throughputEstimate?.rate ?? 0) > 0 ? "Processing" : "No Active Jobs"}</p>
             <p className="mt-1 text-xs text-muted-foreground">{throughputEstimate?.label ?? "Idle"}</p>
             <p className="mt-3 text-[11px] text-muted-foreground">Enable auto-refresh to build a history chart of queue activity over time.</p>
           </div>

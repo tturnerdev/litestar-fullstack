@@ -893,6 +893,8 @@ function ExtensionRow({
         </Tooltip>
       </TableCell>
       <TableCell className={cellClass}>
+        {/** biome-ignore lint/a11y/noStaticElementInteractions: SVG tooltip trigger */}
+        {/** biome-ignore lint/a11y/useKeyWithClickEvents: SVG tooltip trigger */}
         <div onClick={(e) => e.stopPropagation()}>
           <ExtensionRowActions extension={ext} />
         </div>

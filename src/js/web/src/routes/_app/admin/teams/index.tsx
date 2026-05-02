@@ -113,7 +113,7 @@ function AdminTeamsPage() {
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(getStoredPageSize)
 
-  // Reset page when debounced search changes
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional — reset page when search changes
   useEffect(() => {
     setPage(1)
   }, [debouncedSearch])

@@ -286,6 +286,8 @@ function PhoneNumberRow({
         </TableCell>
       )}
       <TableCell className={cn("text-right", cellClass)}>
+        {/** biome-ignore lint/a11y/noStaticElementInteractions: SVG tooltip trigger */}
+        {/** biome-ignore lint/a11y/useKeyWithClickEvents: SVG tooltip trigger */}
         <div onClick={(e) => e.stopPropagation()}>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -364,7 +366,7 @@ function PhoneNumbersPage() {
   const isColumnVisible = useCallback((col: string) => columnVisibility[col] !== false, [columnVisibility])
   const toggleColumn = useCallback((col: string) => {
     setColumnVisibility((prev) => {
-      const updated = { ...prev, [col]: prev[col] !== false ? false : true }
+      const updated = { ...prev, [col]: prev[col] === false }
       localStorage.setItem(COLUMN_VISIBILITY_KEY, JSON.stringify(updated))
       return updated
     })

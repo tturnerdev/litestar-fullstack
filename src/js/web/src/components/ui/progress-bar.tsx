@@ -34,6 +34,7 @@ export function RouteProgressBar() {
     }
   }
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional trigger dependency
   useEffect(() => {
     if (isLoading) {
       // Start loading: reset and begin trickle

@@ -123,7 +123,7 @@ export function ReportIssueTab({ formData, onFormDataChange, onCaptureScreenshot
       const headers: Record<string, string> = {}
       const token = window.localStorage.getItem("access_token")
       if (token) {
-        headers["Authorization"] = `Bearer ${token}`
+        headers.Authorization = `Bearer ${token}`
       }
       const csrfToken = window.__LITESTAR_CSRF__
       if (csrfToken) {

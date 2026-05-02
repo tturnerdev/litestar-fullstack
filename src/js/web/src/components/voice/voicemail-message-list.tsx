@@ -75,7 +75,7 @@ export function VoicemailMessageList({ extensionId }: VoicemailMessageListProps)
     // Filter by search
     if (debouncedSearch) {
       const q = debouncedSearch.toLowerCase()
-      items = items.filter((m) => (m.callerName && m.callerName.toLowerCase().includes(q)) || m.callerNumber.toLowerCase().includes(q))
+      items = items.filter((m) => m.callerName?.toLowerCase().includes(q) || m.callerNumber.toLowerCase().includes(q))
     }
 
     return items

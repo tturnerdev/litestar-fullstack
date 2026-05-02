@@ -338,7 +338,7 @@ function MemberRow({
       <TableCell>
         {member.extensionId ? (
           <Link to="/voice/extensions/$extensionId" params={{ extensionId: member.extensionId }} className="text-primary hover:underline font-mono text-sm">
-            {member.extensionId.slice(0, 8) + "..."}
+            {`${member.extensionId.slice(0, 8)}...`}
           </Link>
         ) : (
           <span className="text-sm">{member.externalNumber ?? "---"}</span>

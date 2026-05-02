@@ -199,7 +199,7 @@ function FaxNumbersPage() {
   const isColumnVisible = useCallback((col: string) => columnVisibility[col] !== false, [columnVisibility])
   const toggleColumn = useCallback((col: string) => {
     setColumnVisibility((prev) => {
-      const updated = { ...prev, [col]: prev[col] !== false ? false : true }
+      const updated = { ...prev, [col]: prev[col] === false }
       localStorage.setItem(COLUMN_VISIBILITY_KEY, JSON.stringify(updated))
       return updated
     })
@@ -266,7 +266,7 @@ function FaxNumbersPage() {
     // Search by number or label
     if (search) {
       const q = search.toLowerCase()
-      items = items.filter((n) => n.number.toLowerCase().includes(q) || (n.label && n.label.toLowerCase().includes(q)))
+      items = items.filter((n) => n.number.toLowerCase().includes(q) || n.label?.toLowerCase().includes(q))
     }
 
     // Status filter
