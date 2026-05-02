@@ -1,8 +1,6 @@
 import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { toast } from "sonner"
-import { useDocumentTitle } from "@/hooks/use-document-title"
 import {
+  Activity,
   AlertCircle,
   AlertTriangle,
   ArrowLeft,
@@ -12,19 +10,28 @@ import {
   Copy,
   Cpu,
   Globe,
+  Headphones,
   Key,
   Loader2,
   Lock,
   MoreHorizontal,
+  Network,
   Pencil,
+  Phone,
   Plug,
   Server,
   Settings,
   ShieldCheck,
   Trash2,
+  Wifi,
   X,
   XCircle,
 } from "lucide-react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { toast } from "sonner"
+import { DeviceStatusBadge } from "@/components/devices/device-status-badge"
+import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,47 +42,27 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { CopyButton } from "@/components/ui/copy-button"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Separator } from "@/components/ui/separator"
-import { Switch } from "@/components/ui/switch"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Switch } from "@/components/ui/switch"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Textarea } from "@/components/ui/textarea"
-import { CopyButton } from "@/components/ui/copy-button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Textarea } from "@/components/ui/textarea"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
-import {
-  useConnection,
-  useDeleteConnection,
-  useTestConnection,
-  useUpdateConnection,
-} from "@/lib/api/hooks/connections"
+import { useDocumentTitle } from "@/hooks/use-document-title"
+import { useConnection, useDeleteConnection, useTestConnection, useUpdateConnection } from "@/lib/api/hooks/connections"
 import { useDevices } from "@/lib/api/hooks/devices"
-import { DeviceStatusBadge } from "@/components/devices/device-status-badge"
-import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 
 export const Route = createFileRoute("/_app/connections/$connectionId/")({
   component: ConnectionDetailPage,
@@ -109,6 +96,67 @@ const deviceTypeLabels: Record<string, string> = {
   conference: "Conference",
   gateway: "Gateway",
   other: "Other",
+}
+
+// ── Provider display helpers ───────────────────────────────────────────
+
+const providerIcons: Record<string, typeof Plug> = {
+  freepbx: Phone,
+  telnyx: Globe,
+  unifi: Wifi,
+}
+
+const providerLabels: Record<string, string> = {
+  freepbx: "FreePBX",
+  telnyx: "Telnyx",
+  unifi: "Unifi Network",
+}
+
+const connectionTypeIcons: Record<string, typeof Plug> = {
+  pbx: Phone,
+  helpdesk: Headphones,
+  carrier: Globe,
+  network: Network,
+  other: Plug,
+}
+
+// ── Health status helpers ──────────────────────────────────────────────
+
+type HealthLevel = "healthy" | "degraded" | "error" | "unknown"
+
+function deriveHealthLevel(status: string, lastError: string | null | undefined, isEnabled: boolean): HealthLevel {
+  if (!isEnabled) return "unknown"
+  if (status === "error" || lastError) return "error"
+  if (status === "connected") return "healthy"
+  if (status === "disconnected") return "degraded"
+  return "unknown"
+}
+
+const healthConfig: Record<HealthLevel, { label: string; dotClass: string; bgClass: string; textClass: string }> = {
+  healthy: {
+    label: "Healthy",
+    dotClass: "bg-emerald-500",
+    bgClass: "bg-emerald-50 dark:bg-emerald-950/30",
+    textClass: "text-emerald-700 dark:text-emerald-400",
+  },
+  degraded: {
+    label: "Degraded",
+    dotClass: "bg-yellow-500",
+    bgClass: "bg-yellow-50 dark:bg-yellow-950/30",
+    textClass: "text-yellow-700 dark:text-yellow-400",
+  },
+  error: {
+    label: "Error",
+    dotClass: "bg-red-500",
+    bgClass: "bg-red-50 dark:bg-red-950/30",
+    textClass: "text-red-700 dark:text-red-400",
+  },
+  unknown: {
+    label: "Unknown",
+    dotClass: "bg-gray-400",
+    bgClass: "bg-gray-50 dark:bg-gray-900/30",
+    textClass: "text-muted-foreground",
+  },
 }
 
 // ── Status badge ────────────────────────────────────────────────────────
@@ -148,13 +196,7 @@ function StatusBadge({ status }: { status: string }) {
 
 // ── Timestamp with tooltip ──────────────────────────────────────────────
 
-function TimestampField({
-  label,
-  value,
-}: {
-  label: string
-  value: string | null | undefined
-}) {
+function TimestampField({ label, value }: { label: string; value: string | null | undefined }) {
   if (!value) {
     return (
       <div>
@@ -190,9 +232,7 @@ function ConnectionDetailPage() {
   const testConnection = useTestConnection(connectionId)
   const updateConnection = useUpdateConnection(connectionId)
   const devicesQuery = useDevices({ pageSize: 200 })
-  const managedDevices = (devicesQuery.data?.items ?? []).filter(
-    (d) => d.connectionId === connectionId,
-  )
+  const managedDevices = (devicesQuery.data?.items ?? []).filter((d) => d.connectionId === connectionId)
 
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [settingsText, setSettingsText] = useState<string | null>(null)
@@ -287,12 +327,9 @@ function ConnectionDetailPage() {
     })
   }, [data, editValues, updateConnection])
 
-  const updateEditValue = useCallback(
-    <K extends keyof typeof editValues>(key: K, value: (typeof editValues)[K]) => {
-      setEditValues((prev) => ({ ...prev, [key]: value }))
-    },
-    [],
-  )
+  const updateEditValue = useCallback(<K extends keyof typeof editValues>(key: K, value: (typeof editValues)[K]) => {
+    setEditValues((prev) => ({ ...prev, [key]: value }))
+  }, [])
 
   if (isLoading) {
     return (
@@ -392,7 +429,11 @@ function ConnectionDetailPage() {
             icon={AlertCircle}
             title="Unable to load connection"
             description="Something went wrong. Please try again."
-            action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+            action={
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
+                Try again
+              </Button>
+            }
           />
         </PageSection>
       </PageContainer>
@@ -404,8 +445,7 @@ function ConnectionDetailPage() {
     router.navigate({ to: "/connections" })
   }
 
-  const currentSettingsText =
-    settingsText ?? (data.settings ? JSON.stringify(data.settings, null, 2) : "")
+  const currentSettingsText = settingsText ?? (data.settings ? JSON.stringify(data.settings, null, 2) : "")
 
   const handleSaveSettings = () => {
     const text = currentSettingsText.trim()
@@ -413,19 +453,13 @@ function ConnectionDetailPage() {
       try {
         const parsed = JSON.parse(text)
         setSettingsError(null)
-        updateConnection.mutate(
-          { settings: parsed },
-          { onSuccess: () => setSettingsDirty(false) },
-        )
+        updateConnection.mutate({ settings: parsed }, { onSuccess: () => setSettingsDirty(false) })
       } catch {
         setSettingsError("Invalid JSON")
         return
       }
     } else {
-      updateConnection.mutate(
-        { settings: null },
-        { onSuccess: () => setSettingsDirty(false) },
-      )
+      updateConnection.mutate({ settings: null }, { onSuccess: () => setSettingsDirty(false) })
     }
   }
 
@@ -462,46 +496,21 @@ function ConnectionDetailPage() {
           <div className="flex items-center gap-3">
             <StatusBadge status={data.status} />
             {!editing && !data.isEnabled && (
-              <Badge
-                variant="outline"
-                className="border-muted-foreground/30 text-muted-foreground"
-              >
+              <Badge variant="outline" className="border-muted-foreground/30 text-muted-foreground">
                 Disabled
               </Badge>
             )}
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => testConnection.mutate()}
-              disabled={testConnection.isPending || editing}
-            >
-              {testConnection.isPending ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Plug className="mr-2 h-4 w-4" />
-              )}
+            <Button size="sm" variant="outline" onClick={() => testConnection.mutate()} disabled={testConnection.isPending || editing}>
+              {testConnection.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plug className="mr-2 h-4 w-4" />}
               Test
             </Button>
             {editing ? (
               <>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleCancelEditing}
-                  disabled={updateConnection.isPending}
-                >
+                <Button variant="ghost" size="sm" onClick={handleCancelEditing} disabled={updateConnection.isPending}>
                   <X className="mr-2 h-4 w-4" /> Cancel
                 </Button>
-                <Button
-                  size="sm"
-                  onClick={handleSaveEditing}
-                  disabled={!editDirty || updateConnection.isPending}
-                >
-                  {updateConnection.isPending ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Check className="mr-2 h-4 w-4" />
-                  )}
+                <Button size="sm" onClick={handleSaveEditing} disabled={!editDirty || updateConnection.isPending}>
+                  {updateConnection.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
                   Save
                 </Button>
               </>
@@ -533,10 +542,7 @@ function ConnectionDetailPage() {
                   Copy Connection ID
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="text-destructive focus:text-destructive"
-                  onClick={() => setDeleteOpen(true)}
-                >
+                <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setDeleteOpen(true)}>
                   <Trash2 className="mr-2 h-4 w-4" />
                   Delete Connection
                 </DropdownMenuItem>
@@ -558,13 +564,106 @@ function ConnectionDetailPage() {
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Connection test failed</AlertTitle>
-          <AlertDescription>
-            {testConnection.error instanceof Error
-              ? testConnection.error.message
-              : "An unexpected error occurred"}
-          </AlertDescription>
+          <AlertDescription>{testConnection.error instanceof Error ? testConnection.error.message : "An unexpected error occurred"}</AlertDescription>
         </Alert>
       )}
+
+      {/* Connection Health */}
+      <PageSection>
+        {(() => {
+          const health = deriveHealthLevel(data.status, data.lastError, data.isEnabled)
+          const config = healthConfig[health]
+          const ProviderIcon = providerIcons[data.provider.toLowerCase()] ?? connectionTypeIcons[data.connectionType] ?? Plug
+          const providerDisplayName = providerLabels[data.provider.toLowerCase()] ?? data.provider
+
+          return (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Activity className="h-5 w-5 text-muted-foreground" />
+                    <CardTitle>Connection Health</CardTitle>
+                  </div>
+                  <Button size="sm" variant="outline" onClick={() => testConnection.mutate()} disabled={testConnection.isPending || editing}>
+                    {testConnection.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plug className="mr-2 h-4 w-4" />}
+                    Test Connection
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                  {/* Health status indicator */}
+                  <div className="space-y-1.5">
+                    <p className="text-muted-foreground text-sm">Status</p>
+                    <div className={`inline-flex items-center gap-2 rounded-md px-3 py-1.5 ${config.bgClass}`}>
+                      <span className={`inline-block h-2.5 w-2.5 rounded-full ${config.dotClass} ${health === "healthy" ? "animate-pulse" : ""}`} />
+                      <span className={`text-sm font-medium ${config.textClass}`}>{config.label}</span>
+                    </div>
+                  </div>
+
+                  {/* Provider badge */}
+                  <div className="space-y-1.5">
+                    <p className="text-muted-foreground text-sm">Provider</p>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="gap-1.5 text-sm">
+                        <ProviderIcon className="h-3.5 w-3.5" />
+                        {providerDisplayName}
+                      </Badge>
+                      <Badge variant="secondary" className="text-xs">
+                        {typeLabels[data.connectionType] ?? data.connectionType}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  {/* Last health check */}
+                  <div className="space-y-1.5">
+                    <p className="text-muted-foreground text-sm">Last Health Check</p>
+                    {data.lastHealthCheck ? (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <p className="cursor-default text-sm">{formatRelativeTimeShort(data.lastHealthCheck)}</p>
+                        </TooltipTrigger>
+                        <TooltipContent>{formatDateTime(data.lastHealthCheck)}</TooltipContent>
+                      </Tooltip>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">Never checked</p>
+                    )}
+                  </div>
+
+                  {/* Enabled / Disabled */}
+                  <div className="space-y-1.5">
+                    <p className="text-muted-foreground text-sm">Enabled</p>
+                    <div className="flex items-center gap-1.5">
+                      {data.isEnabled ? (
+                        <>
+                          <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                          <span className="text-sm">Active</span>
+                        </>
+                      ) : (
+                        <>
+                          <XCircle className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm text-muted-foreground">Disabled</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Last error display */}
+                {data.lastError && (
+                  <div className="mt-4">
+                    <Alert variant="destructive">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertTitle>Last Error</AlertTitle>
+                      <AlertDescription className="font-mono text-xs">{data.lastError}</AlertDescription>
+                    </Alert>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )
+        })()}
+      </PageSection>
 
       <PageSection>
         <Tabs value={tab} onValueChange={(value) => navigate({ search: () => ({ tab: value }), replace: true })}>
@@ -587,12 +686,7 @@ function ConnectionDetailPage() {
                   <div>
                     <p className="text-muted-foreground">Name</p>
                     {editing ? (
-                      <Input
-                        value={editValues.name}
-                        onChange={(e) => updateEditValue("name", e.target.value)}
-                        className="mt-1 h-8"
-                        autoFocus
-                      />
+                      <Input value={editValues.name} onChange={(e) => updateEditValue("name", e.target.value)} className="mt-1 h-8" autoFocus />
                     ) : (
                       <p className="font-medium">{data.name}</p>
                     )}
@@ -629,11 +723,7 @@ function ConnectionDetailPage() {
                     <p className="text-muted-foreground">Enabled</p>
                     {editing ? (
                       <div className="mt-1 flex items-center gap-2">
-                        <Switch
-                          checked={editValues.isEnabled}
-                          onCheckedChange={(checked) => updateEditValue("isEnabled", checked)}
-                          aria-label="Toggle enabled"
-                        />
+                        <Switch checked={editValues.isEnabled} onCheckedChange={(checked) => updateEditValue("isEnabled", checked)} aria-label="Toggle enabled" />
                         <span className="text-sm">{editValues.isEnabled ? "Yes" : "No"}</span>
                       </div>
                     ) : (
@@ -729,11 +819,7 @@ function ConnectionDetailPage() {
                       <p className="text-muted-foreground">Credentials</p>
                       <div className="mt-1.5 flex flex-wrap gap-2">
                         {data.credentialFields.map((field) => (
-                          <Badge
-                            key={field}
-                            variant="outline"
-                            className="gap-1.5 font-mono text-xs"
-                          >
+                          <Badge key={field} variant="outline" className="gap-1.5 font-mono text-xs">
                             <Lock className="h-3 w-3 text-muted-foreground" />
                             {field}
                           </Badge>
@@ -760,14 +846,8 @@ function ConnectionDetailPage() {
                     <div className="grid grid-cols-[minmax(120px,1fr)_2fr] text-sm">
                       {settingsEntries.map(([key, value], idx) => (
                         <div key={key} className="contents">
-                          <div
-                            className={`px-3 py-2 font-mono text-xs text-muted-foreground ${idx !== settingsEntries.length - 1 ? "border-b" : ""}`}
-                          >
-                            {key}
-                          </div>
-                          <div
-                            className={`border-l px-3 py-2 font-mono text-xs ${idx !== settingsEntries.length - 1 ? "border-b" : ""}`}
-                          >
+                          <div className={`px-3 py-2 font-mono text-xs text-muted-foreground ${idx !== settingsEntries.length - 1 ? "border-b" : ""}`}>{key}</div>
+                          <div className={`border-l px-3 py-2 font-mono text-xs ${idx !== settingsEntries.length - 1 ? "border-b" : ""}`}>
                             {typeof value === "object" ? JSON.stringify(value) : String(value ?? "---")}
                           </div>
                         </div>
@@ -775,9 +855,7 @@ function ConnectionDetailPage() {
                     </div>
                   </div>
                 )}
-                {settingsEntries.length === 0 && !settingsDirty && (
-                  <p className="text-sm text-muted-foreground">No settings configured.</p>
-                )}
+                {settingsEntries.length === 0 && !settingsDirty && <p className="text-sm text-muted-foreground">No settings configured.</p>}
 
                 <Separator />
 
@@ -796,9 +874,7 @@ function ConnectionDetailPage() {
                     className="font-mono text-xs"
                     placeholder='{"key": "value"}'
                   />
-                  {settingsError && (
-                    <p className="text-destructive text-sm">{settingsError}</p>
-                  )}
+                  {settingsError && <p className="text-destructive text-sm">{settingsError}</p>}
                 </div>
                 <div className="flex items-center justify-end gap-2">
                   <Button
@@ -812,13 +888,8 @@ function ConnectionDetailPage() {
                   >
                     Reset
                   </Button>
-                  <Button
-                    onClick={handleSaveSettings}
-                    disabled={!settingsDirty || updateConnection.isPending}
-                  >
-                    {updateConnection.isPending && (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    )}
+                  <Button onClick={handleSaveSettings} disabled={!settingsDirty || updateConnection.isPending}>
+                    {updateConnection.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Save Settings
                   </Button>
                 </div>
@@ -841,11 +912,7 @@ function ConnectionDetailPage() {
                     ))}
                   </div>
                 ) : managedDevices.length === 0 ? (
-                  <EmptyState
-                    icon={Cpu}
-                    title="No devices managed by this connection"
-                    description="Devices linked to this connection will appear here."
-                  />
+                  <EmptyState icon={Cpu} title="No devices managed by this connection" description="Devices linked to this connection will appear here." />
                 ) : (
                   <Table aria-label="Connection devices">
                     <TableHeader>
@@ -860,23 +927,15 @@ function ConnectionDetailPage() {
                       {managedDevices.map((device) => (
                         <TableRow key={device.id}>
                           <TableCell>
-                            <Link
-                              to="/devices/$deviceId"
-                              params={{ deviceId: device.id }}
-                              className="font-medium text-primary hover:underline"
-                            >
+                            <Link to="/devices/$deviceId" params={{ deviceId: device.id }} className="font-medium text-primary hover:underline">
                               {device.name}
                             </Link>
                           </TableCell>
-                          <TableCell>
-                            {deviceTypeLabels[device.deviceType] ?? device.deviceType}
-                          </TableCell>
+                          <TableCell>{deviceTypeLabels[device.deviceType] ?? device.deviceType}</TableCell>
                           <TableCell>
                             <DeviceStatusBadge status={device.status} />
                           </TableCell>
-                          <TableCell className="font-mono text-xs">
-                            {device.ipAddress || "---"}
-                          </TableCell>
+                          <TableCell className="font-mono text-xs">{device.ipAddress || "---"}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -898,11 +957,7 @@ function ConnectionDetailPage() {
                   <div>
                     <p className="text-muted-foreground text-sm">Team</p>
                     <div className="flex items-center gap-1">
-                      <Link
-                        to="/teams/$teamId"
-                        params={{ teamId: data.teamId }}
-                        className="font-mono text-xs text-primary hover:underline"
-                      >
+                      <Link to="/teams/$teamId" params={{ teamId: data.teamId }} className="font-mono text-xs text-primary hover:underline">
                         {data.teamId.slice(0, 8)}...
                       </Link>
                       <CopyButton value={data.teamId} label="team ID" />
@@ -914,9 +969,7 @@ function ConnectionDetailPage() {
                     <Alert variant="destructive">
                       <AlertCircle className="h-4 w-4" />
                       <AlertTitle>Last Error</AlertTitle>
-                      <AlertDescription className="font-mono text-xs">
-                        {data.lastError}
-                      </AlertDescription>
+                      <AlertDescription className="font-mono text-xs">{data.lastError}</AlertDescription>
                     </Alert>
                   </div>
                 )}
@@ -930,11 +983,7 @@ function ConnectionDetailPage() {
                 <CardTitle>Activity Log</CardTitle>
               </CardHeader>
               <CardContent>
-                <EntityActivityPanel
-                  targetType="connection"
-                  targetId={connectionId}
-                  enabled={tab === "activity"}
-                />
+                <EntityActivityPanel targetType="connection" targetId={connectionId} enabled={tab === "activity"} />
               </CardContent>
             </Card>
           </TabsContent>
@@ -951,16 +1000,9 @@ function ConnectionDetailPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-medium text-sm">Delete this connection</p>
-                <p className="text-sm text-muted-foreground">
-                  This action cannot be undone. All configuration and credentials will be
-                  permanently removed.
-                </p>
+                <p className="text-sm text-muted-foreground">This action cannot be undone. All configuration and credentials will be permanently removed.</p>
               </div>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => setDeleteOpen(true)}
-              >
+              <Button variant="destructive" size="sm" onClick={() => setDeleteOpen(true)}>
                 <Trash2 className="mr-2 h-4 w-4" /> Delete
               </Button>
             </div>
@@ -977,15 +1019,11 @@ function ConnectionDetailPage() {
               Delete connection?
             </AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete <strong>{data.name}</strong> and all associated
-              configuration. This action cannot be undone.
+              This will permanently delete <strong>{data.name}</strong> and all associated configuration. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel
-              onClick={() => setDeleteOpen(false)}
-              disabled={deleteConnection.isPending}
-            >
+            <AlertDialogCancel onClick={() => setDeleteOpen(false)} disabled={deleteConnection.isPending}>
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
@@ -996,9 +1034,7 @@ function ConnectionDetailPage() {
               }}
               disabled={deleteConnection.isPending}
             >
-              {deleteConnection.isPending && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              )}
+              {deleteConnection.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -154,6 +154,35 @@ export function useActiveTasks() {
 }
 
 // ---------------------------------------------------------------------------
+// Retry Task
+// ---------------------------------------------------------------------------
+
+export function useRetryTask() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (taskId: string) => {
+      // TODO: wire to backend retry endpoint once available
+      void taskId
+      throw new Error("NOT_IMPLEMENTED")
+    },
+    onSuccess: (_data, taskId) => {
+      queryClient.invalidateQueries({ queryKey: taskKeys.all })
+      queryClient.invalidateQueries({ queryKey: taskKeys.detail(taskId) })
+      toast.success("Task queued for retry")
+    },
+    onError: (error) => {
+      if (error instanceof Error && error.message === "NOT_IMPLEMENTED") {
+        toast.info("Task retry is not yet available")
+        return
+      }
+      toast.error("Unable to retry task", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
+    },
+  })
+}
+
+// ---------------------------------------------------------------------------
 // Cancel Task
 // ---------------------------------------------------------------------------
 

@@ -13,6 +13,7 @@ import {
   Layers,
   Loader2,
   MoreHorizontal,
+  RotateCcw,
   Trash2,
   User,
   XCircle,
@@ -55,7 +56,7 @@ import { CopyButton } from "@/components/ui/copy-button"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { useTask, useCancelTask } from "@/lib/api/hooks/tasks"
+import { useTask, useCancelTask, useRetryTask } from "@/lib/api/hooks/tasks"
 import { toast } from "sonner"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
@@ -237,6 +238,7 @@ function TaskDetailPage() {
   const { taskId } = Route.useParams()
   const { data: task, isLoading, isError } = useTask(taskId)
   const cancelMutation = useCancelTask()
+  const retryMutation = useRetryTask()
   const [showCancelDialog, setShowCancelDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
@@ -259,6 +261,7 @@ function TaskDetailPage() {
   }
 
   const isActive = task.status === "pending" || task.status === "running"
+  const isRetryable = task.status === "failed" || task.status === "aborted"
 
   return (
     <PageContainer className="flex-1 space-y-6">
@@ -289,6 +292,21 @@ function TaskDetailPage() {
         }
         actions={
           <div className="flex items-center gap-2">
+            {isRetryable && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => retryMutation.mutate(taskId)}
+                disabled={retryMutation.isPending}
+              >
+                {retryMutation.isPending ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <RotateCcw className="mr-2 h-4 w-4" />
+                )}
+                Retry
+              </Button>
+            )}
             {isActive && (
               <Button
                 size="sm"

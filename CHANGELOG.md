@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.211.0 (2026-05-02)
+
+### Added
+- **Task retry button** — Retry action on failed/aborted tasks in the task detail page header with loading state and placeholder for backend integration
+- **Profile avatar upload** — Clickable avatar with camera overlay on hover, file validation (5MB, image types), local preview, and placeholder for backend upload
+- **Connection health card** — Status indicator (healthy/degraded/error/unknown), provider badge with icon, last health check timestamp, enabled state, and error alert on connection detail page
+
 ## v0.210.0 (2026-05-02)
 
 ### Added

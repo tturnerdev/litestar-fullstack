@@ -1,4 +1,6 @@
-import { BadgeCheck, KeyRound, Link2, Lock, Mail, Phone, Shield, User as UserIcon } from "lucide-react"
+import { BadgeCheck, Camera, KeyRound, Link2, Lock, Mail, Phone, Shield, User as UserIcon } from "lucide-react"
+import { useCallback, useRef, useState } from "react"
+import { toast } from "sonner"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
@@ -24,9 +26,53 @@ function getInitials(user: User): string {
   return user.email.slice(0, 2).toUpperCase()
 }
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5 MB
+const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"]
+
 export function ProfileHero({ user }: ProfileHeroProps) {
   const initials = getInitials(user)
   const displayName = user.name || user.username || user.email.split("@")[0]
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+
+  const handleAvatarClick = useCallback(() => {
+    fileInputRef.current?.click()
+  }, [])
+
+  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Reset input so re-selecting the same file triggers onChange
+    e.target.value = ""
+
+    if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
+      toast.error("Invalid file type", {
+        description: "Please select a JPEG, PNG, GIF, or WebP image.",
+      })
+      return
+    }
+
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error("File too large", {
+        description: "Avatar image must be under 5 MB.",
+      })
+      return
+    }
+
+    // Clean up previous preview URL
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl)
+    }
+
+    const objectUrl = URL.createObjectURL(file)
+    setPreviewUrl(objectUrl)
+    toast.info("Avatar upload coming soon", {
+      description: "Avatar uploads are not yet available. Your selection has been previewed locally.",
+    })
+  }, [previewUrl])
+
+  const avatarSrc = previewUrl ?? user.avatarUrl ?? undefined
 
   const securityIndicators = [
     {
@@ -60,14 +106,32 @@ export function ProfileHero({ user }: ProfileHeroProps) {
       <CardContent className="relative -mt-12 pb-6">
         <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-end">
           <div className="rounded-full bg-background p-1 shadow-md ring-2 ring-background">
-            <Avatar className="h-24 w-24 text-3xl">
-              {user.avatarUrl ? (
-                <AvatarImage src={user.avatarUrl} alt={displayName} />
-              ) : null}
-              <AvatarFallback className="bg-primary/10 text-primary text-3xl font-semibold">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleFileChange}
+              aria-label="Upload avatar image"
+            />
+            <button
+              type="button"
+              onClick={handleAvatarClick}
+              className="group relative rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              aria-label="Change avatar"
+            >
+              <Avatar className="h-24 w-24 text-3xl">
+                {avatarSrc ? (
+                  <AvatarImage src={avatarSrc} alt={displayName} />
+                ) : null}
+                <AvatarFallback className="bg-primary/10 text-primary text-3xl font-semibold">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/0 transition-colors duration-200 group-hover:bg-black/50">
+                <Camera className="h-6 w-6 text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
+              </div>
+            </button>
           </div>
 
           <div className="flex-1 space-y-1.5 text-center sm:pb-1 sm:text-left">
