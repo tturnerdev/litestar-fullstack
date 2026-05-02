@@ -1052,7 +1052,7 @@ function AssignedDevicesCard({ extensionId }: { extensionId: string }) {
             </p>
           </div>
         ) : (
-          <Table>
+          <Table aria-label="Devices using this extension">
             <TableHeader>
               <TableRow>
                 <TableHead>Device</TableHead>

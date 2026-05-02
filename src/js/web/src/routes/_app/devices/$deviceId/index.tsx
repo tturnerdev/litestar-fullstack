@@ -677,7 +677,7 @@ function DeviceDetailPage() {
                     No background tasks have been run for this device yet.
                   </p>
                 ) : (
-                  <Table>
+                  <Table aria-label="Device tasks">
                     <TableHeader>
                       <TableRow>
                         <TableHead>Type</TableHead>

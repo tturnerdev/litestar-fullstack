@@ -322,7 +322,7 @@ function PhoneNumberDetailPage() {
                     Unable to load related extensions.
                   </p>
                 ) : extensionsQuery.data && extensionsQuery.data.length > 0 ? (
-                  <Table>
+                  <Table aria-label="Related extensions">
                     <TableHeader>
                       <TableRow>
                         <TableHead>Extension</TableHead>

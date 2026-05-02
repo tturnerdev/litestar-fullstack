@@ -180,6 +180,7 @@ function OptionRow({
   isReordering: boolean
 }) {
   const deleteOption = useDeleteIvrMenuOption(menuId)
+  const [confirmDelete, setConfirmDelete] = useState(false)
   return (
     <TableRow className={isHighlighted ? "animate-highlight-row" : ""}>
       <TableCell>
@@ -215,13 +216,38 @@ function OptionRow({
             variant="ghost"
             size="icon"
             className="h-7 w-7 text-muted-foreground hover:text-destructive"
-            onClick={() => deleteOption.mutate(option.id)}
+            onClick={() => setConfirmDelete(true)}
             disabled={deleteOption.isPending}
             aria-label="Delete option"
           >
             {deleteOption.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
           </Button>
         </div>
+        <AlertDialog open={confirmDelete} onOpenChange={(open) => !open && setConfirmDelete(false)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-destructive" /> Delete menu option?
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                This will permanently remove option "{option.digit} - {option.label}" from the menu. This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={deleteOption.isPending}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                className={buttonVariants({ variant: "destructive" })}
+                onClick={() => {
+                  deleteOption.mutate(option.id, { onSuccess: () => setConfirmDelete(false) })
+                }}
+                disabled={deleteOption.isPending}
+              >
+                {deleteOption.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {deleteOption.isPending ? "Deleting..." : "Delete"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </TableCell>
     </TableRow>
   )

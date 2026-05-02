@@ -18,7 +18,6 @@ import {
   Square,
   Trash2,
   User,
-  Voicemail,
   Volume2,
   Wrench,
 } from "lucide-react"
@@ -58,6 +57,7 @@ import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { formatDateTime, formatFullDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { formatDuration, formatDurationHuman } from "@/lib/format-utils"
+import { cn } from "@/lib/utils"
 import {
   useDeleteVoicemailMessage,
   useToggleVoicemailRead,
@@ -184,13 +184,16 @@ function VoicemailBoxDetailPage() {
         actions={
           <div className="flex items-center gap-2">
             {!box.isEnabled && (
-              <Badge variant="outline" className="gap-1.5">
-                <Voicemail className="h-3 w-3" />
+              <Badge variant="outline" className="gap-1.5 text-muted-foreground">
+                <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
                 Disabled
               </Badge>
             )}
             {box.isEnabled && box.unreadCount > 0 && (
-              <Badge variant="secondary">{box.unreadCount} unread</Badge>
+              <Badge variant="secondary" className="gap-1.5">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
+                {box.unreadCount} unread
+              </Badge>
             )}
             <Button variant="outline" size="sm" asChild>
               <Link to="/voicemail">
@@ -320,9 +323,17 @@ function BoxSettingsForm({ boxId }: { boxId: string }) {
               Configure mailbox behavior, notifications, and retention.
             </CardDescription>
           </div>
-          <Badge variant={currentEnabled ? "default" : "outline"}>
-            {currentEnabled ? "Enabled" : "Disabled"}
-          </Badge>
+          {currentEnabled ? (
+            <Badge className="gap-1.5 bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              Enabled
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="gap-1.5 text-muted-foreground">
+              <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
+              Disabled
+            </Badge>
+          )}
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -516,14 +527,42 @@ function BoxSettingsForm({ boxId }: { boxId: string }) {
         <Separator />
 
         {/* Notifications */}
-        <div>
-          <h3 className="flex items-center gap-1.5 text-sm font-semibold tracking-tight">
-            <BellRing className="h-3.5 w-3.5 text-muted-foreground" />
-            Notifications
-          </h3>
-          <p className="text-xs text-muted-foreground">
-            Control how you are notified when new voicemails arrive.
-          </p>
+        <div className="flex items-start justify-between">
+          <div>
+            <h3 className="flex items-center gap-1.5 text-sm font-semibold tracking-tight">
+              <BellRing className="h-3.5 w-3.5 text-muted-foreground" />
+              Notifications
+            </h3>
+            <p className="text-xs text-muted-foreground">
+              Control how you are notified when new voicemails arrive.
+            </p>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Badge
+              variant={currentEmailNotif ? "default" : "outline"}
+              className={cn(
+                "gap-1.5",
+                currentEmailNotif
+                  ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400"
+                  : "text-muted-foreground",
+              )}
+            >
+              <span className={cn("h-1.5 w-1.5 rounded-full", currentEmailNotif ? "bg-emerald-500" : "bg-muted-foreground")} />
+              Email
+            </Badge>
+            <Badge
+              variant={currentAttachAudio ? "default" : "outline"}
+              className={cn(
+                "gap-1.5",
+                currentAttachAudio
+                  ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400"
+                  : "text-muted-foreground",
+              )}
+            >
+              <span className={cn("h-1.5 w-1.5 rounded-full", currentAttachAudio ? "bg-emerald-500" : "bg-muted-foreground")} />
+              Audio
+            </Badge>
+          </div>
         </div>
 
         <div className="space-y-4 rounded-lg border border-border/60 bg-muted/20 p-4">
@@ -561,14 +600,28 @@ function BoxSettingsForm({ boxId }: { boxId: string }) {
         <Separator />
 
         {/* Advanced */}
-        <div>
-          <h3 className="flex items-center gap-1.5 text-sm font-semibold tracking-tight">
-            <Wrench className="h-3.5 w-3.5 text-muted-foreground" />
-            Advanced
-          </h3>
-          <p className="text-xs text-muted-foreground">
-            Transcription settings.
-          </p>
+        <div className="flex items-start justify-between">
+          <div>
+            <h3 className="flex items-center gap-1.5 text-sm font-semibold tracking-tight">
+              <Wrench className="h-3.5 w-3.5 text-muted-foreground" />
+              Advanced
+            </h3>
+            <p className="text-xs text-muted-foreground">
+              Transcription settings.
+            </p>
+          </div>
+          <Badge
+            variant={currentTranscription ? "default" : "outline"}
+            className={cn(
+              "gap-1.5",
+              currentTranscription
+                ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400"
+                : "text-muted-foreground",
+            )}
+          >
+            <span className={cn("h-1.5 w-1.5 rounded-full", currentTranscription ? "bg-emerald-500" : "bg-muted-foreground")} />
+            {currentTranscription ? "Enabled" : "Disabled"}
+          </Badge>
         </div>
 
         <div className="flex items-center justify-between">
@@ -756,7 +809,10 @@ function BoxMessageList({ boxId }: { boxId: string }) {
         <div className="flex items-center gap-3">
           <CardTitle>Messages ({data.total})</CardTitle>
           {unreadCount > 0 && (
-            <Badge variant="secondary">{unreadCount} unread</Badge>
+            <Badge variant="secondary" className="gap-1.5">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
+              {unreadCount} unread
+            </Badge>
           )}
           {someSelected && (
             <Badge variant="outline">{selectedIds.size} selected</Badge>
@@ -990,7 +1046,8 @@ function BoxMessageRow({
               </TooltipContent>
             </Tooltip>
             {message.isUrgent && (
-              <Badge variant="destructive" className="text-xs">
+              <Badge variant="destructive" className="gap-1.5 text-xs">
+                <span className="h-1.5 w-1.5 rounded-full bg-red-200 dark:bg-red-400" />
                 Urgent
               </Badge>
             )}
@@ -1007,7 +1064,10 @@ function BoxMessageRow({
               </TooltipContent>
             </Tooltip>
           ) : (
-            <span className="italic">No transcription</span>
+            <Badge variant="outline" className="gap-1.5 text-muted-foreground">
+              <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
+              None
+            </Badge>
           )}
         </TableCell>
         <TableCell className="text-right">

@@ -637,7 +637,7 @@ function ConnectionDetailPage() {
                     description="Devices linked to this connection will appear here."
                   />
                 ) : (
-                  <Table>
+                  <Table aria-label="Connection devices">
                     <TableHeader>
                       <TableRow>
                         <TableHead>Name</TableHead>

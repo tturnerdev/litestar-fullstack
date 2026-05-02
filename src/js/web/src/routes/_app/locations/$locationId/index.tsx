@@ -452,7 +452,7 @@ function LocationDetailPage() {
                     ))}
                   </div>
                 ) : locationDevices && locationDevices.length > 0 ? (
-                  <Table>
+                  <Table aria-label="Devices at this location">
                     <TableHeader>
                       <TableRow>
                         <TableHead>Name</TableHead>

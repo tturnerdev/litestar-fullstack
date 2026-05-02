@@ -226,6 +226,52 @@ function EntryDisplay({
   scheduleId: string
 }) {
   const deleteEntry = useDeleteScheduleEntry(scheduleId)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+
+  const handleDelete = () => {
+    deleteEntry.mutate(entry.id, {
+      onSuccess: () => setConfirmDelete(false),
+    })
+  }
+
+  const deleteButton = (
+    <Button
+      variant="ghost"
+      size="sm"
+      className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
+      onClick={() => setConfirmDelete(true)}
+      disabled={deleteEntry.isPending}
+    >
+      {deleteEntry.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
+    </Button>
+  )
+
+  const deleteDialog = (
+    <AlertDialog open={confirmDelete} onOpenChange={(open) => !open && setConfirmDelete(false)}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle className="flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5 text-destructive" />
+            Delete schedule entry?
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            This will permanently remove this schedule entry. This action cannot be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={deleteEntry.isPending}>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            className={buttonVariants({ variant: "destructive" })}
+            onClick={handleDelete}
+            disabled={deleteEntry.isPending}
+          >
+            {deleteEntry.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {deleteEntry.isPending ? "Deleting..." : "Delete"}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  )
 
   if (entry.isClosed) {
     return (
@@ -233,15 +279,8 @@ function EntryDisplay({
         <Badge variant="outline" className="text-xs text-muted-foreground">
           Closed
         </Badge>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
-          onClick={() => deleteEntry.mutate(entry.id)}
-          disabled={deleteEntry.isPending}
-        >
-          {deleteEntry.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
-        </Button>
+        {deleteButton}
+        {deleteDialog}
       </div>
     )
   }
@@ -251,15 +290,8 @@ function EntryDisplay({
       <span className="text-sm">
         {entry.startTime} - {entry.endTime}
       </span>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
-        onClick={() => deleteEntry.mutate(entry.id)}
-        disabled={deleteEntry.isPending}
-      >
-        {deleteEntry.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
-      </Button>
+      {deleteButton}
+      {deleteDialog}
     </div>
   )
 }
@@ -1056,6 +1088,13 @@ function ScheduleDetailPage() {
 
 function HolidayRow({ entry, scheduleId }: { entry: ScheduleEntry; scheduleId: string }) {
   const deleteEntry = useDeleteScheduleEntry(scheduleId)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+
+  const handleDelete = () => {
+    deleteEntry.mutate(entry.id, {
+      onSuccess: () => setConfirmDelete(false),
+    })
+  }
 
   return (
     <TableRow>
@@ -1079,11 +1118,35 @@ function HolidayRow({ entry, scheduleId }: { entry: ScheduleEntry; scheduleId: s
           variant="ghost"
           size="sm"
           className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
-          onClick={() => deleteEntry.mutate(entry.id)}
+          onClick={() => setConfirmDelete(true)}
           disabled={deleteEntry.isPending}
         >
           {deleteEntry.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
         </Button>
+        <AlertDialog open={confirmDelete} onOpenChange={(open) => !open && setConfirmDelete(false)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-destructive" />
+                Delete holiday entry?
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                This will permanently remove the holiday entry{entry.label ? ` "${entry.label}"` : ""}{entry.date ? ` on ${entry.date}` : ""}. This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={deleteEntry.isPending}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                className={buttonVariants({ variant: "destructive" })}
+                onClick={handleDelete}
+                disabled={deleteEntry.isPending}
+              >
+                {deleteEntry.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {deleteEntry.isPending ? "Deleting..." : "Delete"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </TableCell>
     </TableRow>
   )
