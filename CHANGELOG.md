@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.209.0 (2026-05-02)
+
+### Added
+- **Action dropdown menus** on 8 detail pages: connections, phone numbers, tasks, fax messages, call queues, IVR menus, ring groups, and time conditions — each with Copy ID and Delete actions following the established pattern
+
 ## v0.208.0 (2026-05-02)
 
 ### Added

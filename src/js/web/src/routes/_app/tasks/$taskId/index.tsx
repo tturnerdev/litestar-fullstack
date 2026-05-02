@@ -7,10 +7,13 @@ import {
   ChevronDown,
   ChevronRight,
   Clock,
+  Copy,
   FileJson,
   Hash,
   Layers,
   Loader2,
+  MoreHorizontal,
+  Trash2,
   User,
   XCircle,
 } from "lucide-react"
@@ -37,6 +40,13 @@ import {
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
@@ -46,6 +56,7 @@ import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-lay
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useTask, useCancelTask } from "@/lib/api/hooks/tasks"
+import { toast } from "sonner"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 
@@ -227,6 +238,7 @@ function TaskDetailPage() {
   const { data: task, isLoading, isError } = useTask(taskId)
   const cancelMutation = useCancelTask()
   const [showCancelDialog, setShowCancelDialog] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   useDocumentTitle(task ? `${formatTaskType(task.taskType)} - Task` : "Task Details")
 
@@ -298,6 +310,28 @@ function TaskDetailPage() {
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back
               </Link>
             </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <MoreHorizontal className="h-4 w-4" />
+                  <span className="sr-only">Actions</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => navigator.clipboard.writeText(taskId)}>
+                  <Copy className="mr-2 h-4 w-4" />
+                  Copy Task ID
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-destructive focus:text-destructive"
+                  onClick={() => setShowDeleteDialog(true)}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete Task
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         }
       />
@@ -495,6 +529,30 @@ function TaskDetailPage() {
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
               Cancel Task
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this task?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete this task record. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                toast.info("Task deletion is not yet implemented")
+                setShowDeleteDialog(false)
+              }}
+            >
+              Delete Task
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

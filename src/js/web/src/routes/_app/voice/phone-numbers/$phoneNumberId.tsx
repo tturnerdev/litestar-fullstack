@@ -1,12 +1,20 @@
 import { createFileRoute, Link, useBlocker, useNavigate } from "@tanstack/react-router"
-import { AlertCircle, ArrowLeft, Fingerprint, Home, Loader2, Pencil, Phone, PhoneForwarded, Shield, Trash2 } from "lucide-react"
+import { AlertCircle, ArrowLeft, Copy, Fingerprint, Home, Loader2, MoreHorizontal, Pencil, Phone, PhoneForwarded, Shield, Trash2 } from "lucide-react"
 import { useEffect, useState } from "react"
+import { toast } from "sonner"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { ExternalDataTab } from "@/components/gateway/external-data-tab"
 import { E911StatusBadge } from "@/components/voice/e911-status-badge"
 import { PhoneNumberDeleteDialog } from "@/components/voice/phone-number-delete-dialog"
 import { PhoneNumberEditSheet } from "@/components/voice/phone-number-edit-sheet"
 import { Badge } from "@/components/ui/badge"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -226,6 +234,42 @@ function PhoneNumberDetailPage() {
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back
               </Link>
             </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <MoreHorizontal className="h-4 w-4" />
+                  <span className="sr-only">Actions</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={() => {
+                    navigator.clipboard.writeText(phoneNumberId)
+                    toast.success("Phone number ID copied to clipboard")
+                  }}
+                >
+                  <Copy className="mr-2 h-4 w-4" />
+                  Copy Phone Number ID
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    navigator.clipboard.writeText(data.number)
+                    toast.success("Phone number copied to clipboard")
+                  }}
+                >
+                  <Copy className="mr-2 h-4 w-4" />
+                  Copy Number
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-destructive focus:text-destructive"
+                  onClick={() => setDeleteOpen(true)}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         }
       />

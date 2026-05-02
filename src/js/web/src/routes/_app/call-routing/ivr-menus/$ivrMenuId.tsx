@@ -1,13 +1,16 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
 import { useCallback, useRef, useState } from "react"
+import { toast } from "sonner"
 import {
   AlertCircle,
   AlertTriangle,
   ArrowDown,
   ArrowLeft,
   ArrowUp,
+  Copy,
   Loader2,
   Menu,
+  MoreHorizontal,
   Pencil,
   Plus,
   Trash2,
@@ -34,6 +37,13 @@ import {
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { CopyButton } from "@/components/ui/copy-button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -275,6 +285,7 @@ function IvrMenuDetailPage() {
   const deleteMutation = useDeleteIvrMenu()
 
   const [editing, setEditing] = useState(false)
+  const [showDeleteAlert, setShowDeleteAlert] = useState(false)
   const [editName, setEditName] = useState("")
   const [editGreetingType, setEditGreetingType] = useState("none")
   const [editGreetingText, setEditGreetingText] = useState("")
@@ -425,6 +436,33 @@ function IvrMenuDetailPage() {
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back
               </Link>
             </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <MoreHorizontal className="h-4 w-4" />
+                  <span className="sr-only">Actions</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={() => {
+                    navigator.clipboard.writeText(ivrMenuId)
+                    toast.success("Menu ID copied to clipboard")
+                  }}
+                >
+                  <Copy className="mr-2 h-4 w-4" />
+                  Copy Menu ID
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-destructive focus:text-destructive"
+                  onClick={() => setShowDeleteAlert(true)}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete Menu
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         }
       />
@@ -627,6 +665,31 @@ function IvrMenuDetailPage() {
           targetId={ivrMenuId}
         />
       </PageSection>
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={showDeleteAlert} onOpenChange={setShowDeleteAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" /> Delete "{data.name}"?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete this IVR menu and all its options. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className={buttonVariants({ variant: "destructive" })}
+              onClick={handleDelete}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {deleteMutation.isPending ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PageContainer>
   )
 }

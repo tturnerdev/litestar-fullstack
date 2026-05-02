@@ -6,7 +6,9 @@ import {
   AlertTriangle,
   ArrowLeft,
   Clock,
+  Copy,
   Loader2,
+  MoreHorizontal,
   Pencil,
   Trash2,
 } from "lucide-react"
@@ -32,6 +34,13 @@ import {
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { CopyButton } from "@/components/ui/copy-button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -131,6 +140,7 @@ function TimeConditionDetailPage() {
   const overrideMutation = useSetTimeConditionOverride(timeConditionId)
 
   const [editing, setEditing] = useState(false)
+  const [showDeleteAlert, setShowDeleteAlert] = useState(false)
   const [editName, setEditName] = useState("")
   const [editMatchDest, setEditMatchDest] = useState("")
   const [editNoMatchDest, setEditNoMatchDest] = useState("")
@@ -266,6 +276,33 @@ function TimeConditionDetailPage() {
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back
               </Link>
             </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <MoreHorizontal className="h-4 w-4" />
+                  <span className="sr-only">Actions</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={() => {
+                    navigator.clipboard.writeText(timeConditionId)
+                    toast.success("Time Condition ID copied to clipboard")
+                  }}
+                >
+                  <Copy className="mr-2 h-4 w-4" />
+                  Copy Time Condition ID
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-destructive focus:text-destructive"
+                  onClick={() => setShowDeleteAlert(true)}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete Time Condition
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         }
       />
@@ -419,6 +456,31 @@ function TimeConditionDetailPage() {
           targetId={timeConditionId}
         />
       </PageSection>
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={showDeleteAlert} onOpenChange={setShowDeleteAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" /> Delete "{data.name}"?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete this time condition. Any call routes referencing it will need to be updated. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className={buttonVariants({ variant: "destructive" })}
+              onClick={handleDelete}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {deleteMutation.isPending ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PageContainer>
   )
 }

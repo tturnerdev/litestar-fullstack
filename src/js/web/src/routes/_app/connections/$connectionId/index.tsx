@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { toast } from "sonner"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import {
   AlertCircle,
@@ -8,11 +9,13 @@ import {
   Check,
   CheckCircle2,
   Circle,
+  Copy,
   Cpu,
   Globe,
   Key,
   Loader2,
   Lock,
+  MoreHorizontal,
   Pencil,
   Plug,
   Server,
@@ -32,6 +35,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -505,6 +515,33 @@ function ConnectionDetailPage() {
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back
               </Link>
             </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <MoreHorizontal className="h-4 w-4" />
+                  <span className="sr-only">Actions</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={() => {
+                    navigator.clipboard.writeText(connectionId)
+                    toast.success("Connection ID copied to clipboard")
+                  }}
+                >
+                  <Copy className="mr-2 h-4 w-4" />
+                  Copy Connection ID
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-destructive focus:text-destructive"
+                  onClick={() => setDeleteOpen(true)}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete Connection
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         }
       />

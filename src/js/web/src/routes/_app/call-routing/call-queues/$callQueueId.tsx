@@ -1,12 +1,15 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { toast } from "sonner"
 import {
   AlertCircle,
   AlertTriangle,
   ArrowDown,
   ArrowLeft,
   ArrowUp,
+  Copy,
   Loader2,
+  MoreHorizontal,
   Pause,
   Pencil,
   Phone,
@@ -36,6 +39,13 @@ import {
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { CopyButton } from "@/components/ui/copy-button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import {
   Dialog,
   DialogContent,
@@ -533,6 +543,7 @@ function CallQueueDetailPage() {
   const deleteMutation = useDeleteCallQueue()
 
   const [showEditDialog, setShowEditDialog] = useState(false)
+  const [showDeleteAlert, setShowDeleteAlert] = useState(false)
 
   useDocumentTitle(data ? `${data.name} - Call Queues` : "Call Queue Detail")
 
@@ -650,6 +661,33 @@ function CallQueueDetailPage() {
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back
               </Link>
             </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <MoreHorizontal className="h-4 w-4" />
+                  <span className="sr-only">Actions</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={() => {
+                    navigator.clipboard.writeText(callQueueId)
+                    toast.success("Queue ID copied to clipboard")
+                  }}
+                >
+                  <Copy className="mr-2 h-4 w-4" />
+                  Copy Queue ID
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-destructive focus:text-destructive"
+                  onClick={() => setShowDeleteAlert(true)}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete Queue
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         }
       />
@@ -822,6 +860,31 @@ function CallQueueDetailPage() {
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
       />
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={showDeleteAlert} onOpenChange={setShowDeleteAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" /> Delete "{data.name}"?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete this call queue and all its member assignments. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className={buttonVariants({ variant: "destructive" })}
+              onClick={handleDelete}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {deleteMutation.isPending ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PageContainer>
   )
 }
