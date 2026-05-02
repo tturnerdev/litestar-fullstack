@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import {
@@ -427,20 +427,20 @@ function TeamPermissionEditor({
             <TableRow>
               <TableHead>Feature Area</TableHead>
               {ROLES.map((role) => (
-                <TableHead key={`${role}-view`} className="w-24 text-center">
-                  <div className="text-xs leading-tight">
-                    <div>{role}</div>
-                    <div className="text-muted-foreground">View</div>
-                  </div>
-                </TableHead>
-              ))}
-              {ROLES.map((role) => (
-                <TableHead key={`${role}-edit`} className="w-24 text-center">
-                  <div className="text-xs leading-tight">
-                    <div>{role}</div>
-                    <div className="text-muted-foreground">Edit</div>
-                  </div>
-                </TableHead>
+                <Fragment key={role}>
+                  <TableHead className="w-24 text-center">
+                    <div className="text-xs leading-tight">
+                      <div>{role}</div>
+                      <div className="text-muted-foreground">View</div>
+                    </div>
+                  </TableHead>
+                  <TableHead className="w-24 text-center">
+                    <div className="text-xs leading-tight">
+                      <div>{role}</div>
+                      <div className="text-muted-foreground">Edit</div>
+                    </div>
+                  </TableHead>
+                </Fragment>
               ))}
             </TableRow>
           </TableHeader>
@@ -456,31 +456,28 @@ function TeamPermissionEditor({
                 {ROLES.map((role) => {
                   const perm = matrix[role]?.[area.key] ?? { canView: false, canEdit: false }
                   return (
-                    <TableCell key={`${role}-view`} className="text-center">
-                      <div className="flex justify-center">
-                        <Checkbox
-                          checked={perm.canView}
-                          onChange={() => togglePermission(role, area.key, "canView")}
-                          disabled={saveMutation.isPending}
-                          aria-label={`${role} can view ${area.label}`}
-                        />
-                      </div>
-                    </TableCell>
-                  )
-                })}
-                {ROLES.map((role) => {
-                  const perm = matrix[role]?.[area.key] ?? { canView: false, canEdit: false }
-                  return (
-                    <TableCell key={`${role}-edit`} className="text-center">
-                      <div className="flex justify-center">
-                        <Checkbox
-                          checked={perm.canEdit}
-                          onChange={() => togglePermission(role, area.key, "canEdit")}
-                          disabled={saveMutation.isPending}
-                          aria-label={`${role} can edit ${area.label}`}
-                        />
-                      </div>
-                    </TableCell>
+                    <Fragment key={role}>
+                      <TableCell className="text-center">
+                        <div className="flex justify-center">
+                          <Checkbox
+                            checked={perm.canView}
+                            onChange={() => togglePermission(role, area.key, "canView")}
+                            disabled={saveMutation.isPending}
+                            aria-label={`${role} can view ${area.label}`}
+                          />
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <div className="flex justify-center">
+                          <Checkbox
+                            checked={perm.canEdit}
+                            onChange={() => togglePermission(role, area.key, "canEdit")}
+                            disabled={saveMutation.isPending}
+                            aria-label={`${role} can edit ${area.label}`}
+                          />
+                        </div>
+                      </TableCell>
+                    </Fragment>
                   )
                 })}
               </TableRow>

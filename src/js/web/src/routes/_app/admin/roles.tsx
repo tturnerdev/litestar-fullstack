@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import {
@@ -427,20 +427,20 @@ function TeamPermissionCard({
                 <TableRow>
                   <TableHead>Feature Area</TableHead>
                   {ROLES.map((role) => (
-                    <TableHead key={`${role}-view`} className="w-[100px] text-center">
-                      <div className="text-xs leading-tight">
-                        <div className="font-semibold">{role}</div>
-                        <div className="font-normal text-muted-foreground">View</div>
-                      </div>
-                    </TableHead>
-                  ))}
-                  {ROLES.map((role) => (
-                    <TableHead key={`${role}-edit`} className="w-[100px] text-center">
-                      <div className="text-xs leading-tight">
-                        <div className="font-semibold">{role}</div>
-                        <div className="font-normal text-muted-foreground">Edit</div>
-                      </div>
-                    </TableHead>
+                    <Fragment key={role}>
+                      <TableHead className="w-[100px] text-center">
+                        <div className="text-xs leading-tight">
+                          <div className="font-semibold">{role}</div>
+                          <div className="font-normal text-muted-foreground">View</div>
+                        </div>
+                      </TableHead>
+                      <TableHead className="w-[100px] text-center">
+                        <div className="text-xs leading-tight">
+                          <div className="font-semibold">{role}</div>
+                          <div className="font-normal text-muted-foreground">Edit</div>
+                        </div>
+                      </TableHead>
+                    </Fragment>
                   ))}
                 </TableRow>
               </TableHeader>
@@ -456,39 +456,36 @@ function TeamPermissionCard({
                     {ROLES.map((role) => {
                       const perm = currentMatrix[role]?.[area.key] ?? { canView: false, canEdit: false }
                       return (
-                        <TableCell key={`${role}-view`} className="text-center">
-                          {isEditing ? (
-                            <div className="flex justify-center">
-                              <Checkbox
-                                checked={perm.canView}
-                                onChange={() => togglePermission(role, area.key, "canView")}
-                                disabled={saveMutation.isPending}
-                                aria-label={`${role} can view ${area.label}`}
-                              />
-                            </div>
-                          ) : (
-                            <PermissionIndicator allowed={perm.canView} />
-                          )}
-                        </TableCell>
-                      )
-                    })}
-                    {ROLES.map((role) => {
-                      const perm = currentMatrix[role]?.[area.key] ?? { canView: false, canEdit: false }
-                      return (
-                        <TableCell key={`${role}-edit`} className="text-center">
-                          {isEditing ? (
-                            <div className="flex justify-center">
-                              <Checkbox
-                                checked={perm.canEdit}
-                                onChange={() => togglePermission(role, area.key, "canEdit")}
-                                disabled={saveMutation.isPending}
-                                aria-label={`${role} can edit ${area.label}`}
-                              />
-                            </div>
-                          ) : (
-                            <PermissionIndicator allowed={perm.canEdit} />
-                          )}
-                        </TableCell>
+                        <Fragment key={role}>
+                          <TableCell className="text-center">
+                            {isEditing ? (
+                              <div className="flex justify-center">
+                                <Checkbox
+                                  checked={perm.canView}
+                                  onChange={() => togglePermission(role, area.key, "canView")}
+                                  disabled={saveMutation.isPending}
+                                  aria-label={`${role} can view ${area.label}`}
+                                />
+                              </div>
+                            ) : (
+                              <PermissionIndicator allowed={perm.canView} />
+                            )}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            {isEditing ? (
+                              <div className="flex justify-center">
+                                <Checkbox
+                                  checked={perm.canEdit}
+                                  onChange={() => togglePermission(role, area.key, "canEdit")}
+                                  disabled={saveMutation.isPending}
+                                  aria-label={`${role} can edit ${area.label}`}
+                                />
+                              </div>
+                            ) : (
+                              <PermissionIndicator allowed={perm.canEdit} />
+                            )}
+                          </TableCell>
+                        </Fragment>
                       )
                     })}
                   </TableRow>

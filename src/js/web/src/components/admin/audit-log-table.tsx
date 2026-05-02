@@ -1049,6 +1049,7 @@ export function AuditLogTable() {
           {/* Result count */}
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
+              Showing {items.length.toLocaleString()} of{" "}
               {totalCount.toLocaleString()} {totalCount === 1 ? "entry" : "entries"}
               {activeFilterCount > 0 && " (filtered)"}
             </p>

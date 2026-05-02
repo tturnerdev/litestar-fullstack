@@ -1,5 +1,5 @@
-import { AlertCircle, AlertTriangle, CheckSquare, Inbox, Loader2, Mail, MailOpen, Square, Trash2 } from "lucide-react"
-import { useState } from "react"
+import { AlertCircle, AlertTriangle, Filter, Inbox, Loader2, Mail, MailOpen, Search, Trash2, X } from "lucide-react"
+import { useCallback, useMemo, useState } from "react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,8 +13,11 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
 import { EmptyState } from "@/components/ui/empty-state"
+import { Input } from "@/components/ui/input"
 import { SkeletonTable } from "@/components/ui/skeleton"
+import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { VoicemailPlayer } from "@/components/voice/voicemail-player"
@@ -28,6 +31,7 @@ import {
 } from "@/lib/api/hooks/voice"
 import { formatDateTime, formatFullDateTime } from "@/lib/date-utils"
 import { formatDuration } from "@/lib/format-utils"
+import { useDebouncedValue } from "@/hooks/use-debounced-value"
 
 const PAGE_SIZE = 15
 
@@ -41,11 +45,106 @@ export function VoicemailMessageList({ extensionId }: VoicemailMessageListProps)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false)
   const [singleDeleteId, setSingleDeleteId] = useState<string | null>(null)
+
+  // Search state
+  const [search, setSearch] = useState("")
+  const debouncedSearch = useDebouncedValue(search)
+
+  // Sort state
+  const [sortKey, setSortKey] = useState<string | null>(null)
+  const [sortDir, setSortDir] = useState<SortDirection>(null)
+
+  // Filter state
+  const [unreadOnly, setUnreadOnly] = useState(false)
+
   const { data, isLoading, isError, refetch } = useVoicemailMessages(extensionId, page, PAGE_SIZE)
   const deleteMutation = useDeleteVoicemailMessage(extensionId)
   const markReadMutation = useMarkVoicemailRead(extensionId)
   const bulkMarkReadMutation = useBulkMarkVoicemailRead(extensionId)
   const bulkDeleteMutation = useBulkDeleteVoicemailMessages(extensionId)
+
+  // Client-side filtering
+  const filteredItems = useMemo(() => {
+    let items = data?.items ?? []
+
+    // Filter by unread
+    if (unreadOnly) {
+      items = items.filter((m) => !m.isRead)
+    }
+
+    // Filter by search
+    if (debouncedSearch) {
+      const q = debouncedSearch.toLowerCase()
+      items = items.filter(
+        (m) =>
+          (m.callerName && m.callerName.toLowerCase().includes(q)) ||
+          m.callerNumber.toLowerCase().includes(q),
+      )
+    }
+
+    return items
+  }, [data?.items, debouncedSearch, unreadOnly])
+
+  // Client-side sorting
+  const sortedItems = useMemo(() => {
+    if (!sortKey || !sortDir) return filteredItems
+
+    const sorted = [...filteredItems]
+    sorted.sort((a, b) => {
+      let cmp = 0
+      switch (sortKey) {
+        case "caller": {
+          const aVal = (a.callerName ?? a.callerNumber).toLowerCase()
+          const bVal = (b.callerName ?? b.callerNumber).toLowerCase()
+          cmp = aVal.localeCompare(bVal)
+          break
+        }
+        case "duration":
+          cmp = a.durationSeconds - b.durationSeconds
+          break
+        case "received":
+          cmp = new Date(a.receivedAt).getTime() - new Date(b.receivedAt).getTime()
+          break
+      }
+      return sortDir === "desc" ? -cmp : cmp
+    })
+    return sorted
+  }, [filteredItems, sortKey, sortDir])
+
+  // Sort handler
+  const handleSort = useCallback(
+    (key: string) => {
+      const next = nextSortDirection(sortKey, sortDir, key)
+      setSortKey(next.sort)
+      setSortDir(next.direction)
+    },
+    [sortKey, sortDir],
+  )
+
+  // Selection helpers
+  const allVisibleIds = useMemo(() => sortedItems.map((m) => m.id), [sortedItems])
+  const allSelected = sortedItems.length > 0 && sortedItems.every((m) => selectedIds.has(m.id))
+  const someSelected = sortedItems.some((m) => selectedIds.has(m.id))
+
+  const toggleAll = useCallback(() => {
+    if (allSelected) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(allVisibleIds))
+    }
+  }, [allSelected, allVisibleIds])
+
+  const toggleOne = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      return next
+    })
+  }, [])
 
   if (isLoading) return <SkeletonTable rows={5} />
 
@@ -61,35 +160,26 @@ export function VoicemailMessageList({ extensionId }: VoicemailMessageListProps)
   }
 
   const totalPages = Math.max(1, Math.ceil(data.total / PAGE_SIZE))
+  const totalCount = data.items.length
   const unreadCount = data.items.filter((m) => !m.isRead).length
-  const allSelected = data.items.length > 0 && selectedIds.size === data.items.length
-  const someSelected = selectedIds.size > 0
-
-  function toggleSelectAll() {
-    if (allSelected) {
-      setSelectedIds(new Set())
-    } else {
-      setSelectedIds(new Set(data?.items.map((m) => m.id) ?? []))
-    }
-  }
-
-  function toggleSelect(id: string) {
-    setSelectedIds((prev) => {
-      const next = new Set(prev)
-      if (next.has(id)) {
-        next.delete(id)
-      } else {
-        next.add(id)
-      }
-      return next
-    })
-  }
+  const displayCount = sortedItems.length
+  const hasAnyMessages = data.items.length > 0
+  const isFiltered = !!debouncedSearch || unreadOnly
+  const selectedCount = selectedIds.size
 
   function handleBulkMarkRead() {
     const ids = Array.from(selectedIds)
     bulkMarkReadMutation.mutate(ids, {
       onSuccess: () => setSelectedIds(new Set()),
     })
+  }
+
+  function handleBulkMarkUnread() {
+    const ids = Array.from(selectedIds)
+    // Use individual mutations for mark-as-unread since the bulk hook only marks as read
+    Promise.all(
+      ids.map((messageId) => markReadMutation.mutateAsync({ messageId, isRead: false })),
+    ).then(() => setSelectedIds(new Set()))
   }
 
   function handleBulkDeleteConfirm() {
@@ -134,7 +224,7 @@ export function VoicemailMessageList({ extensionId }: VoicemailMessageListProps)
     }
   }
 
-  if (data.items.length === 0) {
+  if (!hasAnyMessages) {
     return (
       <EmptyState
         icon={Inbox}
@@ -146,92 +236,199 @@ export function VoicemailMessageList({ extensionId }: VoicemailMessageListProps)
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <div className="flex items-center gap-3">
-          <CardTitle>Messages ({data.total})</CardTitle>
-          {unreadCount > 0 && (
-            <Badge variant="secondary">{unreadCount} unread</Badge>
-          )}
-          {someSelected && (
-            <Badge variant="outline">{selectedIds.size} selected</Badge>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleBulkMarkRead}
-            disabled={!someSelected || bulkMarkReadMutation.isPending}
-          >
-            <MailOpen className="mr-1 h-4 w-4" />
-            Mark read
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setBulkDeleteOpen(true)}
-            disabled={!someSelected || bulkDeleteMutation.isPending}
-          >
-            <Trash2 className="mr-1 h-4 w-4" />
-            Delete
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="overflow-x-auto">
-        <Table aria-label="Voicemail messages">
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-10">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 w-6 p-0"
-                  onClick={toggleSelectAll}
-                >
-                  {allSelected ? <CheckSquare className="h-4 w-4" /> : <Square className="h-4 w-4" />}
-                </Button>
-              </TableHead>
-              <TableHead className="w-10" />
-              <TableHead>Caller</TableHead>
-              <TableHead>Duration</TableHead>
-              <TableHead>Received</TableHead>
-              <TableHead>Transcription</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {data.items.map((msg, index) => (
-              <MessageRow
-                key={msg.id}
-                message={msg}
-                isExpanded={expandedId === msg.id}
-                isSelected={selectedIds.has(msg.id)}
-                isEvenRow={index % 2 === 0}
-                onExpand={() => handleExpand(msg)}
-                onDelete={() => setSingleDeleteId(msg.id)}
-                onToggleRead={() => handleToggleRead(msg)}
-                onToggleSelect={() => toggleSelect(msg.id)}
-              />
-            ))}
-          </TableBody>
-        </Table>
+      <CardHeader className="flex flex-col gap-4">
+        {/* Title row */}
+        <div className="flex flex-row items-center justify-between">
+          <div className="flex items-center gap-3">
+            <CardTitle>Messages ({data.total})</CardTitle>
+            {unreadCount > 0 && (
+              <Badge variant="secondary">{unreadCount} unread</Badge>
+            )}
+          </div>
         </div>
 
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">
-              Page {page} of {totalPages}
-            </p>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>
-                Previous
+        {/* Search and filter row */}
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative max-w-sm flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search by caller name or number..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9 pr-8"
+            />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch("")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-3.5 w-3.5" />
+                <span className="sr-only">Clear search</span>
+              </button>
+            )}
+          </div>
+          <Button
+            variant={unreadOnly ? "default" : "outline"}
+            size="sm"
+            onClick={() => {
+              setUnreadOnly((prev) => !prev)
+              setSelectedIds(new Set())
+            }}
+          >
+            <Filter className="mr-1 h-4 w-4" />
+            {unreadOnly ? "Unread only" : "All messages"}
+          </Button>
+        </div>
+
+        {/* Bulk action bar */}
+        {someSelected && (
+          <div className="flex items-center gap-2 rounded-md border border-border/60 bg-muted/30 px-3 py-2">
+            <Badge variant="outline">{selectedCount} selected</Badge>
+            <div className="ml-auto flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleBulkMarkRead}
+                disabled={bulkMarkReadMutation.isPending}
+              >
+                <MailOpen className="mr-1 h-4 w-4" />
+                Mark as read
               </Button>
-              <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>
-                Next
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleBulkMarkUnread}
+                disabled={markReadMutation.isPending}
+              >
+                <Mail className="mr-1 h-4 w-4" />
+                Mark as unread
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setBulkDeleteOpen(true)}
+                disabled={bulkDeleteMutation.isPending}
+              >
+                <Trash2 className="mr-1 h-4 w-4" />
+                Delete selected
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedIds(new Set())}
+              >
+                <X className="mr-1 h-3.5 w-3.5" />
+                Clear
               </Button>
             </div>
           </div>
+        )}
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Result count */}
+        <p className="text-sm text-muted-foreground">
+          Showing {displayCount} of {totalCount} message{totalCount === 1 ? "" : "s"}
+          {isFiltered && " (filtered)"}
+        </p>
+
+        {displayCount === 0 && isFiltered ? (
+          <EmptyState
+            icon={Search}
+            variant="no-results"
+            title="No matching messages"
+            description={
+              debouncedSearch
+                ? `No messages match "${debouncedSearch}". Try a different search term.`
+                : "No unread messages found."
+            }
+            action={
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSearch("")
+                  setUnreadOnly(false)
+                }}
+              >
+                Clear filters
+              </Button>
+            }
+          />
+        ) : (
+          <>
+            <div className="overflow-x-auto">
+              <Table aria-label="Voicemail messages">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-10">
+                      <Checkbox
+                        checked={allSelected}
+                        indeterminate={someSelected && !allSelected}
+                        onChange={toggleAll}
+                        aria-label="Select all messages"
+                      />
+                    </TableHead>
+                    <TableHead className="w-10" />
+                    <SortableHeader
+                      label="Caller"
+                      sortKey="caller"
+                      currentSort={sortKey}
+                      currentDirection={sortDir}
+                      onSort={handleSort}
+                    />
+                    <SortableHeader
+                      label="Duration"
+                      sortKey="duration"
+                      currentSort={sortKey}
+                      currentDirection={sortDir}
+                      onSort={handleSort}
+                    />
+                    <SortableHeader
+                      label="Received"
+                      sortKey="received"
+                      currentSort={sortKey}
+                      currentDirection={sortDir}
+                      onSort={handleSort}
+                    />
+                    <TableHead>Transcription</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {sortedItems.map((msg, index) => (
+                    <MessageRow
+                      key={msg.id}
+                      message={msg}
+                      isExpanded={expandedId === msg.id}
+                      isSelected={selectedIds.has(msg.id)}
+                      isEvenRow={index % 2 === 0}
+                      onExpand={() => handleExpand(msg)}
+                      onDelete={() => setSingleDeleteId(msg.id)}
+                      onToggleRead={() => handleToggleRead(msg)}
+                      onToggleSelect={() => toggleOne(msg.id)}
+                    />
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">
+                  Page {page} of {totalPages}
+                </p>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>
+                    Previous
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>
+                    Next
+                  </Button>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </CardContent>
 
@@ -335,17 +532,15 @@ function MessageRow({ message, isExpanded, isSelected, isEvenRow, onExpand, onDe
         onClick={onExpand}
       >
         <TableCell>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-6 w-6 p-0"
-            onClick={(e) => {
+          <Checkbox
+            checked={isSelected}
+            onChange={(e) => {
               e.stopPropagation()
               onToggleSelect()
             }}
-          >
-            {isSelected ? <CheckSquare className="h-4 w-4" /> : <Square className="h-4 w-4" />}
-          </Button>
+            onClick={(e) => e.stopPropagation()}
+            aria-label={`Select message from ${callerDisplay}`}
+          />
         </TableCell>
         <TableCell>
           <div className="flex items-center gap-1">

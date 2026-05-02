@@ -12,9 +12,11 @@ import {
   MessageSquare,
   Phone,
   Printer,
+  Search,
   Settings,
   Trash2,
   Users,
+  X,
 } from "lucide-react"
 import { useCallback, useMemo, useState } from "react"
 import {
@@ -34,7 +36,15 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { EmptyState } from "@/components/ui/empty-state"
+import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
@@ -52,6 +62,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query"
 import { Skeleton, SkeletonCard } from "@/components/ui/skeleton"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
+import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { cn } from "@/lib/utils"
 
@@ -68,6 +79,14 @@ const CATEGORIES = [
   { value: "voice", label: "Voice" },
   { value: "fax", label: "Fax" },
 ] as const
+
+const READ_STATUS_OPTIONS = [
+  { value: "all", label: "All status" },
+  { value: "unread", label: "Unread only" },
+  { value: "read", label: "Read only" },
+] as const
+
+type ReadStatusFilter = (typeof READ_STATUS_OPTIONS)[number]["value"]
 
 const categoryIcons: Record<string, typeof Bell> = {
   ticket: MessageSquare,
@@ -309,6 +328,9 @@ function NotificationsPage() {
   const queryClient = useQueryClient()
   const [page, setPage] = useState(1)
   const [activeCategory, setActiveCategory] = useState<string>("all")
+  const [readStatusFilter, setReadStatusFilter] = useState<ReadStatusFilter>("all")
+  const [search, setSearch] = useState("")
+  const debouncedSearch = useDebouncedValue(search)
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const pageSize = 20
@@ -329,8 +351,18 @@ function NotificationsPage() {
   const totalPages = Math.max(1, Math.ceil(total / pageSize))
   const readCount = notifications.filter((n) => n.isRead).length
 
-  const filteredNotifications =
-    activeCategory === "all" ? notifications : notifications.filter((n) => n.category === activeCategory)
+  const filteredNotifications = useMemo(() => {
+    return notifications.filter((n) => {
+      if (activeCategory !== "all" && n.category !== activeCategory) return false
+      if (readStatusFilter === "unread" && n.isRead) return false
+      if (readStatusFilter === "read" && !n.isRead) return false
+      if (debouncedSearch) {
+        const query = debouncedSearch.toLowerCase()
+        if (!n.title.toLowerCase().includes(query) && !n.message.toLowerCase().includes(query)) return false
+      }
+      return true
+    })
+  }, [notifications, activeCategory, readStatusFilter, debouncedSearch])
 
   const categoryCounts = notifications.reduce<Record<string, number>>((acc, n) => {
     acc[n.category] = (acc[n.category] ?? 0) + 1
@@ -402,6 +434,7 @@ function NotificationsPage() {
   )
 
   const hasAnyNotifications = total > 0
+  const hasActiveFilters = activeCategory !== "all" || readStatusFilter !== "all" || !!debouncedSearch
   const isEmptyUnfiltered = !isLoading && !hasAnyNotifications
   const isEmptyFiltered = !isLoading && hasAnyNotifications && filteredNotifications.length === 0
 
@@ -444,42 +477,100 @@ function NotificationsPage() {
           />
         ) : (
           <>
-            <div className="flex flex-wrap items-center gap-2">
-              <Checkbox
-                checked={allSelected}
-                indeterminate={someSelected && !allSelected}
-                onChange={toggleAll}
-                aria-label="Select all notifications"
-              />
-              {CATEGORIES.map(({ value, label }) => {
-                const count = value === "all" ? notifications.length : (categoryCounts[value] ?? 0)
-                const isActive = activeCategory === value
-                return (
+            {/* Search & filters */}
+            <div className="space-y-3">
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="relative max-w-sm flex-1">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    placeholder="Search notifications..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="pl-9 pr-8"
+                  />
+                  {search && (
+                    <button
+                      type="button"
+                      onClick={() => setSearch("")}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                      <span className="sr-only">Clear search</span>
+                    </button>
+                  )}
+                </div>
+                <Select
+                  value={readStatusFilter}
+                  onValueChange={(v) => {
+                    setReadStatusFilter(v as ReadStatusFilter)
+                    setPage(1)
+                  }}
+                >
+                  <SelectTrigger className="w-[150px]" aria-label="Filter by read status">
+                    <SelectValue placeholder="All status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {READ_STATUS_OPTIONS.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {hasActiveFilters && (
                   <Button
-                    key={value}
-                    variant={isActive ? "default" : "outline"}
+                    variant="ghost"
                     size="sm"
+                    className="text-xs text-muted-foreground"
                     onClick={() => {
-                      setActiveCategory(value)
+                      setSearch("")
+                      setActiveCategory("all")
+                      setReadStatusFilter("all")
                       setPage(1)
                     }}
-                    className="gap-1.5 text-xs"
                   >
-                    {label}
-                    {count > 0 && (
-                      <Badge
-                        variant={isActive ? "secondary" : "outline"}
-                        className={cn(
-                          "ml-0.5 h-5 min-w-5 justify-center px-1.5 text-[0.6rem]",
-                          isActive && "bg-primary-foreground/20 text-primary-foreground",
-                        )}
-                      >
-                        {count}
-                      </Badge>
-                    )}
+                    Clear all filters
                   </Button>
-                )
-              })}
+                )}
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <Checkbox
+                  checked={allSelected}
+                  indeterminate={someSelected && !allSelected}
+                  onChange={toggleAll}
+                  aria-label="Select all notifications"
+                />
+                {CATEGORIES.map(({ value, label }) => {
+                  const count = value === "all" ? notifications.length : (categoryCounts[value] ?? 0)
+                  const isActive = activeCategory === value
+                  return (
+                    <Button
+                      key={value}
+                      variant={isActive ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => {
+                        setActiveCategory(value)
+                        setPage(1)
+                      }}
+                      className="gap-1.5 text-xs"
+                    >
+                      {label}
+                      {count > 0 && (
+                        <Badge
+                          variant={isActive ? "secondary" : "outline"}
+                          className={cn(
+                            "ml-0.5 h-5 min-w-5 justify-center px-1.5 text-[0.6rem]",
+                            isActive && "bg-primary-foreground/20 text-primary-foreground",
+                          )}
+                        >
+                          {count}
+                        </Badge>
+                      )}
+                    </Button>
+                  )
+                })}
+              </div>
             </div>
 
             <div className="mt-4 space-y-3">
@@ -492,9 +583,22 @@ function NotificationsPage() {
               ) : isEmptyFiltered ? (
                 <EmptyState
                   icon={Bell}
-                  title="No notifications"
-                  description={`No ${activeCategory} notifications found`}
+                  title="No notifications found"
+                  description="No notifications match your current filters. Try adjusting your search or filter criteria."
                   variant="no-results"
+                  action={
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setSearch("")
+                        setActiveCategory("all")
+                        setReadStatusFilter("all")
+                      }}
+                    >
+                      Clear all filters
+                    </Button>
+                  }
                 />
               ) : (
                 filteredNotifications.map((notification) => (
