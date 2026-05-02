@@ -2,6 +2,7 @@ import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-route
 import { useCallback, useMemo, useState } from "react"
 import { toast } from "sonner"
 import { AppSidebar } from "@/components/app-sidebar"
+import { ActiveTaskIndicator } from "@/components/tasks/active-task-indicator"
 import { HelpMenu } from "@/components/help/help-menu"
 import { KeyboardShortcutsDialog } from "@/components/keyboard-shortcuts-dialog"
 import { NotificationBell } from "@/components/notifications/notification-bell"
@@ -72,6 +73,7 @@ export function AppLayout() {
       { prefix: "g", key: "w", action: () => goTo("/webhooks"), description: "Go to Webhooks", category: "navigation" },
       { prefix: "g", key: "m", action: () => goTo("/voicemail"), description: "Go to Voicemail", category: "navigation" },
       { prefix: "g", key: "9", action: () => goTo("/e911"), description: "Go to E911", category: "navigation" },
+      { prefix: "g", key: "k", action: () => goTo("/tasks"), description: "Go to Tasks", category: "navigation" },
       { prefix: "g", key: "x", action: () => goTo("/tags"), description: "Go to Tags", category: "navigation" },
       { prefix: "g", key: "p", action: () => goTo("/profile"), description: "Go to Profile", category: "navigation" },
       { prefix: "g", key: ",", action: () => goTo("/settings"), description: "Go to Settings", category: "navigation" },
@@ -113,6 +115,7 @@ export function AppLayout() {
       { keys: ["g", "w"], description: "Go to Webhooks" },
       { keys: ["g", "m"], description: "Go to Voicemail" },
       { keys: ["g", "9"], description: "Go to E911" },
+      { keys: ["g", "k"], description: "Go to Tasks" },
       { keys: ["g", "x"], description: "Go to Tags" },
       { keys: ["g", "p"], description: "Go to Profile" },
       { keys: ["g", ","], description: "Go to Settings" },
@@ -239,6 +242,12 @@ export function AppLayout() {
     if (pathname === "/voicemail") {
       return { eyebrow: "Voice", title: "Voicemail" }
     }
+    if (pathname === "/tasks") {
+      return { eyebrow: "Workspace", title: "Tasks" }
+    }
+    if (pathname.startsWith("/tasks/")) {
+      return { eyebrow: "Workspace", title: "Task Detail" }
+    }
     if (pathname.startsWith("/tags")) {
       return { eyebrow: "Workspace", title: "Tags" }
     }
@@ -285,6 +294,7 @@ export function AppLayout() {
                     </Link>
                   )}
                   <GlobalSearch />
+                  <ActiveTaskIndicator />
                   <NotificationBell />
                   <HelpMenu />
                 </div>

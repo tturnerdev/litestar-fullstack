@@ -194,6 +194,7 @@ class SaqSettings:
         from app.domain.accounts import jobs as account_jobs
         from app.domain.devices import jobs as device_jobs
         from app.domain.fax import jobs as fax_jobs
+        from app.domain.voice import jobs as voice_jobs
         from app.domain.system import jobs as system_jobs
         from app.domain.tasks import jobs as task_jobs
         from app.lib.worker import after_process, before_process, on_shutdown, on_startup
@@ -215,6 +216,9 @@ class SaqSettings:
                         device_jobs.device_reprovision_job,
                         fax_jobs.fax_send_job,
                         fax_jobs.fax_receive_process_job,
+                        voice_jobs.extension_create_job,
+                        voice_jobs.extension_update_job,
+                        voice_jobs.extension_delete_job,
                     ],
                     scheduled_tasks=[
                         CronJob(

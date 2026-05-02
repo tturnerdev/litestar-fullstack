@@ -5,7 +5,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Annotated, Any
 from uuid import UUID
 
-import msgspec
 from structlog import get_logger
 from litestar import Controller, delete, get, patch, post
 from litestar.di import Provide
@@ -17,8 +16,10 @@ from app.domain.admin.deps import provide_audit_log_service
 from app.domain.gateway.deps import provide_gateway_connections
 from app.domain.gateway.providers import FreePBXProvider
 from app.domain.gateway.providers._freepbx import _GQL_ALL_EXTENSIONS, _GQL_EXTENSION, _to_bool, _to_int
+from app.domain.tasks.deps import provide_background_tasks_service
 from app.domain.teams.guards import requires_feature_permission
 from app.domain.voice.guards import requires_extension_ownership
+from app.domain.voice.jobs import extension_create_job, extension_delete_job, extension_update_job
 from app.domain.voice.schemas import Extension, ExtensionCreate, ExtensionSyncResult, ExtensionUpdate
 from app.domain.voice.services import ExtensionService
 from app.lib.audit import capture_snapshot, log_audit
@@ -33,6 +34,7 @@ if TYPE_CHECKING:
     from litestar.security.jwt import Token
 
     from app.domain.admin.services import AuditLogService
+    from app.domain.tasks.services import BackgroundTaskService
 
 
 class ExtensionController(Controller):
@@ -55,6 +57,7 @@ class ExtensionController(Controller):
     ) | {
         "audit_service": Provide(provide_audit_log_service),
         "gateway_connections": Provide(provide_gateway_connections),
+        "task_service": Provide(provide_background_tasks_service),
     }
 
     @get(
@@ -83,6 +86,7 @@ class ExtensionController(Controller):
         request: Request[m.User, Token, Any],
         extensions_service: ExtensionService,
         audit_service: AuditLogService,
+        task_service: BackgroundTaskService,
         current_user: m.User,
         data: ExtensionCreate,
         gateway_connections: list[m.Connection],
@@ -132,19 +136,19 @@ class ExtensionController(Controller):
             request=request,
         )
 
-        if pbx_connections and not ext_exists_on_pbx:
-            try:
-                await provider.add_extension_on_pbx(
-                    db_obj.extension_number,
-                    conn,
-                    display_name=db_obj.display_name,
-                    email=current_user.email or "",
-                    dnd_enabled=db_obj.dnd_enabled,
-                    no_answer_dest=db_obj.forward_no_answer_destination or "",
-                    ring_timer=db_obj.forward_no_answer_ring_count,
+        # Enqueue background PBX sync task
+        if not ext_exists_on_pbx:
+            team_id = current_user.teams[0].team_id if current_user.teams else None
+            if team_id is not None:
+                await task_service.enqueue_tracked_task(
+                    task_type="extension.create",
+                    job_function=extension_create_job,
+                    team_id=team_id,
+                    initiated_by_id=request.user.id,
+                    entity_type="extension",
+                    entity_id=db_obj.id,
+                    payload={"extension_id": str(db_obj.id), "extension_number": db_obj.extension_number},
                 )
-            except Exception as exc:
-                await logger.awarning("pbx_add_extension_failed", ext=db_obj.extension_number, error=str(exc))
 
         return extensions_service.to_schema(db_obj, schema_type=Extension)
 
@@ -173,10 +177,10 @@ class ExtensionController(Controller):
         request: Request[m.User, Token, Any],
         extensions_service: ExtensionService,
         audit_service: AuditLogService,
+        task_service: BackgroundTaskService,
         current_user: m.User,
         data: ExtensionUpdate,
         ext_id: Annotated[UUID, Parameter(title="Extension ID", description="The extension to update.")],
-        gateway_connections: list[m.Connection],
     ) -> Extension:
         """Update display name, settings."""
         db_obj = await extensions_service.get_one(id=ext_id, user_id=current_user.id)
@@ -197,39 +201,18 @@ class ExtensionController(Controller):
             request=request,
         )
 
-        pbx_connections = [c for c in gateway_connections if c.provider == "freepbx" and c.is_enabled]
-        if pbx_connections:
-            conn = pbx_connections[0]
-            provider = FreePBXProvider()
-            pbx_kwargs: dict[str, Any] = {}
-            if not isinstance(data.display_name, type(msgspec.UNSET)):
-                pbx_kwargs["display_name"] = db_obj.display_name
-            if not isinstance(data.dnd_enabled, type(msgspec.UNSET)):
-                pbx_kwargs["dnd_enabled"] = db_obj.dnd_enabled
-            if not isinstance(data.forward_no_answer_destination, type(msgspec.UNSET)):
-                pbx_kwargs["no_answer_dest"] = db_obj.forward_no_answer_destination or ""
-            if not isinstance(data.forward_no_answer_ring_count, type(msgspec.UNSET)):
-                pbx_kwargs["ring_timer"] = db_obj.forward_no_answer_ring_count
-            if pbx_kwargs:
-                try:
-                    ext_query = _GQL_EXTENSION.format(ext=db_obj.extension_number)
-                    resp = await provider._execute_graphql(ext_query, conn)
-                    ext_data = resp.get("data", {}).get("fetchExtension", {})
-                    ext_status = ext_data.get("status", "")
-                    if str(ext_status).lower() in ("true", "ok", "success", "1"):
-                        await provider.update_extension_on_pbx(db_obj.extension_number, conn, **pbx_kwargs)
-                    else:
-                        await provider.add_extension_on_pbx(
-                            db_obj.extension_number,
-                            conn,
-                            display_name=db_obj.display_name,
-                            email=current_user.email or "",
-                            dnd_enabled=db_obj.dnd_enabled,
-                            no_answer_dest=db_obj.forward_no_answer_destination or "",
-                            ring_timer=db_obj.forward_no_answer_ring_count,
-                        )
-                except Exception as exc:
-                    await logger.awarning("pbx_push_extension_failed", ext=db_obj.extension_number, error=str(exc))
+        # Enqueue background PBX sync task
+        team_id = current_user.teams[0].team_id if current_user.teams else None
+        if team_id is not None:
+            await task_service.enqueue_tracked_task(
+                task_type="extension.update",
+                job_function=extension_update_job,
+                team_id=team_id,
+                initiated_by_id=request.user.id,
+                entity_type="extension",
+                entity_id=db_obj.id,
+                payload={"extension_id": str(db_obj.id), "extension_number": db_obj.extension_number},
+            )
 
         return extensions_service.to_schema(db_obj, schema_type=Extension)
 
@@ -244,6 +227,7 @@ class ExtensionController(Controller):
         request: Request[m.User, Token, Any],
         extensions_service: ExtensionService,
         audit_service: AuditLogService,
+        task_service: BackgroundTaskService,
         current_user: m.User,
         ext_id: Annotated[UUID, Parameter(title="Extension ID", description="The extension to delete.")],
     ) -> None:
@@ -251,6 +235,7 @@ class ExtensionController(Controller):
         db_obj = await extensions_service.get_one(id=ext_id, user_id=current_user.id)
         before = capture_snapshot(db_obj)
         target_label = db_obj.extension_number
+        extension_number = db_obj.extension_number
         await extensions_service.delete(ext_id)
         await log_audit(
             audit_service,
@@ -265,6 +250,19 @@ class ExtensionController(Controller):
             after=None,
             request=request,
         )
+
+        # Enqueue background PBX sync task
+        team_id = current_user.teams[0].team_id if current_user.teams else None
+        if team_id is not None:
+            await task_service.enqueue_tracked_task(
+                task_type="extension.delete",
+                job_function=extension_delete_job,
+                team_id=team_id,
+                initiated_by_id=request.user.id,
+                entity_type="extension",
+                entity_id=ext_id,
+                payload={"extension_id": str(ext_id), "extension_number": extension_number},
+            )
 
     @post(
         operation_id="SyncExtensions",
