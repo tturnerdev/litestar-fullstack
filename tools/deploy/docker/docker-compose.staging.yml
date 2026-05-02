@@ -1,0 +1,163 @@
+# =============================================================================
+# Staging Stack for Portainer
+# =============================================================================
+# Deploy as a Portainer stack with the corresponding .env.staging variables.
+#
+# This stack pulls pre-built images from GHCR instead of building locally.
+# The `migrator` service runs once on deploy to apply pending migrations,
+# then exits. The `app` and `worker` services restart automatically.
+#
+# Image tag `staging-latest` is updated on every push to main.
+# To pin a specific build, replace with `staging-<sha>` from GHCR.
+# =============================================================================
+
+services:
+  cache:
+    image: valkey/valkey:latest
+    hostname: cache
+    command: redis-server --appendonly yes
+    volumes:
+      - cache-data:/data
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  db:
+    image: postgres:17-alpine
+    hostname: db
+    environment:
+      POSTGRES_PASSWORD: "${DATABASE_PASSWORD}"
+      POSTGRES_USER: "${DATABASE_USER}"
+      POSTGRES_DB: "${DATABASE_DB}"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${DATABASE_USER}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  mailpit:
+    image: axllent/mailpit:latest
+    hostname: mailpit
+    ports:
+      - "${MAILPIT_PORT:-8025}:8025"
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "sh", "-c", "wget --no-verbose --tries=1 --spider http://localhost:8025/livez || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  migrator:
+    image: ghcr.io/${GITHUB_REPO}:staging-latest
+    command: litestar database upgrade --no-prompt
+    restart: "no"
+    depends_on:
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
+    environment:
+      - SECRET_KEY=${SECRET_KEY}
+      - DATABASE_URL=postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@db:5432/${DATABASE_DB}
+      - REDIS_URL=redis://cache:6379
+
+  app:
+    image: ghcr.io/${GITHUB_REPO}:staging-latest
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    environment:
+      - LITESTAR_DEBUG=false
+      - LITESTAR_HOST=0.0.0.0
+      - LITESTAR_PORT=8000
+      - LITESTAR_TRUSTED_PROXIES=*
+      - VITE_DEV_MODE=false
+      - SAQ_USE_SERVER_LIFESPAN=false
+      - SECRET_KEY=${SECRET_KEY}
+      - DATABASE_URL=postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@db:5432/${DATABASE_DB}
+      - REDIS_URL=redis://cache:6379
+      - APP_URL=${APP_URL:-http://localhost:8000}
+      - LOG_LEVEL=${LOG_LEVEL:-20}
+      # Email
+      - EMAIL_ENABLED=${EMAIL_ENABLED:-true}
+      - EMAIL_SMTP_HOST=mailpit
+      - EMAIL_SMTP_PORT=1025
+      - EMAIL_USE_TLS=false
+      - EMAIL_USE_SSL=false
+      - EMAIL_FROM_ADDRESS=${EMAIL_FROM_ADDRESS:-noreply@staging.local}
+      - EMAIL_FROM_NAME=${EMAIL_FROM_NAME:-Admin Portal (Staging)}
+      # OAuth (optional)
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
+      - GOOGLE_REDIRECT_URI=${GOOGLE_REDIRECT_URI:-}
+      # Observability
+      - SENTRY_ENABLED=${SENTRY_ENABLED:-false}
+      - SENTRY_DSN=${SENTRY_DSN:-}
+      - SENTRY_ENVIRONMENT=staging
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  worker:
+    image: ghcr.io/${GITHUB_REPO}:staging-latest
+    command: litestar workers run
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
+    environment:
+      - LITESTAR_DEBUG=false
+      - SAQ_USE_SERVER_LIFESPAN=false
+      - SAQ_PROCESSES=${SAQ_PROCESSES:-1}
+      - SAQ_CONCURRENCY=${SAQ_CONCURRENCY:-10}
+      - SECRET_KEY=${SECRET_KEY}
+      - DATABASE_URL=postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@db:5432/${DATABASE_DB}
+      - REDIS_URL=redis://cache:6379
+      - EMAIL_ENABLED=${EMAIL_ENABLED:-true}
+      - EMAIL_SMTP_HOST=mailpit
+      - EMAIL_SMTP_PORT=1025
+      - EMAIL_USE_TLS=false
+      - EMAIL_USE_SSL=false
+      - EMAIL_FROM_ADDRESS=${EMAIL_FROM_ADDRESS:-noreply@staging.local}
+      - EMAIL_FROM_NAME=${EMAIL_FROM_NAME:-Admin Portal (Staging)}
+      - SENTRY_ENABLED=${SENTRY_ENABLED:-false}
+      - SENTRY_DSN=${SENTRY_DSN:-}
+      - SENTRY_ENVIRONMENT=staging
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+
+volumes:
+  db-data: {}
+  cache-data: {}

@@ -1,0 +1,13 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/proxy/network/integration/v1/sites/.*/clients"
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "unifi/clients_site1.json",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

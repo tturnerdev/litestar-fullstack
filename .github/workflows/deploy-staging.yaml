@@ -1,0 +1,80 @@
+# =============================================================================
+# Staging Deployment Pipeline
+# =============================================================================
+# Builds the distroless Docker image, pushes to GitHub Container Registry,
+# and triggers a Portainer stack update via webhook.
+#
+# Images are tagged with:
+#   - staging-<short-sha>  (for pinned rollback)
+#   - staging-latest       (for Portainer auto-pull)
+#
+# Required secrets:
+#   - PORTAINER_STAGING_WEBHOOK_URL: Portainer stack webhook URL
+#
+# The GITHUB_TOKEN is automatically available and has packages:write scope
+# when the `packages: write` permission is declared below.
+# =============================================================================
+
+name: Deploy to Staging
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=staging-
+            type=raw,value=staging-latest
+
+      - name: Build and push app image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: tools/deploy/docker/Dockerfile.distroless
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Trigger Portainer stack update
+        if: success()
+        run: |
+          curl -X POST "${{ secrets.PORTAINER_STAGING_WEBHOOK_URL }}" \
+            --fail --silent --show-error \
+            --max-time 30
+        continue-on-error: true

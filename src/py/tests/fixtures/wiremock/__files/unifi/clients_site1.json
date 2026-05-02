@@ -1,0 +1,57 @@
+{
+  "data": [
+    {
+      "_id": "client-001",
+      "mac": "aa:bb:cc:dd:ee:01",
+      "hostname": "desk-phone-100",
+      "ip": "192.168.1.100",
+      "name": "Desk Phone - Ext 100",
+      "oui": "Yealink",
+      "network": "VoIP",
+      "network_id": "net-voip-001",
+      "is_wired": true,
+      "sw_mac": "aa:bb:cc:00:00:01",
+      "sw_port": 5,
+      "uptime": 86400,
+      "last_seen": 1714600000,
+      "tx_bytes": 1048576,
+      "rx_bytes": 2097152
+    },
+    {
+      "_id": "client-002",
+      "mac": "aa:bb:cc:dd:ee:02",
+      "hostname": "desk-phone-101",
+      "ip": "192.168.1.101",
+      "name": "Desk Phone - Ext 101",
+      "oui": "Yealink",
+      "network": "VoIP",
+      "network_id": "net-voip-001",
+      "is_wired": true,
+      "sw_mac": "aa:bb:cc:00:00:01",
+      "sw_port": 6,
+      "uptime": 172800,
+      "last_seen": 1714600000,
+      "tx_bytes": 524288,
+      "rx_bytes": 1048576
+    },
+    {
+      "_id": "client-003",
+      "mac": "aa:bb:cc:dd:ee:03",
+      "hostname": "laptop-user3",
+      "ip": "192.168.1.50",
+      "name": "User 3 Laptop",
+      "oui": "Dell",
+      "network": "Corporate",
+      "network_id": "net-corp-001",
+      "is_wired": false,
+      "ap_mac": "aa:bb:cc:00:00:10",
+      "channel": 36,
+      "radio": "na",
+      "signal": -55,
+      "uptime": 3600,
+      "last_seen": 1714600000,
+      "tx_bytes": 10485760,
+      "rx_bytes": 52428800
+    }
+  ]
+}

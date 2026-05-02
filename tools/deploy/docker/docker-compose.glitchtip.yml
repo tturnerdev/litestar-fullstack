@@ -1,0 +1,62 @@
+services:
+  glitchtip-db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: glitchtip
+      POSTGRES_USER: glitchtip
+      POSTGRES_PASSWORD: glitchtip
+    volumes:
+      - glitchtip-db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "glitchtip"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  glitchtip-redis:
+    image: valkey/valkey:latest
+    restart: unless-stopped
+
+  glitchtip-web:
+    image: glitchtip/glitchtip
+    depends_on:
+      glitchtip-db:
+        condition: service_healthy
+    ports:
+      - "18090:8080"
+    environment:
+      DATABASE_URL: postgres://glitchtip:glitchtip@glitchtip-db:5432/glitchtip
+      REDIS_URL: redis://glitchtip-redis:6379/0
+      SECRET_KEY: change-me-in-production
+      PORT: 8080
+      GLITCHTIP_DOMAIN: http://localhost:18090
+      DEFAULT_FROM_EMAIL: glitchtip@localhost
+      ENABLE_USER_REGISTRATION: "true"
+    restart: unless-stopped
+
+  glitchtip-worker:
+    image: glitchtip/glitchtip
+    command: ./bin/run-celery-with-beat.sh
+    depends_on:
+      glitchtip-db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://glitchtip:glitchtip@glitchtip-db:5432/glitchtip
+      REDIS_URL: redis://glitchtip-redis:6379/0
+      SECRET_KEY: change-me-in-production
+    restart: unless-stopped
+
+  glitchtip-migrate:
+    image: glitchtip/glitchtip
+    depends_on:
+      glitchtip-db:
+        condition: service_healthy
+    command: ./manage.py migrate
+    environment:
+      DATABASE_URL: postgres://glitchtip:glitchtip@glitchtip-db:5432/glitchtip
+      SECRET_KEY: change-me-in-production
+    restart: "no"
+
+volumes:
+  glitchtip-db-data: {}

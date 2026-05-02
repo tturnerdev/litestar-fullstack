@@ -1,0 +1,13 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/admin/api/api/token"
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "freepbx/token_response.json",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

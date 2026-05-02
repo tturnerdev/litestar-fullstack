@@ -1,0 +1,18 @@
+{
+  "data": {
+    "id": "pn-test-002",
+    "record_type": "phone_number_messaging",
+    "phone_number": "+15551001001",
+    "messaging_profile_id": "msg-prof-001",
+    "messaging_product": "P2P",
+    "features": ["sms", "mms"],
+    "health": {
+      "inbound_outbound_ratio": 0.85,
+      "message_count": 150,
+      "spam_ratio": 0.01,
+      "success_ratio": 0.98
+    },
+    "created_at": "2025-02-20T14:30:00Z",
+    "updated_at": "2025-04-01T12:00:00Z"
+  }
+}

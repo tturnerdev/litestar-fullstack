@@ -1,0 +1,84 @@
+services:
+  db:
+    image: postgres:17-alpine
+    ports:
+      - "25432:5432"
+    hostname: test-db
+    environment:
+      POSTGRES_PASSWORD: "test"
+      POSTGRES_USER: "test"
+      POSTGRES_DB: "test"
+    command: >
+      postgres
+        -c shared_buffers=128MB
+        -c max_connections=50
+        -c fsync=off
+        -c synchronous_commit=off
+        -c full_page_writes=off
+    tmpfs:
+      - /var/lib/postgresql/data
+    restart: "no"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "test"]
+      interval: 1s
+      timeout: 3s
+      retries: 20
+
+  cache:
+    image: valkey/valkey:latest
+    ports:
+      - "26379:6379"
+    hostname: test-cache
+    command: redis-server --appendonly no --save ""
+    restart: "no"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 10
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "28025:8025"
+      - "21025:1025"
+    hostname: test-mailpit
+    restart: "no"
+    healthcheck:
+      test: ["CMD", "sh", "-c", "wget --no-verbose --tries=1 --spider http://localhost:8025/livez || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  storage:
+    image: rustfs/rustfs:latest
+    ports:
+      - "29000:9000"
+    hostname: test-storage
+    environment:
+      RUSTFS_ACCESS_KEY: "test"
+      RUSTFS_SECRET_KEY: "test"
+      RUSTFS_VOLUMES: "/data"
+    tmpfs:
+      - /data
+    restart: "no"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  wiremock:
+    image: wiremock/wiremock:3.13.0-1
+    ports:
+      - "28080:8080"
+    hostname: test-wiremock
+    volumes:
+      - ../../../src/py/tests/fixtures/wiremock:/home/wiremock
+    command: ["--verbose", "--global-response-templating"]
+    restart: "no"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/__admin/health"]
+      interval: 3s
+      timeout: 3s
+      retries: 10

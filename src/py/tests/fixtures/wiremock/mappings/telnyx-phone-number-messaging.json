@@ -1,0 +1,13 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/v2/phone_numbers/.*/messaging"
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "telnyx/phone_number_messaging.json",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

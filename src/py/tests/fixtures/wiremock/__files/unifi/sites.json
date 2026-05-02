@@ -1,0 +1,48 @@
+{
+  "data": [
+    {
+      "_id": "site-001",
+      "name": "default",
+      "desc": "Main Office",
+      "role": "admin",
+      "attr_hidden_id": "default",
+      "attr_no_delete": true,
+      "num_new_alarms": 0,
+      "health": [
+        {
+          "subsystem": "wan",
+          "status": "ok",
+          "num_adopted": 1,
+          "num_gw": 1
+        },
+        {
+          "subsystem": "lan",
+          "status": "ok",
+          "num_adopted": 2,
+          "num_sw": 2
+        },
+        {
+          "subsystem": "wlan",
+          "status": "ok",
+          "num_adopted": 3,
+          "num_ap": 3
+        }
+      ]
+    },
+    {
+      "_id": "site-002",
+      "name": "branch",
+      "desc": "Branch Office",
+      "role": "admin",
+      "num_new_alarms": 0,
+      "health": [
+        {
+          "subsystem": "wan",
+          "status": "ok",
+          "num_adopted": 1,
+          "num_gw": 1
+        }
+      ]
+    }
+  ]
+}

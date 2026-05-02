@@ -1,0 +1,59 @@
+{
+  "data": {
+    "fetchAllExtensions": {
+      "status": true,
+      "message": "",
+      "totalCount": 3,
+      "extension": [
+        {
+          "user": {
+            "extension": "100",
+            "name": "Test User 1",
+            "extPassword": null,
+            "outboundCid": "\"Test User 1\" <5551001000>",
+            "voicemail": "default",
+            "ringtimer": 0
+          },
+          "coreDevice": {
+            "deviceId": "100",
+            "dial": "PJSIP/100",
+            "devicetype": "fixed",
+            "description": "Test User 1"
+          }
+        },
+        {
+          "user": {
+            "extension": "101",
+            "name": "Test User 2",
+            "extPassword": null,
+            "outboundCid": "\"Test User 2\" <5551001001>",
+            "voicemail": "default",
+            "ringtimer": 0
+          },
+          "coreDevice": {
+            "deviceId": "101",
+            "dial": "PJSIP/101",
+            "devicetype": "fixed",
+            "description": "Test User 2"
+          }
+        },
+        {
+          "user": {
+            "extension": "102",
+            "name": "Test User 3",
+            "extPassword": null,
+            "outboundCid": "\"Test User 3\" <5551001002>",
+            "voicemail": "default",
+            "ringtimer": 0
+          },
+          "coreDevice": {
+            "deviceId": "102",
+            "dial": "PJSIP/102",
+            "devicetype": "fixed",
+            "description": "Test User 3"
+          }
+        }
+      ]
+    }
+  }
+}

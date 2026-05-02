@@ -1,0 +1,23 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/admin/api/api/gql",
+    "headers": {
+      "Authorization": {
+        "contains": "Bearer"
+      }
+    },
+    "bodyPatterns": [
+      {
+        "contains": "fetchAllExtensions"
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "freepbx/all_extensions.json",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}
