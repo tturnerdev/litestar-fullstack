@@ -26,6 +26,9 @@ import type {
   AdminCreateMusicOnHoldData,
   AdminCreateMusicOnHoldErrors,
   AdminCreateMusicOnHoldResponses,
+  AdminExecutePhoneNumberBulkImportData,
+  AdminExecutePhoneNumberBulkImportErrors,
+  AdminExecutePhoneNumberBulkImportResponses,
   AdminGetDeviceStatsData,
   AdminGetDeviceStatsResponses,
   AdminGetFaxStatsData,
@@ -130,6 +133,9 @@ import type {
   InitiateMfaSetupResponses,
   ListActiveTasksData,
   ListActiveTasksResponses,
+  ManageCreatePhoneNumberData,
+  ManageCreatePhoneNumberErrors,
+  ManageCreatePhoneNumberResponses,
   MarkAllNotificationsReadData,
   MarkAllNotificationsReadResponses,
   OAuthConfigData,
@@ -188,6 +194,7 @@ export type OperationName =
   | 'create_ivr_menu'
   | 'create_music_on_hold'
   | 'create_phone_number'
+  | 'create_phone_number_api_voice_phone_numbers'
   | 'create_registration'
   | 'create_ring_group'
   | 'create_role'
@@ -202,6 +209,7 @@ export type OperationName =
   | 'create_webhook'
   | 'delete_read_notifications'
   | 'disable_mfa'
+  | 'execute_import'
   | 'forgot_password'
   | 'get_gateway_settings'
   | 'get_mfa_status'
@@ -231,6 +239,7 @@ export type OperationName =
   | 'list_fax_numbers_api_fax_numbers'
   | 'list_ivr_menus'
   | 'list_music_on_hold'
+  | 'list_phone_numbers_api_phone_numbers'
   | 'list_phone_numbers_api_voice_phone_numbers'
   | 'list_registrations'
   | 'list_ring_groups'
@@ -281,7 +290,8 @@ export interface OperationDataTypes {
   'create_fax_number': CreateFaxNumberData
   'create_ivr_menu': CreateIvrMenuData
   'create_music_on_hold': AdminCreateMusicOnHoldData
-  'create_phone_number': CreatePhoneNumberData
+  'create_phone_number': ManageCreatePhoneNumberData
+  'create_phone_number_api_voice_phone_numbers': CreatePhoneNumberData
   'create_registration': CreateE911RegistrationData
   'create_ring_group': CreateRingGroupData
   'create_role': CreateRoleData
@@ -296,6 +306,7 @@ export interface OperationDataTypes {
   'create_webhook': CreateWebhookData
   'delete_read_notifications': DeleteReadNotificationsData
   'disable_mfa': DisableMfaData
+  'execute_import': AdminExecutePhoneNumberBulkImportData
   'forgot_password': ForgotPasswordData
   'get_gateway_settings': UpdateAdminGatewaySettingsData
   'get_mfa_status': GetMfaStatusData
@@ -325,6 +336,7 @@ export interface OperationDataTypes {
   'list_fax_numbers_api_fax_numbers': CreateFaxNumberData
   'list_ivr_menus': CreateIvrMenuData
   'list_music_on_hold': AdminCreateMusicOnHoldData
+  'list_phone_numbers_api_phone_numbers': ManageCreatePhoneNumberData
   'list_phone_numbers_api_voice_phone_numbers': CreatePhoneNumberData
   'list_registrations': CreateE911RegistrationData
   'list_ring_groups': CreateRingGroupData
@@ -376,7 +388,8 @@ export interface OperationResponseTypes {
   'create_fax_number': CreateFaxNumberResponses
   'create_ivr_menu': CreateIvrMenuResponses
   'create_music_on_hold': AdminCreateMusicOnHoldResponses
-  'create_phone_number': CreatePhoneNumberResponses
+  'create_phone_number': ManageCreatePhoneNumberResponses
+  'create_phone_number_api_voice_phone_numbers': CreatePhoneNumberResponses
   'create_registration': CreateE911RegistrationResponses
   'create_ring_group': CreateRingGroupResponses
   'create_role': CreateRoleResponses
@@ -391,6 +404,7 @@ export interface OperationResponseTypes {
   'create_webhook': CreateWebhookResponses
   'delete_read_notifications': DeleteReadNotificationsResponses
   'disable_mfa': DisableMfaResponses
+  'execute_import': AdminExecutePhoneNumberBulkImportResponses
   'forgot_password': ForgotPasswordResponses
   'get_gateway_settings': UpdateAdminGatewaySettingsResponses
   'get_mfa_status': GetMfaStatusResponses
@@ -420,6 +434,7 @@ export interface OperationResponseTypes {
   'list_fax_numbers_api_fax_numbers': CreateFaxNumberResponses
   'list_ivr_menus': CreateIvrMenuResponses
   'list_music_on_hold': AdminCreateMusicOnHoldResponses
+  'list_phone_numbers_api_phone_numbers': ManageCreatePhoneNumberResponses
   'list_phone_numbers_api_voice_phone_numbers': CreatePhoneNumberResponses
   'list_registrations': CreateE911RegistrationResponses
   'list_ring_groups': CreateRingGroupResponses
@@ -471,7 +486,8 @@ export interface OperationErrorTypes {
   'create_fax_number': CreateFaxNumberErrors
   'create_ivr_menu': CreateIvrMenuErrors
   'create_music_on_hold': AdminCreateMusicOnHoldErrors
-  'create_phone_number': CreatePhoneNumberErrors
+  'create_phone_number': ManageCreatePhoneNumberErrors
+  'create_phone_number_api_voice_phone_numbers': CreatePhoneNumberErrors
   'create_registration': CreateE911RegistrationErrors
   'create_ring_group': CreateRingGroupErrors
   'create_role': CreateRoleErrors
@@ -486,6 +502,7 @@ export interface OperationErrorTypes {
   'create_webhook': CreateWebhookErrors
   'delete_read_notifications': never
   'disable_mfa': DisableMfaErrors
+  'execute_import': AdminExecutePhoneNumberBulkImportErrors
   'forgot_password': ForgotPasswordErrors
   'get_gateway_settings': UpdateAdminGatewaySettingsErrors
   'get_mfa_status': never
@@ -515,6 +532,7 @@ export interface OperationErrorTypes {
   'list_fax_numbers_api_fax_numbers': CreateFaxNumberErrors
   'list_ivr_menus': CreateIvrMenuErrors
   'list_music_on_hold': AdminCreateMusicOnHoldErrors
+  'list_phone_numbers_api_phone_numbers': ManageCreatePhoneNumberErrors
   'list_phone_numbers_api_voice_phone_numbers': CreatePhoneNumberErrors
   'list_registrations': CreateE911RegistrationErrors
   'list_ring_groups': CreateRingGroupErrors

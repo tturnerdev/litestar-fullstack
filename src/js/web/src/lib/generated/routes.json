@@ -279,6 +279,13 @@
       "methods": [
         "POST"
       ],
+      "uri": "/api/phone-numbers"
+    },
+    "create_phone_number_api_voice_phone_numbers": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
       "uri": "/api/voice/phone-numbers"
     },
     "create_registration": {
@@ -639,6 +646,19 @@
       "parameters": [
         "phone_number_id"
       ],
+      "uri": "/api/phone-numbers/{phone_number_id}"
+    },
+    "delete_phone_number_api_voice_phone_numbers_phone_number_id:uuid": {
+      "method": "delete",
+      "methods": [
+        "DELETE"
+      ],
+      "parameterTypes": {
+        "phone_number_id": "UUID"
+      },
+      "parameters": [
+        "phone_number_id"
+      ],
       "uri": "/api/voice/phone-numbers/{phone_number_id}"
     },
     "delete_read_notifications": {
@@ -899,6 +919,13 @@
         "GET"
       ],
       "uri": "/api/events/stream"
+    },
+    "execute_import": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "uri": "/api/admin/phone-numbers/bulk-import/execute"
     },
     "export_call_records": {
       "method": "get",
@@ -1222,6 +1249,19 @@
       "uri": "/api/organization"
     },
     "get_phone_number": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "phone_number_id": "UUID"
+      },
+      "parameters": [
+        "phone_number_id"
+      ],
+      "uri": "/api/phone-numbers/{phone_number_id}"
+    },
+    "get_phone_number_api_voice_phone_numbers_phone_number_id:uuid": {
       "method": "get",
       "methods": [
         "GET"
@@ -2249,6 +2289,26 @@
       },
       "uri": "/api/admin/voice/phone-numbers"
     },
+    "list_phone_numbers_api_phone_numbers": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "queryParameters": {
+        "createdAfter": "DateTime | undefined",
+        "createdBefore": "DateTime | undefined",
+        "currentPage": "number | undefined",
+        "ids": "string[] | undefined",
+        "orderBy": "string | undefined",
+        "pageSize": "number | undefined",
+        "searchIgnoreCase": "boolean | undefined",
+        "searchString": "string | undefined",
+        "sortOrder": "\"asc\" | \"desc\" | undefined",
+        "updatedAfter": "DateTime | undefined",
+        "updatedBefore": "DateTime | undefined"
+      },
+      "uri": "/api/phone-numbers"
+    },
     "list_phone_numbers_api_voice_phone_numbers": {
       "method": "get",
       "methods": [
@@ -2850,6 +2910,13 @@
         "POST"
       ],
       "uri": "/api/admin/bulk-import/preview/extensions"
+    },
+    "preview_import": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "uri": "/api/admin/phone-numbers/bulk-import/preview"
     },
     "reboot_device": {
       "method": "post",
@@ -3461,6 +3528,19 @@
       "uri": "/api/me/password"
     },
     "update_phone_number": {
+      "method": "patch",
+      "methods": [
+        "PATCH"
+      ],
+      "parameterTypes": {
+        "phone_number_id": "UUID"
+      },
+      "parameters": [
+        "phone_number_id"
+      ],
+      "uri": "/api/phone-numbers/{phone_number_id}"
+    },
+    "update_phone_number_api_voice_phone_numbers_phone_number_id:uuid": {
       "method": "patch",
       "methods": [
         "PATCH"

@@ -44,6 +44,7 @@ export type RouteName =
   | 'create_music_on_hold'
   | 'create_option'
   | 'create_phone_number'
+  | 'create_phone_number_api_voice_phone_numbers'
   | 'create_registration'
   | 'create_ring_group'
   | 'create_role'
@@ -76,6 +77,7 @@ export type RouteName =
   | 'delete_notification'
   | 'delete_option'
   | 'delete_phone_number'
+  | 'delete_phone_number_api_voice_phone_numbers_phone_number_id:uuid'
   | 'delete_read_notifications'
   | 'delete_registration'
   | 'delete_ring_group'
@@ -97,6 +99,7 @@ export type RouteName =
   | 'delete_webhook'
   | 'disable_mfa'
   | 'events:stream'
+  | 'execute_import'
   | 'export_call_records'
   | 'export_logs'
   | 'forgot_password'
@@ -123,6 +126,7 @@ export type RouteName =
   | 'get_number_data'
   | 'get_organization'
   | 'get_phone_number'
+  | 'get_phone_number_api_voice_phone_numbers_phone_number_id:uuid'
   | 'get_preferences'
   | 'get_profile'
   | 'get_registration'
@@ -194,6 +198,7 @@ export type RouteName =
   | 'list_notifications'
   | 'list_options'
   | 'list_phone_numbers'
+  | 'list_phone_numbers_api_phone_numbers'
   | 'list_phone_numbers_api_voice_phone_numbers'
   | 'list_registrations'
   | 'list_ring_groups'
@@ -232,6 +237,7 @@ export type RouteName =
   | 'pause_member'
   | 'preview_device_import'
   | 'preview_extension_import'
+  | 'preview_import'
   | 'reboot_device'
   | 'refresh_token'
   | 'regenerate_backup_codes'
@@ -285,6 +291,7 @@ export type RouteName =
   | 'update_organization'
   | 'update_password'
   | 'update_phone_number'
+  | 'update_phone_number_api_voice_phone_numbers_phone_number_id:uuid'
   | 'update_preferences'
   | 'update_profile'
   | 'update_registration'
@@ -383,6 +390,7 @@ export interface RoutePathParams {
     ivr_menu_id: UUID;
   };
   'create_phone_number': Record<string, never>;
+  'create_phone_number_api_voice_phone_numbers': Record<string, never>;
   'create_registration': Record<string, never>;
   'create_ring_group': Record<string, never>;
   'create_role': Record<string, never>;
@@ -463,6 +471,9 @@ export interface RoutePathParams {
   'delete_phone_number': {
     phone_number_id: UUID;
   };
+  'delete_phone_number_api_voice_phone_numbers_phone_number_id:uuid': {
+    phone_number_id: UUID;
+  };
   'delete_read_notifications': Record<string, never>;
   'delete_registration': {
     registration_id: UUID;
@@ -522,6 +533,7 @@ export interface RoutePathParams {
   };
   'disable_mfa': Record<string, never>;
   'events:stream': Record<string, never>;
+  'execute_import': Record<string, never>;
   'export_call_records': Record<string, never>;
   'export_logs': Record<string, never>;
   'forgot_password': Record<string, never>;
@@ -583,6 +595,9 @@ export interface RoutePathParams {
   };
   'get_organization': Record<string, never>;
   'get_phone_number': {
+    phone_number_id: UUID;
+  };
+  'get_phone_number_api_voice_phone_numbers_phone_number_id:uuid': {
     phone_number_id: UUID;
   };
   'get_preferences': Record<string, never>;
@@ -728,6 +743,7 @@ export interface RoutePathParams {
     ivr_menu_id: UUID;
   };
   'list_phone_numbers': Record<string, never>;
+  'list_phone_numbers_api_phone_numbers': Record<string, never>;
   'list_phone_numbers_api_voice_phone_numbers': Record<string, never>;
   'list_registrations': Record<string, never>;
   'list_ring_groups': Record<string, never>;
@@ -779,6 +795,7 @@ export interface RoutePathParams {
   };
   'preview_device_import': Record<string, never>;
   'preview_extension_import': Record<string, never>;
+  'preview_import': Record<string, never>;
   'reboot_device': {
     device_id: UUID;
   };
@@ -913,6 +930,9 @@ export interface RoutePathParams {
   'update_organization': Record<string, never>;
   'update_password': Record<string, never>;
   'update_phone_number': {
+    phone_number_id: UUID;
+  };
+  'update_phone_number_api_voice_phone_numbers_phone_number_id:uuid': {
     phone_number_id: UUID;
   };
   'update_preferences': Record<string, never>;
@@ -1051,6 +1071,7 @@ export interface RouteQueryParams {
   'create_music_on_hold': Record<string, never>;
   'create_option': Record<string, never>;
   'create_phone_number': Record<string, never>;
+  'create_phone_number_api_voice_phone_numbers': Record<string, never>;
   'create_registration': Record<string, never>;
   'create_ring_group': Record<string, never>;
   'create_role': Record<string, never>;
@@ -1083,6 +1104,7 @@ export interface RouteQueryParams {
   'delete_notification': Record<string, never>;
   'delete_option': Record<string, never>;
   'delete_phone_number': Record<string, never>;
+  'delete_phone_number_api_voice_phone_numbers_phone_number_id:uuid': Record<string, never>;
   'delete_read_notifications': Record<string, never>;
   'delete_registration': Record<string, never>;
   'delete_ring_group': Record<string, never>;
@@ -1104,6 +1126,7 @@ export interface RouteQueryParams {
   'delete_webhook': Record<string, never>;
   'disable_mfa': Record<string, never>;
   'events:stream': Record<string, never>;
+  'execute_import': Record<string, never>;
   'export_call_records': {
     direction?: string;
     disposition?: string;
@@ -1165,6 +1188,7 @@ export interface RouteQueryParams {
   };
   'get_organization': Record<string, never>;
   'get_phone_number': Record<string, never>;
+  'get_phone_number_api_voice_phone_numbers_phone_number_id:uuid': Record<string, never>;
   'get_preferences': Record<string, never>;
   'get_profile': Record<string, never>;
   'get_registration': Record<string, never>;
@@ -1513,6 +1537,19 @@ export interface RouteQueryParams {
     searchString?: string;
     sortOrder?: "asc" | "desc";
   };
+  'list_phone_numbers_api_phone_numbers': {
+    createdAfter?: DateTime;
+    createdBefore?: DateTime;
+    currentPage?: number;
+    ids?: string[];
+    orderBy?: string;
+    pageSize?: number;
+    searchIgnoreCase?: boolean;
+    searchString?: string;
+    sortOrder?: "asc" | "desc";
+    updatedAfter?: DateTime;
+    updatedBefore?: DateTime;
+  };
   'list_phone_numbers_api_voice_phone_numbers': {
     createdAfter?: DateTime;
     createdBefore?: DateTime;
@@ -1820,6 +1857,7 @@ export interface RouteQueryParams {
   'pause_member': Record<string, never>;
   'preview_device_import': Record<string, never>;
   'preview_extension_import': Record<string, never>;
+  'preview_import': Record<string, never>;
   'reboot_device': Record<string, never>;
   'refresh_token': Record<string, never>;
   'regenerate_backup_codes': Record<string, never>;
@@ -1882,6 +1920,7 @@ export interface RouteQueryParams {
   'update_organization': Record<string, never>;
   'update_password': Record<string, never>;
   'update_phone_number': Record<string, never>;
+  'update_phone_number_api_voice_phone_numbers_phone_number_id:uuid': Record<string, never>;
   'update_preferences': Record<string, never>;
   'update_profile': Record<string, never>;
   'update_registration': Record<string, never>;
@@ -2111,6 +2150,13 @@ export const routeDefinitions = {
     queryParams: [] as const,
   },
   'create_phone_number': {
+    path: '/api/phone-numbers',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
+  'create_phone_number_api_voice_phone_numbers': {
     path: '/api/voice/phone-numbers',
     methods: ['POST'] as const,
     method: 'post',
@@ -2335,6 +2381,13 @@ export const routeDefinitions = {
     queryParams: [] as const,
   },
   'delete_phone_number': {
+    path: '/api/phone-numbers/{phone_number_id}',
+    methods: ['DELETE'] as const,
+    method: 'delete',
+    pathParams: ['phone_number_id'] as const,
+    queryParams: [] as const,
+  },
+  'delete_phone_number_api_voice_phone_numbers_phone_number_id:uuid': {
     path: '/api/voice/phone-numbers/{phone_number_id}',
     methods: ['DELETE'] as const,
     method: 'delete',
@@ -2485,6 +2538,13 @@ export const routeDefinitions = {
     path: '/api/events/stream',
     methods: ['GET'] as const,
     method: 'get',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
+  'execute_import': {
+    path: '/api/admin/phone-numbers/bulk-import/execute',
+    methods: ['POST'] as const,
+    method: 'post',
     pathParams: [] as const,
     queryParams: [] as const,
   },
@@ -2664,6 +2724,13 @@ export const routeDefinitions = {
     queryParams: [] as const,
   },
   'get_phone_number': {
+    path: '/api/phone-numbers/{phone_number_id}',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['phone_number_id'] as const,
+    queryParams: [] as const,
+  },
+  'get_phone_number_api_voice_phone_numbers_phone_number_id:uuid': {
     path: '/api/voice/phone-numbers/{phone_number_id}',
     methods: ['GET'] as const,
     method: 'get',
@@ -3169,6 +3236,13 @@ export const routeDefinitions = {
     pathParams: [] as const,
     queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder'] as const,
   },
+  'list_phone_numbers_api_phone_numbers': {
+    path: '/api/phone-numbers',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
+  },
   'list_phone_numbers_api_voice_phone_numbers': {
     path: '/api/voice/phone-numbers',
     methods: ['GET'] as const,
@@ -3431,6 +3505,13 @@ export const routeDefinitions = {
   },
   'preview_extension_import': {
     path: '/api/admin/bulk-import/preview/extensions',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
+  'preview_import': {
+    path: '/api/admin/phone-numbers/bulk-import/preview',
     methods: ['POST'] as const,
     method: 'post',
     pathParams: [] as const,
@@ -3801,6 +3882,13 @@ export const routeDefinitions = {
     queryParams: [] as const,
   },
   'update_phone_number': {
+    path: '/api/phone-numbers/{phone_number_id}',
+    methods: ['PATCH'] as const,
+    method: 'patch',
+    pathParams: ['phone_number_id'] as const,
+    queryParams: [] as const,
+  },
+  'update_phone_number_api_voice_phone_numbers_phone_number_id:uuid': {
     path: '/api/voice/phone-numbers/{phone_number_id}',
     methods: ['PATCH'] as const,
     method: 'patch',

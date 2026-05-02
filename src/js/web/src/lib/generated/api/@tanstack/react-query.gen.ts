@@ -25,6 +25,7 @@ import {
   adminDeleteTask,
   adminDeleteTeam,
   adminDeleteUser,
+  adminExecutePhoneNumberBulkImport,
   adminExportAuditLog,
   adminGetAuditLog,
   adminGetDeviceStats,
@@ -53,6 +54,7 @@ import {
   adminListUsers,
   adminPreviewDeviceImport,
   adminPreviewExtensionImport,
+  adminPreviewPhoneNumberBulkImport,
   adminUpdateDeviceTemplate,
   adminUpdateMusicOnHold,
   adminUpdateTeam,
@@ -225,6 +227,11 @@ import {
   listWebhookDeliveries,
   listWebhooks,
   lookupDeviceTemplate,
+  manageCreatePhoneNumber,
+  manageDeletePhoneNumber,
+  manageGetPhoneNumber,
+  manageListPhoneNumbers,
+  manageUpdatePhoneNumber,
   markAllNotificationsRead,
   markNotificationRead,
   oAuthConfig,
@@ -346,6 +353,9 @@ import type {
   AdminDeleteUserData,
   AdminDeleteUserError,
   AdminDeleteUserResponse,
+  AdminExecutePhoneNumberBulkImportData,
+  AdminExecutePhoneNumberBulkImportError,
+  AdminExecutePhoneNumberBulkImportResponse,
   AdminExportAuditLogData,
   AdminExportAuditLogError,
   AdminExportAuditLogResponse,
@@ -424,6 +434,9 @@ import type {
   AdminPreviewExtensionImportData,
   AdminPreviewExtensionImportError,
   AdminPreviewExtensionImportResponse,
+  AdminPreviewPhoneNumberBulkImportData,
+  AdminPreviewPhoneNumberBulkImportError,
+  AdminPreviewPhoneNumberBulkImportResponse,
   AdminUpdateDeviceTemplateData,
   AdminUpdateDeviceTemplateError,
   AdminUpdateDeviceTemplateResponse,
@@ -925,6 +938,21 @@ import type {
   LookupDeviceTemplateData,
   LookupDeviceTemplateError,
   LookupDeviceTemplateResponse,
+  ManageCreatePhoneNumberData,
+  ManageCreatePhoneNumberError,
+  ManageCreatePhoneNumberResponse,
+  ManageDeletePhoneNumberData,
+  ManageDeletePhoneNumberError,
+  ManageDeletePhoneNumberResponse,
+  ManageGetPhoneNumberData,
+  ManageGetPhoneNumberError,
+  ManageGetPhoneNumberResponse,
+  ManageListPhoneNumbersData,
+  ManageListPhoneNumbersError,
+  ManageListPhoneNumbersResponse,
+  ManageUpdatePhoneNumberData,
+  ManageUpdatePhoneNumberError,
+  ManageUpdatePhoneNumberResponse,
   MarkAllNotificationsReadData,
   MarkAllNotificationsReadResponse,
   MarkNotificationReadData,
@@ -2237,6 +2265,60 @@ export const adminUpdateMusicOnHoldMutation = (
   > = {
     mutationFn: async (fnOptions) => {
       const { data } = await adminUpdateMusicOnHold({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * ExecuteImport
+ */
+export const adminExecutePhoneNumberBulkImportMutation = (
+  options?: Partial<Options<AdminExecutePhoneNumberBulkImportData>>,
+): UseMutationOptions<
+  AdminExecutePhoneNumberBulkImportResponse,
+  AdminExecutePhoneNumberBulkImportError,
+  Options<AdminExecutePhoneNumberBulkImportData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    AdminExecutePhoneNumberBulkImportResponse,
+    AdminExecutePhoneNumberBulkImportError,
+    Options<AdminExecutePhoneNumberBulkImportData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await adminExecutePhoneNumberBulkImport({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * PreviewImport
+ */
+export const adminPreviewPhoneNumberBulkImportMutation = (
+  options?: Partial<Options<AdminPreviewPhoneNumberBulkImportData>>,
+): UseMutationOptions<
+  AdminPreviewPhoneNumberBulkImportResponse,
+  AdminPreviewPhoneNumberBulkImportError,
+  Options<AdminPreviewPhoneNumberBulkImportData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    AdminPreviewPhoneNumberBulkImportResponse,
+    AdminPreviewPhoneNumberBulkImportError,
+    Options<AdminPreviewPhoneNumberBulkImportData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await adminPreviewPhoneNumberBulkImport({
         ...options,
         ...fnOptions,
         throwOnError: true,
@@ -5294,6 +5376,143 @@ export const updateOrganizationMutation = (
   > = {
     mutationFn: async (fnOptions) => {
       const { data } = await updateOrganization({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const manageListPhoneNumbersQueryKey = (
+  options?: Options<ManageListPhoneNumbersData>,
+) => createQueryKey("manageListPhoneNumbers", options);
+
+/**
+ * ListPhoneNumbers
+ */
+export const manageListPhoneNumbersOptions = (
+  options?: Options<ManageListPhoneNumbersData>,
+) =>
+  queryOptions<
+    ManageListPhoneNumbersResponse,
+    ManageListPhoneNumbersError,
+    ManageListPhoneNumbersResponse,
+    ReturnType<typeof manageListPhoneNumbersQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await manageListPhoneNumbers({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: manageListPhoneNumbersQueryKey(options),
+  });
+
+/**
+ * CreatePhoneNumber
+ */
+export const manageCreatePhoneNumberMutation = (
+  options?: Partial<Options<ManageCreatePhoneNumberData>>,
+): UseMutationOptions<
+  ManageCreatePhoneNumberResponse,
+  ManageCreatePhoneNumberError,
+  Options<ManageCreatePhoneNumberData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    ManageCreatePhoneNumberResponse,
+    ManageCreatePhoneNumberError,
+    Options<ManageCreatePhoneNumberData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await manageCreatePhoneNumber({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * DeletePhoneNumber
+ */
+export const manageDeletePhoneNumberMutation = (
+  options?: Partial<Options<ManageDeletePhoneNumberData>>,
+): UseMutationOptions<
+  ManageDeletePhoneNumberResponse,
+  ManageDeletePhoneNumberError,
+  Options<ManageDeletePhoneNumberData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    ManageDeletePhoneNumberResponse,
+    ManageDeletePhoneNumberError,
+    Options<ManageDeletePhoneNumberData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await manageDeletePhoneNumber({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const manageGetPhoneNumberQueryKey = (
+  options: Options<ManageGetPhoneNumberData>,
+) => createQueryKey("manageGetPhoneNumber", options);
+
+/**
+ * GetPhoneNumber
+ */
+export const manageGetPhoneNumberOptions = (
+  options: Options<ManageGetPhoneNumberData>,
+) =>
+  queryOptions<
+    ManageGetPhoneNumberResponse,
+    ManageGetPhoneNumberError,
+    ManageGetPhoneNumberResponse,
+    ReturnType<typeof manageGetPhoneNumberQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await manageGetPhoneNumber({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: manageGetPhoneNumberQueryKey(options),
+  });
+
+/**
+ * UpdatePhoneNumber
+ */
+export const manageUpdatePhoneNumberMutation = (
+  options?: Partial<Options<ManageUpdatePhoneNumberData>>,
+): UseMutationOptions<
+  ManageUpdatePhoneNumberResponse,
+  ManageUpdatePhoneNumberError,
+  Options<ManageUpdatePhoneNumberData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    ManageUpdatePhoneNumberResponse,
+    ManageUpdatePhoneNumberError,
+    Options<ManageUpdatePhoneNumberData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await manageUpdatePhoneNumber({
         ...options,
         ...fnOptions,
         throwOnError: true,

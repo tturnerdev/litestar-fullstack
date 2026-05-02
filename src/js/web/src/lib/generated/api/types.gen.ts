@@ -435,6 +435,38 @@ export type BackgroundTaskList = {
 };
 
 /**
+ * BulkImportPhoneNumberPreview
+ */
+export type BulkImportPhoneNumberPreview = {
+  duplicateCount: number;
+  duplicateNumbers: Array<string>;
+  errorCount: number;
+  errorRows: Array<BulkImportRowError>;
+  totalRows: number;
+  validCount: number;
+  validRows: Array<BulkImportRowPreview>;
+};
+
+/**
+ * BulkImportPhoneNumberRequest
+ */
+export type BulkImportPhoneNumberRequest = {
+  rows: Array<BulkImportRowData>;
+  skipDuplicates?: boolean;
+};
+
+/**
+ * BulkImportPhoneNumberResult
+ */
+export type BulkImportPhoneNumberResult = {
+  createdCount: number;
+  createdIds: Array<string>;
+  errorCount: number;
+  errors: Array<string>;
+  skippedCount: number;
+};
+
+/**
  * BulkImportPreview
  */
 export type BulkImportPreview = {
@@ -464,6 +496,39 @@ export type BulkImportResult = {
   errors: Array<string>;
   skipped: number;
   updated: number;
+};
+
+/**
+ * BulkImportRowData
+ */
+export type BulkImportRowData = {
+  callerIdName?: string | null;
+  label?: string | null;
+  number: string;
+  numberType?: string;
+  teamId?: string | null;
+  userId: string;
+};
+
+/**
+ * BulkImportRowError
+ */
+export type BulkImportRowError = {
+  errors: Array<string>;
+  rowNumber: number;
+};
+
+/**
+ * BulkImportRowPreview
+ */
+export type BulkImportRowPreview = {
+  callerIdName?: string | null;
+  isDuplicate?: boolean;
+  label?: string | null;
+  number: string;
+  numberType?: string;
+  rowNumber: number;
+  userId: string;
 };
 
 /**
@@ -1818,6 +1883,37 @@ export type PhoneNumberCreate = {
 };
 
 /**
+ * PhoneNumberDetail
+ */
+export type PhoneNumberDetail = {
+  callerIdName?: string | null;
+  createdAt: string;
+  id: string;
+  isActive?: boolean;
+  label?: string | null;
+  number: string;
+  numberType?: string;
+  teamId?: string | null;
+  updatedAt: string;
+  userId: string;
+};
+
+/**
+ * PhoneNumberList
+ */
+export type PhoneNumberList = {
+  callerIdName?: string | null;
+  createdAt: string;
+  id: string;
+  isActive?: boolean;
+  label?: string | null;
+  number: string;
+  numberType?: string;
+  teamId?: string | null;
+  userId: string;
+};
+
+/**
  * PhoneNumberType
  *
  * Valid phone number types.
@@ -2155,9 +2251,11 @@ export type SystemHealth = {
  * Tag
  */
 export type Tag = {
+  createdAt: string;
   id: string;
   name: string;
   slug: string;
+  updatedAt: string;
 };
 
 /**
@@ -3133,9 +3231,9 @@ export type AdminListAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetTypeIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
@@ -3212,9 +3310,9 @@ export type AdminExportAuditLogData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetTypeIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
@@ -3280,9 +3378,9 @@ export type AdminGetTargetAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetTypeIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
@@ -3360,9 +3458,9 @@ export type AdminGetUserAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetTypeIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
@@ -4403,6 +4501,80 @@ export type AdminUpdateMusicOnHoldResponses = {
 
 export type AdminUpdateMusicOnHoldResponse =
   AdminUpdateMusicOnHoldResponses[keyof AdminUpdateMusicOnHoldResponses];
+
+export type AdminExecutePhoneNumberBulkImportData = {
+  body: BulkImportPhoneNumberRequest;
+  path?: never;
+  query?: never;
+  url: "/api/admin/phone-numbers/bulk-import/execute";
+};
+
+export type AdminExecutePhoneNumberBulkImportErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type AdminExecutePhoneNumberBulkImportError =
+  AdminExecutePhoneNumberBulkImportErrors[keyof AdminExecutePhoneNumberBulkImportErrors];
+
+export type AdminExecutePhoneNumberBulkImportResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: BulkImportPhoneNumberResult;
+};
+
+export type AdminExecutePhoneNumberBulkImportResponse =
+  AdminExecutePhoneNumberBulkImportResponses[keyof AdminExecutePhoneNumberBulkImportResponses];
+
+export type AdminPreviewPhoneNumberBulkImportData = {
+  body: {
+    file?: Blob | File;
+  };
+  path?: never;
+  query?: never;
+  url: "/api/admin/phone-numbers/bulk-import/preview";
+};
+
+export type AdminPreviewPhoneNumberBulkImportErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type AdminPreviewPhoneNumberBulkImportError =
+  AdminPreviewPhoneNumberBulkImportErrors[keyof AdminPreviewPhoneNumberBulkImportErrors];
+
+export type AdminPreviewPhoneNumberBulkImportResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: BulkImportPhoneNumberPreview;
+};
+
+export type AdminPreviewPhoneNumberBulkImportResponse =
+  AdminPreviewPhoneNumberBulkImportResponses[keyof AdminPreviewPhoneNumberBulkImportResponses];
 
 export type AdminGetSupportStatsData = {
   body?: never;
@@ -9127,6 +9299,230 @@ export type UpdateOrganizationResponses = {
 
 export type UpdateOrganizationResponse =
   UpdateOrganizationResponses[keyof UpdateOrganizationResponses];
+
+export type ManageListPhoneNumbersData = {
+  body?: never;
+  path?: never;
+  query?: {
+    ids?: Array<string> | null;
+    createdBefore?: string | null;
+    createdAfter?: string | null;
+    updatedBefore?: string | null;
+    updatedAfter?: string | null;
+    /**
+     * Field to search
+     */
+    searchString?: string | null;
+    /**
+     * Search should be case sensitive
+     */
+    searchIgnoreCase?: boolean | null;
+    currentPage?: number;
+    pageSize?: number;
+    /**
+     * Order by field
+     */
+    orderBy?: string | null;
+    /**
+     * Field to search
+     */
+    sortOrder?: "asc" | "desc" | null;
+  };
+  url: "/api/phone-numbers";
+};
+
+export type ManageListPhoneNumbersErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type ManageListPhoneNumbersError =
+  ManageListPhoneNumbersErrors[keyof ManageListPhoneNumbersErrors];
+
+export type ManageListPhoneNumbersResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: {
+    items?: Array<PhoneNumberList>;
+    /**
+     * Maximal number of items to send.
+     */
+    limit?: number;
+    /**
+     * Offset from the beginning of the query.
+     */
+    offset?: number;
+    /**
+     * Total number of items.
+     */
+    total?: number;
+  };
+};
+
+export type ManageListPhoneNumbersResponse =
+  ManageListPhoneNumbersResponses[keyof ManageListPhoneNumbersResponses];
+
+export type ManageCreatePhoneNumberData = {
+  body: PhoneNumberCreate;
+  path?: never;
+  query?: never;
+  url: "/api/phone-numbers";
+};
+
+export type ManageCreatePhoneNumberErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type ManageCreatePhoneNumberError =
+  ManageCreatePhoneNumberErrors[keyof ManageCreatePhoneNumberErrors];
+
+export type ManageCreatePhoneNumberResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: PhoneNumberDetail;
+};
+
+export type ManageCreatePhoneNumberResponse =
+  ManageCreatePhoneNumberResponses[keyof ManageCreatePhoneNumberResponses];
+
+export type ManageDeletePhoneNumberData = {
+  body?: never;
+  path: {
+    phone_number_id: string;
+  };
+  query?: never;
+  url: "/api/phone-numbers/{phone_number_id}";
+};
+
+export type ManageDeletePhoneNumberErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type ManageDeletePhoneNumberError =
+  ManageDeletePhoneNumberErrors[keyof ManageDeletePhoneNumberErrors];
+
+export type ManageDeletePhoneNumberResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: Message;
+};
+
+export type ManageDeletePhoneNumberResponse =
+  ManageDeletePhoneNumberResponses[keyof ManageDeletePhoneNumberResponses];
+
+export type ManageGetPhoneNumberData = {
+  body?: never;
+  path: {
+    phone_number_id: string;
+  };
+  query?: never;
+  url: "/api/phone-numbers/{phone_number_id}";
+};
+
+export type ManageGetPhoneNumberErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type ManageGetPhoneNumberError =
+  ManageGetPhoneNumberErrors[keyof ManageGetPhoneNumberErrors];
+
+export type ManageGetPhoneNumberResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: PhoneNumberDetail;
+};
+
+export type ManageGetPhoneNumberResponse =
+  ManageGetPhoneNumberResponses[keyof ManageGetPhoneNumberResponses];
+
+export type ManageUpdatePhoneNumberData = {
+  body: PhoneNumberUpdate;
+  path: {
+    phone_number_id: string;
+  };
+  query?: never;
+  url: "/api/phone-numbers/{phone_number_id}";
+};
+
+export type ManageUpdatePhoneNumberErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type ManageUpdatePhoneNumberError =
+  ManageUpdatePhoneNumberErrors[keyof ManageUpdatePhoneNumberErrors];
+
+export type ManageUpdatePhoneNumberResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: PhoneNumberDetail;
+};
+
+export type ManageUpdatePhoneNumberResponse =
+  ManageUpdatePhoneNumberResponses[keyof ManageUpdatePhoneNumberResponses];
 
 export type ProfileOAuthAccountsData = {
   body?: never;

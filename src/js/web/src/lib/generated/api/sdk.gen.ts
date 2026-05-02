@@ -57,6 +57,9 @@ import type {
   AdminDeleteUserData,
   AdminDeleteUserErrors,
   AdminDeleteUserResponses,
+  AdminExecutePhoneNumberBulkImportData,
+  AdminExecutePhoneNumberBulkImportErrors,
+  AdminExecutePhoneNumberBulkImportResponses,
   AdminExportAuditLogData,
   AdminExportAuditLogErrors,
   AdminExportAuditLogResponses,
@@ -135,6 +138,9 @@ import type {
   AdminPreviewExtensionImportData,
   AdminPreviewExtensionImportErrors,
   AdminPreviewExtensionImportResponses,
+  AdminPreviewPhoneNumberBulkImportData,
+  AdminPreviewPhoneNumberBulkImportErrors,
+  AdminPreviewPhoneNumberBulkImportResponses,
   AdminUpdateDeviceTemplateData,
   AdminUpdateDeviceTemplateErrors,
   AdminUpdateDeviceTemplateResponses,
@@ -638,6 +644,21 @@ import type {
   LookupDeviceTemplateData,
   LookupDeviceTemplateErrors,
   LookupDeviceTemplateResponses,
+  ManageCreatePhoneNumberData,
+  ManageCreatePhoneNumberErrors,
+  ManageCreatePhoneNumberResponses,
+  ManageDeletePhoneNumberData,
+  ManageDeletePhoneNumberErrors,
+  ManageDeletePhoneNumberResponses,
+  ManageGetPhoneNumberData,
+  ManageGetPhoneNumberErrors,
+  ManageGetPhoneNumberResponses,
+  ManageListPhoneNumbersData,
+  ManageListPhoneNumbersErrors,
+  ManageListPhoneNumbersResponses,
+  ManageUpdatePhoneNumberData,
+  ManageUpdatePhoneNumberErrors,
+  ManageUpdatePhoneNumberResponses,
   MarkAllNotificationsReadData,
   MarkAllNotificationsReadResponses,
   MarkNotificationReadData,
@@ -1545,6 +1566,51 @@ export const adminUpdateMusicOnHold = <ThrowOnError extends boolean = false>(
     ...options,
     headers: {
       "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * ExecuteImport
+ */
+export const adminExecutePhoneNumberBulkImport = <
+  ThrowOnError extends boolean = false,
+>(
+  options: Options<AdminExecutePhoneNumberBulkImportData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    AdminExecutePhoneNumberBulkImportResponses,
+    AdminExecutePhoneNumberBulkImportErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/admin/phone-numbers/bulk-import/execute",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * PreviewImport
+ */
+export const adminPreviewPhoneNumberBulkImport = <
+  ThrowOnError extends boolean = false,
+>(
+  options: Options<AdminPreviewPhoneNumberBulkImportData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    AdminPreviewPhoneNumberBulkImportResponses,
+    AdminPreviewPhoneNumberBulkImportErrors,
+    ThrowOnError
+  >({
+    ...formDataBodySerializer,
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/admin/phone-numbers/bulk-import/preview",
+    ...options,
+    headers: {
+      "Content-Type": null,
       ...options.headers,
     },
   });
@@ -3518,6 +3584,94 @@ export const updateOrganization = <ThrowOnError extends boolean = false>(
   >({
     security: [{ scheme: "bearer", type: "http" }],
     url: "/api/organization",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * ListPhoneNumbers
+ */
+export const manageListPhoneNumbers = <ThrowOnError extends boolean = false>(
+  options?: Options<ManageListPhoneNumbersData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    ManageListPhoneNumbersResponses,
+    ManageListPhoneNumbersErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/phone-numbers",
+    ...options,
+  });
+
+/**
+ * CreatePhoneNumber
+ */
+export const manageCreatePhoneNumber = <ThrowOnError extends boolean = false>(
+  options: Options<ManageCreatePhoneNumberData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    ManageCreatePhoneNumberResponses,
+    ManageCreatePhoneNumberErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/phone-numbers",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+/**
+ * DeletePhoneNumber
+ */
+export const manageDeletePhoneNumber = <ThrowOnError extends boolean = false>(
+  options: Options<ManageDeletePhoneNumberData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    ManageDeletePhoneNumberResponses,
+    ManageDeletePhoneNumberErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/phone-numbers/{phone_number_id}",
+    ...options,
+  });
+
+/**
+ * GetPhoneNumber
+ */
+export const manageGetPhoneNumber = <ThrowOnError extends boolean = false>(
+  options: Options<ManageGetPhoneNumberData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    ManageGetPhoneNumberResponses,
+    ManageGetPhoneNumberErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/phone-numbers/{phone_number_id}",
+    ...options,
+  });
+
+/**
+ * UpdatePhoneNumber
+ */
+export const manageUpdatePhoneNumber = <ThrowOnError extends boolean = false>(
+  options: Options<ManageUpdatePhoneNumberData, ThrowOnError>,
+) =>
+  (options.client ?? client).patch<
+    ManageUpdatePhoneNumberResponses,
+    ManageUpdatePhoneNumberErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/phone-numbers/{phone_number_id}",
     ...options,
     headers: {
       "Content-Type": "application/json",

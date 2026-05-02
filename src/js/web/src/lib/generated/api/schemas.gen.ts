@@ -1707,6 +1707,106 @@ export const BackgroundTaskListSchema = {
   type: "object",
 } as const;
 
+export const BulkImportPhoneNumberPreviewSchema = {
+  properties: {
+    duplicateCount: {
+      type: "integer",
+    },
+    duplicateNumbers: {
+      items: {
+        type: "string",
+      },
+      type: "array",
+    },
+    errorCount: {
+      type: "integer",
+    },
+    errorRows: {
+      items: {
+        $ref: "#/components/schemas/BulkImportRowError",
+      },
+      type: "array",
+    },
+    totalRows: {
+      type: "integer",
+    },
+    validCount: {
+      type: "integer",
+    },
+    validRows: {
+      items: {
+        $ref: "#/components/schemas/BulkImportRowPreview",
+      },
+      type: "array",
+    },
+  },
+  required: [
+    "duplicateCount",
+    "duplicateNumbers",
+    "errorCount",
+    "errorRows",
+    "totalRows",
+    "validCount",
+    "validRows",
+  ],
+  title: "BulkImportPhoneNumberPreview",
+  type: "object",
+} as const;
+
+export const BulkImportPhoneNumberRequestSchema = {
+  properties: {
+    rows: {
+      items: {
+        $ref: "#/components/schemas/BulkImportRowData",
+      },
+      type: "array",
+    },
+    skipDuplicates: {
+      default: true,
+      type: "boolean",
+    },
+  },
+  required: ["rows"],
+  title: "BulkImportPhoneNumberRequest",
+  type: "object",
+} as const;
+
+export const BulkImportPhoneNumberResultSchema = {
+  properties: {
+    createdCount: {
+      type: "integer",
+    },
+    createdIds: {
+      items: {
+        format: "uuid",
+        type: "string",
+      },
+      type: "array",
+    },
+    errorCount: {
+      type: "integer",
+    },
+    errors: {
+      items: {
+        type: "string",
+      },
+      type: "array",
+    },
+    skippedCount: {
+      type: "integer",
+    },
+  },
+  required: [
+    "createdCount",
+    "createdIds",
+    "errorCount",
+    "errors",
+    "skippedCount",
+  ],
+  title: "BulkImportPhoneNumberResult",
+  type: "object",
+} as const;
+
 export const BulkImportPreviewSchema = {
   properties: {
     errorRows: {
@@ -1774,6 +1874,118 @@ export const BulkImportResultSchema = {
   },
   required: ["created", "errors", "skipped", "updated"],
   title: "BulkImportResult",
+  type: "object",
+} as const;
+
+export const BulkImportRowDataSchema = {
+  properties: {
+    callerIdName: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    label: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    number: {
+      type: "string",
+    },
+    numberType: {
+      default: "local",
+      type: "string",
+    },
+    teamId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    userId: {
+      format: "uuid",
+      type: "string",
+    },
+  },
+  required: ["number", "userId"],
+  title: "BulkImportRowData",
+  type: "object",
+} as const;
+
+export const BulkImportRowErrorSchema = {
+  properties: {
+    errors: {
+      items: {
+        type: "string",
+      },
+      type: "array",
+    },
+    rowNumber: {
+      type: "integer",
+    },
+  },
+  required: ["errors", "rowNumber"],
+  title: "BulkImportRowError",
+  type: "object",
+} as const;
+
+export const BulkImportRowPreviewSchema = {
+  properties: {
+    callerIdName: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    isDuplicate: {
+      default: false,
+      type: "boolean",
+    },
+    label: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    number: {
+      type: "string",
+    },
+    numberType: {
+      default: "local",
+      type: "string",
+    },
+    rowNumber: {
+      type: "integer",
+    },
+    userId: {
+      type: "string",
+    },
+  },
+  required: ["number", "rowNumber", "userId"],
+  title: "BulkImportRowPreview",
   type: "object",
 } as const;
 
@@ -7059,6 +7271,134 @@ export const PhoneNumberCreateSchema = {
   type: "object",
 } as const;
 
+export const PhoneNumberDetailSchema = {
+  properties: {
+    callerIdName: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    createdAt: {
+      format: "date-time",
+      type: "string",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    isActive: {
+      default: true,
+      type: "boolean",
+    },
+    label: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    number: {
+      type: "string",
+    },
+    numberType: {
+      default: "local",
+      type: "string",
+    },
+    teamId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    updatedAt: {
+      format: "date-time",
+      type: "string",
+    },
+    userId: {
+      format: "uuid",
+      type: "string",
+    },
+  },
+  required: ["createdAt", "id", "number", "updatedAt", "userId"],
+  title: "PhoneNumberDetail",
+  type: "object",
+} as const;
+
+export const PhoneNumberListSchema = {
+  properties: {
+    callerIdName: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    createdAt: {
+      format: "date-time",
+      type: "string",
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    isActive: {
+      default: true,
+      type: "boolean",
+    },
+    label: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    number: {
+      type: "string",
+    },
+    numberType: {
+      default: "local",
+      type: "string",
+    },
+    teamId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    userId: {
+      format: "uuid",
+      type: "string",
+    },
+  },
+  required: ["createdAt", "id", "number", "userId"],
+  title: "PhoneNumberList",
+  type: "object",
+} as const;
+
 export const PhoneNumberTypeSchema = {
   default: "local",
   description: "Valid phone number types.",
@@ -8106,6 +8446,10 @@ export const SystemHealthSchema = {
 
 export const TagSchema = {
   properties: {
+    createdAt: {
+      format: "date-time",
+      type: "string",
+    },
     id: {
       format: "uuid",
       type: "string",
@@ -8116,8 +8460,12 @@ export const TagSchema = {
     slug: {
       type: "string",
     },
+    updatedAt: {
+      format: "date-time",
+      type: "string",
+    },
   },
-  required: ["id", "name", "slug"],
+  required: ["createdAt", "id", "name", "slug", "updatedAt"],
   title: "Tag",
   type: "object",
 } as const;

@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.218.0 (2026-05-02)
+
+### Fixed
+- **Duplicate operation_id conflict** — Renamed phone_numbers domain operation IDs to avoid collision with voice phone number endpoints, restoring `make types` functionality
+- **Regenerated API client** — Updated TypeScript types and SDK from latest OpenAPI schema including new phone_numbers and webhook endpoints
+
 ## v0.217.0 (2026-05-02)
 
 ### Changed
