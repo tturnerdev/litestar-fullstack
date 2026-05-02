@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
+import { createFileRoute, Link } from "@tanstack/react-router"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   AlertCircle,
@@ -50,6 +50,30 @@ import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 
 export const Route = createFileRoute("/_app/tasks/")({
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): {
+    page?: number
+    status?: string
+    type?: string
+    sort?: string
+    order?: string
+  } => ({
+    page: Number(search.page) > 1 ? Number(search.page) : undefined,
+    status:
+      typeof search.status === "string" && search.status && search.status !== "all"
+        ? search.status
+        : undefined,
+    type:
+      typeof search.type === "string" && search.type && search.type !== "all"
+        ? search.type
+        : undefined,
+    sort: typeof search.sort === "string" && search.sort ? search.sort : undefined,
+    order:
+      typeof search.order === "string" && (search.order === "asc" || search.order === "desc")
+        ? search.order
+        : undefined,
+  }),
   component: TasksPage,
 })
 
@@ -303,42 +327,55 @@ function TaskRow({
 function TasksPage() {
   useDocumentTitle("Background Tasks")
 
-  const navigate = useNavigate()
+  const {
+    page: pageParam,
+    status: statusParam,
+    type: typeParam,
+    sort: sortParam,
+    order: orderParam,
+  } = Route.useSearch()
+  const navigate = Route.useNavigate()
 
-  const [statusFilter, setStatusFilter] = useState("all")
-  const [taskTypeFilter, setTaskTypeFilter] = useState("all")
-  const [page, setPage] = useState(1)
+  // Derive filter state from URL search params
+  const statusFilter = statusParam ?? "all"
+  const taskTypeFilter = typeParam ?? "all"
+  const page = pageParam ?? 1
+  const sortKey = sortParam ?? null
+  const sortDir: SortDirection = (orderParam as SortDirection) ?? null
+
   const [pageSize, setPageSize] = useState(getStoredPageSize)
 
-  // Sort state
-  const [sortKey, setSortKey] = useState<string | null>(null)
-  const [sortDir, setSortDir] = useState<SortDirection>(null)
-
-  const handleSort = useCallback((key: string) => {
-    const next = nextSortDirection(sortKey, sortDir, key)
-    setSortKey(next.sort)
-    setSortDir(next.direction)
-  }, [sortKey, sortDir])
+  const handleSort = useCallback(
+    (key: string) => {
+      const next = nextSortDirection(sortKey, sortDir, key)
+      navigate({
+        search: (prev) => ({
+          ...prev,
+          sort: next.sort || undefined,
+          order: next.direction || undefined,
+        }),
+      })
+    },
+    [sortKey, sortDir, navigate],
+  )
 
   // Page-level cancel mutation for bulk actions
   const cancelMutation = useCancelTask()
 
-  // Reset page when filters change
-  useEffect(() => {
-    setPage(1)
-  }, [statusFilter, taskTypeFilter])
-
   // Persist page size preference
-  const handlePageSizeChange = useCallback((value: string) => {
-    const size = Number(value)
-    setPageSize(size)
-    setPage(1)
-    try {
-      localStorage.setItem(PAGE_SIZE_STORAGE_KEY, value)
-    } catch {
-      // localStorage unavailable
-    }
-  }, [])
+  const handlePageSizeChange = useCallback(
+    (value: string) => {
+      const size = Number(value)
+      setPageSize(size)
+      navigate({ search: (prev) => ({ ...prev, page: undefined }), replace: true })
+      try {
+        localStorage.setItem(PAGE_SIZE_STORAGE_KEY, value)
+      } catch {
+        // localStorage unavailable
+      }
+    },
+    [navigate],
+  )
 
   // Track whether active tasks exist for auto-refresh (avoids circular dep)
   const [hasActiveTasks, setHasActiveTasks] = useState(false)
@@ -465,14 +502,19 @@ function TasksPage() {
   const hasAnyFilters = statusFilter !== "all" || taskTypeFilter !== "all"
 
   const clearAllFilters = useCallback(() => {
-    setStatusFilter("all")
-    setTaskTypeFilter("all")
-    setPage(1)
-  }, [])
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        status: undefined,
+        type: undefined,
+        page: undefined,
+      }),
+    })
+  }, [navigate])
 
   const handleRowClick = useCallback(
     (taskId: string) => {
-      navigate({ to: "/tasks/$taskId", params: { taskId } })
+      void navigate({ to: "/tasks/$taskId", params: { taskId } })
     },
     [navigate],
   )
@@ -574,7 +616,18 @@ function TasksPage() {
       {/* Filters */}
       <PageSection>
         <div className="flex flex-wrap items-center gap-3">
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <Select
+            value={statusFilter}
+            onValueChange={(v) =>
+              navigate({
+                search: (prev) => ({
+                  ...prev,
+                  status: v !== "all" ? v : undefined,
+                  page: undefined,
+                }),
+              })
+            }
+          >
             <SelectTrigger className="w-[160px]">
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
@@ -586,7 +639,18 @@ function TasksPage() {
               ))}
             </SelectContent>
           </Select>
-          <Select value={taskTypeFilter} onValueChange={setTaskTypeFilter}>
+          <Select
+            value={taskTypeFilter}
+            onValueChange={(v) =>
+              navigate({
+                search: (prev) => ({
+                  ...prev,
+                  type: v !== "all" ? v : undefined,
+                  page: undefined,
+                }),
+              })
+            }
+          >
             <SelectTrigger className="w-[160px]">
               <SelectValue placeholder="Filter by type" />
             </SelectTrigger>
@@ -719,7 +783,14 @@ function TasksPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    onClick={() =>
+                      navigate({
+                        search: (prev) => ({
+                          ...prev,
+                          page: page - 1 > 1 ? page - 1 : undefined,
+                        }),
+                      })
+                    }
                     disabled={page <= 1}
                   >
                     Previous
@@ -727,7 +798,11 @@ function TasksPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    onClick={() =>
+                      navigate({
+                        search: (prev) => ({ ...prev, page: page + 1 }),
+                      })
+                    }
                     disabled={page >= totalPages}
                   >
                     Next

@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.234.0 (2026-05-03)
+
+### Added
+- **URL filter state persistence** on voice extensions, voice phone numbers, fax numbers, fax messages, schedules, tasks, and notifications list pages — completing URL state coverage across every list page in the portal
+
 ## v0.233.0 (2026-05-03)
 
 ### Added

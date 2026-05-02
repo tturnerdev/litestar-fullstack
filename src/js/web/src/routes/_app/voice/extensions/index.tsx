@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
+import { createFileRoute, Link } from "@tanstack/react-router"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   AlertCircle,
@@ -64,10 +64,29 @@ import {
   useUpdateAnyExtension,
 } from "@/lib/api/hooks/voice"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 
 export const Route = createFileRoute("/_app/voice/extensions/")({
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): {
+    q?: string
+    page?: number
+    status?: string
+    sort?: string
+    order?: string
+  } => ({
+    q: typeof search.q === "string" && search.q ? search.q : undefined,
+    page: Number(search.page) > 1 ? Number(search.page) : undefined,
+    status: typeof search.status === "string" && search.status ? search.status : undefined,
+    sort: typeof search.sort === "string" && search.sort ? search.sort : undefined,
+    order:
+      typeof search.order === "string" && (search.order === "asc" || search.order === "desc")
+        ? search.order
+        : undefined,
+  }),
   component: ExtensionsPage,
 })
 
@@ -75,6 +94,20 @@ export const Route = createFileRoute("/_app/voice/extensions/")({
 
 const DEFAULT_PAGE_SIZE = 25
 const PAGE_SIZE_OPTIONS = [10, 25, 50] as const
+const PAGE_SIZE_STORAGE_KEY = "extensions-page-size"
+
+function getStoredPageSize(): number {
+  try {
+    const stored = localStorage.getItem(PAGE_SIZE_STORAGE_KEY)
+    if (stored) {
+      const parsed = Number(stored)
+      if ((PAGE_SIZE_OPTIONS as readonly number[]).includes(parsed)) return parsed
+    }
+  } catch {
+    // localStorage unavailable
+  }
+  return DEFAULT_PAGE_SIZE
+}
 
 const statusOptions: FilterOption[] = [
   { value: "active", label: "Active" },
@@ -170,18 +203,48 @@ function FeatureIndicators({ ext }: { ext: Extension }) {
 
 function ExtensionsPage() {
   useDocumentTitle("Extensions")
-  const navigate = useNavigate()
+  const {
+    q: searchParam,
+    page: pageParam,
+    status: statusParam,
+    sort: sortParam,
+    order: orderParam,
+  } = Route.useSearch()
+  const navigate = Route.useNavigate()
   const searchInputRef = useRef<HTMLInputElement>(null)
 
-  // Filter & search state
-  const [search, setSearch] = useState("")
-  const [statusFilter, setStatusFilter] = useState<string[]>([])
-  const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE)
+  // Derive filter state from URL search params
+  const search = searchParam ?? ""
+  const page = pageParam ?? 1
+  const statusFilter = useMemo(
+    () => (statusParam ? statusParam.split(",").filter(Boolean) : []),
+    [statusParam],
+  )
+  const sortKey = sortParam ?? null
+  const sortDir: SortDirection = (orderParam as SortDirection) ?? null
 
-  // Sort state
-  const [sortKey, setSortKey] = useState<string | null>(null)
-  const [sortDir, setSortDir] = useState<SortDirection>(null)
+  // Local input state for search (so typing is smooth before debounce)
+  const [searchInput, setSearchInput] = useState(search)
+  const debouncedSearch = useDebouncedValue(searchInput)
+
+  // Sync URL when debounced search value settles
+  useEffect(() => {
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        q: debouncedSearch || undefined,
+        page: undefined,
+      }),
+      replace: true,
+    })
+  }, [debouncedSearch, navigate])
+
+  // Keep local input in sync if URL search param changes externally (back/forward)
+  useEffect(() => {
+    setSearchInput(search)
+  }, [search])
+
+  const [pageSize, setPageSize] = useState(getStoredPageSize)
 
   // Selection state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -312,10 +375,30 @@ function ExtensionsPage() {
   const handleSort = useCallback(
     (key: string) => {
       const next = nextSortDirection(sortKey, sortDir, key)
-      setSortKey(next.sort)
-      setSortDir(next.direction)
+      navigate({
+        search: (prev) => ({
+          ...prev,
+          sort: next.sort || undefined,
+          order: next.direction || undefined,
+        }),
+      })
     },
-    [sortKey, sortDir],
+    [sortKey, sortDir, navigate],
+  )
+
+  // Persist page size preference
+  const handlePageSizeChange = useCallback(
+    (value: string) => {
+      const newSize = Number.parseInt(value, 10)
+      setPageSize(newSize)
+      navigate({ search: (prev) => ({ ...prev, page: undefined }), replace: true })
+      try {
+        localStorage.setItem(PAGE_SIZE_STORAGE_KEY, value)
+      } catch {
+        // localStorage unavailable
+      }
+    },
+    [navigate],
   )
 
   // Bulk actions
@@ -373,16 +456,16 @@ function ExtensionsPage() {
       }
       if (e.key === "ArrowLeft" && page > 1) {
         e.preventDefault()
-        setPage((p) => Math.max(1, p - 1))
+        navigate({ search: (prev) => ({ ...prev, page: page - 1 > 1 ? page - 1 : undefined }) })
       }
       if (e.key === "ArrowRight" && page < totalPages) {
         e.preventDefault()
-        setPage((p) => Math.min(totalPages, p + 1))
+        navigate({ search: (prev) => ({ ...prev, page: page + 1 }) })
       }
     }
     document.addEventListener("keydown", handleKeyDown)
     return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [page, totalPages])
+  }, [page, totalPages, navigate])
 
   // "Go to page" input state — kept in sync with the current page
   const [pageInput, setPageInput] = useState(String(page))
@@ -394,21 +477,15 @@ function ExtensionsPage() {
   const goToPage = useCallback(() => {
     const parsed = Number.parseInt(pageInput, 10)
     if (Number.isNaN(parsed) || parsed < 1) {
-      setPage(1)
+      navigate({ search: (prev) => ({ ...prev, page: undefined }), replace: true })
       setPageInput("1")
     } else if (parsed > totalPages) {
-      setPage(totalPages)
+      navigate({ search: (prev) => ({ ...prev, page: totalPages > 1 ? totalPages : undefined }), replace: true })
       setPageInput(String(totalPages))
     } else {
-      setPage(parsed)
+      navigate({ search: (prev) => ({ ...prev, page: parsed > 1 ? parsed : undefined }), replace: true })
     }
-  }, [pageInput, totalPages])
-
-  const handlePageSizeChange = useCallback((value: string) => {
-    const newSize = Number.parseInt(value, 10)
-    setPageSize(newSize)
-    setPage(1)
-  }, [])
+  }, [pageInput, totalPages, navigate])
 
   const breadcrumbs = (
     <Breadcrumb>
@@ -529,20 +606,14 @@ function ExtensionsPage() {
             <Input
               ref={searchInputRef}
               placeholder="Search by extension, name, or phone number..."
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value)
-                setPage(1)
-              }}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               className="pl-9 pr-8"
             />
-            {search ? (
+            {searchInput ? (
               <button
                 type="button"
-                onClick={() => {
-                  setSearch("")
-                  setPage(1)
-                }}
+                onClick={() => setSearchInput("")}
                 className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
               >
                 <X className="h-3.5 w-3.5" />
@@ -557,8 +628,13 @@ function ExtensionsPage() {
             options={statusOptions}
             selected={statusFilter}
             onChange={(v) => {
-              setStatusFilter(v)
-              setPage(1)
+              navigate({
+                search: (prev) => ({
+                  ...prev,
+                  status: v.length > 0 ? v.join(",") : undefined,
+                  page: undefined,
+                }),
+              })
             }}
           />
           {activeFilterCount > 0 && (
@@ -567,8 +643,13 @@ function ExtensionsPage() {
               size="sm"
               className="text-xs text-muted-foreground"
               onClick={() => {
-                setStatusFilter([])
-                setPage(1)
+                navigate({
+                  search: (prev) => ({
+                    ...prev,
+                    status: undefined,
+                    page: undefined,
+                  }),
+                })
               }}
             >
               Clear all filters
@@ -619,8 +700,16 @@ function ExtensionsPage() {
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  setSearch("")
-                  setStatusFilter([])
+                  setSearchInput("")
+                  navigate({
+                    search: {
+                      q: undefined,
+                      status: undefined,
+                      sort: undefined,
+                      order: undefined,
+                      page: undefined,
+                    },
+                  })
                 }}
               >
                 Clear all filters
@@ -738,7 +827,14 @@ function ExtensionsPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  onClick={() =>
+                    navigate({
+                      search: (prev) => ({
+                        ...prev,
+                        page: page - 1 > 1 ? page - 1 : undefined,
+                      }),
+                    })
+                  }
                   disabled={page <= 1}
                 >
                   Previous
@@ -747,7 +843,11 @@ function ExtensionsPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  onClick={() =>
+                    navigate({
+                      search: (prev) => ({ ...prev, page: page + 1 }),
+                    })
+                  }
                   disabled={page >= totalPages}
                 >
                   Next

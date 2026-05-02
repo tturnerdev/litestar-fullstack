@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
+import { createFileRoute, Link } from "@tanstack/react-router"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   AlertCircle,
@@ -55,9 +55,30 @@ import {
   useUpdatePhoneNumber,
 } from "@/lib/api/hooks/voice"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 
 export const Route = createFileRoute("/_app/voice/phone-numbers/")({
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): {
+    q?: string
+    page?: number
+    type?: string
+    status?: string
+    sort?: string
+    order?: string
+  } => ({
+    q: typeof search.q === "string" && search.q ? search.q : undefined,
+    page: Number(search.page) > 1 ? Number(search.page) : undefined,
+    type: typeof search.type === "string" && search.type ? search.type : undefined,
+    status: typeof search.status === "string" && search.status ? search.status : undefined,
+    sort: typeof search.sort === "string" && search.sort ? search.sort : undefined,
+    order:
+      typeof search.order === "string" && (search.order === "asc" || search.order === "desc")
+        ? search.order
+        : undefined,
+  }),
   component: PhoneNumbersPage,
 })
 
@@ -307,30 +328,68 @@ function PhoneNumberRow({
 
 function PhoneNumbersPage() {
   useDocumentTitle("Phone Numbers")
-  const navigate = useNavigate()
+  const {
+    q: searchParam,
+    page: pageParam,
+    type: typeParam,
+    status: statusParam,
+    sort: sortParam,
+    order: orderParam,
+  } = Route.useSearch()
+  const navigate = Route.useNavigate()
   const searchInputRef = useRef<HTMLInputElement>(null)
-  // Filter & search state
-  const [search, setSearch] = useState("")
-  const [typeFilter, setTypeFilter] = useState<string[]>([])
-  const [statusFilter, setStatusFilter] = useState<string[]>([])
-  const [page, setPage] = useState(1)
+
+  // Derive filter state from URL search params
+  const search = searchParam ?? ""
+  const page = pageParam ?? 1
+  const typeFilter = useMemo(
+    () => (typeParam ? typeParam.split(",").filter(Boolean) : []),
+    [typeParam],
+  )
+  const statusFilter = useMemo(
+    () => (statusParam ? statusParam.split(",").filter(Boolean) : []),
+    [statusParam],
+  )
+  const sortKey = sortParam ?? null
+  const sortDir: SortDirection = (orderParam as SortDirection) ?? null
+
+  // Local input state for search (so typing is smooth before debounce)
+  const [searchInput, setSearchInput] = useState(search)
+  const debouncedSearch = useDebouncedValue(searchInput)
+
+  // Sync URL when debounced search value settles
+  useEffect(() => {
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        q: debouncedSearch || undefined,
+        page: undefined,
+      }),
+      replace: true,
+    })
+  }, [debouncedSearch, navigate])
+
+  // Keep local input in sync if URL search param changes externally (back/forward)
+  useEffect(() => {
+    setSearchInput(search)
+  }, [search])
+
   const [pageSize, setPageSize] = useState(getStoredPageSize)
 
   // Persist page size preference
-  const handlePageSizeChange = useCallback((value: string) => {
-    const size = Number(value)
-    setPageSize(size)
-    setPage(1)
-    try {
-      localStorage.setItem(PAGE_SIZE_STORAGE_KEY, value)
-    } catch {
-      // localStorage unavailable
-    }
-  }, [])
-
-  // Sort state
-  const [sortKey, setSortKey] = useState<string | null>(null)
-  const [sortDir, setSortDir] = useState<SortDirection>(null)
+  const handlePageSizeChange = useCallback(
+    (value: string) => {
+      const size = Number(value)
+      setPageSize(size)
+      navigate({ search: (prev) => ({ ...prev, page: undefined }), replace: true })
+      try {
+        localStorage.setItem(PAGE_SIZE_STORAGE_KEY, value)
+      } catch {
+        // localStorage unavailable
+      }
+    },
+    [navigate],
+  )
 
   // Selection state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -447,10 +506,15 @@ function PhoneNumbersPage() {
   const handleSort = useCallback(
     (key: string) => {
       const next = nextSortDirection(sortKey, sortDir, key)
-      setSortKey(next.sort)
-      setSortDir(next.direction)
+      navigate({
+        search: (prev) => ({
+          ...prev,
+          sort: next.sort || undefined,
+          order: next.direction || undefined,
+        }),
+      })
     },
-    [sortKey, sortDir],
+    [sortKey, sortDir, navigate],
   )
 
   // Edit handler
@@ -507,16 +571,16 @@ function PhoneNumbersPage() {
       }
       if (e.key === "ArrowLeft" && page > 1) {
         e.preventDefault()
-        setPage((p) => Math.max(1, p - 1))
+        navigate({ search: (prev) => ({ ...prev, page: page - 1 > 1 ? page - 1 : undefined }) })
       }
       if (e.key === "ArrowRight" && page < totalPages) {
         e.preventDefault()
-        setPage((p) => Math.min(totalPages, p + 1))
+        navigate({ search: (prev) => ({ ...prev, page: page + 1 }) })
       }
     }
     document.addEventListener("keydown", handleKeyDown)
     return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [page, totalPages])
+  }, [page, totalPages, navigate])
 
   const breadcrumbs = (
     <Breadcrumb>
@@ -621,20 +685,14 @@ function PhoneNumbersPage() {
             <Input
               ref={searchInputRef}
               placeholder="Search by number, label, or caller ID..."
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value)
-                setPage(1)
-              }}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               className="pl-9 pr-8"
             />
-            {search ? (
+            {searchInput ? (
               <button
                 type="button"
-                onClick={() => {
-                  setSearch("")
-                  setPage(1)
-                }}
+                onClick={() => setSearchInput("")}
                 className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
               >
                 <X className="h-3.5 w-3.5" />
@@ -649,8 +707,13 @@ function PhoneNumbersPage() {
             options={typeFilterOptions}
             selected={typeFilter}
             onChange={(v) => {
-              setTypeFilter(v)
-              setPage(1)
+              navigate({
+                search: (prev) => ({
+                  ...prev,
+                  type: v.length > 0 ? v.join(",") : undefined,
+                  page: undefined,
+                }),
+              })
             }}
           />
           <FilterDropdown
@@ -658,8 +721,13 @@ function PhoneNumbersPage() {
             options={statusFilterOptions}
             selected={statusFilter}
             onChange={(v) => {
-              setStatusFilter(v)
-              setPage(1)
+              navigate({
+                search: (prev) => ({
+                  ...prev,
+                  status: v.length > 0 ? v.join(",") : undefined,
+                  page: undefined,
+                }),
+              })
             }}
           />
           {activeFilterCount > 0 && (
@@ -668,9 +736,14 @@ function PhoneNumbersPage() {
               size="sm"
               className="text-xs text-muted-foreground"
               onClick={() => {
-                setTypeFilter([])
-                setStatusFilter([])
-                setPage(1)
+                navigate({
+                  search: (prev) => ({
+                    ...prev,
+                    type: undefined,
+                    status: undefined,
+                    page: undefined,
+                  }),
+                })
               }}
             >
               Clear all filters
@@ -719,9 +792,17 @@ function PhoneNumbersPage() {
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  setSearch("")
-                  setTypeFilter([])
-                  setStatusFilter([])
+                  setSearchInput("")
+                  navigate({
+                    search: {
+                      q: undefined,
+                      type: undefined,
+                      status: undefined,
+                      sort: undefined,
+                      order: undefined,
+                      page: undefined,
+                    },
+                  })
                 }}
               >
                 Clear all filters
@@ -835,7 +916,14 @@ function PhoneNumbersPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    onClick={() =>
+                      navigate({
+                        search: (prev) => ({
+                          ...prev,
+                          page: page - 1 > 1 ? page - 1 : undefined,
+                        }),
+                      })
+                    }
                     disabled={page <= 1}
                   >
                     Previous
@@ -844,7 +932,11 @@ function PhoneNumbersPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    onClick={() =>
+                      navigate({
+                        search: (prev) => ({ ...prev, page: page + 1 }),
+                      })
+                    }
                     disabled={page >= totalPages}
                   >
                     Next

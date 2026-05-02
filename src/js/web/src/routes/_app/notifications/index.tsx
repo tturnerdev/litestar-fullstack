@@ -64,6 +64,25 @@ import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/notifications/")({
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): {
+    q?: string
+    page?: number
+    category?: string
+    read?: string
+  } => ({
+    q: typeof search.q === "string" && search.q ? search.q : undefined,
+    page: Number(search.page) > 1 ? Number(search.page) : undefined,
+    category:
+      typeof search.category === "string" && search.category && search.category !== "all"
+        ? search.category
+        : undefined,
+    read:
+      typeof search.read === "string" && (search.read === "unread" || search.read === "read")
+        ? search.read
+        : undefined,
+  }),
   component: NotificationsPage,
 })
 
@@ -433,11 +452,42 @@ function NotificationsPage() {
   useDocumentTitle("Notifications")
   const queryClient = useQueryClient()
   const searchInputRef = useRef<HTMLInputElement>(null)
-  const [page, setPage] = useState(1)
-  const [activeCategory, setActiveCategory] = useState<string>("all")
-  const [readStatusFilter, setReadStatusFilter] = useState<ReadStatusFilter>("all")
-  const [search, setSearch] = useState("")
-  const debouncedSearch = useDebouncedValue(search)
+
+  const {
+    q: searchParam,
+    page: pageParam,
+    category: categoryParam,
+    read: readParam,
+  } = Route.useSearch()
+  const navigate = Route.useNavigate()
+
+  // Derive filter state from URL search params
+  const search = searchParam ?? ""
+  const page = pageParam ?? 1
+  const activeCategory = categoryParam ?? "all"
+  const readStatusFilter: ReadStatusFilter = (readParam as ReadStatusFilter) ?? "all"
+
+  // Local input state for search (so typing is smooth before debounce)
+  const [searchInput, setSearchInput] = useState(search)
+  const debouncedSearch = useDebouncedValue(searchInput)
+
+  // Sync URL when debounced search value settles
+  useEffect(() => {
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        q: debouncedSearch || undefined,
+        page: undefined,
+      }),
+      replace: true,
+    })
+  }, [debouncedSearch, navigate])
+
+  // Keep local input in sync if URL search param changes externally (back/forward)
+  useEffect(() => {
+    setSearchInput(search)
+  }, [search])
+
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [pageSize, setPageSize] = useState(getStoredPageSize)
@@ -446,16 +496,19 @@ function NotificationsPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
   // Persist page size preference
-  const handlePageSizeChange = useCallback((value: string) => {
-    const size = Number(value)
-    setPageSize(size)
-    setPage(1)
-    try {
-      localStorage.setItem(PAGE_SIZE_STORAGE_KEY, value)
-    } catch {
-      // localStorage unavailable
-    }
-  }, [])
+  const handlePageSizeChange = useCallback(
+    (value: string) => {
+      const size = Number(value)
+      setPageSize(size)
+      navigate({ search: (prev) => ({ ...prev, page: undefined }), replace: true })
+      try {
+        localStorage.setItem(PAGE_SIZE_STORAGE_KEY, value)
+      } catch {
+        // localStorage unavailable
+      }
+    },
+    [navigate],
+  )
 
   // Keyboard shortcut: "/" to focus search
   useEffect(() => {
@@ -642,11 +695,11 @@ function NotificationsPage() {
               <div className="flex flex-wrap items-center gap-3">
                 <div className="relative max-w-sm flex-1">
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input ref={searchInputRef} placeholder="Search notifications..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 pr-8" />
-                  {search ? (
+                  <Input ref={searchInputRef} placeholder="Search notifications..." value={searchInput} onChange={(e) => setSearchInput(e.target.value)} className="pl-9 pr-8" />
+                  {searchInput ? (
                     <button
                       type="button"
-                      onClick={() => setSearch("")}
+                      onClick={() => setSearchInput("")}
                       className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
                     >
                       <X className="h-3.5 w-3.5" />
@@ -660,10 +713,15 @@ function NotificationsPage() {
                 </div>
                 <Select
                   value={readStatusFilter}
-                  onValueChange={(v) => {
-                    setReadStatusFilter(v as ReadStatusFilter)
-                    setPage(1)
-                  }}
+                  onValueChange={(v) =>
+                    navigate({
+                      search: (prev) => ({
+                        ...prev,
+                        read: v !== "all" ? v : undefined,
+                        page: undefined,
+                      }),
+                    })
+                  }
                 >
                   <SelectTrigger className="w-[150px]" aria-label="Filter by read status">
                     <SelectValue placeholder="All status" />
@@ -682,10 +740,15 @@ function NotificationsPage() {
                     size="sm"
                     className="text-xs text-muted-foreground"
                     onClick={() => {
-                      setSearch("")
-                      setActiveCategory("all")
-                      setReadStatusFilter("all")
-                      setPage(1)
+                      setSearchInput("")
+                      navigate({
+                        search: {
+                          q: undefined,
+                          category: undefined,
+                          read: undefined,
+                          page: undefined,
+                        },
+                      })
                     }}
                   >
                     Clear all filters
@@ -703,10 +766,15 @@ function NotificationsPage() {
                       key={value}
                       variant={isActive ? "default" : "outline"}
                       size="sm"
-                      onClick={() => {
-                        setActiveCategory(value)
-                        setPage(1)
-                      }}
+                      onClick={() =>
+                        navigate({
+                          search: (prev) => ({
+                            ...prev,
+                            category: value !== "all" ? value : undefined,
+                            page: undefined,
+                          }),
+                        })
+                      }
                       className="gap-1.5 text-xs"
                     >
                       {label}
@@ -742,9 +810,15 @@ function NotificationsPage() {
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        setSearch("")
-                        setActiveCategory("all")
-                        setReadStatusFilter("all")
+                        setSearchInput("")
+                        navigate({
+                          search: {
+                            q: undefined,
+                            category: undefined,
+                            read: undefined,
+                            page: undefined,
+                          },
+                        })
                       }}
                     >
                       Clear filters
@@ -793,14 +867,35 @@ function NotificationsPage() {
               </div>
               {totalPages > 1 && (
                 <>
-                  <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={page <= 1}
+                    onClick={() =>
+                      navigate({
+                        search: (prev) => ({
+                          ...prev,
+                          page: page - 1 > 1 ? page - 1 : undefined,
+                        }),
+                      })
+                    }
+                  >
                     <ChevronLeft className="mr-1 h-4 w-4" />
                     Previous
                   </Button>
                   <span className="text-sm text-muted-foreground">
                     Page {page} of {totalPages}
                   </span>
-                  <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={page >= totalPages}
+                    onClick={() =>
+                      navigate({
+                        search: (prev) => ({ ...prev, page: page + 1 }),
+                      })
+                    }
+                  >
                     Next
                     <ChevronRight className="ml-1 h-4 w-4" />
                   </Button>

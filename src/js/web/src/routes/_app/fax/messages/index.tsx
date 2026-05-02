@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
+import { createFileRoute, Link } from "@tanstack/react-router"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   AlertCircle,
@@ -48,6 +48,28 @@ import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 
 export const Route = createFileRoute("/_app/fax/messages/")({
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): {
+    q?: string
+    page?: number
+    number?: string
+    direction?: string
+    status?: string
+    sort?: string
+    order?: string
+  } => ({
+    q: typeof search.q === "string" && search.q ? search.q : undefined,
+    page: Number(search.page) > 1 ? Number(search.page) : undefined,
+    number: typeof search.number === "string" && search.number ? search.number : undefined,
+    direction: typeof search.direction === "string" && search.direction ? search.direction : undefined,
+    status: typeof search.status === "string" && search.status ? search.status : undefined,
+    sort: typeof search.sort === "string" && search.sort ? search.sort : undefined,
+    order:
+      typeof search.order === "string" && (search.order === "asc" || search.order === "desc")
+        ? search.order
+        : undefined,
+  }),
   component: FaxMessagesPage,
 })
 
@@ -155,39 +177,71 @@ function formatPages(count: number): string {
 
 function FaxMessagesPage() {
   useDocumentTitle("Fax Messages")
-  const navigate = useNavigate()
+  const {
+    q: searchParam,
+    page: pageParam,
+    direction: directionParam,
+    status: statusParam,
+    sort: sortParam,
+    order: orderParam,
+  } = Route.useSearch()
+  const navigate = Route.useNavigate()
   const searchInputRef = useRef<HTMLInputElement>(null)
 
-  // Filter & search state
-  const [search, setSearch] = useState("")
-  const debouncedSearch = useDebouncedValue(search)
-  const [directionFilter, setDirectionFilter] = useState<string[]>([])
-  const [statusFilter, setStatusFilter] = useState<string[]>([])
+  // Derive filter state from URL search params
+  const search = searchParam ?? ""
+  const page = pageParam ?? 1
+  const directionFilter = useMemo(
+    () => (directionParam ? directionParam.split(",").filter(Boolean) : []),
+    [directionParam],
+  )
+  const statusFilter = useMemo(
+    () => (statusParam ? statusParam.split(",").filter(Boolean) : []),
+    [statusParam],
+  )
+  const sortKey = sortParam ?? null
+  const sortDir: SortDirection = (orderParam as SortDirection) ?? null
+
+  // Local input state for search (so typing is smooth before debounce)
+  const [searchInput, setSearchInput] = useState(search)
+  const debouncedSearch = useDebouncedValue(searchInput)
+
+  // Sync URL when debounced search value settles
+  useEffect(() => {
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        q: debouncedSearch || undefined,
+        page: undefined,
+      }),
+      replace: true,
+    })
+  }, [debouncedSearch, navigate])
+
+  // Keep local input in sync if URL search param changes externally (back/forward)
+  useEffect(() => {
+    setSearchInput(search)
+  }, [search])
+
+  // Date range state (client-side only, not in URL)
   const [startDate, setStartDate] = useState("")
   const [endDate, setEndDate] = useState("")
-  const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(getStoredPageSize)
 
-  // Reset page when debounced search changes
-  useEffect(() => {
-    setPage(1)
-  }, [debouncedSearch])
-
   // Persist page size preference
-  const handlePageSizeChange = useCallback((value: string) => {
-    const size = Number(value)
-    setPageSize(size)
-    setPage(1)
-    try {
-      localStorage.setItem(PAGE_SIZE_STORAGE_KEY, value)
-    } catch {
-      // localStorage unavailable
-    }
-  }, [])
-
-  // Sort state
-  const [sortKey, setSortKey] = useState<string | null>(null)
-  const [sortDir, setSortDir] = useState<SortDirection>(null)
+  const handlePageSizeChange = useCallback(
+    (value: string) => {
+      const size = Number(value)
+      setPageSize(size)
+      navigate({ search: (prev) => ({ ...prev, page: undefined }), replace: true })
+      try {
+        localStorage.setItem(PAGE_SIZE_STORAGE_KEY, value)
+      } catch {
+        // localStorage unavailable
+      }
+    },
+    [navigate],
+  )
 
   // Selection state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -268,10 +322,15 @@ function FaxMessagesPage() {
   const handleSort = useCallback(
     (key: string) => {
       const next = nextSortDirection(sortKey, sortDir, key)
-      setSortKey(next.sort)
-      setSortDir(next.direction)
+      navigate({
+        search: (prev) => ({
+          ...prev,
+          sort: next.sort || undefined,
+          order: next.direction || undefined,
+        }),
+      })
     },
-    [sortKey, sortDir],
+    [sortKey, sortDir, navigate],
   )
 
   // Date range handler
@@ -280,20 +339,28 @@ function FaxMessagesPage() {
       const { start, end } = getPresetDates(days)
       setStartDate(start)
       setEndDate(end)
-      setPage(1)
+      navigate({ search: (prev) => ({ ...prev, page: undefined }) })
     },
-    [],
+    [navigate],
   )
 
   // Reset filters helper
   const clearAllFilters = useCallback(() => {
-    setSearch("")
-    setDirectionFilter([])
-    setStatusFilter([])
+    setSearchInput("")
     setStartDate("")
     setEndDate("")
-    setPage(1)
-  }, [])
+    navigate({
+      search: {
+        q: undefined,
+        number: undefined,
+        direction: undefined,
+        status: undefined,
+        sort: undefined,
+        order: undefined,
+        page: undefined,
+      },
+    })
+  }, [navigate])
 
   // Export all visible
   const handleExportAll = useCallback(() => {
@@ -344,16 +411,16 @@ function FaxMessagesPage() {
       }
       if (e.key === "ArrowLeft" && page > 1) {
         e.preventDefault()
-        setPage((p) => Math.max(1, p - 1))
+        navigate({ search: (prev) => ({ ...prev, page: page - 1 > 1 ? page - 1 : undefined }) })
       }
       if (e.key === "ArrowRight" && page < totalPages) {
         e.preventDefault()
-        setPage((p) => Math.min(totalPages, p + 1))
+        navigate({ search: (prev) => ({ ...prev, page: page + 1 }) })
       }
     }
     document.addEventListener("keydown", handleKeyDown)
     return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [page, totalPages])
+  }, [page, totalPages, navigate])
 
   const breadcrumbs = (
     <Breadcrumb>
@@ -428,14 +495,14 @@ function FaxMessagesPage() {
             <Input
               ref={searchInputRef}
               placeholder="Search by number, sender, or subject..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               className="pl-9 pr-8"
             />
-            {search ? (
+            {searchInput ? (
               <button
                 type="button"
-                onClick={() => setSearch("")}
+                onClick={() => setSearchInput("")}
                 className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
               >
                 <X className="h-3.5 w-3.5" />
@@ -450,8 +517,13 @@ function FaxMessagesPage() {
             options={directionOptions}
             selected={directionFilter}
             onChange={(v) => {
-              setDirectionFilter(v)
-              setPage(1)
+              navigate({
+                search: (prev) => ({
+                  ...prev,
+                  direction: v.length > 0 ? v.join(",") : undefined,
+                  page: undefined,
+                }),
+              })
             }}
           />
           <FilterDropdown
@@ -459,8 +531,13 @@ function FaxMessagesPage() {
             options={statusOptions}
             selected={statusFilter}
             onChange={(v) => {
-              setStatusFilter(v)
-              setPage(1)
+              navigate({
+                search: (prev) => ({
+                  ...prev,
+                  status: v.length > 0 ? v.join(",") : undefined,
+                  page: undefined,
+                }),
+              })
             }}
           />
           <DateRangeFilter
@@ -468,11 +545,11 @@ function FaxMessagesPage() {
             endDate={endDate}
             onStartDateChange={(v) => {
               setStartDate(v)
-              setPage(1)
+              navigate({ search: (prev) => ({ ...prev, page: undefined }) })
             }}
             onEndDateChange={(v) => {
               setEndDate(v)
-              setPage(1)
+              navigate({ search: (prev) => ({ ...prev, page: undefined }) })
             }}
             onPreset={handleDatePreset}
             label="Date"
@@ -632,7 +709,14 @@ function FaxMessagesPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    onClick={() =>
+                      navigate({
+                        search: (prev) => ({
+                          ...prev,
+                          page: page - 1 > 1 ? page - 1 : undefined,
+                        }),
+                      })
+                    }
                     disabled={page <= 1}
                   >
                     Previous
@@ -641,7 +725,11 @@ function FaxMessagesPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    onClick={() =>
+                      navigate({
+                        search: (prev) => ({ ...prev, page: page + 1 }),
+                      })
+                    }
                     disabled={page >= totalPages}
                   >
                     Next
