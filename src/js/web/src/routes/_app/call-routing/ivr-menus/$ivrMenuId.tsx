@@ -77,6 +77,44 @@ const greetingTypeLabels: Record<string, string> = {
   file: "Audio File",
 }
 
+/** Known destination prefixes and their corresponding route paths + param names. */
+const destinationRoutes: Record<string, { to: string; paramKey: string; label: string }> = {
+  ext: { to: "/voice/extensions/$extensionId", paramKey: "extensionId", label: "Extension" },
+  extension: { to: "/voice/extensions/$extensionId", paramKey: "extensionId", label: "Extension" },
+  "ring-group": { to: "/call-routing/ring-groups/$ringGroupId", paramKey: "ringGroupId", label: "Ring Group" },
+  ringgroup: { to: "/call-routing/ring-groups/$ringGroupId", paramKey: "ringGroupId", label: "Ring Group" },
+  "call-queue": { to: "/call-routing/call-queues/$callQueueId", paramKey: "callQueueId", label: "Call Queue" },
+  callqueue: { to: "/call-routing/call-queues/$callQueueId", paramKey: "callQueueId", label: "Call Queue" },
+  queue: { to: "/call-routing/call-queues/$callQueueId", paramKey: "callQueueId", label: "Call Queue" },
+  ivr: { to: "/call-routing/ivr-menus/$ivrMenuId", paramKey: "ivrMenuId", label: "IVR Menu" },
+  "ivr-menu": { to: "/call-routing/ivr-menus/$ivrMenuId", paramKey: "ivrMenuId", label: "IVR Menu" },
+  voicemail: { to: "/voicemail/$boxId", paramKey: "boxId", label: "Voicemail" },
+  vm: { to: "/voicemail/$boxId", paramKey: "boxId", label: "Voicemail" },
+}
+
+/** Render a destination string as a clickable link when possible, plain text otherwise. */
+function DestinationLink({ value, className }: { value: string; className?: string }) {
+  const colonIdx = value.indexOf(":")
+  if (colonIdx > 0) {
+    const prefix = value.slice(0, colonIdx).toLowerCase()
+    const id = value.slice(colonIdx + 1)
+    const route = destinationRoutes[prefix]
+    if (route && id) {
+      return (
+        <Link
+          to={route.to as string}
+          params={{ [route.paramKey]: id } as Record<string, string>}
+          className={className ?? "text-sm text-primary hover:underline"}
+          onClick={(e: React.MouseEvent) => e.stopPropagation()}
+        >
+          {value}
+        </Link>
+      )
+    }
+  }
+  return <span className={className ?? "text-sm text-muted-foreground"}>{value}</span>
+}
+
 // -- Delete Dialog ------------------------------------------------------------
 
 function DeleteDialog({ name, onDelete, isPending }: { name: string; onDelete: () => void; isPending: boolean }) {
@@ -199,7 +237,7 @@ function OptionRow({
         </span>
       </TableCell>
       <TableCell><span className="text-sm font-medium">{option.label}</span></TableCell>
-      <TableCell><span className="text-sm text-muted-foreground">{option.destination}</span></TableCell>
+      <TableCell><DestinationLink value={option.destination} /></TableCell>
       <TableCell>
         <div className="flex items-center justify-end gap-0.5">
           <Button
@@ -537,8 +575,14 @@ function IvrMenuDetailPage() {
                     {data.greetingType === "text" && <InfoField label="Greeting Text" value={data.greetingText} />}
                     <InfoField label="Timeout" value={`${data.timeoutSeconds}s`} />
                     <InfoField label="Max Retries" value={data.maxRetries} />
-                    <InfoField label="Timeout Destination" value={data.timeoutDestination} />
-                    <InfoField label="Invalid Destination" value={data.invalidDestination} />
+                    <div>
+                      <p className="text-muted-foreground">Timeout Destination</p>
+                      {data.timeoutDestination ? <DestinationLink value={data.timeoutDestination} className="text-primary hover:underline" /> : <p>---</p>}
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Invalid Destination</p>
+                      {data.invalidDestination ? <DestinationLink value={data.invalidDestination} className="text-primary hover:underline" /> : <p>---</p>}
+                    </div>
                   </div>
                 )}
               </CardContent>

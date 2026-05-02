@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
-import { AlertCircle, AlertTriangle, ArrowLeft, Clock, Copy, Cpu, ExternalLink, Loader2, MapPin, MoreHorizontal, Pencil, RefreshCw, Trash2 } from "lucide-react"
+import { AlertCircle, AlertTriangle, ArrowLeft, ArrowRight, Clock, Copy, Cpu, ExternalLink, Loader2, MapPin, MoreHorizontal, Pencil, RefreshCw, Shield, Trash2 } from "lucide-react"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -37,6 +37,7 @@ import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useAuthStore } from "@/lib/auth"
 import { formatDateTime, formatRelativeTime } from "@/lib/date-utils"
 import { useDevicesByLocation } from "@/lib/api/hooks/devices"
+import { useE911Registrations } from "@/lib/api/hooks/e911"
 import { useDeleteLocation, useLocation, useUpdateLocation, type Location } from "@/lib/api/hooks/locations"
 
 export const Route = createFileRoute("/_app/locations/$locationId/")({
@@ -90,6 +91,8 @@ function LocationDetailPage() {
   const updateLocation = useUpdateLocation(teamId, locationId)
   const deleteLocation = useDeleteLocation(teamId)
   const { data: locationDevices, isLoading: devicesLoading } = useDevicesByLocation(locationId)
+  const { data: e911Data, isLoading: e911Loading } = useE911Registrations({ pageSize: 100, teamId })
+  const e911Registrations = (e911Data?.items ?? []).filter((r) => r.locationId === locationId)
 
   const [editing, setEditing] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
@@ -529,6 +532,78 @@ function LocationDetailPage() {
                     icon={Cpu}
                     title="No devices at this location"
                     description="Devices assigned to this location will appear here."
+                  />
+                )}
+              </CardContent>
+            </Card>
+
+            {/* E911 Registrations */}
+            <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2">
+                    <Shield className="h-5 w-5 text-muted-foreground" />
+                    E911 Registrations
+                  </CardTitle>
+                  {!e911Loading && e911Registrations.length > 0 && (
+                    <Badge variant="secondary" className="ml-1">{e911Registrations.length}</Badge>
+                  )}
+                </div>
+                {!e911Loading && e911Registrations.length > 0 && (
+                  <Button variant="outline" size="sm" asChild>
+                    <Link to="/e911">
+                      View all
+                      <ExternalLink className="ml-2 h-3 w-3" />
+                    </Link>
+                  </Button>
+                )}
+              </CardHeader>
+              <CardContent>
+                {e911Loading ? (
+                  <div className="space-y-3">
+                    {Array.from({ length: 2 }).map((_, i) => (
+                      <Skeleton key={i} className="h-16 w-full rounded-xl" />
+                    ))}
+                  </div>
+                ) : e911Registrations.length > 0 ? (
+                  <div className="space-y-2">
+                    {e911Registrations.map((reg) => (
+                      <Link
+                        key={reg.id}
+                        to="/e911/$registrationId"
+                        params={{ registrationId: reg.id }}
+                        className="group flex items-center justify-between rounded-lg border border-border/40 p-3 transition-all hover:bg-muted/30 hover:shadow-sm"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+                            <Shield className="h-4 w-4" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium group-hover:text-primary transition-colors">
+                              {reg.phoneNumberDisplay ?? reg.phoneNumberLabel ?? "No phone number"}
+                            </p>
+                            <p className="text-xs text-muted-foreground line-clamp-1">
+                              {[reg.addressLine1, reg.city, reg.state, reg.postalCode].filter(Boolean).join(", ")}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge
+                            variant={reg.validated ? "default" : "outline"}
+                            className={reg.validated ? "bg-emerald-600 text-white text-xs" : "text-xs"}
+                          >
+                            {reg.validated ? "Validated" : "Pending"}
+                          </Badge>
+                          <ArrowRight className="h-4 w-4 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" />
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <EmptyState
+                    icon={Shield}
+                    title="No E911 registrations"
+                    description="E911 registrations linked to this location will appear here."
                   />
                 )}
               </CardContent>

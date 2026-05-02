@@ -504,7 +504,25 @@ function TimeConditionsTab() {
       ) : isError ? (
         <EmptyState icon={AlertCircle} title="Unable to load time conditions" description="Something went wrong. Please try again." action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>} />
       ) : items.length === 0 ? (
-        <EmptyState icon={Clock} title={search ? "No results found" : "No time conditions yet"} description={search ? "No time conditions match your search." : "Create a time condition to route calls based on schedules."} variant={search ? "no-results" : undefined} action={search ? <Button variant="outline" size="sm" onClick={() => setSearch("")}>Clear search</Button> : <Button size="sm" onClick={() => setDialogOpen(true)}><Plus className="mr-2 h-4 w-4" /> New time condition</Button>} />
+        <EmptyState
+          icon={Clock}
+          title={search ? "No results found" : "No time conditions yet"}
+          description={
+            search
+              ? "No time conditions match your search. Try adjusting your keywords."
+              : "Time conditions route calls based on schedules, like business hours or holidays, so callers always reach the right destination."
+          }
+          variant={search ? "no-results" : undefined}
+          action={
+            search ? (
+              <Button variant="outline" size="sm" onClick={() => setSearch("")}>Clear search</Button>
+            ) : (
+              <Button size="sm" onClick={() => setDialogOpen(true)}>
+                <Plus className="mr-2 h-4 w-4" /> Create time condition
+              </Button>
+            )
+          }
+        />
       ) : (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
@@ -726,7 +744,25 @@ function IvrMenusTab() {
       ) : isError ? (
         <EmptyState icon={AlertCircle} title="Unable to load IVR menus" description="Something went wrong. Please try again." action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>} />
       ) : items.length === 0 ? (
-        <EmptyState icon={Menu} title={search ? "No results found" : "No IVR menus yet"} description={search ? "No IVR menus match your search." : "Create an IVR menu to build interactive call menus."} variant={search ? "no-results" : undefined} action={search ? <Button variant="outline" size="sm" onClick={() => setSearch("")}>Clear search</Button> : <Button size="sm" onClick={() => setDialogOpen(true)}><Plus className="mr-2 h-4 w-4" /> New IVR menu</Button>} />
+        <EmptyState
+          icon={Menu}
+          title={search ? "No results found" : "No IVR menus yet"}
+          description={
+            search
+              ? "No IVR menus match your search. Try adjusting your keywords."
+              : "IVR menus greet callers with audio prompts and let them navigate options using their keypad to reach the right department or person."
+          }
+          variant={search ? "no-results" : undefined}
+          action={
+            search ? (
+              <Button variant="outline" size="sm" onClick={() => setSearch("")}>Clear search</Button>
+            ) : (
+              <Button size="sm" onClick={() => setDialogOpen(true)}>
+                <Plus className="mr-2 h-4 w-4" /> Create IVR menu
+              </Button>
+            )
+          }
+        />
       ) : (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
@@ -944,7 +980,25 @@ function CallQueuesTab() {
       ) : isError ? (
         <EmptyState icon={AlertCircle} title="Unable to load call queues" description="Something went wrong. Please try again." action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>} />
       ) : items.length === 0 ? (
-        <EmptyState icon={Phone} title={search ? "No results found" : "No call queues yet"} description={search ? "No call queues match your search." : "Create a call queue to distribute calls among agents."} variant={search ? "no-results" : undefined} action={search ? <Button variant="outline" size="sm" onClick={() => setSearch("")}>Clear search</Button> : <Button size="sm" onClick={() => setDialogOpen(true)}><Plus className="mr-2 h-4 w-4" /> New call queue</Button>} />
+        <EmptyState
+          icon={Phone}
+          title={search ? "No results found" : "No call queues yet"}
+          description={
+            search
+              ? "No call queues match your search. Try adjusting your keywords."
+              : "Call queues hold incoming calls and distribute them across team members using strategies like round robin or ring all, reducing wait times and missed calls."
+          }
+          variant={search ? "no-results" : undefined}
+          action={
+            search ? (
+              <Button variant="outline" size="sm" onClick={() => setSearch("")}>Clear search</Button>
+            ) : (
+              <Button size="sm" onClick={() => setDialogOpen(true)}>
+                <Plus className="mr-2 h-4 w-4" /> Create call queue
+              </Button>
+            )
+          }
+        />
       ) : (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
@@ -1164,7 +1218,25 @@ function RingGroupsTab() {
       ) : isError ? (
         <EmptyState icon={AlertCircle} title="Unable to load ring groups" description="Something went wrong. Please try again." action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>} />
       ) : items.length === 0 ? (
-        <EmptyState icon={Users} title={search ? "No results found" : "No ring groups yet"} description={search ? "No ring groups match your search." : "Create a ring group to ring multiple extensions."} variant={search ? "no-results" : undefined} action={search ? <Button variant="outline" size="sm" onClick={() => setSearch("")}>Clear search</Button> : <Button size="sm" onClick={() => setDialogOpen(true)}><Plus className="mr-2 h-4 w-4" /> New ring group</Button>} />
+        <EmptyState
+          icon={Users}
+          title={search ? "No results found" : "No ring groups yet"}
+          description={
+            search
+              ? "No ring groups match your search. Try adjusting your keywords."
+              : "Ring groups let you ring multiple extensions simultaneously or in sequence so calls are answered quickly by the first available team member."
+          }
+          variant={search ? "no-results" : undefined}
+          action={
+            search ? (
+              <Button variant="outline" size="sm" onClick={() => setSearch("")}>Clear search</Button>
+            ) : (
+              <Button size="sm" onClick={() => setDialogOpen(true)}>
+                <Plus className="mr-2 h-4 w-4" /> Create ring group
+              </Button>
+            )
+          }
+        />
       ) : (
         <div className="space-y-3">
           <div className="flex items-center justify-between">

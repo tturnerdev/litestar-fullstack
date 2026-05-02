@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.214.0 (2026-05-02)
+
+### Added
+- **Location E911 cross-links** — E911 registrations card on location detail showing linked registrations with phone number, address, and validation status
+- **IVR menu destination links** — Clickable cross-links for extension, ring group, call queue, voicemail, and IVR menu destinations on the IVR menu detail page
+
+### Changed
+- **Call routing empty states** — Improved empty state descriptions for all four call routing tabs with feature explanations and renamed CTA buttons to "Create X"
+
 ## v0.213.0 (2026-05-02)
 
 ### Added
