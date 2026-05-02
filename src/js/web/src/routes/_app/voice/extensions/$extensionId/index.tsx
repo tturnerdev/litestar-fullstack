@@ -11,6 +11,7 @@ import {
   ExternalLink,
   Fingerprint,
   Inbox,
+  Link2,
   Loader2,
   Mail,
   Monitor,
@@ -22,6 +23,7 @@ import {
   Shield,
   ShieldOff,
   Trash2,
+  Users,
   Voicemail,
 } from "lucide-react"
 import { ExternalDataTab } from "@/components/gateway/external-data-tab"
@@ -69,8 +71,10 @@ import {
   useVoicemailMessages,
   useVoicemailSettings,
 } from "@/lib/api/hooks/voice"
+import { useCallQueues, useRingGroups } from "@/lib/api/hooks/call-routing"
 import { useDevicesByExtension } from "@/lib/api/hooks/devices"
 import { useGatewayLookupExtension } from "@/lib/api/hooks/gateway"
+import { useTeams } from "@/lib/api/hooks/teams"
 import { formatDuration } from "@/lib/format-utils"
 
 const searchSchema = z.object({
@@ -457,6 +461,9 @@ function ExtensionDetailPage() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Related Resources */}
+            <RelatedResourcesSection extensionId={extensionId} extension={data} />
           </TabsContent>
 
           <TabsContent value="voicemail" className="mt-6 space-y-6">
@@ -1120,6 +1127,229 @@ function AssignedDevicesCard({ extensionId }: { extensionId: string }) {
               ))}
             </TableBody>
           </Table>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
+// -- Related Resources --------------------------------------------------------
+
+function RelatedResourcesSection({
+  extensionId,
+  extension,
+}: {
+  extensionId: string
+  extension: ExtensionType
+}) {
+  const phoneNumberQuery = usePhoneNumber(extension.phoneNumberId ?? "")
+  const ringGroupsQuery = useRingGroups({ pageSize: 100 })
+  const callQueuesQuery = useCallQueues({ pageSize: 100 })
+  const teamsQuery = useTeams({ pageSize: 100 })
+
+  // Find ring groups where this extension is a member
+  const memberRingGroups = (ringGroupsQuery.data?.items ?? []).filter((rg) =>
+    rg.members.some((m) => m.extensionId === extensionId),
+  )
+
+  // Find call queues where this extension is a member
+  const memberCallQueues = (callQueuesQuery.data?.items ?? []).filter((cq) =>
+    cq.members.some((m) => m.extensionId === extensionId),
+  )
+
+  // Find teams that this extension's user belongs to
+  const userTeams = (teamsQuery.data?.items ?? []).filter((team) =>
+    (team.members ?? []).some((m) => m.userId === extension.userId),
+  )
+
+  const hasPhoneNumber = !!extension.phoneNumberId
+  const hasRingGroups = memberRingGroups.length > 0
+  const hasCallQueues = memberCallQueues.length > 0
+  const hasTeams = userTeams.length > 0
+  const hasAnyRelated = hasPhoneNumber || hasRingGroups || hasCallQueues || hasTeams
+
+  const isLoading =
+    ringGroupsQuery.isLoading || callQueuesQuery.isLoading || teamsQuery.isLoading
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Link2 className="h-5 w-5 text-muted-foreground" />
+            <CardTitle>Related Resources</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-3 md:grid-cols-2">
+            {Array.from({ length: 2 }).map((_, i) => (
+              <div key={i} className="rounded-lg border border-border/40 p-4 space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-36" />
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (!hasAnyRelated) {
+    return (
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Link2 className="h-5 w-5 text-muted-foreground" />
+            <CardTitle>Related Resources</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col items-center gap-2 py-6 text-center">
+            <Link2 className="h-8 w-8 text-muted-foreground/50" />
+            <p className="text-sm text-muted-foreground">
+              No related items. This extension is not linked to any phone numbers,
+              ring groups, call queues, or teams.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center gap-2">
+          <Link2 className="h-5 w-5 text-muted-foreground" />
+          <CardTitle>Related Resources</CardTitle>
+        </div>
+        <CardDescription>
+          Entities linked to this extension across the system
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Associated Phone Number */}
+        {hasPhoneNumber && (
+          <div className="space-y-2">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              Phone Number
+            </p>
+            <Link
+              to="/voice/phone-numbers/$phoneNumberId"
+              params={{ phoneNumberId: extension.phoneNumberId! }}
+              className="group flex items-center justify-between rounded-lg border border-border/40 p-3 transition-all hover:bg-muted/30 hover:shadow-sm"
+            >
+              <div className="flex items-center gap-3">
+                <Phone className="h-4 w-4 text-primary" />
+                <div>
+                  <p className="text-sm font-medium group-hover:text-primary">
+                    {phoneNumberQuery.data?.number ?? "Loading..."}
+                  </p>
+                  {phoneNumberQuery.data?.label && (
+                    <p className="text-xs text-muted-foreground">
+                      {phoneNumberQuery.data.label}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {phoneNumberQuery.data?.isActive === false && (
+                  <Badge variant="outline" className="text-xs">Inactive</Badge>
+                )}
+                <ArrowRight className="h-4 w-4 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" />
+              </div>
+            </Link>
+          </div>
+        )}
+
+        {/* Ring Groups */}
+        {hasRingGroups && (
+          <div className="space-y-2">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              Ring Groups
+            </p>
+            <div className="space-y-2">
+              {memberRingGroups.map((rg) => (
+                <Link
+                  key={rg.id}
+                  to="/call-routing/ring-groups/$ringGroupId"
+                  params={{ ringGroupId: rg.id }}
+                  className="group flex items-center justify-between rounded-lg border border-border/40 p-3 transition-all hover:bg-muted/30 hover:shadow-sm"
+                >
+                  <div className="flex items-center gap-3">
+                    <Phone className="h-4 w-4 text-emerald-600" />
+                    <div>
+                      <p className="text-sm font-medium group-hover:text-primary">{rg.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {rg.strategy} &middot; {rg.members.length} member{rg.members.length !== 1 ? "s" : ""}
+                      </p>
+                    </div>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" />
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Call Queues */}
+        {hasCallQueues && (
+          <div className="space-y-2">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              Call Queues
+            </p>
+            <div className="space-y-2">
+              {memberCallQueues.map((cq) => (
+                <Link
+                  key={cq.id}
+                  to="/call-routing/call-queues/$callQueueId"
+                  params={{ callQueueId: cq.id }}
+                  className="group flex items-center justify-between rounded-lg border border-border/40 p-3 transition-all hover:bg-muted/30 hover:shadow-sm"
+                >
+                  <div className="flex items-center gap-3">
+                    <Phone className="h-4 w-4 text-violet-600" />
+                    <div>
+                      <p className="text-sm font-medium group-hover:text-primary">{cq.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {cq.strategy} &middot; {cq.members.length} member{cq.members.length !== 1 ? "s" : ""}
+                      </p>
+                    </div>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" />
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Teams */}
+        {hasTeams && (
+          <div className="space-y-2">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              Team
+            </p>
+            <div className="space-y-2">
+              {userTeams.map((team) => (
+                <Link
+                  key={team.id}
+                  to="/teams/$teamId"
+                  params={{ teamId: team.id }}
+                  className="group flex items-center justify-between rounded-lg border border-border/40 p-3 transition-all hover:bg-muted/30 hover:shadow-sm"
+                >
+                  <div className="flex items-center gap-3">
+                    <Users className="h-4 w-4 text-blue-600" />
+                    <div>
+                      <p className="text-sm font-medium group-hover:text-primary">{team.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {(team.members ?? []).length} member{(team.members ?? []).length !== 1 ? "s" : ""}
+                      </p>
+                    </div>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" />
+                </Link>
+              ))}
+            </div>
+          </div>
         )}
       </CardContent>
     </Card>

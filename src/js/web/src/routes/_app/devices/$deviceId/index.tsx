@@ -5,12 +5,14 @@ import {
   AlertCircle,
   AlertTriangle,
   ArrowLeft,
+  ChevronRight,
   ClipboardList,
   Copy,
   Cpu,
   Eye,
   EyeOff,
   Fingerprint,
+  Link2,
   Loader2,
   MapPin,
   MoreHorizontal,
@@ -20,6 +22,7 @@ import {
   Settings,
   Shield,
   Trash2,
+  Users,
   Wrench,
 } from "lucide-react"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
@@ -83,6 +86,7 @@ import { useConnections } from "@/lib/api/hooks/connections"
 import { useTasks } from "@/lib/api/hooks/tasks"
 import { useGatewayLookupDevice } from "@/lib/api/hooks/gateway"
 import { useLocations } from "@/lib/api/hooks/locations"
+import { useTeam } from "@/lib/api/hooks/teams"
 import { useAuthStore } from "@/lib/auth"
 import { ExternalDataTab } from "@/components/gateway/external-data-tab"
 import { DeviceDiagnosticTab } from "@/components/devices/device-diagnostic-tab"
@@ -178,6 +182,7 @@ function DeviceDetailPage() {
   const gatewayQuery = useGatewayLookupDevice(data?.macAddress ?? "", tab === "external")
   const locationsQuery = useLocations({ teamId, pageSize: 100 })
   const connectionsQuery = useConnections({ teamId, pageSize: 100 })
+  const teamQuery = useTeam(data?.teamId ?? "")
   const tasksQuery = useTasks({
     entityType: "device",
     entityId: deviceId,
@@ -683,6 +688,150 @@ function DeviceDetailPage() {
                     ))}
                   </div>
                 )}
+              </CardContent>
+            </Card>
+
+            {/* Related Resources */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Link2 className="h-5 w-5 text-muted-foreground" />
+                  <CardTitle>Related Resources</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {/* Team */}
+                  {data.teamId ? (
+                    <Link
+                      to="/teams/$teamId"
+                      params={{ teamId: data.teamId }}
+                      className="group flex items-center gap-3 rounded-lg border border-border/60 px-4 py-3 transition-colors hover:bg-muted/50 hover:border-primary/30"
+                    >
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                        <Users className="h-4.5 w-4.5" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs text-muted-foreground">Team</p>
+                        <p className="truncate text-sm font-medium group-hover:text-primary">
+                          {teamQuery.data?.name ?? "Loading..."}
+                        </p>
+                      </div>
+                      <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+                    </Link>
+                  ) : (
+                    <div className="flex items-center gap-3 rounded-lg border border-dashed border-border/60 px-4 py-3">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground/50">
+                        <Users className="h-4.5 w-4.5" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs text-muted-foreground">Team</p>
+                        <p className="text-sm text-muted-foreground">Not assigned</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Location */}
+                  {data.locationId ? (
+                    <Link
+                      to="/locations/$locationId"
+                      params={{ locationId: data.locationId }}
+                      className="group flex items-center gap-3 rounded-lg border border-border/60 px-4 py-3 transition-colors hover:bg-muted/50 hover:border-primary/30"
+                    >
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                        <MapPin className="h-4.5 w-4.5" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs text-muted-foreground">Location</p>
+                        <p className="truncate text-sm font-medium group-hover:text-primary">
+                          {data.locationName ?? data.locationId.slice(0, 8)}
+                        </p>
+                      </div>
+                      <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+                    </Link>
+                  ) : (
+                    <div className="flex items-center gap-3 rounded-lg border border-dashed border-border/60 px-4 py-3">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground/50">
+                        <MapPin className="h-4.5 w-4.5" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs text-muted-foreground">Location</p>
+                        <p className="text-sm text-muted-foreground">Not assigned</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Connection */}
+                  {data.connectionId ? (
+                    <Link
+                      to="/connections/$connectionId"
+                      params={{ connectionId: data.connectionId }}
+                      className="group flex items-center gap-3 rounded-lg border border-border/60 px-4 py-3 transition-colors hover:bg-muted/50 hover:border-primary/30"
+                    >
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-violet-500/10 text-violet-600 dark:text-violet-400">
+                        <Network className="h-4.5 w-4.5" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs text-muted-foreground">Connection</p>
+                        <p className="truncate text-sm font-medium group-hover:text-primary">
+                          {data.connectionName ?? data.connectionId.slice(0, 8)}
+                        </p>
+                      </div>
+                      <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+                    </Link>
+                  ) : (
+                    <div className="flex items-center gap-3 rounded-lg border border-dashed border-border/60 px-4 py-3">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground/50">
+                        <Network className="h-4.5 w-4.5" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs text-muted-foreground">Connection</p>
+                        <p className="text-sm text-muted-foreground">Not assigned</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Extensions from line assignments */}
+                {(() => {
+                  const assignedLines = lines.filter((l) => l.extensionId)
+                  if (assignedLines.length === 0) return null
+                  return (
+                    <div className="mt-4 border-t pt-4">
+                      <p className="mb-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        Assigned Extensions
+                      </p>
+                      <div className="space-y-1.5">
+                        {assignedLines.map((line) => (
+                          <Link
+                            key={line.id}
+                            to="/voice/extensions/$extensionId"
+                            params={{ extensionId: line.extensionId! }}
+                            className="group flex items-center gap-3 rounded-md px-3 py-2 transition-colors hover:bg-muted/50"
+                          >
+                            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                              <Phone className="h-3.5 w-3.5" />
+                            </div>
+                            <div className="flex min-w-0 flex-1 items-center gap-2">
+                              <span className="font-mono text-sm font-medium group-hover:text-primary">
+                                {line.extensionNumber ?? "Ext"}
+                              </span>
+                              {line.extensionDisplayName && (
+                                <span className="truncate text-sm text-muted-foreground">
+                                  {line.extensionDisplayName}
+                                </span>
+                              )}
+                              <Badge variant="outline" className="ml-auto text-[10px] shrink-0">
+                                Line {line.lineNumber}
+                              </Badge>
+                            </div>
+                            <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                })()}
               </CardContent>
             </Card>
 

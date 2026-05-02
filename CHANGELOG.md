@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.206.0 (2026-05-02)
+
+### Added
+- **Organization overview dashboard** — Setup completeness progress bar, quick stats cards (users, teams, devices, tickets), and configuration checklist at top of organization page
+- **Extension detail cross-links** — Related resources section showing associated phone numbers, team, and other linked entities with navigation links
+- **Device detail cross-links** — Related resources section showing team, location, and extension assignments with navigation links
+
 ## v0.205.0 (2026-05-02)
 
 ### Added

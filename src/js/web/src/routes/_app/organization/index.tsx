@@ -1,5 +1,5 @@
 import { createFileRoute, useBlocker } from "@tanstack/react-router"
-import { Building2, Copy, Globe, Hash, Link2, Loader2, Mail, MapPin, MoreHorizontal, Pencil, Save, Users, X } from "lucide-react"
+import { Building2, CheckCircle2, Circle, Copy, Globe, Hash, Link2, Loader2, Mail, MapPin, MonitorSmartphone, MoreHorizontal, Pencil, Save, Sparkles, TicketCheck, Users, UsersRound, X } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   AlertDialog,
@@ -43,6 +43,7 @@ import { OrganizationStats } from "@/components/organization/organization-stats"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useAuthStore } from "@/lib/auth"
 import { useOrganization, useOrganizationStats, useUpdateOrganization } from "@/lib/api/hooks/organization"
+import type { DashboardStats, Organization } from "@/lib/generated/api/types.gen"
 
 export const Route = createFileRoute("/_app/organization/")({
   component: OrganizationSettingsPage,
@@ -74,6 +75,141 @@ const LANGUAGES = [
   { value: "zh", label: "Chinese" },
   { value: "pt", label: "Portuguese" },
 ]
+
+// ---------------------------------------------------------------------------
+// Organization Overview (completeness + quick stats + setup checklist)
+// ---------------------------------------------------------------------------
+
+interface CompletionStep {
+  label: string
+  completed: boolean
+}
+
+function useOrgCompletionSteps(org: Organization | undefined, stats: DashboardStats | undefined): CompletionStep[] {
+  return useMemo(() => {
+    if (!org) return []
+    return [
+      { label: "Organization name set", completed: !!org.name && org.name.trim() !== "" },
+      { label: "Address configured", completed: !!(org.addressLine1 && org.city && org.state) },
+      { label: "Timezone set", completed: !!org.timezone && org.timezone !== "UTC" },
+      { label: "Logo uploaded", completed: !!org.logoUrl },
+      { label: "At least one team created", completed: (stats?.totalTeams ?? 0) > 0 },
+    ]
+  }, [org, stats])
+}
+
+function OrganizationOverview({ org, stats }: { org: Organization; stats: DashboardStats | undefined }) {
+  const steps = useOrgCompletionSteps(org, stats)
+  const completedCount = steps.filter((s) => s.completed).length
+  const totalSteps = steps.length
+  const percentage = totalSteps > 0 ? Math.round((completedCount / totalSteps) * 100) : 0
+
+  const quickStats = [
+    {
+      label: "Total Users",
+      value: stats?.totalUsers ?? 0,
+      icon: Users,
+      color: "text-blue-600 dark:text-blue-400",
+      bgColor: "bg-blue-500/10",
+    },
+    {
+      label: "Total Teams",
+      value: stats?.totalTeams ?? 0,
+      icon: UsersRound,
+      color: "text-emerald-600 dark:text-emerald-400",
+      bgColor: "bg-emerald-500/10",
+    },
+    {
+      label: "Devices",
+      value: stats?.totalDevices ?? 0,
+      icon: MonitorSmartphone,
+      color: "text-cyan-600 dark:text-cyan-400",
+      bgColor: "bg-cyan-500/10",
+    },
+    {
+      label: "Open Tickets",
+      value: stats?.openTickets ?? 0,
+      icon: TicketCheck,
+      color: "text-rose-600 dark:text-rose-400",
+      bgColor: "bg-rose-500/10",
+    },
+  ]
+
+  return (
+    <PageSection>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Building2 className="h-5 w-5 text-muted-foreground" />
+            <div>
+              <CardTitle className="text-lg">Organization Overview</CardTitle>
+              <CardDescription>Setup progress and platform summary</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Completeness indicator */}
+          {percentage === 100 ? (
+            <div className="flex items-center gap-3 rounded-lg border border-green-200 bg-green-50/50 px-4 py-3 dark:border-green-900 dark:bg-green-950/20">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/50">
+                <Sparkles className="h-5 w-5 text-green-600 dark:text-green-400" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-green-800 dark:text-green-300">Setup complete</p>
+                <p className="text-xs text-green-600 dark:text-green-400">Your organization is fully configured.</p>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="font-medium">Setup completeness</span>
+                <span className="text-muted-foreground">{percentage}% &mdash; {totalSteps - completedCount} {totalSteps - completedCount === 1 ? "item" : "items"} remaining</span>
+              </div>
+              <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-full rounded-full bg-primary transition-all duration-500"
+                  style={{ width: `${percentage}%` }}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Quick stats row */}
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {quickStats.map((stat) => (
+              <div key={stat.label} className="flex items-center gap-3 rounded-lg border px-4 py-3">
+                <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${stat.bgColor}`}>
+                  <stat.icon className={`h-4 w-4 ${stat.color}`} />
+                </div>
+                <div>
+                  <p className="text-2xl font-semibold tabular-nums">{stat.value.toLocaleString()}</p>
+                  <p className="text-xs text-muted-foreground">{stat.label}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Setup checklist */}
+          <div className="space-y-2">
+            <p className="text-sm font-medium">Setup checklist</p>
+            <ul className="grid gap-1.5 sm:grid-cols-2">
+              {steps.map((step) => (
+                <li key={step.label} className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm">
+                  {step.completed ? (
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-green-600 dark:text-green-400" />
+                  ) : (
+                    <Circle className="h-4 w-4 shrink-0 text-muted-foreground/50" />
+                  )}
+                  <span className={step.completed ? "text-foreground" : "text-muted-foreground"}>{step.label}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </CardContent>
+      </Card>
+    </PageSection>
+  )
+}
 
 interface OrgFormData {
   name: string
@@ -324,6 +460,8 @@ function OrganizationSettingsPage() {
           </div>
         </PageSection>
       )}
+
+      {org && <OrganizationOverview org={org} stats={stats} />}
 
       <PageSection delay={0.1}>
         <div className="grid gap-6 lg:grid-cols-2">
