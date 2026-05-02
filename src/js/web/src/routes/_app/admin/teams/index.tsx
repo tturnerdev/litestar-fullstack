@@ -34,6 +34,7 @@ import { SkeletonTable } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
@@ -151,7 +152,7 @@ function AdminTeamsPage() {
 
   // Queries & mutations
   const queryClient = useQueryClient()
-  const { data, isLoading, isError, refetch } = useAdminTeams({
+  const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useAdminTeams({
     page,
     pageSize,
     search: debouncedSearch || undefined,
@@ -330,6 +331,13 @@ function AdminTeamsPage() {
               Clear all filters
             </Button>
           )}
+          <div className="ml-auto">
+            <DataFreshness
+              dataUpdatedAt={dataUpdatedAt}
+              onRefresh={() => refetch()}
+              isRefreshing={isRefetching}
+            />
+          </div>
         </div>
       </PageSection>
 

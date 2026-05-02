@@ -207,6 +207,7 @@ function getInitials(name?: string | null, email?: string): string {
 
 function SupportPage() {
   useDocumentTitle("Support Tickets")
+  const searchInputRef = useRef<HTMLInputElement>(null)
   // Filter & search state
   const [search, setSearch] = useState("")
   const debouncedSearch = useDebouncedValue(search)
@@ -647,11 +648,15 @@ function SupportPage() {
   const hasAnyTickets = (data?.items.length ?? 0) > 0
   const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / pageSize))
 
-  // Keyboard shortcuts: ArrowLeft/ArrowRight for pagination
+  // Keyboard shortcuts: "/" to focus search, ArrowLeft/ArrowRight for pagination
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement
       if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return
+      if (e.key === "/" && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault()
+        searchInputRef.current?.focus()
+      }
       if (e.key === "ArrowLeft" && page > 1) {
         e.preventDefault()
         setPage((p) => Math.max(1, p - 1))
@@ -807,12 +812,13 @@ function SupportPage() {
           <div className="relative max-w-sm flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
+              ref={searchInputRef}
               placeholder="Search by subject or description..."
               value={search}
               onChange={(e) => handleSearchChange(e.target.value)}
               className="pl-9 pr-8"
             />
-            {search && (
+            {search ? (
               <button
                 type="button"
                 onClick={() => handleSearchChange("")}
@@ -821,6 +827,8 @@ function SupportPage() {
                 <X className="h-3.5 w-3.5" />
                 <span className="sr-only">Clear search</span>
               </button>
+            ) : (
+              <kbd className="pointer-events-none absolute right-8 top-1/2 -translate-y-1/2 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">/</kbd>
             )}
           </div>
           <FilterDropdown

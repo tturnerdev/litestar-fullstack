@@ -19,7 +19,7 @@ import {
   Users,
   X,
 } from "lucide-react"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -328,6 +328,7 @@ function NotificationPreferences() {
 function NotificationsPage() {
   useDocumentTitle("Notifications")
   const queryClient = useQueryClient()
+  const searchInputRef = useRef<HTMLInputElement>(null)
   const [page, setPage] = useState(1)
   const [activeCategory, setActiveCategory] = useState<string>("all")
   const [readStatusFilter, setReadStatusFilter] = useState<ReadStatusFilter>("all")
@@ -339,6 +340,20 @@ function NotificationsPage() {
 
   // Selection state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+
+  // Keyboard shortcut: "/" to focus search
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return
+      if (e.key === "/" && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault()
+        searchInputRef.current?.focus()
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [])
 
   const { data: unreadData } = useUnreadCount()
   const { data, isLoading } = useNotifications(page, pageSize)
@@ -516,12 +531,13 @@ function NotificationsPage() {
                 <div className="relative max-w-sm flex-1">
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
+                    ref={searchInputRef}
                     placeholder="Search notifications..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     className="pl-9 pr-8"
                   />
-                  {search && (
+                  {search ? (
                     <button
                       type="button"
                       onClick={() => setSearch("")}
@@ -530,6 +546,8 @@ function NotificationsPage() {
                       <X className="h-3.5 w-3.5" />
                       <span className="sr-only">Clear search</span>
                     </button>
+                  ) : (
+                    <kbd className="pointer-events-none absolute right-8 top-1/2 -translate-y-1/2 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">/</kbd>
                   )}
                 </div>
                 <Select

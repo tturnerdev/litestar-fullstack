@@ -1,8 +1,14 @@
 import { Slot } from "@radix-ui/react-slot"
-import { ChevronRight, MoreHorizontal } from "lucide-react"
+import { ChevronDown, ChevronRight, MoreHorizontal } from "lucide-react"
 import type * as React from "react"
 
 import { cn } from "@/lib/utils"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 function Breadcrumb({ ...props }: React.ComponentProps<"nav">) {
   return <nav aria-label="breadcrumb" data-slot="breadcrumb" {...props} />
@@ -49,4 +55,56 @@ function BreadcrumbEllipsis({ className, ...props }: React.ComponentProps<"span"
   )
 }
 
-export { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator, BreadcrumbEllipsis }
+interface BreadcrumbSibling {
+  label: string
+  to: string
+}
+
+/** A breadcrumb segment that opens a dropdown of sibling navigation links. */
+function BreadcrumbDropdownLink({
+  label,
+  siblings,
+  renderLink,
+  className,
+}: {
+  /** Display label for the breadcrumb segment. */
+  label: string
+  /** Sibling pages shown in the dropdown. */
+  siblings: BreadcrumbSibling[]
+  /** Render function for navigation links (avoids coupling to a router). */
+  renderLink: (sibling: BreadcrumbSibling) => React.ReactNode
+  className?: string
+}) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        className={cn(
+          "flex items-center gap-1 transition-colors hover:text-foreground",
+          className,
+        )}
+      >
+        {label}
+        <ChevronDown className="h-3 w-3" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start">
+        {siblings.map((sibling) => (
+          <DropdownMenuItem key={sibling.to} asChild>
+            {renderLink(sibling)}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+
+export {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+  BreadcrumbEllipsis,
+  BreadcrumbDropdownLink,
+}
+export type { BreadcrumbSibling }

@@ -1,11 +1,13 @@
 import { Link, useRouterState } from "@tanstack/react-router"
 import {
   Breadcrumb,
+  BreadcrumbDropdownLink,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
+  type BreadcrumbSibling,
 } from "@/components/ui/breadcrumb"
 
 /** Known second-level admin sections mapped from URL segment to display label. */
@@ -13,12 +15,40 @@ const sectionLabels: Record<string, string> = {
   users: "Users",
   teams: "Teams",
   devices: "Devices",
+  "device-templates": "Device Templates",
   voice: "Voice",
+  "music-on-hold": "Music on Hold",
   fax: "Fax",
   support: "Support",
+  gateway: "Gateway",
+  "bulk-import": "Bulk Import",
   tasks: "Tasks",
+  roles: "Roles & Permissions",
   audit: "Audit Log",
   system: "System",
+}
+
+/** All admin sibling pages available from the "Admin" breadcrumb dropdown. */
+const adminSiblings: BreadcrumbSibling[] = [
+  { label: "Dashboard", to: "/admin" },
+  { label: "Users", to: "/admin/users" },
+  { label: "Teams", to: "/admin/teams" },
+  { label: "Devices", to: "/admin/devices" },
+  { label: "Device Templates", to: "/admin/device-templates" },
+  { label: "Voice", to: "/admin/voice" },
+  { label: "Music on Hold", to: "/admin/music-on-hold" },
+  { label: "Fax", to: "/admin/fax" },
+  { label: "Support", to: "/admin/support" },
+  { label: "Gateway", to: "/admin/gateway" },
+  { label: "Bulk Import", to: "/admin/bulk-import" },
+  { label: "Tasks", to: "/admin/tasks" },
+  { label: "Roles & Permissions", to: "/admin/roles" },
+  { label: "Audit Log", to: "/admin/audit" },
+  { label: "System", to: "/admin/system" },
+]
+
+function renderAdminLink(sibling: BreadcrumbSibling) {
+  return <Link to={sibling.to}>{sibling.label}</Link>
 }
 
 interface AdminBreadcrumbsProps {
@@ -65,17 +95,23 @@ export function AdminBreadcrumbs({ currentLabel }: AdminBreadcrumbsProps) {
   return (
     <Breadcrumb className="mb-2">
       <BreadcrumbList>
-        {/* Root: Admin */}
+        {/* Root: Admin — with dropdown to all admin sub-pages */}
         {crumbs.length === 0 ? (
           <BreadcrumbItem>
-            <BreadcrumbPage>Admin</BreadcrumbPage>
+            <BreadcrumbDropdownLink
+              label="Admin"
+              siblings={adminSiblings}
+              renderLink={renderAdminLink}
+            />
           </BreadcrumbItem>
         ) : (
           <>
             <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link to="/admin">Admin</Link>
-              </BreadcrumbLink>
+              <BreadcrumbDropdownLink
+                label="Admin"
+                siblings={adminSiblings}
+                renderLink={renderAdminLink}
+              />
             </BreadcrumbItem>
 
             {crumbs.map((crumb, idx) => {

@@ -57,6 +57,7 @@ import {
 } from "@/lib/api/hooks/admin"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 
 export const Route = createFileRoute("/_app/admin/tasks")({
@@ -536,7 +537,7 @@ function AdminTasksPage() {
     [page, pageSize, statusFilter, taskTypeFilter, entityTypeFilter],
   )
 
-  const { data, isLoading, isError, refetch } = useAdminTasks(queryOptions)
+  const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useAdminTasks(queryOptions)
 
   // Selection state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -777,6 +778,13 @@ function AdminTasksPage() {
               Clear all filters
             </Button>
           )}
+          <div className="ml-auto">
+            <DataFreshness
+              dataUpdatedAt={dataUpdatedAt}
+              onRefresh={() => refetch()}
+              isRefreshing={isRefetching}
+            />
+          </div>
         </div>
       </PageSection>
 

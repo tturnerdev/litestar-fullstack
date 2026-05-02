@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 import {
   Activity,
@@ -576,6 +576,7 @@ function DeleteWebhookDialog({
 
 function WebhooksPage() {
   useDocumentTitle("Webhooks")
+  const searchInputRef = useRef<HTMLInputElement>(null)
 
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState("")
@@ -598,12 +599,16 @@ function WebhooksPage() {
     [sortKey, sortDir],
   )
 
-  // Keyboard shortcut: "N" opens the create dialog
+  // Keyboard shortcuts: "/" to focus search, "N" opens the create dialog
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return
+      if (e.key === "/" && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault()
+        searchInputRef.current?.focus()
+      }
       if (e.key === "n" && !e.ctrlKey && !e.metaKey && !e.altKey) {
-        const target = e.target as HTMLElement
-        if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return
         e.preventDefault()
         setCreateOpen(true)
       }
@@ -744,12 +749,13 @@ function WebhooksPage() {
           <div className="relative max-w-sm flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
+              ref={searchInputRef}
               placeholder="Search webhooks..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9 pr-8"
             />
-            {search && (
+            {search ? (
               <button
                 type="button"
                 onClick={() => setSearch("")}
@@ -758,6 +764,8 @@ function WebhooksPage() {
                 <X className="h-3.5 w-3.5" />
                 <span className="sr-only">Clear search</span>
               </button>
+            ) : (
+              <kbd className="pointer-events-none absolute right-8 top-1/2 -translate-y-1/2 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">/</kbd>
             )}
           </div>
         </div>
