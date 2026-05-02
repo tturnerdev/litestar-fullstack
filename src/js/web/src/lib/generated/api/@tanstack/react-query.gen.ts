@@ -211,6 +211,7 @@ import {
   listTicketMessages,
   listTickets,
   listTimeConditions,
+  listUnregisteredE911PhoneNumbers,
   listUnregisteredPhoneNumbers,
   listUsers,
   listVoicemailBoxes,
@@ -878,6 +879,9 @@ import type {
   ListTimeConditionsData,
   ListTimeConditionsError,
   ListTimeConditionsResponse,
+  ListUnregisteredE911PhoneNumbersData,
+  ListUnregisteredE911PhoneNumbersError,
+  ListUnregisteredE911PhoneNumbersResponse,
   ListUnregisteredPhoneNumbersData,
   ListUnregisteredPhoneNumbersError,
   ListUnregisteredPhoneNumbersResponse,
@@ -8161,6 +8165,34 @@ export const createPhoneNumberMutation = (
   };
   return mutationOptions;
 };
+
+export const listUnregisteredE911PhoneNumbersQueryKey = (
+  options: Options<ListUnregisteredE911PhoneNumbersData>,
+) => createQueryKey("listUnregisteredE911PhoneNumbers", options);
+
+/**
+ * ListUnregisteredE911
+ */
+export const listUnregisteredE911PhoneNumbersOptions = (
+  options: Options<ListUnregisteredE911PhoneNumbersData>,
+) =>
+  queryOptions<
+    ListUnregisteredE911PhoneNumbersResponse,
+    ListUnregisteredE911PhoneNumbersError,
+    ListUnregisteredE911PhoneNumbersResponse,
+    ReturnType<typeof listUnregisteredE911PhoneNumbersQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listUnregisteredE911PhoneNumbers({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listUnregisteredE911PhoneNumbersQueryKey(options),
+  });
 
 /**
  * DeletePhoneNumber

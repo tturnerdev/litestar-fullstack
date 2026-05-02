@@ -99,6 +99,21 @@ class PhoneNumberController(Controller):
         )
         return phone_numbers_service.to_schema_enriched(db_obj)
 
+    @get(
+        operation_id="ListUnregisteredE911PhoneNumbers",
+        path="/unregistered-e911",
+        guards=[requires_feature_permission("voice", "view")],
+    )
+    async def list_unregistered_e911(
+        self,
+        phone_numbers_service: PhoneNumberService,
+        current_user: m.User,
+        team_id: Annotated[UUID, Parameter(title="Team ID", description="The team to check for unregistered numbers.", query="teamId")],
+    ) -> list[PhoneNumber]:
+        """List active phone numbers without E911 registration."""
+        results = await phone_numbers_service.get_unregistered_e911_numbers(team_id)
+        return phone_numbers_service.to_schema_enriched(results)
+
     @get(operation_id="GetPhoneNumber", path="/{phone_number_id:uuid}", guards=[requires_feature_permission("voice", "view"), requires_phone_number_access])
     async def get_phone_number(
         self,

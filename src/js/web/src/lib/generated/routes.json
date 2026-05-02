@@ -2511,6 +2511,16 @@
       },
       "uri": "/api/e911/unregistered"
     },
+    "list_unregistered_e911": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "queryParameters": {
+        "teamId": "UUID"
+      },
+      "uri": "/api/voice/phone-numbers/unregistered-e911"
+    },
     "list_users": {
       "method": "get",
       "methods": [

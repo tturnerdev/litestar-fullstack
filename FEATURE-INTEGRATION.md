@@ -426,7 +426,7 @@ No new hook files. Existing hooks return the enriched schemas automatically afte
 - [x] Regenerate TypeScript types (`make types`)
 - [x] Add Location field to device detail page overview section — shows as clickable link
 - [x] Add Location dropdown to device create/edit form — Select dropdown with location options
-- [ ] Add "Devices at this location" section to location detail page
+- [x] Add "Devices at this location" section to location detail page
 - [ ] Build `RelatedEntitiesSection` shared component
 
 ### Phase 2: DeviceLineAssignment ↔ Extension (FK formalization)
@@ -440,8 +440,8 @@ No new hook files. Existing hooks return the enriched schemas automatically afte
 - [x] Update `DeviceService` line loading to eager-load extension
 - [ ] Update `ExtensionService` to support loading assigned devices
 - [x] Regenerate TypeScript types (`make types`) — done in v0.155.0
-- [ ] Show extension number/name in device line configuration UI
-- [ ] Add "Assigned to Devices" section to extension detail page
+- [x] Show extension number/name in device line configuration UI
+- [x] Add "Assigned to Devices" section to extension detail page
 
 ### Phase 3: Extension ↔ E911 and Phone Number ↔ E911 (surfacing)
 
@@ -475,7 +475,7 @@ No new hook files. Existing hooks return the enriched schemas automatically afte
 - [x] Regenerate TypeScript types (`make types`)
 - [x] Add Connection field to device detail page — shows as clickable link
 - [x] Add Connection dropdown to device create/edit form — Select dropdown
-- [ ] Add "Managed Devices" section to connection detail page
+- [x] Add "Managed Devices" section to connection detail page
 
 ### Phase 5: Review Candidate Links
 

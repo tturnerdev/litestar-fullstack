@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 from typing import Any, Sequence
+from uuid import UUID
 
 from advanced_alchemy.extensions.litestar import repository, service
+from sqlalchemy import select
 
 from app.db import models as m
 from app.domain.voice.schemas import PhoneNumber as PhoneNumberSchema
@@ -17,6 +19,32 @@ class PhoneNumberService(service.SQLAlchemyAsyncRepositoryService[m.PhoneNumber]
         model_type = m.PhoneNumber
 
     repository_type = Repo
+
+    async def get_unregistered_e911_numbers(self, team_id: UUID) -> list[m.PhoneNumber]:
+        """Get active phone numbers belonging to a team that have no E911 registration.
+
+        Args:
+            team_id: The team ID to filter by.
+
+        Returns:
+            A list of PhoneNumber objects without an E911 registration.
+        """
+        registered_subq = (
+            select(m.E911Registration.phone_number_id)
+            .where(m.E911Registration.phone_number_id.isnot(None))
+            .scalar_subquery()
+        )
+        stmt = (
+            select(m.PhoneNumber)
+            .where(
+                m.PhoneNumber.team_id == team_id,
+                m.PhoneNumber.is_active.is_(True),
+                m.PhoneNumber.id.notin_(registered_subq),
+            )
+            .order_by(m.PhoneNumber.number)
+        )
+        result = await self.repository.session.execute(stmt)
+        return list(result.scalars().all())
 
     @staticmethod
     def _enrich_schema(db_obj: m.PhoneNumber) -> dict[str, Any]:

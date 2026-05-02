@@ -541,7 +541,17 @@ function E911Page() {
     <PageContainer className="flex-1 space-y-8">
       <PageHeader
         eyebrow="Compliance"
-        title="E911 Addresses"
+        title={
+          <span className="flex items-center gap-3">
+            E911 Addresses
+            {unregisteredCount > 0 && (
+              <Badge variant="outline" className="border-amber-500/40 text-amber-600 dark:text-amber-400 text-xs font-normal">
+                <AlertTriangle className="mr-1 h-3 w-3" />
+                {unregisteredCount} unregistered
+              </Badge>
+            )}
+          </span>
+        }
         description="Manage E911 emergency address registrations for your phone numbers."
         breadcrumbs={breadcrumbs}
         actions={

@@ -198,6 +198,14 @@ export function useDeletePhoneNumber() {
   })
 }
 
+export function useUnregisteredE911Numbers(teamId: string) {
+  return useQuery({
+    queryKey: ["voice", "phone-numbers", "unregistered-e911", teamId],
+    queryFn: () => apiFetch<PhoneNumber[]>(`/api/voice/phone-numbers/unregistered-e911?teamId=${teamId}`),
+    enabled: !!teamId,
+  })
+}
+
 // ---------------------------------------------------------------------------
 // Extensions
 // ---------------------------------------------------------------------------

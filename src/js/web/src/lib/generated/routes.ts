@@ -206,6 +206,7 @@ export type RouteName =
   | 'list_tickets_api_support_tickets'
   | 'list_time_conditions'
   | 'list_unregistered'
+  | 'list_unregistered_e911'
   | 'list_users'
   | 'list_users_api_users'
   | 'list_voicemail_boxes'
@@ -732,6 +733,7 @@ export interface RoutePathParams {
   'list_tickets_api_support_tickets': Record<string, never>;
   'list_time_conditions': Record<string, never>;
   'list_unregistered': Record<string, never>;
+  'list_unregistered_e911': Record<string, never>;
   'list_users': Record<string, never>;
   'list_users_api_users': Record<string, never>;
   'list_voicemail_boxes': Record<string, never>;
@@ -1673,6 +1675,9 @@ export interface RouteQueryParams {
     updatedBefore?: DateTime;
   };
   'list_unregistered': {
+    teamId: UUID;
+  };
+  'list_unregistered_e911': {
     teamId: UUID;
   };
   'list_users': {
@@ -3208,6 +3213,13 @@ export const routeDefinitions = {
   },
   'list_unregistered': {
     path: '/api/e911/unregistered',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: ['teamId'] as const,
+  },
+  'list_unregistered_e911': {
+    path: '/api/voice/phone-numbers/unregistered-e911',
     methods: ['GET'] as const,
     method: 'get',
     pathParams: [] as const,

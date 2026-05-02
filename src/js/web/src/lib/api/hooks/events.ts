@@ -198,6 +198,7 @@ export function useEventStream() {
         case "notification.created": {
           const d = data as unknown as NotificationEventData
           queryClient.invalidateQueries({ queryKey: ["notifications"] })
+          queryClient.invalidateQueries({ queryKey: ["notifications", "unread-count"] })
           if (d.title || d.message) {
             toast.info(d.title ?? "New notification", {
               description: d.message,

@@ -96,10 +96,12 @@ export function useTask(taskId: string) {
     queryKey: taskKeys.detail(taskId),
     queryFn: () => apiFetch<BackgroundTaskDetail>(`/api/tasks/${taskId}`),
     enabled: !!taskId,
+    // Fallback polling when SSE is disconnected — primary updates come from
+    // task.updated / task.completed / task.failed SSE events (see events.ts).
     refetchInterval: (query) => {
       const data = query.state.data
       if (data && (data.status === "pending" || data.status === "running")) {
-        return 3000
+        return 30_000
       }
       return false
     },
@@ -114,7 +116,9 @@ export function useActiveTasks() {
   return useQuery({
     queryKey: taskKeys.active(),
     queryFn: () => apiFetch<BackgroundTaskList[]>("/api/tasks/active"),
-    refetchInterval: 10000,
+    // Fallback polling when SSE is disconnected — primary updates come from
+    // task lifecycle SSE events (see events.ts).
+    refetchInterval: 30_000,
   })
 }
 

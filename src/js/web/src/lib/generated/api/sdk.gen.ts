@@ -597,6 +597,9 @@ import type {
   ListTimeConditionsData,
   ListTimeConditionsErrors,
   ListTimeConditionsResponses,
+  ListUnregisteredE911PhoneNumbersData,
+  ListUnregisteredE911PhoneNumbersErrors,
+  ListUnregisteredE911PhoneNumbersResponses,
   ListUnregisteredPhoneNumbersData,
   ListUnregisteredPhoneNumbersErrors,
   ListUnregisteredPhoneNumbersResponses,
@@ -5399,6 +5402,24 @@ export const createPhoneNumber = <ThrowOnError extends boolean = false>(
       "Content-Type": "application/json",
       ...options.headers,
     },
+  });
+
+/**
+ * ListUnregisteredE911
+ */
+export const listUnregisteredE911PhoneNumbers = <
+  ThrowOnError extends boolean = false,
+>(
+  options: Options<ListUnregisteredE911PhoneNumbersData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    ListUnregisteredE911PhoneNumbersResponses,
+    ListUnregisteredE911PhoneNumbersErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/voice/phone-numbers/unregistered-e911",
+    ...options,
   });
 
 /**

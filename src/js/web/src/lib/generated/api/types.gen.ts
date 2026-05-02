@@ -3080,10 +3080,10 @@ export type AdminListAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetIdIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
     actionIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3159,10 +3159,10 @@ export type AdminExportAuditLogData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetIdIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
     actionIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3227,10 +3227,10 @@ export type AdminGetTargetAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetIdIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
     actionIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -3307,10 +3307,10 @@ export type AdminGetUserAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetIdIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
     actionIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -14078,6 +14078,49 @@ export type CreatePhoneNumberResponses = {
 
 export type CreatePhoneNumberResponse =
   CreatePhoneNumberResponses[keyof CreatePhoneNumberResponses];
+
+export type ListUnregisteredE911PhoneNumbersData = {
+  body?: never;
+  path?: never;
+  query: {
+    /**
+     * Team ID
+     *
+     * The team to check for unregistered numbers.
+     */
+    teamId: string;
+  };
+  url: "/api/voice/phone-numbers/unregistered-e911";
+};
+
+export type ListUnregisteredE911PhoneNumbersErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type ListUnregisteredE911PhoneNumbersError =
+  ListUnregisteredE911PhoneNumbersErrors[keyof ListUnregisteredE911PhoneNumbersErrors];
+
+export type ListUnregisteredE911PhoneNumbersResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: Array<PhoneNumber>;
+};
+
+export type ListUnregisteredE911PhoneNumbersResponse =
+  ListUnregisteredE911PhoneNumbersResponses[keyof ListUnregisteredE911PhoneNumbersResponses];
 
 export type DeletePhoneNumberData = {
   body?: never;
