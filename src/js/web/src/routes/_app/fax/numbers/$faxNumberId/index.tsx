@@ -1,25 +1,24 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
-import { useMemo, useState } from "react"
+import { createFileRoute, Link, useBlocker, useNavigate } from "@tanstack/react-router"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   AlertCircle,
   AlertTriangle,
   ArrowLeft,
   ArrowUpRight,
-  Check,
   Copy,
   Eye,
-  Hash,
+  Loader2,
   MessageSquare,
   MoreHorizontal,
   Pencil,
   Phone,
+  Save,
   Send,
   Trash2,
   X,
 } from "lucide-react"
 import { DirectionBadge, FaxStatusBadge } from "@/components/fax/fax-status-badge"
 import { EmailRouteEditor } from "@/components/fax/email-route-editor"
-import { FaxNumberEditDialog } from "@/components/fax/fax-number-edit-dialog"
 import { Badge } from "@/components/ui/badge"
 import {
   Breadcrumb,
@@ -40,7 +39,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Button, buttonVariants } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -50,8 +49,11 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Switch } from "@/components/ui/switch"
 import { CopyButton } from "@/components/ui/copy-button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDocumentTitle } from "@/hooks/use-document-title"
@@ -64,6 +66,7 @@ import {
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { formatDateTime, formatRelativeTime } from "@/lib/date-utils"
 import { formatPhoneNumber } from "@/lib/format-utils"
+import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/fax/numbers/$faxNumberId/")({
   component: FaxNumberDetailPage,
@@ -123,7 +126,6 @@ function FaxNumberDetailPage() {
   const navigate = useNavigate()
   const { data, isLoading, isError, refetch } = useFaxNumber(faxNumberId)
   useDocumentTitle(data?.number ? `${data.number} - Fax Number` : "Fax Number")
-  const updateFaxNumber = useUpdateFaxNumber(faxNumberId)
   const deleteFaxNumber = useDeleteFaxNumber()
 
   // Fetch recent messages (last 5) -- filter client-side by faxNumberId
@@ -134,10 +136,8 @@ function FaxNumberDetailPage() {
     sortOrder: "desc",
   })
 
-  const [editingLabel, setEditingLabel] = useState(false)
-  const [showEditDialog, setShowEditDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-  const [labelValue, setLabelValue] = useState("")
+  const [editing, setEditing] = useState(false)
 
   // Filter messages for this fax number and take the last 5
   const recentMessages = useMemo(() => {
@@ -155,24 +155,6 @@ function FaxNumberDetailPage() {
     const received = forNumber.filter((msg) => msg.direction === "inbound").length
     return { sent, received, total: sent + received }
   }, [messagesData?.items, faxNumberId])
-
-  function startEditingLabel() {
-    setLabelValue(data?.label ?? "")
-    setEditingLabel(true)
-  }
-
-  function cancelEditingLabel() {
-    setEditingLabel(false)
-    setLabelValue("")
-  }
-
-  function saveLabel() {
-    const trimmed = labelValue.trim()
-    updateFaxNumber.mutate(
-      { label: trimmed || null },
-      { onSuccess: () => setEditingLabel(false) },
-    )
-  }
 
   if (isLoading) {
     return (
@@ -230,23 +212,6 @@ function FaxNumberDetailPage() {
             <div className="space-y-2">
               {Array.from({ length: 3 }).map((_, i) => (
                 <Skeleton key={i} className="h-12 w-full rounded-md" />
-              ))}
-            </div>
-          </div>
-        </PageSection>
-        {/* Metadata card */}
-        <PageSection delay={0.2}>
-          <div className="rounded-xl border border-border/60 bg-card/80 p-6 space-y-4">
-            <div className="flex items-center gap-2">
-              <Skeleton className="h-5 w-5 rounded" />
-              <Skeleton className="h-6 w-24" />
-            </div>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="space-y-1.5">
-                  <Skeleton className="h-3.5 w-20" />
-                  <Skeleton className="h-5 w-32" />
-                </div>
               ))}
             </div>
           </div>
@@ -339,9 +304,9 @@ function FaxNumberDetailPage() {
                   Copy Phone Number
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => setShowEditDialog(true)}>
+                <DropdownMenuItem onClick={() => setEditing(true)}>
                   <Pencil className="mr-2 h-4 w-4" />
-                  Edit Fax Number
+                  Edit
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -393,105 +358,9 @@ function FaxNumberDetailPage() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Edit dialog */}
-      <FaxNumberEditDialog
-        faxNumber={data}
-        open={showEditDialog}
-        onOpenChange={setShowEditDialog}
-      />
-
-      {/* Number Info */}
+      {/* Number Info (inline editing) */}
       <PageSection>
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Phone className="h-5 w-5 text-muted-foreground" />
-              <CardTitle>Number Info</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
-              <div>
-                <p className="text-muted-foreground">Fax Number</p>
-                <p className="font-mono text-base font-medium">{formatPhoneNumber(data.number)}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Label</p>
-                {editingLabel ? (
-                  <div className="flex items-center gap-2">
-                    <Input
-                      value={labelValue}
-                      onChange={(e) => setLabelValue(e.target.value)}
-                      placeholder="e.g. Main Fax, Billing Dept"
-                      className="h-9 max-w-xs"
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") saveLabel()
-                        if (e.key === "Escape") cancelEditingLabel()
-                      }}
-                      autoFocus
-                    />
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={saveLabel}
-                      disabled={updateFaxNumber.isPending}
-                    >
-                      <Check className="h-4 w-4 text-emerald-600" />
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={cancelEditingLabel}>
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <p className="font-medium">{data.label || "---"}</p>
-                    <Button variant="ghost" size="sm" onClick={startEditingLabel} className="h-7 w-7 p-0" aria-label="Edit label">
-                      <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
-                    </Button>
-                  </div>
-                )}
-              </div>
-              <div>
-                <p className="text-muted-foreground">Status</p>
-                <div className="mt-0.5 flex items-center gap-3">
-                  <ActiveStatusBadge isActive={data.isActive} />
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 text-xs"
-                    onClick={() => updateFaxNumber.mutate({ isActive: !data.isActive })}
-                    disabled={updateFaxNumber.isPending}
-                  >
-                    {updateFaxNumber.isPending
-                      ? "..."
-                      : data.isActive
-                        ? "Deactivate"
-                        : "Activate"}
-                  </Button>
-                </div>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Assignment</p>
-                <p>{data.teamId ? "Team" : "Personal"}</p>
-              </div>
-              {messageCounts.total > 0 && (
-                <div className="md:col-span-2">
-                  <p className="text-muted-foreground">Message Summary</p>
-                  <div className="mt-1 flex items-center gap-3">
-                    <Badge variant="outline" className="gap-1.5 font-mono text-xs">
-                      <ArrowUpRight className="h-3 w-3 text-violet-500" />
-                      {messageCounts.sent} sent
-                    </Badge>
-                    <Badge variant="outline" className="gap-1.5 font-mono text-xs">
-                      <ArrowLeft className="h-3 w-3 text-blue-500" />
-                      {messageCounts.received} received
-                    </Badge>
-                  </div>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+        <FaxNumberSettingsCard faxNumberId={faxNumberId} messageCounts={messageCounts} editing={editing} setEditing={setEditing} />
       </PageSection>
 
       {/* Email Routes */}
@@ -569,37 +438,8 @@ function FaxNumberDetailPage() {
         </Card>
       </PageSection>
 
-      {/* Metadata */}
-      <PageSection delay={0.2}>
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Hash className="h-5 w-5 text-muted-foreground" />
-              <CardTitle>Metadata</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-4">
-              <div>
-                <p className="text-muted-foreground text-sm">Fax Number ID</p>
-                <div className="flex items-center gap-1">
-                  <p className="font-mono text-xs">{faxNumberId}</p>
-                  <CopyButton value={faxNumberId} label="fax number ID" />
-                </div>
-              </div>
-              <TimestampField label="Created" value={data.createdAt} />
-              <TimestampField label="Updated" value={data.updatedAt} />
-              <div>
-                <p className="text-muted-foreground text-sm">Owner</p>
-                <p className="text-sm">{data.teamId ? "Team-assigned" : "Personal"}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </PageSection>
-
       {/* Activity History */}
-      <PageSection delay={0.25}>
+      <PageSection delay={0.2}>
         <Card>
           <CardHeader>
             <CardTitle>Activity History</CardTitle>
@@ -614,7 +454,7 @@ function FaxNumberDetailPage() {
       </PageSection>
 
       {/* Danger Zone */}
-      <PageSection delay={0.3}>
+      <PageSection delay={0.25}>
         <Card className="border-destructive/30">
           <CardHeader>
             <CardTitle className="text-destructive">Danger Zone</CardTitle>
@@ -640,5 +480,286 @@ function FaxNumberDetailPage() {
         </Card>
       </PageSection>
     </PageContainer>
+  )
+}
+
+// ── Fax Number Settings Card (inline editing) ──────────────────────────
+
+interface SettingsFormData {
+  label: string
+  isActive: boolean
+}
+
+function FaxNumberSettingsCard({
+  faxNumberId,
+  messageCounts,
+  editing,
+  setEditing,
+}: {
+  faxNumberId: string
+  messageCounts: { sent: number; received: number; total: number }
+  editing: boolean
+  setEditing: (editing: boolean) => void
+}) {
+  const { data, isLoading, isError, refetch } = useFaxNumber(faxNumberId)
+  const updateMutation = useUpdateFaxNumber(faxNumberId)
+  const [formData, setFormData] = useState<SettingsFormData>({
+    label: "",
+    isActive: true,
+  })
+
+  const syncFormFromData = useCallback(() => {
+    if (data) {
+      setFormData({
+        label: data.label ?? "",
+        isActive: data.isActive,
+      })
+    }
+  }, [data])
+
+  useEffect(() => {
+    syncFormFromData()
+  }, [syncFormFromData])
+
+  const formDirty = useMemo(() => {
+    if (!editing || !data) return false
+    return (
+      formData.label !== (data.label ?? "") ||
+      formData.isActive !== data.isActive
+    )
+  }, [editing, data, formData])
+
+  const blocker = useBlocker({
+    shouldBlockFn: () => formDirty,
+    withResolver: true,
+  })
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-5 w-5 rounded" />
+            <Skeleton className="h-6 w-28" />
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="space-y-1.5">
+                <Skeleton className="h-3.5 w-24" />
+                <Skeleton className="h-5 w-36" />
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (isError || !data) {
+    return (
+      <EmptyState
+        icon={AlertCircle}
+        title="Unable to load fax number settings"
+        description="Something went wrong. Please try again."
+        action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+      />
+    )
+  }
+
+  function handleSave() {
+    if (!data) return
+    const payload: Record<string, unknown> = {}
+    const trimmedLabel = formData.label.trim()
+    if (trimmedLabel !== (data.label ?? "")) payload.label = trimmedLabel || null
+    if (formData.isActive !== data.isActive) payload.isActive = formData.isActive
+
+    if (Object.keys(payload).length === 0) {
+      setEditing(false)
+      return
+    }
+
+    updateMutation.mutate(payload, {
+      onSuccess: () => {
+        setEditing(false)
+      },
+    })
+  }
+
+  function handleCancel() {
+    syncFormFromData()
+    setEditing(false)
+  }
+
+  function updateField<K extends keyof SettingsFormData>(field: K, value: SettingsFormData[K]) {
+    setFormData((prev) => ({ ...prev, [field]: value }))
+  }
+
+  return (
+    <>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="flex items-center gap-2">
+                <Phone className="h-5 w-5 text-muted-foreground" />
+                <CardTitle>Number Info</CardTitle>
+              </div>
+              <CardDescription>
+                Fax number details, label, and status configuration.
+              </CardDescription>
+            </div>
+            <div className="flex items-center gap-2">
+              {(editing ? formData.isActive : data.isActive) ? (
+                <Badge className="gap-1.5 bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  Active
+                </Badge>
+              ) : (
+                <Badge variant="outline" className="gap-1.5 text-muted-foreground">
+                  <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
+                  Inactive
+                </Badge>
+              )}
+              {editing ? (
+                <>
+                  <Button size="sm" variant="outline" onClick={handleCancel} disabled={updateMutation.isPending}>
+                    <X className="mr-2 h-4 w-4" /> Cancel
+                  </Button>
+                  <Button size="sm" onClick={handleSave} disabled={updateMutation.isPending}>
+                    {updateMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                    {updateMutation.isPending ? "Saving..." : "Save changes"}
+                  </Button>
+                </>
+              ) : (
+                <Button size="sm" onClick={() => setEditing(true)}>
+                  <Pencil className="mr-2 h-4 w-4" /> Edit
+                </Button>
+              )}
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {editing && formDirty && (
+            <div className="flex items-center gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-400">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-500" />
+              You have unsaved changes
+            </div>
+          )}
+
+          {/* Fax Number (always read-only) */}
+          <div className="space-y-2">
+            <Label>Fax Number</Label>
+            <p className="font-mono text-base font-medium">{formatPhoneNumber(data.number)}</p>
+          </div>
+
+          {/* Label */}
+          <div className="space-y-2">
+            <Label htmlFor="fax-label">Label</Label>
+            <p className="text-xs text-muted-foreground">
+              A friendly name to identify this fax number.
+            </p>
+            {editing ? (
+              <Input
+                id="fax-label"
+                placeholder="e.g. Main Fax, Billing Dept"
+                value={formData.label}
+                onChange={(e) => updateField("label", e.target.value)}
+                disabled={updateMutation.isPending}
+                maxLength={100}
+              />
+            ) : (
+              <p className="text-sm">{data.label || <span className="text-muted-foreground italic">Not set</span>}</p>
+            )}
+          </div>
+
+          {/* Status */}
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label>Status</Label>
+              <p className="text-xs text-muted-foreground">
+                When inactive, this number cannot send or receive faxes.
+              </p>
+            </div>
+            {editing ? (
+              <Switch
+                checked={formData.isActive}
+                onCheckedChange={(v) => updateField("isActive", v)}
+              />
+            ) : (
+              <Badge
+                variant={data.isActive ? "default" : "outline"}
+                className={cn(
+                  "gap-1.5",
+                  data.isActive
+                    ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400"
+                    : "text-muted-foreground",
+                )}
+              >
+                <span className={cn("h-1.5 w-1.5 rounded-full", data.isActive ? "bg-emerald-500" : "bg-muted-foreground")} />
+                {data.isActive ? "Active" : "Inactive"}
+              </Badge>
+            )}
+          </div>
+
+          <Separator />
+
+          {/* Read-only info */}
+          <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
+            <div>
+              <p className="text-muted-foreground text-sm">Fax Number ID</p>
+              <div className="flex items-center gap-1">
+                <p className="font-mono text-xs">{faxNumberId}</p>
+                <CopyButton value={faxNumberId} label="fax number ID" />
+              </div>
+            </div>
+            <div>
+              <p className="text-muted-foreground text-sm">Assignment</p>
+              <p className="text-sm">{data.teamId ? "Team" : "Personal"}</p>
+            </div>
+            {messageCounts.total > 0 && (
+              <div>
+                <p className="text-muted-foreground text-sm">Message Summary</p>
+                <div className="mt-1 flex items-center gap-3">
+                  <Badge variant="outline" className="gap-1.5 font-mono text-xs">
+                    <ArrowUpRight className="h-3 w-3 text-violet-500" />
+                    {messageCounts.sent} sent
+                  </Badge>
+                  <Badge variant="outline" className="gap-1.5 font-mono text-xs">
+                    <ArrowLeft className="h-3 w-3 text-blue-500" />
+                    {messageCounts.received} received
+                  </Badge>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <Separator />
+
+          {/* Timestamps */}
+          <div className="grid gap-4 text-sm md:grid-cols-2">
+            <TimestampField label="Created" value={data.createdAt} />
+            <TimestampField label="Last Updated" value={data.updatedAt} />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Unsaved changes dialog */}
+      <AlertDialog open={blocker.status === "blocked"} onOpenChange={() => blocker.reset?.()}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
+            <AlertDialogDescription>
+              You have unsaved changes to fax number settings. Are you sure you want to leave? Your changes will be lost.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => blocker.reset?.()}>Stay on page</AlertDialogCancel>
+            <AlertDialogAction onClick={() => blocker.proceed?.()}>Discard changes</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }

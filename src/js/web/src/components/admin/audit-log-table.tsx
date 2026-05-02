@@ -25,7 +25,7 @@ import {
   Users,
   X,
 } from "lucide-react"
-import { Fragment, useCallback, useMemo, useState } from "react"
+import { Fragment, useCallback, useMemo, useRef, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -66,6 +66,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { useAdminAuditLogs, useAdminAuditLogsExport } from "@/lib/api/hooks/admin"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
+import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import type { AuditLogEntry } from "@/lib/generated/api"
 
 // ── Constants ──────────────────────────────────────────────────────────────
@@ -934,6 +935,9 @@ export function AuditLogTable() {
 
   // Filters
   const [search, setSearch] = useState("")
+  const [actorEmail, setActorEmail] = useState("")
+  const debouncedActorEmail = useDebouncedValue(actorEmail, 300)
+  const actorEmailRef = useRef<HTMLInputElement>(null)
   const [selectedActions, setSelectedActions] = useState<string[]>([])
   const [selectedTargetTypes, setSelectedTargetTypes] = useState<string[]>([])
   const [startDate, setStartDate] = useState("")
@@ -962,6 +966,7 @@ export function AuditLogTable() {
     page,
     pageSize: PAGE_SIZE,
     search: search || undefined,
+    actorEmail: debouncedActorEmail || undefined,
     actions: selectedActions.length > 0 ? selectedActions : undefined,
     targetTypes: selectedTargetTypes.length > 0 ? selectedTargetTypes : undefined,
     startDate: startDate ? new Date(startDate).toISOString() : undefined,
@@ -973,6 +978,7 @@ export function AuditLogTable() {
   // Export query (disabled until triggered)
   const { refetch: fetchExport } = useAdminAuditLogsExport({
     search: search || undefined,
+    actorEmail: debouncedActorEmail || undefined,
     actions: selectedActions.length > 0 ? selectedActions : undefined,
     targetTypes: selectedTargetTypes.length > 0 ? selectedTargetTypes : undefined,
     startDate: startDate ? new Date(startDate).toISOString() : undefined,
@@ -1082,14 +1088,25 @@ export function AuditLogTable() {
     [resetPage],
   )
 
+  const handleActorEmailChange = useCallback(
+    (value: string) => {
+      setActorEmail(value)
+      setActivePreset(null)
+      resetPage()
+    },
+    [resetPage],
+  )
+
   const activeFilterCount =
     (selectedActions.length > 0 ? 1 : 0) +
     (selectedTargetTypes.length > 0 ? 1 : 0) +
     (startDate || endDate ? 1 : 0) +
-    (search ? 1 : 0)
+    (search ? 1 : 0) +
+    (actorEmail ? 1 : 0)
 
   const handleClearAll = useCallback(() => {
     setSearch("")
+    setActorEmail("")
     setSelectedActions([])
     setSelectedTargetTypes([])
     setStartDate("")
@@ -1110,6 +1127,7 @@ export function AuditLogTable() {
 
       // Reset everything first
       setSearch("")
+      setActorEmail("")
       setSelectedActions([])
       setSelectedTargetTypes([])
       setStartDate("")
@@ -1154,6 +1172,31 @@ export function AuditLogTable() {
             onChange={(e) => handleSearchChange(e.target.value)}
             className="pl-9"
           />
+        </div>
+
+        {/* Actor email filter */}
+        <div className="relative max-w-[200px]">
+          <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            ref={actorEmailRef}
+            placeholder="Filter by user..."
+            value={actorEmail}
+            onChange={(e) => handleActorEmailChange(e.target.value)}
+            className="h-9 pl-9 text-sm"
+          />
+          {actorEmail && (
+            <button
+              type="button"
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 hover:bg-muted"
+              onClick={() => {
+                handleActorEmailChange("")
+                actorEmailRef.current?.focus()
+              }}
+              aria-label="Clear user filter"
+            >
+              <X className="h-3 w-3 text-muted-foreground" />
+            </button>
+          )}
         </div>
 
         {/* Action type filter */}
@@ -1275,8 +1318,22 @@ export function AuditLogTable() {
       </div>
 
       {/* Active filter chips */}
-      {(selectedActions.length > 0 || selectedTargetTypes.length > 0) && (
+      {(selectedActions.length > 0 || selectedTargetTypes.length > 0 || actorEmail) && (
         <div className="flex flex-wrap items-center gap-1.5">
+          {actorEmail && (
+            <Badge variant="secondary" className="gap-1 pr-1">
+              <User className="h-3 w-3" />
+              <span className="text-xs">{actorEmail}</span>
+              <button
+                type="button"
+                className="ml-0.5 rounded-full p-0.5 hover:bg-muted"
+                onClick={() => handleActorEmailChange("")}
+                aria-label="Remove user filter"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </Badge>
+          )}
           {selectedActions.map((action) => (
             <Badge key={action} variant="secondary" className="gap-1 pr-1">
               <span className="text-xs">{action}</span>

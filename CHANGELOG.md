@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.205.0 (2026-05-02)
+
+### Added
+- **Fax number inline editing** — Edit label and active status directly on the fax number detail page with view/edit toggle, dirty state warning, and Edit action in dropdown menu
+- **Audit log filtering** — Filter audit events by event type, user, and date range with reset button and CSV export
+- **Analytics call heatmap** — Hour-of-day by day-of-week heatmap visualization on the analytics dashboard showing call volume patterns
+
 ## v0.204.0 (2026-05-02)
 
 ### Added

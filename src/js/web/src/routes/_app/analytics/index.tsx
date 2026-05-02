@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import React, { useCallback, useEffect, useMemo, useState } from "react"
 import {
   AlertCircle,
   BarChart3,
@@ -433,6 +433,137 @@ function DetailField({ label, children }: { label: string; children: React.React
   )
 }
 
+// -- Call Activity Heatmap ----------------------------------------------------
+
+const DAYS_OF_WEEK = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const
+const HOURS = Array.from({ length: 24 }, (_, i) => i)
+
+function formatHourLabel(hour: number): string {
+  if (hour === 0) return "12 AM"
+  if (hour === 12) return "12 PM"
+  return hour < 12 ? `${hour} AM` : `${hour - 12} PM`
+}
+
+function CallHeatmap({
+  data,
+  isLoading,
+}: {
+  data: { period: string; count: number }[]
+  isLoading: boolean
+}) {
+  // Build a 24x7 grid: heatmap[hour][dayIndex] = count
+  const { grid, maxCount } = useMemo(() => {
+    const g: number[][] = HOURS.map(() => Array(7).fill(0) as number[])
+    let max = 0
+    for (const point of data) {
+      const d = new Date(point.period)
+      if (Number.isNaN(d.getTime())) continue
+      const hour = d.getHours()
+      // JS getDay: 0=Sun..6=Sat -> convert to 0=Mon..6=Sun
+      const jsDay = d.getDay()
+      const dayIdx = jsDay === 0 ? 6 : jsDay - 1
+      g[hour][dayIdx] += point.count
+      if (g[hour][dayIdx] > max) max = g[hour][dayIdx]
+    }
+    return { grid: g, maxCount: max }
+  }, [data])
+
+  if (isLoading) {
+    return (
+      <div className="flex h-48 items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
+  if (data.length === 0 || maxCount === 0) {
+    return (
+      <div className="flex h-48 items-center justify-center text-sm text-muted-foreground">
+        No call activity data for this period
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-3">
+      {/* Grid */}
+      <div className="overflow-x-auto">
+        <div
+          className="inline-grid gap-px"
+          style={{
+            gridTemplateColumns: `auto repeat(7, minmax(2.5rem, 1fr))`,
+            gridTemplateRows: `auto repeat(24, 1.5rem)`,
+          }}
+        >
+          {/* Header: empty corner + day labels */}
+          <div />
+          {DAYS_OF_WEEK.map((day) => (
+            <div
+              key={day}
+              className="flex items-end justify-center pb-1 text-[11px] font-medium text-muted-foreground"
+            >
+              {day}
+            </div>
+          ))}
+
+          {/* Rows: hour label + 7 cells */}
+          {HOURS.map((hour) => (
+            <React.Fragment key={hour}>
+              <div className="flex items-center justify-end pr-2 text-[10px] text-muted-foreground tabular-nums">
+                {hour % 3 === 0 ? formatHourLabel(hour) : ""}
+              </div>
+              {DAYS_OF_WEEK.map((day, dayIdx) => {
+                const count = grid[hour][dayIdx]
+                const intensity = maxCount > 0 ? count / maxCount : 0
+                return (
+                  <Tooltip key={`${hour}-${day}`}>
+                    <TooltipTrigger asChild>
+                      <div
+                        className="rounded-[3px] border border-border/30 transition-colors"
+                        style={{
+                          backgroundColor:
+                            count === 0
+                              ? "hsl(var(--muted) / 0.3)"
+                              : `hsl(142, 76%, 46%, ${0.15 + intensity * 0.85})`,
+                        }}
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="text-xs">
+                      <span className="font-medium">{day} {formatHourLabel(hour)}</span>
+                      <br />
+                      {count} call{count !== 1 ? "s" : ""}
+                    </TooltipContent>
+                  </Tooltip>
+                )
+              })}
+            </React.Fragment>
+          ))}
+        </div>
+      </div>
+
+      {/* Legend */}
+      <div className="flex items-center justify-end gap-2">
+        <span className="text-[11px] text-muted-foreground">Less</span>
+        <div className="flex gap-0.5">
+          {[0, 0.25, 0.5, 0.75, 1].map((level) => (
+            <div
+              key={level}
+              className="h-3 w-3 rounded-[2px] border border-border/30"
+              style={{
+                backgroundColor:
+                  level === 0
+                    ? "hsl(var(--muted) / 0.3)"
+                    : `hsl(142, 76%, 46%, ${0.15 + level * 0.85})`,
+              }}
+            />
+          ))}
+        </div>
+        <span className="text-[11px] text-muted-foreground">More</span>
+      </div>
+    </div>
+  )
+}
+
 // -- Dashboard tab ------------------------------------------------------------
 
 function DashboardTab() {
@@ -442,6 +573,7 @@ function DashboardTab() {
 
   const { data: summary, isLoading: summaryLoading } = useAnalyticsSummary(startDate, endDate)
   const { data: volumeData, isLoading: volumeLoading } = useAnalyticsVolume(startDate, endDate, "day")
+  const { data: hourlyVolumeData, isLoading: hourlyVolumeLoading } = useAnalyticsVolume(startDate, endDate, "hour")
   const { data: extensionData, isLoading: extensionLoading } = useAnalyticsByExtension(startDate, endDate)
 
   const handleDatePreset = useCallback((days: number) => {
@@ -578,6 +710,22 @@ function DashboardTab() {
               </Table>
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Call Activity Heatmap */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Call Activity Heatmap</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Call volume by hour of day and day of week
+          </p>
+        </CardHeader>
+        <CardContent>
+          <CallHeatmap
+            data={hourlyVolumeData?.items ?? []}
+            isLoading={hourlyVolumeLoading}
+          />
         </CardContent>
       </Card>
     </div>
