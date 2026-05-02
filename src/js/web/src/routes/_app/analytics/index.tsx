@@ -5,6 +5,7 @@ import {
   BarChart3,
   ChevronDown,
   Clock,
+  DollarSign,
   Download,
   FileText,
   Loader2,
@@ -17,6 +18,8 @@ import {
   X,
 } from "lucide-react"
 import {
+  Area,
+  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
@@ -59,6 +62,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import {
   useAnalyticsByExtension,
+  useAnalyticsCostBreakdown,
   useAnalyticsSummary,
   useAnalyticsVolume,
   useCallRecord,
@@ -728,6 +732,197 @@ function DashboardTab() {
           />
         </CardContent>
       </Card>
+
+      {/* Cost Analysis */}
+      <CostAnalysisSection startDate={startDate} endDate={endDate} />
+    </div>
+  )
+}
+
+// -- Cost Analysis section ----------------------------------------------------
+
+function CostAnalysisSection({
+  startDate,
+  endDate,
+}: {
+  startDate: string
+  endDate: string
+}) {
+  const { data, isLoading } = useAnalyticsCostBreakdown(startDate, endDate)
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <h3 className="flex items-center gap-2 text-base font-semibold">
+          <DollarSign className="h-4 w-4 text-muted-foreground" />
+          Cost Analysis
+        </h3>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  if (!data || data.summary.totalCalls === 0) {
+    return null
+  }
+
+  const { summary, byExtension, dailyTrend } = data
+  const hasCostData = summary.callsWithCost > 0
+
+  return (
+    <div className="space-y-4">
+      <h3 className="flex items-center gap-2 text-base font-semibold">
+        <DollarSign className="h-4 w-4 text-muted-foreground" />
+        Cost Analysis
+      </h3>
+
+      {/* Cost summary cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          title="Total Cost"
+          value={hasCostData ? `$${summary.totalCost.toFixed(2)}` : "$0.00"}
+          subtitle={`${summary.callsWithCost} of ${summary.totalCalls} calls with cost`}
+          icon={DollarSign}
+        />
+        <StatCard
+          title="Avg Cost / Call"
+          value={hasCostData ? `$${summary.avgCostPerCall.toFixed(4)}` : "$0.00"}
+          subtitle="Across all calls in period"
+          icon={TrendingUp}
+        />
+        <StatCard
+          title="Inbound Cost"
+          value={`$${summary.inboundCost.toFixed(2)}`}
+          subtitle={`Outbound: $${summary.outboundCost.toFixed(2)}`}
+          icon={PhoneIncoming}
+        />
+        <StatCard
+          title="Outbound Cost"
+          value={`$${summary.outboundCost.toFixed(2)}`}
+          subtitle={summary.internalCost > 0 ? `Internal: $${summary.internalCost.toFixed(2)}` : "No internal costs"}
+          icon={PhoneOutgoing}
+        />
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        {/* Cost by extension - horizontal bar chart */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Top Extensions by Cost</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {byExtension.length === 0 ? (
+              <div className="flex h-48 items-center justify-center text-sm text-muted-foreground">
+                No cost data by extension for this period
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={Math.max(200, byExtension.length * 36)}>
+                <BarChart
+                  data={byExtension}
+                  layout="vertical"
+                  margin={{ top: 4, right: 30, bottom: 4, left: 60 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-border" horizontal={false} />
+                  <XAxis
+                    type="number"
+                    tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
+                    tickFormatter={(v: number) => `$${v.toFixed(2)}`}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    type="category"
+                    dataKey="extension"
+                    tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
+                    width={50}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <RechartsTooltip
+                    contentStyle={{
+                      background: "hsl(var(--popover))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "var(--radius)",
+                      fontSize: 13,
+                      color: "hsl(var(--popover-foreground))",
+                    }}
+                    formatter={(value) => [`$${Number(value ?? 0).toFixed(4)}`, "Cost"]}
+                    labelFormatter={(label) => `Ext ${label}`}
+                  />
+                  <Bar
+                    dataKey="totalCost"
+                    name="Cost"
+                    fill="hsl(var(--primary))"
+                    radius={[0, 4, 4, 0]}
+                    maxBarSize={28}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Daily cost trend - area chart */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Daily Cost Trend</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {dailyTrend.length === 0 ? (
+              <div className="flex h-48 items-center justify-center text-sm text-muted-foreground">
+                No daily cost data for this period
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={Math.max(200, byExtension.length * 36)}>
+                <AreaChart data={dailyTrend} margin={{ top: 8, right: 8, bottom: 0, left: -10 }}>
+                  <defs>
+                    <linearGradient id="costGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.02} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                  <XAxis
+                    dataKey="label"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
+                    dy={4}
+                  />
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
+                    tickFormatter={(v: number) => `$${v.toFixed(2)}`}
+                  />
+                  <RechartsTooltip
+                    contentStyle={{
+                      background: "hsl(var(--popover))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "var(--radius)",
+                      fontSize: 13,
+                      color: "hsl(var(--popover-foreground))",
+                    }}
+                    formatter={(value) => [`$${Number(value ?? 0).toFixed(4)}`, "Cost"]}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="cost"
+                    name="Cost"
+                    stroke="hsl(var(--primary))"
+                    strokeWidth={2}
+                    fill="url(#costGradient)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

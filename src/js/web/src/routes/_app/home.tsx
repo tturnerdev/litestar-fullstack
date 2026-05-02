@@ -28,7 +28,9 @@ import { FeatureAreasGrid } from "@/components/home/feature-areas-grid"
 import { GettingStarted } from "@/components/home/getting-started"
 import { useGreeting } from "@/components/home/greeting"
 import { QuickActionsCard } from "@/components/home/quick-actions-card"
+import { QuickShortcutsRow } from "@/components/home/quick-shortcuts-row"
 import { RecentActivityCard } from "@/components/home/recent-activity-card"
+import { RecentActivityFeed } from "@/components/home/recent-activity-feed"
 import { StatCard } from "@/components/home/stat-card"
 import { TeamsCard } from "@/components/home/teams-card"
 import { Badge } from "@/components/ui/badge"
@@ -279,7 +281,20 @@ function HomePage() {
   const { data: unreadData, isLoading: unreadLoading } = useUnreadCount()
   const { data: activeTasksData, isLoading: activeTasksLoading } = useActiveTasks()
 
+  // Recent activity feed data
+  const { data: recentTicketsData, isLoading: recentTicketsLoading } = useTickets(1, 5, { orderBy: "created_at", sortOrder: "desc" })
+  const { data: recentDevicesData, isLoading: recentDevicesLoading } = useDevices({ page: 1, pageSize: 5, orderBy: "created_at", sortOrder: "desc" })
+
   const teams = teamsRaw?.items ?? []
+  const recentTeams = useMemo(() => {
+    return [...teams]
+      .sort((a, b) => {
+        const dateA = a.updatedAt ?? a.createdAt ?? ""
+        const dateB = b.updatedAt ?? b.createdAt ?? ""
+        return dateB.localeCompare(dateA)
+      })
+      .slice(0, 5)
+  }, [teams])
 
   const hasError = teamsError || tagsError || rolesError
 
@@ -319,6 +334,14 @@ function HomePage() {
           </Button>
         }
       />
+
+      {/* Quick Shortcuts */}
+      <PageSection delay={0.03}>
+        <div className="space-y-3">
+          <h2 className="text-lg font-semibold tracking-tight">Quick Actions</h2>
+          <QuickShortcutsRow />
+        </div>
+      </PageSection>
 
       {/* Operational Stats Row */}
       <PageSection delay={0.05}>
@@ -443,6 +466,20 @@ function HomePage() {
       {/* Quick Actions */}
       <PageSection delay={0.15}>
         <QuickActionsCard isSuperuser={isSuperuser} teamCount={teams.length} />
+      </PageSection>
+
+      {/* Recent Activity Feed */}
+      <PageSection delay={0.17}>
+        <SectionErrorBoundary name="Recent Activity Feed">
+          <RecentActivityFeed
+            tickets={recentTicketsData?.items ?? []}
+            ticketsLoading={recentTicketsLoading}
+            teams={recentTeams}
+            teamsLoading={teamsLoading}
+            devices={recentDevicesData?.items ?? []}
+            devicesLoading={recentDevicesLoading}
+          />
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Admin Section: Recent Activity + Chart */}

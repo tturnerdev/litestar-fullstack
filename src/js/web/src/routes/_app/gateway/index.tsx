@@ -3,9 +3,11 @@ import {
   AlertCircle,
   CheckCircle2,
   Clock,
+  Download,
   Hash,
   History,
   Info,
+  Layers,
   Loader2,
   Monitor,
   Phone,
@@ -29,15 +31,41 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { SkeletonCard } from "@/components/ui/skeleton"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Textarea } from "@/components/ui/textarea"
 import {
   useGatewayLookupDevice,
   useGatewayLookupExtension,
   useGatewayLookupNumber,
 } from "@/lib/api/hooks/gateway"
 import { useDocumentTitle } from "@/hooks/use-document-title"
-import type { SourceResult } from "@/lib/generated/api"
+import type {
+  DeviceGatewayResponse,
+  ExtensionGatewayResponse,
+  NumberGatewayResponse,
+  SourceResult,
+} from "@/lib/generated/api"
+import {
+  gatewayLookupDevice,
+  gatewayLookupExtension,
+  gatewayLookupNumber,
+} from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/gateway/")({
   component: GatewayPage,
@@ -537,6 +565,346 @@ function DeviceTab() {
   )
 }
 
+// -- Batch lookup -------------------------------------------------------------
+
+type BatchLookupType = "phone" | "extension" | "device"
+
+interface BatchResultEntry {
+  input: string
+  status: "pending" | "loading" | "ok" | "error"
+  summary: string
+  sources?: Record<string, SourceResult>
+  error?: string
+}
+
+function parseBatchInput(raw: string): string[] {
+  return raw
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0)
+}
+
+async function executeSingleLookup(
+  type: BatchLookupType,
+  value: string,
+): Promise<{ sources?: Record<string, SourceResult>; error?: string }> {
+  try {
+    if (type === "phone") {
+      const res = await gatewayLookupNumber({ path: { phone_number: value } })
+      const data = res.data as NumberGatewayResponse | undefined
+      return { sources: data?.sources }
+    }
+    if (type === "extension") {
+      const res = await gatewayLookupExtension({ path: { extension_number: value } })
+      const data = res.data as ExtensionGatewayResponse | undefined
+      return { sources: data?.sources }
+    }
+    const res = await gatewayLookupDevice({ path: { mac_address: value } })
+    const data = res.data as DeviceGatewayResponse | undefined
+    return { sources: data?.sources }
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Lookup failed" }
+  }
+}
+
+function summarizeSources(sources?: Record<string, SourceResult> | null): string {
+  if (!sources) return "No sources"
+  const entries = Object.values(sources)
+  if (entries.length === 0) return "No sources"
+  const ok = entries.filter((s) => s.status === "ok").length
+  const errors = entries.filter((s) => s.status === "error").length
+  const parts: string[] = []
+  if (ok > 0) parts.push(`${ok} OK`)
+  if (errors > 0) parts.push(`${errors} error`)
+  const other = entries.length - ok - errors
+  if (other > 0) parts.push(`${other} other`)
+  return parts.join(", ")
+}
+
+function escapeCsvField(value: string): string {
+  if (value.includes(",") || value.includes('"') || value.includes("\n")) {
+    return `"${value.replace(/"/g, '""')}"`
+  }
+  return value
+}
+
+function exportBatchCsv(results: BatchResultEntry[], lookupType: BatchLookupType) {
+  const headerLabel =
+    lookupType === "phone" ? "Phone Number" : lookupType === "extension" ? "Extension" : "MAC Address"
+  const rows = [
+    [headerLabel, "Status", "Summary", "Sources", "Error"].map(escapeCsvField).join(","),
+  ]
+  for (const r of results) {
+    const sourcesDetail = r.sources
+      ? Object.entries(r.sources)
+          .map(([name, src]) => {
+            const fields = src.data
+              ? Object.entries(src.data)
+                  .map(([k, v]) => `${k}=${typeof v === "object" ? JSON.stringify(v) : String(v ?? "")}`)
+                  .join("; ")
+              : ""
+            return `${name} (${src.status})${fields ? `: ${fields}` : ""}`
+          })
+          .join(" | ")
+      : ""
+    rows.push(
+      [r.input, r.status, r.summary, sourcesDetail, r.error ?? ""].map(escapeCsvField).join(","),
+    )
+  }
+  const blob = new Blob([rows.join("\n")], { type: "text/csv;charset=utf-8;" })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement("a")
+  a.href = url
+  a.download = `gateway-batch-${lookupType}-${new Date().toISOString().slice(0, 10)}.csv`
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}
+
+function BatchStatusBadge({ status }: { status: BatchResultEntry["status"] }) {
+  switch (status) {
+    case "pending":
+      return (
+        <Badge variant="outline" className="gap-1">
+          <Clock className="h-3 w-3" />
+          Pending
+        </Badge>
+      )
+    case "loading":
+      return (
+        <Badge variant="secondary" className="gap-1">
+          <Loader2 className="h-3 w-3 animate-spin" />
+          Loading
+        </Badge>
+      )
+    case "ok":
+      return (
+        <Badge variant="default" className="gap-1">
+          <CheckCircle2 className="h-3 w-3" />
+          OK
+        </Badge>
+      )
+    case "error":
+      return (
+        <Badge variant="destructive" className="gap-1">
+          <XCircle className="h-3 w-3" />
+          Error
+        </Badge>
+      )
+  }
+}
+
+function BatchTab() {
+  const [lookupType, setLookupType] = useState<BatchLookupType>("phone")
+  const [rawInput, setRawInput] = useState("")
+  const [results, setResults] = useState<BatchResultEntry[]>([])
+  const [isRunning, setIsRunning] = useState(false)
+  const [progress, setProgress] = useState({ completed: 0, total: 0 })
+  const abortRef = useRef(false)
+
+  const placeholderMap: Record<BatchLookupType, string> = {
+    phone: "+15551234567\n+15559876543\n+15550001111",
+    extension: "1001\n1002\n1003",
+    device: "AA:BB:CC:DD:EE:FF\n11:22:33:44:55:66",
+  }
+
+  const handleRun = useCallback(async () => {
+    const entries = parseBatchInput(rawInput)
+    if (entries.length === 0) return
+
+    abortRef.current = false
+    setIsRunning(true)
+
+    const initial: BatchResultEntry[] = entries.map((input) => ({
+      input,
+      status: "pending",
+      summary: "",
+    }))
+    setResults(initial)
+    setProgress({ completed: 0, total: entries.length })
+
+    for (let i = 0; i < entries.length; i++) {
+      if (abortRef.current) break
+
+      setResults((prev) =>
+        prev.map((r, idx) => (idx === i ? { ...r, status: "loading" } : r)),
+      )
+
+      const { sources, error } = await executeSingleLookup(lookupType, entries[i])
+
+      setResults((prev) =>
+        prev.map((r, idx) =>
+          idx === i
+            ? {
+                ...r,
+                status: error ? "error" : "ok",
+                summary: error ? error : summarizeSources(sources),
+                sources,
+                error,
+              }
+            : r,
+        ),
+      )
+      setProgress((prev) => ({ ...prev, completed: i + 1 }))
+    }
+
+    setIsRunning(false)
+  }, [rawInput, lookupType])
+
+  const handleStop = useCallback(() => {
+    abortRef.current = true
+  }, [])
+
+  const entryCount = parseBatchInput(rawInput).length
+  const hasResults = results.length > 0
+  const completedResults = results.filter((r) => r.status === "ok" || r.status === "error")
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Batch Lookup</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Look up multiple values at once. Enter one value per line.
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
+            <div className="w-full sm:w-48 space-y-1.5">
+              <label htmlFor="batch-type" className="text-sm font-medium">
+                Lookup Type
+              </label>
+              <Select value={lookupType} onValueChange={(v) => setLookupType(v as BatchLookupType)}>
+                <SelectTrigger id="batch-type">
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="phone">
+                    <span className="flex items-center gap-2">
+                      <Phone className="h-3.5 w-3.5" />
+                      Phone Number
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="extension">
+                    <span className="flex items-center gap-2">
+                      <Hash className="h-3.5 w-3.5" />
+                      Extension
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="device">
+                    <span className="flex items-center gap-2">
+                      <Monitor className="h-3.5 w-3.5" />
+                      Device (MAC)
+                    </span>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label htmlFor="batch-input" className="text-sm font-medium">
+              Values (one per line)
+            </label>
+            <Textarea
+              id="batch-input"
+              placeholder={placeholderMap[lookupType]}
+              value={rawInput}
+              onChange={(e) => setRawInput(e.target.value)}
+              rows={6}
+              className="font-mono text-sm"
+              disabled={isRunning}
+            />
+            {entryCount > 0 && (
+              <p className="text-xs text-muted-foreground">
+                {entryCount} {entryCount === 1 ? "entry" : "entries"} detected
+              </p>
+            )}
+          </div>
+
+          <div className="flex items-center gap-3">
+            {isRunning ? (
+              <Button variant="destructive" onClick={handleStop}>
+                <XCircle className="mr-2 h-4 w-4" />
+                Stop
+              </Button>
+            ) : (
+              <Button onClick={handleRun} disabled={entryCount === 0}>
+                <Search className="mr-2 h-4 w-4" />
+                Look Up {entryCount > 0 ? `(${entryCount})` : ""}
+              </Button>
+            )}
+            {hasResults && !isRunning && completedResults.length > 0 && (
+              <Button variant="outline" onClick={() => exportBatchCsv(results, lookupType)}>
+                <Download className="mr-2 h-4 w-4" />
+                Export CSV
+              </Button>
+            )}
+          </div>
+
+          {isRunning && progress.total > 0 && (
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>
+                  Processing {progress.completed} of {progress.total}
+                </span>
+                <span>{Math.round((progress.completed / progress.total) * 100)}%</span>
+              </div>
+              <div className="h-2 w-full overflow-hidden rounded-full bg-secondary">
+                <div
+                  className="h-full bg-primary transition-all duration-300 ease-out"
+                  style={{ width: `${(progress.completed / progress.total) * 100}%` }}
+                />
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {hasResults && (
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base">Results</CardTitle>
+              {!isRunning && (
+                <p className="text-sm text-muted-foreground">
+                  {completedResults.filter((r) => r.status === "ok").length} succeeded,{" "}
+                  {completedResults.filter((r) => r.status === "error").length} failed
+                </p>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[200px]">Input</TableHead>
+                    <TableHead className="w-[100px]">Status</TableHead>
+                    <TableHead>Summary</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {results.map((r, idx) => (
+                    <TableRow key={`${r.input}-${idx}`}>
+                      <TableCell className="font-mono text-sm">{r.input}</TableCell>
+                      <TableCell>
+                        <BatchStatusBadge status={r.status} />
+                      </TableCell>
+                      <TableCell className="text-sm">{r.summary || "--"}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  )
+}
+
 // -- Main page ----------------------------------------------------------------
 
 function GatewayPage() {
@@ -582,6 +950,10 @@ function GatewayPage() {
               <Monitor className="h-4 w-4" />
               Device
             </TabsTrigger>
+            <TabsTrigger value="batch" className="gap-1.5">
+              <Layers className="h-4 w-4" />
+              Batch
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="phone" className="mt-6">
@@ -594,6 +966,10 @@ function GatewayPage() {
 
           <TabsContent value="device" className="mt-6">
             <DeviceTab />
+          </TabsContent>
+
+          <TabsContent value="batch" className="mt-6">
+            <BatchTab />
           </TabsContent>
         </Tabs>
       </PageSection>

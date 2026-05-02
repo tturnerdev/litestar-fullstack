@@ -6,8 +6,10 @@ import {
   ArrowLeft,
   Calendar,
   Check,
+  CheckCircle2,
   ChevronDown,
   ChevronRight,
+  CircleDot,
   Clock,
   Copy,
   Hash,
@@ -23,6 +25,7 @@ import {
   Trash2,
   Unlock,
   User,
+  UserPlus,
   Users,
   X,
 } from "lucide-react"
@@ -92,8 +95,10 @@ import {
   useDeleteTicket,
   useReopenTicket,
   useTicket,
+  useTicketMessages,
   useUpdateTicket,
 } from "@/lib/api/hooks/support"
+import type { Ticket as TicketType, TicketMessage as TicketMessageType } from "@/lib/api/hooks/support"
 import { useAdminUsers } from "@/lib/api/hooks/admin"
 import { useTags, type Tag as TagType } from "@/lib/api/hooks/tags"
 import { useDocumentTitle } from "@/hooks/use-document-title"
@@ -333,6 +338,212 @@ function TicketTagManager({
   )
 }
 
+// ── Lifecycle Timeline ──────────────────────────────────────────────────
+
+interface TimelineEvent {
+  id: string
+  type: "created" | "message" | "status" | "assigned" | "resolved" | "closed" | "updated"
+  timestamp: string
+  label: string
+  description?: string
+  icon: React.ComponentType<{ className?: string }>
+  dotColor: string
+}
+
+const statusLabels: Record<string, string> = {
+  open: "Open",
+  in_progress: "In Progress",
+  waiting_on_customer: "Waiting on Customer",
+  waiting_on_support: "Waiting on Support",
+  resolved: "Resolved",
+  closed: "Closed",
+}
+
+function buildTimelineEvents(
+  ticket: TicketType,
+  messages: TicketMessageType[],
+): TimelineEvent[] {
+  const events: TimelineEvent[] = []
+
+  // 1. Created
+  if (ticket.createdAt) {
+    const creatorName = ticket.user?.name ?? ticket.user?.email ?? "Unknown"
+    events.push({
+      id: "created",
+      type: "created",
+      timestamp: ticket.createdAt,
+      label: "Ticket created",
+      description: `by ${creatorName}`,
+      icon: Plus,
+      dotColor: "bg-green-500",
+    })
+  }
+
+  // 2. Assignment (current)
+  if (ticket.assignedTo) {
+    const assigneeName = ticket.assignedTo.name ?? ticket.assignedTo.email
+    // Place assignment slightly after creation
+    const ts = ticket.createdAt
+      ? new Date(new Date(ticket.createdAt).getTime() + 1).toISOString()
+      : ticket.updatedAt ?? ticket.createdAt ?? ""
+    events.push({
+      id: "assigned",
+      type: "assigned",
+      timestamp: ts,
+      label: "Assigned",
+      description: `to ${assigneeName}`,
+      icon: UserPlus,
+      dotColor: "bg-blue-500",
+    })
+  }
+
+  // 3. Messages (non-system, with timestamp)
+  for (const msg of messages) {
+    if (msg.isSystemMessage || !msg.createdAt) continue
+    const authorName = msg.author?.name ?? msg.author?.email ?? "Unknown"
+    const isNote = msg.isInternalNote
+    events.push({
+      id: `msg-${msg.id}`,
+      type: "message",
+      timestamp: msg.createdAt,
+      label: isNote ? "Internal note" : "Reply",
+      description: `by ${authorName}`,
+      icon: MessageSquare,
+      dotColor: isNote ? "bg-amber-500" : "bg-indigo-500",
+    })
+  }
+
+  // 4. Current status (if not open and not covered by resolved/closed)
+  if (
+    ticket.status !== "open" &&
+    ticket.status !== "resolved" &&
+    ticket.status !== "closed" &&
+    ticket.updatedAt
+  ) {
+    events.push({
+      id: "status-current",
+      type: "status",
+      timestamp: ticket.updatedAt,
+      label: `Status changed`,
+      description: `to ${statusLabels[ticket.status] ?? ticket.status}`,
+      icon: CircleDot,
+      dotColor: "bg-blue-500",
+    })
+  }
+
+  // 5. Resolved
+  if (ticket.resolvedAt) {
+    events.push({
+      id: "resolved",
+      type: "resolved",
+      timestamp: ticket.resolvedAt,
+      label: "Ticket resolved",
+      icon: CheckCircle2,
+      dotColor: "bg-green-500",
+    })
+  }
+
+  // 6. Closed
+  if (ticket.closedAt) {
+    events.push({
+      id: "closed",
+      type: "closed",
+      timestamp: ticket.closedAt,
+      label: "Ticket closed",
+      icon: Lock,
+      dotColor: "bg-zinc-500",
+    })
+  }
+
+  // 7. Last updated (only if distinct from created, resolved, closed)
+  if (
+    ticket.updatedAt &&
+    ticket.updatedAt !== ticket.createdAt &&
+    ticket.updatedAt !== ticket.resolvedAt &&
+    ticket.updatedAt !== ticket.closedAt
+  ) {
+    // Check if we already have a status event at this timestamp
+    const hasStatusAtUpdated = events.some(
+      (e) => e.type === "status" && e.timestamp === ticket.updatedAt,
+    )
+    if (!hasStatusAtUpdated) {
+      events.push({
+        id: "updated",
+        type: "updated",
+        timestamp: ticket.updatedAt,
+        label: "Last updated",
+        icon: Clock,
+        dotColor: "bg-zinc-400",
+      })
+    }
+  }
+
+  // Sort chronologically
+  events.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+
+  return events
+}
+
+function TicketLifecycleTimeline({
+  ticket,
+  messages,
+}: {
+  ticket: TicketType
+  messages: TicketMessageType[]
+}) {
+  const events = useMemo(() => buildTimelineEvents(ticket, messages), [ticket, messages])
+
+  if (events.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-6 text-center">
+        <Clock className="mb-2 h-6 w-6 text-muted-foreground/40" />
+        <p className="text-sm text-muted-foreground">No timeline events</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="relative space-y-0">
+      {events.map((event, index) => {
+        const Icon = event.icon
+        const isLast = index === events.length - 1
+
+        return (
+          <div key={event.id} className="relative flex gap-3 pb-5 last:pb-0">
+            {/* Vertical connector line */}
+            {!isLast && (
+              <div className="absolute left-3 top-7 h-[calc(100%-12px)] w-px bg-border" />
+            )}
+
+            {/* Dot with icon */}
+            <div
+              className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-white ${event.dotColor}`}
+            >
+              <Icon className="h-3 w-3" />
+            </div>
+
+            {/* Content */}
+            <div className="min-w-0 flex-1 space-y-0.5">
+              <p className="text-sm font-medium leading-snug">{event.label}</p>
+              {event.description && (
+                <p className="text-xs text-muted-foreground">{event.description}</p>
+              )}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <p className="cursor-default text-xs text-muted-foreground/70">
+                    {formatRelativeTimeShort(event.timestamp)}
+                  </p>
+                </TooltipTrigger>
+                <TooltipContent>{formatDateTime(event.timestamp)}</TooltipContent>
+              </Tooltip>
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 // ── Loading Skeleton ────────────────────────────────────────────────────
 
 function TicketDetailSkeleton() {
@@ -428,6 +639,7 @@ function TicketDetailPage() {
   const reopenTicket = useReopenTicket(ticketId)
   const updateTicket = useUpdateTicket(ticketId)
   const deleteTicket = useDeleteTicket(ticketId)
+  const { data: messagesData } = useTicketMessages(ticketId)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [activityOpen, setActivityOpen] = useState(false)
 
@@ -993,8 +1205,26 @@ function TicketDetailPage() {
             </Card>
           </PageSection>
 
+          {/* Lifecycle Timeline */}
+          <PageSection delay={0.18}>
+            <Card className="border-border/60 bg-card/80">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                  <History className="h-4 w-4" />
+                  Lifecycle
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <TicketLifecycleTimeline
+                  ticket={ticket}
+                  messages={messagesData ?? []}
+                />
+              </CardContent>
+            </Card>
+          </PageSection>
+
           {/* Activity Log — collapsed by default, lazy-loads when expanded */}
-          <PageSection delay={0.2}>
+          <PageSection delay={0.22}>
             <Collapsible open={activityOpen} onOpenChange={setActivityOpen}>
               <Card className="border-border/60 bg-card/80">
                 <CollapsibleTrigger asChild>
@@ -1022,7 +1252,7 @@ function TicketDetailPage() {
           </PageSection>
 
           {/* Danger zone */}
-          <PageSection delay={0.25}>
+          <PageSection delay={0.27}>
             <Card className="border-destructive/30">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium text-destructive">

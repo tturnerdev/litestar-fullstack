@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.208.0 (2026-05-02)
+
+### Added
+- **Analytics cost analysis section** — Summary stats (total cost, avg per call, inbound/outbound), top extensions by cost bar chart, and daily cost trend area chart on analytics dashboard
+- **Support ticket lifecycle timeline** — Visual vertical timeline on ticket detail sidebar showing creation, assignment, messages, status changes, resolution, and closure with color-coded dots and relative timestamps
+- **Home quick shortcuts row** — Compact icon cards for common actions (Create ticket, Add device, Create team, View analytics) at top of home dashboard
+- **Home recent activity feed** — Recent tickets, teams, and devices feed with status badges, timestamps, and "View all" links on the home dashboard
+- **Gateway batch lookup** — New Batch tab on gateway page for bulk lookups (phone number, extension, device), with progress bar, results table, stop button, and CSV export
+
 ## v0.207.0 (2026-05-02)
 
 ### Added
