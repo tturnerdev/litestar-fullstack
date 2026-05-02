@@ -22,6 +22,11 @@ export function useInitiateMfaSetup() {
       const { data } = await initiateMfaSetup({ throwOnError: true })
       return data
     },
+    onError: (error) => {
+      toast.error("Unable to set up MFA", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
+    },
   })
 }
 
@@ -37,6 +42,11 @@ export function useConfirmMfaSetup() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["getMfaStatus"] })
+    },
+    onError: (error) => {
+      toast.error("Unable to confirm MFA setup", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
     },
   })
 }
@@ -55,6 +65,11 @@ export function useDisableMfa() {
       queryClient.invalidateQueries({ queryKey: ["getMfaStatus"] })
       toast.success("MFA disabled")
     },
+    onError: (error) => {
+      toast.error("Unable to disable MFA", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
+    },
   })
 }
 
@@ -66,6 +81,11 @@ export function useInitiateDisableMfaOAuth() {
         throwOnError: true,
       })
       return data
+    },
+    onError: (error) => {
+      toast.error("Unable to disable MFA via OAuth", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
     },
   })
 }
@@ -84,6 +104,11 @@ export function useRegenerateBackupCodes() {
       queryClient.invalidateQueries({ queryKey: ["getMfaStatus"] })
       toast.success("Backup codes regenerated")
     },
+    onError: (error) => {
+      toast.error("Unable to regenerate backup codes", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
+    },
   })
 }
 
@@ -98,6 +123,11 @@ export function useVerifyMfaChallenge() {
         security: [],
       })
       return data
+    },
+    onError: (error) => {
+      toast.error("Unable to verify MFA code", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
     },
   })
 }
@@ -116,6 +146,11 @@ export function useStartOAuthLink() {
       })
       return data
     },
+    onError: (error) => {
+      toast.error("Unable to link OAuth account", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
+    },
   })
 }
 
@@ -132,6 +167,11 @@ export function useUnlinkOAuthAccount() {
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: profileOAuthAccountsQueryKey(),
+      })
+    },
+    onError: (error) => {
+      toast.error("Unable to unlink OAuth account", {
+        description: error instanceof Error ? error.message : "Try again later",
       })
     },
   })

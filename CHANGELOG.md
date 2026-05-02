@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.246.0 (2026-05-03)
+
+### Fixed
+- **Missing error toasts on auth mutations** — added `onError` handlers with `toast.error()` to all 8 auth mutation hooks (MFA setup/confirm/disable, backup codes, OAuth link/unlink, MFA verify)
+- **Missing error toast on notification mark-read** — added `onError` handler to `useMarkRead` mutation
+
 ## v0.245.0 (2026-05-03)
 
 ### Added
