@@ -1,5 +1,62 @@
 # Changelog
 
+## v0.196.0 (2026-05-02)
+
+### Added
+- **Analytics call volume chart** — Stacked bar chart showing inbound/outbound call volume by day with summary stats (total, inbound, outbound, avg/day)
+- **Webhook detail links** — Webhook names in list are now clickable links to the detail page; "View details" added to row action dropdown
+- **Profile data export** — GDPR-compliant "Your Data" card on profile page allows downloading personal data, preferences, and notification settings as JSON
+
+## v0.195.0 (2026-05-02)
+
+### Added
+- **Accessibility settings** — New settings section with reduced motion toggle, high contrast mode, and font size controls (Default/Large/Extra Large)
+- **Connection health dashboard** — Collapsible summary stats (total, connected, errors, last check) at top of connections list page
+- **Profile completeness indicator** — Progress bar and step checklist on profile page showing setup completion for name, email, MFA, team, and avatar
+
+## v0.194.0 (2026-05-02)
+
+### Added
+- **Webhook detail page** — Full detail view at `/webhooks/$webhookId` with info card, active toggle, event badges, secret reveal, delivery log table, test button, and danger zone delete
+- **Notification preferences** — Granular per-category in-app notification toggles (system, tasks, teams, support, devices, security) in settings with localStorage persistence
+- **Permissions reference matrix** — Visual role-vs-capability table on admin roles page showing Superuser/Admin/Member access levels
+
+## v0.193.0 (2026-05-02)
+
+### Added
+- **Sortable column headers** — E911 registrations (phone number, address, city, validated) and tags (name, slug) now use standard SortableHeader components
+
+## v0.192.0 (2026-05-02)
+
+### Added
+- **Items-per-page selector** — Standardized across teams, schedules, voicemail, E911, tags, and notifications list pages with localStorage persistence
+- **Tasks sortable headers** — Task type, status, started, and completed columns now support click-to-sort
+- **Tasks bulk actions** — BulkActionBar with Export Selected and Cancel Selected actions
+- **Sticky table headers** — Added to teams and E911 list pages
+
+## v0.191.0 (2026-05-02)
+
+### Added
+- **Action dropdown menus** — Consolidated Copy ID and Delete actions into DropdownMenu on schedule, E911 registration, and support ticket detail pages
+
+### Changed
+- Ticket detail header reorganized — secondary actions (Close/Reopen, Delete) moved into dropdown menu while Edit stays visible
+
+## v0.190.0 (2026-05-02)
+
+### Added
+- **Teams list row actions** — DropdownMenu with View, Edit, Delete and confirmation dialog on each team row; rows are now clickable
+- **Teams detail action dropdown** — Copy Team ID and Delete Team in header dropdown menu
+- **Location row delete** — Delete action with confirmation dialog added to location list row dropdown
+- **Tasks page polish** — Items-per-page selector, DataFreshness component, duration column (computed from started/completed timestamps), auto-refresh every 15s when active tasks visible
+
+## v0.189.0 (2026-05-02)
+
+### Added
+- **Cross-domain entity links** — Extension and team IDs on call queue, ring group, device, phone number, connection, and voicemail detail pages are now clickable Links to their respective detail pages
+- **Team related entities** — Team detail page shows Devices and Extensions sections with tables linking to individual entities
+- **Items-per-page** — Added to admin device-templates and webhooks list pages
+
 ## v0.118.0 (2026-05-01)
 
 ### Fixed
