@@ -63,15 +63,16 @@ interface PageSectionProps {
   className?: string
   delay?: number
   animated?: boolean
+  id?: string
 }
 
-export function PageSection({ children, className, delay = 0, animated = true }: PageSectionProps) {
+export function PageSection({ children, className, delay = 0, animated = true, id }: PageSectionProps) {
   if (!animated) {
-    return <section className={cn("space-y-6", className)}>{children}</section>
+    return <section id={id} className={cn("space-y-6", className)}>{children}</section>
   }
 
   return (
-    <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay, duration: 0.4 }} className={cn("space-y-6", className)}>
+    <motion.section id={id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay, duration: 0.4 }} className={cn("space-y-6", className)}>
       {children}
     </motion.section>
   )

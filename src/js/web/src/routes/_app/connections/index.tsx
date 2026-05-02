@@ -1,10 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
+  Activity,
   AlertCircle,
   Cable,
   CheckCircle2,
+  ChevronDown,
   Circle,
+  Clock,
   Download,
   Eye,
   Home,
@@ -39,6 +42,8 @@ import {
 } from "@/components/ui/breadcrumb"
 import { BulkActionBar, createBulkDeleteAction, createBulkToggleActions, createExportAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
   DropdownMenu,
@@ -330,6 +335,19 @@ function ConnectionsPage() {
   const hasAnyConnections = (data?.items.length ?? 0) > 0
   const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / pageSize))
 
+  // Connection health summary
+  const [healthOpen, setHealthOpen] = useState(true)
+  const healthStats = useMemo(() => {
+    const items = data?.items ?? []
+    const active = items.filter((c) => c.status === "connected").length
+    const errors = items.filter((c) => c.status === "error" || c.status === "disconnected").length
+    const lastCheck = items.reduce<string | null>((latest, c) => {
+      if (c.lastHealthCheck && (!latest || c.lastHealthCheck > latest)) return c.lastHealthCheck
+      return latest
+    }, null)
+    return { total: items.length, active, errors, lastCheck }
+  }, [data?.items])
+
   // Keyboard shortcuts: "/" to focus search, "N" opens create page, ArrowLeft/ArrowRight for pagination
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -396,6 +414,72 @@ function ConnectionsPage() {
           </div>
         }
       />
+
+      {/* Connection health summary */}
+      {hasAnyConnections && !isLoading && !isError && (
+        <PageSection>
+          <Collapsible open={healthOpen} onOpenChange={setHealthOpen}>
+            <div className="flex items-center justify-between mb-3">
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" size="sm" className="gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground -ml-2">
+                  Connection Health
+                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${healthOpen ? "" : "-rotate-90"}`} />
+                </Button>
+              </CollapsibleTrigger>
+            </div>
+            <CollapsibleContent>
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                <Card>
+                  <CardContent className="flex items-center gap-3 px-4 py-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted">
+                      <Activity className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-2xl font-semibold leading-none">{healthStats.total}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">Total</p>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="flex items-center gap-3 px-4 py-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-2xl font-semibold leading-none text-emerald-600 dark:text-emerald-400">{healthStats.active}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">Connected</p>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="flex items-center gap-3 px-4 py-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/30">
+                      <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-2xl font-semibold leading-none text-red-600 dark:text-red-400">{healthStats.errors}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">Errors</p>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="flex items-center gap-3 px-4 py-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted">
+                      <Clock className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold leading-none">
+                        {healthStats.lastCheck ? formatRelativeTimeShort(healthStats.lastCheck) : "Never"}
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">Last checked</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        </PageSection>
+      )}
 
       {/* Search & filters */}
       <PageSection>

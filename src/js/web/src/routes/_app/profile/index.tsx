@@ -1,7 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query"
 import { Link, createFileRoute, useNavigate, useSearch } from "@tanstack/react-router"
-import { AlertCircle, ArrowRight, Bell, Calendar, CheckCircle2, ChevronRight, KeyRound, Link2, Mail, Monitor, Palette, Phone, Shield, ShieldAlert, ShieldCheck, User as UserIcon, Users } from "lucide-react"
-import { useEffect } from "react"
+import { AlertCircle, ArrowRight, Bell, Calendar, CheckCircle2, ChevronRight, Circle, KeyRound, Link2, Mail, Monitor, Palette, Phone, Shield, ShieldAlert, ShieldCheck, Sparkles, User as UserIcon, Users } from "lucide-react"
+import { useEffect, useMemo } from "react"
 import { toast } from "sonner"
 import { z } from "zod"
 import { ActiveSessions } from "@/components/profile/active-sessions"
@@ -270,6 +270,92 @@ function QuickLinksCard() {
   )
 }
 
+interface CompletionStep {
+  label: string
+  completed: boolean
+  sectionId?: string
+}
+
+function ProfileCompletenessCard({ user }: { user: User }) {
+  const completionSteps: CompletionStep[] = useMemo(() => {
+    return [
+      { label: "Set display name", completed: !!user.name && user.name.trim() !== "", sectionId: "personal-info" },
+      { label: "Add email address", completed: !!user.email },
+      { label: "Verify email", completed: user.isVerified === true },
+      { label: "Set up MFA", completed: user.isTwoFactorEnabled === true, sectionId: "security" },
+      { label: "Join a team", completed: (user.teams?.length ?? 0) > 0 },
+      { label: "Upload avatar", completed: !!user.avatarUrl },
+    ]
+  }, [user.name, user.email, user.isVerified, user.isTwoFactorEnabled, user.teams, user.avatarUrl])
+
+  const completedCount = completionSteps.filter((s) => s.completed).length
+  const totalSteps = completionSteps.length
+  const percentage = Math.round((completedCount / totalSteps) * 100)
+
+  if (percentage === 100) {
+    return (
+      <Card className="border-green-200 bg-green-50/50 dark:border-green-900 dark:bg-green-950/20">
+        <CardContent className="flex items-center gap-3 py-4">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/50">
+            <Sparkles className="h-5 w-5 text-green-600 dark:text-green-400" />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-green-800 dark:text-green-300">Profile complete</p>
+            <p className="text-xs text-green-600 dark:text-green-400">Great job! Your profile is fully set up.</p>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base">Profile completeness</CardTitle>
+        <CardDescription>{percentage}% complete &mdash; {totalSteps - completedCount} {totalSteps - completedCount === 1 ? "step" : "steps"} remaining</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Progress bar */}
+        <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+          <div
+            className="h-full rounded-full bg-primary transition-all duration-500"
+            style={{ width: `${percentage}%` }}
+          />
+        </div>
+
+        {/* Steps checklist */}
+        <ul className="grid gap-1.5 sm:grid-cols-2">
+          {completionSteps.map((step) => (
+            <li key={step.label}>
+              {!step.completed && step.sectionId ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    document.getElementById(step.sectionId!)?.scrollIntoView({ behavior: "smooth", block: "start" })
+                  }}
+                  className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm transition-colors hover:bg-accent"
+                >
+                  <Circle className="h-4 w-4 shrink-0 text-muted-foreground/50" />
+                  <span className="text-muted-foreground">{step.label}</span>
+                </button>
+              ) : (
+                <div className="flex items-center gap-2 px-2 py-1.5 text-sm">
+                  {step.completed ? (
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-green-600 dark:text-green-400" />
+                  ) : (
+                    <Circle className="h-4 w-4 shrink-0 text-muted-foreground/50" />
+                  )}
+                  <span className={step.completed ? "text-foreground" : "text-muted-foreground"}>{step.label}</span>
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
+      </CardContent>
+    </Card>
+  )
+}
+
 function ProfilePage() {
   useDocumentTitle("Profile")
   const queryClient = useQueryClient()
@@ -334,6 +420,11 @@ function ProfilePage() {
     <PageContainer className="flex-1 space-y-10" maxWidth="4xl">
       <PageHeader eyebrow="Account" title="Profile" description="Manage your personal information, security, and connected accounts." />
 
+      {/* Profile completeness indicator */}
+      <PageSection>
+        <ProfileCompletenessCard user={user} />
+      </PageSection>
+
       {/* Hero / avatar section */}
       <PageSection>
         <ProfileHero user={user} />
@@ -350,7 +441,7 @@ function ProfilePage() {
       <Separator />
 
       {/* Personal information */}
-      <PageSection delay={0.1}>
+      <PageSection delay={0.1} id="personal-info">
         <SectionHeading icon={UserIcon} title="Personal information" description="Update your name, username, and contact details." />
         <PersonalInfoForm user={user} />
       </PageSection>
@@ -358,7 +449,7 @@ function ProfilePage() {
       <Separator />
 
       {/* Security section */}
-      <PageSection delay={0.2}>
+      <PageSection delay={0.2} id="security">
         <SectionHeading icon={Shield} title="Security" description="Manage your password and multi-factor authentication." />
         <div className="grid gap-6 lg:grid-cols-2">
           <PasswordChangeCard />

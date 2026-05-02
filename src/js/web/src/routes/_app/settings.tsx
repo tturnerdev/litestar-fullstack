@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { AnimatePresence, motion } from "framer-motion"
 import {
+  Accessibility,
   Bell,
   Calendar,
   Check,
@@ -18,8 +19,9 @@ import {
   Shield,
   Smartphone,
   Sun,
+  Type,
 } from "lucide-react"
-import { useCallback, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 import { NotificationPreferences } from "@/components/settings/notification-preferences"
 import { Badge } from "@/components/ui/badge"
@@ -46,6 +48,7 @@ const NAV_ITEMS = [
   { id: "appearance", label: "Appearance", icon: Palette },
   { id: "notifications", label: "Notifications", icon: Bell },
   { id: "display", label: "Display", icon: Layout },
+  { id: "accessibility", label: "Accessibility", icon: Accessibility },
   { id: "sessions", label: "Sessions", icon: Shield },
   { id: "shortcuts", label: "Shortcuts", icon: Keyboard },
 ] as const
@@ -142,12 +145,18 @@ function SettingsPage() {
           </PageSection>
 
           <PageSection delay={0.25}>
+            <div ref={(el) => { sectionRefs.current.accessibility = el }} className="scroll-mt-24">
+              <AccessibilitySection />
+            </div>
+          </PageSection>
+
+          <PageSection delay={0.3}>
             <div ref={(el) => { sectionRefs.current.sessions = el }} className="scroll-mt-24">
               <ActiveSessionsSection />
             </div>
           </PageSection>
 
-          <PageSection delay={0.3}>
+          <PageSection delay={0.35}>
             <div ref={(el) => { sectionRefs.current.shortcuts = el }} className="scroll-mt-24">
               <KeyboardShortcutsSection />
             </div>
@@ -391,6 +400,117 @@ function DisplaySection() {
             <p className="text-sm text-muted-foreground">Start with the sidebar in its collapsed state.</p>
           </div>
           <Switch id="sidebar-collapsed" checked={sidebarCollapsed} onCheckedChange={handleSidebarChange} />
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+/* -----------------------------------------------------------------------
+ * Accessibility section
+ * ----------------------------------------------------------------------- */
+
+function AccessibilitySection() {
+  const {
+    reducedMotion, setReducedMotion,
+    highContrast, setHighContrast,
+    fontSize, setFontSize,
+  } = useSettingsStore()
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("motion-reduce", reducedMotion)
+  }, [reducedMotion])
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("high-contrast", highContrast)
+  }, [highContrast])
+
+  useEffect(() => {
+    document.documentElement.style.fontSize =
+      fontSize === "large" ? "112.5%" : fontSize === "x-large" ? "125%" : ""
+  }, [fontSize])
+
+  const handleReducedMotionChange = useCallback(
+    (checked: boolean) => {
+      setReducedMotion(checked)
+      toast.success(checked ? "Reduced motion enabled" : "Reduced motion disabled")
+    },
+    [setReducedMotion],
+  )
+
+  const handleHighContrastChange = useCallback(
+    (checked: boolean) => {
+      setHighContrast(checked)
+      toast.success(checked ? "High contrast enabled" : "High contrast disabled")
+    },
+    [setHighContrast],
+  )
+
+  const handleFontSizeChange = useCallback(
+    (v: string) => {
+      setFontSize(v as "default" | "large" | "x-large")
+      const labels: Record<string, string> = { default: "Default", large: "Large", "x-large": "Extra Large" }
+      toast.success(`Font size set to ${labels[v]}`)
+    },
+    [setFontSize],
+  )
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10">
+            <Accessibility className="h-4 w-4 text-violet-500" />
+          </div>
+          Accessibility
+        </CardTitle>
+        <CardDescription>Adjust settings to make the interface more comfortable and easier to use.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        <div className="flex items-center justify-between rounded-lg border border-border/60 p-4">
+          <div className="space-y-0.5">
+            <Label htmlFor="reduced-motion" className="text-sm font-medium">
+              Reduced motion
+            </Label>
+            <p className="text-sm text-muted-foreground">Minimize animations and transitions throughout the interface.</p>
+          </div>
+          <Switch id="reduced-motion" checked={reducedMotion} onCheckedChange={handleReducedMotionChange} />
+        </div>
+
+        <div className="flex items-center justify-between rounded-lg border border-border/60 p-4">
+          <div className="space-y-0.5">
+            <Label htmlFor="high-contrast" className="text-sm font-medium">
+              High contrast
+            </Label>
+            <p className="text-sm text-muted-foreground">Increase contrast between foreground and background elements.</p>
+          </div>
+          <Switch id="high-contrast" checked={highContrast} onCheckedChange={handleHighContrastChange} />
+        </div>
+
+        <div className="flex items-center justify-between rounded-lg border border-border/60 p-4">
+          <div className="space-y-0.5">
+            <Label className="flex items-center gap-1.5 text-sm font-medium">
+              <Type className="h-3.5 w-3.5 text-muted-foreground" />
+              Font size
+            </Label>
+            <p className="text-sm text-muted-foreground">
+              {fontSize === "large"
+                ? "Text is 12% larger than default."
+                : fontSize === "x-large"
+                  ? "Text is 25% larger than default."
+                  : "Standard text size across the interface."}
+            </p>
+          </div>
+          <Select value={fontSize} onValueChange={handleFontSizeChange}>
+            <SelectTrigger className="w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="default">Default</SelectItem>
+              <SelectItem value="large">Large</SelectItem>
+              <SelectItem value="x-large">Extra Large</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </CardContent>
     </Card>
