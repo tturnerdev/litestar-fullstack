@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
-import { AlertCircle, AlertTriangle, ArrowLeft, Clock, Cpu, Loader2, MapPin, Pencil, Trash2 } from "lucide-react"
+import { AlertCircle, AlertTriangle, ArrowLeft, Clock, Cpu, ExternalLink, Loader2, MapPin, Pencil, Trash2 } from "lucide-react"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -38,6 +38,33 @@ export const Route = createFileRoute("/_app/locations/$locationId/")({
     edit: search.edit === true || search.edit === "true" || undefined,
   }),
 })
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+function buildGoogleMapsUrl(location: Location): string | null {
+  const parts = [
+    location.addressLine1,
+    location.addressLine2,
+    location.city,
+    location.state,
+    location.postalCode,
+    location.country,
+  ].filter(Boolean)
+  if (parts.length === 0) return null
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(parts.join(", "))}`
+}
+
+function formatFullAddress(location: Location): string | null {
+  const line1 = location.addressLine1
+  const line2 = location.addressLine2
+  const cityStateZip = [location.city, location.state].filter(Boolean).join(", ")
+  const zipCountry = [location.postalCode, location.country].filter(Boolean).join(" ")
+  const parts = [line1, line2, [cityStateZip, zipCountry].filter(Boolean).join(" ")].filter(Boolean)
+  if (parts.length === 0) return null
+  return parts.join(", ")
+}
 
 // ---------------------------------------------------------------------------
 // Main page
@@ -341,7 +368,7 @@ function LocationDetailPage() {
                             <InfoField label="Description" value={data.description} />
                           </div>
                         )}
-                        {!isAddressed && data.parentId && <InfoField label="Parent ID" value={data.parentId} mono />}
+                        {data.teamId && <InfoField label="Team" value={data.teamId} mono />}
                       </div>
                     </div>
 
@@ -350,7 +377,27 @@ function LocationDetailPage() {
                       <>
                         <Separator />
                         <div className="space-y-4">
-                          <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Address</h4>
+                          <div className="flex items-center justify-between">
+                            <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Address</h4>
+                            {buildGoogleMapsUrl(data) && (
+                              <Button variant="outline" size="sm" asChild>
+                                <a
+                                  href={buildGoogleMapsUrl(data)!}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  <MapPin className="mr-2 h-3.5 w-3.5" />
+                                  View on Map
+                                  <ExternalLink className="ml-2 h-3 w-3" />
+                                </a>
+                              </Button>
+                            )}
+                          </div>
+                          {formatFullAddress(data) && (
+                            <div className="rounded-lg border border-border/60 bg-muted/30 p-4">
+                              <p className="text-sm leading-relaxed">{formatFullAddress(data)}</p>
+                            </div>
+                          )}
                           <div className="grid gap-4 text-sm md:grid-cols-2">
                             <InfoField label="Address Line 1" value={data.addressLine1} />
                             <InfoField label="Address Line 2" value={data.addressLine2} />
@@ -369,11 +416,24 @@ function LocationDetailPage() {
 
             {/* Devices at this Location */}
             <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Cpu className="h-5 w-5 text-muted-foreground" />
-                  Devices at this Location
-                </CardTitle>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2">
+                    <Cpu className="h-5 w-5 text-muted-foreground" />
+                    Devices at this Location
+                  </CardTitle>
+                  {!devicesLoading && locationDevices && locationDevices.length > 0 && (
+                    <Badge variant="secondary" className="ml-1">{locationDevices.length}</Badge>
+                  )}
+                </div>
+                {!devicesLoading && locationDevices && locationDevices.length > 0 && (
+                  <Button variant="outline" size="sm" asChild>
+                    <Link to="/devices" search={{ search: data.name }}>
+                      View all
+                      <ExternalLink className="ml-2 h-3 w-3" />
+                    </Link>
+                  </Button>
+                )}
               </CardHeader>
               <CardContent>
                 {devicesLoading ? (
@@ -404,7 +464,9 @@ function LocationDetailPage() {
                               {device.name}
                             </Link>
                           </TableCell>
-                          <TableCell>{device.deviceType}</TableCell>
+                          <TableCell>
+                            <span className="capitalize">{device.deviceType.replace(/_/g, " ")}</span>
+                          </TableCell>
                           <TableCell>
                             <Badge variant={device.status === "online" ? "default" : "secondary"}>
                               {device.status}
@@ -477,20 +539,36 @@ function LocationDetailPage() {
                     <CopyButton value={data.id} label="location ID" />
                   </div>
                 </div>
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground">Type</p>
+                  <Badge variant="outline" className="uppercase text-xs">
+                    {isAddressed ? "Addressed" : "Physical"}
+                  </Badge>
+                </div>
+                {data.parentId && (
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium text-muted-foreground">Parent Location</p>
+                    <Link
+                      to="/locations/$locationId"
+                      params={{ locationId: data.parentId }}
+                      className="text-sm text-primary hover:underline"
+                    >
+                      View parent location
+                    </Link>
+                  </div>
+                )}
                 {data.createdAt && (
                   <div className="space-y-1">
                     <p className="text-xs font-medium text-muted-foreground">Created</p>
-                    <p className="text-sm" title={formatDateTime(data.createdAt)}>
-                      {formatRelativeTime(data.createdAt)}
-                    </p>
+                    <p className="text-sm">{formatRelativeTime(data.createdAt)}</p>
+                    <p className="text-xs text-muted-foreground">{formatDateTime(data.createdAt)}</p>
                   </div>
                 )}
                 {data.updatedAt && (
                   <div className="space-y-1">
                     <p className="text-xs font-medium text-muted-foreground">Last Updated</p>
-                    <p className="text-sm" title={formatDateTime(data.updatedAt)}>
-                      {formatRelativeTime(data.updatedAt)}
-                    </p>
+                    <p className="text-sm">{formatRelativeTime(data.updatedAt)}</p>
+                    <p className="text-xs text-muted-foreground">{formatDateTime(data.updatedAt)}</p>
                   </div>
                 )}
               </CardContent>
@@ -510,45 +588,47 @@ function LocationDetailPage() {
             </Card>
 
             {/* Sub-locations card */}
-            {isAddressed && (
-              <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4" />
-                    Sub-locations
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {children.length > 0 ? (
-                    children.map((child) => (
-                      <Link
-                        key={child.id}
-                        to="/locations/$locationId"
-                        params={{ locationId: child.id }}
-                        className="flex items-center justify-between rounded-xl border bg-background/60 p-3 border-border/60 hover:border-border transition-colors"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
-                            <MapPin className="h-4 w-4" />
-                          </div>
-                          <div>
-                            <p className="font-medium text-sm">{child.name}</p>
-                            {child.description && <p className="text-xs text-muted-foreground">{child.description}</p>}
-                          </div>
-                        </div>
-                      </Link>
-                    ))
-                  ) : (
-                    <div className="text-muted-foreground text-sm py-4 text-center">
-                      <p>No sub-locations yet.</p>
-                      <Button variant="link" size="sm" className="mt-1" asChild>
-                        <Link to="/locations/new">Add a physical location</Link>
-                      </Button>
-                    </div>
+            <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />
+                  Sub-locations
+                  {children.length > 0 && (
+                    <Badge variant="secondary" className="ml-1">{children.length}</Badge>
                   )}
-                </CardContent>
-              </Card>
-            )}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {children.length > 0 ? (
+                  children.map((child) => (
+                    <Link
+                      key={child.id}
+                      to="/locations/$locationId"
+                      params={{ locationId: child.id }}
+                      className="group flex items-center justify-between rounded-xl border bg-background/60 p-3 border-border/60 hover:border-border transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+                          <MapPin className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-sm group-hover:text-primary transition-colors">{child.name}</p>
+                          {child.description && <p className="text-xs text-muted-foreground line-clamp-1">{child.description}</p>}
+                        </div>
+                      </div>
+                      <ArrowLeft className="h-4 w-4 rotate-180 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </Link>
+                  ))
+                ) : (
+                  <div className="text-muted-foreground text-sm py-4 text-center">
+                    <p>No sub-locations yet.</p>
+                    <Button variant="link" size="sm" className="mt-1" asChild>
+                      <Link to="/locations/new">Add a physical location</Link>
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
         </div>
       </PageSection>

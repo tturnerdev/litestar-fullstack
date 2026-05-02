@@ -2,16 +2,18 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { useCallback, useMemo, useState } from "react"
 import {
   AlertCircle,
-  CheckCircle2,
+  BellOff,
   Download,
   Home,
   Loader2,
   Phone,
+  PhoneForwarded,
   Plus,
   RefreshCw,
   Search,
+  Shield,
+  ShieldOff,
   X,
-  XCircle,
 } from "lucide-react"
 import {
   AlertDialog,
@@ -23,6 +25,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { Badge } from "@/components/ui/badge"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -70,26 +73,85 @@ const statusOptions: FilterOption[] = [
 
 const csvHeaders: CsvHeader<Extension>[] = [
   { label: "Extension", accessor: (e) => e.extensionNumber },
-  { label: "Display Name", accessor: (e) => e.displayName },
+  { label: "Display Name", accessor: (e) => e.displayName ?? "" },
   { label: "Phone Number Assigned", accessor: (e) => (e.phoneNumberId ? "Yes" : "No") },
   { label: "Active", accessor: (e) => (e.isActive ? "Yes" : "No") },
+  { label: "DND", accessor: (e) => (e.dndEnabled ? "Yes" : "No") },
+  { label: "E911 Status", accessor: (e) => e.e911Status ?? "None" },
+  { label: "Forwarding", accessor: (e) => (e.forwardAlwaysEnabled ? "Always" : "No") },
 ]
 
 // -- Helpers ------------------------------------------------------------------
 
-function StatusIndicator({ isActive }: { isActive: boolean }) {
-  if (isActive) {
-    return (
-      <span className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400">
-        <CheckCircle2 className="h-3.5 w-3.5" />
-        Active
-      </span>
-    )
-  }
+function StatusDot({ active }: { active: boolean }) {
   return (
-    <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-      <XCircle className="h-3.5 w-3.5" />
-      Inactive
+    <span className="flex items-center gap-1.5 text-xs">
+      <span
+        className={`h-2 w-2 rounded-full ${active ? "bg-emerald-500" : "bg-muted-foreground/40"}`}
+      />
+      <span className={active ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}>
+        {active ? "Active" : "Inactive"}
+      </span>
+    </span>
+  )
+}
+
+function FeatureIndicators({ ext }: { ext: Extension }) {
+  const hasE911 = ext.e911RegistrationId != null
+  const e911Status = ext.e911Status ?? "none"
+  const dndOn = ext.dndEnabled === true
+  const fwdOn = ext.forwardAlwaysEnabled === true
+
+  // No features worth showing
+  if (!hasE911 && !dndOn && !fwdOn) return <span className="text-xs text-muted-foreground">--</span>
+
+  return (
+    <span className="flex items-center gap-1.5">
+      {hasE911 && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Badge
+              variant={e911Status === "registered" ? "default" : "outline"}
+              className={`gap-1 px-1.5 py-0 text-[10px] ${e911Status === "registered" ? "bg-emerald-600 text-white" : ""}`}
+            >
+              {e911Status === "registered" ? (
+                <Shield className="h-3 w-3" />
+              ) : (
+                <ShieldOff className="h-3 w-3" />
+              )}
+              E911
+            </Badge>
+          </TooltipTrigger>
+          <TooltipContent>
+            {e911Status === "registered" ? "E911 registered" : `E911: ${e911Status}`}
+          </TooltipContent>
+        </Tooltip>
+      )}
+      {dndOn && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Badge variant="destructive" className="gap-1 px-1.5 py-0 text-[10px]">
+              <BellOff className="h-3 w-3" />
+              DND
+            </Badge>
+          </TooltipTrigger>
+          <TooltipContent>Do Not Disturb is active</TooltipContent>
+        </Tooltip>
+      )}
+      {fwdOn && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Badge variant="secondary" className="gap-1 px-1.5 py-0 text-[10px]">
+              <PhoneForwarded className="h-3 w-3" />
+              FWD
+            </Badge>
+          </TooltipTrigger>
+          <TooltipContent>
+            Call forwarding always enabled
+            {ext.forwardAlwaysDestination ? ` to ${ext.forwardAlwaysDestination}` : ""}
+          </TooltipContent>
+        </Tooltip>
+      )}
     </span>
   )
 }
@@ -152,7 +214,7 @@ function ExtensionsPage() {
         const phoneNumber = ext.phoneNumberId ? phoneMap.get(ext.phoneNumberId) ?? "" : ""
         return (
           ext.extensionNumber.toLowerCase().includes(q) ||
-          ext.displayName.toLowerCase().includes(q) ||
+          (ext.displayName ?? "").toLowerCase().includes(q) ||
           phoneNumber.toLowerCase().includes(q)
         )
       })
@@ -170,8 +232,8 @@ function ExtensionsPage() {
             bVal = b.extensionNumber
             break
           case "display_name":
-            aVal = a.displayName.toLowerCase()
-            bVal = b.displayName.toLowerCase()
+            aVal = (a.displayName ?? "").toLowerCase()
+            bVal = (b.displayName ?? "").toLowerCase()
             break
           case "phone_number": {
             aVal = a.phoneNumberId ? (phoneMap.get(a.phoneNumberId) ?? "") : ""
@@ -459,13 +521,6 @@ function ExtensionsPage() {
                       onSort={handleSort}
                     />
                     <SortableHeader
-                      label="Display Name"
-                      sortKey="display_name"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                    />
-                    <SortableHeader
                       label="Phone Number"
                       sortKey="phone_number"
                       currentSort={sortKey}
@@ -480,6 +535,7 @@ function ExtensionsPage() {
                       currentDirection={sortDir}
                       onSort={handleSort}
                     />
+                    <TableHead className="hidden lg:table-cell">Features</TableHead>
                     <TableHead className="hidden md:table-cell">Created</TableHead>
                     <TableHead className="w-10">
                       <span className="sr-only">Actions</span>
@@ -608,9 +664,11 @@ function ExtensionRow({
           onClick={(e) => e.stopPropagation()}
         >
           <span className="font-mono font-medium group-hover:underline">{ext.extensionNumber}</span>
+          {ext.displayName && (
+            <span className="text-xs text-muted-foreground">{ext.displayName}</span>
+          )}
         </Link>
       </TableCell>
-      <TableCell>{ext.displayName}</TableCell>
       <TableCell className="hidden md:table-cell">
         {phoneNumber ? (
           <span className="font-mono text-xs">{phoneNumber}</span>
@@ -619,21 +677,20 @@ function ExtensionRow({
         )}
       </TableCell>
       <TableCell>
-        <StatusIndicator isActive={ext.isActive} />
+        <StatusDot active={ext.isActive ?? false} />
+      </TableCell>
+      <TableCell className="hidden lg:table-cell">
+        <FeatureIndicators ext={ext} />
       </TableCell>
       <TableCell className="hidden md:table-cell">
         <Tooltip>
           <TooltipTrigger asChild>
             <span className="cursor-default text-xs text-muted-foreground">
-              {formatRelativeTimeShort(
-                "createdAt" in ext ? (ext as unknown as { createdAt?: string }).createdAt : undefined,
-              )}
+              {formatRelativeTimeShort(ext.createdAt)}
             </span>
           </TooltipTrigger>
           <TooltipContent>
-            {formatDateTime(
-              "createdAt" in ext ? (ext as unknown as { createdAt?: string }).createdAt : undefined,
-            )}
+            {formatDateTime(ext.createdAt)}
           </TooltipContent>
         </Tooltip>
       </TableCell>

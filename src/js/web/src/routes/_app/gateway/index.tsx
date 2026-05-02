@@ -4,15 +4,17 @@ import {
   CheckCircle2,
   Clock,
   Hash,
+  History,
   Info,
   Loader2,
   Monitor,
   Phone,
   Search,
   ShieldAlert,
+  Trash2,
   XCircle,
 } from "lucide-react"
-import { useCallback, useState } from "react"
+import { useCallback, useRef, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import {
   Breadcrumb,
@@ -43,6 +45,79 @@ export const Route = createFileRoute("/_app/gateway/")({
     tab: (search.tab as string) || undefined,
   }),
 })
+
+// -- Recent searches ----------------------------------------------------------
+
+function useRecentSearches(key: string, max = 10) {
+  const storageKey = `gateway-recent-${key}`
+  const [items, setItems] = useState<string[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem(storageKey) ?? "[]")
+    } catch {
+      return []
+    }
+  })
+  const add = useCallback(
+    (term: string) => {
+      const trimmed = term.trim()
+      if (!trimmed) return
+      setItems((prev) => {
+        const updated = [trimmed, ...prev.filter((i) => i !== trimmed)].slice(0, max)
+        localStorage.setItem(storageKey, JSON.stringify(updated))
+        return updated
+      })
+    },
+    [storageKey, max],
+  )
+  const clear = useCallback(() => {
+    setItems([])
+    localStorage.removeItem(storageKey)
+  }, [storageKey])
+  return { items, add, clear }
+}
+
+function RecentSearches({
+  items,
+  onSelect,
+  onClear,
+}: {
+  items: string[]
+  onSelect: (term: string) => void
+  onClear: () => void
+}) {
+  if (items.length === 0) return null
+  return (
+    <div className="rounded-md border border-border bg-card p-3 space-y-2">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+          <History className="h-3 w-3" />
+          Recent searches
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-6 px-2 text-xs text-muted-foreground hover:text-destructive"
+          onClick={onClear}
+        >
+          <Trash2 className="mr-1 h-3 w-3" />
+          Clear
+        </Button>
+      </div>
+      <div className="flex flex-wrap gap-1.5">
+        {items.map((term) => (
+          <button
+            key={term}
+            type="button"
+            onClick={() => onSelect(term)}
+            className="inline-flex items-center rounded-md border border-border bg-background px-2.5 py-1 text-sm font-mono transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          >
+            {term}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
 
 // -- Status helpers -----------------------------------------------------------
 
@@ -237,15 +312,27 @@ function LookupResults({
 function PhoneNumberTab() {
   const [input, setInput] = useState("")
   const [searchValue, setSearchValue] = useState("")
+  const [showRecent, setShowRecent] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
   const query = useGatewayLookupNumber(searchValue)
+  const recent = useRecentSearches("phone")
+
+  const executeLookup = useCallback(
+    (value: string) => {
+      const trimmed = value.trim()
+      if (!trimmed) return
+      setInput(trimmed)
+      setSearchValue(trimmed)
+      setShowRecent(false)
+      recent.add(trimmed)
+      setTimeout(() => query.refetch(), 0)
+    },
+    [query, recent],
+  )
 
   const handleLookup = useCallback(() => {
-    const trimmed = input.trim()
-    if (!trimmed) return
-    setSearchValue(trimmed)
-    // setTimeout ensures the query key updates before refetch
-    setTimeout(() => query.refetch(), 0)
-  }, [input, query])
+    executeLookup(input)
+  }, [input, executeLookup])
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -256,23 +343,36 @@ function PhoneNumberTab() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-end gap-3">
-        <div className="flex-1 max-w-md space-y-1.5">
-          <label htmlFor="phone-input" className="text-sm font-medium">
-            Phone Number
-          </label>
-          <Input
-            id="phone-input"
-            placeholder="e.g. +15551234567"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-          />
+      <div className="space-y-2">
+        <div className="flex items-end gap-3">
+          <div ref={containerRef} className="flex-1 max-w-md space-y-1.5">
+            <label htmlFor="phone-input" className="text-sm font-medium">
+              Phone Number
+            </label>
+            <Input
+              id="phone-input"
+              placeholder="e.g. +15551234567"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              onFocus={() => setShowRecent(true)}
+              onBlur={(e) => {
+                if (!containerRef.current?.contains(e.relatedTarget)) {
+                  setShowRecent(false)
+                }
+              }}
+            />
+          </div>
+          <Button onClick={handleLookup} disabled={!input.trim() || query.isFetching}>
+            {query.isFetching ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />}
+            Look Up
+          </Button>
         </div>
-        <Button onClick={handleLookup} disabled={!input.trim() || query.isFetching}>
-          {query.isFetching ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />}
-          Look Up
-        </Button>
+        {showRecent && (
+          <div className="max-w-md">
+            <RecentSearches items={recent.items} onSelect={executeLookup} onClear={recent.clear} />
+          </div>
+        )}
       </div>
       <LookupResults
         sources={query.data?.sources}
@@ -288,14 +388,27 @@ function PhoneNumberTab() {
 function ExtensionTab() {
   const [input, setInput] = useState("")
   const [searchValue, setSearchValue] = useState("")
+  const [showRecent, setShowRecent] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
   const query = useGatewayLookupExtension(searchValue)
+  const recent = useRecentSearches("extension")
+
+  const executeLookup = useCallback(
+    (value: string) => {
+      const trimmed = value.trim()
+      if (!trimmed) return
+      setInput(trimmed)
+      setSearchValue(trimmed)
+      setShowRecent(false)
+      recent.add(trimmed)
+      setTimeout(() => query.refetch(), 0)
+    },
+    [query, recent],
+  )
 
   const handleLookup = useCallback(() => {
-    const trimmed = input.trim()
-    if (!trimmed) return
-    setSearchValue(trimmed)
-    setTimeout(() => query.refetch(), 0)
-  }, [input, query])
+    executeLookup(input)
+  }, [input, executeLookup])
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -306,23 +419,36 @@ function ExtensionTab() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-end gap-3">
-        <div className="flex-1 max-w-md space-y-1.5">
-          <label htmlFor="ext-input" className="text-sm font-medium">
-            Extension Number
-          </label>
-          <Input
-            id="ext-input"
-            placeholder="e.g. 1001"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-          />
+      <div className="space-y-2">
+        <div className="flex items-end gap-3">
+          <div ref={containerRef} className="flex-1 max-w-md space-y-1.5">
+            <label htmlFor="ext-input" className="text-sm font-medium">
+              Extension Number
+            </label>
+            <Input
+              id="ext-input"
+              placeholder="e.g. 1001"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              onFocus={() => setShowRecent(true)}
+              onBlur={(e) => {
+                if (!containerRef.current?.contains(e.relatedTarget)) {
+                  setShowRecent(false)
+                }
+              }}
+            />
+          </div>
+          <Button onClick={handleLookup} disabled={!input.trim() || query.isFetching}>
+            {query.isFetching ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />}
+            Look Up
+          </Button>
         </div>
-        <Button onClick={handleLookup} disabled={!input.trim() || query.isFetching}>
-          {query.isFetching ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />}
-          Look Up
-        </Button>
+        {showRecent && (
+          <div className="max-w-md">
+            <RecentSearches items={recent.items} onSelect={executeLookup} onClear={recent.clear} />
+          </div>
+        )}
       </div>
       <LookupResults
         sources={query.data?.sources}
@@ -338,14 +464,27 @@ function ExtensionTab() {
 function DeviceTab() {
   const [input, setInput] = useState("")
   const [searchValue, setSearchValue] = useState("")
+  const [showRecent, setShowRecent] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
   const query = useGatewayLookupDevice(searchValue)
+  const recent = useRecentSearches("device")
+
+  const executeLookup = useCallback(
+    (value: string) => {
+      const trimmed = value.trim()
+      if (!trimmed) return
+      setInput(trimmed)
+      setSearchValue(trimmed)
+      setShowRecent(false)
+      recent.add(trimmed)
+      setTimeout(() => query.refetch(), 0)
+    },
+    [query, recent],
+  )
 
   const handleLookup = useCallback(() => {
-    const trimmed = input.trim()
-    if (!trimmed) return
-    setSearchValue(trimmed)
-    setTimeout(() => query.refetch(), 0)
-  }, [input, query])
+    executeLookup(input)
+  }, [input, executeLookup])
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -356,23 +495,36 @@ function DeviceTab() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-end gap-3">
-        <div className="flex-1 max-w-md space-y-1.5">
-          <label htmlFor="mac-input" className="text-sm font-medium">
-            MAC Address
-          </label>
-          <Input
-            id="mac-input"
-            placeholder="e.g. AA:BB:CC:DD:EE:FF"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-          />
+      <div className="space-y-2">
+        <div className="flex items-end gap-3">
+          <div ref={containerRef} className="flex-1 max-w-md space-y-1.5">
+            <label htmlFor="mac-input" className="text-sm font-medium">
+              MAC Address
+            </label>
+            <Input
+              id="mac-input"
+              placeholder="e.g. AA:BB:CC:DD:EE:FF"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              onFocus={() => setShowRecent(true)}
+              onBlur={(e) => {
+                if (!containerRef.current?.contains(e.relatedTarget)) {
+                  setShowRecent(false)
+                }
+              }}
+            />
+          </div>
+          <Button onClick={handleLookup} disabled={!input.trim() || query.isFetching}>
+            {query.isFetching ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />}
+            Look Up
+          </Button>
         </div>
-        <Button onClick={handleLookup} disabled={!input.trim() || query.isFetching}>
-          {query.isFetching ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />}
-          Look Up
-        </Button>
+        {showRecent && (
+          <div className="max-w-md">
+            <RecentSearches items={recent.items} onSelect={executeLookup} onClear={recent.clear} />
+          </div>
+        )}
       </div>
       <LookupResults
         sources={query.data?.sources}

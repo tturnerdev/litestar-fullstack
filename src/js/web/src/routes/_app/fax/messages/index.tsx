@@ -78,6 +78,56 @@ const csvHeaders: CsvHeader<FaxMessage>[] = [
   { label: "Date", accessor: (m) => { const d = m.receivedAt ?? m.createdAt; return d ? formatDateTime(d) : "" } },
 ]
 
+// -- Status summary config ----------------------------------------------------
+
+interface StatusConfig {
+  label: string
+  dotClass: string
+  bgClass: string
+  textClass: string
+}
+
+const STATUS_CONFIG: Record<string, StatusConfig> = {
+  delivered: {
+    label: "Delivered",
+    dotClass: "bg-green-500",
+    bgClass: "bg-green-500/10",
+    textClass: "text-green-600 dark:text-green-400",
+  },
+  received: {
+    label: "Received",
+    dotClass: "bg-green-500",
+    bgClass: "bg-green-500/10",
+    textClass: "text-green-600 dark:text-green-400",
+  },
+  sent: {
+    label: "Sent",
+    dotClass: "bg-green-500",
+    bgClass: "bg-green-500/10",
+    textClass: "text-green-600 dark:text-green-400",
+  },
+  sending: {
+    label: "Sending",
+    dotClass: "bg-blue-500",
+    bgClass: "bg-blue-500/10",
+    textClass: "text-blue-600 dark:text-blue-400",
+  },
+  queued: {
+    label: "Queued",
+    dotClass: "bg-amber-500",
+    bgClass: "bg-amber-500/10",
+    textClass: "text-amber-600 dark:text-amber-400",
+  },
+  failed: {
+    label: "Failed",
+    dotClass: "bg-red-500",
+    bgClass: "bg-red-500/10",
+    textClass: "text-red-600 dark:text-red-400",
+  },
+}
+
+const STATUS_DISPLAY_ORDER = ["delivered", "received", "sent", "sending", "queued", "failed"]
+
 // -- Helpers ------------------------------------------------------------------
 
 
@@ -147,6 +197,15 @@ function FaxMessagesPage() {
       return true
     })
   }, [data?.items, directionFilter, statusFilter, startDate, endDate])
+
+  // Status distribution counts from the currently visible items
+  const statusCounts = useMemo(() => {
+    const counts = new Map<string, number>()
+    for (const msg of filteredItems) {
+      counts.set(msg.status, (counts.get(msg.status) ?? 0) + 1)
+    }
+    return counts
+  }, [filteredItems])
 
   const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / PAGE_SIZE))
 
@@ -289,6 +348,25 @@ function FaxMessagesPage() {
           </div>
         }
       />
+
+      {/* Status distribution summary */}
+      {filteredItems.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2">
+          {STATUS_DISPLAY_ORDER.filter((s) => statusCounts.has(s)).map((status) => {
+            const config = STATUS_CONFIG[status]
+            const count = statusCounts.get(status) ?? 0
+            return (
+              <span
+                key={status}
+                className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${config.bgClass} ${config.textClass}`}
+              >
+                <span className={`h-1.5 w-1.5 rounded-full ${config.dotClass}`} />
+                {count} {config.label}
+              </span>
+            )
+          })}
+        </div>
+      )}
 
       {/* Search & filters */}
       <PageSection>
