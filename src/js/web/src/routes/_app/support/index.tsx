@@ -17,6 +17,7 @@ import {
   RotateCcw,
   Save,
   Search,
+  SlidersHorizontal,
   Trash2,
   User,
   UserX,
@@ -34,7 +35,15 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { DataFreshness } from "@/components/ui/data-freshness"
 import { DateRangeFilter, getPresetDates, isDateInRange } from "@/components/ui/date-range-filter"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { FilterDropdown, type FilterOption } from "@/components/ui/filter-dropdown"
 import { Input } from "@/components/ui/input"
@@ -52,6 +61,7 @@ import { useAuthStore } from "@/lib/auth"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { client } from "@/lib/generated/api/client.gen"
+import { useSettingsStore } from "@/lib/settings-store"
 import { cn } from "@/lib/utils"
 
 interface SupportSearchParams {
@@ -88,6 +98,8 @@ export const Route = createFileRoute("/_app/support/")({
 const PAGE_SIZES = [10, 25, 50, 100] as const
 const DEFAULT_PAGE_SIZE = 25
 const PAGE_SIZE_STORAGE_KEY = "support-page-size"
+const AUTO_REFRESH_STORAGE_KEY = "support-auto-refresh"
+const AUTO_REFRESH_INTERVAL = 30_000
 
 function getStoredPageSize(): number {
   try {
@@ -225,11 +237,70 @@ function getInitials(name?: string | null, email?: string): string {
   return email ? email[0].toUpperCase() : "?"
 }
 
+// ── Column visibility ────────────────────────────────────────────────────
+
+const COLUMN_VISIBILITY_KEY = "support-columns"
+
+const TOGGLEABLE_COLUMNS = [
+  { key: "status", label: "Status" },
+  { key: "priority", label: "Priority" },
+  { key: "category", label: "Category" },
+  { key: "created", label: "Created" },
+  { key: "updated", label: "Updated" },
+] as const
+
+type ColumnVisibility = Record<string, boolean>
+
+function loadColumnVisibility(): ColumnVisibility {
+  try {
+    return JSON.parse(localStorage.getItem(COLUMN_VISIBILITY_KEY) ?? "{}")
+  } catch {
+    return {}
+  }
+}
+
 // ── Main page ────────────────────────────────────────────────────────────
 
 function SupportPage() {
   useDocumentTitle("Support Tickets")
+  const compactMode = useSettingsStore((s) => s.compactMode)
+  const cellClass = compactMode ? "py-1 px-2 text-xs" : ""
   const searchInputRef = useRef<HTMLInputElement>(null)
+
+  // Column visibility
+  const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(loadColumnVisibility)
+  const isColumnVisible = useCallback(
+    (col: string) => columnVisibility[col] !== false,
+    [columnVisibility],
+  )
+  const toggleColumn = useCallback((col: string) => {
+    setColumnVisibility((prev) => {
+      const updated = { ...prev, [col]: prev[col] !== false ? false : true }
+      localStorage.setItem(COLUMN_VISIBILITY_KEY, JSON.stringify(updated))
+      return updated
+    })
+  }, [])
+
+  // Auto-refresh state
+  const [autoRefresh, setAutoRefresh] = useState(() => {
+    try {
+      return localStorage.getItem(AUTO_REFRESH_STORAGE_KEY) === "true"
+    } catch {
+      return false
+    }
+  })
+
+  const toggleAutoRefresh = useCallback(() => {
+    setAutoRefresh((prev) => {
+      const next = !prev
+      try {
+        localStorage.setItem(AUTO_REFRESH_STORAGE_KEY, String(next))
+      } catch {
+        // localStorage unavailable
+      }
+      return next
+    })
+  }, [])
 
   // URL-backed filter state
   const searchParams = Route.useSearch()
@@ -396,7 +467,7 @@ function SupportPage() {
     }
   }, [debouncedSearch, statusFilter, priorityFilter, categoryFilter, sortKey, sortDir])
 
-  const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useTickets(page, pageSize, serverFilters)
+  const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useTickets(page, pageSize, serverFilters, autoRefresh ? AUTO_REFRESH_INTERVAL : false)
 
   // Apply client-side multi-value filters
   const filteredItems = useMemo(() => {
@@ -805,6 +876,37 @@ function SupportPage() {
         actions={
           <div className="flex items-center gap-2">
             <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
+            <Button
+              variant={autoRefresh ? "default" : "outline"}
+              size="sm"
+              onClick={toggleAutoRefresh}
+            >
+              {autoRefresh && (
+                <span className="mr-2 h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
+              )}
+              Live
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <SlidersHorizontal className="mr-1.5 h-3.5 w-3.5" />
+                  Columns
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-44">
+                <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {TOGGLEABLE_COLUMNS.map((col) => (
+                  <DropdownMenuCheckboxItem
+                    key={col.key}
+                    checked={isColumnVisible(col.key)}
+                    onCheckedChange={() => toggleColumn(col.key)}
+                  >
+                    {col.label}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button variant="outline" size="sm" onClick={handleExportAll} disabled={!hasData}>
               <Download className="mr-1.5 h-3.5 w-3.5" />
               Export
@@ -1075,11 +1177,21 @@ function SupportPage() {
                     </TableHead>
                     <TableHead className="w-[100px]">Ticket</TableHead>
                     <SortableHeader label="Subject" sortKey="subject" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
-                    <SortableHeader label="Status" sortKey="status" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
-                    <SortableHeader label="Priority" sortKey="priority" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
-                    <TableHead className="hidden md:table-cell">Category</TableHead>
-                    <SortableHeader label="Created" sortKey="created_at" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
-                    <SortableHeader label="Updated" sortKey="updated_at" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
+                    {isColumnVisible("status") && (
+                      <SortableHeader label="Status" sortKey="status" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                    )}
+                    {isColumnVisible("priority") && (
+                      <SortableHeader label="Priority" sortKey="priority" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
+                    )}
+                    {isColumnVisible("category") && (
+                      <TableHead className="hidden md:table-cell">Category</TableHead>
+                    )}
+                    {isColumnVisible("created") && (
+                      <SortableHeader label="Created" sortKey="created_at" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
+                    )}
+                    {isColumnVisible("updated") && (
+                      <SortableHeader label="Updated" sortKey="updated_at" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
+                    )}
                     <TableHead className="w-16 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -1093,6 +1205,8 @@ function SupportPage() {
                       onToggle={() => toggleOne(ticket.id)}
                       onRowClick={() => handleRowClick(ticket.id)}
                       onDelete={() => handleDeleteTicket(ticket.id)}
+                      cellClass={cellClass}
+                      isColumnVisible={isColumnVisible}
                     />
                   ))}
                 </TableBody>
@@ -1148,6 +1262,8 @@ function TicketRow({
   onToggle,
   onRowClick,
   onDelete,
+  cellClass,
+  isColumnVisible,
 }: {
   ticket: Ticket
   index: number
@@ -1155,6 +1271,8 @@ function TicketRow({
   onToggle: () => void
   onRowClick: () => void
   onDelete: () => void
+  cellClass: string
+  isColumnVisible: (col: string) => boolean
 }) {
   return (
     <TableRow
@@ -1173,7 +1291,7 @@ function TicketRow({
         onRowClick()
       }}
     >
-      <TableCell>
+      <TableCell className={cellClass}>
         <Checkbox
           checked={selected}
           onChange={(e) => {
@@ -1183,66 +1301,76 @@ function TicketRow({
           aria-label={`Select ticket ${ticket.ticketNumber}`}
         />
       </TableCell>
-      <TableCell className="font-mono text-xs text-muted-foreground">
+      <TableCell className={cn("font-mono text-xs text-muted-foreground", cellClass)}>
         <div className="flex items-center gap-1.5">
           {!ticket.isReadByUser && <span className="h-1.5 w-1.5 rounded-full bg-primary" />}
           {ticket.ticketNumber}
         </div>
       </TableCell>
-      <TableCell>
+      <TableCell className={cellClass}>
         <Link to="/support/$ticketId" params={{ ticketId: ticket.id }} className={cn("group flex flex-col gap-0.5")} onClick={(e) => e.stopPropagation()}>
           <span className={cn("group-hover:underline", ticket.isReadByUser ? "font-medium" : "font-semibold")}>{ticket.subject}</span>
           {ticket.latestMessagePreview && <span className="text-xs text-muted-foreground line-clamp-1">{ticket.latestMessagePreview}</span>}
         </Link>
       </TableCell>
-      <TableCell>
-        <div className="flex flex-col gap-1.5">
-          <TicketStatusBadge status={ticket.status} />
-          {ticket.assignedTo && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="flex items-center gap-1.5">
-                  <Avatar className="size-4">
-                    {ticket.assignedTo.avatarUrl ? <AvatarImage src={ticket.assignedTo.avatarUrl} alt={ticket.assignedTo.name ?? ticket.assignedTo.email} /> : null}
-                    <AvatarFallback className="text-[8px] font-medium bg-muted">{getInitials(ticket.assignedTo.name, ticket.assignedTo.email)}</AvatarFallback>
-                  </Avatar>
-                  <span className="text-xs text-muted-foreground truncate max-w-[100px]">{ticket.assignedTo.name ?? ticket.assignedTo.email}</span>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>Assigned to {ticket.assignedTo.name ?? ticket.assignedTo.email}</TooltipContent>
-            </Tooltip>
+      {isColumnVisible("status") && (
+        <TableCell className={cellClass}>
+          <div className="flex flex-col gap-1.5">
+            <TicketStatusBadge status={ticket.status} />
+            {ticket.assignedTo && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-1.5">
+                    <Avatar className="size-4">
+                      {ticket.assignedTo.avatarUrl ? <AvatarImage src={ticket.assignedTo.avatarUrl} alt={ticket.assignedTo.name ?? ticket.assignedTo.email} /> : null}
+                      <AvatarFallback className="text-[8px] font-medium bg-muted">{getInitials(ticket.assignedTo.name, ticket.assignedTo.email)}</AvatarFallback>
+                    </Avatar>
+                    <span className="text-xs text-muted-foreground truncate max-w-[100px]">{ticket.assignedTo.name ?? ticket.assignedTo.email}</span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>Assigned to {ticket.assignedTo.name ?? ticket.assignedTo.email}</TooltipContent>
+              </Tooltip>
+            )}
+          </div>
+        </TableCell>
+      )}
+      {isColumnVisible("priority") && (
+        <TableCell className={cn("hidden md:table-cell", cellClass)}>
+          <TicketPriorityBadge priority={ticket.priority} />
+        </TableCell>
+      )}
+      {isColumnVisible("category") && (
+        <TableCell className={cn("hidden md:table-cell", cellClass)}>
+          {ticket.category ? (
+            <Badge variant="outline" className="text-xs capitalize">
+              {ticket.category}
+            </Badge>
+          ) : (
+            <span className="text-xs text-muted-foreground">--</span>
           )}
-        </div>
-      </TableCell>
-      <TableCell className="hidden md:table-cell">
-        <TicketPriorityBadge priority={ticket.priority} />
-      </TableCell>
-      <TableCell className="hidden md:table-cell">
-        {ticket.category ? (
-          <Badge variant="outline" className="text-xs capitalize">
-            {ticket.category}
-          </Badge>
-        ) : (
-          <span className="text-xs text-muted-foreground">--</span>
-        )}
-      </TableCell>
-      <TableCell className="hidden md:table-cell">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="cursor-default text-xs text-muted-foreground">{formatRelativeTimeShort(ticket.createdAt)}</span>
-          </TooltipTrigger>
-          <TooltipContent>{formatDateTime(ticket.createdAt)}</TooltipContent>
-        </Tooltip>
-      </TableCell>
-      <TableCell className="hidden md:table-cell">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="cursor-default text-xs text-muted-foreground">{formatRelativeTimeShort(ticket.updatedAt)}</span>
-          </TooltipTrigger>
-          <TooltipContent>{formatDateTime(ticket.updatedAt)}</TooltipContent>
-        </Tooltip>
-      </TableCell>
-      <TableCell className="text-right">
+        </TableCell>
+      )}
+      {isColumnVisible("created") && (
+        <TableCell className={cn("hidden md:table-cell", cellClass)}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="cursor-default text-xs text-muted-foreground">{formatRelativeTimeShort(ticket.createdAt)}</span>
+            </TooltipTrigger>
+            <TooltipContent>{formatDateTime(ticket.createdAt)}</TooltipContent>
+          </Tooltip>
+        </TableCell>
+      )}
+      {isColumnVisible("updated") && (
+        <TableCell className={cn("hidden md:table-cell", cellClass)}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="cursor-default text-xs text-muted-foreground">{formatRelativeTimeShort(ticket.updatedAt)}</span>
+            </TooltipTrigger>
+            <TooltipContent>{formatDateTime(ticket.updatedAt)}</TooltipContent>
+          </Tooltip>
+        </TableCell>
+      )}
+      <TableCell className={cn("text-right", cellClass)}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className="h-8 w-8 p-0" data-slot="dropdown" onClick={(e) => e.stopPropagation()}>

@@ -67,6 +67,8 @@ import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
+import { useSettingsStore } from "@/lib/settings-store"
+import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/voice/extensions/")({
   validateSearch: (
@@ -95,6 +97,8 @@ export const Route = createFileRoute("/_app/voice/extensions/")({
 const DEFAULT_PAGE_SIZE = 25
 const PAGE_SIZE_OPTIONS = [10, 25, 50] as const
 const PAGE_SIZE_STORAGE_KEY = "extensions-page-size"
+const AUTO_REFRESH_STORAGE_KEY = "extensions-auto-refresh"
+const AUTO_REFRESH_INTERVAL = 30_000
 
 function getStoredPageSize(): number {
   try {
@@ -203,6 +207,8 @@ function FeatureIndicators({ ext }: { ext: Extension }) {
 
 function ExtensionsPage() {
   useDocumentTitle("Extensions")
+  const compactMode = useSettingsStore((s) => s.compactMode)
+  const cellClass = compactMode ? "py-1 px-2 text-xs" : ""
   const {
     q: searchParam,
     page: pageParam,
@@ -212,6 +218,27 @@ function ExtensionsPage() {
   } = Route.useSearch()
   const navigate = Route.useNavigate()
   const searchInputRef = useRef<HTMLInputElement>(null)
+
+  // Auto-refresh state
+  const [autoRefresh, setAutoRefresh] = useState(() => {
+    try {
+      return localStorage.getItem(AUTO_REFRESH_STORAGE_KEY) === "true"
+    } catch {
+      return false
+    }
+  })
+
+  const toggleAutoRefresh = useCallback(() => {
+    setAutoRefresh((prev) => {
+      const next = !prev
+      try {
+        localStorage.setItem(AUTO_REFRESH_STORAGE_KEY, String(next))
+      } catch {
+        // localStorage unavailable
+      }
+      return next
+    })
+  }, [])
 
   // Derive filter state from URL search params
   const search = searchParam ?? ""
@@ -253,7 +280,7 @@ function ExtensionsPage() {
   const [showSyncDialog, setShowSyncDialog] = useState(false)
 
   // Queries & mutations
-  const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useExtensions(page, pageSize)
+  const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useExtensions(page, pageSize, autoRefresh ? AUTO_REFRESH_INTERVAL : false)
   const { data: phoneData } = usePhoneNumbers(1, 100)
   const deleteExtension = useDeleteExtension()
   const updateAnyExtension = useUpdateAnyExtension()
@@ -525,6 +552,16 @@ function ExtensionsPage() {
               onRefresh={() => refetch()}
               isRefreshing={isRefetching}
             />
+            <Button
+              variant={autoRefresh ? "default" : "outline"}
+              size="sm"
+              onClick={toggleAutoRefresh}
+            >
+              {autoRefresh && (
+                <span className="mr-2 h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
+              )}
+              Live
+            </Button>
             <Button variant="outline" size="sm" onClick={handleExportAll} disabled={!hasData}>
               <Download className="mr-2 h-4 w-4" />
               Export
@@ -782,6 +819,7 @@ function ExtensionsPage() {
                           params: { extensionId: ext.id },
                         })
                       }
+                      cellClass={cellClass}
                     />
                   ))}
                 </TableBody>
@@ -898,12 +936,14 @@ function ExtensionRow({
   selected,
   onToggle,
   onNavigate,
+  cellClass,
 }: {
   ext: Extension
   phoneNumber: string | undefined
   selected: boolean
   onToggle: () => void
   onNavigate: () => void
+  cellClass: string
 }) {
   return (
     <TableRow
@@ -917,7 +957,7 @@ function ExtensionRow({
         onNavigate()
       }}
     >
-      <TableCell>
+      <TableCell className={cellClass}>
         <Checkbox
           checked={selected}
           onChange={(e) => {
@@ -928,7 +968,7 @@ function ExtensionRow({
           aria-label={`Select extension ${ext.extensionNumber}`}
         />
       </TableCell>
-      <TableCell>
+      <TableCell className={cellClass}>
         <Link
           to="/voice/extensions/$extensionId"
           params={{ extensionId: ext.id }}
@@ -941,20 +981,20 @@ function ExtensionRow({
           )}
         </Link>
       </TableCell>
-      <TableCell className="hidden md:table-cell">
+      <TableCell className={cn("hidden md:table-cell", cellClass)}>
         {phoneNumber ? (
           <span className="font-mono text-xs">{phoneNumber}</span>
         ) : (
           <span className="text-xs text-muted-foreground">--</span>
         )}
       </TableCell>
-      <TableCell>
+      <TableCell className={cellClass}>
         <StatusDot active={ext.isActive ?? false} />
       </TableCell>
-      <TableCell className="hidden lg:table-cell">
+      <TableCell className={cn("hidden lg:table-cell", cellClass)}>
         <FeatureIndicators ext={ext} />
       </TableCell>
-      <TableCell className="hidden md:table-cell">
+      <TableCell className={cn("hidden md:table-cell", cellClass)}>
         <Tooltip>
           <TooltipTrigger asChild>
             <span className="cursor-default text-xs text-muted-foreground">
@@ -966,7 +1006,7 @@ function ExtensionRow({
           </TooltipContent>
         </Tooltip>
       </TableCell>
-      <TableCell>
+      <TableCell className={cellClass}>
         <div onClick={(e) => e.stopPropagation()}>
           <ExtensionRowActions extension={ext} />
         </div>

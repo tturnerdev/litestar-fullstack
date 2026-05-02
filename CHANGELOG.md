@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.235.0 (2026-05-03)
+
+### Added
+- **Compact table mode** — the existing compact mode setting now applies to table rows on devices, support, teams, and extensions list pages with reduced padding and smaller text
+- **Column visibility toggle** on devices and support list pages — users can show/hide table columns with preferences persisted to localStorage
+- **Auto-refresh toggle** on support, voice extensions, and connections list pages — "Live" button enables 30-second automatic data refresh with animated indicator
+
 ## v0.234.0 (2026-05-03)
 
 ### Added

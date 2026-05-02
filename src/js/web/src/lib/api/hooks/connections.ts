@@ -78,12 +78,13 @@ export interface UseConnectionsOptions {
   teamId?: string
   orderBy?: string
   sortOrder?: "asc" | "desc"
+  refetchInterval?: number | false
 }
 
 export function useConnections(pageOrOptions: number | UseConnectionsOptions = 1, pageSizeArg = 20) {
   const opts: UseConnectionsOptions =
     typeof pageOrOptions === "number" ? { page: pageOrOptions, pageSize: pageSizeArg } : pageOrOptions
-  const { page = 1, pageSize = 20, search, teamId, orderBy, sortOrder } = opts
+  const { page = 1, pageSize = 20, search, teamId, orderBy, sortOrder, refetchInterval } = opts
 
   return useQuery({
     queryKey: ["connections", page, pageSize, search, teamId, orderBy, sortOrder],
@@ -103,6 +104,7 @@ export function useConnections(pageOrOptions: number | UseConnectionsOptions = 1
       } as never)
       return (response as { data: unknown }).data as { items: ConnectionList[]; total: number }
     },
+    refetchInterval,
   })
 }
 

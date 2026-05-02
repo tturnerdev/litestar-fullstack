@@ -71,7 +71,7 @@ export interface TicketFilters {
 
 // ── Ticket Hooks ───────────────────────────────────────────────────────
 
-export function useTickets(page = 1, pageSize = 25, filters?: TicketFilters) {
+export function useTickets(page = 1, pageSize = 25, filters?: TicketFilters, refetchInterval?: number | false) {
   return useQuery({
     queryKey: ["support", "tickets", page, pageSize, filters],
     queryFn: async () => {
@@ -89,6 +89,7 @@ export function useTickets(page = 1, pageSize = 25, filters?: TicketFilters) {
       } as never)
       return (response as { data: unknown }).data as { items: Ticket[]; total: number }
     },
+    refetchInterval,
   })
 }
 

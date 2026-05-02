@@ -52,6 +52,8 @@ import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import type { Team } from "@/lib/generated/api"
+import { useSettingsStore } from "@/lib/settings-store"
+import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/teams/")({
   validateSearch: (
@@ -128,6 +130,8 @@ const csvHeaders: CsvHeader<Team>[] = [
 
 function TeamsPage() {
   useDocumentTitle("Teams")
+  const compactMode = useSettingsStore((s) => s.compactMode)
+  const cellClass = compactMode ? "py-1 px-2 text-xs" : ""
   const {
     q: searchParam,
     page: pageParam,
@@ -530,6 +534,7 @@ function TeamsPage() {
                       isActiveTeam={currentTeam?.id === team.id}
                       onSwitchTeam={() => setCurrentTeam(team)}
                       currentUserId={user?.id}
+                      cellClass={cellClass}
                     />
                   ))}
                 </TableBody>
@@ -609,6 +614,7 @@ function TeamRow({
   isActiveTeam,
   onSwitchTeam,
   currentUserId,
+  cellClass,
 }: {
   team: Team
   selected: boolean
@@ -616,6 +622,7 @@ function TeamRow({
   isActiveTeam: boolean
   onSwitchTeam: () => void
   currentUserId?: string
+  cellClass: string
 }) {
   const navigate = Route.useNavigate()
   const deleteTeamMutation = useDeleteTeam()
@@ -641,7 +648,7 @@ function TeamRow({
           navigate({ to: "/teams/$teamId", params: { teamId: team.id } })
         }}
       >
-        <TableCell>
+        <TableCell className={cellClass}>
           <Checkbox
             checked={selected}
             onChange={(e) => {
@@ -651,7 +658,7 @@ function TeamRow({
             aria-label={`Select ${team.name}`}
           />
         </TableCell>
-        <TableCell>
+        <TableCell className={cellClass}>
           <div className="flex items-center gap-3">
             <button
               type="button"
@@ -683,13 +690,13 @@ function TeamRow({
             </Link>
           </div>
         </TableCell>
-        <TableCell>
+        <TableCell className={cellClass}>
           <span className="flex items-center gap-1.5 text-sm">
             <Users className="h-3.5 w-3.5 text-muted-foreground" />
             {memberCount}
           </span>
         </TableCell>
-        <TableCell className="hidden md:table-cell">
+        <TableCell className={cn("hidden md:table-cell", cellClass)}>
           {isOwner ? (
             <Badge className="gap-1 bg-amber-500/15 text-amber-700 hover:bg-amber-500/20 dark:text-amber-400">
               <Crown className="h-3 w-3" />
@@ -708,7 +715,7 @@ function TeamRow({
             <span className="text-xs text-muted-foreground">--</span>
           )}
         </TableCell>
-        <TableCell className="hidden md:table-cell">
+        <TableCell className={cn("hidden md:table-cell", cellClass)}>
           {tags.length > 0 ? (
             <div className="flex flex-wrap gap-1">
               {tags.slice(0, 2).map((tag) => (
@@ -726,7 +733,7 @@ function TeamRow({
             <span className="text-xs text-muted-foreground">--</span>
           )}
         </TableCell>
-        <TableCell className="hidden md:table-cell">
+        <TableCell className={cn("hidden md:table-cell", cellClass)}>
           {team.isActive === false ? (
             <Badge variant="destructive" className="text-[10px]">Inactive</Badge>
           ) : (
@@ -736,7 +743,7 @@ function TeamRow({
             </span>
           )}
         </TableCell>
-        <TableCell className="text-right">
+        <TableCell className={cn("text-right", cellClass)}>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button

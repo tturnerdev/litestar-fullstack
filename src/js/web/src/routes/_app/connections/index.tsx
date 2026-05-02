@@ -98,6 +98,8 @@ export const Route = createFileRoute("/_app/connections/")({
 const PAGE_SIZES = [10, 25, 50, 100] as const
 const DEFAULT_PAGE_SIZE = 25
 const PAGE_SIZE_STORAGE_KEY = "connections-page-size"
+const AUTO_REFRESH_STORAGE_KEY = "connections-auto-refresh"
+const AUTO_REFRESH_INTERVAL = 30_000
 
 function getStoredPageSize(): number {
   try {
@@ -200,6 +202,27 @@ function ConnectionsPage() {
   const navigate = Route.useNavigate()
   const searchInputRef = useRef<HTMLInputElement>(null)
 
+  // Auto-refresh state
+  const [autoRefresh, setAutoRefresh] = useState(() => {
+    try {
+      return localStorage.getItem(AUTO_REFRESH_STORAGE_KEY) === "true"
+    } catch {
+      return false
+    }
+  })
+
+  const toggleAutoRefresh = useCallback(() => {
+    setAutoRefresh((prev) => {
+      const next = !prev
+      try {
+        localStorage.setItem(AUTO_REFRESH_STORAGE_KEY, String(next))
+      } catch {
+        // localStorage unavailable
+      }
+      return next
+    })
+  }, [])
+
   // Derive filter state from URL search params
   const search = searchParam ?? ""
   const page = pageParam ?? 1
@@ -262,6 +285,7 @@ function ConnectionsPage() {
     search: debouncedSearch || undefined,
     orderBy: sortKey ?? undefined,
     sortOrder: sortDir ?? undefined,
+    refetchInterval: autoRefresh ? AUTO_REFRESH_INTERVAL : false,
   })
   const deleteConnection = useDeleteConnection()
   const updateAnyConnection = useUpdateAnyConnection()
@@ -459,6 +483,16 @@ function ConnectionsPage() {
               onRefresh={() => refetch()}
               isRefreshing={isRefetching}
             />
+            <Button
+              variant={autoRefresh ? "default" : "outline"}
+              size="sm"
+              onClick={toggleAutoRefresh}
+            >
+              {autoRefresh && (
+                <span className="mr-2 h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
+              )}
+              Live
+            </Button>
             <Button variant="outline" size="sm" onClick={handleExportAll} disabled={!hasData}>
               <Download className="mr-2 h-4 w-4" />
               Export

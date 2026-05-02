@@ -210,10 +210,11 @@ export function useUnregisteredE911Numbers(teamId: string) {
 // Extensions
 // ---------------------------------------------------------------------------
 
-export function useExtensions(page = 1, pageSize = 25) {
+export function useExtensions(page = 1, pageSize = 25, refetchInterval?: number | false) {
   return useQuery({
     queryKey: ["voice", "extensions", page, pageSize],
     queryFn: () => apiFetch<PaginatedResponse<Extension>>(`/api/voice/extensions?currentPage=${page}&pageSize=${pageSize}`),
+    refetchInterval,
   })
 }
 

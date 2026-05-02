@@ -14,6 +14,7 @@ import {
   RefreshCw,
   RotateCcw,
   Search,
+  SlidersHorizontal,
   Trash2,
   X,
 } from "lucide-react"
@@ -32,7 +33,15 @@ import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/com
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { DateRangeFilter, getPresetDates, isDateInRange } from "@/components/ui/date-range-filter"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { FilterDropdown, type FilterOption } from "@/components/ui/filter-dropdown"
 import { Input } from "@/components/ui/input"
@@ -54,6 +63,8 @@ import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { useSettingsStore } from "@/lib/settings-store"
+import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/devices/")({
   validateSearch: (
@@ -157,10 +168,34 @@ function isQuickFilterActive(filter: QuickFilter, statusFilter: string[]): boole
   return filter.statuses.every((s) => statusFilter.includes(s))
 }
 
+// -- Column visibility ---------------------------------------------------------
+
+const COLUMN_VISIBILITY_KEY = "devices-columns"
+
+const TOGGLEABLE_COLUMNS = [
+  { key: "status", label: "Status" },
+  { key: "type", label: "Type" },
+  { key: "mac", label: "MAC Address" },
+  { key: "ip", label: "IP Address" },
+  { key: "lastSeen", label: "Last Seen" },
+] as const
+
+type ColumnVisibility = Record<string, boolean>
+
+function loadColumnVisibility(): ColumnVisibility {
+  try {
+    return JSON.parse(localStorage.getItem(COLUMN_VISIBILITY_KEY) ?? "{}")
+  } catch {
+    return {}
+  }
+}
+
 // -- Main page ----------------------------------------------------------------
 
 function DevicesPage() {
   useDocumentTitle("Devices")
+  const compactMode = useSettingsStore((s) => s.compactMode)
+  const cellClass = compactMode ? "py-1 px-2 text-xs" : ""
   const {
     q: searchParam,
     page: pageParam,
@@ -190,6 +225,20 @@ function DevicesPage() {
         // localStorage unavailable
       }
       return next
+    })
+  }, [])
+
+  // Column visibility
+  const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(loadColumnVisibility)
+  const isColumnVisible = useCallback(
+    (col: string) => columnVisibility[col] !== false,
+    [columnVisibility],
+  )
+  const toggleColumn = useCallback((col: string) => {
+    setColumnVisibility((prev) => {
+      const updated = { ...prev, [col]: prev[col] !== false ? false : true }
+      localStorage.setItem(COLUMN_VISIBILITY_KEY, JSON.stringify(updated))
+      return updated
     })
   }, [])
 
@@ -474,6 +523,27 @@ function DevicesPage() {
               )}
               Live
             </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <SlidersHorizontal className="mr-1.5 h-3.5 w-3.5" />
+                  Columns
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-44">
+                <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {TOGGLEABLE_COLUMNS.map((col) => (
+                  <DropdownMenuCheckboxItem
+                    key={col.key}
+                    checked={isColumnVisible(col.key)}
+                    onCheckedChange={() => toggleColumn(col.key)}
+                  >
+                    {col.label}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button variant="outline" size="sm" onClick={handleExportAll} disabled={!hasData}>
               <Download className="mr-2 h-4 w-4" />
               Export
@@ -737,38 +807,48 @@ function DevicesPage() {
                       currentDirection={sortDir}
                       onSort={handleSort}
                     />
-                    <SortableHeader
-                      label="Type"
-                      sortKey="device_type"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                      className="hidden md:table-cell"
-                    />
-                    <SortableHeader
-                      label="Status"
-                      sortKey="status"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                    />
-                    <TableHead className="hidden md:table-cell">MAC Address</TableHead>
-                    <SortableHeader
-                      label="IP Address"
-                      sortKey="ip_address"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                      className="hidden md:table-cell"
-                    />
-                    <SortableHeader
-                      label="Last Seen"
-                      sortKey="last_seen_at"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                      className="hidden md:table-cell"
-                    />
+                    {isColumnVisible("type") && (
+                      <SortableHeader
+                        label="Type"
+                        sortKey="device_type"
+                        currentSort={sortKey}
+                        currentDirection={sortDir}
+                        onSort={handleSort}
+                        className="hidden md:table-cell"
+                      />
+                    )}
+                    {isColumnVisible("status") && (
+                      <SortableHeader
+                        label="Status"
+                        sortKey="status"
+                        currentSort={sortKey}
+                        currentDirection={sortDir}
+                        onSort={handleSort}
+                      />
+                    )}
+                    {isColumnVisible("mac") && (
+                      <TableHead className="hidden md:table-cell">MAC Address</TableHead>
+                    )}
+                    {isColumnVisible("ip") && (
+                      <SortableHeader
+                        label="IP Address"
+                        sortKey="ip_address"
+                        currentSort={sortKey}
+                        currentDirection={sortDir}
+                        onSort={handleSort}
+                        className="hidden md:table-cell"
+                      />
+                    )}
+                    {isColumnVisible("lastSeen") && (
+                      <SortableHeader
+                        label="Last Seen"
+                        sortKey="last_seen_at"
+                        currentSort={sortKey}
+                        currentDirection={sortDir}
+                        onSort={handleSort}
+                        className="hidden md:table-cell"
+                      />
+                    )}
                     <TableHead className="w-16 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -782,6 +862,8 @@ function DevicesPage() {
                       onToggle={() => toggleOne(device.id)}
                       onRowClick={() => handleRowClick(device.id)}
                       onDelete={() => deleteMutation.mutate(device.id)}
+                      cellClass={cellClass}
+                      isColumnVisible={isColumnVisible}
                     />
                   ))}
                 </TableBody>
@@ -863,6 +945,8 @@ function DeviceRow({
   onToggle,
   onRowClick,
   onDelete,
+  cellClass,
+  isColumnVisible,
 }: {
   device: Device
   index: number
@@ -870,6 +954,8 @@ function DeviceRow({
   onToggle: () => void
   onRowClick: () => void
   onDelete: () => void
+  cellClass: string
+  isColumnVisible: (col: string) => boolean
 }) {
   const rebootMutation = useRebootDevice(device.id)
   const reprovisionMutation = useReprovisionDevice(device.id)
@@ -887,7 +973,7 @@ function DeviceRow({
         onRowClick()
       }}
     >
-      <TableCell>
+      <TableCell className={cellClass}>
         <Checkbox
           checked={selected}
           onChange={(e) => {
@@ -897,7 +983,7 @@ function DeviceRow({
           aria-label={`Select ${device.name}`}
         />
       </TableCell>
-      <TableCell>
+      <TableCell className={cellClass}>
         <Link
           to="/devices/$deviceId"
           params={{ deviceId: device.id }}
@@ -918,39 +1004,49 @@ function DeviceRow({
           </Badge>
         )}
       </TableCell>
-      <TableCell className="hidden md:table-cell">
-        <Badge variant="outline">
-          {deviceTypeLabels[device.deviceType] ?? device.deviceType}
-        </Badge>
-      </TableCell>
-      <TableCell>
-        <DeviceStatusBadge status={device.status} />
-      </TableCell>
-      <TableCell className="hidden md:table-cell">
-        {device.macAddress ? (
-          <span className="font-mono text-xs text-muted-foreground">{device.macAddress}</span>
-        ) : (
-          <span className="text-xs text-muted-foreground">--</span>
-        )}
-      </TableCell>
-      <TableCell className="hidden md:table-cell">
-        {device.ipAddress ? (
-          <span className="font-mono text-xs text-muted-foreground">{device.ipAddress}</span>
-        ) : (
-          <span className="text-xs text-muted-foreground">--</span>
-        )}
-      </TableCell>
-      <TableCell className="hidden md:table-cell">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="text-xs text-muted-foreground">
-              {formatRelativeTimeShort(device.lastSeenAt)}
-            </span>
-          </TooltipTrigger>
-          <TooltipContent>{formatDateTime(device.lastSeenAt)}</TooltipContent>
-        </Tooltip>
-      </TableCell>
-      <TableCell className="text-right">
+      {isColumnVisible("type") && (
+        <TableCell className={cn("hidden md:table-cell", cellClass)}>
+          <Badge variant="outline">
+            {deviceTypeLabels[device.deviceType] ?? device.deviceType}
+          </Badge>
+        </TableCell>
+      )}
+      {isColumnVisible("status") && (
+        <TableCell className={cellClass}>
+          <DeviceStatusBadge status={device.status} />
+        </TableCell>
+      )}
+      {isColumnVisible("mac") && (
+        <TableCell className={cn("hidden md:table-cell", cellClass)}>
+          {device.macAddress ? (
+            <span className="font-mono text-xs text-muted-foreground">{device.macAddress}</span>
+          ) : (
+            <span className="text-xs text-muted-foreground">--</span>
+          )}
+        </TableCell>
+      )}
+      {isColumnVisible("ip") && (
+        <TableCell className={cn("hidden md:table-cell", cellClass)}>
+          {device.ipAddress ? (
+            <span className="font-mono text-xs text-muted-foreground">{device.ipAddress}</span>
+          ) : (
+            <span className="text-xs text-muted-foreground">--</span>
+          )}
+        </TableCell>
+      )}
+      {isColumnVisible("lastSeen") && (
+        <TableCell className={cn("hidden md:table-cell", cellClass)}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="text-xs text-muted-foreground">
+                {formatRelativeTimeShort(device.lastSeenAt)}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>{formatDateTime(device.lastSeenAt)}</TooltipContent>
+          </Tooltip>
+        </TableCell>
+      )}
+      <TableCell className={cn("text-right", cellClass)}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
