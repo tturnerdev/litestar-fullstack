@@ -1,20 +1,8 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
+import { AlertCircle, AlertTriangle, ArrowDown, ArrowLeft, ArrowUp, Copy, Loader2, Menu, MoreHorizontal, Pencil, Plus, Trash2 } from "lucide-react"
 import { useCallback, useRef, useState } from "react"
 import { toast } from "sonner"
-import {
-  AlertCircle,
-  AlertTriangle,
-  ArrowDown,
-  ArrowLeft,
-  ArrowUp,
-  Copy,
-  Loader2,
-  Menu,
-  MoreHorizontal,
-  Pencil,
-  Plus,
-  Trash2,
-} from "lucide-react"
+import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,24 +14,11 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { CopyButton } from "@/components/ui/copy-button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -53,18 +28,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import {
-  useIvrMenu,
-  useUpdateIvrMenu,
-  useDeleteIvrMenu,
-  useCreateIvrMenuOption,
-  useReorderIvrMenuOptions,
-  useDeleteIvrMenuOption,
   type IvrMenu,
   type IvrMenuOption,
+  useCreateIvrMenuOption,
+  useDeleteIvrMenu,
+  useDeleteIvrMenuOption,
+  useIvrMenu,
+  useReorderIvrMenuOptions,
+  useUpdateIvrMenu,
 } from "@/lib/api/hooks/call-routing"
-import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
-import { useDocumentTitle } from "@/hooks/use-document-title"
 
 export const Route = createFileRoute("/_app/call-routing/ivr-menus/$ivrMenuId")({
   component: IvrMenuDetailPage,
@@ -131,9 +105,7 @@ function DeleteDialog({ name, onDelete, isPending }: { name: string; onDelete: (
             <AlertDialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-destructive" /> Delete "{name}"?
             </AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete this IVR menu and all its options. This action cannot be undone.
-            </AlertDialogDescription>
+            <AlertDialogDescription>This will permanently delete this IVR menu and all its options. This action cannot be undone.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
@@ -201,7 +173,9 @@ function AddOptionRow({ menuId }: { menuId: string }) {
           {createOption.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Add
         </Button>
-        <Button variant="ghost" size="sm" onClick={() => setAdding(false)}>Cancel</Button>
+        <Button variant="ghost" size="sm" onClick={() => setAdding(false)}>
+          Cancel
+        </Button>
       </div>
     </div>
   )
@@ -233,32 +207,20 @@ function OptionRow({
   return (
     <TableRow className={isHighlighted ? "animate-highlight-row" : ""}>
       <TableCell>
-        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-muted font-mono text-xs font-medium">
-          {option.digit}
-        </span>
+        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-muted font-mono text-xs font-medium">{option.digit}</span>
       </TableCell>
-      <TableCell><span className="text-sm font-medium">{option.label}</span></TableCell>
-      <TableCell><DestinationLink value={option.destination} /></TableCell>
+      <TableCell>
+        <span className="text-sm font-medium">{option.label}</span>
+      </TableCell>
+      <TableCell>
+        <DestinationLink value={option.destination} />
+      </TableCell>
       <TableCell>
         <div className="flex items-center justify-end gap-0.5">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7 text-muted-foreground"
-            onClick={onMoveUp}
-            disabled={isFirst || isReordering}
-            aria-label="Move up"
-          >
+          <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground" onClick={onMoveUp} disabled={isFirst || isReordering} aria-label="Move up">
             <ArrowUp className="h-3.5 w-3.5" />
           </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7 text-muted-foreground"
-            onClick={onMoveDown}
-            disabled={isLast || isReordering}
-            aria-label="Move down"
-          >
+          <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground" onClick={onMoveDown} disabled={isLast || isReordering} aria-label="Move down">
             <ArrowDown className="h-3.5 w-3.5" />
           </Button>
           <Button
@@ -410,17 +372,29 @@ function IvrMenuDetailPage() {
               <div className="rounded-xl border border-border/60 bg-card/80 p-6 space-y-4">
                 <Skeleton className="h-6 w-40" />
                 <div className="grid gap-4 md:grid-cols-2">
-                  {Array.from({ length: 6 }).map((_, i) => <div key={i} className="space-y-1.5"><Skeleton className="h-3.5 w-20" /><Skeleton className="h-5 w-36" /></div>)}
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <div key={i} className="space-y-1.5">
+                      <Skeleton className="h-3.5 w-20" />
+                      <Skeleton className="h-5 w-36" />
+                    </div>
+                  ))}
                 </div>
               </div>
               <div className="rounded-xl border border-border/60 bg-card/80 p-6 space-y-4">
                 <Skeleton className="h-6 w-24" />
-                {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <Skeleton key={i} className="h-10 w-full" />
+                ))}
               </div>
             </div>
             <div className="rounded-xl border border-border/60 bg-card/80 p-6 space-y-4">
               <Skeleton className="h-5 w-24" />
-              {Array.from({ length: 2 }).map((_, i) => <div key={i} className="space-y-1"><Skeleton className="h-3 w-20" /><Skeleton className="h-5 w-40" /></div>)}
+              {Array.from({ length: 2 }).map((_, i) => (
+                <div key={i} className="space-y-1">
+                  <Skeleton className="h-3 w-20" />
+                  <Skeleton className="h-5 w-40" />
+                </div>
+              ))}
             </div>
           </div>
         </PageSection>
@@ -432,13 +406,27 @@ function IvrMenuDetailPage() {
   if (isError || !data) {
     return (
       <PageContainer className="flex-1 space-y-8">
-        <PageHeader eyebrow="Call Routing" title="IVR Menu" actions={<Button variant="outline" size="sm" asChild><Link to="/call-routing" search={{ tab: "ivr-menus" }}><ArrowLeft className="mr-2 h-4 w-4" /> Back</Link></Button>} />
+        <PageHeader
+          eyebrow="Call Routing"
+          title="IVR Menu"
+          actions={
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/call-routing" search={{ tab: "ivr-menus" }}>
+                <ArrowLeft className="mr-2 h-4 w-4" /> Back
+              </Link>
+            </Button>
+          }
+        />
         <PageSection>
           <EmptyState
             icon={AlertCircle}
             title="Unable to load IVR menu"
             description="Something went wrong. Please try again."
-            action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+            action={
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
+                Try again
+              </Button>
+            }
           />
         </PageSection>
       </PageContainer>
@@ -454,17 +442,31 @@ function IvrMenuDetailPage() {
         breadcrumbs={
           <Breadcrumb>
             <BreadcrumbList>
-              <BreadcrumbItem><BreadcrumbLink asChild><Link to="/home">Home</Link></BreadcrumbLink></BreadcrumbItem>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/home">Home</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
               <BreadcrumbSeparator />
-              <BreadcrumbItem><BreadcrumbLink asChild><Link to="/call-routing" search={{ tab: "ivr-menus" }}>Call Routing</Link></BreadcrumbLink></BreadcrumbItem>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/call-routing" search={{ tab: "ivr-menus" }}>
+                    Call Routing
+                  </Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
               <BreadcrumbSeparator />
-              <BreadcrumbItem><BreadcrumbPage>{data.name}</BreadcrumbPage></BreadcrumbItem>
+              <BreadcrumbItem>
+                <BreadcrumbPage>{data.name}</BreadcrumbPage>
+              </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         }
         actions={
           <div className="flex items-center gap-3">
-            <Badge variant="outline">{options.length} option{options.length === 1 ? "" : "s"}</Badge>
+            <Badge variant="outline">
+              {options.length} option{options.length === 1 ? "" : "s"}
+            </Badge>
             {!editing && (
               <Button variant="outline" size="sm" onClick={() => startEditing(data)}>
                 <Pencil className="mr-2 h-4 w-4" /> Edit
@@ -493,10 +495,7 @@ function IvrMenuDetailPage() {
                   Copy Menu ID
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="text-destructive focus:text-destructive"
-                  onClick={() => setShowDeleteAlert(true)}
-                >
+                <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setShowDeleteAlert(true)}>
                   <Trash2 className="mr-2 h-4 w-4" />
                   Delete Menu
                 </DropdownMenuItem>
@@ -511,214 +510,219 @@ function IvrMenuDetailPage() {
           <div className="space-y-6">
             {/* Menu Configuration */}
             <SectionErrorBoundary name="Menu Configuration">
-            <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <Menu className="h-5 w-5 text-muted-foreground" />
-                  Menu Configuration
-                </CardTitle>
-                {editing && (
-                  <div className="flex gap-2">
-                    <Button variant="ghost" size="sm" onClick={() => setEditing(false)}>Cancel</Button>
-                    <Button size="sm" onClick={handleSave} disabled={updateMutation.isPending}>
-                      {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      Save
-                    </Button>
-                  </div>
-                )}
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {editing ? (
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label>Name</Label>
-                      <Input value={editName} onChange={(e) => setEditName(e.target.value)} />
+              <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Menu className="h-5 w-5 text-muted-foreground" />
+                    Menu Configuration
+                  </CardTitle>
+                  {editing && (
+                    <div className="flex gap-2">
+                      <Button variant="ghost" size="sm" onClick={() => setEditing(false)}>
+                        Cancel
+                      </Button>
+                      <Button size="sm" onClick={handleSave} disabled={updateMutation.isPending}>
+                        {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Save
+                      </Button>
                     </div>
-                    <div className="space-y-2">
-                      <Label>Greeting Type</Label>
-                      <Select value={editGreetingType} onValueChange={setEditGreetingType}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none">None</SelectItem>
-                          <SelectItem value="text">Text-to-Speech</SelectItem>
-                          <SelectItem value="file">Audio File</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    {editGreetingType === "text" && (
+                  )}
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {editing ? (
+                    <div className="space-y-4">
                       <div className="space-y-2">
-                        <Label>Greeting Text</Label>
-                        <Input value={editGreetingText} onChange={(e) => setEditGreetingText(e.target.value)} placeholder="Enter greeting text..." />
-                      </div>
-                    )}
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <div className="space-y-2">
-                        <Label>Timeout (seconds)</Label>
-                        <Input type="number" value={editTimeout} onChange={(e) => setEditTimeout(Number(e.target.value))} min={1} max={60} />
+                        <Label>Name</Label>
+                        <Input value={editName} onChange={(e) => setEditName(e.target.value)} />
                       </div>
                       <div className="space-y-2">
-                        <Label>Max Retries</Label>
-                        <Input type="number" value={editMaxRetries} onChange={(e) => setEditMaxRetries(Number(e.target.value))} min={0} max={10} />
+                        <Label>Greeting Type</Label>
+                        <Select value={editGreetingType} onValueChange={setEditGreetingType}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">None</SelectItem>
+                            <SelectItem value="text">Text-to-Speech</SelectItem>
+                            <SelectItem value="file">Audio File</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      {editGreetingType === "text" && (
+                        <div className="space-y-2">
+                          <Label>Greeting Text</Label>
+                          <Input value={editGreetingText} onChange={(e) => setEditGreetingText(e.target.value)} placeholder="Enter greeting text..." />
+                        </div>
+                      )}
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label>Timeout (seconds)</Label>
+                          <Input type="number" value={editTimeout} onChange={(e) => setEditTimeout(Number(e.target.value))} min={1} max={60} />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Max Retries</Label>
+                          <Input type="number" value={editMaxRetries} onChange={(e) => setEditMaxRetries(Number(e.target.value))} min={0} max={10} />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Timeout Destination</Label>
+                        <Input value={editTimeoutDest} onChange={(e) => setEditTimeoutDest(e.target.value)} placeholder="Destination on timeout (optional)" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Invalid Destination</Label>
+                        <Input value={editInvalidDest} onChange={(e) => setEditInvalidDest(e.target.value)} placeholder="Destination on invalid input (optional)" />
                       </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label>Timeout Destination</Label>
-                      <Input value={editTimeoutDest} onChange={(e) => setEditTimeoutDest(e.target.value)} placeholder="Destination on timeout (optional)" />
+                  ) : (
+                    <div className="grid gap-4 text-sm md:grid-cols-2">
+                      <InfoField label="Name" value={data.name} />
+                      <InfoField label="Greeting Type" value={greetingTypeLabels[data.greetingType] ?? data.greetingType} />
+                      {data.greetingType === "text" && <InfoField label="Greeting Text" value={data.greetingText} />}
+                      <InfoField label="Timeout" value={`${data.timeoutSeconds}s`} />
+                      <InfoField label="Max Retries" value={data.maxRetries} />
+                      <div>
+                        <p className="text-muted-foreground">Timeout Destination</p>
+                        {data.timeoutDestination ? <DestinationLink value={data.timeoutDestination} className="text-primary hover:underline" /> : <p>---</p>}
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Invalid Destination</p>
+                        {data.invalidDestination ? <DestinationLink value={data.invalidDestination} className="text-primary hover:underline" /> : <p>---</p>}
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label>Invalid Destination</Label>
-                      <Input value={editInvalidDest} onChange={(e) => setEditInvalidDest(e.target.value)} placeholder="Destination on invalid input (optional)" />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="grid gap-4 text-sm md:grid-cols-2">
-                    <InfoField label="Name" value={data.name} />
-                    <InfoField label="Greeting Type" value={greetingTypeLabels[data.greetingType] ?? data.greetingType} />
-                    {data.greetingType === "text" && <InfoField label="Greeting Text" value={data.greetingText} />}
-                    <InfoField label="Timeout" value={`${data.timeoutSeconds}s`} />
-                    <InfoField label="Max Retries" value={data.maxRetries} />
-                    <div>
-                      <p className="text-muted-foreground">Timeout Destination</p>
-                      {data.timeoutDestination ? <DestinationLink value={data.timeoutDestination} className="text-primary hover:underline" /> : <p>---</p>}
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Invalid Destination</p>
-                      {data.invalidDestination ? <DestinationLink value={data.invalidDestination} className="text-primary hover:underline" /> : <p>---</p>}
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                  )}
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
 
             {/* Options */}
             <SectionErrorBoundary name="Menu Options">
-            <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Menu className="h-5 w-5 text-muted-foreground" />
-                  Menu Options
-                </CardTitle>
-                <CardDescription>Define the key-press options available to callers.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {sortedOptions.length > 0 ? (
-                  <div className="overflow-x-auto">
-                  <Table aria-label="IVR menu options">
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-16">Digit</TableHead>
-                        <TableHead>Label</TableHead>
-                        <TableHead>Destination</TableHead>
-                        <TableHead className="w-28 text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {sortedOptions.map((opt, idx) => (
-                        <OptionRow
-                          key={opt.id}
-                          option={opt}
-                          menuId={ivrMenuId}
-                          isFirst={idx === 0}
-                          isLast={idx === sortedOptions.length - 1}
-                          isHighlighted={highlightedId === opt.id}
-                          isReordering={reorderMutation.isPending}
-                          onMoveUp={() => handleReorder(idx, "up")}
-                          onMoveDown={() => handleReorder(idx, "down")}
-                        />
-                      ))}
-                    </TableBody>
-                  </Table>
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground py-4 text-center">No options configured.</p>
-                )}
-                <AddOptionRow menuId={ivrMenuId} />
-              </CardContent>
-            </Card>
+              <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Menu className="h-5 w-5 text-muted-foreground" />
+                    Menu Options
+                  </CardTitle>
+                  <CardDescription>Define the key-press options available to callers.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {sortedOptions.length > 0 ? (
+                    <div className="overflow-x-auto">
+                      <Table aria-label="IVR menu options">
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-16">Digit</TableHead>
+                            <TableHead>Label</TableHead>
+                            <TableHead>Destination</TableHead>
+                            <TableHead className="w-28 text-right">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {sortedOptions.map((opt, idx) => (
+                            <OptionRow
+                              key={opt.id}
+                              option={opt}
+                              menuId={ivrMenuId}
+                              isFirst={idx === 0}
+                              isLast={idx === sortedOptions.length - 1}
+                              isHighlighted={highlightedId === opt.id}
+                              isReordering={reorderMutation.isPending}
+                              onMoveUp={() => handleReorder(idx, "up")}
+                              onMoveDown={() => handleReorder(idx, "down")}
+                            />
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground py-4 text-center">No options configured.</p>
+                  )}
+                  <AddOptionRow menuId={ivrMenuId} />
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
 
             {/* Danger Zone */}
             <SectionErrorBoundary name="Danger Zone">
-            <Card className="border-destructive/30 bg-card/80 shadow-md">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-destructive">
-                  <AlertTriangle className="h-4 w-4" /> Danger Zone
-                </CardTitle>
-                <CardDescription>Irreversible and destructive actions.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between rounded-lg border border-destructive/20 bg-destructive/5 p-4">
-                  <div>
-                    <p className="font-medium text-sm">Delete this IVR menu</p>
-                    <p className="text-xs text-muted-foreground">Once deleted, this IVR menu and all its options cannot be recovered.</p>
+              <Card className="border-destructive/30 bg-card/80 shadow-md">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-destructive">
+                    <AlertTriangle className="h-4 w-4" /> Danger Zone
+                  </CardTitle>
+                  <CardDescription>Irreversible and destructive actions.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between rounded-lg border border-destructive/20 bg-destructive/5 p-4">
+                    <div>
+                      <p className="font-medium text-sm">Delete this IVR menu</p>
+                      <p className="text-xs text-muted-foreground">Once deleted, this IVR menu and all its options cannot be recovered.</p>
+                    </div>
+                    <DeleteDialog name={data.name} onDelete={handleDelete} isPending={deleteMutation.isPending} />
                   </div>
-                  <DeleteDialog name={data.name} onDelete={handleDelete} isPending={deleteMutation.isPending} />
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
           </div>
 
           {/* Sidebar */}
           <div className="space-y-4">
             <SectionErrorBoundary name="Metadata">
-            <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Menu className="h-4 w-4" /> Metadata</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-1">
-                  <p className="text-xs font-medium text-muted-foreground">IVR Menu ID</p>
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs break-all">{data.id}</span>
-                    <CopyButton value={data.id} label="IVR menu ID" />
+              <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Menu className="h-4 w-4" /> Metadata
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium text-muted-foreground">IVR Menu ID</p>
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-xs break-all">{data.id}</span>
+                      <CopyButton value={data.id} label="IVR menu ID" />
+                    </div>
                   </div>
-                </div>
-                <Separator />
-                <div className="space-y-1">
-                  <p className="text-xs font-medium text-muted-foreground">Team ID</p>
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs break-all">{data.teamId}</span>
-                    <CopyButton value={data.teamId} label="team ID" />
+                  <Separator />
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium text-muted-foreground">Team ID</p>
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-xs break-all">{data.teamId}</span>
+                      <CopyButton value={data.teamId} label="team ID" />
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
 
             <SectionErrorBoundary name="Summary">
-            <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Menu className="h-4 w-4" /> Summary</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Options count</span>
-                  <span className="font-medium text-sm">{options.length}</span>
-                </div>
-                <Separator />
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Greeting type</span>
-                  <span className="font-medium text-sm">{greetingTypeLabels[data.greetingType] ?? data.greetingType}</span>
-                </div>
-                <Separator />
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Timeout</span>
-                  <span className="font-medium text-sm">{data.timeoutSeconds}s</span>
-                </div>
-              </CardContent>
-            </Card>
+              <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Menu className="h-4 w-4" /> Summary
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Options count</span>
+                    <span className="font-medium text-sm">{options.length}</span>
+                  </div>
+                  <Separator />
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Greeting type</span>
+                    <span className="font-medium text-sm">{greetingTypeLabels[data.greetingType] ?? data.greetingType}</span>
+                  </div>
+                  <Separator />
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Timeout</span>
+                    <span className="font-medium text-sm">{data.timeoutSeconds}s</span>
+                  </div>
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
           </div>
         </div>
       </PageSection>
 
       <PageSection>
-        <EntityActivityPanel
-          targetType="ivr_menu"
-          targetId={ivrMenuId}
-        />
+        <EntityActivityPanel targetType="ivr_menu" targetId={ivrMenuId} />
       </PageSection>
 
       {/* Delete confirmation dialog */}
@@ -728,17 +732,11 @@ function IvrMenuDetailPage() {
             <AlertDialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-destructive" /> Delete "{data.name}"?
             </AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete this IVR menu and all its options. This action cannot be undone.
-            </AlertDialogDescription>
+            <AlertDialogDescription>This will permanently delete this IVR menu and all its options. This action cannot be undone.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={deleteMutation.isPending}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className={buttonVariants({ variant: "destructive" })}
-              onClick={handleDelete}
-              disabled={deleteMutation.isPending}
-            >
+            <AlertDialogAction className={buttonVariants({ variant: "destructive" })} onClick={handleDelete} disabled={deleteMutation.isPending}>
               {deleteMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {deleteMutation.isPending ? "Deleting..." : "Delete"}
             </AlertDialogAction>

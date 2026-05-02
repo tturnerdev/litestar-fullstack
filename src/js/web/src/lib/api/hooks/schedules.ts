@@ -104,8 +104,7 @@ export interface UseSchedulesOptions {
 }
 
 export function useSchedules(pageOrOptions: number | UseSchedulesOptions = 1, pageSizeArg = 20) {
-  const opts: UseSchedulesOptions =
-    typeof pageOrOptions === "number" ? { page: pageOrOptions, pageSize: pageSizeArg } : pageOrOptions
+  const opts: UseSchedulesOptions = typeof pageOrOptions === "number" ? { page: pageOrOptions, pageSize: pageSizeArg } : pageOrOptions
   const { page = 1, pageSize = 20, search, orderBy, sortOrder } = opts
 
   return useQuery({

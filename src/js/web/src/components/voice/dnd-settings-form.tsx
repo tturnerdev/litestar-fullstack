@@ -1,17 +1,17 @@
 import { AlertCircle, BellOff, BellRing, Calendar, Clock, Moon, Sun, X } from "lucide-react"
-import { useRef, useState, type KeyboardEvent } from "react"
+import { type KeyboardEvent, useRef, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
-import { EmptyState } from "@/components/ui/empty-state"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { DndSchedulePicker } from "@/components/voice/dnd-schedule-picker"
-import { cn } from "@/lib/utils"
 import { useDndSettings, useToggleDnd, useUpdateDndSettings } from "@/lib/api/hooks/voice"
+import { cn } from "@/lib/utils"
 
 const MODE_OPTIONS = [
   {
@@ -59,7 +59,11 @@ export function DndSettingsForm({ extensionId }: { extensionId: string }) {
         icon={AlertCircle}
         title="Unable to load DND settings"
         description="Something went wrong. Please try again."
-        action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+        action={
+          <Button variant="outline" size="sm" onClick={() => refetch()}>
+            Try again
+          </Button>
+        }
       />
     )
   }
@@ -127,9 +131,7 @@ export function DndSettingsForm({ extensionId }: { extensionId: string }) {
         <div
           className={cn(
             "flex items-center justify-between rounded-lg border p-4",
-            data.isEnabled
-              ? "border-destructive/30 bg-destructive/10"
-              : "border-emerald-500/30 bg-emerald-500/10",
+            data.isEnabled ? "border-destructive/30 bg-destructive/10" : "border-emerald-500/30 bg-emerald-500/10",
           )}
         >
           <div className="flex items-center gap-3">
@@ -146,21 +148,14 @@ export function DndSettingsForm({ extensionId }: { extensionId: string }) {
               <p className={cn("text-sm font-semibold", data.isEnabled ? "text-destructive" : "text-emerald-700 dark:text-emerald-400")}>
                 {data.isEnabled ? "Do Not Disturb is ON" : "Do Not Disturb is OFF"}
               </p>
-              <p className="text-xs text-muted-foreground">
-                {data.isEnabled ? "Incoming calls are being silenced" : "All calls will ring normally"}
-              </p>
+              <p className="text-xs text-muted-foreground">{data.isEnabled ? "Incoming calls are being silenced" : "All calls will ring normally"}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <Label htmlFor="dnd-toggle" className="text-sm text-muted-foreground">
               {data.isEnabled ? "Enabled" : "Disabled"}
             </Label>
-            <Switch
-              id="dnd-toggle"
-              checked={data.isEnabled}
-              onCheckedChange={handleToggle}
-              disabled={toggleMutation.isPending}
-            />
+            <Switch id="dnd-toggle" checked={data.isEnabled} onCheckedChange={handleToggle} disabled={toggleMutation.isPending} />
           </div>
         </div>
 
@@ -183,9 +178,7 @@ export function DndSettingsForm({ extensionId }: { extensionId: string }) {
                   }}
                   className={cn(
                     "relative flex flex-col items-start gap-2 rounded-lg border-2 p-4 text-left transition-all hover:bg-accent/50",
-                    isSelected
-                      ? "border-primary bg-accent/30 shadow-sm"
-                      : "border-border",
+                    isSelected ? "border-primary bg-accent/30 shadow-sm" : "border-border",
                   )}
                 >
                   <div className="flex w-full items-center gap-2">
@@ -241,19 +234,12 @@ export function DndSettingsForm({ extensionId }: { extensionId: string }) {
         {/* Allow list */}
         <div className="space-y-3">
           <Label>Allow list</Label>
-          <p className="text-xs text-muted-foreground">
-            Phone numbers that can bypass Do Not Disturb. Press Enter to add.
-          </p>
+          <p className="text-xs text-muted-foreground">Phone numbers that can bypass Do Not Disturb. Press Enter to add.</p>
           <div className="flex flex-wrap items-center gap-1.5 rounded-md border border-input bg-background px-3 py-2 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background">
             {currentAllowList.map((num) => (
               <Badge key={num} variant="secondary" className="gap-1 font-mono text-xs">
                 {num}
-                <button
-                  type="button"
-                  onClick={() => handleRemoveNumber(num)}
-                  className="ml-0.5 rounded-sm hover:bg-muted-foreground/20"
-                  aria-label={`Remove ${num}`}
-                >
+                <button type="button" onClick={() => handleRemoveNumber(num)} className="ml-0.5 rounded-sm hover:bg-muted-foreground/20" aria-label={`Remove ${num}`}>
                   <X className="h-3 w-3" />
                 </button>
               </Badge>

@@ -1,5 +1,4 @@
 import { createFileRoute, Link, useBlocker, useNavigate } from "@tanstack/react-router"
-import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   AlertCircle,
   AlertTriangle,
@@ -21,17 +20,11 @@ import {
   Users,
   X,
 } from "lucide-react"
-import { DirectionBadge, FaxStatusBadge } from "@/components/fax/fax-status-badge"
+import { useCallback, useEffect, useMemo, useState } from "react"
+import { toast } from "sonner"
 import { EmailRouteEditor } from "@/components/fax/email-route-editor"
-import { Badge } from "@/components/ui/badge"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { DirectionBadge, FaxStatusBadge } from "@/components/fax/fax-status-badge"
+import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,15 +35,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { Badge } from "@/components/ui/badge"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { CopyButton } from "@/components/ui/copy-button"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -59,21 +49,13 @@ import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
-import { CopyButton } from "@/components/ui/copy-button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDocumentTitle } from "@/hooks/use-document-title"
-import {
-  useDeleteFaxNumber,
-  useFaxMessages,
-  useFaxNumber,
-  useUpdateFaxNumber,
-} from "@/lib/api/hooks/fax"
+import { useDeleteFaxNumber, useFaxMessages, useFaxNumber, useUpdateFaxNumber } from "@/lib/api/hooks/fax"
 import { useTeam } from "@/lib/api/hooks/teams"
-import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { formatDateTime, formatRelativeTime } from "@/lib/date-utils"
 import { formatPhoneNumber } from "@/lib/format-utils"
 import { cn } from "@/lib/utils"
-import { toast } from "sonner"
 
 export const Route = createFileRoute("/_app/fax/numbers/$faxNumberId/")({
   component: FaxNumberDetailPage,
@@ -81,13 +63,7 @@ export const Route = createFileRoute("/_app/fax/numbers/$faxNumberId/")({
 
 // ── Timestamp with tooltip ──────────────────────────────────────────────
 
-function TimestampField({
-  label,
-  value,
-}: {
-  label: string
-  value: string | null | undefined
-}) {
+function TimestampField({ label, value }: { label: string; value: string | null | undefined }) {
   if (!value) {
     return (
       <div>
@@ -150,9 +126,7 @@ function FaxNumberDetailPage() {
   // Filter messages for this fax number and take the last 5
   const recentMessages = useMemo(() => {
     if (!messagesData?.items) return []
-    return messagesData.items
-      .filter((msg) => msg.faxNumberId === faxNumberId)
-      .slice(0, 5)
+    return messagesData.items.filter((msg) => msg.faxNumberId === faxNumberId).slice(0, 5)
   }, [messagesData?.items, faxNumberId])
 
   // Message count summary
@@ -247,7 +221,11 @@ function FaxNumberDetailPage() {
             icon={AlertCircle}
             title="Unable to load fax number"
             description="Something went wrong. Please try again."
-            action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+            action={
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
+                Try again
+              </Button>
+            }
           />
         </PageSection>
       </PageContainer>
@@ -317,10 +295,7 @@ function FaxNumberDetailPage() {
                   Edit
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="text-destructive focus:text-destructive"
-                  onClick={() => setShowDeleteDialog(true)}
-                >
+                <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setShowDeleteDialog(true)}>
                   <Trash2 className="mr-2 h-4 w-4" />
                   Delete Fax Number
                 </DropdownMenuItem>
@@ -339,9 +314,7 @@ function FaxNumberDetailPage() {
               Delete fax number?
             </AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete{" "}
-              <strong>{data.label ?? formatPhoneNumber(data.number)}</strong> and all
-              associated email routes. This action cannot be undone.
+              This will permanently delete <strong>{data.label ?? formatPhoneNumber(data.number)}</strong> and all associated email routes. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -369,196 +342,173 @@ function FaxNumberDetailPage() {
       {/* Number Info (inline editing) */}
       <PageSection>
         <SectionErrorBoundary name="Number Info">
-        <FaxNumberSettingsCard faxNumberId={faxNumberId} messageCounts={messageCounts} editing={editing} setEditing={setEditing} />
+          <FaxNumberSettingsCard faxNumberId={faxNumberId} messageCounts={messageCounts} editing={editing} setEditing={setEditing} />
         </SectionErrorBoundary>
       </PageSection>
 
       {/* Email Routes */}
       <PageSection delay={0.1}>
         <SectionErrorBoundary name="Email Routes">
-        <EmailRouteEditor faxNumberId={faxNumberId} />
+          <EmailRouteEditor faxNumberId={faxNumberId} />
         </SectionErrorBoundary>
       </PageSection>
 
       {/* Recent Messages */}
       <PageSection delay={0.15}>
         <SectionErrorBoundary name="Recent Messages">
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <MessageSquare className="h-5 w-5 text-muted-foreground" />
-                <CardTitle>Recent Messages</CardTitle>
-              </div>
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/fax/messages">
-                  View all <ArrowUpRight className="ml-1 h-3.5 w-3.5" />
-                </Link>
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {recentMessages.length === 0 ? (
-              <div className="flex flex-col items-center gap-2 py-6 text-center">
-                <MessageSquare className="h-8 w-8 text-muted-foreground/50" />
-                <p className="text-sm text-muted-foreground">No messages yet for this number.</p>
-                <Button size="sm" variant="outline" asChild>
-                  <Link to="/fax/send">
-                    <Send className="mr-2 h-3.5 w-3.5" /> Send a fax
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5 text-muted-foreground" />
+                  <CardTitle>Recent Messages</CardTitle>
+                </div>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/fax/messages">
+                    View all <ArrowUpRight className="ml-1 h-3.5 w-3.5" />
                   </Link>
                 </Button>
               </div>
-            ) : (
-              <div className="space-y-2">
-                {recentMessages.map((msg) => (
-                  <Link
-                    key={msg.id}
-                    to="/fax/messages/$messageId"
-                    params={{ messageId: msg.id }}
-                    className="flex items-center justify-between rounded-md border border-border/60 px-3 py-2.5 transition-colors hover:bg-muted/50"
-                  >
-                    <div className="flex items-center gap-3">
-                      <DirectionBadge direction={msg.direction} />
-                      <div className="flex flex-col gap-0.5">
-                        <span className="font-mono text-sm">{msg.remoteNumber}</span>
-                        {msg.remoteName && (
-                          <span className="text-xs text-muted-foreground">{msg.remoteName}</span>
-                        )}
+            </CardHeader>
+            <CardContent>
+              {recentMessages.length === 0 ? (
+                <div className="flex flex-col items-center gap-2 py-6 text-center">
+                  <MessageSquare className="h-8 w-8 text-muted-foreground/50" />
+                  <p className="text-sm text-muted-foreground">No messages yet for this number.</p>
+                  <Button size="sm" variant="outline" asChild>
+                    <Link to="/fax/send">
+                      <Send className="mr-2 h-3.5 w-3.5" /> Send a fax
+                    </Link>
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {recentMessages.map((msg) => (
+                    <Link
+                      key={msg.id}
+                      to="/fax/messages/$messageId"
+                      params={{ messageId: msg.id }}
+                      className="flex items-center justify-between rounded-md border border-border/60 px-3 py-2.5 transition-colors hover:bg-muted/50"
+                    >
+                      <div className="flex items-center gap-3">
+                        <DirectionBadge direction={msg.direction} />
+                        <div className="flex flex-col gap-0.5">
+                          <span className="font-mono text-sm">{msg.remoteNumber}</span>
+                          {msg.remoteName && <span className="text-xs text-muted-foreground">{msg.remoteName}</span>}
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <FaxStatusBadge status={msg.status} />
-                      <Badge variant="outline" className="font-mono text-xs">
-                        {msg.pageCount} pg{msg.pageCount === 1 ? "" : "s"}
-                      </Badge>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="cursor-default whitespace-nowrap text-xs text-muted-foreground">
-                            {formatRelativeTime(msg.receivedAt ?? msg.createdAt)}
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          {formatDateTime(msg.receivedAt ?? msg.createdAt)}
-                        </TooltipContent>
-                      </Tooltip>
-                      <Eye className="h-3.5 w-3.5 text-muted-foreground" />
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                      <div className="flex items-center gap-3">
+                        <FaxStatusBadge status={msg.status} />
+                        <Badge variant="outline" className="font-mono text-xs">
+                          {msg.pageCount} pg{msg.pageCount === 1 ? "" : "s"}
+                        </Badge>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="cursor-default whitespace-nowrap text-xs text-muted-foreground">{formatRelativeTime(msg.receivedAt ?? msg.createdAt)}</span>
+                          </TooltipTrigger>
+                          <TooltipContent>{formatDateTime(msg.receivedAt ?? msg.createdAt)}</TooltipContent>
+                        </Tooltip>
+                        <Eye className="h-3.5 w-3.5 text-muted-foreground" />
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </SectionErrorBoundary>
       </PageSection>
 
       {/* Related Resources */}
       <PageSection delay={0.2}>
         <SectionErrorBoundary name="Related Resources">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Link2 className="h-5 w-5 text-muted-foreground" />
-              Related Resources
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {/* Team */}
-              {data.teamId ? (
-                <Link
-                  to="/teams/$teamId"
-                  params={{ teamId: data.teamId }}
-                  className="group flex items-center gap-3 rounded-lg border border-border/60 px-4 py-3 transition-colors hover:bg-muted/50 hover:border-primary/30"
-                >
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                    <Users className="h-4.5 w-4.5" />
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Link2 className="h-5 w-5 text-muted-foreground" />
+                Related Resources
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {/* Team */}
+                {data.teamId ? (
+                  <Link
+                    to="/teams/$teamId"
+                    params={{ teamId: data.teamId }}
+                    className="group flex items-center gap-3 rounded-lg border border-border/60 px-4 py-3 transition-colors hover:bg-muted/50 hover:border-primary/30"
+                  >
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                      <Users className="h-4.5 w-4.5" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs text-muted-foreground">Team</p>
+                      <p className="truncate text-sm font-medium group-hover:text-primary">{teamQuery.data?.name ?? "Loading..."}</p>
+                    </div>
+                    <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+                  </Link>
+                ) : (
+                  <div className="flex items-center gap-3 rounded-lg border border-dashed border-border/60 px-4 py-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground/50">
+                      <Users className="h-4.5 w-4.5" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs text-muted-foreground">Team</p>
+                      <p className="text-sm text-muted-foreground">Not assigned</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* E911 Registration */}
+                <Link to="/e911" className="group flex items-center gap-3 rounded-lg border border-border/60 px-4 py-3 transition-colors hover:bg-muted/50 hover:border-primary/30">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-red-500/10 text-red-600 dark:text-red-400">
+                    <ShieldAlert className="h-4.5 w-4.5" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs text-muted-foreground">Team</p>
-                    <p className="truncate text-sm font-medium group-hover:text-primary">
-                      {teamQuery.data?.name ?? "Loading..."}
-                    </p>
+                    <p className="text-xs text-muted-foreground">E911 Registrations</p>
+                    <p className="truncate text-sm font-medium group-hover:text-primary">View registrations</p>
                   </div>
                   <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
                 </Link>
-              ) : (
-                <div className="flex items-center gap-3 rounded-lg border border-dashed border-border/60 px-4 py-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground/50">
-                    <Users className="h-4.5 w-4.5" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs text-muted-foreground">Team</p>
-                    <p className="text-sm text-muted-foreground">Not assigned</p>
-                  </div>
-                </div>
-              )}
-
-              {/* E911 Registration */}
-              <Link
-                to="/e911"
-                className="group flex items-center gap-3 rounded-lg border border-border/60 px-4 py-3 transition-colors hover:bg-muted/50 hover:border-primary/30"
-              >
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-red-500/10 text-red-600 dark:text-red-400">
-                  <ShieldAlert className="h-4.5 w-4.5" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs text-muted-foreground">E911 Registrations</p>
-                  <p className="truncate text-sm font-medium group-hover:text-primary">
-                    View registrations
-                  </p>
-                </div>
-                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
+              </div>
+            </CardContent>
+          </Card>
         </SectionErrorBoundary>
       </PageSection>
 
       {/* Activity History */}
       <PageSection delay={0.25}>
         <SectionErrorBoundary name="Activity History">
-        <Card>
-          <CardHeader>
-            <CardTitle>Activity History</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <EntityActivityPanel
-              targetType="fax_number"
-              targetId={faxNumberId}
-            />
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Activity History</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <EntityActivityPanel targetType="fax_number" targetId={faxNumberId} />
+            </CardContent>
+          </Card>
         </SectionErrorBoundary>
       </PageSection>
 
       {/* Danger Zone */}
       <PageSection delay={0.3}>
         <SectionErrorBoundary name="Danger Zone">
-        <Card className="border-destructive/30">
-          <CardHeader>
-            <CardTitle className="text-destructive">Danger Zone</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium text-sm">Delete this fax number</p>
-                <p className="text-sm text-muted-foreground">
-                  This action cannot be undone. All email routes and message associations will be
-                  permanently removed.
-                </p>
+          <Card className="border-destructive/30">
+            <CardHeader>
+              <CardTitle className="text-destructive">Danger Zone</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-sm">Delete this fax number</p>
+                  <p className="text-sm text-muted-foreground">This action cannot be undone. All email routes and message associations will be permanently removed.</p>
+                </div>
+                <Button variant="destructive" size="sm" onClick={() => setShowDeleteDialog(true)}>
+                  <Trash2 className="mr-2 h-4 w-4" /> Delete
+                </Button>
               </div>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => setShowDeleteDialog(true)}
-              >
-                <Trash2 className="mr-2 h-4 w-4" /> Delete
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
         </SectionErrorBoundary>
       </PageSection>
     </PageContainer>
@@ -605,10 +555,7 @@ function FaxNumberSettingsCard({
 
   const formDirty = useMemo(() => {
     if (!editing || !data) return false
-    return (
-      formData.label !== (data.label ?? "") ||
-      formData.isActive !== data.isActive
-    )
+    return formData.label !== (data.label ?? "") || formData.isActive !== data.isActive
   }, [editing, data, formData])
 
   const blocker = useBlocker({
@@ -645,7 +592,11 @@ function FaxNumberSettingsCard({
         icon={AlertCircle}
         title="Unable to load fax number settings"
         description="Something went wrong. Please try again."
-        action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+        action={
+          <Button variant="outline" size="sm" onClick={() => refetch()}>
+            Try again
+          </Button>
+        }
       />
     )
   }
@@ -689,9 +640,7 @@ function FaxNumberSettingsCard({
                 <Phone className="h-5 w-5 text-muted-foreground" />
                 <CardTitle>Number Info</CardTitle>
               </div>
-              <CardDescription>
-                Fax number details, label, and status configuration.
-              </CardDescription>
+              <CardDescription>Fax number details, label, and status configuration.</CardDescription>
             </div>
             <div className="flex items-center gap-2">
               {(editing ? formData.isActive : data.isActive) ? (
@@ -740,9 +689,7 @@ function FaxNumberSettingsCard({
           {/* Label */}
           <div className="space-y-2">
             <Label htmlFor="fax-label">Label</Label>
-            <p className="text-xs text-muted-foreground">
-              A friendly name to identify this fax number.
-            </p>
+            <p className="text-xs text-muted-foreground">A friendly name to identify this fax number.</p>
             {editing ? (
               <Input
                 id="fax-label"
@@ -761,23 +708,16 @@ function FaxNumberSettingsCard({
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label>Status</Label>
-              <p className="text-xs text-muted-foreground">
-                When inactive, this number cannot send or receive faxes.
-              </p>
+              <p className="text-xs text-muted-foreground">When inactive, this number cannot send or receive faxes.</p>
             </div>
             {editing ? (
-              <Switch
-                checked={formData.isActive}
-                onCheckedChange={(v) => updateField("isActive", v)}
-              />
+              <Switch checked={formData.isActive} onCheckedChange={(v) => updateField("isActive", v)} />
             ) : (
               <Badge
                 variant={data.isActive ? "default" : "outline"}
                 className={cn(
                   "gap-1.5",
-                  data.isActive
-                    ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400"
-                    : "text-muted-foreground",
+                  data.isActive ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400" : "text-muted-foreground",
                 )}
               >
                 <span className={cn("h-1.5 w-1.5 rounded-full", data.isActive ? "bg-emerald-500" : "bg-muted-foreground")} />
@@ -833,9 +773,7 @@ function FaxNumberSettingsCard({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
-            <AlertDialogDescription>
-              You have unsaved changes to fax number settings. Are you sure you want to leave? Your changes will be lost.
-            </AlertDialogDescription>
+            <AlertDialogDescription>You have unsaved changes to fax number settings. Are you sure you want to leave? Your changes will be lost.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => blocker.reset?.()}>Stay on page</AlertDialogCancel>

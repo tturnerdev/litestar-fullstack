@@ -1,5 +1,5 @@
+import { useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
-import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   AlertCircle,
   CheckCircle2,
@@ -15,13 +15,13 @@ import {
   Trash2,
   UserCheck,
   UserPlus,
-  UserX,
   Users,
+  UserX,
   X,
   XCircle,
 } from "lucide-react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
-import { useQueryClient } from "@tanstack/react-query"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { DeleteUserDialog } from "@/components/admin/delete-user-dialog"
@@ -35,25 +35,25 @@ import { Badge } from "@/components/ui/badge"
 import { type BulkAction, BulkActionBar } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { EmptyState } from "@/components/ui/empty-state"
-import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { FilterDropdown, type FilterOption } from "@/components/ui/filter-dropdown"
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { SkeletonTable } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { DataFreshness } from "@/components/ui/data-freshness"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
-import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { useAdminUsers } from "@/lib/api/hooks/admin"
-import { adminDeleteUser, adminUpdateUser } from "@/lib/generated/api"
+import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import type { AdminUserSummary } from "@/lib/generated/api"
+import { adminDeleteUser, adminUpdateUser } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/admin/users/")({
   component: AdminUsersPage,
@@ -395,12 +395,7 @@ function AdminUsersPage() {
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative max-w-sm flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Search by name, email, or username..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 pr-8"
-            />
+            <Input placeholder="Search by name, email, or username..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 pr-8" />
             {search && (
               <button
                 type="button"
@@ -412,18 +407,8 @@ function AdminUsersPage() {
               </button>
             )}
           </div>
-          <FilterDropdown
-            label="Role"
-            options={roleOptions}
-            selected={roleFilter}
-            onChange={setRoleFilter}
-          />
-          <FilterDropdown
-            label="Status"
-            options={statusOptions}
-            selected={statusFilter}
-            onChange={setStatusFilter}
-          />
+          <FilterDropdown label="Role" options={roleOptions} selected={roleFilter} onChange={setRoleFilter} />
+          <FilterDropdown label="Status" options={statusOptions} selected={statusFilter} onChange={setStatusFilter} />
           {activeFilterCount > 0 && (
             <Button
               variant="ghost"
@@ -438,11 +423,7 @@ function AdminUsersPage() {
             </Button>
           )}
           <div className="ml-auto">
-            <DataFreshness
-              dataUpdatedAt={dataUpdatedAt}
-              onRefresh={() => refetch()}
-              isRefreshing={isRefetching}
-            />
+            <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
           </div>
         </div>
       </PageSection>
@@ -464,11 +445,7 @@ function AdminUsersPage() {
               }
             />
           ) : !hasAnyUsers && !search ? (
-            <EmptyState
-              icon={Users}
-              title="No users yet"
-              description="Users will appear here once they register or are added to the system."
-            />
+            <EmptyState icon={Users} title="No users yet" description="Users will appear here once they register or are added to the system." />
           ) : !hasData ? (
             <EmptyState
               icon={Users}
@@ -511,59 +488,14 @@ function AdminUsersPage() {
                   <TableHeader className="sticky top-0 z-10 bg-background">
                     <TableRow>
                       <TableHead className="w-10">
-                        <Checkbox
-                          checked={allSelected}
-                          indeterminate={someSelected && !allSelected}
-                          onChange={toggleAll}
-                          aria-label="Select all users"
-                        />
+                        <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all users" />
                       </TableHead>
-                      <SortableHeader
-                        label="User"
-                        sortKey="name"
-                        currentSort={sortKey}
-                        currentDirection={sortDir}
-                        onSort={handleSort}
-                      />
-                      <SortableHeader
-                        label="Email"
-                        sortKey="email"
-                        currentSort={sortKey}
-                        currentDirection={sortDir}
-                        onSort={handleSort}
-                        className="hidden sm:table-cell"
-                      />
-                      <SortableHeader
-                        label="Role"
-                        sortKey="is_superuser"
-                        currentSort={sortKey}
-                        currentDirection={sortDir}
-                        onSort={handleSort}
-                        className="hidden sm:table-cell"
-                      />
-                      <SortableHeader
-                        label="Status"
-                        sortKey="is_active"
-                        currentSort={sortKey}
-                        currentDirection={sortDir}
-                        onSort={handleSort}
-                      />
-                      <SortableHeader
-                        label="Logins"
-                        sortKey="login_count"
-                        currentSort={sortKey}
-                        currentDirection={sortDir}
-                        onSort={handleSort}
-                        className="hidden md:table-cell"
-                      />
-                      <SortableHeader
-                        label="Created"
-                        sortKey="created_at"
-                        currentSort={sortKey}
-                        currentDirection={sortDir}
-                        onSort={handleSort}
-                        className="hidden md:table-cell"
-                      />
+                      <SortableHeader label="User" sortKey="name" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                      <SortableHeader label="Email" sortKey="email" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden sm:table-cell" />
+                      <SortableHeader label="Role" sortKey="is_superuser" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden sm:table-cell" />
+                      <SortableHeader label="Status" sortKey="is_active" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                      <SortableHeader label="Logins" sortKey="login_count" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
+                      <SortableHeader label="Created" sortKey="created_at" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
                       <TableHead className="w-16 text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -634,31 +566,14 @@ function AdminUsersPage() {
       </PageSection>
 
       {/* Bulk action bar */}
-      <BulkActionBar
-        selectedCount={selectedIds.size}
-        selectedIds={Array.from(selectedIds)}
-        onClearSelection={() => setSelectedIds(new Set())}
-        actions={bulkActions}
-      />
+      <BulkActionBar selectedCount={selectedIds.size} selectedIds={Array.from(selectedIds)} onClearSelection={() => setSelectedIds(new Set())} actions={bulkActions} />
     </PageContainer>
   )
 }
 
 // -- Table row ----------------------------------------------------------------
 
-function UserRow({
-  user,
-  index,
-  selected,
-  onToggle,
-  onRowClick,
-}: {
-  user: AdminUserSummary
-  index: number
-  selected: boolean
-  onToggle: () => void
-  onRowClick: () => void
-}) {
+function UserRow({ user, index, selected, onToggle, onRowClick }: { user: AdminUserSummary; index: number; selected: boolean; onToggle: () => void; onRowClick: () => void }) {
   const [editOpen, setEditOpen] = useState(false)
   const [rolesOpen, setRolesOpen] = useState(false)
   const [joinTeamOpen, setJoinTeamOpen] = useState(false)
@@ -690,12 +605,7 @@ function UserRow({
           />
         </TableCell>
         <TableCell>
-          <Link
-            to="/admin/users/$userId"
-            params={{ userId: user.id }}
-            className="group flex items-center gap-3"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <Link to="/admin/users/$userId" params={{ userId: user.id }} className="group flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
             <Avatar className="size-8 text-xs">
               <AvatarFallback>{getInitials(user.name, user.email)}</AvatarFallback>
             </Avatar>
@@ -741,16 +651,12 @@ function UserRow({
           </div>
         </TableCell>
         <TableCell className="hidden md:table-cell">
-          <span className="text-sm tabular-nums text-muted-foreground">
-            {user.loginCount ?? 0}
-          </span>
+          <span className="text-sm tabular-nums text-muted-foreground">{user.loginCount ?? 0}</span>
         </TableCell>
         <TableCell className="hidden md:table-cell">
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className="cursor-default text-xs text-muted-foreground">
-                {formatRelativeTimeShort(user.createdAt)}
-              </span>
+              <span className="cursor-default text-xs text-muted-foreground">{formatRelativeTimeShort(user.createdAt)}</span>
             </TooltipTrigger>
             <TooltipContent>{formatDateTime(user.createdAt)}</TooltipContent>
           </Tooltip>
@@ -758,13 +664,7 @@ function UserRow({
         <TableCell className="text-right">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                data-slot="dropdown"
-                onClick={(e) => e.stopPropagation()}
-              >
+              <Button variant="ghost" size="icon" className="h-8 w-8" data-slot="dropdown" onClick={(e) => e.stopPropagation()}>
                 <MoreVertical className="h-4 w-4" />
                 <span className="sr-only">Actions for {user.name ?? user.email}</span>
               </Button>
@@ -820,7 +720,14 @@ function UserRow({
       <ManageRolesDialog userId={user.id} userEmail={user.email} open={rolesOpen} onOpenChange={setRolesOpen} />
       <JoinTeamDialog userId={user.id} userName={user.name ?? user.email} open={joinTeamOpen} onOpenChange={setJoinTeamOpen} />
       <ManagePermissionsDialog userId={user.id} open={permissionsOpen} onOpenChange={setPermissionsOpen} />
-      <ToggleUserStatusDialog userId={user.id} userEmail={user.email} userName={user.name ?? undefined} isActive={user.isActive ?? true} open={statusOpen} onOpenChange={setStatusOpen} />
+      <ToggleUserStatusDialog
+        userId={user.id}
+        userEmail={user.email}
+        userName={user.name ?? undefined}
+        isActive={user.isActive ?? true}
+        open={statusOpen}
+        onOpenChange={setStatusOpen}
+      />
       <DeleteUserDialog userId={user.id} userEmail={user.email} open={deleteOpen} onOpenChange={setDeleteOpen} />
     </>
   )

@@ -18,15 +18,7 @@ function formatLastUpdated(timestamp: number): string {
   return new Date(timestamp).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })
 }
 
-export function DataFreshness({
-  dataUpdatedAt,
-  onRefresh,
-  isRefreshing,
-}: {
-  dataUpdatedAt: number | undefined
-  onRefresh: () => void
-  isRefreshing: boolean
-}) {
+export function DataFreshness({ dataUpdatedAt, onRefresh, isRefreshing }: { dataUpdatedAt: number | undefined; onRefresh: () => void; isRefreshing: boolean }) {
   const [label, setLabel] = useState("")
 
   useEffect(() => {
@@ -41,18 +33,10 @@ export function DataFreshness({
 
   return (
     <div className="flex items-center gap-1.5">
-      {label && (
-        <span className="text-xs text-muted-foreground">Updated {label}</span>
-      )}
+      {label && <span className="text-xs text-muted-foreground">Updated {label}</span>}
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button
-            size="sm"
-            variant="ghost"
-            className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
-            onClick={onRefresh}
-            disabled={isRefreshing}
-          >
+          <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground" onClick={onRefresh} disabled={isRefreshing}>
             <RefreshCw className={cn("h-3.5 w-3.5", isRefreshing && "animate-spin")} />
             <span className="sr-only">Refresh data</span>
           </Button>

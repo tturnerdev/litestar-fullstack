@@ -68,7 +68,11 @@ interface PageSectionProps {
 
 export function PageSection({ children, className, delay = 0, animated = true, id }: PageSectionProps) {
   if (!animated) {
-    return <section id={id} className={cn("space-y-6", className)}>{children}</section>
+    return (
+      <section id={id} className={cn("space-y-6", className)}>
+        {children}
+      </section>
+    )
   }
 
   return (

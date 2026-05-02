@@ -1,6 +1,4 @@
 import { createFileRoute, Link, useBlocker, useNavigate } from "@tanstack/react-router"
-import { useCallback, useEffect, useMemo, useState } from "react"
-import { toast } from "sonner"
 import {
   AlertCircle,
   AlertTriangle,
@@ -26,6 +24,9 @@ import {
   Wrench,
   X,
 } from "lucide-react"
+import { useCallback, useEffect, useMemo, useState } from "react"
+import { toast } from "sonner"
+import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -37,27 +38,15 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton, SkeletonCard } from "@/components/ui/skeleton"
@@ -65,12 +54,7 @@ import { Switch } from "@/components/ui/switch"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { VoicemailPlayer } from "@/components/voice/voicemail-player"
-import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
-import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { useDocumentTitle } from "@/hooks/use-document-title"
-import { formatDateTime, formatFullDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
-import { formatDuration, formatDurationHuman } from "@/lib/format-utils"
-import { cn } from "@/lib/utils"
 import {
   useDeleteVoicemailBox,
   useDeleteVoicemailMessage,
@@ -80,6 +64,9 @@ import {
   useVoicemailMessages,
   type VoicemailMessage,
 } from "@/lib/api/hooks/voicemail"
+import { formatDateTime, formatFullDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
+import { formatDuration, formatDurationHuman } from "@/lib/format-utils"
+import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/voicemail/$boxId")({
   component: VoicemailBoxDetailPage,
@@ -114,9 +101,7 @@ function VoicemailBoxDetailPage() {
   const deleteBoxMutation = useDeleteVoicemailBox()
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
-  const boxLabel = box?.extensionNumber
-    ? `Ext. ${box.extensionNumber}`
-    : box?.mailboxNumber ?? "Voicemail Box"
+  const boxLabel = box?.extensionNumber ? `Ext. ${box.extensionNumber}` : (box?.mailboxNumber ?? "Voicemail Box")
 
   useDocumentTitle(isLoading ? "Voicemail Box" : `${boxLabel} - Voicemail`)
 
@@ -154,7 +139,11 @@ function VoicemailBoxDetailPage() {
             icon={AlertCircle}
             title="Unable to load voicemail box"
             description="Something went wrong. Please try again."
-            action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+            action={
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
+                Try again
+              </Button>
+            }
           />
         </PageSection>
       </PageContainer>
@@ -204,10 +193,7 @@ function VoicemailBoxDetailPage() {
             )}
             {box.extensionId && (
               <Button variant="outline" size="sm" asChild>
-                <Link
-                  to="/voice/extensions/$extensionId"
-                  params={{ extensionId: box.extensionId }}
-                >
+                <Link to="/voice/extensions/$extensionId" params={{ extensionId: box.extensionId }}>
                   View Extension
                 </Link>
               </Button>
@@ -235,10 +221,7 @@ function VoicemailBoxDetailPage() {
                   Copy Box ID
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  variant="destructive"
-                  onClick={() => setShowDeleteConfirm(true)}
-                >
+                <DropdownMenuItem variant="destructive" onClick={() => setShowDeleteConfirm(true)}>
                   <Trash2 className="mr-2 h-4 w-4" />
                   Delete
                 </DropdownMenuItem>
@@ -251,57 +234,48 @@ function VoicemailBoxDetailPage() {
       {/* Box Settings */}
       <PageSection>
         <SectionErrorBoundary name="Box Settings">
-        <BoxSettingsForm boxId={boxId} />
+          <BoxSettingsForm boxId={boxId} />
         </SectionErrorBoundary>
       </PageSection>
 
       {/* Messages */}
       <PageSection delay={0.1}>
         <SectionErrorBoundary name="Voicemail Messages">
-        <BoxMessageList boxId={boxId} />
+          <BoxMessageList boxId={boxId} />
         </SectionErrorBoundary>
       </PageSection>
 
       {/* Activity */}
       <PageSection delay={0.2}>
         <SectionErrorBoundary name="Activity">
-        <EntityActivityPanel
-          targetType="voicemail_box"
-          targetId={boxId}
-        />
+          <EntityActivityPanel targetType="voicemail_box" targetId={boxId} />
         </SectionErrorBoundary>
       </PageSection>
 
       {/* Danger Zone */}
       <PageSection delay={0.3}>
         <SectionErrorBoundary name="Danger Zone">
-        <Card className="border-destructive/30 bg-card/80 shadow-md">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-destructive">
-              <AlertTriangle className="h-4 w-4" />
-              Danger Zone
-            </CardTitle>
-            <CardDescription>Irreversible and destructive actions for this voicemail box.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between rounded-lg border border-destructive/20 bg-destructive/5 p-4">
-              <div>
-                <p className="font-medium text-sm">Delete this voicemail box</p>
-                <p className="text-xs text-muted-foreground">
-                  Once deleted, this voicemail box and all messages cannot be recovered.
-                </p>
+          <Card className="border-destructive/30 bg-card/80 shadow-md">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-destructive">
+                <AlertTriangle className="h-4 w-4" />
+                Danger Zone
+              </CardTitle>
+              <CardDescription>Irreversible and destructive actions for this voicemail box.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between rounded-lg border border-destructive/20 bg-destructive/5 p-4">
+                <div>
+                  <p className="font-medium text-sm">Delete this voicemail box</p>
+                  <p className="text-xs text-muted-foreground">Once deleted, this voicemail box and all messages cannot be recovered.</p>
+                </div>
+                <Button variant="destructive" size="sm" onClick={() => setShowDeleteConfirm(true)}>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
+                </Button>
               </div>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => setShowDeleteConfirm(true)}
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
         </SectionErrorBoundary>
       </PageSection>
 
@@ -319,22 +293,21 @@ function VoicemailBoxDetailPage() {
               Delete voicemail box
             </AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete the voicemail box for{" "}
-              <span className="font-medium text-foreground">{boxLabel}</span>
-              {" "}and all associated messages. This action cannot be undone.
+              This will permanently delete the voicemail box for <span className="font-medium text-foreground">{boxLabel}</span> and all associated messages. This action cannot be
+              undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteBoxMutation.isPending}>
-              Cancel
-            </AlertDialogCancel>
+            <AlertDialogCancel disabled={deleteBoxMutation.isPending}>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => deleteBoxMutation.mutate(boxId, {
-                onSuccess: () => {
-                  setShowDeleteConfirm(false)
-                  navigate({ to: "/voicemail" })
-                },
-              })}
+              onClick={() =>
+                deleteBoxMutation.mutate(boxId, {
+                  onSuccess: () => {
+                    setShowDeleteConfirm(false)
+                    navigate({ to: "/voicemail" })
+                  },
+                })
+              }
               disabled={deleteBoxMutation.isPending}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
@@ -445,7 +418,11 @@ function BoxSettingsForm({ boxId }: { boxId: string }) {
         icon={AlertCircle}
         title="Unable to load voicemail box settings"
         description="Something went wrong. Please try again."
-        action={<Button variant="outline" size="sm" onClick={() => refetchSettings()}>Try again</Button>}
+        action={
+          <Button variant="outline" size="sm" onClick={() => refetchSettings()}>
+            Try again
+          </Button>
+        }
       />
     )
   }
@@ -492,494 +469,410 @@ function BoxSettingsForm({ boxId }: { boxId: string }) {
 
   return (
     <>
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle>Voicemail Box Settings</CardTitle>
-            <CardDescription>
-              Configure mailbox behavior, notifications, and retention.
-            </CardDescription>
-          </div>
-          <div className="flex items-center gap-2">
-            {(editing ? formData.isEnabled : data.isEnabled) ? (
-              <Badge className="gap-1.5 bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                Enabled
-              </Badge>
-            ) : (
-              <Badge variant="outline" className="gap-1.5 text-muted-foreground">
-                <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
-                Disabled
-              </Badge>
-            )}
-            {editing ? (
-              <>
-                <Button size="sm" variant="outline" onClick={handleCancel} disabled={updateMutation.isPending}>
-                  <X className="mr-2 h-4 w-4" /> Cancel
-                </Button>
-                <Button size="sm" onClick={handleSave} disabled={updateMutation.isPending || !!pinError}>
-                  {updateMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                  {updateMutation.isPending ? "Saving..." : "Save changes"}
-                </Button>
-              </>
-            ) : (
-              <Button size="sm" onClick={() => setEditing(true)}>
-                <Pencil className="mr-2 h-4 w-4" /> Edit
-              </Button>
-            )}
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {editing && formDirty && (
-          <div className="flex items-center gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-400">
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-500" />
-            You have unsaved changes
-          </div>
-        )}
-
-        {/* General */}
-        <div>
-          <h3 className="flex items-center gap-1.5 text-sm font-semibold tracking-tight">
-            <Settings2 className="h-3.5 w-3.5 text-muted-foreground" />
-            General
-          </h3>
-          <p className="text-xs text-muted-foreground">
-            Basic voicemail behavior and greeting configuration.
-          </p>
-        </div>
-
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5">
-            <Label>Voicemail enabled</Label>
-            <p className="text-xs text-muted-foreground">
-              When disabled, callers will not be able to leave voicemails.
-            </p>
-          </div>
-          {editing ? (
-            <Switch
-              checked={formData.isEnabled}
-              onCheckedChange={(v) => updateField("isEnabled", v)}
-            />
-          ) : (
-            <Badge
-              variant={data.isEnabled ? "default" : "outline"}
-              className={cn(
-                "gap-1.5",
-                data.isEnabled
-                  ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400"
-                  : "text-muted-foreground",
-              )}
-            >
-              <span className={cn("h-1.5 w-1.5 rounded-full", data.isEnabled ? "bg-emerald-500" : "bg-muted-foreground")} />
-              {data.isEnabled ? "Yes" : "No"}
-            </Badge>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="vm-email">Notification email</Label>
-          <p className="text-xs text-muted-foreground">
-            Email address for voicemail notifications.
-          </p>
-          {editing ? (
-            <Input
-              id="vm-email"
-              type="email"
-              placeholder="user@example.com"
-              value={formData.email}
-              onChange={(e) => updateField("email", e.target.value)}
-              disabled={updateMutation.isPending}
-            />
-          ) : (
-            <p className="text-sm">{data.email || <span className="text-muted-foreground italic">Not set</span>}</p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <Label>Greeting type</Label>
-          <p className="text-xs text-muted-foreground">
-            Choose which greeting callers hear before leaving a message.
-          </p>
-          {editing ? (
-            <>
-              <Select
-                value={formData.greetingType}
-                onValueChange={(v) => updateField("greetingType", v)}
-                disabled={updateMutation.isPending}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="default">
-                    <span className="flex items-center gap-2">
-                      <Volume2 className="h-3.5 w-3.5 text-muted-foreground" />
-                      Default
-                    </span>
-                  </SelectItem>
-                  <SelectItem value="custom">
-                    <span className="flex items-center gap-2">
-                      <Mic className="h-3.5 w-3.5 text-muted-foreground" />
-                      Custom
-                    </span>
-                  </SelectItem>
-                  <SelectItem value="name_only">
-                    <span className="flex items-center gap-2">
-                      <User className="h-3.5 w-3.5 text-muted-foreground" />
-                      Name only
-                    </span>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground">
-                {GREETING_TYPE_DESCRIPTIONS[formData.greetingType ?? "default"]}
-              </p>
-            </>
-          ) : (
-            <p className="text-sm">{GREETING_LABELS[data.greetingType] ?? data.greetingType}</p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="vm-max-length">Max message length (seconds)</Label>
-          <p className="text-xs text-muted-foreground">
-            Maximum recording duration for each voicemail message.
-          </p>
-          {editing ? (
-            <div className="flex items-center gap-3">
-              <Input
-                id="vm-max-length"
-                type="number"
-                min={10}
-                max={600}
-                className="max-w-[140px]"
-                value={formData.maxLength}
-                onChange={(e) => updateField("maxLength", e.target.value)}
-                disabled={updateMutation.isPending}
-              />
-              {formData.maxLength && Number(formData.maxLength) > 0 && (
-                <span className="text-xs text-muted-foreground">
-                  = {formatDurationHuman(Number(formData.maxLength))}
-                </span>
-              )}
-            </div>
-          ) : (
-            <p className="text-sm">
-              {data.maxMessageLengthSeconds}s
-              <span className="ml-1.5 text-muted-foreground">
-                ({formatDurationHuman(data.maxMessageLengthSeconds)})
-              </span>
-            </p>
-          )}
-        </div>
-
-        <div className="space-y-2">
+      <Card>
+        <CardHeader>
           <div className="flex items-center justify-between">
-            <Label htmlFor="vm-pin">Access PIN</Label>
-            {editing && formData.pin && (
-              <span
-                className={`text-xs ${formData.pin.length >= 4 && formData.pin.length <= 6 ? "text-muted-foreground" : "text-destructive"}`}
-              >
-                {formData.pin.length}/4-6 digits
-              </span>
-            )}
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Used to access voicemail remotely by phone. Must be 4-6 digits.
-          </p>
-          {editing ? (
+            <div>
+              <CardTitle>Voicemail Box Settings</CardTitle>
+              <CardDescription>Configure mailbox behavior, notifications, and retention.</CardDescription>
+            </div>
             <div className="flex items-center gap-2">
-              <Input
-                id="vm-pin"
-                type={showPin ? "text" : "password"}
-                inputMode="numeric"
-                placeholder="Enter new PIN"
-                className={cn(
-                  "max-w-[200px]",
-                  pinError ? "border-destructive focus-visible:ring-destructive" : "",
-                )}
-                value={formData.pin}
-                onChange={(e) => {
-                  const value = e.target.value
-                  if (value && !/^\d*$/.test(value)) {
-                    setPinError("PIN must contain only digits")
-                    return
-                  }
-                  if (value.length > 6) return
-                  setPinError(
-                    value.length > 0 && value.length < 4
-                      ? "PIN must be at least 4 digits"
-                      : "",
-                  )
-                  updateField("pin", value)
-                }}
-                disabled={updateMutation.isPending}
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="h-9 w-9 p-0"
-                onClick={() => setShowPin((p) => !p)}
-                aria-label={showPin ? "Hide PIN" : "Show PIN"}
-              >
-                {showPin ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
-              </Button>
-            </div>
-          ) : (
-            <p className="text-sm font-mono tracking-widest text-muted-foreground">{data.pin ? "****" : <span className="tracking-normal italic">Not set</span>}</p>
-          )}
-          {pinError && <p className="text-xs text-destructive">{pinError}</p>}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="vm-auto-delete">Auto-delete days</Label>
-          <p className="text-xs text-muted-foreground">
-            Automatically delete voicemails older than this number of days. Leave empty to
-            keep messages indefinitely.
-          </p>
-          {editing ? (
-            <div className="flex items-center gap-3">
-              <Input
-                id="vm-auto-delete"
-                type="number"
-                min={1}
-                max={365}
-                className="max-w-[140px]"
-                placeholder="Forever"
-                value={formData.autoDeleteDays}
-                onChange={(e) => updateField("autoDeleteDays", e.target.value)}
-                disabled={updateMutation.isPending}
-              />
-              {formData.autoDeleteDays && Number(formData.autoDeleteDays) >= 7 && (
-                <span className="text-xs text-muted-foreground">
-                  {formatRetention(Number(formData.autoDeleteDays))}
-                </span>
+              {(editing ? formData.isEnabled : data.isEnabled) ? (
+                <Badge className="gap-1.5 bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  Enabled
+                </Badge>
+              ) : (
+                <Badge variant="outline" className="gap-1.5 text-muted-foreground">
+                  <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
+                  Disabled
+                </Badge>
               )}
-            </div>
-          ) : (
-            <p className="text-sm">
-              {data.autoDeleteDays != null ? (
+              {editing ? (
                 <>
-                  {data.autoDeleteDays} days
-                  {data.autoDeleteDays >= 7 && (
-                    <span className="ml-1.5 text-muted-foreground">
-                      ({formatRetention(data.autoDeleteDays)})
-                    </span>
-                  )}
+                  <Button size="sm" variant="outline" onClick={handleCancel} disabled={updateMutation.isPending}>
+                    <X className="mr-2 h-4 w-4" /> Cancel
+                  </Button>
+                  <Button size="sm" onClick={handleSave} disabled={updateMutation.isPending || !!pinError}>
+                    {updateMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                    {updateMutation.isPending ? "Saving..." : "Save changes"}
+                  </Button>
                 </>
               ) : (
-                <span className="text-muted-foreground italic">Forever</span>
+                <Button size="sm" onClick={() => setEditing(true)}>
+                  <Pencil className="mr-2 h-4 w-4" /> Edit
+                </Button>
               )}
-            </p>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {editing && formDirty && (
+            <div className="flex items-center gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-400">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-500" />
+              You have unsaved changes
+            </div>
           )}
-        </div>
 
-        <Separator />
-
-        {/* Notifications */}
-        <div className="flex items-start justify-between">
+          {/* General */}
           <div>
             <h3 className="flex items-center gap-1.5 text-sm font-semibold tracking-tight">
-              <BellRing className="h-3.5 w-3.5 text-muted-foreground" />
-              Notifications
+              <Settings2 className="h-3.5 w-3.5 text-muted-foreground" />
+              General
             </h3>
-            <p className="text-xs text-muted-foreground">
-              Control how you are notified when new voicemails arrive.
-            </p>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <Badge
-              variant={(editing ? formData.emailNotification : data.emailNotification) ? "default" : "outline"}
-              className={cn(
-                "gap-1.5",
-                (editing ? formData.emailNotification : data.emailNotification)
-                  ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400"
-                  : "text-muted-foreground",
-              )}
-            >
-              <span className={cn("h-1.5 w-1.5 rounded-full", (editing ? formData.emailNotification : data.emailNotification) ? "bg-emerald-500" : "bg-muted-foreground")} />
-              Email
-            </Badge>
-            <Badge
-              variant={(editing ? formData.emailAttachAudio : data.emailAttachAudio) ? "default" : "outline"}
-              className={cn(
-                "gap-1.5",
-                (editing ? formData.emailAttachAudio : data.emailAttachAudio)
-                  ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400"
-                  : "text-muted-foreground",
-              )}
-            >
-              <span className={cn("h-1.5 w-1.5 rounded-full", (editing ? formData.emailAttachAudio : data.emailAttachAudio) ? "bg-emerald-500" : "bg-muted-foreground")} />
-              Audio
-            </Badge>
-          </div>
-        </div>
-
-        <div className="space-y-4 rounded-lg border border-border/60 bg-muted/20 p-4">
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label>Email notification</Label>
-              <p className="text-xs text-muted-foreground">
-                Send an email alert whenever a new voicemail is received.
-              </p>
-            </div>
-            {editing ? (
-              <Switch
-                checked={formData.emailNotification}
-                onCheckedChange={(v) => updateField("emailNotification", v)}
-              />
-            ) : (
-              <Badge
-                variant={data.emailNotification ? "default" : "outline"}
-                className={cn(
-                  "gap-1.5",
-                  data.emailNotification
-                    ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400"
-                    : "text-muted-foreground",
-                )}
-              >
-                <span className={cn("h-1.5 w-1.5 rounded-full", data.emailNotification ? "bg-emerald-500" : "bg-muted-foreground")} />
-                {data.emailNotification ? "On" : "Off"}
-              </Badge>
-            )}
+            <p className="text-xs text-muted-foreground">Basic voicemail behavior and greeting configuration.</p>
           </div>
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label>Attach audio to email</Label>
-              <p className="text-xs text-muted-foreground">
-                Include the voicemail recording as an audio attachment.
-              </p>
+              <Label>Voicemail enabled</Label>
+              <p className="text-xs text-muted-foreground">When disabled, callers will not be able to leave voicemails.</p>
             </div>
             {editing ? (
-              <Switch
-                checked={formData.emailAttachAudio}
-                onCheckedChange={(v) => updateField("emailAttachAudio", v)}
-              />
+              <Switch checked={formData.isEnabled} onCheckedChange={(v) => updateField("isEnabled", v)} />
             ) : (
               <Badge
-                variant={data.emailAttachAudio ? "default" : "outline"}
+                variant={data.isEnabled ? "default" : "outline"}
                 className={cn(
                   "gap-1.5",
-                  data.emailAttachAudio
+                  data.isEnabled ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400" : "text-muted-foreground",
+                )}
+              >
+                <span className={cn("h-1.5 w-1.5 rounded-full", data.isEnabled ? "bg-emerald-500" : "bg-muted-foreground")} />
+                {data.isEnabled ? "Yes" : "No"}
+              </Badge>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="vm-email">Notification email</Label>
+            <p className="text-xs text-muted-foreground">Email address for voicemail notifications.</p>
+            {editing ? (
+              <Input
+                id="vm-email"
+                type="email"
+                placeholder="user@example.com"
+                value={formData.email}
+                onChange={(e) => updateField("email", e.target.value)}
+                disabled={updateMutation.isPending}
+              />
+            ) : (
+              <p className="text-sm">{data.email || <span className="text-muted-foreground italic">Not set</span>}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label>Greeting type</Label>
+            <p className="text-xs text-muted-foreground">Choose which greeting callers hear before leaving a message.</p>
+            {editing ? (
+              <>
+                <Select value={formData.greetingType} onValueChange={(v) => updateField("greetingType", v)} disabled={updateMutation.isPending}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="default">
+                      <span className="flex items-center gap-2">
+                        <Volume2 className="h-3.5 w-3.5 text-muted-foreground" />
+                        Default
+                      </span>
+                    </SelectItem>
+                    <SelectItem value="custom">
+                      <span className="flex items-center gap-2">
+                        <Mic className="h-3.5 w-3.5 text-muted-foreground" />
+                        Custom
+                      </span>
+                    </SelectItem>
+                    <SelectItem value="name_only">
+                      <span className="flex items-center gap-2">
+                        <User className="h-3.5 w-3.5 text-muted-foreground" />
+                        Name only
+                      </span>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">{GREETING_TYPE_DESCRIPTIONS[formData.greetingType ?? "default"]}</p>
+              </>
+            ) : (
+              <p className="text-sm">{GREETING_LABELS[data.greetingType] ?? data.greetingType}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="vm-max-length">Max message length (seconds)</Label>
+            <p className="text-xs text-muted-foreground">Maximum recording duration for each voicemail message.</p>
+            {editing ? (
+              <div className="flex items-center gap-3">
+                <Input
+                  id="vm-max-length"
+                  type="number"
+                  min={10}
+                  max={600}
+                  className="max-w-[140px]"
+                  value={formData.maxLength}
+                  onChange={(e) => updateField("maxLength", e.target.value)}
+                  disabled={updateMutation.isPending}
+                />
+                {formData.maxLength && Number(formData.maxLength) > 0 && <span className="text-xs text-muted-foreground">= {formatDurationHuman(Number(formData.maxLength))}</span>}
+              </div>
+            ) : (
+              <p className="text-sm">
+                {data.maxMessageLengthSeconds}s<span className="ml-1.5 text-muted-foreground">({formatDurationHuman(data.maxMessageLengthSeconds)})</span>
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="vm-pin">Access PIN</Label>
+              {editing && formData.pin && (
+                <span className={`text-xs ${formData.pin.length >= 4 && formData.pin.length <= 6 ? "text-muted-foreground" : "text-destructive"}`}>
+                  {formData.pin.length}/4-6 digits
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground">Used to access voicemail remotely by phone. Must be 4-6 digits.</p>
+            {editing ? (
+              <div className="flex items-center gap-2">
+                <Input
+                  id="vm-pin"
+                  type={showPin ? "text" : "password"}
+                  inputMode="numeric"
+                  placeholder="Enter new PIN"
+                  className={cn("max-w-[200px]", pinError ? "border-destructive focus-visible:ring-destructive" : "")}
+                  value={formData.pin}
+                  onChange={(e) => {
+                    const value = e.target.value
+                    if (value && !/^\d*$/.test(value)) {
+                      setPinError("PIN must contain only digits")
+                      return
+                    }
+                    if (value.length > 6) return
+                    setPinError(value.length > 0 && value.length < 4 ? "PIN must be at least 4 digits" : "")
+                    updateField("pin", value)
+                  }}
+                  disabled={updateMutation.isPending}
+                />
+                <Button type="button" variant="ghost" size="sm" className="h-9 w-9 p-0" onClick={() => setShowPin((p) => !p)} aria-label={showPin ? "Hide PIN" : "Show PIN"}>
+                  {showPin ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
+                </Button>
+              </div>
+            ) : (
+              <p className="text-sm font-mono tracking-widest text-muted-foreground">{data.pin ? "****" : <span className="tracking-normal italic">Not set</span>}</p>
+            )}
+            {pinError && <p className="text-xs text-destructive">{pinError}</p>}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="vm-auto-delete">Auto-delete days</Label>
+            <p className="text-xs text-muted-foreground">Automatically delete voicemails older than this number of days. Leave empty to keep messages indefinitely.</p>
+            {editing ? (
+              <div className="flex items-center gap-3">
+                <Input
+                  id="vm-auto-delete"
+                  type="number"
+                  min={1}
+                  max={365}
+                  className="max-w-[140px]"
+                  placeholder="Forever"
+                  value={formData.autoDeleteDays}
+                  onChange={(e) => updateField("autoDeleteDays", e.target.value)}
+                  disabled={updateMutation.isPending}
+                />
+                {formData.autoDeleteDays && Number(formData.autoDeleteDays) >= 7 && (
+                  <span className="text-xs text-muted-foreground">{formatRetention(Number(formData.autoDeleteDays))}</span>
+                )}
+              </div>
+            ) : (
+              <p className="text-sm">
+                {data.autoDeleteDays != null ? (
+                  <>
+                    {data.autoDeleteDays} days
+                    {data.autoDeleteDays >= 7 && <span className="ml-1.5 text-muted-foreground">({formatRetention(data.autoDeleteDays)})</span>}
+                  </>
+                ) : (
+                  <span className="text-muted-foreground italic">Forever</span>
+                )}
+              </p>
+            )}
+          </div>
+
+          <Separator />
+
+          {/* Notifications */}
+          <div className="flex items-start justify-between">
+            <div>
+              <h3 className="flex items-center gap-1.5 text-sm font-semibold tracking-tight">
+                <BellRing className="h-3.5 w-3.5 text-muted-foreground" />
+                Notifications
+              </h3>
+              <p className="text-xs text-muted-foreground">Control how you are notified when new voicemails arrive.</p>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Badge
+                variant={(editing ? formData.emailNotification : data.emailNotification) ? "default" : "outline"}
+                className={cn(
+                  "gap-1.5",
+                  (editing ? formData.emailNotification : data.emailNotification)
                     ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400"
                     : "text-muted-foreground",
                 )}
               >
-                <span className={cn("h-1.5 w-1.5 rounded-full", data.emailAttachAudio ? "bg-emerald-500" : "bg-muted-foreground")} />
-                {data.emailAttachAudio ? "On" : "Off"}
+                <span className={cn("h-1.5 w-1.5 rounded-full", (editing ? formData.emailNotification : data.emailNotification) ? "bg-emerald-500" : "bg-muted-foreground")} />
+                Email
               </Badge>
-            )}
+              <Badge
+                variant={(editing ? formData.emailAttachAudio : data.emailAttachAudio) ? "default" : "outline"}
+                className={cn(
+                  "gap-1.5",
+                  (editing ? formData.emailAttachAudio : data.emailAttachAudio)
+                    ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400"
+                    : "text-muted-foreground",
+                )}
+              >
+                <span className={cn("h-1.5 w-1.5 rounded-full", (editing ? formData.emailAttachAudio : data.emailAttachAudio) ? "bg-emerald-500" : "bg-muted-foreground")} />
+                Audio
+              </Badge>
+            </div>
           </div>
-        </div>
 
-        <Separator />
+          <div className="space-y-4 rounded-lg border border-border/60 bg-muted/20 p-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Email notification</Label>
+                <p className="text-xs text-muted-foreground">Send an email alert whenever a new voicemail is received.</p>
+              </div>
+              {editing ? (
+                <Switch checked={formData.emailNotification} onCheckedChange={(v) => updateField("emailNotification", v)} />
+              ) : (
+                <Badge
+                  variant={data.emailNotification ? "default" : "outline"}
+                  className={cn(
+                    "gap-1.5",
+                    data.emailNotification ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400" : "text-muted-foreground",
+                  )}
+                >
+                  <span className={cn("h-1.5 w-1.5 rounded-full", data.emailNotification ? "bg-emerald-500" : "bg-muted-foreground")} />
+                  {data.emailNotification ? "On" : "Off"}
+                </Badge>
+              )}
+            </div>
 
-        {/* Advanced */}
-        <div className="flex items-start justify-between">
-          <div>
-            <h3 className="flex items-center gap-1.5 text-sm font-semibold tracking-tight">
-              <Wrench className="h-3.5 w-3.5 text-muted-foreground" />
-              Advanced
-            </h3>
-            <p className="text-xs text-muted-foreground">
-              Transcription settings.
-            </p>
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Attach audio to email</Label>
+                <p className="text-xs text-muted-foreground">Include the voicemail recording as an audio attachment.</p>
+              </div>
+              {editing ? (
+                <Switch checked={formData.emailAttachAudio} onCheckedChange={(v) => updateField("emailAttachAudio", v)} />
+              ) : (
+                <Badge
+                  variant={data.emailAttachAudio ? "default" : "outline"}
+                  className={cn(
+                    "gap-1.5",
+                    data.emailAttachAudio ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400" : "text-muted-foreground",
+                  )}
+                >
+                  <span className={cn("h-1.5 w-1.5 rounded-full", data.emailAttachAudio ? "bg-emerald-500" : "bg-muted-foreground")} />
+                  {data.emailAttachAudio ? "On" : "Off"}
+                </Badge>
+              )}
+            </div>
           </div>
-          <Badge
-            variant={(editing ? formData.transcriptionEnabled : data.transcriptionEnabled) ? "default" : "outline"}
-            className={cn(
-              "gap-1.5",
-              (editing ? formData.transcriptionEnabled : data.transcriptionEnabled)
-                ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400"
-                : "text-muted-foreground",
-            )}
-          >
-            <span className={cn("h-1.5 w-1.5 rounded-full", (editing ? formData.transcriptionEnabled : data.transcriptionEnabled) ? "bg-emerald-500" : "bg-muted-foreground")} />
-            {(editing ? formData.transcriptionEnabled : data.transcriptionEnabled) ? "Enabled" : "Disabled"}
-          </Badge>
-        </div>
 
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5">
-            <Label>Transcription</Label>
-            <p className="text-xs text-muted-foreground">
-              Automatically convert voicemail audio to text.
-            </p>
-          </div>
-          {editing ? (
-            <Switch
-              checked={formData.transcriptionEnabled}
-              onCheckedChange={(v) => updateField("transcriptionEnabled", v)}
-            />
-          ) : (
+          <Separator />
+
+          {/* Advanced */}
+          <div className="flex items-start justify-between">
+            <div>
+              <h3 className="flex items-center gap-1.5 text-sm font-semibold tracking-tight">
+                <Wrench className="h-3.5 w-3.5 text-muted-foreground" />
+                Advanced
+              </h3>
+              <p className="text-xs text-muted-foreground">Transcription settings.</p>
+            </div>
             <Badge
-              variant={data.transcriptionEnabled ? "default" : "outline"}
+              variant={(editing ? formData.transcriptionEnabled : data.transcriptionEnabled) ? "default" : "outline"}
               className={cn(
                 "gap-1.5",
-                data.transcriptionEnabled
+                (editing ? formData.transcriptionEnabled : data.transcriptionEnabled)
                   ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400"
                   : "text-muted-foreground",
               )}
             >
-              <span className={cn("h-1.5 w-1.5 rounded-full", data.transcriptionEnabled ? "bg-emerald-500" : "bg-muted-foreground")} />
-              {data.transcriptionEnabled ? "On" : "Off"}
+              <span className={cn("h-1.5 w-1.5 rounded-full", (editing ? formData.transcriptionEnabled : data.transcriptionEnabled) ? "bg-emerald-500" : "bg-muted-foreground")} />
+              {(editing ? formData.transcriptionEnabled : data.transcriptionEnabled) ? "Enabled" : "Disabled"}
             </Badge>
-          )}
-        </div>
+          </div>
 
-        <Separator />
-
-        {/* Timestamps */}
-        <div className="grid gap-4 text-sm md:grid-cols-2">
-          <div>
-            <p className="text-muted-foreground text-sm">Created</p>
-            {data.createdAt ? (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <p className="cursor-default text-sm">{formatRelativeTimeShort(data.createdAt)}</p>
-                </TooltipTrigger>
-                <TooltipContent>{formatDateTime(data.createdAt)}</TooltipContent>
-              </Tooltip>
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label>Transcription</Label>
+              <p className="text-xs text-muted-foreground">Automatically convert voicemail audio to text.</p>
+            </div>
+            {editing ? (
+              <Switch checked={formData.transcriptionEnabled} onCheckedChange={(v) => updateField("transcriptionEnabled", v)} />
             ) : (
-              <p className="text-sm">---</p>
+              <Badge
+                variant={data.transcriptionEnabled ? "default" : "outline"}
+                className={cn(
+                  "gap-1.5",
+                  data.transcriptionEnabled ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400" : "text-muted-foreground",
+                )}
+              >
+                <span className={cn("h-1.5 w-1.5 rounded-full", data.transcriptionEnabled ? "bg-emerald-500" : "bg-muted-foreground")} />
+                {data.transcriptionEnabled ? "On" : "Off"}
+              </Badge>
             )}
           </div>
-          <div>
-            <p className="text-muted-foreground text-sm">Last Updated</p>
-            {data.updatedAt ? (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <p className="cursor-default text-sm">{formatRelativeTimeShort(data.updatedAt)}</p>
-                </TooltipTrigger>
-                <TooltipContent>{formatDateTime(data.updatedAt)}</TooltipContent>
-              </Tooltip>
-            ) : (
-              <p className="text-sm">---</p>
-            )}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
 
-    {/* Unsaved changes dialog */}
-    <AlertDialog open={blocker.status === "blocked"} onOpenChange={() => blocker.reset?.()}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
-          <AlertDialogDescription>
-            You have unsaved changes to voicemail box settings. Are you sure you want to leave? Your changes will be lost.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => blocker.reset?.()}>Stay on page</AlertDialogCancel>
-          <AlertDialogAction onClick={() => blocker.proceed?.()}>Discard changes</AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+          <Separator />
+
+          {/* Timestamps */}
+          <div className="grid gap-4 text-sm md:grid-cols-2">
+            <div>
+              <p className="text-muted-foreground text-sm">Created</p>
+              {data.createdAt ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <p className="cursor-default text-sm">{formatRelativeTimeShort(data.createdAt)}</p>
+                  </TooltipTrigger>
+                  <TooltipContent>{formatDateTime(data.createdAt)}</TooltipContent>
+                </Tooltip>
+              ) : (
+                <p className="text-sm">---</p>
+              )}
+            </div>
+            <div>
+              <p className="text-muted-foreground text-sm">Last Updated</p>
+              {data.updatedAt ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <p className="cursor-default text-sm">{formatRelativeTimeShort(data.updatedAt)}</p>
+                  </TooltipTrigger>
+                  <TooltipContent>{formatDateTime(data.updatedAt)}</TooltipContent>
+                </Tooltip>
+              ) : (
+                <p className="text-sm">---</p>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Unsaved changes dialog */}
+      <AlertDialog open={blocker.status === "blocked"} onOpenChange={() => blocker.reset?.()}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
+            <AlertDialogDescription>You have unsaved changes to voicemail box settings. Are you sure you want to leave? Your changes will be lost.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => blocker.reset?.()}>Stay on page</AlertDialogCancel>
+            <AlertDialogAction onClick={() => blocker.proceed?.()}>Discard changes</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }
@@ -992,7 +885,12 @@ function BoxMessageList({ boxId }: { boxId: string }) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [singleDeleteId, setSingleDeleteId] = useState<string | null>(null)
 
-  const { data, isLoading, isError, refetch: refetchMessages } = useVoicemailMessages({
+  const {
+    data,
+    isLoading,
+    isError,
+    refetch: refetchMessages,
+  } = useVoicemailMessages({
     boxId,
     page,
     pageSize: PAGE_SIZE,
@@ -1010,7 +908,11 @@ function BoxMessageList({ boxId }: { boxId: string }) {
         icon={AlertCircle}
         title="Unable to load voicemail messages"
         description="Something went wrong. Please try again."
-        action={<Button variant="outline" size="sm" onClick={() => refetchMessages()}>Try again</Button>}
+        action={
+          <Button variant="outline" size="sm" onClick={() => refetchMessages()}>
+            Try again
+          </Button>
+        }
       />
     )
   }
@@ -1071,11 +973,7 @@ function BoxMessageList({ boxId }: { boxId: string }) {
           <CardTitle>Messages</CardTitle>
         </CardHeader>
         <CardContent>
-          <EmptyState
-            icon={Inbox}
-            title="No voicemail messages"
-            description="When callers leave a voicemail for this box, their messages will appear here."
-          />
+          <EmptyState icon={Inbox} title="No voicemail messages" description="When callers leave a voicemail for this box, their messages will appear here." />
         </CardContent>
       </Card>
     )
@@ -1092,79 +990,62 @@ function BoxMessageList({ boxId }: { boxId: string }) {
               {unreadCount} unread
             </Badge>
           )}
-          {someSelected && (
-            <Badge variant="outline">{selectedIds.size} selected</Badge>
-          )}
+          {someSelected && <Badge variant="outline">{selectedIds.size} selected</Badge>}
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="overflow-x-auto">
-        <Table aria-label="Voicemail messages">
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-10">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 w-6 p-0"
-                  onClick={toggleSelectAll}
-                >
-                  {allSelected ? (
-                    <CheckSquare className="h-4 w-4" />
-                  ) : (
-                    <Square className="h-4 w-4" />
-                  )}
-                </Button>
-              </TableHead>
-              <TableHead className="w-10" />
-              <TableHead>Caller</TableHead>
-              <TableHead>Duration</TableHead>
-              <TableHead>Received</TableHead>
-              <TableHead>Transcription</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {data.items.map((msg, index) => {
-              const callerDisplay = msg.callerName ?? msg.callerNumber
-              const transcriptionPreview = msg.transcription
-                ? msg.transcription.length > 60
-                  ? `${msg.transcription.slice(0, 60)}...`
-                  : msg.transcription
-                : null
+          <Table aria-label="Voicemail messages">
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-10">
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={toggleSelectAll}>
+                    {allSelected ? <CheckSquare className="h-4 w-4" /> : <Square className="h-4 w-4" />}
+                  </Button>
+                </TableHead>
+                <TableHead className="w-10" />
+                <TableHead>Caller</TableHead>
+                <TableHead>Duration</TableHead>
+                <TableHead>Received</TableHead>
+                <TableHead>Transcription</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {data.items.map((msg, index) => {
+                const callerDisplay = msg.callerName ?? msg.callerNumber
+                const transcriptionPreview = msg.transcription ? (msg.transcription.length > 60 ? `${msg.transcription.slice(0, 60)}...` : msg.transcription) : null
 
-              return (
-                <BoxMessageRow
-                  key={msg.id}
-                  message={msg}
-                  callerDisplay={callerDisplay}
-                  transcriptionPreview={transcriptionPreview}
-                  isExpanded={expandedId === msg.id}
-                  isSelected={selectedIds.has(msg.id)}
-                  isEvenRow={index % 2 === 0}
-                  onExpand={() => handleExpand(msg)}
-                  onDelete={() => setSingleDeleteId(msg.id)}
-                  onToggleRead={() =>
-                    toggleReadMutation.mutate(
-                      {
-                        messageId: msg.id,
-                        isRead: !msg.isRead,
-                      },
-                      {
-                        onSuccess: () => {
-                          toast.success(
-                            msg.isRead ? "Marked as unread" : "Marked as read",
-                          )
+                return (
+                  <BoxMessageRow
+                    key={msg.id}
+                    message={msg}
+                    callerDisplay={callerDisplay}
+                    transcriptionPreview={transcriptionPreview}
+                    isExpanded={expandedId === msg.id}
+                    isSelected={selectedIds.has(msg.id)}
+                    isEvenRow={index % 2 === 0}
+                    onExpand={() => handleExpand(msg)}
+                    onDelete={() => setSingleDeleteId(msg.id)}
+                    onToggleRead={() =>
+                      toggleReadMutation.mutate(
+                        {
+                          messageId: msg.id,
+                          isRead: !msg.isRead,
                         },
-                      },
-                    )
-                  }
-                  onToggleSelect={() => toggleSelect(msg.id)}
-                />
-              )
-            })}
-          </TableBody>
-        </Table>
+                        {
+                          onSuccess: () => {
+                            toast.success(msg.isRead ? "Marked as unread" : "Marked as read")
+                          },
+                        },
+                      )
+                    }
+                    onToggleSelect={() => toggleSelect(msg.id)}
+                  />
+                )
+              })}
+            </TableBody>
+          </Table>
         </div>
 
         {totalPages > 1 && (
@@ -1173,20 +1054,10 @@ function BoxMessageList({ boxId }: { boxId: string }) {
               Page {page} of {totalPages}
             </p>
             <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page <= 1}
-              >
+              <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>
                 Previous
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page >= totalPages}
-              >
+              <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>
                 Next
               </Button>
             </div>
@@ -1207,20 +1078,11 @@ function BoxMessageList({ boxId }: { boxId: string }) {
               <AlertTriangle className="size-5" />
               Delete voicemail
             </AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete this voicemail message. This action cannot be
-              undone.
-            </AlertDialogDescription>
+            <AlertDialogDescription>This will permanently delete this voicemail message. This action cannot be undone.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteMutation.isPending}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteConfirm}
-              disabled={deleteMutation.isPending}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
+            <AlertDialogCancel disabled={deleteMutation.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} disabled={deleteMutation.isPending} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               {deleteMutation.isPending ? (
                 <>
                   <Loader2 className="mr-1 size-4 animate-spin" />
@@ -1281,38 +1143,22 @@ function BoxMessageRow({
               onToggleSelect()
             }}
           >
-            {isSelected ? (
-              <CheckSquare className="h-4 w-4" />
-            ) : (
-              <Square className="h-4 w-4" />
-            )}
+            {isSelected ? <CheckSquare className="h-4 w-4" /> : <Square className="h-4 w-4" />}
           </Button>
         </TableCell>
         <TableCell>
           <div className="flex items-center gap-1">
-            {!message.isRead && (
-              <div className="h-2.5 w-2.5 animate-pulse rounded-full bg-primary" />
-            )}
-            {message.isUrgent && (
-              <AlertTriangle className="h-3.5 w-3.5 text-destructive" />
-            )}
+            {!message.isRead && <div className="h-2.5 w-2.5 animate-pulse rounded-full bg-primary" />}
+            {message.isUrgent && <AlertTriangle className="h-3.5 w-3.5 text-destructive" />}
           </div>
         </TableCell>
         <TableCell>
           <div>
-            <span className={!message.isRead ? "font-semibold" : ""}>
-              {callerDisplay}
-            </span>
-            {message.callerName && (
-              <p className="font-mono text-xs text-muted-foreground">
-                {message.callerNumber}
-              </p>
-            )}
+            <span className={!message.isRead ? "font-semibold" : ""}>{callerDisplay}</span>
+            {message.callerName && <p className="font-mono text-xs text-muted-foreground">{message.callerNumber}</p>}
           </div>
         </TableCell>
-        <TableCell className="tabular-nums">
-          {formatDuration(message.durationSeconds)}
-        </TableCell>
+        <TableCell className="tabular-nums">{formatDuration(message.durationSeconds)}</TableCell>
         <TableCell>
           <div className="flex items-center gap-2">
             <Tooltip>
@@ -1359,11 +1205,7 @@ function BoxMessageRow({
               }}
               title={message.isRead ? "Mark as unread" : "Mark as read"}
             >
-              {message.isRead ? (
-                <MailOpen className="h-4 w-4" />
-              ) : (
-                <Mail className="h-4 w-4" />
-              )}
+              {message.isRead ? <MailOpen className="h-4 w-4" /> : <Mail className="h-4 w-4" />}
             </Button>
             <Button
               variant="ghost"
@@ -1382,15 +1224,10 @@ function BoxMessageRow({
         <TableRow>
           <TableCell colSpan={7} className="bg-muted/30 px-6 py-4">
             <div className="space-y-4">
-              <VoicemailPlayer
-                audioUrl={message.audioFilePath}
-                durationSeconds={message.durationSeconds}
-              />
+              <VoicemailPlayer audioUrl={message.audioFilePath} durationSeconds={message.durationSeconds} />
               {message.transcription && (
                 <div className="space-y-1">
-                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    Transcription
-                  </p>
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Transcription</p>
                   <p className="text-sm leading-relaxed">{message.transcription}</p>
                 </div>
               )}

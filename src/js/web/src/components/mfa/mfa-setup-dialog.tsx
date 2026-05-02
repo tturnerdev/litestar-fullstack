@@ -8,9 +8,9 @@ import { Button } from "@/components/ui/button"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Skeleton } from "@/components/ui/skeleton"
-import { cn } from "@/lib/utils"
 import { useConfirmMfaSetup, useInitiateMfaSetup } from "@/lib/api/hooks/auth"
 import type { MfaSetup } from "@/lib/generated/api"
+import { cn } from "@/lib/utils"
 
 interface MfaSetupDialogProps {
   disabled?: boolean
@@ -36,23 +36,9 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
             >
               {step}
             </div>
-            <span
-              className={cn(
-                "text-[11px] leading-tight whitespace-nowrap",
-                step <= currentStep ? "font-medium text-foreground" : "text-muted-foreground",
-              )}
-            >
-              {label}
-            </span>
+            <span className={cn("text-[11px] leading-tight whitespace-nowrap", step <= currentStep ? "font-medium text-foreground" : "text-muted-foreground")}>{label}</span>
           </div>
-          {index < STEPS.length - 1 && (
-            <div
-              className={cn(
-                "mx-2 mb-5 h-px w-10 transition-colors",
-                step < currentStep ? "bg-primary" : "bg-muted-foreground/30",
-              )}
-            />
-          )}
+          {index < STEPS.length - 1 && <div className={cn("mx-2 mb-5 h-px w-10 transition-colors", step < currentStep ? "bg-primary" : "bg-muted-foreground/30")} />}
         </div>
       ))}
     </div>
@@ -124,23 +110,13 @@ export function MfaSetupDialog({ disabled }: MfaSetupDialogProps) {
         </div>
         <Collapsible open={secretOpen} onOpenChange={setSecretOpen}>
           <CollapsibleTrigger asChild>
-            <button
-              type="button"
-              className="flex w-full items-center justify-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
+            <button type="button" className="flex w-full items-center justify-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground">
               <span>Can&apos;t scan? Enter manually</span>
-              <ChevronDown
-                className={cn(
-                  "h-4 w-4 transition-transform duration-200",
-                  secretOpen && "rotate-180",
-                )}
-              />
+              <ChevronDown className={cn("h-4 w-4 transition-transform duration-200", secretOpen && "rotate-180")} />
             </button>
           </CollapsibleTrigger>
           <CollapsibleContent>
-            <div className="mt-2 rounded-lg border border-border/60 bg-muted/30 px-4 py-3 font-mono text-sm select-all">
-              {setup.secret}
-            </div>
+            <div className="mt-2 rounded-lg border border-border/60 bg-muted/30 px-4 py-3 font-mono text-sm select-all">{setup.secret}</div>
           </CollapsibleContent>
         </Collapsible>
         <TotpInput value={code} onChange={setCode} disabled={isLoading} autoFocus />

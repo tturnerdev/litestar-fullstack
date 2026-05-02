@@ -1,19 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import {
-  AlertTriangle,
-  FileText,
-  Hash,
-  Inbox,
-  Mail,
-  Send,
-  TrendingUp,
-  type LucideIcon,
-} from "lucide-react"
+import { AlertTriangle, FileText, Hash, Inbox, type LucideIcon, Mail, Send, TrendingUp } from "lucide-react"
 import { useMemo } from "react"
-import { Area, AreaChart, ResponsiveContainer, Tooltip as RechartsTooltip, XAxis, YAxis } from "recharts"
-import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
+import { Area, AreaChart, Tooltip as RechartsTooltip, ResponsiveContainer, XAxis, YAxis } from "recharts"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useFaxMessages, useFaxNumbers } from "@/lib/api/hooks/fax"
@@ -112,11 +103,7 @@ function FaxOverviewPage() {
 
   return (
     <PageContainer className="flex-1 space-y-8">
-      <PageHeader
-        eyebrow="Communications"
-        title="Fax"
-        description="Manage your fax numbers, view message history, and send faxes."
-      />
+      <PageHeader eyebrow="Communications" title="Fax" description="Manage your fax numbers, view message history, and send faxes." />
 
       <PageSection delay={0.1}>
         {isLoading ? (
@@ -136,9 +123,7 @@ function FaxOverviewPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-semibold">{numbers?.total ?? 0}</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {activeCount} active
-                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">{activeCount} active</p>
                 </CardContent>
               </Card>
               <Card>
@@ -170,9 +155,7 @@ function FaxOverviewPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-semibold">{failedCount}</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {failedCount === 0 ? "all clear" : "need attention"}
-                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">{failedCount === 0 ? "all clear" : "need attention"}</p>
                 </CardContent>
               </Card>
             </div>
@@ -187,14 +170,10 @@ function FaxOverviewPage() {
               <Link key={shortcut.key} to={shortcut.to}>
                 <Card className="group cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-md">
                   <CardContent className="flex flex-col items-center gap-2.5 px-3 py-4">
-                    <div
-                      className={`flex h-10 w-10 items-center justify-center rounded-lg transition-colors ${shortcut.iconBg} ${shortcut.iconText}`}
-                    >
+                    <div className={`flex h-10 w-10 items-center justify-center rounded-lg transition-colors ${shortcut.iconBg} ${shortcut.iconText}`}>
                       <shortcut.icon className="h-5 w-5" />
                     </div>
-                    <span className="text-center text-xs font-medium text-muted-foreground group-hover:text-foreground">
-                      {shortcut.label}
-                    </span>
+                    <span className="text-center text-xs font-medium text-muted-foreground group-hover:text-foreground">{shortcut.label}</span>
                   </CardContent>
                 </Card>
               </Link>
@@ -227,19 +206,8 @@ function FaxOverviewPage() {
                         <stop offset="95%" stopColor="hsl(var(--chart-2, 220 70% 50%))" stopOpacity={0.02} />
                       </linearGradient>
                     </defs>
-                    <XAxis
-                      dataKey="label"
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
-                      dy={4}
-                    />
-                    <YAxis
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
-                      allowDecimals={false}
-                    />
+                    <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} dy={4} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} allowDecimals={false} />
                     <RechartsTooltip
                       contentStyle={{
                         backgroundColor: "hsl(var(--popover))",
@@ -250,15 +218,7 @@ function FaxOverviewPage() {
                       }}
                       labelFormatter={(label) => String(label)}
                     />
-                    <Area
-                      type="monotone"
-                      dataKey="inbound"
-                      name="Inbound"
-                      stroke="hsl(var(--primary))"
-                      strokeWidth={2}
-                      fill="url(#faxInboundGradient)"
-                      stackId="fax"
-                    />
+                    <Area type="monotone" dataKey="inbound" name="Inbound" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#faxInboundGradient)" stackId="fax" />
                     <Area
                       type="monotone"
                       dataKey="outbound"
@@ -282,10 +242,7 @@ function FaxOverviewPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-lg">Recent Messages</CardTitle>
-                <Link
-                  to="/fax/messages"
-                  className="text-sm text-primary hover:underline"
-                >
+                <Link to="/fax/messages" className="text-sm text-primary hover:underline">
                   View all
                 </Link>
               </CardHeader>
@@ -300,25 +257,17 @@ function FaxOverviewPage() {
                     >
                       <div
                         className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md ${
-                          msg.direction === "inbound"
-                            ? "bg-blue-500/10 text-blue-600 dark:text-blue-400"
-                            : "bg-violet-500/10 text-violet-600 dark:text-violet-400"
+                          msg.direction === "inbound" ? "bg-blue-500/10 text-blue-600 dark:text-blue-400" : "bg-violet-500/10 text-violet-600 dark:text-violet-400"
                         }`}
                       >
-                        {msg.direction === "inbound" ? (
-                          <Inbox className="h-4 w-4" />
-                        ) : (
-                          <Send className="h-4 w-4" />
-                        )}
+                        {msg.direction === "inbound" ? <Inbox className="h-4 w-4" /> : <Send className="h-4 w-4" />}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium">
-                          {msg.direction === "inbound" ? "From" : "To"}{" "}
-                          <span className="font-mono">{msg.remoteNumber}</span>
+                          {msg.direction === "inbound" ? "From" : "To"} <span className="font-mono">{msg.remoteNumber}</span>
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {msg.pageCount} page{msg.pageCount !== 1 ? "s" : ""} &middot;{" "}
-                          {formatDateTime(msg.receivedAt, "--")}
+                          {msg.pageCount} page{msg.pageCount !== 1 ? "s" : ""} &middot; {formatDateTime(msg.receivedAt, "--")}
                         </p>
                       </div>
                       <span

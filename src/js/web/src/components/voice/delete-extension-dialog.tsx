@@ -1,5 +1,5 @@
-import { useCallback } from "react"
 import { AlertTriangle, Loader2, Trash2 } from "lucide-react"
+import { useCallback } from "react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,14 +22,7 @@ interface DeleteExtensionDialogProps {
   onDeleted?: () => void
 }
 
-export function DeleteExtensionDialog({
-  extensionId,
-  extensionName,
-  extensionNumber,
-  open,
-  onOpenChange,
-  onDeleted,
-}: DeleteExtensionDialogProps) {
+export function DeleteExtensionDialog({ extensionId, extensionName, extensionNumber, open, onOpenChange, onDeleted }: DeleteExtensionDialogProps) {
   const deleteExtension = useDeleteExtension()
 
   const restoreFocus = useCallback(() => {
@@ -60,27 +53,18 @@ export function DeleteExtensionDialog({
             Delete Extension
           </AlertDialogTitle>
           <AlertDialogDescription>
-            Are you sure you want to delete{" "}
-            <span className="font-medium text-foreground">
-              {extensionName}
-            </span>
+            Are you sure you want to delete <span className="font-medium text-foreground">{extensionName}</span>
             {extensionNumber && (
               <>
                 {" "}
-                (Ext.{" "}
-                <span className="font-mono text-foreground">
-                  {extensionNumber}
-                </span>
-                )
+                (Ext. <span className="font-mono text-foreground">{extensionNumber}</span>)
               </>
             )}
             ? This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <div className="rounded-md border border-destructive/20 bg-destructive/5 px-4 py-3">
-          <p className="mb-2 text-sm font-medium text-destructive">
-            The following will be permanently removed:
-          </p>
+          <p className="mb-2 text-sm font-medium text-destructive">The following will be permanently removed:</p>
           <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
             <li>All call forwarding rules</li>
             <li>Voicemail settings and messages</li>
@@ -88,22 +72,11 @@ export function DeleteExtensionDialog({
           </ul>
         </div>
         <AlertDialogFooter>
-          <AlertDialogCancel
-            onClick={() => onOpenChange(false)}
-            disabled={deleteExtension.isPending}
-          >
+          <AlertDialogCancel onClick={() => onOpenChange(false)} disabled={deleteExtension.isPending}>
             Cancel
           </AlertDialogCancel>
-          <AlertDialogAction
-            className={buttonVariants({ variant: "destructive" })}
-            onClick={handleDelete}
-            disabled={deleteExtension.isPending}
-          >
-            {deleteExtension.isPending ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Trash2 className="mr-2 h-4 w-4" />
-            )}
+          <AlertDialogAction className={buttonVariants({ variant: "destructive" })} onClick={handleDelete} disabled={deleteExtension.isPending}>
+            {deleteExtension.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
             Delete Extension
           </AlertDialogAction>
         </AlertDialogFooter>

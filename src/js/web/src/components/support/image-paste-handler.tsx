@@ -8,12 +8,7 @@ interface ImagePasteHandlerOptions {
   onUploadEnd?: () => void
 }
 
-export function useImagePasteHandler({
-  onUpload,
-  onInsert,
-  onUploadStart,
-  onUploadEnd,
-}: ImagePasteHandlerOptions) {
+export function useImagePasteHandler({ onUpload, onInsert, onUploadStart, onUploadEnd }: ImagePasteHandlerOptions) {
   const handlePaste = useCallback(
     async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
       const items = e.clipboardData?.items

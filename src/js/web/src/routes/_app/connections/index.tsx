@@ -1,5 +1,4 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   AlertCircle,
   Cable,
@@ -16,9 +15,10 @@ import {
   SlidersHorizontal,
   Trash2,
   X,
-  Zap,
   XCircle,
+  Zap,
 } from "lucide-react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,19 +29,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { DataFreshness } from "@/components/ui/data-freshness"
 import { Badge } from "@/components/ui/badge"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { BulkActionBar, createBulkDeleteAction, createBulkToggleActions, createExportAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -55,23 +48,17 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { FilterDropdown, type FilterOption } from "@/components/ui/filter-dropdown"
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Skeleton, SkeletonCard } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import {
-  type ConnectionList,
-  useConnections,
-  useDeleteConnection,
-  useTestAnyConnection,
-  useUpdateAnyConnection,
-} from "@/lib/api/hooks/connections"
-import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
-import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
-import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
+import { type ConnectionList, useConnections, useDeleteConnection, useTestAnyConnection, useUpdateAnyConnection } from "@/lib/api/hooks/connections"
+import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { useSettingsStore } from "@/lib/settings-store"
 import { cn } from "@/lib/utils"
 
@@ -91,10 +78,7 @@ export const Route = createFileRoute("/_app/connections/")({
     type: typeof search.type === "string" && search.type ? search.type : undefined,
     status: typeof search.status === "string" && search.status ? search.status : undefined,
     sort: typeof search.sort === "string" && search.sort ? search.sort : undefined,
-    order:
-      typeof search.order === "string" && (search.order === "asc" || search.order === "desc")
-        ? search.order
-        : undefined,
+    order: typeof search.order === "string" && (search.order === "asc" || search.order === "desc") ? search.order : undefined,
   }),
   component: ConnectionsPage,
 })
@@ -214,30 +198,19 @@ function StatusIndicator({ status }: { status: string }) {
   }
 }
 
-
 // ── Main page ────────────────────────────────────────────────────────────
 
 function ConnectionsPage() {
   useDocumentTitle("Connections")
   const compactMode = useSettingsStore((s) => s.compactMode)
   const cellClass = compactMode ? "py-1 px-2 text-xs" : ""
-  const {
-    q: searchParam,
-    page: pageParam,
-    type: typeParam,
-    status: statusParam,
-    sort: sortParam,
-    order: orderParam,
-  } = Route.useSearch()
+  const { q: searchParam, page: pageParam, type: typeParam, status: statusParam, sort: sortParam, order: orderParam } = Route.useSearch()
   const navigate = Route.useNavigate()
   const searchInputRef = useRef<HTMLInputElement>(null)
 
   // Column visibility
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(loadColumnVisibility)
-  const isColumnVisible = useCallback(
-    (col: string) => columnVisibility[col] !== false,
-    [columnVisibility],
-  )
+  const isColumnVisible = useCallback((col: string) => columnVisibility[col] !== false, [columnVisibility])
   const toggleColumn = useCallback((col: string) => {
     setColumnVisibility((prev) => {
       const updated = { ...prev, [col]: prev[col] !== false ? false : true }
@@ -270,14 +243,8 @@ function ConnectionsPage() {
   // Derive filter state from URL search params
   const search = searchParam ?? ""
   const page = pageParam ?? 1
-  const typeFilter = useMemo(
-    () => (typeParam ? typeParam.split(",").filter(Boolean) : []),
-    [typeParam],
-  )
-  const statusFilter = useMemo(
-    () => (statusParam ? statusParam.split(",").filter(Boolean) : []),
-    [statusParam],
-  )
+  const typeFilter = useMemo(() => (typeParam ? typeParam.split(",").filter(Boolean) : []), [typeParam])
+  const statusFilter = useMemo(() => (statusParam ? statusParam.split(",").filter(Boolean) : []), [statusParam])
   const sortKey = sortParam ?? null
   const sortDir: SortDirection = (orderParam as SortDirection) ?? null
 
@@ -421,8 +388,7 @@ function ConnectionsPage() {
   const [bulkEnableAction, bulkDisableAction] = useMemo(
     () =>
       createBulkToggleActions(
-        (id, enabled) =>
-          updateAnyConnection.mutateAsync({ connectionId: id, payload: { isEnabled: enabled } }).then(() => {}),
+        (id, enabled) => updateAnyConnection.mutateAsync({ connectionId: id, payload: { isEnabled: enabled } }).then(() => {}),
         () => {},
         { entityName: "connection" },
       ),
@@ -439,11 +405,7 @@ function ConnectionsPage() {
           setSelectedIds(new Set())
         },
       ),
-      createExportAction<ConnectionList>(
-        "connections-selected",
-        csvHeaders,
-        (ids) => filteredItems.filter((c) => ids.includes(c.id)),
-      ),
+      createExportAction<ConnectionList>("connections-selected", csvHeaders, (ids) => filteredItems.filter((c) => ids.includes(c.id))),
     ],
     [bulkEnableAction, bulkDisableAction, filteredItems, deleteConnection],
   )
@@ -522,19 +484,9 @@ function ConnectionsPage() {
         breadcrumbs={breadcrumbs}
         actions={
           <div className="flex items-center gap-2">
-            <DataFreshness
-              dataUpdatedAt={dataUpdatedAt}
-              onRefresh={() => refetch()}
-              isRefreshing={isRefetching}
-            />
-            <Button
-              variant={autoRefresh ? "default" : "outline"}
-              size="sm"
-              onClick={toggleAutoRefresh}
-            >
-              {autoRefresh && (
-                <span className="mr-2 h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
-              )}
+            <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
+            <Button variant={autoRefresh ? "default" : "outline"} size="sm" onClick={toggleAutoRefresh}>
+              {autoRefresh && <span className="mr-2 h-2 w-2 animate-pulse rounded-full bg-emerald-500" />}
               Live
             </Button>
             <DropdownMenu>
@@ -548,11 +500,7 @@ function ConnectionsPage() {
                 <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {TOGGLEABLE_COLUMNS.map((col) => (
-                  <DropdownMenuCheckboxItem
-                    key={col.key}
-                    checked={isColumnVisible(col.key)}
-                    onCheckedChange={() => toggleColumn(col.key)}
-                  >
+                  <DropdownMenuCheckboxItem key={col.key} checked={isColumnVisible(col.key)} onCheckedChange={() => toggleColumn(col.key)}>
                     {col.label}
                   </DropdownMenuCheckboxItem>
                 ))}
@@ -574,42 +522,42 @@ function ConnectionsPage() {
 
       {/* Summary distribution pills */}
       <SectionErrorBoundary name="Connection Statistics">
-      <div className="flex flex-wrap items-center gap-2">
-        {isLoading ? (
-          <>
-            <Skeleton className="h-7 w-24 rounded-full" />
-            <Skeleton className="h-7 w-28 rounded-full" />
-            <Skeleton className="h-7 w-32 rounded-full" />
-            <Skeleton className="h-7 w-24 rounded-full" />
-          </>
-        ) : (
-          <>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground">
-              Total
-              <span className="ml-0.5 font-semibold text-foreground">{healthStats.total}</span>
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              Connected
-              <span className="ml-0.5 font-semibold">{healthStats.connected}</span>
-            </span>
-            {healthStats.disconnected > 0 && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-xs font-medium text-red-700 dark:text-red-400">
-                <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
-                Disconnected
-                <span className="ml-0.5 font-semibold">{healthStats.disconnected}</span>
+        <div className="flex flex-wrap items-center gap-2">
+          {isLoading ? (
+            <>
+              <Skeleton className="h-7 w-24 rounded-full" />
+              <Skeleton className="h-7 w-28 rounded-full" />
+              <Skeleton className="h-7 w-32 rounded-full" />
+              <Skeleton className="h-7 w-24 rounded-full" />
+            </>
+          ) : (
+            <>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground">
+                Total
+                <span className="ml-0.5 font-semibold text-foreground">{healthStats.total}</span>
               </span>
-            )}
-            {healthStats.disabled > 0 && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-zinc-400/30 bg-zinc-400/10 px-3 py-1 text-xs font-medium text-zinc-600 dark:text-zinc-400">
-                <span className="h-1.5 w-1.5 rounded-full bg-zinc-400" />
-                Disabled
-                <span className="ml-0.5 font-semibold">{healthStats.disabled}</span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                Connected
+                <span className="ml-0.5 font-semibold">{healthStats.connected}</span>
               </span>
-            )}
-          </>
-        )}
-      </div>
+              {healthStats.disconnected > 0 && (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-xs font-medium text-red-700 dark:text-red-400">
+                  <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+                  Disconnected
+                  <span className="ml-0.5 font-semibold">{healthStats.disconnected}</span>
+                </span>
+              )}
+              {healthStats.disabled > 0 && (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-zinc-400/30 bg-zinc-400/10 px-3 py-1 text-xs font-medium text-zinc-600 dark:text-zinc-400">
+                  <span className="h-1.5 w-1.5 rounded-full bg-zinc-400" />
+                  Disabled
+                  <span className="ml-0.5 font-semibold">{healthStats.disabled}</span>
+                </span>
+              )}
+            </>
+          )}
+        </div>
       </SectionErrorBoundary>
 
       {/* Search & filters */}
@@ -617,13 +565,7 @@ function ConnectionsPage() {
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative max-w-sm flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              ref={searchInputRef}
-              placeholder="Search by name or provider..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              className="pl-9 pr-8"
-            />
+            <Input ref={searchInputRef} placeholder="Search by name or provider..." value={searchInput} onChange={(e) => setSearchInput(e.target.value)} className="pl-9 pr-8" />
             {searchInput ? (
               <button
                 type="button"
@@ -634,7 +576,9 @@ function ConnectionsPage() {
                 <span className="sr-only">Clear search</span>
               </button>
             ) : (
-              <kbd className="pointer-events-none absolute right-8 top-1/2 -translate-y-1/2 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">/</kbd>
+              <kbd className="pointer-events-none absolute right-8 top-1/2 -translate-y-1/2 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">
+                /
+              </kbd>
             )}
           </div>
           <FilterDropdown
@@ -690,230 +634,204 @@ function ConnectionsPage() {
       {/* Content */}
       <PageSection delay={0.1}>
         <SectionErrorBoundary name="Connections Table">
-        {isLoading ? (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <SkeletonCard key={i} />
-            ))}
-          </div>
-        ) : isError ? (
-          <EmptyState
-            icon={AlertCircle}
-            title="Unable to load connections"
-            description="Something went wrong while fetching your connections. Please try again."
-            action={
-              <Button variant="outline" size="sm" onClick={() => refetch()}>
-                Try again
-              </Button>
-            }
-          />
-        ) : !hasAnyConnections && !search ? (
-          <EmptyState
-            icon={Cable}
-            title="No connections yet"
-            description="Add your first connection to integrate with an external data source."
-            action={
-              <Button size="sm" asChild>
-                <Link to="/connections/new">
-                  <Plus className="mr-2 h-4 w-4" /> Add connection
-                </Link>
-              </Button>
-            }
-          />
-        ) : !hasData ? (
-          <EmptyState
-            icon={Cable}
-            variant="no-results"
-            title="No results found"
-            description="No connections match your current filters. Try adjusting your search or filters."
-            action={
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setSearchInput("")
-                  navigate({
-                    search: {
-                      q: undefined,
-                      type: undefined,
-                      status: undefined,
-                      sort: undefined,
-                      order: undefined,
-                      page: undefined,
-                    },
-                  })
-                }}
-              >
-                Clear all filters
-              </Button>
-            }
-          />
-        ) : (
-          <div className="space-y-3">
-            {/* Result count & pagination info */}
-            <div className="flex items-center justify-between">
-              <p className="text-xs text-muted-foreground">
-                {data?.total ?? filteredItems.length} connection{(data?.total ?? filteredItems.length) === 1 ? "" : "s"}
-                {activeFilterCount > 0 && " (filtered)"}
-              </p>
-              {totalPages > 1 && (
+          {isLoading ? (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <SkeletonCard key={i} />
+              ))}
+            </div>
+          ) : isError ? (
+            <EmptyState
+              icon={AlertCircle}
+              title="Unable to load connections"
+              description="Something went wrong while fetching your connections. Please try again."
+              action={
+                <Button variant="outline" size="sm" onClick={() => refetch()}>
+                  Try again
+                </Button>
+              }
+            />
+          ) : !hasAnyConnections && !search ? (
+            <EmptyState
+              icon={Cable}
+              title="No connections yet"
+              description="Add your first connection to integrate with an external data source."
+              action={
+                <Button size="sm" asChild>
+                  <Link to="/connections/new">
+                    <Plus className="mr-2 h-4 w-4" /> Add connection
+                  </Link>
+                </Button>
+              }
+            />
+          ) : !hasData ? (
+            <EmptyState
+              icon={Cable}
+              variant="no-results"
+              title="No results found"
+              description="No connections match your current filters. Try adjusting your search or filters."
+              action={
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSearchInput("")
+                    navigate({
+                      search: {
+                        q: undefined,
+                        type: undefined,
+                        status: undefined,
+                        sort: undefined,
+                        order: undefined,
+                        page: undefined,
+                      },
+                    })
+                  }}
+                >
+                  Clear all filters
+                </Button>
+              }
+            />
+          ) : (
+            <div className="space-y-3">
+              {/* Result count & pagination info */}
+              <div className="flex items-center justify-between">
                 <p className="text-xs text-muted-foreground">
-                  Page {page} of {totalPages}
+                  {data?.total ?? filteredItems.length} connection{(data?.total ?? filteredItems.length) === 1 ? "" : "s"}
+                  {activeFilterCount > 0 && " (filtered)"}
                 </p>
-              )}
-            </div>
-
-            {/* Table */}
-            <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
-              <Table aria-label="Connections" aria-busy={isLoading || isRefetching}>
-                <TableHeader className="sticky top-0 z-10 bg-background">
-                  <TableRow>
-                    <TableHead className="w-10">
-                      <Checkbox
-                        checked={allSelected}
-                        indeterminate={someSelected && !allSelected}
-                        onChange={toggleAll}
-                        aria-label="Select all connections"
-                      />
-                    </TableHead>
-                    <SortableHeader
-                      label="Name"
-                      sortKey="name"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                    />
-                    {isColumnVisible("type") && (
-                      <SortableHeader
-                        label="Type"
-                        sortKey="connection_type"
-                        currentSort={sortKey}
-                        currentDirection={sortDir}
-                        onSort={handleSort}
-                        className="hidden md:table-cell"
-                      />
-                    )}
-                    {isColumnVisible("status") && (
-                      <SortableHeader
-                        label="Status"
-                        sortKey="status"
-                        currentSort={sortKey}
-                        currentDirection={sortDir}
-                        onSort={handleSort}
-                      />
-                    )}
-                    {isColumnVisible("host") && (
-                      <TableHead className="hidden md:table-cell">Host</TableHead>
-                    )}
-                    {isColumnVisible("lastSync") && (
-                      <SortableHeader
-                        label="Last Tested"
-                        sortKey="last_health_check"
-                        currentSort={sortKey}
-                        currentDirection={sortDir}
-                        onSort={handleSort}
-                        className="hidden md:table-cell"
-                      />
-                    )}
-                    {isColumnVisible("created") && (
-                      <SortableHeader
-                        label="Created"
-                        sortKey="created_at"
-                        currentSort={sortKey}
-                        currentDirection={sortDir}
-                        onSort={handleSort}
-                        className="hidden md:table-cell"
-                      />
-                    )}
-                    <TableHead className="w-16 text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredItems.map((conn, index) => (
-                    <ConnectionRow
-                      key={conn.id}
-                      conn={conn}
-                      index={index}
-                      selected={selectedIds.has(conn.id)}
-                      onToggle={() => toggleOne(conn.id)}
-                      onRowClick={() => handleRowClick(conn.id)}
-                      onDelete={() => setItemToDelete({ id: conn.id, name: conn.name })}
-                      onTest={() => testConnection.mutate(conn.id)}
-                      isTestPending={testConnection.isPending && testConnection.variables === conn.id}
-                      cellClass={cellClass}
-                      isColumnVisible={isColumnVisible}
-                    />
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-            <div className="sr-only" aria-live="polite" aria-atomic="true">
-              {!isLoading && `Showing ${filteredItems.length} of ${data?.total ?? 0} results, page ${page}`}
-            </div>
-
-            {/* Pagination */}
-            <div className="flex items-center justify-end gap-4">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Rows per page</span>
-                <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
-                  <SelectTrigger className="h-8 w-[70px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PAGE_SIZES.map((size) => (
-                      <SelectItem key={size} value={String(size)}>
-                        {size}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {totalPages > 1 && (
+                  <p className="text-xs text-muted-foreground">
+                    Page {page} of {totalPages}
+                  </p>
+                )}
               </div>
-              {totalPages > 1 && (
+
+              {/* Table */}
+              <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
+                <Table aria-label="Connections" aria-busy={isLoading || isRefetching}>
+                  <TableHeader className="sticky top-0 z-10 bg-background">
+                    <TableRow>
+                      <TableHead className="w-10">
+                        <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all connections" />
+                      </TableHead>
+                      <SortableHeader label="Name" sortKey="name" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                      {isColumnVisible("type") && (
+                        <SortableHeader
+                          label="Type"
+                          sortKey="connection_type"
+                          currentSort={sortKey}
+                          currentDirection={sortDir}
+                          onSort={handleSort}
+                          className="hidden md:table-cell"
+                        />
+                      )}
+                      {isColumnVisible("status") && <SortableHeader label="Status" sortKey="status" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />}
+                      {isColumnVisible("host") && <TableHead className="hidden md:table-cell">Host</TableHead>}
+                      {isColumnVisible("lastSync") && (
+                        <SortableHeader
+                          label="Last Tested"
+                          sortKey="last_health_check"
+                          currentSort={sortKey}
+                          currentDirection={sortDir}
+                          onSort={handleSort}
+                          className="hidden md:table-cell"
+                        />
+                      )}
+                      {isColumnVisible("created") && (
+                        <SortableHeader
+                          label="Created"
+                          sortKey="created_at"
+                          currentSort={sortKey}
+                          currentDirection={sortDir}
+                          onSort={handleSort}
+                          className="hidden md:table-cell"
+                        />
+                      )}
+                      <TableHead className="w-16 text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredItems.map((conn, index) => (
+                      <ConnectionRow
+                        key={conn.id}
+                        conn={conn}
+                        index={index}
+                        selected={selectedIds.has(conn.id)}
+                        onToggle={() => toggleOne(conn.id)}
+                        onRowClick={() => handleRowClick(conn.id)}
+                        onDelete={() => setItemToDelete({ id: conn.id, name: conn.name })}
+                        onTest={() => testConnection.mutate(conn.id)}
+                        isTestPending={testConnection.isPending && testConnection.variables === conn.id}
+                        cellClass={cellClass}
+                        isColumnVisible={isColumnVisible}
+                      />
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              <div className="sr-only" aria-live="polite" aria-atomic="true">
+                {!isLoading && `Showing ${filteredItems.length} of ${data?.total ?? 0} results, page ${page}`}
+              </div>
+
+              {/* Pagination */}
+              <div className="flex items-center justify-end gap-4">
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      navigate({
-                        search: (prev) => ({
-                          ...prev,
-                          page: page - 1 > 1 ? page - 1 : undefined,
-                        }),
-                      })
-                    }
-                    disabled={page <= 1}
-                  >
-                    Previous
-                    <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&larr;</kbd>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      navigate({
-                        search: (prev) => ({ ...prev, page: page + 1 }),
-                      })
-                    }
-                    disabled={page >= totalPages}
-                  >
-                    Next
-                    <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&rarr;</kbd>
-                  </Button>
+                  <span className="text-sm text-muted-foreground">Rows per page</span>
+                  <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
+                    <SelectTrigger className="h-8 w-[70px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PAGE_SIZES.map((size) => (
+                        <SelectItem key={size} value={String(size)}>
+                          {size}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-              )}
+                {totalPages > 1 && (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        navigate({
+                          search: (prev) => ({
+                            ...prev,
+                            page: page - 1 > 1 ? page - 1 : undefined,
+                          }),
+                        })
+                      }
+                      disabled={page <= 1}
+                    >
+                      Previous
+                      <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&larr;</kbd>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        navigate({
+                          search: (prev) => ({ ...prev, page: page + 1 }),
+                        })
+                      }
+                      disabled={page >= totalPages}
+                    >
+                      Next
+                      <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&rarr;</kbd>
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
         </SectionErrorBoundary>
       </PageSection>
 
       {/* Bulk action bar */}
-      <BulkActionBar
-        selectedCount={selectedIds.size}
-        selectedIds={Array.from(selectedIds)}
-        onClearSelection={() => setSelectedIds(new Set())}
-        actions={bulkActions}
-      />
+      <BulkActionBar selectedCount={selectedIds.size} selectedIds={Array.from(selectedIds)} onClearSelection={() => setSelectedIds(new Set())} actions={bulkActions} />
 
       <AlertDialog open={!!itemToDelete} onOpenChange={(open) => !open && setItemToDelete(null)}>
         <AlertDialogContent>
@@ -983,21 +901,14 @@ function ConnectionRow({
         />
       </TableCell>
       <TableCell className={cellClass}>
-        <Link
-          to="/connections/$connectionId"
-          params={{ connectionId: conn.id }}
-          className="group flex flex-col gap-0.5"
-          onClick={(e) => e.stopPropagation()}
-        >
+        <Link to="/connections/$connectionId" params={{ connectionId: conn.id }} className="group flex flex-col gap-0.5" onClick={(e) => e.stopPropagation()}>
           <span className="font-medium group-hover:underline">{conn.name}</span>
           <span className="text-xs text-muted-foreground">{conn.provider}</span>
         </Link>
       </TableCell>
       {isColumnVisible("type") && (
         <TableCell className={cn("hidden md:table-cell", cellClass)}>
-          <Badge variant={typeBadgeVariant[conn.connectionType] ?? "outline"}>
-            {typeLabels[conn.connectionType] ?? conn.connectionType}
-          </Badge>
+          <Badge variant={typeBadgeVariant[conn.connectionType] ?? "outline"}>{typeLabels[conn.connectionType] ?? conn.connectionType}</Badge>
         </TableCell>
       )}
       {isColumnVisible("status") && (
@@ -1028,9 +939,7 @@ function ConnectionRow({
         <TableCell className={cn("hidden md:table-cell", cellClass)}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className="cursor-default text-xs text-muted-foreground">
-                {formatRelativeTimeShort(conn.lastHealthCheck)}
-              </span>
+              <span className="cursor-default text-xs text-muted-foreground">{formatRelativeTimeShort(conn.lastHealthCheck)}</span>
             </TooltipTrigger>
             <TooltipContent>{formatDateTime(conn.lastHealthCheck)}</TooltipContent>
           </Tooltip>
@@ -1040,9 +949,7 @@ function ConnectionRow({
         <TableCell className={cn("hidden md:table-cell", cellClass)}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className="cursor-default text-xs text-muted-foreground">
-                {formatRelativeTimeShort(conn.createdAt)}
-              </span>
+              <span className="cursor-default text-xs text-muted-foreground">{formatRelativeTimeShort(conn.createdAt)}</span>
             </TooltipTrigger>
             <TooltipContent>{formatDateTime(conn.createdAt)}</TooltipContent>
           </Tooltip>
@@ -1051,13 +958,7 @@ function ConnectionRow({
       <TableCell className={cn("text-right", cellClass)}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0"
-              data-slot="dropdown"
-              onClick={(e) => e.stopPropagation()}
-            >
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" data-slot="dropdown" onClick={(e) => e.stopPropagation()}>
               <MoreVertical className="h-4 w-4" />
               <span className="sr-only">Actions for {conn.name}</span>
             </Button>
@@ -1076,11 +977,7 @@ function ConnectionRow({
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={onTest} disabled={isTestPending}>
-              {isTestPending ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Zap className="mr-2 h-4 w-4" />
-              )}
+              {isTestPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Zap className="mr-2 h-4 w-4" />}
               Test connection
             </DropdownMenuItem>
             <DropdownMenuSeparator />

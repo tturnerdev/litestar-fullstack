@@ -1,22 +1,8 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
+import { AlertCircle, AlertTriangle, ArrowDown, ArrowLeft, ArrowUp, Copy, Loader2, MoreHorizontal, Pause, Pencil, Phone, Play, Plus, Trash2 } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
-import {
-  AlertCircle,
-  AlertTriangle,
-  ArrowDown,
-  ArrowLeft,
-  ArrowUp,
-  Copy,
-  Loader2,
-  MoreHorizontal,
-  Pause,
-  Pencil,
-  Phone,
-  Play,
-  Plus,
-  Trash2,
-} from "lucide-react"
+import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,32 +14,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { CopyButton } from "@/components/ui/copy-button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -64,19 +30,18 @@ import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import {
+  type CallQueue,
+  type CallQueueMember,
   useCallQueue,
-  useUpdateCallQueue,
-  useDeleteCallQueue,
   useCreateCallQueueMember,
+  useDeleteCallQueue,
   useDeleteCallQueueMember,
   usePauseCallQueueMember,
   useReorderCallQueueMembers,
-  type CallQueue,
-  type CallQueueMember,
+  useUpdateCallQueue,
 } from "@/lib/api/hooks/call-routing"
-import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
-import { useDocumentTitle } from "@/hooks/use-document-title"
 
 export const Route = createFileRoute("/_app/call-routing/call-queues/$callQueueId")({
   component: CallQueueDetailPage,
@@ -109,9 +74,7 @@ function DeleteDialog({ name, onDelete, isPending }: { name: string; onDelete: (
             <AlertDialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-destructive" /> Delete "{name}"?
             </AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete this call queue and all its member assignments. This action cannot be undone.
-            </AlertDialogDescription>
+            <AlertDialogDescription>This will permanently delete this call queue and all its member assignments. This action cannot be undone.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
@@ -220,8 +183,7 @@ function EditCallQueueDialog({ queue, open, onOpenChange }: EditCallQueueDialogP
               Edit Call Queue
             </DialogTitle>
             <DialogDescription>
-              Update configuration for queue{" "}
-              <span className="font-mono font-medium">{queue.number}</span>.
+              Update configuration for queue <span className="font-mono font-medium">{queue.number}</span>.
             </DialogDescription>
           </DialogHeader>
 
@@ -229,22 +191,11 @@ function EditCallQueueDialog({ queue, open, onOpenChange }: EditCallQueueDialogP
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="edit-cq-name">Name</Label>
-                <Input
-                  id="edit-cq-name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Sales Queue"
-                  required
-                />
+                <Input id="edit-cq-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Sales Queue" required />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-cq-number">Number</Label>
-                <Input
-                  id="edit-cq-number"
-                  value={number}
-                  onChange={(e) => setNumber(e.target.value)}
-                  placeholder="8001"
-                />
+                <Input id="edit-cq-number" value={number} onChange={(e) => setNumber(e.target.value)} placeholder="8001" />
               </div>
             </div>
 
@@ -256,7 +207,9 @@ function EditCallQueueDialog({ queue, open, onOpenChange }: EditCallQueueDialogP
                 </SelectTrigger>
                 <SelectContent>
                   {Object.entries(strategyLabels).map(([k, v]) => (
-                    <SelectItem key={k} value={k}>{v}</SelectItem>
+                    <SelectItem key={k} value={k}>
+                      {v}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -267,45 +220,21 @@ function EditCallQueueDialog({ queue, open, onOpenChange }: EditCallQueueDialogP
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="space-y-2">
                 <Label htmlFor="edit-cq-ring-time">Ring Time (s)</Label>
-                <Input
-                  id="edit-cq-ring-time"
-                  type="number"
-                  value={ringTime}
-                  onChange={(e) => setRingTime(Number(e.target.value))}
-                  min={5}
-                />
+                <Input id="edit-cq-ring-time" type="number" value={ringTime} onChange={(e) => setRingTime(Number(e.target.value))} min={5} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-cq-max-wait">Max Wait (s)</Label>
-                <Input
-                  id="edit-cq-max-wait"
-                  type="number"
-                  value={maxWaitTime}
-                  onChange={(e) => setMaxWaitTime(Number(e.target.value))}
-                  min={0}
-                />
+                <Input id="edit-cq-max-wait" type="number" value={maxWaitTime} onChange={(e) => setMaxWaitTime(Number(e.target.value))} min={0} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-cq-max-callers">Max Callers</Label>
-                <Input
-                  id="edit-cq-max-callers"
-                  type="number"
-                  value={maxCallers}
-                  onChange={(e) => setMaxCallers(Number(e.target.value))}
-                  min={1}
-                />
+                <Input id="edit-cq-max-callers" type="number" value={maxCallers} onChange={(e) => setMaxCallers(Number(e.target.value))} min={1} />
               </div>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="edit-cq-wrapup">Wrapup Time (s)</Label>
-              <Input
-                id="edit-cq-wrapup"
-                type="number"
-                value={wrapupTime}
-                onChange={(e) => setWrapupTime(Number(e.target.value))}
-                min={0}
-              />
+              <Input id="edit-cq-wrapup" type="number" value={wrapupTime} onChange={(e) => setWrapupTime(Number(e.target.value))} min={0} />
             </div>
 
             <Separator />
@@ -344,9 +273,7 @@ function EditCallQueueDialog({ queue, open, onOpenChange }: EditCallQueueDialogP
                 onChange={(e) => setTimeoutDestination(e.target.value)}
                 placeholder="Destination on queue timeout (optional)"
               />
-              <p className="text-xs text-muted-foreground">
-                Where to route callers when the max wait time is exceeded.
-              </p>
+              <p className="text-xs text-muted-foreground">Where to route callers when the max wait time is exceeded.</p>
             </div>
           </div>
 
@@ -417,7 +344,9 @@ function AddMemberRow({ queueId }: { queueId: string }) {
           {createMember.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Add
         </Button>
-        <Button variant="ghost" size="sm" onClick={() => setAdding(false)}>Cancel</Button>
+        <Button variant="ghost" size="sm" onClick={() => setAdding(false)}>
+          Cancel
+        </Button>
       </div>
     </div>
   )
@@ -451,19 +380,19 @@ function MemberRow({
     <TableRow className={isHighlighted ? "animate-highlight-row" : ""}>
       <TableCell>
         {member.extensionId ? (
-          <Link
-            to="/voice/extensions/$extensionId"
-            params={{ extensionId: member.extensionId }}
-            className="text-primary hover:underline font-mono text-sm"
-          >
+          <Link to="/voice/extensions/$extensionId" params={{ extensionId: member.extensionId }} className="text-primary hover:underline font-mono text-sm">
             {member.extensionId.slice(0, 8) + "..."}
           </Link>
         ) : (
           <span className="font-mono text-xs">---</span>
         )}
       </TableCell>
-      <TableCell><span className="text-sm">{member.priority}</span></TableCell>
-      <TableCell><span className="text-sm">{member.penalty}</span></TableCell>
+      <TableCell>
+        <span className="text-sm">{member.priority}</span>
+      </TableCell>
+      <TableCell>
+        <span className="text-sm">{member.penalty}</span>
+      </TableCell>
       <TableCell>
         {member.isPaused ? (
           <Badge variant="outline" className="gap-1 text-amber-600 border-amber-300 dark:text-amber-400 dark:border-amber-700">
@@ -477,24 +406,10 @@ function MemberRow({
       </TableCell>
       <TableCell className="text-right">
         <div className="flex items-center justify-end gap-0.5">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7 text-muted-foreground"
-            onClick={onMoveUp}
-            disabled={isFirst || isReordering}
-            aria-label="Move up"
-          >
+          <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground" onClick={onMoveUp} disabled={isFirst || isReordering} aria-label="Move up">
             <ArrowUp className="h-3.5 w-3.5" />
           </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7 text-muted-foreground"
-            onClick={onMoveDown}
-            disabled={isLast || isReordering}
-            aria-label="Move down"
-          >
+          <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground" onClick={onMoveDown} disabled={isLast || isReordering} aria-label="Move down">
             <ArrowDown className="h-3.5 w-3.5" />
           </Button>
           <Button
@@ -591,7 +506,9 @@ function CallQueueDetailPage() {
     return (
       <PageContainer className="flex-1 space-y-8">
         <div className="space-y-2">
-          <Skeleton className="h-4 w-28" /><Skeleton className="h-8 w-52" /><Skeleton className="h-4 w-64" />
+          <Skeleton className="h-4 w-28" />
+          <Skeleton className="h-8 w-52" />
+          <Skeleton className="h-4 w-64" />
         </div>
         <PageSection>
           <div className="grid gap-6 md:grid-cols-[1.1fr_0.9fr]">
@@ -599,17 +516,29 @@ function CallQueueDetailPage() {
               <div className="rounded-xl border border-border/60 bg-card/80 p-6 space-y-4">
                 <Skeleton className="h-6 w-40" />
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {Array.from({ length: 9 }).map((_, i) => <div key={i} className="space-y-1.5"><Skeleton className="h-3.5 w-20" /><Skeleton className="h-5 w-36" /></div>)}
+                  {Array.from({ length: 9 }).map((_, i) => (
+                    <div key={i} className="space-y-1.5">
+                      <Skeleton className="h-3.5 w-20" />
+                      <Skeleton className="h-5 w-36" />
+                    </div>
+                  ))}
                 </div>
               </div>
               <div className="rounded-xl border border-border/60 bg-card/80 p-6 space-y-4">
                 <Skeleton className="h-6 w-24" />
-                {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <Skeleton key={i} className="h-10 w-full" />
+                ))}
               </div>
             </div>
             <div className="rounded-xl border border-border/60 bg-card/80 p-6 space-y-4">
               <Skeleton className="h-5 w-24" />
-              {Array.from({ length: 3 }).map((_, i) => <div key={i} className="space-y-1"><Skeleton className="h-3 w-20" /><Skeleton className="h-5 w-40" /></div>)}
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="space-y-1">
+                  <Skeleton className="h-3 w-20" />
+                  <Skeleton className="h-5 w-40" />
+                </div>
+              ))}
             </div>
           </div>
         </PageSection>
@@ -621,13 +550,27 @@ function CallQueueDetailPage() {
   if (isError || !data) {
     return (
       <PageContainer className="flex-1 space-y-8">
-        <PageHeader eyebrow="Call Routing" title="Call Queue" actions={<Button variant="outline" size="sm" asChild><Link to="/call-routing" search={{ tab: "call-queues" }}><ArrowLeft className="mr-2 h-4 w-4" /> Back</Link></Button>} />
+        <PageHeader
+          eyebrow="Call Routing"
+          title="Call Queue"
+          actions={
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/call-routing" search={{ tab: "call-queues" }}>
+                <ArrowLeft className="mr-2 h-4 w-4" /> Back
+              </Link>
+            </Button>
+          }
+        />
         <PageSection>
           <EmptyState
             icon={AlertCircle}
             title="Unable to load call queue"
             description="Something went wrong. Please try again."
-            action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+            action={
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
+                Try again
+              </Button>
+            }
           />
         </PageSection>
       </PageContainer>
@@ -643,17 +586,31 @@ function CallQueueDetailPage() {
         breadcrumbs={
           <Breadcrumb>
             <BreadcrumbList>
-              <BreadcrumbItem><BreadcrumbLink asChild><Link to="/home">Home</Link></BreadcrumbLink></BreadcrumbItem>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/home">Home</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
               <BreadcrumbSeparator />
-              <BreadcrumbItem><BreadcrumbLink asChild><Link to="/call-routing" search={{ tab: "call-queues" }}>Call Routing</Link></BreadcrumbLink></BreadcrumbItem>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/call-routing" search={{ tab: "call-queues" }}>
+                    Call Routing
+                  </Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
               <BreadcrumbSeparator />
-              <BreadcrumbItem><BreadcrumbPage>{data.name}</BreadcrumbPage></BreadcrumbItem>
+              <BreadcrumbItem>
+                <BreadcrumbPage>{data.name}</BreadcrumbPage>
+              </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         }
         actions={
           <div className="flex items-center gap-3">
-            <Badge variant="outline">{members.length} member{members.length === 1 ? "" : "s"}</Badge>
+            <Badge variant="outline">
+              {members.length} member{members.length === 1 ? "" : "s"}
+            </Badge>
             <Button variant="outline" size="sm" onClick={() => setShowEditDialog(true)}>
               <Pencil className="mr-2 h-4 w-4" /> Edit
             </Button>
@@ -680,10 +637,7 @@ function CallQueueDetailPage() {
                   Copy Queue ID
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="text-destructive focus:text-destructive"
-                  onClick={() => setShowDeleteAlert(true)}
-                >
+                <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setShowDeleteAlert(true)}>
                   <Trash2 className="mr-2 h-4 w-4" />
                   Delete Queue
                 </DropdownMenuItem>
@@ -698,179 +652,172 @@ function CallQueueDetailPage() {
           <div className="space-y-6">
             {/* Queue Configuration */}
             <SectionErrorBoundary name="Queue Configuration">
-            <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Phone className="h-5 w-5 text-muted-foreground" />
-                  Queue Configuration
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
-                  <InfoField label="Name" value={data.name} />
-                  <InfoField label="Number" value={data.number} />
-                  <InfoField label="Strategy" value={strategyLabels[data.strategy] ?? data.strategy} />
-                  <InfoField label="Ring Time" value={`${data.ringTime}s`} />
-                  <InfoField label="Max Wait" value={`${data.maxWaitTime}s`} />
-                  <InfoField label="Max Callers" value={data.maxCallers} />
-                  <InfoField label="Wrapup Time" value={`${data.wrapupTime}s`} />
-                  <InfoField label="Join Empty" value={data.joinEmpty} />
-                  <InfoField label="Leave Empty" value={data.leaveWhenEmpty} />
-                  <InfoField label="Announce Hold" value={data.announceHoldtime} />
-                  <InfoField label="Timeout Dest." value={data.timeoutDestination} />
-                </div>
-              </CardContent>
-            </Card>
+              <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Phone className="h-5 w-5 text-muted-foreground" />
+                    Queue Configuration
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
+                    <InfoField label="Name" value={data.name} />
+                    <InfoField label="Number" value={data.number} />
+                    <InfoField label="Strategy" value={strategyLabels[data.strategy] ?? data.strategy} />
+                    <InfoField label="Ring Time" value={`${data.ringTime}s`} />
+                    <InfoField label="Max Wait" value={`${data.maxWaitTime}s`} />
+                    <InfoField label="Max Callers" value={data.maxCallers} />
+                    <InfoField label="Wrapup Time" value={`${data.wrapupTime}s`} />
+                    <InfoField label="Join Empty" value={data.joinEmpty} />
+                    <InfoField label="Leave Empty" value={data.leaveWhenEmpty} />
+                    <InfoField label="Announce Hold" value={data.announceHoldtime} />
+                    <InfoField label="Timeout Dest." value={data.timeoutDestination} />
+                  </div>
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
 
             {/* Members */}
             <SectionErrorBoundary name="Queue Members">
-            <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Phone className="h-5 w-5 text-muted-foreground" />
-                  Queue Members
-                </CardTitle>
-                <CardDescription>Agents assigned to receive calls from this queue.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {sortedMembers.length > 0 ? (
-                  <div className="overflow-x-auto">
-                  <Table aria-label="Queue members">
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Extension</TableHead>
-                        <TableHead>Priority</TableHead>
-                        <TableHead>Penalty</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead className="w-40 text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {sortedMembers.map((m, idx) => (
-                        <MemberRow
-                          key={m.id}
-                          member={m}
-                          queueId={callQueueId}
-                          isFirst={idx === 0}
-                          isLast={idx === sortedMembers.length - 1}
-                          isHighlighted={highlightedId === m.id}
-                          isReordering={reorderMutation.isPending}
-                          onMoveUp={() => handleReorder(idx, "up")}
-                          onMoveDown={() => handleReorder(idx, "down")}
-                        />
-                      ))}
-                    </TableBody>
-                  </Table>
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground py-4 text-center">No members assigned.</p>
-                )}
-                <AddMemberRow queueId={callQueueId} />
-              </CardContent>
-            </Card>
+              <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Phone className="h-5 w-5 text-muted-foreground" />
+                    Queue Members
+                  </CardTitle>
+                  <CardDescription>Agents assigned to receive calls from this queue.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {sortedMembers.length > 0 ? (
+                    <div className="overflow-x-auto">
+                      <Table aria-label="Queue members">
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Extension</TableHead>
+                            <TableHead>Priority</TableHead>
+                            <TableHead>Penalty</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead className="w-40 text-right">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {sortedMembers.map((m, idx) => (
+                            <MemberRow
+                              key={m.id}
+                              member={m}
+                              queueId={callQueueId}
+                              isFirst={idx === 0}
+                              isLast={idx === sortedMembers.length - 1}
+                              isHighlighted={highlightedId === m.id}
+                              isReordering={reorderMutation.isPending}
+                              onMoveUp={() => handleReorder(idx, "up")}
+                              onMoveDown={() => handleReorder(idx, "down")}
+                            />
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground py-4 text-center">No members assigned.</p>
+                  )}
+                  <AddMemberRow queueId={callQueueId} />
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
 
             {/* Danger Zone */}
             <SectionErrorBoundary name="Danger Zone">
-            <Card className="border-destructive/30 bg-card/80 shadow-md">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-destructive">
-                  <AlertTriangle className="h-4 w-4" /> Danger Zone
-                </CardTitle>
-                <CardDescription>Irreversible and destructive actions.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between rounded-lg border border-destructive/20 bg-destructive/5 p-4">
-                  <div>
-                    <p className="font-medium text-sm">Delete this call queue</p>
-                    <p className="text-xs text-muted-foreground">Once deleted, this call queue and all member assignments cannot be recovered.</p>
+              <Card className="border-destructive/30 bg-card/80 shadow-md">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-destructive">
+                    <AlertTriangle className="h-4 w-4" /> Danger Zone
+                  </CardTitle>
+                  <CardDescription>Irreversible and destructive actions.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between rounded-lg border border-destructive/20 bg-destructive/5 p-4">
+                    <div>
+                      <p className="font-medium text-sm">Delete this call queue</p>
+                      <p className="text-xs text-muted-foreground">Once deleted, this call queue and all member assignments cannot be recovered.</p>
+                    </div>
+                    <DeleteDialog name={data.name} onDelete={handleDelete} isPending={deleteMutation.isPending} />
                   </div>
-                  <DeleteDialog name={data.name} onDelete={handleDelete} isPending={deleteMutation.isPending} />
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
           </div>
 
           {/* Sidebar */}
           <div className="space-y-4">
             <SectionErrorBoundary name="Metadata">
-            <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Phone className="h-4 w-4" /> Metadata</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-1">
-                  <p className="text-xs font-medium text-muted-foreground">Call Queue ID</p>
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs break-all">{data.id}</span>
-                    <CopyButton value={data.id} label="call queue ID" />
+              <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Phone className="h-4 w-4" /> Metadata
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium text-muted-foreground">Call Queue ID</p>
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-xs break-all">{data.id}</span>
+                      <CopyButton value={data.id} label="call queue ID" />
+                    </div>
                   </div>
-                </div>
-                <Separator />
-                <div className="space-y-1">
-                  <p className="text-xs font-medium text-muted-foreground">Team ID</p>
-                  <div className="flex items-center gap-2">
-                    <Link
-                      to="/teams/$teamId"
-                      params={{ teamId: data.teamId }}
-                      className="text-primary hover:underline font-mono text-xs break-all"
-                    >
-                      {data.teamId}
-                    </Link>
-                    <CopyButton value={data.teamId} label="team ID" />
+                  <Separator />
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium text-muted-foreground">Team ID</p>
+                    <div className="flex items-center gap-2">
+                      <Link to="/teams/$teamId" params={{ teamId: data.teamId }} className="text-primary hover:underline font-mono text-xs break-all">
+                        {data.teamId}
+                      </Link>
+                      <CopyButton value={data.teamId} label="team ID" />
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
 
             <SectionErrorBoundary name="Summary">
-            <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Phone className="h-4 w-4" /> Summary</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Total members</span>
-                  <span className="font-medium text-sm">{members.length}</span>
-                </div>
-                <Separator />
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Active members</span>
-                  <span className="font-medium text-sm">{activeMemberCount}</span>
-                </div>
-                <Separator />
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Paused members</span>
-                  <span className="font-medium text-sm">{members.length - activeMemberCount}</span>
-                </div>
-                <Separator />
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Strategy</span>
-                  <span className="font-medium text-sm">{strategyLabels[data.strategy] ?? data.strategy}</span>
-                </div>
-              </CardContent>
-            </Card>
+              <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Phone className="h-4 w-4" /> Summary
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Total members</span>
+                    <span className="font-medium text-sm">{members.length}</span>
+                  </div>
+                  <Separator />
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Active members</span>
+                    <span className="font-medium text-sm">{activeMemberCount}</span>
+                  </div>
+                  <Separator />
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Paused members</span>
+                    <span className="font-medium text-sm">{members.length - activeMemberCount}</span>
+                  </div>
+                  <Separator />
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Strategy</span>
+                    <span className="font-medium text-sm">{strategyLabels[data.strategy] ?? data.strategy}</span>
+                  </div>
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
           </div>
         </div>
       </PageSection>
 
       <PageSection>
-        <EntityActivityPanel
-          targetType="call_queue"
-          targetId={callQueueId}
-        />
+        <EntityActivityPanel targetType="call_queue" targetId={callQueueId} />
       </PageSection>
 
       {/* Edit call queue dialog */}
-      <EditCallQueueDialog
-        queue={data}
-        open={showEditDialog}
-        onOpenChange={setShowEditDialog}
-      />
+      <EditCallQueueDialog queue={data} open={showEditDialog} onOpenChange={setShowEditDialog} />
 
       {/* Delete confirmation dialog */}
       <AlertDialog open={showDeleteAlert} onOpenChange={setShowDeleteAlert}>
@@ -879,17 +826,11 @@ function CallQueueDetailPage() {
             <AlertDialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-destructive" /> Delete "{data.name}"?
             </AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete this call queue and all its member assignments. This action cannot be undone.
-            </AlertDialogDescription>
+            <AlertDialogDescription>This will permanently delete this call queue and all its member assignments. This action cannot be undone.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={deleteMutation.isPending}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className={buttonVariants({ variant: "destructive" })}
-              onClick={handleDelete}
-              disabled={deleteMutation.isPending}
-            >
+            <AlertDialogAction className={buttonVariants({ variant: "destructive" })} onClick={handleDelete} disabled={deleteMutation.isPending}>
               {deleteMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {deleteMutation.isPending ? "Deleting..." : "Delete"}
             </AlertDialogAction>

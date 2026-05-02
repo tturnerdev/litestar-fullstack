@@ -1,10 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { useDocumentTitle } from "@/hooks/use-document-title"
 import { ArrowLeft } from "lucide-react"
 import { SendFaxForm } from "@/components/fax/send-fax-form"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 
 export const Route = createFileRoute("/_app/fax/send")({
   component: SendFaxPage,
@@ -21,11 +21,21 @@ function SendFaxPage() {
         breadcrumbs={
           <Breadcrumb>
             <BreadcrumbList>
-              <BreadcrumbItem><BreadcrumbLink asChild><Link to="/home">Home</Link></BreadcrumbLink></BreadcrumbItem>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/home">Home</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
               <BreadcrumbSeparator />
-              <BreadcrumbItem><BreadcrumbLink asChild><Link to="/fax">Fax</Link></BreadcrumbLink></BreadcrumbItem>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/fax">Fax</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
               <BreadcrumbSeparator />
-              <BreadcrumbItem><BreadcrumbPage>Send Fax</BreadcrumbPage></BreadcrumbItem>
+              <BreadcrumbItem>
+                <BreadcrumbPage>Send Fax</BreadcrumbPage>
+              </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         }

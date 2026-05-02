@@ -1,6 +1,6 @@
-import { Component, type ErrorInfo, type ReactNode } from "react"
 import * as Sentry from "@sentry/react"
 import { AlertCircle, RefreshCw } from "lucide-react"
+import { Component, type ErrorInfo, type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 
@@ -54,9 +54,7 @@ export class SectionErrorBoundary extends Component<SectionErrorBoundaryProps, S
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium">This section couldn't load</p>
               <p className="text-xs text-muted-foreground">
-                {this.props.name
-                  ? `Something went wrong loading ${this.props.name}.`
-                  : "An unexpected error occurred in this section."}
+                {this.props.name ? `Something went wrong loading ${this.props.name}.` : "An unexpected error occurred in this section."}
               </p>
             </div>
             <Button variant="outline" size="sm" onClick={this.handleReset}>

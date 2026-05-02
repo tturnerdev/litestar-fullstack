@@ -27,9 +27,7 @@ function formatTimeAgo(dateStr: string): string {
   const diffMs = Date.now() - new Date(dateStr).getTime()
   if (diffMs >= 0) return formatRelativeTime(dateStr)
   // Future date: rewrite "X ago" → "in X"
-  const agoStr = formatRelativeTime(
-    new Date(Date.now() + Math.abs(diffMs)).toISOString(),
-  )
+  const agoStr = formatRelativeTime(new Date(Date.now() + Math.abs(diffMs)).toISOString())
   return `in ${agoStr.replace(/ ago$/, "")}`
 }
 
@@ -150,20 +148,12 @@ function SessionItem({
   return (
     <div
       className={`flex items-center justify-between gap-4 rounded-lg border px-4 py-3 ${
-        session.isCurrent
-          ? "border-emerald-500/30 bg-emerald-500/5"
-          : "border-border/60 bg-muted/30 hover:bg-muted/50 transition-colors"
+        session.isCurrent ? "border-emerald-500/30 bg-emerald-500/5" : "border-border/60 bg-muted/30 hover:bg-muted/50 transition-colors"
       }`}
     >
       <div className="flex items-center gap-3">
-        <div
-          className={`flex h-9 w-9 items-center justify-center rounded-full ${
-            session.isCurrent ? "bg-emerald-500/10" : "bg-muted"
-          }`}
-        >
-          <DeviceIcon
-            className={`h-4 w-4 ${session.isCurrent ? "text-emerald-600" : iconColor}`}
-          />
+        <div className={`flex h-9 w-9 items-center justify-center rounded-full ${session.isCurrent ? "bg-emerald-500/10" : "bg-muted"}`}>
+          <DeviceIcon className={`h-4 w-4 ${session.isCurrent ? "text-emerald-600" : iconColor}`} />
         </div>
         <div className="min-w-0">
           <div className="flex items-center gap-2">
@@ -210,33 +200,15 @@ function SessionItem({
           {isConfirming ? (
             <div className="flex items-center gap-1.5">
               <span className="text-xs text-muted-foreground whitespace-nowrap">Are you sure?</span>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => onRevoke(session.id)}
-                disabled={isRevoking}
-                className="h-7 px-2 text-xs"
-                autoFocus
-              >
+              <Button variant="destructive" size="sm" onClick={() => onRevoke(session.id)} disabled={isRevoking} className="h-7 px-2 text-xs" autoFocus>
                 Confirm
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onConfirmCancel}
-                className="h-7 px-2 text-xs"
-              >
+              <Button variant="ghost" size="sm" onClick={onConfirmCancel} className="h-7 px-2 text-xs">
                 Cancel
               </Button>
             </div>
           ) : (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onConfirmStart(session.id)}
-              disabled={isRevoking}
-              className="text-destructive hover:text-destructive"
-            >
+            <Button variant="ghost" size="sm" onClick={() => onConfirmStart(session.id)} disabled={isRevoking} className="text-destructive hover:text-destructive">
               <Trash2 className="mr-1.5 h-3.5 w-3.5" />
               Revoke
             </Button>
@@ -329,7 +301,11 @@ export function ActiveSessions() {
         icon={AlertCircle}
         title="Unable to load sessions"
         description="Something went wrong loading your active sessions."
-        action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+        action={
+          <Button variant="outline" size="sm" onClick={() => refetch()}>
+            Try again
+          </Button>
+        }
       />
     )
   }
@@ -347,29 +323,15 @@ export function ActiveSessions() {
                 </Badge>
               )}
             </div>
-            <CardDescription>
-              Manage your active sessions across devices. If you see a session you don't recognize, revoke it immediately.
-            </CardDescription>
+            <CardDescription>Manage your active sessions across devices. If you see a session you don't recognize, revoke it immediately.</CardDescription>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => refetch()}
-              disabled={isFetching}
-              className="h-8 w-8"
-              aria-label="Refresh sessions"
-            >
+            <Button variant="ghost" size="icon" onClick={() => refetch()} disabled={isFetching} className="h-8 w-8" aria-label="Refresh sessions">
               <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
               <span className="sr-only">Refresh sessions</span>
             </Button>
             {otherSessionCount > 0 && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setConfirmRevokeAll(true)}
-                disabled={revokeAll.isPending}
-              >
+              <Button variant="outline" size="sm" onClick={() => setConfirmRevokeAll(true)} disabled={revokeAll.isPending}>
                 Revoke all others
               </Button>
             )}
@@ -422,20 +384,15 @@ export function ActiveSessions() {
               </div>
               <AlertDialogTitle>Revoke all other sessions?</AlertDialogTitle>
             </div>
-            <AlertDialogDescription>
-              This will sign you out of all other devices. You'll stay signed in on this device.
-            </AlertDialogDescription>
+            <AlertDialogDescription>This will sign you out of all other devices. You'll stay signed in on this device.</AlertDialogDescription>
           </AlertDialogHeader>
           <div className="rounded-md border border-amber-500/20 bg-amber-500/5 p-3">
             <p className="text-sm text-amber-700 dark:text-amber-400">
-              {otherSessionCount} other session{otherSessionCount !== 1 ? "s" : ""} will be revoked.
-              Anyone using those sessions will need to sign in again.
+              {otherSessionCount} other session{otherSessionCount !== 1 ? "s" : ""} will be revoked. Anyone using those sessions will need to sign in again.
             </p>
           </div>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setConfirmRevokeAll(false)}>
-              Cancel
-            </AlertDialogCancel>
+            <AlertDialogCancel onClick={() => setConfirmRevokeAll(false)}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={async () => {
                 await revokeAll.mutateAsync()

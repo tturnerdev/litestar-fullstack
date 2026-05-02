@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { useDocumentTitle } from "@/hooks/use-document-title"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { AuditLogTable } from "@/components/admin/audit-log-table"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 
 export const Route = createFileRoute("/_app/admin/audit")({
   component: AdminAuditPage,

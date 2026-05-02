@@ -113,11 +113,7 @@ export function DeleteUserDialog({ userId, userEmail, open, onOpenChange, naviga
           <AlertDialogCancel onClick={() => handleOpenChange(false)} disabled={deleteUser.isPending}>
             Cancel
           </AlertDialogCancel>
-          <AlertDialogAction
-            onClick={handleDelete}
-            disabled={!isConfirmed || deleteUser.isPending}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-          >
+          <AlertDialogAction onClick={handleDelete} disabled={!isConfirmed || deleteUser.isPending} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
             {deleteUser.isPending ? (
               <>
                 <Loader2 className="size-4 animate-spin" />

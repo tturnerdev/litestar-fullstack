@@ -74,19 +74,12 @@ export function TeamsCard({ teams, isLoading }: TeamsCardProps) {
               const memberCount = team.members?.length
 
               return (
-                <motion.div
-                  key={team.id}
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.25, delay: index * 0.05, ease: "easeOut" }}
-                >
+                <motion.div key={team.id} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.25, delay: index * 0.05, ease: "easeOut" }}>
                   <Link
                     to="/teams/$teamId"
                     params={{ teamId: team.id }}
                     className={`group flex items-center gap-3 rounded-lg border p-3 transition-all duration-200 hover:scale-[1.01] hover:shadow-sm ${
-                      isActive
-                        ? "border-primary/50 bg-primary/5"
-                        : "border-border/60 bg-background/60 hover:bg-accent"
+                      isActive ? "border-primary/50 bg-primary/5" : "border-border/60 bg-background/60 hover:bg-accent"
                     }`}
                   >
                     <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md ${color}`}>

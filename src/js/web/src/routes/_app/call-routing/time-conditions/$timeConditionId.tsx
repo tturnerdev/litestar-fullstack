@@ -1,17 +1,8 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
+import { AlertCircle, AlertTriangle, ArrowLeft, Clock, Copy, Loader2, MoreHorizontal, Pencil, Trash2 } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
-import {
-  AlertCircle,
-  AlertTriangle,
-  ArrowLeft,
-  Clock,
-  Copy,
-  Loader2,
-  MoreHorizontal,
-  Pencil,
-  Trash2,
-} from "lucide-react"
+import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,24 +14,11 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { CopyButton } from "@/components/ui/copy-button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -48,15 +26,8 @@ import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-lay
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
-import {
-  useTimeCondition,
-  useUpdateTimeCondition,
-  useDeleteTimeCondition,
-  useSetTimeConditionOverride,
-  type TimeCondition,
-} from "@/lib/api/hooks/call-routing"
-import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { type TimeCondition, useDeleteTimeCondition, useSetTimeConditionOverride, useTimeCondition, useUpdateTimeCondition } from "@/lib/api/hooks/call-routing"
 
 export const Route = createFileRoute("/_app/call-routing/time-conditions/$timeConditionId")({
   component: TimeConditionDetailPage,
@@ -78,15 +49,7 @@ const overrideModeDescriptions: Record<string, string> = {
 
 // -- Delete Dialog ------------------------------------------------------------
 
-function DeleteDialog({
-  name,
-  onDelete,
-  isPending,
-}: {
-  name: string
-  onDelete: () => void
-  isPending: boolean
-}) {
+function DeleteDialog({ name, onDelete, isPending }: { name: string; onDelete: () => void; isPending: boolean }) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -217,7 +180,10 @@ function TimeConditionDetailPage() {
               <div className="rounded-xl border border-border/60 bg-card/80 p-6 space-y-4">
                 <Skeleton className="h-5 w-24" />
                 {Array.from({ length: 2 }).map((_, i) => (
-                  <div key={i} className="space-y-1"><Skeleton className="h-3 w-20" /><Skeleton className="h-5 w-40" /></div>
+                  <div key={i} className="space-y-1">
+                    <Skeleton className="h-3 w-20" />
+                    <Skeleton className="h-5 w-40" />
+                  </div>
                 ))}
               </div>
             </div>
@@ -231,13 +197,27 @@ function TimeConditionDetailPage() {
   if (isError || !data) {
     return (
       <PageContainer className="flex-1 space-y-8">
-        <PageHeader eyebrow="Call Routing" title="Time Condition" actions={<Button variant="outline" size="sm" asChild><Link to="/call-routing" search={{ tab: "time-conditions" }}><ArrowLeft className="mr-2 h-4 w-4" /> Back</Link></Button>} />
+        <PageHeader
+          eyebrow="Call Routing"
+          title="Time Condition"
+          actions={
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/call-routing" search={{ tab: "time-conditions" }}>
+                <ArrowLeft className="mr-2 h-4 w-4" /> Back
+              </Link>
+            </Button>
+          }
+        />
         <PageSection>
           <EmptyState
             icon={AlertCircle}
             title="Unable to load time condition"
             description="Something went wrong. Please try again."
-            action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+            action={
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
+                Try again
+              </Button>
+            }
           />
         </PageSection>
       </PageContainer>
@@ -254,19 +234,29 @@ function TimeConditionDetailPage() {
         breadcrumbs={
           <Breadcrumb>
             <BreadcrumbList>
-              <BreadcrumbItem><BreadcrumbLink asChild><Link to="/home">Home</Link></BreadcrumbLink></BreadcrumbItem>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/home">Home</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
               <BreadcrumbSeparator />
-              <BreadcrumbItem><BreadcrumbLink asChild><Link to="/call-routing" search={{ tab: "time-conditions" }}>Call Routing</Link></BreadcrumbLink></BreadcrumbItem>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/call-routing" search={{ tab: "time-conditions" }}>
+                    Call Routing
+                  </Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
               <BreadcrumbSeparator />
-              <BreadcrumbItem><BreadcrumbPage>{data.name}</BreadcrumbPage></BreadcrumbItem>
+              <BreadcrumbItem>
+                <BreadcrumbPage>{data.name}</BreadcrumbPage>
+              </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         }
         actions={
           <div className="flex items-center gap-3">
-            <Badge variant={data.overrideMode === "none" ? "outline" : "default"}>
-              {overrideModeLabels[data.overrideMode] ?? data.overrideMode}
-            </Badge>
+            <Badge variant={data.overrideMode === "none" ? "outline" : "default"}>{overrideModeLabels[data.overrideMode] ?? data.overrideMode}</Badge>
             {!editing && (
               <Button variant="outline" size="sm" onClick={() => startEditing(data)}>
                 <Pencil className="mr-2 h-4 w-4" /> Edit
@@ -295,10 +285,7 @@ function TimeConditionDetailPage() {
                   Copy Time Condition ID
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="text-destructive focus:text-destructive"
-                  onClick={() => setShowDeleteAlert(true)}
-                >
+                <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setShowDeleteAlert(true)}>
                   <Trash2 className="mr-2 h-4 w-4" />
                   Delete Time Condition
                 </DropdownMenuItem>
@@ -314,156 +301,153 @@ function TimeConditionDetailPage() {
           <div className="space-y-6">
             {/* Configuration */}
             <SectionErrorBoundary name="Configuration">
-            <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <Clock className="h-5 w-5 text-muted-foreground" />
-                  Configuration
-                </CardTitle>
-                {editing && (
-                  <div className="flex gap-2">
-                    <Button variant="ghost" size="sm" onClick={() => setEditing(false)}>Cancel</Button>
-                    <Button size="sm" onClick={handleSave} disabled={updateMutation.isPending}>
-                      {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      Save
-                    </Button>
-                  </div>
-                )}
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {editing ? (
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label>Name</Label>
-                      <Input value={editName} onChange={(e) => setEditName(e.target.value)} />
+              <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Clock className="h-5 w-5 text-muted-foreground" />
+                    Configuration
+                  </CardTitle>
+                  {editing && (
+                    <div className="flex gap-2">
+                      <Button variant="ghost" size="sm" onClick={() => setEditing(false)}>
+                        Cancel
+                      </Button>
+                      <Button size="sm" onClick={handleSave} disabled={updateMutation.isPending}>
+                        {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Save
+                      </Button>
                     </div>
-                    <div className="space-y-2">
-                      <Label>Match Destination</Label>
-                      <Input value={editMatchDest} onChange={(e) => setEditMatchDest(e.target.value)} placeholder="e.g., ext:100" />
+                  )}
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {editing ? (
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label>Name</Label>
+                        <Input value={editName} onChange={(e) => setEditName(e.target.value)} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Match Destination</Label>
+                        <Input value={editMatchDest} onChange={(e) => setEditMatchDest(e.target.value)} placeholder="e.g., ext:100" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>No Match Destination</Label>
+                        <Input value={editNoMatchDest} onChange={(e) => setEditNoMatchDest(e.target.value)} placeholder="e.g., voicemail:main" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Schedule ID</Label>
+                        <Input value={editScheduleId} onChange={(e) => setEditScheduleId(e.target.value)} placeholder="Linked schedule UUID (optional)" />
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label>No Match Destination</Label>
-                      <Input value={editNoMatchDest} onChange={(e) => setEditNoMatchDest(e.target.value)} placeholder="e.g., voicemail:main" />
+                  ) : (
+                    <div className="grid gap-4 text-sm md:grid-cols-2">
+                      <InfoField label="Name" value={data.name} />
+                      <InfoField label="Match Destination" value={data.matchDestination} />
+                      <InfoField label="No Match Destination" value={data.noMatchDestination} />
+                      <InfoField label="Schedule ID" value={data.scheduleId} mono />
                     </div>
-                    <div className="space-y-2">
-                      <Label>Schedule ID</Label>
-                      <Input value={editScheduleId} onChange={(e) => setEditScheduleId(e.target.value)} placeholder="Linked schedule UUID (optional)" />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="grid gap-4 text-sm md:grid-cols-2">
-                    <InfoField label="Name" value={data.name} />
-                    <InfoField label="Match Destination" value={data.matchDestination} />
-                    <InfoField label="No Match Destination" value={data.noMatchDestination} />
-                    <InfoField label="Schedule ID" value={data.scheduleId} mono />
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                  )}
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
 
             {/* Override Mode */}
             <SectionErrorBoundary name="Night Mode Override">
-            <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Clock className="h-5 w-5 text-muted-foreground" />
-                  Night Mode Override
-                </CardTitle>
-                <CardDescription>
-                  Override the normal schedule-based routing. Use this for emergencies or planned outages.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">{overrideModeDescriptions[data.overrideMode] ?? "Unknown mode."}</p>
-                <div className="flex flex-wrap gap-2">
-                  {Object.entries(overrideModeLabels).map(([mode, label]) => (
-                    <Button
-                      key={mode}
-                      variant={data.overrideMode === mode ? "default" : "outline"}
-                      size="sm"
-                      onClick={() =>
-                        overrideMutation.mutate(mode, {
-                          onSuccess: () => {
-                            toast.success("Override mode updated")
-                          },
-                          onError: (err) => {
-                            toast.error("Failed to update override mode", {
-                              description: err instanceof Error ? err.message : undefined,
-                            })
-                          },
-                        })
-                      }
-                      disabled={overrideMutation.isPending || data.overrideMode === mode}
-                    >
-                      {overrideMutation.isPending && overrideMutation.variables === mode && <Loader2 className="mr-2 h-3 w-3 animate-spin" />}
-                      {label}
-                    </Button>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+              <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Clock className="h-5 w-5 text-muted-foreground" />
+                    Night Mode Override
+                  </CardTitle>
+                  <CardDescription>Override the normal schedule-based routing. Use this for emergencies or planned outages.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-sm text-muted-foreground">{overrideModeDescriptions[data.overrideMode] ?? "Unknown mode."}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {Object.entries(overrideModeLabels).map(([mode, label]) => (
+                      <Button
+                        key={mode}
+                        variant={data.overrideMode === mode ? "default" : "outline"}
+                        size="sm"
+                        onClick={() =>
+                          overrideMutation.mutate(mode, {
+                            onSuccess: () => {
+                              toast.success("Override mode updated")
+                            },
+                            onError: (err) => {
+                              toast.error("Failed to update override mode", {
+                                description: err instanceof Error ? err.message : undefined,
+                              })
+                            },
+                          })
+                        }
+                        disabled={overrideMutation.isPending || data.overrideMode === mode}
+                      >
+                        {overrideMutation.isPending && overrideMutation.variables === mode && <Loader2 className="mr-2 h-3 w-3 animate-spin" />}
+                        {label}
+                      </Button>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
 
             {/* Danger Zone */}
             <SectionErrorBoundary name="Danger Zone">
-            <Card className="border-destructive/30 bg-card/80 shadow-md">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-destructive">
-                  <AlertTriangle className="h-4 w-4" /> Danger Zone
-                </CardTitle>
-                <CardDescription>Irreversible and destructive actions.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between rounded-lg border border-destructive/20 bg-destructive/5 p-4">
-                  <div>
-                    <p className="font-medium text-sm">Delete this time condition</p>
-                    <p className="text-xs text-muted-foreground">Once deleted, this time condition cannot be recovered.</p>
+              <Card className="border-destructive/30 bg-card/80 shadow-md">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-destructive">
+                    <AlertTriangle className="h-4 w-4" /> Danger Zone
+                  </CardTitle>
+                  <CardDescription>Irreversible and destructive actions.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between rounded-lg border border-destructive/20 bg-destructive/5 p-4">
+                    <div>
+                      <p className="font-medium text-sm">Delete this time condition</p>
+                      <p className="text-xs text-muted-foreground">Once deleted, this time condition cannot be recovered.</p>
+                    </div>
+                    <DeleteDialog name={data.name} onDelete={handleDelete} isPending={deleteMutation.isPending} />
                   </div>
-                  <DeleteDialog name={data.name} onDelete={handleDelete} isPending={deleteMutation.isPending} />
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
           </div>
 
           {/* Sidebar */}
           <div className="space-y-4">
             <SectionErrorBoundary name="Metadata">
-            <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" /> Metadata
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-1">
-                  <p className="text-xs font-medium text-muted-foreground">Time Condition ID</p>
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs break-all">{data.id}</span>
-                    <CopyButton value={data.id} label="time condition ID" />
+              <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Clock className="h-4 w-4" /> Metadata
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium text-muted-foreground">Time Condition ID</p>
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-xs break-all">{data.id}</span>
+                      <CopyButton value={data.id} label="time condition ID" />
+                    </div>
                   </div>
-                </div>
-                <Separator />
-                <div className="space-y-1">
-                  <p className="text-xs font-medium text-muted-foreground">Team ID</p>
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs break-all">{data.teamId}</span>
-                    <CopyButton value={data.teamId} label="team ID" />
+                  <Separator />
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium text-muted-foreground">Team ID</p>
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-xs break-all">{data.teamId}</span>
+                      <CopyButton value={data.teamId} label="team ID" />
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
           </div>
         </div>
       </PageSection>
 
       <PageSection>
-        <EntityActivityPanel
-          targetType="time_condition"
-          targetId={timeConditionId}
-        />
+        <EntityActivityPanel targetType="time_condition" targetId={timeConditionId} />
       </PageSection>
 
       {/* Delete confirmation dialog */}
@@ -479,11 +463,7 @@ function TimeConditionDetailPage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={deleteMutation.isPending}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className={buttonVariants({ variant: "destructive" })}
-              onClick={handleDelete}
-              disabled={deleteMutation.isPending}
-            >
+            <AlertDialogAction className={buttonVariants({ variant: "destructive" })} onClick={handleDelete} disabled={deleteMutation.isPending}>
               {deleteMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {deleteMutation.isPending ? "Deleting..." : "Delete"}
             </AlertDialogAction>

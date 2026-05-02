@@ -185,7 +185,11 @@ export function StatsCards() {
         icon={AlertCircle}
         title="Unable to load dashboard stats"
         description="Something went wrong. Please try again."
-        action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+        action={
+          <Button variant="outline" size="sm" onClick={() => refetch()}>
+            Try again
+          </Button>
+        }
       />
     )
   }
@@ -202,9 +206,7 @@ export function StatsCards() {
               <Card className="transition-all duration-200 group-hover:shadow-md group-hover:border-primary/30 group-hover:-translate-y-0.5">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">{stat.label}</CardTitle>
-                  <div
-                    className={`flex h-9 w-9 items-center justify-center rounded-lg ${stat.bg} ${stat.color} transition-colors ${stat.hoverBg} group-hover:text-white`}
-                  >
+                  <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${stat.bg} ${stat.color} transition-colors ${stat.hoverBg} group-hover:text-white`}>
                     <Icon className="h-4 w-4" />
                   </div>
                 </CardHeader>

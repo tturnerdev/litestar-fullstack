@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react"
 import { useRouterState } from "@tanstack/react-router"
+import { useEffect, useRef, useState } from "react"
 import { cn } from "@/lib/utils"
 
 /**
@@ -79,10 +79,7 @@ export function RouteProgressBar() {
   }
 
   return (
-    <div
-      aria-hidden="true"
-      className="pointer-events-none fixed inset-x-0 top-0 z-[9999] h-[3px]"
-    >
+    <div aria-hidden="true" className="pointer-events-none fixed inset-x-0 top-0 z-[9999] h-[3px]">
       <div
         className={cn(
           "h-full bg-primary transition-all ease-out",
@@ -97,8 +94,7 @@ export function RouteProgressBar() {
         <div
           className="absolute right-0 top-0 h-full w-24 -translate-x-px"
           style={{
-            background:
-              "linear-gradient(to right, transparent, hsl(var(--primary) / 0.4))",
+            background: "linear-gradient(to right, transparent, hsl(var(--primary) / 0.4))",
           }}
         />
       )}

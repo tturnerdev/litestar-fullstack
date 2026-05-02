@@ -91,9 +91,7 @@ export function useVoicemailBoxes(options: UseVoicemailBoxesOptions = {}) {
       params.set("currentPage", String(page))
       params.set("pageSize", String(pageSize))
       if (search) params.set("search", search)
-      return apiFetch<PaginatedResponse<VoicemailBox>>(
-        `/api/voicemail/boxes?${params.toString()}`,
-      )
+      return apiFetch<PaginatedResponse<VoicemailBox>>(`/api/voicemail/boxes?${params.toString()}`)
     },
   })
 }
@@ -172,13 +170,9 @@ export function useVoicemailMessages(options: UseVoicemailMessagesOptions = {}) 
       if (endDate) params.set("endDate", endDate)
 
       if (boxId) {
-        return apiFetch<PaginatedResponse<VoicemailMessage>>(
-          `/api/voicemail/boxes/${boxId}/messages?${params.toString()}`,
-        )
+        return apiFetch<PaginatedResponse<VoicemailMessage>>(`/api/voicemail/boxes/${boxId}/messages?${params.toString()}`)
       }
-      return apiFetch<PaginatedResponse<VoicemailMessage>>(
-        `/api/voicemail/messages?${params.toString()}`,
-      )
+      return apiFetch<PaginatedResponse<VoicemailMessage>>(`/api/voicemail/messages?${params.toString()}`)
     },
   })
 }

@@ -26,54 +26,26 @@ import {
   X,
 } from "lucide-react"
 import { Fragment, useCallback, useMemo, useRef, useState } from "react"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { DateRangeFilter, getPresetDates } from "@/components/ui/date-range-filter"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { FilterDropdown, type FilterOption } from "@/components/ui/filter-dropdown"
 import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { SkeletonTable } from "@/components/ui/skeleton"
-import {
-  nextSortDirection,
-  SortableHeader,
-  type SortDirection,
-} from "@/components/ui/sortable-header"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { useAdminAuditLogs, useAdminAuditLogsExport } from "@/lib/api/hooks/admin"
-import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
-import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
+import { useAdminAuditLogs, useAdminAuditLogsExport } from "@/lib/api/hooks/admin"
+import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import type { AuditLogEntry } from "@/lib/generated/api"
 
 // ── Constants ──────────────────────────────────────────────────────────────
@@ -152,13 +124,7 @@ const TARGET_TYPE_OPTIONS: FilterOption[] = [
 // ── Quick filter presets ──────────────────────────────────────────────────
 
 /** Action values for authentication-related events. */
-const AUTH_ACTIONS = [
-  "login.success",
-  "login.failed",
-  "password.changed",
-  "mfa.enabled",
-  "mfa.disabled",
-]
+const AUTH_ACTIONS = ["login.success", "login.failed", "password.changed", "mfa.enabled", "mfa.disabled"]
 
 /** Action values for create/update/delete mutations. */
 const CHANGE_ACTIONS = [
@@ -286,9 +252,7 @@ function escapeCsvField(value: string): string {
   return value
 }
 
-function flattenDetails(
-  details: Record<string, unknown> | null | undefined,
-): Record<string, string> {
+function flattenDetails(details: Record<string, unknown> | null | undefined): Record<string, string> {
   if (!details) return {}
   const flat: Record<string, string> = {}
   for (const [key, value] of Object.entries(details)) {
@@ -393,21 +357,12 @@ function AuditDetailRow({ entry, colSpan }: { entry: AuditLogEntry; colSpan: num
             <Tooltip>
               <TooltipTrigger asChild>
                 <span>
-                  <DetailField
-                    label="User Agent"
-                    value={entry.userAgent}
-                    className="max-w-xs truncate"
-                  />
+                  <DetailField label="User Agent" value={entry.userAgent} className="max-w-xs truncate" />
                 </span>
               </TooltipTrigger>
-              <TooltipContent className="max-w-sm break-all">
-                {entry.userAgent ?? "N/A"}
-              </TooltipContent>
+              <TooltipContent className="max-w-sm break-all">{entry.userAgent ?? "N/A"}</TooltipContent>
             </Tooltip>
-            <DetailField
-              label="Timestamp"
-              value={formatDateTime(entry.createdAt)}
-            />
+            <DetailField label="Timestamp" value={formatDateTime(entry.createdAt)} />
           </div>
           <div className="space-y-2">
             <h4 className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -427,9 +382,7 @@ function AuditDetailRow({ entry, colSpan }: { entry: AuditLogEntry; colSpan: num
               <FileText className="h-3.5 w-3.5" />
               Change Details
             </h4>
-            <pre className="max-h-56 overflow-auto rounded-md border bg-muted/50 p-3 font-mono text-xs leading-relaxed">
-              {JSON.stringify(entry.details, null, 2)}
-            </pre>
+            <pre className="max-h-56 overflow-auto rounded-md border bg-muted/50 p-3 font-mono text-xs leading-relaxed">{JSON.stringify(entry.details, null, 2)}</pre>
           </div>
         )}
       </TableCell>
@@ -437,25 +390,11 @@ function AuditDetailRow({ entry, colSpan }: { entry: AuditLogEntry; colSpan: num
   )
 }
 
-function DetailField({
-  label,
-  value,
-  mono,
-  className,
-}: {
-  label: string
-  value: string | null | undefined
-  mono?: boolean
-  className?: string
-}) {
+function DetailField({ label, value, mono, className }: { label: string; value: string | null | undefined; mono?: boolean; className?: string }) {
   return (
     <p className="flex items-baseline gap-2">
       <span className="min-w-[5rem] shrink-0 text-xs text-muted-foreground">{label}</span>
-      <span
-        className={`text-xs ${mono ? "font-mono" : ""} ${className ?? ""} ${!value ? "text-muted-foreground/50" : ""}`}
-      >
-        {value ?? "N/A"}
-      </span>
+      <span className={`text-xs ${mono ? "font-mono" : ""} ${className ?? ""} ${!value ? "text-muted-foreground/50" : ""}`}>{value ?? "N/A"}</span>
     </p>
   )
 }
@@ -469,9 +408,7 @@ interface DiffDetails {
 }
 
 /** Try to extract before/after diff data from the entry details. */
-function parseDiffDetails(
-  details: Record<string, unknown> | null | undefined,
-): DiffDetails | null {
+function parseDiffDetails(details: Record<string, unknown> | null | undefined): DiffDetails | null {
   if (!details) return null
   const before = details.before as Record<string, unknown> | null | undefined
   const after = details.after as Record<string, unknown> | null | undefined
@@ -492,10 +429,7 @@ function formatDiffValue(value: unknown): string {
 }
 
 /** Collect all unique keys from before and after objects. */
-function collectAllFields(
-  before: Record<string, unknown> | null,
-  after: Record<string, unknown> | null,
-): string[] {
+function collectAllFields(before: Record<string, unknown> | null, after: Record<string, unknown> | null): string[] {
   const keys = new Set<string>()
   if (before) for (const k of Object.keys(before)) keys.add(k)
   if (after) for (const k of Object.keys(after)) keys.add(k)
@@ -504,12 +438,7 @@ function collectAllFields(
 
 type FieldChangeType = "added" | "removed" | "changed" | "unchanged"
 
-function getFieldChangeType(
-  field: string,
-  before: Record<string, unknown> | null,
-  after: Record<string, unknown> | null,
-  changedFields: string[] | null,
-): FieldChangeType {
+function getFieldChangeType(field: string, before: Record<string, unknown> | null, after: Record<string, unknown> | null, changedFields: string[] | null): FieldChangeType {
   const inBefore = before !== null && field in before
   const inAfter = after !== null && field in after
 
@@ -546,9 +475,7 @@ function ChangeDiff({ diff }: { diff: DiffDetails }) {
   const isDelete = before !== null && after === null
 
   if (allFields.length === 0) {
-    return (
-      <p className="text-xs italic text-muted-foreground">No field data available.</p>
-    )
+    return <p className="text-xs italic text-muted-foreground">No field data available.</p>
   }
 
   return (
@@ -586,32 +513,14 @@ function ChangeDiff({ diff }: { diff: DiffDetails }) {
       <div className="divide-y divide-border rounded-md border">
         {allFields.map((field) => {
           const changeType = getFieldChangeType(field, before, after, changedFields)
-          return (
-            <DiffRow
-              key={field}
-              field={field}
-              changeType={changeType}
-              beforeValue={before?.[field]}
-              afterValue={after?.[field]}
-            />
-          )
+          return <DiffRow key={field} field={field} changeType={changeType} beforeValue={before?.[field]} afterValue={after?.[field]} />
         })}
       </div>
     </div>
   )
 }
 
-function DiffRow({
-  field,
-  changeType,
-  beforeValue,
-  afterValue,
-}: {
-  field: string
-  changeType: FieldChangeType
-  beforeValue: unknown
-  afterValue: unknown
-}) {
+function DiffRow({ field, changeType, beforeValue, afterValue }: { field: string; changeType: FieldChangeType; beforeValue: unknown; afterValue: unknown }) {
   const rowBg =
     changeType === "added"
       ? "bg-green-50/50 dark:bg-green-950/20"
@@ -634,35 +543,17 @@ function DiffRow({
     <div className={`flex items-start gap-3 px-3 py-2 ${rowBg}`}>
       <div className="flex w-5 shrink-0 items-center pt-0.5">{icon}</div>
       <div className="min-w-0 flex-1">
-        <span className="text-xs font-medium text-foreground">
-          {field.replace(/_/g, " ")}
-        </span>
+        <span className="text-xs font-medium text-foreground">{field.replace(/_/g, " ")}</span>
         <div className="mt-0.5">
-          {changeType === "added" && (
-            <span className="font-mono text-xs text-green-700 dark:text-green-300">
-              {formatDiffValue(afterValue)}
-            </span>
-          )}
-          {changeType === "removed" && (
-            <span className="font-mono text-xs text-red-700 line-through dark:text-red-300">
-              {formatDiffValue(beforeValue)}
-            </span>
-          )}
+          {changeType === "added" && <span className="font-mono text-xs text-green-700 dark:text-green-300">{formatDiffValue(afterValue)}</span>}
+          {changeType === "removed" && <span className="font-mono text-xs text-red-700 line-through dark:text-red-300">{formatDiffValue(beforeValue)}</span>}
           {changeType === "changed" && (
             <div className="flex flex-col gap-0.5">
-              <span className="font-mono text-xs text-red-700 line-through dark:text-red-300">
-                {formatDiffValue(beforeValue)}
-              </span>
-              <span className="font-mono text-xs text-green-700 dark:text-green-300">
-                {formatDiffValue(afterValue)}
-              </span>
+              <span className="font-mono text-xs text-red-700 line-through dark:text-red-300">{formatDiffValue(beforeValue)}</span>
+              <span className="font-mono text-xs text-green-700 dark:text-green-300">{formatDiffValue(afterValue)}</span>
             </div>
           )}
-          {changeType === "unchanged" && (
-            <span className="font-mono text-xs text-muted-foreground">
-              {formatDiffValue(afterValue ?? beforeValue)}
-            </span>
-          )}
+          {changeType === "unchanged" && <span className="font-mono text-xs text-muted-foreground">{formatDiffValue(afterValue ?? beforeValue)}</span>}
         </div>
       </div>
     </div>
@@ -671,15 +562,7 @@ function DiffRow({
 
 // ── Detail Sheet ──────────────────────────────────────────────────────────
 
-function AuditLogDetailSheet({
-  entry,
-  open,
-  onOpenChange,
-}: {
-  entry: AuditLogEntry | null
-  open: boolean
-  onOpenChange: (open: boolean) => void
-}) {
+function AuditLogDetailSheet({ entry, open, onOpenChange }: { entry: AuditLogEntry | null; open: boolean; onOpenChange: (open: boolean) => void }) {
   const [rawJsonOpen, setRawJsonOpen] = useState(false)
 
   if (!entry) return null
@@ -693,10 +576,7 @@ function AuditLogDetailSheet({
       <SheetContent className="sm:max-w-lg">
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
-            <Badge
-              variant="outline"
-              className={getActionBadgeClasses(entry.action)}
-            >
+            <Badge variant="outline" className={getActionBadgeClasses(entry.action)}>
               {entry.action}
             </Badge>
           </SheetTitle>
@@ -731,10 +611,7 @@ function AuditLogDetailSheet({
               <div className="space-y-1.5">
                 <DetailField label="IP Address" value={entry.ipAddress} mono />
                 <DetailField label="User Agent" value={entry.userAgent} />
-                <DetailField
-                  label="Timestamp"
-                  value={formatDateTime(entry.createdAt)}
-                />
+                <DetailField label="Timestamp" value={formatDateTime(entry.createdAt)} />
               </div>
             </div>
 
@@ -759,11 +636,7 @@ function AuditLogDetailSheet({
               <div>
                 <h4 className="mb-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   <FileText className="h-3.5 w-3.5" />
-                  {actionVerb === "created"
-                    ? "Created Values"
-                    : actionVerb === "deleted"
-                      ? "Deleted Values"
-                      : "Changes"}
+                  {actionVerb === "created" ? "Created Values" : actionVerb === "deleted" ? "Deleted Values" : "Changes"}
                 </h4>
                 <ChangeDiff diff={diff} />
               </div>
@@ -776,23 +649,14 @@ function AuditLogDetailSheet({
               <Separator className="my-4" />
               <Collapsible open={rawJsonOpen} onOpenChange={setRawJsonOpen}>
                 <CollapsibleTrigger asChild>
-                  <button
-                    type="button"
-                    className="flex w-full items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground"
-                  >
-                    {rawJsonOpen ? (
-                      <ChevronDown className="h-3.5 w-3.5" />
-                    ) : (
-                      <ChevronRight className="h-3.5 w-3.5" />
-                    )}
+                  <button type="button" className="flex w-full items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground">
+                    {rawJsonOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
                     <Code className="h-3.5 w-3.5" />
                     Raw Details
                   </button>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                  <pre className="mt-2 max-h-64 overflow-auto rounded-md border bg-muted/50 p-3 font-mono text-xs leading-relaxed">
-                    {JSON.stringify(entry.details, null, 2)}
-                  </pre>
+                  <pre className="mt-2 max-h-64 overflow-auto rounded-md border bg-muted/50 p-3 font-mono text-xs leading-relaxed">{JSON.stringify(entry.details, null, 2)}</pre>
                 </CollapsibleContent>
               </Collapsible>
             </>
@@ -1020,15 +884,9 @@ export function AuditLogTable() {
     enabled: false,
   })
 
-  const totalPages = useMemo(
-    () => Math.max(1, Math.ceil((data?.total ?? 0) / pageSize)),
-    [data?.total, pageSize],
-  )
+  const totalPages = useMemo(() => Math.max(1, Math.ceil((data?.total ?? 0) / pageSize)), [data?.total, pageSize])
 
-  const stats = useMemo(
-    () => computeAuditStats(data?.items ?? [], data?.total ?? 0),
-    [data?.items, data?.total],
-  )
+  const stats = useMemo(() => computeAuditStats(data?.items ?? [], data?.total ?? 0), [data?.items, data?.total])
 
   // Handlers
   const toggleRow = useCallback((id: string) => {
@@ -1132,11 +990,7 @@ export function AuditLogTable() {
   )
 
   const activeFilterCount =
-    (selectedActions.length > 0 ? 1 : 0) +
-    (selectedTargetTypes.length > 0 ? 1 : 0) +
-    (startDate || endDate ? 1 : 0) +
-    (search ? 1 : 0) +
-    (actorEmail ? 1 : 0)
+    (selectedActions.length > 0 ? 1 : 0) + (selectedTargetTypes.length > 0 ? 1 : 0) + (startDate || endDate ? 1 : 0) + (search ? 1 : 0) + (actorEmail ? 1 : 0)
 
   const handleClearAll = useCallback(() => {
     setSearch("")
@@ -1200,24 +1054,13 @@ export function AuditLogTable() {
         {/* Search */}
         <div className="relative max-w-sm flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search by actor, action, or target..."
-            value={search}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            className="pl-9"
-          />
+          <Input placeholder="Search by actor, action, or target..." value={search} onChange={(e) => handleSearchChange(e.target.value)} className="pl-9" />
         </div>
 
         {/* Actor email filter */}
         <div className="relative max-w-[200px]">
           <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            ref={actorEmailRef}
-            placeholder="Filter by user..."
-            value={actorEmail}
-            onChange={(e) => handleActorEmailChange(e.target.value)}
-            className="h-9 pl-9 text-sm"
-          />
+          <Input ref={actorEmailRef} placeholder="Filter by user..." value={actorEmail} onChange={(e) => handleActorEmailChange(e.target.value)} className="h-9 pl-9 text-sm" />
           {actorEmail && (
             <button
               type="button"
@@ -1234,20 +1077,10 @@ export function AuditLogTable() {
         </div>
 
         {/* Action type filter */}
-        <FilterDropdown
-          label="Action"
-          options={ACTION_FILTER_OPTIONS}
-          selected={selectedActions}
-          onChange={handleActionsChange}
-        />
+        <FilterDropdown label="Action" options={ACTION_FILTER_OPTIONS} selected={selectedActions} onChange={handleActionsChange} />
 
         {/* Resource type filter */}
-        <FilterDropdown
-          label="Resource"
-          options={TARGET_TYPE_OPTIONS}
-          selected={selectedTargetTypes}
-          onChange={handleTargetTypesChange}
-        />
+        <FilterDropdown label="Resource" options={TARGET_TYPE_OPTIONS} selected={selectedTargetTypes} onChange={handleTargetTypesChange} />
 
         {/* Date range picker */}
         <DateRangeFilter
@@ -1269,17 +1102,8 @@ export function AuditLogTable() {
         {/* Export */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={isExporting || totalCount === 0}
-              className="gap-1.5"
-            >
-              {isExporting ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <Download className="h-3.5 w-3.5" />
-              )}
+            <Button variant="outline" size="sm" disabled={isExporting || totalCount === 0} className="gap-1.5">
+              {isExporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
               Export
               <ChevronDown className="ml-0.5 h-3 w-3" />
             </Button>
@@ -1298,21 +1122,14 @@ export function AuditLogTable() {
             <DropdownMenuItem onClick={() => handleExport("extended")}>
               <FileSpreadsheet className="mr-2 h-4 w-4" />
               Extended CSV
-              <span className="ml-2 text-xs text-muted-foreground">
-                All fields + details
-              </span>
+              <span className="ml-2 text-xs text-muted-foreground">All fields + details</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 
         {/* Clear all */}
         {activeFilterCount > 0 && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-xs text-muted-foreground"
-            onClick={handleClearAll}
-          >
+          <Button variant="ghost" size="sm" className="text-xs text-muted-foreground" onClick={handleClearAll}>
             <X className="mr-1 h-3 w-3" />
             Clear all filters
           </Button>
@@ -1326,25 +1143,14 @@ export function AuditLogTable() {
           const isActive = activePreset === preset.id
           const Icon = preset.icon
           return (
-            <Button
-              key={preset.id}
-              variant={isActive ? "default" : "outline"}
-              size="sm"
-              className="h-7 rounded-full text-xs"
-              onClick={() => handlePresetClick(preset)}
-            >
+            <Button key={preset.id} variant={isActive ? "default" : "outline"} size="sm" className="h-7 rounded-full text-xs" onClick={() => handlePresetClick(preset)}>
               <Icon className="mr-1 h-3 w-3" />
               {preset.label}
             </Button>
           )
         })}
         {activePreset && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 rounded-full text-xs text-muted-foreground"
-            onClick={handleClearAll}
-          >
+          <Button variant="ghost" size="sm" className="h-7 rounded-full text-xs text-muted-foreground" onClick={handleClearAll}>
             <RotateCcw className="mr-1 h-3 w-3" />
             Clear
           </Button>
@@ -1358,12 +1164,7 @@ export function AuditLogTable() {
             <Badge variant="secondary" className="gap-1 pr-1">
               <User className="h-3 w-3" />
               <span className="text-xs">{actorEmail}</span>
-              <button
-                type="button"
-                className="ml-0.5 rounded-full p-0.5 hover:bg-muted"
-                onClick={() => handleActorEmailChange("")}
-                aria-label="Remove user filter"
-              >
+              <button type="button" className="ml-0.5 rounded-full p-0.5 hover:bg-muted" onClick={() => handleActorEmailChange("")} aria-label="Remove user filter">
                 <X className="h-3 w-3" />
               </button>
             </Badge>
@@ -1374,9 +1175,7 @@ export function AuditLogTable() {
               <button
                 type="button"
                 className="ml-0.5 rounded-full p-0.5 hover:bg-muted"
-                onClick={() =>
-                  handleActionsChange(selectedActions.filter((a) => a !== action))
-                }
+                onClick={() => handleActionsChange(selectedActions.filter((a) => a !== action))}
                 aria-label={`Remove ${action} filter`}
               >
                 <X className="h-3 w-3" />
@@ -1389,11 +1188,7 @@ export function AuditLogTable() {
               <button
                 type="button"
                 className="ml-0.5 rounded-full p-0.5 hover:bg-muted"
-                onClick={() =>
-                  handleTargetTypesChange(
-                    selectedTargetTypes.filter((t) => t !== type),
-                  )
-                }
+                onClick={() => handleTargetTypesChange(selectedTargetTypes.filter((t) => t !== type))}
                 aria-label={`Remove ${type} filter`}
               >
                 <X className="h-3 w-3" />
@@ -1415,21 +1210,13 @@ export function AuditLogTable() {
           title="Unable to load audit logs"
           description="Something went wrong while fetching audit log entries. Please try refreshing the page."
           action={
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => window.location.reload()}
-            >
+            <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
               Refresh page
             </Button>
           }
         />
       ) : !hasData && activeFilterCount === 0 ? (
-        <EmptyState
-          icon={Clock}
-          title="No audit log entries"
-          description="Audit log entries will appear here as users perform actions in the system."
-        />
+        <EmptyState icon={Clock} title="No audit log entries" description="Audit log entries will appear here as users perform actions in the system." />
       ) : !hasData ? (
         <EmptyState
           icon={Search}
@@ -1447,8 +1234,7 @@ export function AuditLogTable() {
           {/* Result count */}
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
-              Showing {items.length.toLocaleString()} of{" "}
-              {totalCount.toLocaleString()} {totalCount === 1 ? "entry" : "entries"}
+              Showing {items.length.toLocaleString()} of {totalCount.toLocaleString()} {totalCount === 1 ? "entry" : "entries"}
               {activeFilterCount > 0 && " (filtered)"}
             </p>
           </div>
@@ -1459,36 +1245,11 @@ export function AuditLogTable() {
               <TableHeader className="sticky top-0 z-10 bg-background">
                 <TableRow>
                   <TableHead className="w-8" />
-                  <SortableHeader
-                    label="Action"
-                    sortKey="action"
-                    currentSort={sortKey}
-                    currentDirection={sortDir}
-                    onSort={handleSort}
-                  />
-                  <SortableHeader
-                    label="Actor"
-                    sortKey="actor_name"
-                    currentSort={sortKey}
-                    currentDirection={sortDir}
-                    onSort={handleSort}
-                  />
-                  <SortableHeader
-                    label="Target"
-                    sortKey="target_label"
-                    currentSort={sortKey}
-                    currentDirection={sortDir}
-                    onSort={handleSort}
-                  />
+                  <SortableHeader label="Action" sortKey="action" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                  <SortableHeader label="Actor" sortKey="actor_name" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                  <SortableHeader label="Target" sortKey="target_label" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
                   <TableHead>Resource</TableHead>
-                  <SortableHeader
-                    label="Time"
-                    sortKey="created_at"
-                    currentSort={sortKey}
-                    currentDirection={sortDir}
-                    onSort={handleSort}
-                    className="text-right"
-                  />
+                  <SortableHeader label="Time" sortKey="created_at" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="text-right" />
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -1496,10 +1257,7 @@ export function AuditLogTable() {
                   const isExpanded = expandedRows.has(entry.id)
                   return (
                     <Fragment key={entry.id}>
-                      <TableRow
-                        className="cursor-pointer transition-colors hover:bg-muted/50"
-                        onClick={() => setSelectedEntry(entry)}
-                      >
+                      <TableRow className="cursor-pointer transition-colors hover:bg-muted/50" onClick={() => setSelectedEntry(entry)}>
                         <TableCell className="w-8 pr-0">
                           <button
                             type="button"
@@ -1510,18 +1268,11 @@ export function AuditLogTable() {
                             }}
                             aria-label={isExpanded ? "Collapse row" : "Expand row"}
                           >
-                            {isExpanded ? (
-                              <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                            ) : (
-                              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                            )}
+                            {isExpanded ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
                           </button>
                         </TableCell>
                         <TableCell>
-                          <Badge
-                            variant="outline"
-                            className={getActionBadgeClasses(entry.action)}
-                          >
+                          <Badge variant="outline" className={getActionBadgeClasses(entry.action)}>
                             {entry.action}
                           </Badge>
                         </TableCell>
@@ -1529,24 +1280,16 @@ export function AuditLogTable() {
                           {entry.actorName ? (
                             <div>
                               <span className="text-sm">{entry.actorName}</span>
-                              {entry.actorEmail && (
-                                <span className="block text-xs text-muted-foreground/70">
-                                  {entry.actorEmail}
-                                </span>
-                              )}
+                              {entry.actorEmail && <span className="block text-xs text-muted-foreground/70">{entry.actorEmail}</span>}
                             </div>
                           ) : entry.actorEmail ? (
                             <span className="text-sm">{entry.actorEmail}</span>
                           ) : (
-                            <span className="text-sm italic text-muted-foreground/60">
-                              System
-                            </span>
+                            <span className="text-sm italic text-muted-foreground/60">System</span>
                           )}
                         </TableCell>
                         <TableCell className="text-muted-foreground">
-                          <span className="text-sm">
-                            {entry.targetLabel ?? entry.targetId ?? "-"}
-                          </span>
+                          <span className="text-sm">{entry.targetLabel ?? entry.targetId ?? "-"}</span>
                         </TableCell>
                         <TableCell>
                           {entry.targetType ? (
@@ -1560,23 +1303,13 @@ export function AuditLogTable() {
                         <TableCell className="text-right">
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <span className="cursor-default text-sm text-muted-foreground">
-                                {formatRelativeTimeShort(entry.createdAt)}
-                              </span>
+                              <span className="cursor-default text-sm text-muted-foreground">{formatRelativeTimeShort(entry.createdAt)}</span>
                             </TooltipTrigger>
-                            <TooltipContent>
-                              {formatDateTime(entry.createdAt)}
-                            </TooltipContent>
+                            <TooltipContent>{formatDateTime(entry.createdAt)}</TooltipContent>
                           </Tooltip>
                         </TableCell>
                       </TableRow>
-                      {isExpanded && (
-                        <AuditDetailRow
-                          key={`${entry.id}-detail`}
-                          entry={entry}
-                          colSpan={colSpan}
-                        />
-                      )}
+                      {isExpanded && <AuditDetailRow key={`${entry.id}-detail`} entry={entry} colSpan={colSpan} />}
                     </Fragment>
                   )
                 })}
@@ -1606,20 +1339,10 @@ export function AuditLogTable() {
                 </Select>
               </div>
               <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={page <= 1}
-                >
+                <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>
                   Previous
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={page >= totalPages}
-                >
+                <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>
                   Next
                 </Button>
               </div>

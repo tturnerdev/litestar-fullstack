@@ -1,14 +1,8 @@
 import { Slot } from "@radix-ui/react-slot"
 import { ChevronDown, ChevronRight, MoreHorizontal } from "lucide-react"
 import type * as React from "react"
-
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 
 function Breadcrumb({ ...props }: React.ComponentProps<"nav">) {
   return <nav aria-label="breadcrumb" data-slot="breadcrumb" {...props} />
@@ -77,12 +71,7 @@ function BreadcrumbDropdownLink({
 }) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger
-        className={cn(
-          "flex items-center gap-1 transition-colors hover:text-foreground",
-          className,
-        )}
-      >
+      <DropdownMenuTrigger className={cn("flex items-center gap-1 transition-colors hover:text-foreground", className)}>
         {label}
         <ChevronDown className="h-3 w-3" />
       </DropdownMenuTrigger>
@@ -97,14 +86,5 @@ function BreadcrumbDropdownLink({
   )
 }
 
-export {
-  Breadcrumb,
-  BreadcrumbList,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-  BreadcrumbEllipsis,
-  BreadcrumbDropdownLink,
-}
+export { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator, BreadcrumbEllipsis, BreadcrumbDropdownLink }
 export type { BreadcrumbSibling }

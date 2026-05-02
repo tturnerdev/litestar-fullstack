@@ -1,20 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
+import { AlertCircle, BellOff, Download, Home, Loader2, Phone, PhoneForwarded, Plus, RefreshCw, Search, Shield, ShieldOff, X } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import {
-  AlertCircle,
-  BellOff,
-  Download,
-  Home,
-  Loader2,
-  Phone,
-  PhoneForwarded,
-  Plus,
-  RefreshCw,
-  Search,
-  Shield,
-  ShieldOff,
-  X,
-} from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,49 +11,29 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { DataFreshness } from "@/components/ui/data-freshness"
 import { Badge } from "@/components/ui/badge"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { BulkActionBar, createBulkDeleteAction, createBulkToggleActions, createExportAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { EmptyState } from "@/components/ui/empty-state"
 import { FilterDropdown, type FilterOption } from "@/components/ui/filter-dropdown"
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { CreateExtensionDialog } from "@/components/voice/create-extension-dialog"
 import { ExtensionRowActions } from "@/components/voice/extension-row-actions"
-import {
-  type Extension,
-  useDeleteExtension,
-  useExtensions,
-  usePhoneNumbers,
-  useSyncExtensions,
-  useUpdateAnyExtension,
-} from "@/lib/api/hooks/voice"
-import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
-import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
+import { useDocumentTitle } from "@/hooks/use-document-title"
+import { type Extension, useDeleteExtension, useExtensions, usePhoneNumbers, useSyncExtensions, useUpdateAnyExtension } from "@/lib/api/hooks/voice"
+import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
-import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { useSettingsStore } from "@/lib/settings-store"
 import { cn } from "@/lib/utils"
 
@@ -85,10 +51,7 @@ export const Route = createFileRoute("/_app/voice/extensions/")({
     page: Number(search.page) > 1 ? Number(search.page) : undefined,
     status: typeof search.status === "string" && search.status ? search.status : undefined,
     sort: typeof search.sort === "string" && search.sort ? search.sort : undefined,
-    order:
-      typeof search.order === "string" && (search.order === "asc" || search.order === "desc")
-        ? search.order
-        : undefined,
+    order: typeof search.order === "string" && (search.order === "asc" || search.order === "desc") ? search.order : undefined,
   }),
   component: ExtensionsPage,
 })
@@ -134,12 +97,8 @@ const csvHeaders: CsvHeader<Extension>[] = [
 function StatusDot({ active }: { active: boolean }) {
   return (
     <span className="flex items-center gap-1.5 text-xs">
-      <span
-        className={`h-2 w-2 rounded-full ${active ? "bg-emerald-500" : "bg-muted-foreground/40"}`}
-      />
-      <span className={active ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}>
-        {active ? "Active" : "Inactive"}
-      </span>
+      <span className={`h-2 w-2 rounded-full ${active ? "bg-emerald-500" : "bg-muted-foreground/40"}`} />
+      <span className={active ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}>{active ? "Active" : "Inactive"}</span>
     </span>
   )
 }
@@ -162,17 +121,11 @@ function FeatureIndicators({ ext }: { ext: Extension }) {
               variant={e911Status === "registered" ? "default" : "outline"}
               className={`gap-1 px-1.5 py-0 text-[10px] ${e911Status === "registered" ? "bg-emerald-600 text-white" : ""}`}
             >
-              {e911Status === "registered" ? (
-                <Shield className="h-3 w-3" />
-              ) : (
-                <ShieldOff className="h-3 w-3" />
-              )}
+              {e911Status === "registered" ? <Shield className="h-3 w-3" /> : <ShieldOff className="h-3 w-3" />}
               E911
             </Badge>
           </TooltipTrigger>
-          <TooltipContent>
-            {e911Status === "registered" ? "E911 registered" : `E911: ${e911Status}`}
-          </TooltipContent>
+          <TooltipContent>{e911Status === "registered" ? "E911 registered" : `E911: ${e911Status}`}</TooltipContent>
         </Tooltip>
       )}
       {dndOn && (
@@ -210,13 +163,7 @@ function ExtensionsPage() {
   useDocumentTitle("Extensions")
   const compactMode = useSettingsStore((s) => s.compactMode)
   const cellClass = compactMode ? "py-1 px-2 text-xs" : ""
-  const {
-    q: searchParam,
-    page: pageParam,
-    status: statusParam,
-    sort: sortParam,
-    order: orderParam,
-  } = Route.useSearch()
+  const { q: searchParam, page: pageParam, status: statusParam, sort: sortParam, order: orderParam } = Route.useSearch()
   const navigate = Route.useNavigate()
   const searchInputRef = useRef<HTMLInputElement>(null)
 
@@ -244,10 +191,7 @@ function ExtensionsPage() {
   // Derive filter state from URL search params
   const search = searchParam ?? ""
   const page = pageParam ?? 1
-  const statusFilter = useMemo(
-    () => (statusParam ? statusParam.split(",").filter(Boolean) : []),
-    [statusParam],
-  )
+  const statusFilter = useMemo(() => (statusParam ? statusParam.split(",").filter(Boolean) : []), [statusParam])
   const sortKey = sortParam ?? null
   const sortDir: SortDirection = (orderParam as SortDirection) ?? null
 
@@ -315,12 +259,8 @@ function ExtensionsPage() {
     if (search) {
       const q = search.toLowerCase()
       items = items.filter((ext) => {
-        const phoneNumber = ext.phoneNumberId ? phoneMap.get(ext.phoneNumberId) ?? "" : ""
-        return (
-          ext.extensionNumber.toLowerCase().includes(q) ||
-          (ext.displayName ?? "").toLowerCase().includes(q) ||
-          phoneNumber.toLowerCase().includes(q)
-        )
+        const phoneNumber = ext.phoneNumberId ? (phoneMap.get(ext.phoneNumberId) ?? "") : ""
+        return ext.extensionNumber.toLowerCase().includes(q) || (ext.displayName ?? "").toLowerCase().includes(q) || phoneNumber.toLowerCase().includes(q)
       })
     }
 
@@ -433,8 +373,7 @@ function ExtensionsPage() {
   const [bulkEnableAction, bulkDisableAction] = useMemo(
     () =>
       createBulkToggleActions(
-        (id, enabled) =>
-          updateAnyExtension.mutateAsync({ extensionId: id, payload: { isActive: enabled } }).then(() => {}),
+        (id, enabled) => updateAnyExtension.mutateAsync({ extensionId: id, payload: { isActive: enabled } }).then(() => {}),
         () => {},
         { entityName: "extension" },
       ),
@@ -451,11 +390,7 @@ function ExtensionsPage() {
           setSelectedIds(new Set())
         },
       ),
-      createExportAction<Extension>(
-        "extensions-selected",
-        csvHeaders,
-        (ids) => filteredItems.filter((e) => ids.includes(e.id)),
-      ),
+      createExportAction<Extension>("extensions-selected", csvHeaders, (ids) => filteredItems.filter((e) => ids.includes(e.id))),
     ],
     [bulkEnableAction, bulkDisableAction, deleteExtension, filteredItems],
   )
@@ -548,36 +483,17 @@ function ExtensionsPage() {
         breadcrumbs={breadcrumbs}
         actions={
           <div className="flex items-center gap-2">
-            <DataFreshness
-              dataUpdatedAt={dataUpdatedAt}
-              onRefresh={() => refetch()}
-              isRefreshing={isRefetching}
-            />
-            <Button
-              variant={autoRefresh ? "default" : "outline"}
-              size="sm"
-              onClick={toggleAutoRefresh}
-            >
-              {autoRefresh && (
-                <span className="mr-2 h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
-              )}
+            <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
+            <Button variant={autoRefresh ? "default" : "outline"} size="sm" onClick={toggleAutoRefresh}>
+              {autoRefresh && <span className="mr-2 h-2 w-2 animate-pulse rounded-full bg-emerald-500" />}
               Live
             </Button>
             <Button variant="outline" size="sm" onClick={handleExportAll} disabled={!hasData}>
               <Download className="mr-2 h-4 w-4" />
               Export
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowSyncDialog(true)}
-              disabled={syncExtensions.isPending}
-            >
-              {syncExtensions.isPending ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <RefreshCw className="mr-2 h-4 w-4" />
-              )}
+            <Button variant="outline" size="sm" onClick={() => setShowSyncDialog(true)} disabled={syncExtensions.isPending}>
+              {syncExtensions.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
               Sync from PBX
             </Button>
             <CreateExtensionDialog
@@ -594,48 +510,48 @@ function ExtensionsPage() {
 
       {/* Summary stats */}
       <SectionErrorBoundary name="Extensions Summary">
-      <div className="flex flex-wrap items-center gap-2">
-        {isLoading ? (
-          <>
-            <Skeleton className="h-7 w-24 rounded-full" />
-            <Skeleton className="h-7 w-24 rounded-full" />
-            <Skeleton className="h-7 w-24 rounded-full" />
-            <Skeleton className="h-7 w-28 rounded-full" />
-            <Skeleton className="h-7 w-28 rounded-full" />
-          </>
-        ) : (
-          <>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground">
-              Total
-              <span className="ml-0.5 font-semibold text-foreground">{extensionStats.total}</span>
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              Active
-              <span className="ml-0.5 font-semibold">{extensionStats.active}</span>
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-zinc-400/30 bg-zinc-400/10 px-3 py-1 text-xs font-medium text-zinc-600 dark:text-zinc-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-zinc-400" />
-              Inactive
-              <span className="ml-0.5 font-semibold">{extensionStats.inactive}</span>
-            </span>
-            {extensionStats.dnd > 0 && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-xs font-medium text-red-700 dark:text-red-400">
-                <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
-                DND
-                <span className="ml-0.5 font-semibold">{extensionStats.dnd}</span>
+        <div className="flex flex-wrap items-center gap-2">
+          {isLoading ? (
+            <>
+              <Skeleton className="h-7 w-24 rounded-full" />
+              <Skeleton className="h-7 w-24 rounded-full" />
+              <Skeleton className="h-7 w-24 rounded-full" />
+              <Skeleton className="h-7 w-28 rounded-full" />
+              <Skeleton className="h-7 w-28 rounded-full" />
+            </>
+          ) : (
+            <>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground">
+                Total
+                <span className="ml-0.5 font-semibold text-foreground">{extensionStats.total}</span>
               </span>
-            )}
-            {extensionStats.forwarding > 0 && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-700 dark:text-blue-400">
-                <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
-                Forwarding
-                <span className="ml-0.5 font-semibold">{extensionStats.forwarding}</span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                Active
+                <span className="ml-0.5 font-semibold">{extensionStats.active}</span>
               </span>
-            )}
-          </>
-        )}
-      </div>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-zinc-400/30 bg-zinc-400/10 px-3 py-1 text-xs font-medium text-zinc-600 dark:text-zinc-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-zinc-400" />
+                Inactive
+                <span className="ml-0.5 font-semibold">{extensionStats.inactive}</span>
+              </span>
+              {extensionStats.dnd > 0 && (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-xs font-medium text-red-700 dark:text-red-400">
+                  <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+                  DND
+                  <span className="ml-0.5 font-semibold">{extensionStats.dnd}</span>
+                </span>
+              )}
+              {extensionStats.forwarding > 0 && (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-700 dark:text-blue-400">
+                  <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+                  Forwarding
+                  <span className="ml-0.5 font-semibold">{extensionStats.forwarding}</span>
+                </span>
+              )}
+            </>
+          )}
+        </div>
       </SectionErrorBoundary>
 
       {/* Search & filters */}
@@ -660,7 +576,9 @@ function ExtensionsPage() {
                 <span className="sr-only">Clear search</span>
               </button>
             ) : (
-              <kbd className="pointer-events-none absolute right-8 top-1/2 -translate-y-1/2 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">/</kbd>
+              <kbd className="pointer-events-none absolute right-8 top-1/2 -translate-y-1/2 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">
+                /
+              </kbd>
             )}
           </div>
           <FilterDropdown
@@ -701,217 +619,195 @@ function ExtensionsPage() {
       {/* Content */}
       <PageSection delay={0.1}>
         <SectionErrorBoundary name="Extensions Table">
-        {isLoading ? (
-          <SkeletonTable rows={6} />
-        ) : isError ? (
-          <EmptyState
-            icon={AlertCircle}
-            title="Unable to load extensions"
-            description="Something went wrong while fetching your extensions. Please try again."
-            action={
-              <Button variant="outline" size="sm" onClick={() => refetch()}>
-                Try again
-              </Button>
-            }
-          />
-        ) : !hasAnyExtensions && !search ? (
-          <EmptyState
-            icon={Phone}
-            title="No extensions yet"
-            description="Create your first extension to get started with voice management. Extensions allow you to assign phone numbers and configure call forwarding, voicemail, and more."
-            action={
-              <CreateExtensionDialog
-                trigger={
-                  <Button size="sm">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Extension
-                  </Button>
-                }
-              />
-            }
-          />
-        ) : !hasData ? (
-          <EmptyState
-            icon={Phone}
-            variant="no-results"
-            title="No results found"
-            description="No extensions match your current search or filters. Try adjusting your criteria."
-            action={
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setSearchInput("")
-                  navigate({
-                    search: {
-                      q: undefined,
-                      status: undefined,
-                      sort: undefined,
-                      order: undefined,
-                      page: undefined,
-                    },
-                  })
-                }}
-              >
-                Clear all filters
-              </Button>
-            }
-          />
-        ) : (
-          <div className="space-y-3">
-            {/* Result count & pagination info */}
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">
-                {data?.total ?? filteredItems.length} extension{(data?.total ?? filteredItems.length) === 1 ? "" : "s"}
-                {statusFilter.length > 0 && " (filtered)"}
-              </p>
-            </div>
+          {isLoading ? (
+            <SkeletonTable rows={6} />
+          ) : isError ? (
+            <EmptyState
+              icon={AlertCircle}
+              title="Unable to load extensions"
+              description="Something went wrong while fetching your extensions. Please try again."
+              action={
+                <Button variant="outline" size="sm" onClick={() => refetch()}>
+                  Try again
+                </Button>
+              }
+            />
+          ) : !hasAnyExtensions && !search ? (
+            <EmptyState
+              icon={Phone}
+              title="No extensions yet"
+              description="Create your first extension to get started with voice management. Extensions allow you to assign phone numbers and configure call forwarding, voicemail, and more."
+              action={
+                <CreateExtensionDialog
+                  trigger={
+                    <Button size="sm">
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add Extension
+                    </Button>
+                  }
+                />
+              }
+            />
+          ) : !hasData ? (
+            <EmptyState
+              icon={Phone}
+              variant="no-results"
+              title="No results found"
+              description="No extensions match your current search or filters. Try adjusting your criteria."
+              action={
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSearchInput("")
+                    navigate({
+                      search: {
+                        q: undefined,
+                        status: undefined,
+                        sort: undefined,
+                        order: undefined,
+                        page: undefined,
+                      },
+                    })
+                  }}
+                >
+                  Clear all filters
+                </Button>
+              }
+            />
+          ) : (
+            <div className="space-y-3">
+              {/* Result count & pagination info */}
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">
+                  {data?.total ?? filteredItems.length} extension{(data?.total ?? filteredItems.length) === 1 ? "" : "s"}
+                  {statusFilter.length > 0 && " (filtered)"}
+                </p>
+              </div>
 
-            {/* Table */}
-            <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
-              <Table aria-label="Extensions" aria-busy={isLoading || isRefetching}>
-                <TableHeader className="sticky top-0 z-10 bg-background">
-                  <TableRow>
-                    <TableHead className="w-10">
-                      <Checkbox
-                        checked={allSelected}
-                        indeterminate={someSelected && !allSelected}
-                        onChange={toggleAll}
-                        aria-label="Select all extensions"
+              {/* Table */}
+              <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
+                <Table aria-label="Extensions" aria-busy={isLoading || isRefetching}>
+                  <TableHeader className="sticky top-0 z-10 bg-background">
+                    <TableRow>
+                      <TableHead className="w-10">
+                        <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all extensions" />
+                      </TableHead>
+                      <SortableHeader label="Extension" sortKey="extension_number" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                      <SortableHeader
+                        label="Phone Number"
+                        sortKey="phone_number"
+                        currentSort={sortKey}
+                        currentDirection={sortDir}
+                        onSort={handleSort}
+                        className="hidden md:table-cell"
                       />
-                    </TableHead>
-                    <SortableHeader
-                      label="Extension"
-                      sortKey="extension_number"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                    />
-                    <SortableHeader
-                      label="Phone Number"
-                      sortKey="phone_number"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                      className="hidden md:table-cell"
-                    />
-                    <SortableHeader
-                      label="Status"
-                      sortKey="status"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                    />
-                    <TableHead className="hidden lg:table-cell">Features</TableHead>
-                    <TableHead className="hidden md:table-cell">Created</TableHead>
-                    <TableHead className="w-10">
-                      <span className="sr-only">Actions</span>
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredItems.map((ext) => (
-                    <ExtensionRow
-                      key={ext.id}
-                      ext={ext}
-                      phoneNumber={ext.phoneNumberId ? phoneMap.get(ext.phoneNumberId) : undefined}
-                      selected={selectedIds.has(ext.id)}
-                      onToggle={() => toggleOne(ext.id)}
-                      onNavigate={() =>
-                        navigate({
-                          to: "/voice/extensions/$extensionId",
-                          params: { extensionId: ext.id },
-                        })
-                      }
-                      cellClass={cellClass}
-                    />
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-            <div className="sr-only" aria-live="polite" aria-atomic="true">
-              {!isLoading && `Showing ${filteredItems.length} of ${data?.total ?? filteredItems.length} results, page ${page}`}
-            </div>
-
-            {/* Pagination */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Rows per page</span>
-                <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
-                  <SelectTrigger className="h-8 w-[70px]" aria-label="Rows per page">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PAGE_SIZE_OPTIONS.map((size) => (
-                      <SelectItem key={size} value={String(size)}>
-                        {size}
-                      </SelectItem>
+                      <SortableHeader label="Status" sortKey="status" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                      <TableHead className="hidden lg:table-cell">Features</TableHead>
+                      <TableHead className="hidden md:table-cell">Created</TableHead>
+                      <TableHead className="w-10">
+                        <span className="sr-only">Actions</span>
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredItems.map((ext) => (
+                      <ExtensionRow
+                        key={ext.id}
+                        ext={ext}
+                        phoneNumber={ext.phoneNumberId ? phoneMap.get(ext.phoneNumberId) : undefined}
+                        selected={selectedIds.has(ext.id)}
+                        onToggle={() => toggleOne(ext.id)}
+                        onNavigate={() =>
+                          navigate({
+                            to: "/voice/extensions/$extensionId",
+                            params: { extensionId: ext.id },
+                          })
+                        }
+                        cellClass={cellClass}
+                      />
                     ))}
-                  </SelectContent>
-                </Select>
+                  </TableBody>
+                </Table>
+              </div>
+              <div className="sr-only" aria-live="polite" aria-atomic="true">
+                {!isLoading && `Showing ${filteredItems.length} of ${data?.total ?? filteredItems.length} results, page ${page}`}
               </div>
 
-              <div className="flex items-center gap-2">
+              {/* Pagination */}
+              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">Page</span>
-                  <Input
-                    type="number"
-                    min={1}
-                    max={totalPages}
-                    value={pageInput}
-                    onChange={(e) => setPageInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") goToPage()
-                    }}
-                    onBlur={goToPage}
-                    className="h-8 w-16 text-center"
-                    aria-label="Go to page"
-                  />
-                  <span className="text-sm text-muted-foreground">of {totalPages}</span>
+                  <span className="text-sm text-muted-foreground">Rows per page</span>
+                  <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
+                    <SelectTrigger className="h-8 w-[70px]" aria-label="Rows per page">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PAGE_SIZE_OPTIONS.map((size) => (
+                        <SelectItem key={size} value={String(size)}>
+                          {size}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    navigate({
-                      search: (prev) => ({
-                        ...prev,
-                        page: page - 1 > 1 ? page - 1 : undefined,
-                      }),
-                    })
-                  }
-                  disabled={page <= 1}
-                >
-                  Previous
-                  <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&larr;</kbd>
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    navigate({
-                      search: (prev) => ({ ...prev, page: page + 1 }),
-                    })
-                  }
-                  disabled={page >= totalPages}
-                >
-                  Next
-                  <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&rarr;</kbd>
-                </Button>
+
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">Page</span>
+                    <Input
+                      type="number"
+                      min={1}
+                      max={totalPages}
+                      value={pageInput}
+                      onChange={(e) => setPageInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") goToPage()
+                      }}
+                      onBlur={goToPage}
+                      className="h-8 w-16 text-center"
+                      aria-label="Go to page"
+                    />
+                    <span className="text-sm text-muted-foreground">of {totalPages}</span>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      navigate({
+                        search: (prev) => ({
+                          ...prev,
+                          page: page - 1 > 1 ? page - 1 : undefined,
+                        }),
+                      })
+                    }
+                    disabled={page <= 1}
+                  >
+                    Previous
+                    <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&larr;</kbd>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      navigate({
+                        search: (prev) => ({ ...prev, page: page + 1 }),
+                      })
+                    }
+                    disabled={page >= totalPages}
+                  >
+                    Next
+                    <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&rarr;</kbd>
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
         </SectionErrorBoundary>
       </PageSection>
 
       {/* Bulk action bar */}
-      <BulkActionBar
-        selectedCount={selectedIds.size}
-        selectedIds={Array.from(selectedIds)}
-        onClearSelection={() => setSelectedIds(new Set())}
-        actions={bulkActions}
-      />
+      <BulkActionBar selectedCount={selectedIds.size} selectedIds={Array.from(selectedIds)} onClearSelection={() => setSelectedIds(new Set())} actions={bulkActions} />
 
       {/* PBX sync confirmation dialog */}
       <AlertDialog open={showSyncDialog} onOpenChange={setShowSyncDialog}>
@@ -919,16 +815,13 @@ function ExtensionsPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Sync Extensions from PBX</AlertDialogTitle>
             <AlertDialogDescription>
-              This will import all extensions from the connected PBX server. Existing
-              extensions will be updated to match PBX data. New extensions found on
-              the PBX will be created in the portal.
+              This will import all extensions from the connected PBX server. Existing extensions will be updated to match PBX data. New extensions found on the PBX will be created
+              in the portal.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => syncExtensions.mutate()}>
-              Sync Now
-            </AlertDialogAction>
+            <AlertDialogAction onClick={() => syncExtensions.mutate()}>Sync Now</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -977,24 +870,13 @@ function ExtensionRow({
         />
       </TableCell>
       <TableCell className={cellClass}>
-        <Link
-          to="/voice/extensions/$extensionId"
-          params={{ extensionId: ext.id }}
-          className="group flex flex-col gap-0.5"
-          onClick={(e) => e.stopPropagation()}
-        >
+        <Link to="/voice/extensions/$extensionId" params={{ extensionId: ext.id }} className="group flex flex-col gap-0.5" onClick={(e) => e.stopPropagation()}>
           <span className="font-mono font-medium group-hover:underline">{ext.extensionNumber}</span>
-          {ext.displayName && (
-            <span className="text-xs text-muted-foreground">{ext.displayName}</span>
-          )}
+          {ext.displayName && <span className="text-xs text-muted-foreground">{ext.displayName}</span>}
         </Link>
       </TableCell>
       <TableCell className={cn("hidden md:table-cell", cellClass)}>
-        {phoneNumber ? (
-          <span className="font-mono text-xs">{phoneNumber}</span>
-        ) : (
-          <span className="text-xs text-muted-foreground">--</span>
-        )}
+        {phoneNumber ? <span className="font-mono text-xs">{phoneNumber}</span> : <span className="text-xs text-muted-foreground">--</span>}
       </TableCell>
       <TableCell className={cellClass}>
         <StatusDot active={ext.isActive ?? false} />
@@ -1005,13 +887,9 @@ function ExtensionRow({
       <TableCell className={cn("hidden md:table-cell", cellClass)}>
         <Tooltip>
           <TooltipTrigger asChild>
-            <span className="cursor-default text-xs text-muted-foreground">
-              {formatRelativeTimeShort(ext.createdAt)}
-            </span>
+            <span className="cursor-default text-xs text-muted-foreground">{formatRelativeTimeShort(ext.createdAt)}</span>
           </TooltipTrigger>
-          <TooltipContent>
-            {formatDateTime(ext.createdAt)}
-          </TooltipContent>
+          <TooltipContent>{formatDateTime(ext.createdAt)}</TooltipContent>
         </Tooltip>
       </TableCell>
       <TableCell className={cellClass}>

@@ -86,12 +86,15 @@ export function InviteMemberDialog({ teamId }: InviteMemberDialogProps) {
     }
   }
 
-  const handleRoleChange = useCallback((onChange: (value: string) => void, value: string) => {
-    onChange(value)
-    if (pendingEmails.length > 0) {
-      setRoleHighlight(true)
-    }
-  }, [pendingEmails.length])
+  const handleRoleChange = useCallback(
+    (onChange: (value: string) => void, value: string) => {
+      onChange(value)
+      if (pendingEmails.length > 0) {
+        setRoleHighlight(true)
+      }
+    },
+    [pendingEmails.length],
+  )
 
   useEffect(() => {
     if (roleHighlight) {
@@ -204,7 +207,13 @@ export function InviteMemberDialog({ teamId }: InviteMemberDialogProps) {
                           type="email"
                           placeholder="colleague@company.com"
                           onKeyDown={handleKeyDown}
-                          className={currentEmail.length > 2 && !isCurrentEmailValid ? "pr-10 border-destructive/50 focus-visible:ring-destructive/30" : currentEmail.length > 0 && isCurrentEmailValid ? "pr-10" : ""}
+                          className={
+                            currentEmail.length > 2 && !isCurrentEmailValid
+                              ? "pr-10 border-destructive/50 focus-visible:ring-destructive/30"
+                              : currentEmail.length > 0 && isCurrentEmailValid
+                                ? "pr-10"
+                                : ""
+                          }
                         />
                         {currentEmail.length > 0 && isCurrentEmailValid && (
                           <CheckCircle2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-emerald-500 transition-opacity duration-200" />
@@ -221,9 +230,7 @@ export function InviteMemberDialog({ teamId }: InviteMemberDialogProps) {
                     )}
                   </div>
                   <FormMessage />
-                  {pendingEmails.length > 0 && (
-                    <p className="text-xs text-muted-foreground/60">Up to 10 recipients per batch</p>
-                  )}
+                  {pendingEmails.length > 0 && <p className="text-xs text-muted-foreground/60">Up to 10 recipients per batch</p>}
                 </FormItem>
               )}
             />
@@ -235,17 +242,9 @@ export function InviteMemberDialog({ teamId }: InviteMemberDialogProps) {
                 </p>
                 <div className="flex flex-wrap gap-1.5">
                   {pendingEmails.map((email) => (
-                    <Badge
-                      key={email}
-                      variant="secondary"
-                      className="gap-1 pl-2 pr-1 py-1 animate-in fade-in zoom-in-95 duration-200"
-                    >
+                    <Badge key={email} variant="secondary" className="gap-1 pl-2 pr-1 py-1 animate-in fade-in zoom-in-95 duration-200">
                       {email}
-                      <button
-                        type="button"
-                        onClick={() => removeEmail(email)}
-                        className="ml-0.5 rounded-full p-0.5 transition-colors hover:bg-muted-foreground/20"
-                      >
+                      <button type="button" onClick={() => removeEmail(email)} className="ml-0.5 rounded-full p-0.5 transition-colors hover:bg-muted-foreground/20">
                         <X className="h-3 w-3" />
                         <span className="sr-only">Remove {email}</span>
                       </button>
@@ -256,13 +255,7 @@ export function InviteMemberDialog({ teamId }: InviteMemberDialogProps) {
             )}
 
             {pendingEmails.length === 0 && isCurrentEmailValid && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="text-muted-foreground"
-                onClick={addEmail}
-              >
+              <Button type="button" variant="ghost" size="sm" className="text-muted-foreground" onClick={addEmail}>
                 <UserPlus className="mr-1.5 h-3.5 w-3.5" />
                 Add another recipient
               </Button>
@@ -306,20 +299,12 @@ export function InviteMemberDialog({ teamId }: InviteMemberDialogProps) {
               )}
             />
 
-            <Card
-              ref={roleCardRef}
-              className={`border-dashed transition-all duration-500 ${roleHighlight ? "border-primary/50 bg-primary/5 ring-1 ring-primary/20" : ""}`}
-            >
+            <Card ref={roleCardRef} className={`border-dashed transition-all duration-500 ${roleHighlight ? "border-primary/50 bg-primary/5 ring-1 ring-primary/20" : ""}`}>
               <CardContent className="p-3">
-                <p className="text-xs font-medium text-muted-foreground mb-1.5">
-                  {selectedRole?.label} permissions
-                </p>
+                <p className="text-xs font-medium text-muted-foreground mb-1.5">{selectedRole?.label} permissions</p>
                 <ul className="space-y-1">
                   {rolePermissions[currentRole]?.map((perm) => (
-                    <li
-                      key={perm}
-                      className="flex items-center gap-1.5 text-xs text-muted-foreground animate-in fade-in slide-in-from-left-1 duration-200"
-                    >
+                    <li key={perm} className="flex items-center gap-1.5 text-xs text-muted-foreground animate-in fade-in slide-in-from-left-1 duration-200">
                       <CheckCircle2 className="h-3 w-3 shrink-0 text-emerald-500" />
                       {perm}
                     </li>
@@ -341,9 +326,7 @@ export function InviteMemberDialog({ teamId }: InviteMemberDialogProps) {
                 {form.formState.isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {sendProgress && sendProgress.total > 1
-                      ? `Sending ${sendProgress.current} of ${sendProgress.total}...`
-                      : "Sending..."}
+                    {sendProgress && sendProgress.total > 1 ? `Sending ${sendProgress.current} of ${sendProgress.total}...` : "Sending..."}
                   </>
                 ) : totalCount > 1 ? (
                   `Send ${totalCount} Invitations`

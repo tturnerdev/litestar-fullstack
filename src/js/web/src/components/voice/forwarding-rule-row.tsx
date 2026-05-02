@@ -123,9 +123,7 @@ export function ForwardingRuleRow({ rule, onUpdate, onDelete, isUpdating, isDele
           {DEST_TYPE_LABELS[rule.destinationType] ?? rule.destinationType}
         </Badge>
         <span className="font-mono text-sm">{rule.destinationValue}</span>
-        {rule.ringTimeoutSeconds != null && (
-          <span className="text-xs text-muted-foreground">({rule.ringTimeoutSeconds}s timeout)</span>
-        )}
+        {rule.ringTimeoutSeconds != null && <span className="text-xs text-muted-foreground">({rule.ringTimeoutSeconds}s timeout)</span>}
       </div>
       <Badge variant={rule.isActive ? "default" : "outline"} className="shrink-0">
         {rule.isActive ? "Active" : "Inactive"}

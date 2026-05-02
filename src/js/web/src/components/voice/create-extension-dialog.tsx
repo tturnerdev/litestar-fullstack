@@ -1,5 +1,5 @@
+import { Loader2, Phone } from "lucide-react"
 import { useRef, useState } from "react"
-import { Phone, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
@@ -62,8 +62,16 @@ export function CreateExtensionDialog({ trigger }: { trigger: React.ReactNode })
   const isFormValid = extensionNumber.trim() && !extensionNumberError
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm() }}>
-      <DialogTrigger asChild ref={triggerRef}>{trigger}</DialogTrigger>
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        setOpen(v)
+        if (!v) resetForm()
+      }}
+    >
+      <DialogTrigger asChild ref={triggerRef}>
+        {trigger}
+      </DialogTrigger>
       <DialogContent>
         <form onSubmit={handleSubmit}>
           <DialogHeader>
@@ -94,13 +102,7 @@ export function CreateExtensionDialog({ trigger }: { trigger: React.ReactNode })
             </div>
             <div className="grid gap-2">
               <Label htmlFor="ext-name">Display Name</Label>
-              <Input
-                id="ext-name"
-                placeholder="Front Desk"
-                value={displayName}
-                onChange={(e) => handleDisplayNameChange(e.target.value)}
-                maxLength={DISPLAY_NAME_MAX_LENGTH}
-              />
+              <Input id="ext-name" placeholder="Front Desk" value={displayName} onChange={(e) => handleDisplayNameChange(e.target.value)} maxLength={DISPLAY_NAME_MAX_LENGTH} />
               <div className="flex items-center justify-between">
                 <p className="text-xs text-muted-foreground">Name shown on caller ID and in the directory</p>
                 <span className="text-xs text-muted-foreground">
@@ -113,11 +115,7 @@ export function CreateExtensionDialog({ trigger }: { trigger: React.ReactNode })
                 <Label htmlFor="ext-active">Active</Label>
                 <p className="text-xs text-muted-foreground">Extension will be available for call routing</p>
               </div>
-              <Switch
-                id="ext-active"
-                checked={isActive}
-                onCheckedChange={setIsActive}
-              />
+              <Switch id="ext-active" checked={isActive} onCheckedChange={setIsActive} />
             </div>
           </div>
           <DialogFooter>

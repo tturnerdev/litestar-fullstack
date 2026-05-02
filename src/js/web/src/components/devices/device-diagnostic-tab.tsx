@@ -1,14 +1,5 @@
-import { useState, useMemo, useEffect } from "react"
-import {
-  AlertCircle,
-  Copy,
-  Check,
-  FileCode,
-  Loader2,
-  MonitorSmartphone,
-  Play,
-  RefreshCw,
-} from "lucide-react"
+import { AlertCircle, Check, Copy, FileCode, Loader2, MonitorSmartphone, Play, RefreshCw } from "lucide-react"
+import { useEffect, useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
@@ -289,11 +280,7 @@ function WireframeRenderer({ data }: { data: WireframeData }) {
   const svgHeight = data.height + padding * 2
 
   return (
-    <svg
-      viewBox={`0 0 ${svgWidth} ${svgHeight}`}
-      className="w-full max-w-lg mx-auto"
-      style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
-    >
+    <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} className="w-full max-w-lg mx-auto" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
       <defs>
         <linearGradient id="screen-gradient" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#c7d2e0" />
@@ -305,18 +292,7 @@ function WireframeRenderer({ data }: { data: WireframeData }) {
       </defs>
 
       {/* Phone body */}
-      <rect
-        x={padding}
-        y={padding}
-        width={data.width}
-        height={data.height}
-        rx={12}
-        ry={12}
-        fill="#f8fafc"
-        stroke="#cbd5e1"
-        strokeWidth={1.5}
-        filter="url(#shadow)"
-      />
+      <rect x={padding} y={padding} width={data.width} height={data.height} rx={12} ry={12} fill="#f8fafc" stroke="#cbd5e1" strokeWidth={1.5} filter="url(#shadow)" />
 
       {/* Regions */}
       <g transform={`translate(${padding}, ${padding})`}>
@@ -328,11 +304,7 @@ function WireframeRenderer({ data }: { data: WireframeData }) {
             return (
               <Tooltip key={region.id}>
                 <TooltipTrigger asChild>
-                  <g
-                    onMouseEnter={() => setHoveredId(region.id)}
-                    onMouseLeave={() => setHoveredId(null)}
-                    className="cursor-default"
-                  >
+                  <g onMouseEnter={() => setHoveredId(region.id)} onMouseLeave={() => setHoveredId(null)} className="cursor-default">
                     <rect
                       x={region.x}
                       y={region.y}
@@ -366,11 +338,7 @@ function WireframeRenderer({ data }: { data: WireframeData }) {
             return (
               <Tooltip key={region.id}>
                 <TooltipTrigger asChild>
-                  <g
-                    onMouseEnter={() => setHoveredId(region.id)}
-                    onMouseLeave={() => setHoveredId(null)}
-                    className="cursor-default"
-                  >
+                  <g onMouseEnter={() => setHoveredId(region.id)} onMouseLeave={() => setHoveredId(null)} className="cursor-default">
                     {/* Simplified handset shape */}
                     <rect
                       x={region.x}
@@ -408,11 +376,7 @@ function WireframeRenderer({ data }: { data: WireframeData }) {
             return (
               <Tooltip key={region.id}>
                 <TooltipTrigger asChild>
-                  <g
-                    onMouseEnter={() => setHoveredId(region.id)}
-                    onMouseLeave={() => setHoveredId(null)}
-                    className="cursor-pointer"
-                  >
+                  <g onMouseEnter={() => setHoveredId(region.id)} onMouseLeave={() => setHoveredId(null)} className="cursor-pointer">
                     <circle
                       cx={region.cx}
                       cy={region.cy}
@@ -433,11 +397,7 @@ function WireframeRenderer({ data }: { data: WireframeData }) {
           return (
             <Tooltip key={region.id}>
               <TooltipTrigger asChild>
-                <g
-                  onMouseEnter={() => setHoveredId(region.id)}
-                  onMouseLeave={() => setHoveredId(null)}
-                  className="cursor-pointer"
-                >
+                <g onMouseEnter={() => setHoveredId(region.id)} onMouseLeave={() => setHoveredId(null)} className="cursor-pointer">
                   <rect
                     x={region.x}
                     y={region.y}
@@ -476,15 +436,7 @@ function WireframeRenderer({ data }: { data: WireframeData }) {
   )
 }
 
-function DialpadRenderer({
-  dialpad,
-  hoveredId,
-  setHoveredId,
-}: {
-  dialpad: WireframeDialpad
-  hoveredId: string | null
-  setHoveredId: (id: string | null) => void
-}) {
+function DialpadRenderer({ dialpad, hoveredId, setHoveredId }: { dialpad: WireframeDialpad; hoveredId: string | null; setHoveredId: (id: string | null) => void }) {
   const cols = 3
   return (
     <g>
@@ -500,11 +452,7 @@ function DialpadRenderer({
         return (
           <Tooltip key={id}>
             <TooltipTrigger asChild>
-              <g
-                onMouseEnter={() => setHoveredId(id)}
-                onMouseLeave={() => setHoveredId(null)}
-                className="cursor-pointer"
-              >
+              <g onMouseEnter={() => setHoveredId(id)} onMouseLeave={() => setHoveredId(null)} className="cursor-pointer">
                 <rect
                   x={x}
                   y={y}
@@ -542,7 +490,10 @@ function DialpadRenderer({
                 )}
               </g>
             </TooltipTrigger>
-            <TooltipContent>Key: {key}{subLabel ? ` (${subLabel})` : ""}</TooltipContent>
+            <TooltipContent>
+              Key: {key}
+              {subLabel ? ` (${subLabel})` : ""}
+            </TooltipContent>
           </Tooltip>
         )
       })}
@@ -595,11 +546,7 @@ function WireframeRendererV1({ data, screenshotUrl, onAction }: { data: V1Wirefr
   const vb = data.canvas.viewBox
 
   return (
-    <svg
-      viewBox={`${vb.x} ${vb.y} ${vb.width} ${vb.height}`}
-      className="w-full max-w-lg mx-auto"
-      style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
-    >
+    <svg viewBox={`${vb.x} ${vb.y} ${vb.width} ${vb.height}`} className="w-full max-w-lg mx-auto" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
       {/* Chassis body */}
       <rect
         x={data.body.bounds.x}
@@ -641,11 +588,7 @@ function WireframeRendererV1({ data, screenshotUrl, onAction }: { data: V1Wirefr
       })}
 
       {/* Handset */}
-      <V1HandsetRenderer
-        handset={data.handset}
-        hoveredId={hoveredId}
-        setHoveredId={setHoveredId}
-      />
+      <V1HandsetRenderer handset={data.handset} hoveredId={hoveredId} setHoveredId={setHoveredId} />
 
       {/* Branding */}
       <text
@@ -664,13 +607,7 @@ function WireframeRendererV1({ data, screenshotUrl, onAction }: { data: V1Wirefr
         <g>
           <defs>
             <clipPath id="lcd-clip">
-              <rect
-                x={data.display.bounds.x}
-                y={data.display.bounds.y}
-                width={data.display.bounds.width}
-                height={data.display.bounds.height}
-                rx={data.display.cornerRadius}
-              />
+              <rect x={data.display.bounds.x} y={data.display.bounds.y} width={data.display.bounds.width} height={data.display.bounds.height} rx={data.display.cornerRadius} />
             </clipPath>
           </defs>
           <image
@@ -684,11 +621,7 @@ function WireframeRendererV1({ data, screenshotUrl, onAction }: { data: V1Wirefr
           />
         </g>
       ) : (
-        <V1DisplayRenderer
-          display={data.display}
-          hoveredId={hoveredId}
-          setHoveredId={setHoveredId}
-        />
+        <V1DisplayRenderer display={data.display} hoveredId={hoveredId} setHoveredId={setHoveredId} />
       )}
 
       {/* Line Keys */}
@@ -716,7 +649,9 @@ function WireframeRendererV1({ data, screenshotUrl, onAction }: { data: V1Wirefr
                 style={{ transition: "opacity 0.15s ease" }}
               />
             </TooltipTrigger>
-            <TooltipContent>Line {lk.slot} ({lk.color}){ak ? ` — ${ak}` : ""}</TooltipContent>
+            <TooltipContent>
+              Line {lk.slot} ({lk.color}){ak ? ` — ${ak}` : ""}
+            </TooltipContent>
           </Tooltip>
         )
       })}
@@ -744,34 +679,22 @@ function WireframeRendererV1({ data, screenshotUrl, onAction }: { data: V1Wirefr
                 style={{ transition: "fill 0.15s ease" }}
               />
             </TooltipTrigger>
-            <TooltipContent>Soft Key {sk.slot}{ak ? ` — ${ak}` : ""}</TooltipContent>
+            <TooltipContent>
+              Soft Key {sk.slot}
+              {ak ? ` — ${ak}` : ""}
+            </TooltipContent>
           </Tooltip>
         )
       })}
 
       {/* Dial Pad */}
-      <V1DialPadRenderer
-        dialPad={data.dialPad}
-        hoveredId={hoveredId}
-        setHoveredId={setHoveredId}
-        onAction={onAction}
-      />
+      <V1DialPadRenderer dialPad={data.dialPad} hoveredId={hoveredId} setHoveredId={setHoveredId} onAction={onAction} />
 
       {/* Function Keys */}
-      <V1FunctionKeysRenderer
-        functionKeys={data.functionKeys}
-        hoveredId={hoveredId}
-        setHoveredId={setHoveredId}
-        onAction={onAction}
-      />
+      <V1FunctionKeysRenderer functionKeys={data.functionKeys} hoveredId={hoveredId} setHoveredId={setHoveredId} onAction={onAction} />
 
       {/* Volume Rocker */}
-      <V1VolumeRockerRenderer
-        rocker={data.volumeRocker}
-        hoveredId={hoveredId}
-        setHoveredId={setHoveredId}
-        onAction={onAction}
-      />
+      <V1VolumeRockerRenderer rocker={data.volumeRocker} hoveredId={hoveredId} setHoveredId={setHoveredId} onAction={onAction} />
     </svg>
   )
 }
@@ -780,24 +703,12 @@ function WireframeRendererV1({ data, screenshotUrl, onAction }: { data: V1Wirefr
 // V1 Handset Sub-renderer
 // ---------------------------------------------------------------------------
 
-function V1HandsetRenderer({
-  handset,
-  hoveredId,
-  setHoveredId,
-}: {
-  handset: V1Handset
-  hoveredId: string | null
-  setHoveredId: (id: string | null) => void
-}) {
+function V1HandsetRenderer({ handset, hoveredId, setHoveredId }: { handset: V1Handset; hoveredId: string | null; setHoveredId: (id: string | null) => void }) {
   const isHovered = hoveredId === handset.id
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <g
-          onMouseEnter={() => setHoveredId(handset.id)}
-          onMouseLeave={() => setHoveredId(null)}
-          className="cursor-default"
-        >
+        <g onMouseEnter={() => setHoveredId(handset.id)} onMouseLeave={() => setHoveredId(null)} className="cursor-default">
           {/* Handset body */}
           <rect
             x={handset.bounds.x}
@@ -826,15 +737,7 @@ function V1HandsetRenderer({
                     stroke={V1_COLORS.grilleStroke}
                     strokeWidth={V1_COLORS.keyStrokeWidth}
                   />
-                  <ellipse
-                    cx={el.geometry.cx}
-                    cy={el.geometry.cy}
-                    rx={22}
-                    ry={9}
-                    fill="none"
-                    stroke={V1_COLORS.grilleStroke}
-                    strokeWidth={V1_COLORS.keyStrokeWidth}
-                  />
+                  <ellipse cx={el.geometry.cx} cy={el.geometry.cy} rx={22} ry={9} fill="none" stroke={V1_COLORS.grilleStroke} strokeWidth={V1_COLORS.keyStrokeWidth} />
                 </g>
               )
             }
@@ -843,14 +746,7 @@ function V1HandsetRenderer({
               // HD mark with wifi-wave arcs
               return (
                 <g key={el.id}>
-                  <text
-                    x={el.anchor.x}
-                    y={el.anchor.y}
-                    textAnchor="end"
-                    fill={V1_COLORS.textTertiary}
-                    fontSize={11}
-                    fontWeight={500}
-                  >
+                  <text x={el.anchor.x} y={el.anchor.y} textAnchor="end" fill={V1_COLORS.textTertiary} fontSize={11} fontWeight={500}>
                     {el.text}
                   </text>
                   {el.decoration === "wifi-waves" && (
@@ -937,15 +833,7 @@ function V1HandsetRenderer({
 // V1 Display Sub-renderer
 // ---------------------------------------------------------------------------
 
-function V1DisplayRenderer({
-  display,
-  hoveredId,
-  setHoveredId,
-}: {
-  display: V1Display
-  hoveredId: string | null
-  setHoveredId: (id: string | null) => void
-}) {
+function V1DisplayRenderer({ display, hoveredId, setHoveredId }: { display: V1Display; hoveredId: string | null; setHoveredId: (id: string | null) => void }) {
   const isHovered = hoveredId === display.id
   const b = display.bounds
   const c = display.content
@@ -966,11 +854,7 @@ function V1DisplayRenderer({
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <g
-          onMouseEnter={() => setHoveredId(display.id)}
-          onMouseLeave={() => setHoveredId(null)}
-          className="cursor-default"
-        >
+        <g onMouseEnter={() => setHoveredId(display.id)} onMouseLeave={() => setHoveredId(null)} className="cursor-default">
           {/* LCD background */}
           <rect
             x={b.x}
@@ -989,49 +873,21 @@ function V1DisplayRenderer({
           <g transform={`translate(${b.x + 12}, ${b.y + 16})`}>
             <path d={PHONE_ICON_PATH} fill={V1_COLORS.textPrimary} />
           </g>
-          <text
-            x={b.x + 28}
-            y={b.y + 18}
-            fill={V1_COLORS.textPrimary}
-            fontFamily={monoFont}
-            fontSize={11}
-            fontWeight={400}
-          >
+          <text x={b.x + 28} y={b.y + 18} fill={V1_COLORS.textPrimary} fontFamily={monoFont} fontSize={11} fontWeight={400}>
             {c.statusBar.text}
           </text>
 
           {/* Primary region: time */}
-          <text
-            x={b.x + 12}
-            y={b.y + 60}
-            fill={V1_COLORS.textPrimary}
-            fontFamily={monoFont}
-            fontSize={22}
-            fontWeight={500}
-          >
+          <text x={b.x + 12} y={b.y + 60} fill={V1_COLORS.textPrimary} fontFamily={monoFont} fontSize={22} fontWeight={500}>
             {c.primaryRegion.time}
           </text>
           {/* Seconds */}
-          <text
-            x={b.x + 68}
-            y={b.y + 52}
-            fill={V1_COLORS.textPrimary}
-            fontFamily={monoFont}
-            fontSize={11}
-            fontWeight={400}
-          >
+          <text x={b.x + 68} y={b.y + 52} fill={V1_COLORS.textPrimary} fontFamily={monoFont} fontSize={11} fontWeight={400}>
             {c.primaryRegion.seconds}
           </text>
 
           {/* Date */}
-          <text
-            x={b.x + 12}
-            y={b.y + 104}
-            fill={V1_COLORS.textPrimary}
-            fontFamily={monoFont}
-            fontSize={11}
-            fontWeight={400}
-          >
+          <text x={b.x + 12} y={b.y + 104} fill={V1_COLORS.textPrimary} fontFamily={monoFont} fontSize={11} fontWeight={400}>
             {c.primaryRegion.date}
           </text>
 
@@ -1040,27 +896,11 @@ function V1DisplayRenderer({
             const rowY = lineKeyAreaY + i * (lineKeyRowHeight + 6)
             return (
               <g key={lkl.slot}>
-                <rect
-                  x={lineKeyAreaX}
-                  y={rowY}
-                  width={lineKeyAreaWidth}
-                  height={lineKeyRowHeight}
-                  rx={2}
-                  fill="none"
-                  stroke={V1_COLORS.textTertiary}
-                  strokeWidth={0.5}
-                />
+                <rect x={lineKeyAreaX} y={rowY} width={lineKeyAreaWidth} height={lineKeyRowHeight} rx={2} fill="none" stroke={V1_COLORS.textTertiary} strokeWidth={0.5} />
                 <g transform={`translate(${lineKeyAreaX + 10}, ${rowY + 18})`}>
                   <path d={PHONE_ICON_PATH} fill={V1_COLORS.textPrimary} />
                 </g>
-                <text
-                  x={lineKeyAreaX + 28}
-                  y={rowY + 23}
-                  fill={V1_COLORS.textPrimary}
-                  fontFamily={monoFont}
-                  fontSize={11}
-                  fontWeight={400}
-                >
+                <text x={lineKeyAreaX + 28} y={rowY + 23} fill={V1_COLORS.textPrimary} fontFamily={monoFont} fontSize={11} fontWeight={400}>
                   {lkl.text}
                 </text>
               </g>
@@ -1068,13 +908,7 @@ function V1DisplayRenderer({
           })}
 
           {/* Soft key bar (inverted) */}
-          <rect
-            x={b.x}
-            y={softKeyBarY}
-            width={softKeyBarWidth}
-            height={softKeyBarHeight}
-            fill={V1_COLORS.softKeyBarBg}
-          />
+          <rect x={b.x} y={softKeyBarY} width={softKeyBarWidth} height={softKeyBarHeight} fill={V1_COLORS.softKeyBarBg} />
           {c.softKeyBar.labels.map((label, i) => (
             <g key={label}>
               <text
@@ -1145,12 +979,7 @@ function V1DialPadRenderer({
         return (
           <Tooltip key={key.id}>
             <TooltipTrigger asChild>
-              <g
-                onMouseEnter={() => setHoveredId(key.id)}
-                onMouseLeave={() => setHoveredId(null)}
-                onClick={onAction ? () => onAction(ak) : undefined}
-                className="cursor-pointer"
-              >
+              <g onMouseEnter={() => setHoveredId(key.id)} onMouseLeave={() => setHoveredId(null)} onClick={onAction ? () => onAction(ak) : undefined} className="cursor-pointer">
                 <rect
                   x={kx}
                   y={ky}
@@ -1162,33 +991,19 @@ function V1DialPadRenderer({
                   strokeWidth={V1_COLORS.keyStrokeWidth}
                   style={{ transition: "fill 0.15s ease" }}
                 />
-                <text
-                  x={digitX}
-                  y={digitY}
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                  fill={V1_COLORS.textPrimary}
-                  fontSize={18}
-                  fontWeight={500}
-                >
+                <text x={digitX} y={digitY} textAnchor="middle" dominantBaseline="middle" fill={V1_COLORS.textPrimary} fontSize={18} fontWeight={500}>
                   {key.digit}
                 </text>
                 {hasLetters && (
-                  <text
-                    x={lettersX}
-                    y={lettersY}
-                    textAnchor="start"
-                    fill={V1_COLORS.textTertiary}
-                    fontSize={isSend ? 9 : 11}
-                    fontWeight={400}
-                  >
+                  <text x={lettersX} y={lettersY} textAnchor="start" fill={V1_COLORS.textTertiary} fontSize={isSend ? 9 : 11} fontWeight={400}>
                     {key.letters}
                   </text>
                 )}
               </g>
             </TooltipTrigger>
             <TooltipContent>
-              Key: {key.digit}{key.letters ? ` (${key.letters})` : ""}
+              Key: {key.digit}
+              {key.letters ? ` (${key.letters})` : ""}
             </TooltipContent>
           </Tooltip>
         )
@@ -1226,7 +1041,13 @@ function V1FunctionKeyIcon({ icon, cx, cy }: { icon: string; cx: number; cy: num
     case "phone-arrow":
       return (
         <g transform={`translate(${cx}, ${cy})`}>
-          <path d="M -11 -2 Q -10 -5 -7 -5 L -5 -5 Q -3 -5 -3 -3 L -3 -1 Q -3 0 -4 0 L -5 0 Q -3 3 0 4 L 0 3 Q 0 1 2 1 L 4 1 Q 6 1 6 3 L 6 5 Q 6 7 4 7 Q -7 7 -11 -2 Z" fill="none" stroke={color} strokeWidth={1.2} strokeLinejoin="round" />
+          <path
+            d="M -11 -2 Q -10 -5 -7 -5 L -5 -5 Q -3 -5 -3 -3 L -3 -1 Q -3 0 -4 0 L -5 0 Q -3 3 0 4 L 0 3 Q 0 1 2 1 L 4 1 Q 6 1 6 3 L 6 5 Q 6 7 4 7 Q -7 7 -11 -2 Z"
+            fill="none"
+            stroke={color}
+            strokeWidth={1.2}
+            strokeLinejoin="round"
+          />
           <line x1={7} y1={-4} x2={13} y2={-4} stroke={color} strokeWidth={1.2} />
           <polygon points="11,-7 14,-4 11,-1" fill={color} />
         </g>
@@ -1303,11 +1124,7 @@ function V1FunctionKeysRenderer({
                   strokeWidth={V1_COLORS.keyStrokeWidth}
                   style={{ transition: "fill 0.15s ease" }}
                 />
-                <V1FunctionKeyIcon
-                  icon={key.icon}
-                  cx={kx + keySize.width / 2}
-                  cy={ky + keySize.height / 2}
-                />
+                <V1FunctionKeyIcon icon={key.icon} cx={kx + keySize.width / 2} cy={ky + keySize.height / 2} />
               </g>
             </TooltipTrigger>
             <TooltipContent>{key.function}</TooltipContent>
@@ -1340,10 +1157,7 @@ function V1VolumeRockerRenderer({
   const upCtrl = rocker.controls.find((c) => c.side === "right" || c.side === "plus")
 
   return (
-    <g
-      onMouseEnter={() => setHoveredId(rocker.id)}
-      onMouseLeave={() => setHoveredId(null)}
-    >
+    <g onMouseEnter={() => setHoveredId(rocker.id)} onMouseLeave={() => setHoveredId(null)}>
       <rect
         x={b.x}
         y={b.y}
@@ -1355,15 +1169,7 @@ function V1VolumeRockerRenderer({
         strokeWidth={V1_COLORS.keyStrokeWidth}
         style={{ transition: "fill 0.15s ease" }}
       />
-      <line
-        x1={b.x + 25}
-        y1={b.y + b.height - 5}
-        x2={b.x + b.width - 25}
-        y2={b.y + 5}
-        stroke={V1_COLORS.grilleStroke}
-        strokeWidth={0.75}
-        strokeLinecap="round"
-      />
+      <line x1={b.x + 25} y1={b.y + b.height - 5} x2={b.x + b.width - 25} y2={b.y + 5} stroke={V1_COLORS.grilleStroke} strokeWidth={0.75} strokeLinecap="round" />
       {/* Volume down (left half) */}
       <Tooltip>
         <TooltipTrigger asChild>
@@ -1372,15 +1178,7 @@ function V1VolumeRockerRenderer({
             className={downCtrl?.actionKey && onAction ? "cursor-pointer" : "cursor-default"}
           >
             <rect x={b.x} y={b.y} width={halfW} height={b.height} fill="transparent" />
-            <text
-              x={b.x + 10}
-              y={b.y + b.height / 2}
-              textAnchor="middle"
-              dominantBaseline="middle"
-              fill={V1_COLORS.textSecondary}
-              fontSize={11}
-              fontWeight={400}
-            >
+            <text x={b.x + 10} y={b.y + b.height / 2} textAnchor="middle" dominantBaseline="middle" fill={V1_COLORS.textSecondary} fontSize={11} fontWeight={400}>
               {"−"}
             </text>
           </g>
@@ -1395,15 +1193,7 @@ function V1VolumeRockerRenderer({
             className={upCtrl?.actionKey && onAction ? "cursor-pointer" : "cursor-default"}
           >
             <rect x={b.x + halfW} y={b.y} width={halfW} height={b.height} fill="transparent" />
-            <text
-              x={b.x + b.width - 10}
-              y={b.y + b.height / 2}
-              textAnchor="middle"
-              dominantBaseline="middle"
-              fill={V1_COLORS.textSecondary}
-              fontSize={11}
-              fontWeight={400}
-            >
+            <text x={b.x + b.width - 10} y={b.y + b.height / 2} textAnchor="middle" dominantBaseline="middle" fill={V1_COLORS.textSecondary} fontSize={11} fontWeight={400}>
               +
             </text>
           </g>
@@ -1418,10 +1208,7 @@ function V1VolumeRockerRenderer({
 // Config Generator
 // ---------------------------------------------------------------------------
 
-function generateConfig(
-  template: string,
-  variables: Record<string, string>,
-): string {
+function generateConfig(template: string, variables: Record<string, string>): string {
   let result = template
   for (const [key, value] of Object.entries(variables)) {
     result = result.replace(new RegExp(`\\{\\{\\s*${key}\\s*\\}\\}`, "g"), value)
@@ -1444,16 +1231,7 @@ interface DeviceDiagnosticTabProps {
   deviceName?: string
 }
 
-export function DeviceDiagnosticTab({
-  deviceId,
-  manufacturer,
-  deviceModel,
-  macAddress,
-  sipUsername,
-  sipServer,
-  ipAddress,
-  deviceName,
-}: DeviceDiagnosticTabProps) {
+export function DeviceDiagnosticTab({ deviceId, manufacturer, deviceModel, macAddress, sipUsername, sipServer, ipAddress, deviceName }: DeviceDiagnosticTabProps) {
   const { data: template, isLoading, isError } = useDeviceTemplateLookup(manufacturer, deviceModel)
   const [generatedConfig, setGeneratedConfig] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
@@ -1512,10 +1290,7 @@ export function DeviceDiagnosticTab({
         <CardContent className="py-12 text-center text-muted-foreground">
           <MonitorSmartphone className="mx-auto mb-3 h-10 w-10 text-muted-foreground/50" />
           <p className="font-medium">No device model information</p>
-          <p className="mt-1 text-sm">
-            Set the manufacturer and model on this device to view its wireframe diagram
-            and provisioning template.
-          </p>
+          <p className="mt-1 text-sm">Set the manufacturer and model on this device to view its wireframe diagram and provisioning template.</p>
         </CardContent>
       </Card>
     )
@@ -1545,9 +1320,7 @@ export function DeviceDiagnosticTab({
           <p className="font-medium">
             No wireframe template available for {manufacturer} {deviceModel}
           </p>
-          <p className="mt-1 text-sm">
-            An administrator can create a template for this device model in the Admin panel.
-          </p>
+          <p className="mt-1 text-sm">An administrator can create a template for this device model in the Admin panel.</p>
         </CardContent>
       </Card>
     )
@@ -1585,11 +1358,7 @@ export function DeviceDiagnosticTab({
           {ipAddress && (
             <div className="flex items-center justify-center gap-3 mb-4">
               <div className="flex items-center gap-2">
-                <Switch
-                  id="live-view"
-                  checked={liveView}
-                  onCheckedChange={setLiveView}
-                />
+                <Switch id="live-view" checked={liveView} onCheckedChange={setLiveView} />
                 <Label htmlFor="live-view" className="text-sm font-medium cursor-pointer">
                   Live View
                 </Label>
@@ -1620,11 +1389,7 @@ export function DeviceDiagnosticTab({
           )}
           {wireframe ? (
             wireframe.version === "v1" ? (
-              <WireframeRendererV1
-                data={wireframe.data}
-                screenshotUrl={screenshotUrl}
-                onAction={ipAddress ? handleAction : undefined}
-              />
+              <WireframeRendererV1 data={wireframe.data} screenshotUrl={screenshotUrl} onAction={ipAddress ? handleAction : undefined} />
             ) : (
               <WireframeRenderer data={wireframe.data} />
             )
@@ -1633,7 +1398,8 @@ export function DeviceDiagnosticTab({
               <FileCode className="mx-auto mb-2 h-8 w-8 text-muted-foreground/50" />
               <p>Wireframe data uses an unsupported schema format.</p>
               <p className="mt-1 text-xs">
-                Expected top-level <code className="bg-muted px-1 rounded">width</code>, <code className="bg-muted px-1 rounded">height</code>, and <code className="bg-muted px-1 rounded">regions</code> fields.
+                Expected top-level <code className="bg-muted px-1 rounded">width</code>, <code className="bg-muted px-1 rounded">height</code>, and{" "}
+                <code className="bg-muted px-1 rounded">regions</code> fields.
               </p>
             </div>
           )}
@@ -1642,10 +1408,7 @@ export function DeviceDiagnosticTab({
           <div className="mt-6 flex flex-wrap gap-4 justify-center text-xs text-muted-foreground">
             {(wireframe?.version === "v1" ? v1LegendItems : v0LegendItems).map((item) => (
               <div key={item.label} className="flex items-center gap-1.5">
-                <span
-                  className="inline-block h-2.5 w-2.5 rounded-sm border"
-                  style={{ backgroundColor: item.color, borderColor: item.color }}
-                />
+                <span className="inline-block h-2.5 w-2.5 rounded-sm border" style={{ backgroundColor: item.color, borderColor: item.color }} />
                 {item.label}
               </div>
             ))}
@@ -1664,9 +1427,7 @@ export function DeviceDiagnosticTab({
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="rounded-lg border bg-muted/30 p-4">
-              <pre className="text-xs font-mono whitespace-pre-wrap text-muted-foreground overflow-x-auto">
-                {template.provisioningTemplate}
-              </pre>
+              <pre className="text-xs font-mono whitespace-pre-wrap text-muted-foreground overflow-x-auto">{template.provisioningTemplate}</pre>
             </div>
 
             <div className="flex items-center gap-3">
@@ -1674,9 +1435,7 @@ export function DeviceDiagnosticTab({
                 <Play className="mr-2 h-4 w-4" />
                 Generate Config
               </Button>
-              <p className="text-xs text-muted-foreground">
-                Substitutes device variables (MAC, SIP credentials, etc.) into the template.
-              </p>
+              <p className="text-xs text-muted-foreground">Substitutes device variables (MAC, SIP credentials, etc.) into the template.</p>
             </div>
 
             {generatedConfig !== null && (
@@ -1698,9 +1457,7 @@ export function DeviceDiagnosticTab({
                   </Button>
                 </div>
                 <div className="rounded-lg border bg-card p-4">
-                  <pre className="text-xs font-mono whitespace-pre-wrap overflow-x-auto">
-                    {generatedConfig}
-                  </pre>
+                  <pre className="text-xs font-mono whitespace-pre-wrap overflow-x-auto">{generatedConfig}</pre>
                 </div>
               </div>
             )}

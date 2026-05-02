@@ -57,12 +57,8 @@ export function AuthForm() {
                 exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.2 }}
               >
-                <h1 className="text-2xl font-semibold tracking-tight">
-                  {isLogin ? "Welcome back" : "Create account"}
-                </h1>
-                <p className="text-sm text-muted-foreground">
-                  {isLogin ? "Sign in to your account to continue" : "Enter your details to get started"}
-                </p>
+                <h1 className="text-2xl font-semibold tracking-tight">{isLogin ? "Welcome back" : "Create account"}</h1>
+                <p className="text-sm text-muted-foreground">{isLogin ? "Sign in to your account to continue" : "Enter your details to get started"}</p>
               </motion.div>
             </AnimatePresence>
           </div>

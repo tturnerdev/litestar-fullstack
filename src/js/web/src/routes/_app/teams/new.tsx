@@ -1,11 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { useDocumentTitle } from "@/hooks/use-document-title"
 import { ChevronRight, Shield, Tag, UserPlus, Users } from "lucide-react"
 import { CreateTeamForm } from "@/components/teams/create-team-form"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PageContainer, PageHeader } from "@/components/ui/page-layout"
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 
 export const Route = createFileRoute("/_app/teams/new")({
   component: NewTeamPage,
@@ -68,17 +68,15 @@ function NewTeamPage() {
       <div className="flex gap-6">
         {/* Main form */}
         <SectionErrorBoundary name="Create Team Form">
-        <Card className="min-w-0 flex-1">
-          <CardHeader>
-            <CardTitle className="text-lg">Team Details</CardTitle>
-            <CardDescription>
-              Provide a name and optional description for your team. You can also add tags to help organize and find it later.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <CreateTeamForm />
-          </CardContent>
-        </Card>
+          <Card className="min-w-0 flex-1">
+            <CardHeader>
+              <CardTitle className="text-lg">Team Details</CardTitle>
+              <CardDescription>Provide a name and optional description for your team. You can also add tags to help organize and find it later.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <CreateTeamForm />
+            </CardContent>
+          </Card>
         </SectionErrorBoundary>
 
         {/* Sidebar tips */}

@@ -2,16 +2,16 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import {
   createDevice,
-  deleteDevice,
   type Device,
   type DeviceCreate,
   type DeviceLineAssignment,
   type DeviceUpdate,
+  deleteDevice,
   type ExtensionDeviceSummary,
   getDevice,
+  type ListDevicesData,
   listDevices,
   listExtensionDevices,
-  type ListDevicesData,
   updateDevice,
 } from "@/lib/generated/api"
 import { client } from "@/lib/generated/api/client.gen"
@@ -75,8 +75,7 @@ export interface UseDevicesOptions {
 }
 
 export function useDevices(pageOrOptions: number | UseDevicesOptions = 1, pageSizeArg = 20) {
-  const opts: UseDevicesOptions =
-    typeof pageOrOptions === "number" ? { page: pageOrOptions, pageSize: pageSizeArg } : pageOrOptions
+  const opts: UseDevicesOptions = typeof pageOrOptions === "number" ? { page: pageOrOptions, pageSize: pageSizeArg } : pageOrOptions
   const { page = 1, pageSize = 20, search, orderBy, sortOrder, refetchInterval } = opts
 
   return useQuery({
@@ -263,10 +262,7 @@ export function useSetDeviceLines(deviceId: string) {
 export function useDeviceAction(deviceId: string) {
   return useMutation({
     mutationFn: (key: string) =>
-      apiFetch<{ deviceId: string; action: string; status: string; message: string }>(
-        `/api/devices/${deviceId}/action?key=${encodeURIComponent(key)}`,
-        { method: "POST" },
-      ),
+      apiFetch<{ deviceId: string; action: string; status: string; message: string }>(`/api/devices/${deviceId}/action?key=${encodeURIComponent(key)}`, { method: "POST" }),
     onSuccess: (data) => {
       toast.success(data.message || "Action completed")
     },

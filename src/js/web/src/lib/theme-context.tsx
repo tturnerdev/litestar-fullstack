@@ -66,10 +66,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setMode(resolved === "light" ? "dark" : "light")
   }, [resolved, setMode])
 
-  const value = useMemo(
-    () => ({ mode, theme: resolved, setMode, toggleTheme }),
-    [mode, resolved, setMode, toggleTheme],
-  )
+  const value = useMemo(() => ({ mode, theme: resolved, setMode, toggleTheme }), [mode, resolved, setMode, toggleTheme])
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
 }

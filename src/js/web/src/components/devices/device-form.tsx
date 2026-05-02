@@ -1,20 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Link, useBlocker, useRouter } from "@tanstack/react-router"
-import {
-  AlertCircle,
-  Cable,
-  Headset,
-  Info,
-  Loader2,
-  type LucideIcon,
-  MapPin,
-  MoreHorizontal,
-  Network,
-  Phone,
-  Users,
-} from "lucide-react"
+import { AlertCircle, Cable, Headset, Info, Loader2, type LucideIcon, MapPin, MoreHorizontal, Network, Phone, Users } from "lucide-react"
 import { useCallback, useRef } from "react"
 import { useForm } from "react-hook-form"
+import { toast } from "sonner"
 import { z } from "zod"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
@@ -39,7 +28,6 @@ import { useLocations } from "@/lib/api/hooks/locations"
 import { useAuthStore } from "@/lib/auth"
 import { formatMacAddress } from "@/lib/format-utils"
 import { cn } from "@/lib/utils"
-import { toast } from "sonner"
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -263,9 +251,7 @@ export function CreateDeviceForm() {
                     maxLength={17}
                   />
                 </FormControl>
-                <FormDescription>
-                  Hardware address used for auto-provisioning. Formatted automatically.
-                </FormDescription>
+                <FormDescription>Hardware address used for auto-provisioning. Formatted automatically.</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -290,9 +276,7 @@ export function CreateDeviceForm() {
                 <FormControl>
                   <Input placeholder="192.168.1.100" {...field} />
                 </FormControl>
-                <FormDescription>
-                  Static IP of the device on your network, if known.
-                </FormDescription>
+                <FormDescription>Static IP of the device on your network, if known.</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -343,9 +327,7 @@ export function CreateDeviceForm() {
                 <FormControl>
                   <Input placeholder="Team ID (optional)" {...field} />
                 </FormControl>
-                <FormDescription>
-                  Assign this device to a team for shared access and reporting.
-                </FormDescription>
+                <FormDescription>Assign this device to a team for shared access and reporting.</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -361,10 +343,7 @@ export function CreateDeviceForm() {
                     <MapPin className="h-4 w-4 text-muted-foreground" />
                     Location
                   </FormLabel>
-                  <Select
-                    onValueChange={(v) => field.onChange(v === "__none__" ? "" : v)}
-                    defaultValue={field.value || "__none__"}
-                  >
+                  <Select onValueChange={(v) => field.onChange(v === "__none__" ? "" : v)} defaultValue={field.value || "__none__"}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a location" />
@@ -379,9 +358,7 @@ export function CreateDeviceForm() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <FormDescription>
-                    Physical location where this device is installed.
-                  </FormDescription>
+                  <FormDescription>Physical location where this device is installed.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -396,10 +373,7 @@ export function CreateDeviceForm() {
                     <Network className="h-4 w-4 text-muted-foreground" />
                     Connection
                   </FormLabel>
-                  <Select
-                    onValueChange={(v) => field.onChange(v === "__none__" ? "" : v)}
-                    defaultValue={field.value || "__none__"}
-                  >
+                  <Select onValueChange={(v) => field.onChange(v === "__none__" ? "" : v)} defaultValue={field.value || "__none__"}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a connection" />
@@ -414,9 +388,7 @@ export function CreateDeviceForm() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <FormDescription>
-                    SIP trunk or provider connection for this device.
-                  </FormDescription>
+                  <FormDescription>SIP trunk or provider connection for this device.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -453,9 +425,7 @@ export function CreateDeviceForm() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
-            <AlertDialogDescription>
-              You have unsaved changes to this device form. Are you sure you want to leave? Your changes will be lost.
-            </AlertDialogDescription>
+            <AlertDialogDescription>You have unsaved changes to this device form. Are you sure you want to leave? Your changes will be lost.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => blocker.reset?.()}>Stay on page</AlertDialogCancel>

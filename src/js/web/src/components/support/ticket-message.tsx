@@ -1,23 +1,12 @@
-import { AlertTriangle, Check, Copy, Headphones, Loader2, Pencil, Reply, ThumbsUp, Trash2, Eye } from "lucide-react"
+import { AlertTriangle, Check, Copy, Eye, Headphones, Loader2, Pencil, Reply, ThumbsUp, Trash2 } from "lucide-react"
 import { useState } from "react"
 import { AttachmentList } from "@/components/support/attachment-list"
 import { TicketMessageSystem } from "@/components/support/ticket-message-system"
+import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import type { TicketMessage as TicketMessageType } from "@/lib/api/hooks/support"
 import { useDeleteTicketMessage } from "@/lib/api/hooks/support"
 import { useAuthStore } from "@/lib/auth"
@@ -99,11 +88,7 @@ export function TicketMessage({ message, ticketId, isFirstMessage = false, onRep
     setThumbsUpCount((prev) => (thumbsUp ? prev - 1 : prev + 1))
   }
 
-  const leftBorderColor = isInternal
-    ? "border-l-amber-500"
-    : isStaff
-      ? "border-l-blue-500"
-      : "border-l-muted-foreground/20"
+  const leftBorderColor = isInternal ? "border-l-amber-500" : isStaff ? "border-l-blue-500" : "border-l-muted-foreground/20"
 
   return (
     <>
@@ -119,14 +104,7 @@ export function TicketMessage({ message, ticketId, isFirstMessage = false, onRep
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div
-                className={cn(
-                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-medium",
-                  avatarColor,
-                )}
-              >
-                {authorInitial}
-              </div>
+              <div className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-medium", avatarColor)}>{authorInitial}</div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <Tooltip>
@@ -155,9 +133,7 @@ export function TicketMessage({ message, ticketId, isFirstMessage = false, onRep
                 <div className="flex items-center gap-1.5">
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <p className="cursor-default text-xs text-muted-foreground">
-                        {formatRelativeTimeShort(message.createdAt)}
-                      </p>
+                      <p className="cursor-default text-xs text-muted-foreground">{formatRelativeTimeShort(message.createdAt)}</p>
                     </TooltipTrigger>
                     <TooltipContent side="bottom" align="start">
                       {formatDateTime(message.createdAt, "")}
@@ -231,22 +207,15 @@ export function TicketMessage({ message, ticketId, isFirstMessage = false, onRep
           </div>
         </CardHeader>
         <CardContent className="space-y-3">
-          <div
-            className="prose prose-sm dark:prose-invert max-w-none"
-            dangerouslySetInnerHTML={{ __html: message.bodyHtml }}
-          />
-          {message.attachments && message.attachments.length > 0 && (
-            <AttachmentList attachments={message.attachments} className="pt-2" />
-          )}
+          <div className="prose prose-sm dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: message.bodyHtml }} />
+          {message.attachments && message.attachments.length > 0 && <AttachmentList attachments={message.attachments} className="pt-2" />}
           <div className="flex items-center gap-1 pt-1">
             <Button
               size="sm"
               variant="ghost"
               className={cn(
                 "h-6 gap-1 rounded-full px-2 text-xs",
-                thumbsUp
-                  ? "bg-blue-500/10 text-blue-600 hover:bg-blue-500/15 dark:text-blue-400"
-                  : "text-muted-foreground hover:text-foreground",
+                thumbsUp ? "bg-blue-500/10 text-blue-600 hover:bg-blue-500/15 dark:text-blue-400" : "text-muted-foreground hover:text-foreground",
               )}
               onClick={handleThumbsUp}
             >
@@ -265,9 +234,7 @@ export function TicketMessage({ message, ticketId, isFirstMessage = false, onRep
               Delete message
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this message from{" "}
-              <span className="font-medium text-foreground">{authorName}</span>?
-              This action cannot be undone.
+              Are you sure you want to delete this message from <span className="font-medium text-foreground">{authorName}</span>? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

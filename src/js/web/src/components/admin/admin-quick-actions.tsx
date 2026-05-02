@@ -1,6 +1,6 @@
-import { useState } from "react"
 import { Link, useLocation } from "@tanstack/react-router"
 import { ChevronRight, FileText, Monitor, Phone, ShieldCheck, Ticket, UserPlus, Users } from "lucide-react"
+import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 
@@ -114,9 +114,7 @@ export function AdminQuickActions() {
           return (
             <div key={group.label}>
               {groupIdx > 0 && startIndex < visibleCount && <Separator className="mb-3" />}
-              <p className="mb-1.5 px-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60">
-                {group.label}
-              </p>
+              <p className="mb-1.5 px-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60">{group.label}</p>
               <div className="space-y-1">
                 {group.actions.map((action) => {
                   const currentIndex = globalIndex

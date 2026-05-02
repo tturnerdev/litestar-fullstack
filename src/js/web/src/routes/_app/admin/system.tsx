@@ -1,7 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { createFileRoute, Link } from "@tanstack/react-router"
 import { useQuery } from "@tanstack/react-query"
-import { useDocumentTitle } from "@/hooks/use-document-title"
+import { createFileRoute, Link } from "@tanstack/react-router"
 import {
   Activity,
   AlertCircle,
@@ -24,26 +22,28 @@ import {
   XCircle,
   Zap,
 } from "lucide-react"
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip, XAxis, YAxis } from "recharts"
-import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { Area, AreaChart, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, XAxis, YAxis } from "recharts"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { DataFreshness } from "@/components/ui/data-freshness"
-import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
-import { Separator } from "@/components/ui/separator"
 import { EmptyState } from "@/components/ui/empty-state"
+import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
+import { Separator } from "@/components/ui/separator"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useAdminSystemStatus } from "@/lib/api/hooks/admin"
 import { useConnections, useTestAnyConnection } from "@/lib/api/hooks/connections"
 import { sseStatus } from "@/lib/api/hooks/events"
-import { systemHealth, type SystemHealth } from "@/lib/generated/api"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { formatUptime } from "@/lib/format-utils"
+import { type SystemHealth, systemHealth } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/admin/system")({
   component: AdminSystemPage,
@@ -76,12 +76,8 @@ function StatusDot({ ok, label }: { ok: boolean; label?: string }) {
     <Tooltip>
       <TooltipTrigger asChild>
         <span className="relative flex h-2.5 w-2.5">
-          {ok && (
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-40" />
-          )}
-          <span
-            className={`relative inline-flex h-2.5 w-2.5 rounded-full ${ok ? "bg-emerald-500" : "bg-destructive"}`}
-          />
+          {ok && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-40" />}
+          <span className={`relative inline-flex h-2.5 w-2.5 rounded-full ${ok ? "bg-emerald-500" : "bg-destructive"}`} />
         </span>
       </TooltipTrigger>
       <TooltipContent side="top" className="text-xs">
@@ -95,17 +91,13 @@ function OverallHealthBanner({ healthy }: { healthy: boolean }) {
   return (
     <div
       className={`flex items-center gap-3 rounded-lg border px-4 py-3 ${
-        healthy
-          ? "border-emerald-500/20 bg-emerald-500/5 text-emerald-700 dark:text-emerald-400"
-          : "border-destructive/20 bg-destructive/5 text-destructive"
+        healthy ? "border-emerald-500/20 bg-emerald-500/5 text-emerald-700 dark:text-emerald-400" : "border-destructive/20 bg-destructive/5 text-destructive"
       }`}
     >
       {healthy ? <CheckCircle2 className="h-5 w-5" /> : <XCircle className="h-5 w-5" />}
       <div>
         <p className="text-sm font-semibold">{healthy ? "All Systems Operational" : "Issue Detected"}</p>
-        <p className="text-xs opacity-75">
-          {healthy ? "All services are running normally." : "One or more services are reporting problems."}
-        </p>
+        <p className="text-xs opacity-75">{healthy ? "All services are running normally." : "One or more services are reporting problems."}</p>
       </div>
     </div>
   )
@@ -116,9 +108,7 @@ function UptimeBanner({ startedAt, uptimeSeconds }: { startedAt: string; uptimeS
   const display = liveUptime ?? formatUptime(uptimeSeconds, true)
 
   // Parse into segments for the large display
-  const totalSec = startedAt
-    ? Math.max(0, Math.floor((Date.now() - new Date(startedAt).getTime()) / 1000))
-    : uptimeSeconds
+  const totalSec = startedAt ? Math.max(0, Math.floor((Date.now() - new Date(startedAt).getTime()) / 1000)) : uptimeSeconds
   const days = Math.floor(totalSec / 86400)
   const hours = Math.floor((totalSec % 86400) / 3600)
   const minutes = Math.floor((totalSec % 3600) / 60)
@@ -146,9 +136,7 @@ function UptimeBanner({ startedAt, uptimeSeconds }: { startedAt: string; uptimeS
         </div>
         <Tooltip>
           <TooltipTrigger asChild>
-            <span className="shrink-0 cursor-default text-xs text-muted-foreground">
-              since {formatDateTime(startedAt)}
-            </span>
+            <span className="shrink-0 cursor-default text-xs text-muted-foreground">since {formatDateTime(startedAt)}</span>
           </TooltipTrigger>
           <TooltipContent side="top" className="text-xs">
             {display}
@@ -246,9 +234,7 @@ function HealthIndicatorCard({ indicator }: { indicator: HealthIndicator }) {
                 {colors.label}
               </Badge>
               <span className="relative flex h-2.5 w-2.5">
-                {showPing && (
-                  <span className={`absolute inline-flex h-full w-full animate-ping rounded-full ${colors.ping} opacity-40`} />
-                )}
+                {showPing && <span className={`absolute inline-flex h-full w-full animate-ping rounded-full ${colors.ping} opacity-40`} />}
                 <span className={`relative inline-flex h-2.5 w-2.5 rounded-full ${colors.dot}`} />
               </span>
             </div>
@@ -279,13 +265,7 @@ function SystemHealthIndicators({ autoRefresh }: { autoRefresh: boolean }) {
 
   // Determine individual statuses
   const apiStatus: HealthStatus = healthError ? "unhealthy" : healthData ? "healthy" : "unknown"
-  const dbStatus: HealthStatus = healthError
-    ? "unknown"
-    : healthData?.databaseStatus === "online"
-      ? "healthy"
-      : healthData?.databaseStatus === "offline"
-        ? "unhealthy"
-        : "unknown"
+  const dbStatus: HealthStatus = healthError ? "unknown" : healthData?.databaseStatus === "online" ? "healthy" : healthData?.databaseStatus === "offline" ? "unhealthy" : "unknown"
   const redisStatus: HealthStatus = healthError ? "unknown" : healthData ? "healthy" : "unknown"
   const sseIndicatorStatus: HealthStatus = sseConnected ? "healthy" : "degraded"
 
@@ -294,21 +274,13 @@ function SystemHealthIndicators({ autoRefresh }: { autoRefresh: boolean }) {
       name: "API Server",
       icon: Server,
       status: apiStatus,
-      detail: apiStatus === "healthy"
-        ? `v${healthData?.version ?? "?"} -- ${healthData?.app ?? "Litestar"}`
-        : apiStatus === "unhealthy"
-          ? "Endpoint unreachable"
-          : "Checking...",
+      detail: apiStatus === "healthy" ? `v${healthData?.version ?? "?"} -- ${healthData?.app ?? "Litestar"}` : apiStatus === "unhealthy" ? "Endpoint unreachable" : "Checking...",
     },
     {
       name: "Database",
       icon: Database,
       status: dbStatus,
-      detail: dbStatus === "healthy"
-        ? "PostgreSQL connected"
-        : dbStatus === "unhealthy"
-          ? "Connection failed"
-          : "Status unavailable",
+      detail: dbStatus === "healthy" ? "PostgreSQL connected" : dbStatus === "unhealthy" ? "Connection failed" : "Status unavailable",
     },
     {
       name: "Redis / Queue",
@@ -320,16 +292,11 @@ function SystemHealthIndicators({ autoRefresh }: { autoRefresh: boolean }) {
       name: "SSE Connection",
       icon: Radio,
       status: sseIndicatorStatus,
-      detail: sseConnected
-        ? "Real-time events active"
-        : sseStatus.disconnectedSince
-          ? `Disconnected ${formatTimeSince(new Date(sseStatus.disconnectedSince))}`
-          : "Reconnecting...",
+      detail: sseConnected ? "Real-time events active" : sseStatus.disconnectedSince ? `Disconnected ${formatTimeSince(new Date(sseStatus.disconnectedSince))}` : "Reconnecting...",
     },
   ]
 
-  const lastCheckedLabel =
-    dataUpdatedAt > 0 ? `Last checked: ${formatTimeSince(new Date(dataUpdatedAt))}` : "Checking..."
+  const lastCheckedLabel = dataUpdatedAt > 0 ? `Last checked: ${formatTimeSince(new Date(dataUpdatedAt))}` : "Checking..."
 
   return (
     <Card>
@@ -344,13 +311,7 @@ function SystemHealthIndicators({ autoRefresh }: { autoRefresh: boolean }) {
           </div>
           <div className="flex items-center gap-3">
             <span className="text-[11px] text-muted-foreground">{lastCheckedLabel}</span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => refetch()}
-              disabled={isFetching}
-              aria-label="Refresh health checks"
-            >
+            <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching} aria-label="Refresh health checks">
               <RefreshCw className={`h-3.5 w-3.5 ${isFetching ? "animate-spin" : ""}`} />
               Refresh
             </Button>
@@ -421,18 +382,11 @@ function ServiceStatusGrid({
             const isHealthy = svc.status === "healthy"
             const isUnknown = svc.status === "unknown"
             return (
-              <div
-                key={svc.name}
-                className="flex items-center justify-between rounded-lg border px-4 py-3"
-              >
+              <div key={svc.name} className="flex items-center justify-between rounded-lg border px-4 py-3">
                 <div className="flex items-center gap-3">
                   <div
                     className={`flex h-8 w-8 items-center justify-center rounded-md ${
-                      isHealthy
-                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                        : isUnknown
-                          ? "bg-muted text-muted-foreground"
-                          : "bg-destructive/10 text-destructive"
+                      isHealthy ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : isUnknown ? "bg-muted text-muted-foreground" : "bg-destructive/10 text-destructive"
                     }`}
                   >
                     <SvcIcon className="h-4 w-4" />
@@ -531,11 +485,7 @@ function SystemInfoCard({
   )
 }
 
-function WorkerQueuesCard({
-  queues,
-}: {
-  queues: Array<{ name: string; active?: number; queued?: number; scheduled?: number }>
-}) {
+function WorkerQueuesCard({ queues }: { queues: Array<{ name: string; active?: number; queued?: number; scheduled?: number }> }) {
   const totalActive = queues.reduce((sum, q) => sum + (q.active ?? 0), 0)
   const totalQueued = queues.reduce((sum, q) => sum + (q.queued ?? 0), 0)
   const totalScheduled = queues.reduce((sum, q) => sum + (q.scheduled ?? 0), 0)
@@ -589,9 +539,7 @@ function WorkerQueuesCard({
                     <StatusDot ok label={isIdle ? "Idle" : `${total} job${total !== 1 ? "s" : ""}`} />
                     <div>
                       <p className="text-sm font-medium">{queue.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {isIdle ? "No active jobs" : `${active} active, ${queued} pending, ${scheduled} scheduled`}
-                      </p>
+                      <p className="text-xs text-muted-foreground">{isIdle ? "No active jobs" : `${active} active, ${queued} pending, ${scheduled} scheduled`}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5">
@@ -619,24 +567,9 @@ function WorkerQueuesCard({
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <div className="flex h-2 w-full overflow-hidden rounded-full bg-muted">
-                          {activePct > 0 && (
-                            <div
-                              className="h-full bg-primary transition-all duration-300"
-                              style={{ width: `${activePct}%` }}
-                            />
-                          )}
-                          {queuedPct > 0 && (
-                            <div
-                              className="h-full bg-amber-500 transition-all duration-300"
-                              style={{ width: `${queuedPct}%` }}
-                            />
-                          )}
-                          {scheduledPct > 0 && (
-                            <div
-                              className="h-full bg-muted-foreground/30 transition-all duration-300"
-                              style={{ width: `${scheduledPct}%` }}
-                            />
-                          )}
+                          {activePct > 0 && <div className="h-full bg-primary transition-all duration-300" style={{ width: `${activePct}%` }} />}
+                          {queuedPct > 0 && <div className="h-full bg-amber-500 transition-all duration-300" style={{ width: `${queuedPct}%` }} />}
+                          {scheduledPct > 0 && <div className="h-full bg-muted-foreground/30 transition-all duration-300" style={{ width: `${scheduledPct}%` }} />}
                         </div>
                       </TooltipTrigger>
                       <TooltipContent side="bottom" className="text-xs">
@@ -752,11 +685,7 @@ function ExternalConnectionsCard() {
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={handleTestAll} disabled={testingAll}>
-              {testingAll ? (
-                <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <Zap className="mr-1.5 h-3.5 w-3.5" />
-              )}
+              {testingAll ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Zap className="mr-1.5 h-3.5 w-3.5" />}
               Test All
             </Button>
           </div>
@@ -768,19 +697,12 @@ function ExternalConnectionsCard() {
           const StatusIcon = config.icon
           const isCurrentlyTesting = testConnection.isPending && testConnection.variables === conn.id
           return (
-            <div
-              key={conn.id}
-              className="flex items-center justify-between rounded-lg border px-4 py-3"
-            >
+            <div key={conn.id} className="flex items-center justify-between rounded-lg border px-4 py-3">
               <div className="flex items-center gap-3">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <span className={`flex items-center ${config.colorClass}`}>
-                      {isCurrentlyTesting ? (
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      ) : (
-                        <StatusIcon className="h-3.5 w-3.5" />
-                      )}
+                      {isCurrentlyTesting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <StatusIcon className="h-3.5 w-3.5" />}
                     </span>
                   </TooltipTrigger>
                   <TooltipContent side="top" className="text-xs">
@@ -800,9 +722,7 @@ function ExternalConnectionsCard() {
                 {conn.lastHealthCheck && (
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <span className="cursor-default text-[10px] text-muted-foreground">
-                        {formatRelativeTimeShort(conn.lastHealthCheck)}
-                      </span>
+                      <span className="cursor-default text-[10px] text-muted-foreground">{formatRelativeTimeShort(conn.lastHealthCheck)}</span>
                     </TooltipTrigger>
                     <TooltipContent className="text-xs">{formatDateTime(conn.lastHealthCheck)}</TooltipContent>
                   </Tooltip>
@@ -812,10 +732,7 @@ function ExternalConnectionsCard() {
           )
         })}
         <div className="pt-1">
-          <Link
-            to="/connections"
-            className="inline-flex items-center gap-1 text-xs text-primary underline-offset-4 hover:underline"
-          >
+          <Link to="/connections" className="inline-flex items-center gap-1 text-xs text-primary underline-offset-4 hover:underline">
             Manage connections
             <ExternalLink className="h-3 w-3" />
           </Link>
@@ -838,9 +755,7 @@ interface QueueSnapshot {
 
 const MAX_HISTORY_POINTS = 20
 
-function useQueueHistory(
-  queues: Array<{ name: string; active?: number; queued?: number; scheduled?: number }> | undefined,
-) {
+function useQueueHistory(queues: Array<{ name: string; active?: number; queued?: number; scheduled?: number }> | undefined) {
   const historyRef = useRef<QueueSnapshot[]>([])
   const lastUpdateRef = useRef<number>(0)
 
@@ -867,11 +782,7 @@ function useQueueHistory(
   return historyRef.current
 }
 
-function WorkerQueueHistoryChart({
-  queues,
-}: {
-  queues?: Array<{ name: string; active?: number; queued?: number; scheduled?: number }>
-}) {
+function WorkerQueueHistoryChart({ queues }: { queues?: Array<{ name: string; active?: number; queued?: number; scheduled?: number }> }) {
   const history = useQueueHistory(queues)
 
   // Calculate throughput estimate from snapshot deltas
@@ -898,11 +809,7 @@ function WorkerQueueHistoryChart({
           <BarChart3 className="h-4 w-4 text-muted-foreground" />
           Queue Activity
         </CardTitle>
-        <CardDescription>
-          {hasHistory
-            ? "Job counts sampled over recent refreshes."
-            : "Live throughput estimate based on current queue state."}
-        </CardDescription>
+        <CardDescription>{hasHistory ? "Job counts sampled over recent refreshes." : "Live throughput estimate based on current queue state."}</CardDescription>
       </CardHeader>
       <CardContent>
         {hasHistory ? (
@@ -924,20 +831,8 @@ function WorkerQueueHistoryChart({
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.5} />
-                <XAxis
-                  dataKey="time"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
-                  dy={4}
-                />
-                <YAxis
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
-                  allowDecimals={false}
-                  width={35}
-                />
+                <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} dy={4} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} allowDecimals={false} width={35} />
                 <RechartsTooltip
                   contentStyle={{
                     backgroundColor: "hsl(var(--popover))",
@@ -947,22 +842,8 @@ function WorkerQueueHistoryChart({
                   }}
                   labelStyle={{ color: "hsl(var(--popover-foreground))", fontWeight: 500 }}
                 />
-                <Area
-                  type="monotone"
-                  dataKey="active"
-                  name="Active"
-                  stroke="hsl(var(--primary))"
-                  fill="url(#activeGradient)"
-                  strokeWidth={2}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="queued"
-                  name="Pending"
-                  stroke="hsl(38 92% 50%)"
-                  fill="url(#queuedGradient)"
-                  strokeWidth={2}
-                />
+                <Area type="monotone" dataKey="active" name="Active" stroke="hsl(var(--primary))" fill="url(#activeGradient)" strokeWidth={2} />
+                <Area type="monotone" dataKey="queued" name="Pending" stroke="hsl(38 92% 50%)" fill="url(#queuedGradient)" strokeWidth={2} />
                 <Area
                   type="monotone"
                   dataKey="scheduled"
@@ -980,15 +861,9 @@ function WorkerQueueHistoryChart({
             <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
               <BarChart3 className="h-5 w-5 text-muted-foreground" />
             </div>
-            <p className="text-sm font-medium">
-              {throughputEstimate?.rate ?? 0 > 0 ? "Processing" : "No Active Jobs"}
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {throughputEstimate?.label ?? "Idle"}
-            </p>
-            <p className="mt-3 text-[11px] text-muted-foreground">
-              Enable auto-refresh to build a history chart of queue activity over time.
-            </p>
+            <p className="text-sm font-medium">{(throughputEstimate?.rate ?? 0 > 0) ? "Processing" : "No Active Jobs"}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{throughputEstimate?.label ?? "Idle"}</p>
+            <p className="mt-3 text-[11px] text-muted-foreground">Enable auto-refresh to build a history chart of queue activity over time.</p>
           </div>
         )}
 
@@ -1075,13 +950,7 @@ const timelineStatusLabels: Record<TimelineSegmentStatus, string> = {
   unknown: "No data",
 }
 
-function SystemStatusTimeline({
-  startedAt,
-  databaseStatus,
-}: {
-  startedAt: string
-  databaseStatus: "online" | "offline"
-}) {
+function SystemStatusTimeline({ startedAt, databaseStatus }: { startedAt: string; databaseStatus: "online" | "offline" }) {
   const segments = useStatusTimeline(startedAt, databaseStatus)
 
   const uptimePercent = useMemo(() => {
@@ -1115,9 +984,7 @@ function SystemStatusTimeline({
             {segments.map((seg) => (
               <Tooltip key={seg.startHour}>
                 <TooltipTrigger asChild>
-                  <div
-                    className={`flex-1 cursor-default transition-opacity hover:opacity-80 ${timelineStatusColors[seg.status]}`}
-                  />
+                  <div className={`flex-1 cursor-default transition-opacity hover:opacity-80 ${timelineStatusColors[seg.status]}`} />
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="text-xs">
                   <p className="font-medium">{seg.label}</p>
@@ -1192,14 +1059,7 @@ function CircularGauge({
       <div className="relative" style={{ width: size, height: size }}>
         <svg width={size} height={size} className="-rotate-90">
           {/* Background ring */}
-          <circle
-            cx={size / 2}
-            cy={size / 2}
-            r={radius}
-            fill="none"
-            stroke="hsl(var(--muted))"
-            strokeWidth={strokeWidth}
-          />
+          <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="hsl(var(--muted))" strokeWidth={strokeWidth} />
           {/* Progress ring */}
           <circle
             cx={size / 2}
@@ -1216,9 +1076,7 @@ function CircularGauge({
         </svg>
         {/* Center text */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className={`text-lg font-bold tabular-nums ${getColor(percentage)}`}>
-            {Math.round(percentage)}%
-          </span>
+          <span className={`text-lg font-bold tabular-nums ${getColor(percentage)}`}>{Math.round(percentage)}%</span>
         </div>
       </div>
       <div className="text-center">
@@ -1229,11 +1087,7 @@ function CircularGauge({
   )
 }
 
-function QueueUtilizationGauges({
-  queues,
-}: {
-  queues: Array<{ name: string; active?: number; queued?: number; scheduled?: number }>
-}) {
+function QueueUtilizationGauges({ queues }: { queues: Array<{ name: string; active?: number; queued?: number; scheduled?: number }> }) {
   // Compute utilization metrics from queue data
   const metrics = useMemo(() => {
     const totalActive = queues.reduce((sum, q) => sum + (q.active ?? 0), 0)
@@ -1344,7 +1198,11 @@ function AdminSystemPage() {
               icon={AlertCircle}
               title="Unable to load system status"
               description="The server may be unreachable. Please try again."
-              action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+              action={
+                <Button variant="outline" size="sm" onClick={() => refetch()}>
+                  Try again
+                </Button>
+              }
             />
           ) : (
             <div className="space-y-6">
@@ -1399,9 +1257,7 @@ function AdminSystemPage() {
                         <CardDescription>Background job processing status.</CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <p className="text-sm text-muted-foreground">
-                          No worker queue data available. Workers may not be running.
-                        </p>
+                        <p className="text-sm text-muted-foreground">No worker queue data available. Workers may not be running.</p>
                       </CardContent>
                     </Card>
                   )}
@@ -1427,9 +1283,7 @@ function AdminSystemPage() {
                         <CardDescription>Worker and queue capacity gauges.</CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <p className="text-sm text-muted-foreground">
-                          No queue data available. Workers may not be running.
-                        </p>
+                        <p className="text-sm text-muted-foreground">No queue data available. Workers may not be running.</p>
                       </CardContent>
                     </Card>
                   )}
@@ -1443,11 +1297,7 @@ function AdminSystemPage() {
 
               {/* Data freshness footer */}
               <div className="flex items-center justify-end">
-                <DataFreshness
-                  dataUpdatedAt={dataUpdatedAt > 0 ? dataUpdatedAt : undefined}
-                  onRefresh={handleRefresh}
-                  isRefreshing={isFetching}
-                />
+                <DataFreshness dataUpdatedAt={dataUpdatedAt > 0 ? dataUpdatedAt : undefined} onRefresh={handleRefresh} isRefreshing={isFetching} />
               </div>
             </div>
           )}

@@ -31,8 +31,7 @@ export interface UseTagsOptions {
 }
 
 export function useTags(pageOrOptions: number | UseTagsOptions = 1, pageSizeArg = 20) {
-  const opts: UseTagsOptions =
-    typeof pageOrOptions === "number" ? { page: pageOrOptions, pageSize: pageSizeArg } : pageOrOptions
+  const opts: UseTagsOptions = typeof pageOrOptions === "number" ? { page: pageOrOptions, pageSize: pageSizeArg } : pageOrOptions
   const { page = 1, pageSize = 20, search, orderBy, sortOrder } = opts
 
   return useQuery({

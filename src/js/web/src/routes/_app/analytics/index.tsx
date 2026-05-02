@@ -1,5 +1,4 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import React, { useCallback, useEffect, useMemo, useState } from "react"
 import {
   AlertCircle,
   BarChart3,
@@ -18,64 +17,41 @@ import {
   TrendingUp,
   X,
 } from "lucide-react"
-import {
-  Area,
-  AreaChart,
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Legend,
-  ResponsiveContainer,
-  Tooltip as RechartsTooltip,
-  XAxis,
-  YAxis,
-} from "recharts"
+import React, { useCallback, useEffect, useMemo, useState } from "react"
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, Legend, Tooltip as RechartsTooltip, ResponsiveContainer, XAxis, YAxis } from "recharts"
 
 import { Badge } from "@/components/ui/badge"
-import { DataFreshness } from "@/components/ui/data-freshness"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { BulkActionBar, createExportAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { DateRangeFilter, getPresetDates, getPresetLabel } from "@/components/ui/date-range-filter"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { EmptyState } from "@/components/ui/empty-state"
 import { FilterDropdown, type FilterOption } from "@/components/ui/filter-dropdown"
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { useDebouncedValue } from "@/hooks/use-debounced-value"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import {
+  type CallRecord,
   useAnalyticsByExtension,
   useAnalyticsCostBreakdown,
   useAnalyticsSummary,
   useAnalyticsVolume,
   useCallRecord,
   useCallRecords,
-  type CallRecord,
 } from "@/lib/api/hooks/analytics"
-import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
+import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { formatDateTime } from "@/lib/date-utils"
-import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
-import { useDebouncedValue } from "@/hooks/use-debounced-value"
-import { useDocumentTitle } from "@/hooks/use-document-title"
 
 export const Route = createFileRoute("/_app/analytics/")({
   component: AnalyticsPage,
@@ -203,17 +179,7 @@ function DispositionBadge({ disposition }: { disposition: string }) {
 
 // -- Stat card ----------------------------------------------------------------
 
-function StatCard({
-  title,
-  value,
-  subtitle,
-  icon: Icon,
-}: {
-  title: string
-  value: string | number
-  subtitle?: string
-  icon: typeof Phone
-}) {
+function StatCard({ title, value, subtitle, icon: Icon }: { title: string; value: string | number; subtitle?: string; icon: typeof Phone }) {
   return (
     <Card className="print:break-inside-avoid print:shadow-none print:border">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -237,15 +203,7 @@ const QUICK_PRESETS = [
   { label: "90 Days", days: 90 },
 ] as const
 
-function DateRangePresets({
-  startDate,
-  endDate,
-  onPreset,
-}: {
-  startDate: string
-  endDate: string
-  onPreset: (days: number) => void
-}) {
+function DateRangePresets({ startDate, endDate, onPreset }: { startDate: string; endDate: string; onPreset: (days: number) => void }) {
   const activeLabel = getPresetLabel(startDate, endDate)
 
   return (
@@ -270,17 +228,9 @@ function DateRangePresets({
 
 // -- Volume bar chart ---------------------------------------------------------
 
-function VolumeChart({
-  data,
-}: {
-  data: { period: string; count: number; answered: number; missed: number }[]
-}) {
+function VolumeChart({ data }: { data: { period: string; count: number; answered: number; missed: number }[] }) {
   if (data.length === 0) {
-    return (
-      <div className="flex h-48 items-center justify-center text-sm text-muted-foreground">
-        No volume data for this period
-      </div>
-    )
+    return <div className="flex h-48 items-center justify-center text-sm text-muted-foreground">No volume data for this period</div>
   }
 
   const maxCount = Math.max(...data.map((d) => d.count), 1)
@@ -328,9 +278,7 @@ function VolumeChart({
           const showLabel = data.length <= 14 || i % Math.ceil(data.length / 10) === 0 || i === data.length - 1
           return (
             <div key={point.period} className="flex-1 text-center">
-              {showLabel && (
-                <span className="text-[10px] text-muted-foreground">{formatPeriodLabel(point.period)}</span>
-              )}
+              {showLabel && <span className="text-[10px] text-muted-foreground">{formatPeriodLabel(point.period)}</span>}
             </div>
           )
         })}
@@ -352,15 +300,7 @@ function VolumeChart({
 
 // -- CDR detail dialog --------------------------------------------------------
 
-function CdrDetailDialog({
-  cdrId,
-  open,
-  onOpenChange,
-}: {
-  cdrId: string
-  open: boolean
-  onOpenChange: (open: boolean) => void
-}) {
+function CdrDetailDialog({ cdrId, open, onOpenChange }: { cdrId: string; open: boolean; onOpenChange: (open: boolean) => void }) {
   const { data: record, isLoading, isError, refetch } = useCallRecord(cdrId)
 
   return (
@@ -382,7 +322,11 @@ function CdrDetailDialog({
             icon={AlertCircle}
             title="Unable to load call record details"
             description="Something went wrong. Please try again."
-            action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+            action={
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
+                Try again
+              </Button>
+            }
           />
         )}
 
@@ -491,13 +435,7 @@ function formatHourLabel(hour: number): string {
   return hour < 12 ? `${hour} AM` : `${hour - 12} PM`
 }
 
-function CallHeatmap({
-  data,
-  isLoading,
-}: {
-  data: { period: string; count: number }[]
-  isLoading: boolean
-}) {
+function CallHeatmap({ data, isLoading }: { data: { period: string; count: number }[]; isLoading: boolean }) {
   // Build a 24x7 grid: heatmap[hour][dayIndex] = count
   const { grid, maxCount } = useMemo(() => {
     const g: number[][] = HOURS.map(() => Array(7).fill(0) as number[])
@@ -524,11 +462,7 @@ function CallHeatmap({
   }
 
   if (data.length === 0 || maxCount === 0) {
-    return (
-      <div className="flex h-48 items-center justify-center text-sm text-muted-foreground">
-        No call activity data for this period
-      </div>
-    )
+    return <div className="flex h-48 items-center justify-center text-sm text-muted-foreground">No call activity data for this period</div>
   }
 
   return (
@@ -545,10 +479,7 @@ function CallHeatmap({
           {/* Header: empty corner + day labels */}
           <div />
           {DAYS_OF_WEEK.map((day) => (
-            <div
-              key={day}
-              className="flex items-end justify-center pb-1 text-[11px] font-medium text-muted-foreground"
-            >
+            <div key={day} className="flex items-end justify-center pb-1 text-[11px] font-medium text-muted-foreground">
               {day}
             </div>
           ))}
@@ -556,9 +487,7 @@ function CallHeatmap({
           {/* Rows: hour label + 7 cells */}
           {HOURS.map((hour) => (
             <React.Fragment key={hour}>
-              <div className="flex items-center justify-end pr-2 text-[10px] text-muted-foreground tabular-nums">
-                {hour % 3 === 0 ? formatHourLabel(hour) : ""}
-              </div>
+              <div className="flex items-center justify-end pr-2 text-[10px] text-muted-foreground tabular-nums">{hour % 3 === 0 ? formatHourLabel(hour) : ""}</div>
               {DAYS_OF_WEEK.map((day, dayIdx) => {
                 const count = grid[hour][dayIdx]
                 const intensity = maxCount > 0 ? count / maxCount : 0
@@ -568,15 +497,14 @@ function CallHeatmap({
                       <div
                         className="rounded-[3px] border border-border/30 transition-colors"
                         style={{
-                          backgroundColor:
-                            count === 0
-                              ? "hsl(var(--muted) / 0.3)"
-                              : `hsl(142, 76%, 46%, ${0.15 + intensity * 0.85})`,
+                          backgroundColor: count === 0 ? "hsl(var(--muted) / 0.3)" : `hsl(142, 76%, 46%, ${0.15 + intensity * 0.85})`,
                         }}
                       />
                     </TooltipTrigger>
                     <TooltipContent side="top" className="text-xs">
-                      <span className="font-medium">{day} {formatHourLabel(hour)}</span>
+                      <span className="font-medium">
+                        {day} {formatHourLabel(hour)}
+                      </span>
                       <br />
                       {count} call{count !== 1 ? "s" : ""}
                     </TooltipContent>
@@ -597,10 +525,7 @@ function CallHeatmap({
               key={level}
               className="h-3 w-3 rounded-[2px] border border-border/30"
               style={{
-                backgroundColor:
-                  level === 0
-                    ? "hsl(var(--muted) / 0.3)"
-                    : `hsl(142, 76%, 46%, ${0.15 + level * 0.85})`,
+                backgroundColor: level === 0 ? "hsl(var(--muted) / 0.3)" : `hsl(142, 76%, 46%, ${0.15 + level * 0.85})`,
               }}
             />
           ))}
@@ -629,13 +554,9 @@ function DashboardTab() {
     setEndDate(end)
   }, [])
 
-  const answeredPct = summary && summary.totalCalls > 0
-    ? ((summary.answered / summary.totalCalls) * 100).toFixed(1)
-    : "0"
+  const answeredPct = summary && summary.totalCalls > 0 ? ((summary.answered / summary.totalCalls) * 100).toFixed(1) : "0"
 
-  const missedPct = summary && summary.totalCalls > 0
-    ? ((summary.missed / summary.totalCalls) * 100).toFixed(1)
-    : "0"
+  const missedPct = summary && summary.totalCalls > 0 ? ((summary.missed / summary.totalCalls) * 100).toFixed(1) : "0"
 
   return (
     <div className="space-y-6">
@@ -643,14 +564,7 @@ function DashboardTab() {
       <div className="flex items-center gap-3 print:hidden">
         <DateRangePresets startDate={startDate} endDate={endDate} onPreset={handleDatePreset} />
         <div className="h-5 w-px bg-border" />
-        <DateRangeFilter
-          startDate={startDate}
-          endDate={endDate}
-          onStartDateChange={setStartDate}
-          onEndDateChange={setEndDate}
-          onPreset={handleDatePreset}
-          label="Date range"
-        />
+        <DateRangeFilter startDate={startDate} endDate={endDate} onStartDateChange={setStartDate} onEndDateChange={setEndDate} onPreset={handleDatePreset} label="Date range" />
         <div className="ml-auto flex items-center gap-2">
           <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
           <Button variant="outline" size="sm" onClick={() => window.print()}>
@@ -662,58 +576,38 @@ function DashboardTab() {
 
       {/* Summary stat cards */}
       <SectionErrorBoundary name="Analytics Summary Stats">
-      {summaryLoading ? (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <SkeletonCard key={i} />
-          ))}
-        </div>
-      ) : summary ? (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <StatCard
-            title="Total Calls"
-            value={summary.totalCalls.toLocaleString()}
-            subtitle={`${formatDurationLong(summary.totalDuration)} total duration`}
-            icon={Phone}
-          />
-          <StatCard
-            title="Answered"
-            value={summary.answered.toLocaleString()}
-            subtitle={`${answeredPct}% answer rate`}
-            icon={PhoneIncoming}
-          />
-          <StatCard
-            title="Missed"
-            value={summary.missed.toLocaleString()}
-            subtitle={`${missedPct}% of total calls`}
-            icon={PhoneMissed}
-          />
-          <StatCard
-            title="Avg Duration"
-            value={formatDuration(summary.avgDuration)}
-            subtitle={`${formatDuration(summary.avgBillableSeconds)} avg billable`}
-            icon={Clock}
-          />
-        </div>
-      ) : null}
+        {summaryLoading ? (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
+          </div>
+        ) : summary ? (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <StatCard title="Total Calls" value={summary.totalCalls.toLocaleString()} subtitle={`${formatDurationLong(summary.totalDuration)} total duration`} icon={Phone} />
+            <StatCard title="Answered" value={summary.answered.toLocaleString()} subtitle={`${answeredPct}% answer rate`} icon={PhoneIncoming} />
+            <StatCard title="Missed" value={summary.missed.toLocaleString()} subtitle={`${missedPct}% of total calls`} icon={PhoneMissed} />
+            <StatCard title="Avg Duration" value={formatDuration(summary.avgDuration)} subtitle={`${formatDuration(summary.avgBillableSeconds)} avg billable`} icon={Clock} />
+          </div>
+        ) : null}
       </SectionErrorBoundary>
 
       {/* Call volume chart */}
       <SectionErrorBoundary name="Call Volume Chart">
-      <Card className="print:break-inside-avoid print:shadow-none print:border">
-        <CardHeader>
-          <CardTitle className="text-base">Call Volume</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {volumeLoading ? (
-            <div className="flex h-48 items-center justify-center">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : (
-            <VolumeChart data={volumeData?.items ?? []} />
-          )}
-        </CardContent>
-      </Card>
+        <Card className="print:break-inside-avoid print:shadow-none print:border">
+          <CardHeader>
+            <CardTitle className="text-base">Call Volume</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {volumeLoading ? (
+              <div className="flex h-48 items-center justify-center">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : (
+              <VolumeChart data={volumeData?.items ?? []} />
+            )}
+          </CardContent>
+        </Card>
       </SectionErrorBoundary>
 
       {/* Per-extension table */}
@@ -727,9 +621,7 @@ function DashboardTab() {
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
           ) : !extensionData?.items?.length ? (
-            <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">
-              No extension data for this period
-            </div>
+            <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">No extension data for this period</div>
           ) : (
             <div className="overflow-x-auto rounded-md border border-border/60">
               <Table aria-label="Call detail records">
@@ -745,9 +637,7 @@ function DashboardTab() {
                 </TableHeader>
                 <TableBody>
                   {extensionData.items.map((ext) => {
-                    const rate = ext.totalCalls > 0
-                      ? ((ext.answered / ext.totalCalls) * 100).toFixed(1)
-                      : "0.0"
+                    const rate = ext.totalCalls > 0 ? ((ext.answered / ext.totalCalls) * 100).toFixed(1) : "0.0"
                     return (
                       <TableRow key={ext.extension}>
                         <TableCell className="font-mono font-medium">{ext.extension}</TableCell>
@@ -756,10 +646,7 @@ function DashboardTab() {
                         <TableCell className="text-right text-red-600 dark:text-red-400">{ext.missed}</TableCell>
                         <TableCell className="text-right">{formatDuration(ext.avgDuration)}</TableCell>
                         <TableCell className="text-right">
-                          <Badge
-                            variant={Number(rate) >= 80 ? "default" : Number(rate) >= 50 ? "secondary" : "destructive"}
-                            className="text-xs"
-                          >
+                          <Badge variant={Number(rate) >= 80 ? "default" : Number(rate) >= 50 ? "secondary" : "destructive"} className="text-xs">
                             {rate}%
                           </Badge>
                         </TableCell>
@@ -777,15 +664,10 @@ function DashboardTab() {
       <Card className="print:break-inside-avoid print:shadow-none print:border">
         <CardHeader>
           <CardTitle className="text-base">Call Activity Heatmap</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Call volume by hour of day and day of week
-          </p>
+          <p className="text-sm text-muted-foreground">Call volume by hour of day and day of week</p>
         </CardHeader>
         <CardContent>
-          <CallHeatmap
-            data={hourlyVolumeData?.items ?? []}
-            isLoading={hourlyVolumeLoading}
-          />
+          <CallHeatmap data={hourlyVolumeData?.items ?? []} isLoading={hourlyVolumeLoading} />
         </CardContent>
       </Card>
 
@@ -797,13 +679,7 @@ function DashboardTab() {
 
 // -- Cost Analysis section ----------------------------------------------------
 
-function CostAnalysisSection({
-  startDate,
-  endDate,
-}: {
-  startDate: string
-  endDate: string
-}) {
+function CostAnalysisSection({ startDate, endDate }: { startDate: string; endDate: string }) {
   const { data, isLoading } = useAnalyticsCostBreakdown(startDate, endDate)
 
   if (isLoading) {
@@ -844,18 +720,8 @@ function CostAnalysisSection({
           subtitle={`${summary.callsWithCost} of ${summary.totalCalls} calls with cost`}
           icon={DollarSign}
         />
-        <StatCard
-          title="Avg Cost / Call"
-          value={hasCostData ? `$${summary.avgCostPerCall.toFixed(4)}` : "$0.00"}
-          subtitle="Across all calls in period"
-          icon={TrendingUp}
-        />
-        <StatCard
-          title="Inbound Cost"
-          value={`$${summary.inboundCost.toFixed(2)}`}
-          subtitle={`Outbound: $${summary.outboundCost.toFixed(2)}`}
-          icon={PhoneIncoming}
-        />
+        <StatCard title="Avg Cost / Call" value={hasCostData ? `$${summary.avgCostPerCall.toFixed(4)}` : "$0.00"} subtitle="Across all calls in period" icon={TrendingUp} />
+        <StatCard title="Inbound Cost" value={`$${summary.inboundCost.toFixed(2)}`} subtitle={`Outbound: $${summary.outboundCost.toFixed(2)}`} icon={PhoneIncoming} />
         <StatCard
           title="Outbound Cost"
           value={`$${summary.outboundCost.toFixed(2)}`}
@@ -872,16 +738,10 @@ function CostAnalysisSection({
           </CardHeader>
           <CardContent>
             {byExtension.length === 0 ? (
-              <div className="flex h-48 items-center justify-center text-sm text-muted-foreground">
-                No cost data by extension for this period
-              </div>
+              <div className="flex h-48 items-center justify-center text-sm text-muted-foreground">No cost data by extension for this period</div>
             ) : (
               <ResponsiveContainer width="100%" height={Math.max(200, byExtension.length * 36)}>
-                <BarChart
-                  data={byExtension}
-                  layout="vertical"
-                  margin={{ top: 4, right: 30, bottom: 4, left: 60 }}
-                >
+                <BarChart data={byExtension} layout="vertical" margin={{ top: 4, right: 30, bottom: 4, left: 60 }}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-border" horizontal={false} />
                   <XAxis
                     type="number"
@@ -890,14 +750,7 @@ function CostAnalysisSection({
                     axisLine={false}
                     tickLine={false}
                   />
-                  <YAxis
-                    type="category"
-                    dataKey="extension"
-                    tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
-                    width={50}
-                    axisLine={false}
-                    tickLine={false}
-                  />
+                  <YAxis type="category" dataKey="extension" tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} width={50} axisLine={false} tickLine={false} />
                   <RechartsTooltip
                     contentStyle={{
                       background: "hsl(var(--popover))",
@@ -909,13 +762,7 @@ function CostAnalysisSection({
                     formatter={(value) => [`$${Number(value ?? 0).toFixed(4)}`, "Cost"]}
                     labelFormatter={(label) => `Ext ${label}`}
                   />
-                  <Bar
-                    dataKey="totalCost"
-                    name="Cost"
-                    fill="hsl(var(--primary))"
-                    radius={[0, 4, 4, 0]}
-                    maxBarSize={28}
-                  />
+                  <Bar dataKey="totalCost" name="Cost" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} maxBarSize={28} />
                 </BarChart>
               </ResponsiveContainer>
             )}
@@ -929,9 +776,7 @@ function CostAnalysisSection({
           </CardHeader>
           <CardContent>
             {dailyTrend.length === 0 ? (
-              <div className="flex h-48 items-center justify-center text-sm text-muted-foreground">
-                No daily cost data for this period
-              </div>
+              <div className="flex h-48 items-center justify-center text-sm text-muted-foreground">No daily cost data for this period</div>
             ) : (
               <ResponsiveContainer width="100%" height={Math.max(200, byExtension.length * 36)}>
                 <AreaChart data={dailyTrend} margin={{ top: 8, right: 8, bottom: 0, left: -10 }}>
@@ -942,19 +787,8 @@ function CostAnalysisSection({
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                  <XAxis
-                    dataKey="label"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
-                    dy={4}
-                  />
-                  <YAxis
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
-                    tickFormatter={(v: number) => `$${v.toFixed(2)}`}
-                  />
+                  <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} dy={4} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v: number) => `$${v.toFixed(2)}`} />
                   <RechartsTooltip
                     contentStyle={{
                       background: "hsl(var(--popover))",
@@ -965,14 +799,7 @@ function CostAnalysisSection({
                     }}
                     formatter={(value) => [`$${Number(value ?? 0).toFixed(4)}`, "Cost"]}
                   />
-                  <Area
-                    type="monotone"
-                    dataKey="cost"
-                    name="Cost"
-                    stroke="hsl(var(--primary))"
-                    strokeWidth={2}
-                    fill="url(#costGradient)"
-                  />
+                  <Area type="monotone" dataKey="cost" name="Cost" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#costGradient)" />
                 </AreaChart>
               </ResponsiveContainer>
             )}
@@ -998,9 +825,7 @@ function CallVolumeSection({ items }: { items: CallRecord[] }) {
   const chartData = useMemo<CallVolumeChartData[]>(() => {
     const dailyCounts = new Map<string, { total: number; inbound: number; outbound: number }>()
     for (const call of items) {
-      const date = call.startedAt
-        ? new Date(call.startedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })
-        : "Unknown"
+      const date = call.startedAt ? new Date(call.startedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "Unknown"
       const existing = dailyCounts.get(date) ?? { total: 0, inbound: 0, outbound: 0 }
       existing.total++
       if (call.direction === "inbound") existing.inbound++
@@ -1017,11 +842,7 @@ function CallVolumeSection({ items }: { items: CallRecord[] }) {
     const totalCalls = items.length
     const inbound = items.filter((c) => c.direction === "inbound").length
     const outbound = items.filter((c) => c.direction === "outbound").length
-    const uniqueDays = new Set(
-      items
-        .filter((c) => c.startedAt)
-        .map((c) => new Date(c.startedAt).toDateString()),
-    ).size
+    const uniqueDays = new Set(items.filter((c) => c.startedAt).map((c) => new Date(c.startedAt).toDateString())).size
     const avgPerDay = uniqueDays > 0 ? (totalCalls / uniqueDays).toFixed(1) : "0"
     return { totalCalls, inbound, outbound, avgPerDay }
   }, [items])
@@ -1038,9 +859,7 @@ function CallVolumeSection({ items }: { items: CallRecord[] }) {
                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
                 <CardTitle className="text-base">Call Volume</CardTitle>
               </div>
-              <ChevronDown
-                className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${open ? "rotate-180" : ""}`}
-              />
+              <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
             </div>
           </CardHeader>
         </CollapsibleTrigger>
@@ -1054,15 +873,11 @@ function CallVolumeSection({ items }: { items: CallRecord[] }) {
               </div>
               <div className="rounded-md border p-3">
                 <p className="text-xs font-medium text-muted-foreground">Inbound</p>
-                <p className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                  {summaryStats.inbound.toLocaleString()}
-                </p>
+                <p className="text-xl font-bold text-blue-600 dark:text-blue-400">{summaryStats.inbound.toLocaleString()}</p>
               </div>
               <div className="rounded-md border p-3">
                 <p className="text-xs font-medium text-muted-foreground">Outbound</p>
-                <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
-                  {summaryStats.outbound.toLocaleString()}
-                </p>
+                <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">{summaryStats.outbound.toLocaleString()}</p>
               </div>
               <div className="rounded-md border p-3">
                 <p className="text-xs font-medium text-muted-foreground">Avg / Day</p>
@@ -1074,16 +889,8 @@ function CallVolumeSection({ items }: { items: CallRecord[] }) {
             <ResponsiveContainer width="100%" height={280}>
               <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                <XAxis
-                  dataKey="date"
-                  className="text-xs"
-                  tick={{ fill: "hsl(var(--muted-foreground))" }}
-                />
-                <YAxis
-                  className="text-xs"
-                  tick={{ fill: "hsl(var(--muted-foreground))" }}
-                  allowDecimals={false}
-                />
+                <XAxis dataKey="date" className="text-xs" tick={{ fill: "hsl(var(--muted-foreground))" }} />
+                <YAxis className="text-xs" tick={{ fill: "hsl(var(--muted-foreground))" }} allowDecimals={false} />
                 <RechartsTooltip
                   contentStyle={{
                     background: "hsl(var(--card))",
@@ -1092,20 +899,8 @@ function CallVolumeSection({ items }: { items: CallRecord[] }) {
                   }}
                 />
                 <Legend />
-                <Bar
-                  dataKey="inbound"
-                  name="Inbound"
-                  fill="hsl(210, 100%, 60%)"
-                  stackId="calls"
-                  radius={[0, 0, 0, 0]}
-                />
-                <Bar
-                  dataKey="outbound"
-                  name="Outbound"
-                  fill="hsl(142, 76%, 46%)"
-                  stackId="calls"
-                  radius={[4, 4, 0, 0]}
-                />
+                <Bar dataKey="inbound" name="Inbound" fill="hsl(210, 100%, 60%)" stackId="calls" radius={[0, 0, 0, 0]} />
+                <Bar dataKey="outbound" name="Outbound" fill="hsl(142, 76%, 46%)" stackId="calls" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -1195,13 +990,7 @@ function CallRecordsTab() {
 
   // Bulk actions (export only — CDR is audit data, no delete)
   const bulkActions = useMemo(
-    () => [
-      createExportAction<CallRecord>(
-        "call-records-selected",
-        csvHeaders,
-        (ids) => filteredItems.filter((r) => ids.includes(r.id)),
-      ),
-    ],
+    () => [createExportAction<CallRecord>("call-records-selected", csvHeaders, (ids) => filteredItems.filter((r) => ids.includes(r.id)))],
     [filteredItems],
   )
 
@@ -1221,11 +1010,7 @@ function CallRecordsTab() {
     exportToCsv("call-records", csvHeaders, filteredItems)
   }, [filteredItems])
 
-  const activeFilterCount =
-    directionFilter.length +
-    dispositionFilter.length +
-    (startDate || endDate ? 1 : 0) +
-    (minDuration || maxDuration ? 1 : 0)
+  const activeFilterCount = directionFilter.length + dispositionFilter.length + (startDate || endDate ? 1 : 0) + (minDuration || maxDuration ? 1 : 0)
 
   const handleClearFilters = useCallback(() => {
     setSearch("")
@@ -1275,8 +1060,14 @@ function CallRecordsTab() {
         <DateRangeFilter
           startDate={startDate}
           endDate={endDate}
-          onStartDateChange={(v) => { setStartDate(v); setPage(1) }}
-          onEndDateChange={(v) => { setEndDate(v); setPage(1) }}
+          onStartDateChange={(v) => {
+            setStartDate(v)
+            setPage(1)
+          }}
+          onEndDateChange={(v) => {
+            setEndDate(v)
+            setPage(1)
+          }}
           onPreset={handleDatePreset}
           label="Date range"
         />
@@ -1284,13 +1075,19 @@ function CallRecordsTab() {
           label="Direction"
           options={directionOptions}
           selected={directionFilter}
-          onChange={(v) => { setDirectionFilter(v); setPage(1) }}
+          onChange={(v) => {
+            setDirectionFilter(v)
+            setPage(1)
+          }}
         />
         <FilterDropdown
           label="Disposition"
           options={dispositionOptions}
           selected={dispositionFilter}
-          onChange={(v) => { setDispositionFilter(v); setPage(1) }}
+          onChange={(v) => {
+            setDispositionFilter(v)
+            setPage(1)
+          }}
         />
         {/* Duration range inputs */}
         <div className="flex items-center gap-1.5">
@@ -1298,7 +1095,10 @@ function CallRecordsTab() {
             type="number"
             placeholder="Min sec"
             value={minDuration}
-            onChange={(e) => { setMinDuration(e.target.value); setPage(1) }}
+            onChange={(e) => {
+              setMinDuration(e.target.value)
+              setPage(1)
+            }}
             className="h-9 w-20 text-xs"
             min={0}
           />
@@ -1307,18 +1107,16 @@ function CallRecordsTab() {
             type="number"
             placeholder="Max sec"
             value={maxDuration}
-            onChange={(e) => { setMaxDuration(e.target.value); setPage(1) }}
+            onChange={(e) => {
+              setMaxDuration(e.target.value)
+              setPage(1)
+            }}
             className="h-9 w-20 text-xs"
             min={0}
           />
         </div>
         {activeFilterCount > 0 && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-xs text-muted-foreground"
-            onClick={handleClearFilters}
-          >
+          <Button variant="ghost" size="sm" className="text-xs text-muted-foreground" onClick={handleClearFilters}>
             Clear all filters
           </Button>
         )}
@@ -1350,143 +1148,118 @@ function CallRecordsTab() {
 
       {/* Table */}
       <SectionErrorBoundary name="Call Records Table">
-      {isLoading ? (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <SkeletonCard key={i} />
-          ))}
-        </div>
-      ) : isError ? (
-        <EmptyState
-          icon={AlertCircle}
-          title="Unable to load call records"
-          description="Something went wrong while fetching call records. Please try again."
-          action={
-            <Button variant="outline" size="sm" onClick={() => refetch()}>
-              Try again
-            </Button>
-          }
-        />
-      ) : !hasAnyRecords && !search && activeFilterCount === 0 ? (
-        <EmptyState
-          icon={FileText}
-          title="No call records yet"
-          description="Call detail records will appear here once calls are processed."
-        />
-      ) : !hasData ? (
-        <EmptyState
-          icon={FileText}
-          variant="no-results"
-          title="No results found"
-          description="No call records match your current filters. Try adjusting your search or filters."
-          action={
-            <Button variant="outline" size="sm" onClick={handleClearFilters}>
-              Clear all filters
-            </Button>
-          }
-        />
-      ) : (
-        <>
-          <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80 print:shadow-none">
-            <Table aria-label="Call Records">
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-10">
-                    <Checkbox
-                      checked={allSelected}
-                      indeterminate={someSelected && !allSelected}
-                      onChange={toggleAll}
-                      aria-label="Select all call records"
-                    />
-                  </TableHead>
-                  <TableHead>Date/Time</TableHead>
-                  <TableHead>Direction</TableHead>
-                  <TableHead>Source</TableHead>
-                  <TableHead>Destination</TableHead>
-                  <TableHead className="text-right">Duration</TableHead>
-                  <TableHead>Disposition</TableHead>
-                  <TableHead className="text-right">Cost</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredItems.map((record) => (
-                  <TableRow
-                    key={record.id}
-                    data-state={selectedIds.has(record.id) ? "selected" : undefined}
-                    className="cursor-pointer hover:bg-muted/50"
-                    onClick={(e) => {
-                      const target = e.target as HTMLElement
-                      if (target.closest("[role=checkbox]")) return
-                      setSelectedCdrId(record.id)
-                    }}
-                  >
-                    <TableCell>
-                      <Checkbox
-                        checked={selectedIds.has(record.id)}
-                        onChange={(e) => {
-                          e.stopPropagation()
-                          toggleOne(record.id)
-                        }}
-                        aria-label={`Select call record from ${record.source} to ${record.destination}`}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="text-sm whitespace-nowrap">
-                            {formatDateTime(record.startedAt)}
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent>{formatDateTime(record.startedAt)}</TooltipContent>
-                      </Tooltip>
-                    </TableCell>
-                    <TableCell>
-                      <DirectionBadge direction={record.direction} />
-                    </TableCell>
-                    <TableCell>
-                      <span className="font-mono text-sm">{record.source}</span>
-                    </TableCell>
-                    <TableCell>
-                      <span className="font-mono text-sm">{record.destination}</span>
-                    </TableCell>
-                    <TableCell className="text-right font-mono text-sm">
-                      {formatDuration(record.durationSeconds)}
-                    </TableCell>
-                    <TableCell>
-                      <DispositionBadge disposition={record.disposition} />
-                    </TableCell>
-                    <TableCell className="text-right font-mono text-sm">
-                      {formatCost(record.cost)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+        {isLoading ? (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
           </div>
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-end gap-2 print:hidden">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page <= 1}
-              >
-                Previous
+        ) : isError ? (
+          <EmptyState
+            icon={AlertCircle}
+            title="Unable to load call records"
+            description="Something went wrong while fetching call records. Please try again."
+            action={
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
+                Try again
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page >= totalPages}
-              >
-                Next
+            }
+          />
+        ) : !hasAnyRecords && !search && activeFilterCount === 0 ? (
+          <EmptyState icon={FileText} title="No call records yet" description="Call detail records will appear here once calls are processed." />
+        ) : !hasData ? (
+          <EmptyState
+            icon={FileText}
+            variant="no-results"
+            title="No results found"
+            description="No call records match your current filters. Try adjusting your search or filters."
+            action={
+              <Button variant="outline" size="sm" onClick={handleClearFilters}>
+                Clear all filters
               </Button>
+            }
+          />
+        ) : (
+          <>
+            <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80 print:shadow-none">
+              <Table aria-label="Call Records">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-10">
+                      <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all call records" />
+                    </TableHead>
+                    <TableHead>Date/Time</TableHead>
+                    <TableHead>Direction</TableHead>
+                    <TableHead>Source</TableHead>
+                    <TableHead>Destination</TableHead>
+                    <TableHead className="text-right">Duration</TableHead>
+                    <TableHead>Disposition</TableHead>
+                    <TableHead className="text-right">Cost</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredItems.map((record) => (
+                    <TableRow
+                      key={record.id}
+                      data-state={selectedIds.has(record.id) ? "selected" : undefined}
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={(e) => {
+                        const target = e.target as HTMLElement
+                        if (target.closest("[role=checkbox]")) return
+                        setSelectedCdrId(record.id)
+                      }}
+                    >
+                      <TableCell>
+                        <Checkbox
+                          checked={selectedIds.has(record.id)}
+                          onChange={(e) => {
+                            e.stopPropagation()
+                            toggleOne(record.id)
+                          }}
+                          aria-label={`Select call record from ${record.source} to ${record.destination}`}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="text-sm whitespace-nowrap">{formatDateTime(record.startedAt)}</span>
+                          </TooltipTrigger>
+                          <TooltipContent>{formatDateTime(record.startedAt)}</TooltipContent>
+                        </Tooltip>
+                      </TableCell>
+                      <TableCell>
+                        <DirectionBadge direction={record.direction} />
+                      </TableCell>
+                      <TableCell>
+                        <span className="font-mono text-sm">{record.source}</span>
+                      </TableCell>
+                      <TableCell>
+                        <span className="font-mono text-sm">{record.destination}</span>
+                      </TableCell>
+                      <TableCell className="text-right font-mono text-sm">{formatDuration(record.durationSeconds)}</TableCell>
+                      <TableCell>
+                        <DispositionBadge disposition={record.disposition} />
+                      </TableCell>
+                      <TableCell className="text-right font-mono text-sm">{formatCost(record.cost)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
-          )}
-        </>
-      )}
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-end gap-2 print:hidden">
+                <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>
+                  Previous
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>
+                  Next
+                </Button>
+              </div>
+            )}
+          </>
+        )}
       </SectionErrorBoundary>
 
       {/* CDR Detail Dialog */}
@@ -1501,12 +1274,7 @@ function CallRecordsTab() {
       )}
 
       {/* Bulk action bar */}
-      <BulkActionBar
-        selectedCount={selectedIds.size}
-        selectedIds={Array.from(selectedIds)}
-        onClearSelection={() => setSelectedIds(new Set())}
-        actions={bulkActions}
-      />
+      <BulkActionBar selectedCount={selectedIds.size} selectedIds={Array.from(selectedIds)} onClearSelection={() => setSelectedIds(new Set())} actions={bulkActions} />
     </div>
   )
 }
@@ -1564,18 +1332,10 @@ function AnalyticsPage() {
           }
         }
       `}</style>
-      <PageHeader
-        eyebrow="Insights"
-        title="Analytics"
-        description="Call analytics, volume trends, and detailed call records."
-        breadcrumbs={breadcrumbs}
-      />
+      <PageHeader eyebrow="Insights" title="Analytics" description="Call analytics, volume trends, and detailed call records." breadcrumbs={breadcrumbs} />
 
       <PageSection>
-        <Tabs
-          value={tab}
-          onValueChange={(value) => navigate({ search: () => ({ tab: value }), replace: true })}
-        >
+        <Tabs value={tab} onValueChange={(value) => navigate({ search: () => ({ tab: value }), replace: true })}>
           <TabsList className="print:hidden">
             <TabsTrigger value="dashboard" className="gap-1.5">
               <BarChart3 className="h-4 w-4" />

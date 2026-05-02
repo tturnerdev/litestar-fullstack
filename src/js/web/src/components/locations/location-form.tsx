@@ -3,6 +3,7 @@ import { Link, useBlocker, useRouter } from "@tanstack/react-router"
 import { AlertCircle, AlertTriangle, Info, Loader2 } from "lucide-react"
 import { useEffect } from "react"
 import { useForm } from "react-hook-form"
+import { toast } from "sonner"
 import { z } from "zod"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
@@ -22,9 +23,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { useAuthStore } from "@/lib/auth"
 import { useCreateLocation, useLocations } from "@/lib/api/hooks/locations"
-import { toast } from "sonner"
+import { useAuthStore } from "@/lib/auth"
 import { cn } from "@/lib/utils"
 
 const NAME_MAX = 100
@@ -32,15 +32,9 @@ const DESC_MAX = 500
 
 const createLocationSchema = z
   .object({
-    name: z
-      .string()
-      .min(1, "Location name is required")
-      .max(NAME_MAX, "Name must be 100 characters or fewer"),
+    name: z.string().min(1, "Location name is required").max(NAME_MAX, "Name must be 100 characters or fewer"),
     locationType: z.enum(["ADDRESSED", "PHYSICAL"], { message: "Location type is required" }),
-    description: z
-      .string()
-      .max(DESC_MAX, "Description must be 500 characters or fewer")
-      .optional(),
+    description: z.string().max(DESC_MAX, "Description must be 500 characters or fewer").optional(),
     parentId: z.string().optional(),
     addressLine1: z.string().optional(),
     addressLine2: z.string().optional(),
@@ -247,7 +241,12 @@ export function CreateLocationForm() {
                 </FormControl>
                 <div className="flex items-center justify-between">
                   <FormDescription>A brief summary of this location's purpose or usage.</FormDescription>
-                  <p className={cn("shrink-0 text-xs", descriptionLength >= DESC_MAX ? "text-destructive" : descriptionLength >= DESC_MAX * 0.8 ? "text-amber-500" : "text-muted-foreground")}>
+                  <p
+                    className={cn(
+                      "shrink-0 text-xs",
+                      descriptionLength >= DESC_MAX ? "text-destructive" : descriptionLength >= DESC_MAX * 0.8 ? "text-amber-500" : "text-muted-foreground",
+                    )}
+                  >
                     {descriptionLength}/{DESC_MAX}
                   </p>
                 </div>
@@ -290,9 +289,7 @@ export function CreateLocationForm() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <FormDescription>
-                    The addressed location this physical location belongs to.
-                  </FormDescription>
+                  <FormDescription>The addressed location this physical location belongs to.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -434,9 +431,7 @@ export function CreateLocationForm() {
               <AlertTriangle className="h-5 w-5 text-amber-500" />
               Unsaved Changes
             </AlertDialogTitle>
-            <AlertDialogDescription>
-              You have unsaved changes on this form. If you leave now, your progress will be lost.
-            </AlertDialogDescription>
+            <AlertDialogDescription>You have unsaved changes on this form. If you leave now, your progress will be lost.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => blocker.reset?.()}>Stay on Page</AlertDialogCancel>

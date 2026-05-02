@@ -1,5 +1,5 @@
-import { CircleHelp, Compass, Keyboard, Layout, Search, Zap } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
+import { CircleHelp, Compass, Keyboard, Layout, Search, Zap } from "lucide-react"
 import { useMemo, useState } from "react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { EmptyState } from "@/components/ui/empty-state"
@@ -46,10 +46,7 @@ function Kbd({ children, className }: { children: React.ReactNode; className?: s
 export function KeyboardShortcutsDialog({ open, onOpenChange, groups }: KeyboardShortcutsDialogProps) {
   const [search, setSearch] = useState("")
 
-  const totalShortcuts = useMemo(
-    () => groups.reduce((sum, g) => sum + g.shortcuts.length, 0),
-    [groups],
-  )
+  const totalShortcuts = useMemo(() => groups.reduce((sum, g) => sum + g.shortcuts.length, 0), [groups])
 
   const filteredGroups = useMemo(() => {
     if (!search.trim()) return groups
@@ -63,26 +60,25 @@ export function KeyboardShortcutsDialog({ open, onOpenChange, groups }: Keyboard
   }, [groups, search])
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { onOpenChange(v); if (!v) setSearch("") }}>
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        onOpenChange(v)
+        if (!v) setSearch("")
+      }}
+    >
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Keyboard className="size-4" />
             Keyboard shortcuts
           </DialogTitle>
-          <DialogDescription>
-            Navigate and take actions quickly. {totalShortcuts} shortcuts available.
-          </DialogDescription>
+          <DialogDescription>Navigate and take actions quickly. {totalShortcuts} shortcuts available.</DialogDescription>
         </DialogHeader>
 
         <div className="relative">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search shortcuts..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 h-9"
-          />
+          <Input placeholder="Search shortcuts..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 h-9" />
         </div>
 
         <div className="max-h-[60vh] overflow-y-auto space-y-4 py-2">
@@ -108,10 +104,7 @@ export function KeyboardShortcutsDialog({ open, onOpenChange, groups }: Keyboard
                     {group.shortcuts.map((shortcut, shortcutIndex) => (
                       <div
                         key={shortcut.description}
-                        className={cn(
-                          "flex items-center justify-between rounded-md px-2 py-1.5 text-sm hover:bg-muted/50",
-                          shortcutIndex % 2 === 1 && "bg-muted/30",
-                        )}
+                        className={cn("flex items-center justify-between rounded-md px-2 py-1.5 text-sm hover:bg-muted/50", shortcutIndex % 2 === 1 && "bg-muted/30")}
                       >
                         <span className="text-foreground">{shortcut.description}</span>
                         <div className="flex items-center gap-1">

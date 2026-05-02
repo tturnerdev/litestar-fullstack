@@ -26,7 +26,11 @@ function AcceptInvitationPage() {
   const [status, setStatus] = useState<"pending" | "accepting" | "declining" | "accepted" | "declined" | "error">("pending")
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
-  const { data: team, isLoading: isTeamLoading, isError: isTeamError } = useQuery({
+  const {
+    data: team,
+    isLoading: isTeamLoading,
+    isError: isTeamError,
+  } = useQuery({
     queryKey: ["team", teamId],
     queryFn: async () => {
       const response = await getTeam({ path: { team_id: teamId } })
@@ -173,9 +177,7 @@ function AcceptInvitationPage() {
                 )}
               </AnimatePresence>
             </div>
-            <CardTitle className="text-xl">
-              {status === "accepted" ? "Welcome to the team!" : status === "declined" ? "Invitation declined" : "Team Invitation"}
-            </CardTitle>
+            <CardTitle className="text-xl">{status === "accepted" ? "Welcome to the team!" : status === "declined" ? "Invitation declined" : "Team Invitation"}</CardTitle>
             <CardDescription className="mt-1">
               {status === "accepted" ? (
                 "You're now a member. Redirecting..."
@@ -202,9 +204,7 @@ function AcceptInvitationPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2, duration: 0.4 }}
               >
-                {team.description && (
-                  <p className="text-sm text-muted-foreground">{team.description}</p>
-                )}
+                {team.description && <p className="text-sm text-muted-foreground">{team.description}</p>}
                 {memberCount != null && memberCount > 0 && (
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <Users className="h-3.5 w-3.5" />
@@ -231,12 +231,7 @@ function AcceptInvitationPage() {
 
             <AnimatePresence>
               {isComplete && (
-                <motion.div
-                  className="flex flex-col items-center space-y-3 py-4"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.3 }}
-                >
+                <motion.div className="flex flex-col items-center space-y-3 py-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
                   <Icons.spinner className="h-6 w-6 animate-spin text-muted-foreground" />
                   <p className="text-sm text-muted-foreground">Redirecting...</p>
                 </motion.div>

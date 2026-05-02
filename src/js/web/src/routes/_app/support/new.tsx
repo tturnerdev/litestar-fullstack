@@ -1,29 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { useDocumentTitle } from "@/hooks/use-document-title"
-import {
-  AlertTriangle,
-  ArrowDown,
-  ArrowRight,
-  ArrowUp,
-  Clock,
-  FileText,
-  Flame,
-  MessageSquare,
-  Shield,
-} from "lucide-react"
+import { AlertTriangle, ArrowDown, ArrowRight, ArrowUp, Clock, FileText, Flame, MessageSquare, Shield } from "lucide-react"
 import { CreateTicketForm } from "@/components/support/create-ticket-form"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PageContainer, PageHeader } from "@/components/ui/page-layout"
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Separator } from "@/components/ui/separator"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/support/new")({
@@ -94,17 +77,17 @@ function NewTicketPage() {
       <div className="flex gap-6">
         {/* Main form */}
         <SectionErrorBoundary name="Create Ticket Form">
-        <Card className="min-w-0 flex-1">
-          <CardHeader>
-            <CardTitle className="text-lg">Ticket Details</CardTitle>
-            <CardDescription>
-              Fields marked with <span className="text-destructive">*</span> are required.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <CreateTicketForm />
-          </CardContent>
-        </Card>
+          <Card className="min-w-0 flex-1">
+            <CardHeader>
+              <CardTitle className="text-lg">Ticket Details</CardTitle>
+              <CardDescription>
+                Fields marked with <span className="text-destructive">*</span> are required.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <CreateTicketForm />
+            </CardContent>
+          </Card>
         </SectionErrorBoundary>
 
         {/* Sidebar */}

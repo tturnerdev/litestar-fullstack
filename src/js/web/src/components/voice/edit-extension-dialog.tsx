@@ -1,30 +1,13 @@
-import { useEffect, useMemo, useState } from "react"
 import { Loader2, Phone } from "lucide-react"
+import { useEffect, useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
-import {
-  type Extension,
-  usePhoneNumbers,
-  useUpdateExtension,
-} from "@/lib/api/hooks/voice"
+import { type Extension, usePhoneNumbers, useUpdateExtension } from "@/lib/api/hooks/voice"
 import { cn } from "@/lib/utils"
 
 const DISPLAY_NAME_MAX = 100
@@ -38,16 +21,10 @@ interface EditExtensionDialogProps {
   onOpenChange: (open: boolean) => void
 }
 
-export function EditExtensionDialog({
-  extension,
-  open,
-  onOpenChange,
-}: EditExtensionDialogProps) {
+export function EditExtensionDialog({ extension, open, onOpenChange }: EditExtensionDialogProps) {
   const [displayName, setDisplayName] = useState(extension.displayName ?? "")
   const [isActive, setIsActive] = useState(extension.isActive)
-  const [phoneNumberId, setPhoneNumberId] = useState(
-    extension.phoneNumberId ?? PHONE_NONE,
-  )
+  const [phoneNumberId, setPhoneNumberId] = useState(extension.phoneNumberId ?? PHONE_NONE)
   const updateExtension = useUpdateExtension(extension.id)
   const { data: phoneNumbers } = usePhoneNumbers(1, 100)
 
@@ -105,11 +82,7 @@ export function EditExtensionDialog({
               Edit Extension
             </DialogTitle>
             <DialogDescription>
-              Update settings for extension{" "}
-              <span className="font-mono font-medium">
-                {extension.extensionNumber}
-              </span>
-              .
+              Update settings for extension <span className="font-mono font-medium">{extension.extensionNumber}</span>.
             </DialogDescription>
           </DialogHeader>
 
@@ -117,12 +90,8 @@ export function EditExtensionDialog({
             {/* Extension Number (read-only context) */}
             <div className="flex items-center justify-between rounded-md bg-muted/50 px-3 py-2.5">
               <div className="space-y-0.5">
-                <p className="text-xs text-muted-foreground">
-                  Extension Number
-                </p>
-                <p className="font-mono text-sm font-medium">
-                  {extension.extensionNumber}
-                </p>
+                <p className="text-xs text-muted-foreground">Extension Number</p>
+                <p className="font-mono text-sm font-medium">{extension.extensionNumber}</p>
               </div>
             </div>
 
@@ -134,24 +103,16 @@ export function EditExtensionDialog({
               <Input
                 id="edit-ext-name"
                 value={displayName}
-                onChange={(e) =>
-                  setDisplayName(e.target.value.slice(0, DISPLAY_NAME_MAX))
-                }
+                onChange={(e) => setDisplayName(e.target.value.slice(0, DISPLAY_NAME_MAX))}
                 placeholder="Front Desk"
                 maxLength={DISPLAY_NAME_MAX}
               />
               <div className="flex items-center justify-between">
-                <p className="text-xs text-muted-foreground">
-                  Name shown in the directory and call logs.
-                </p>
+                <p className="text-xs text-muted-foreground">Name shown in the directory and call logs.</p>
                 <p
                   className={cn(
                     "shrink-0 text-xs",
-                    displayName.length >= DISPLAY_NAME_MAX
-                      ? "text-destructive"
-                      : displayName.length >= DISPLAY_NAME_MAX * 0.8
-                        ? "text-amber-500"
-                        : "text-muted-foreground",
+                    displayName.length >= DISPLAY_NAME_MAX ? "text-destructive" : displayName.length >= DISPLAY_NAME_MAX * 0.8 ? "text-amber-500" : "text-muted-foreground",
                   )}
                 >
                   {displayName.length}/{DISPLAY_NAME_MAX}
@@ -176,10 +137,7 @@ export function EditExtensionDialog({
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">
-                Optionally link a DID number that routes directly to this
-                extension.
-              </p>
+              <p className="text-xs text-muted-foreground">Optionally link a DID number that routes directly to this extension.</p>
             </div>
 
             <Separator />
@@ -188,33 +146,18 @@ export function EditExtensionDialog({
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label htmlFor="edit-ext-active">Active</Label>
-                <p className="text-xs text-muted-foreground">
-                  Whether this extension can receive calls.
-                </p>
+                <p className="text-xs text-muted-foreground">Whether this extension can receive calls.</p>
               </div>
-              <Switch
-                id="edit-ext-active"
-                checked={isActive}
-                onCheckedChange={setIsActive}
-              />
+              <Switch id="edit-ext-active" checked={isActive} onCheckedChange={setIsActive} />
             </div>
           </div>
 
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button
-              type="submit"
-              disabled={!isDirty || updateExtension.isPending}
-            >
-              {updateExtension.isPending && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              )}
+            <Button type="submit" disabled={!isDirty || updateExtension.isPending}>
+              {updateExtension.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {updateExtension.isPending ? "Saving..." : "Save changes"}
             </Button>
           </DialogFooter>

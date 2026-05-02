@@ -1,30 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { ArrowRight, BellOff, Home, Mail, Phone, PhoneForwarded, PhoneOff, TrendingUp, Voicemail } from "lucide-react"
 import { useMemo } from "react"
-import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip as RechartsTooltip, XAxis, YAxis } from "recharts"
+import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, Tooltip as RechartsTooltip, ResponsiveContainer, XAxis, YAxis } from "recharts"
 import { Badge } from "@/components/ui/badge"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Separator } from "@/components/ui/separator"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { useDocumentTitle } from "@/hooks/use-document-title"
-import {
-  useDndSettings,
-  useExtensions,
-  usePhoneNumbers,
-  useVoicemailMessages,
-  useVoicemailSettings,
-} from "@/lib/api/hooks/voice"
 import { useCallQueues, useRingGroups } from "@/lib/api/hooks/call-routing"
+import { useDndSettings, useExtensions, usePhoneNumbers, useVoicemailMessages, useVoicemailSettings } from "@/lib/api/hooks/voice"
 
 export const Route = createFileRoute("/_app/voice/")({
   component: VoiceOverviewPage,
@@ -198,9 +185,7 @@ function VoicemailSummaryCard({ extensionId }: { extensionId: string }) {
       </CardHeader>
       <CardContent>
         <div className="text-3xl font-semibold">{unreadCount > 0 ? unreadCount : totalCount}</div>
-        <p className="text-xs text-muted-foreground">
-          {unreadCount > 0 ? `${unreadCount} unread of ${totalCount}` : `${totalCount} total messages`}
-        </p>
+        <p className="text-xs text-muted-foreground">{unreadCount > 0 ? `${unreadCount} unread of ${totalCount}` : `${totalCount} total messages`}</p>
         {!isEnabled && (
           <Badge variant="outline" className="mt-1 text-xs">
             Disabled
@@ -324,21 +309,8 @@ function VoiceResourceCharts() {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={resourceBarData} layout="vertical" margin={{ top: 4, right: 12, bottom: 0, left: 0 }}>
                 <CartesianGrid horizontal={false} strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis
-                  type="number"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
-                  allowDecimals={false}
-                />
-                <YAxis
-                  dataKey="name"
-                  type="category"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
-                  width={100}
-                />
+                <XAxis type="number" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} allowDecimals={false} />
+                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} width={100} />
                 <RechartsTooltip
                   contentStyle={{
                     backgroundColor: "hsl(var(--popover))",
@@ -348,13 +320,7 @@ function VoiceResourceCharts() {
                     color: "hsl(var(--popover-foreground))",
                   }}
                 />
-                <Legend
-                  verticalAlign="top"
-                  align="right"
-                  iconType="circle"
-                  iconSize={8}
-                  wrapperStyle={{ fontSize: 12, paddingBottom: 8 }}
-                />
+                <Legend verticalAlign="top" align="right" iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12, paddingBottom: 8 }} />
                 <Bar dataKey="active" name="Active" stackId="status" fill="hsl(142 71% 45%)" radius={[0, 0, 0, 0]} />
                 <Bar dataKey="inactive" name="Inactive" stackId="status" fill="hsl(var(--muted-foreground) / 0.3)" radius={[0, 4, 4, 0]} />
               </BarChart>
@@ -378,17 +344,7 @@ function VoiceResourceCharts() {
             <div className="h-[200px] w-[200px] shrink-0">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie
-                    data={distributionData}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={55}
-                    outerRadius={85}
-                    paddingAngle={2}
-                    strokeWidth={0}
-                  >
+                  <Pie data={distributionData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={55} outerRadius={85} paddingAngle={2} strokeWidth={0}>
                     {distributionData.map((_entry, index) => (
                       // biome-ignore lint/suspicious/noArrayIndexKey: Static pie segments
                       <Cell key={`pie-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
@@ -410,10 +366,7 @@ function VoiceResourceCharts() {
             <div className="flex flex-col gap-2.5">
               {distributionData.map((entry, index) => (
                 <div key={entry.name} className="flex items-center gap-2.5">
-                  <span
-                    className="inline-block h-3 w-3 shrink-0 rounded-full"
-                    style={{ backgroundColor: PIE_COLORS[index % PIE_COLORS.length] }}
-                  />
+                  <span className="inline-block h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: PIE_COLORS[index % PIE_COLORS.length] }} />
                   <span className="text-sm text-muted-foreground">{entry.name}</span>
                   <span className="ml-auto text-sm font-semibold tabular-nums">{entry.value}</span>
                 </div>
@@ -494,10 +447,7 @@ function StatusOverview() {
                   <span className="font-medium text-green-600">{activeExts}</span>
                 </div>
                 <div className="h-2 overflow-hidden rounded-full bg-muted">
-                  <div
-                    className="h-full rounded-full bg-green-500 transition-all duration-500"
-                    style={{ width: totalExts > 0 ? `${(activeExts / totalExts) * 100}%` : "0%" }}
-                  />
+                  <div className="h-full rounded-full bg-green-500 transition-all duration-500" style={{ width: totalExts > 0 ? `${(activeExts / totalExts) * 100}%` : "0%" }} />
                 </div>
                 {inactiveExts > 0 && (
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -612,17 +562,7 @@ function RecentExtensions() {
   )
 }
 
-function ExtensionRow({
-  extensionId,
-  displayName,
-  extensionNumber,
-  isActive,
-}: {
-  extensionId: string
-  displayName: string
-  extensionNumber: string
-  isActive: boolean
-}) {
+function ExtensionRow({ extensionId, displayName, extensionNumber, isActive }: { extensionId: string; displayName: string; extensionNumber: string; isActive: boolean }) {
   const { data: dndData } = useDndSettings(extensionId)
   const { data: vmData } = useVoicemailMessages(extensionId, 1, 5)
 

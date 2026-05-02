@@ -1,16 +1,14 @@
 import { Link } from "@tanstack/react-router"
-import { Activity, ArrowRight, LogIn, Pencil, Plus, Trash2, type LucideIcon } from "lucide-react"
+import { Activity, ArrowRight, LogIn, type LucideIcon, Pencil, Plus, Trash2 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import type { ActivityLogEntry } from "@/lib/generated/api"
 import { formatRelativeTimeShort } from "@/lib/date-utils"
+import type { ActivityLogEntry } from "@/lib/generated/api"
 
 function formatActionLabel(action: string): string {
-  return action
-    .replace(/[._-]/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase())
+  return action.replace(/[._-]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
 interface ActionStyle {
@@ -144,10 +142,7 @@ export function RecentActivityCard({ activities, isLoading, isAdmin = false }: R
         )}
         {isAdmin && activities.length > 0 && (
           <div className="mt-4 border-t pt-3">
-            <Link
-              to="/admin/audit"
-              className="flex items-center justify-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
+            <Link to="/admin/audit" className="flex items-center justify-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
               View all activity
               <ArrowRight className="h-3.5 w-3.5" />
             </Link>

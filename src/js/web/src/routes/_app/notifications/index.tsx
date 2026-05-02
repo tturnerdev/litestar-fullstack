@@ -34,14 +34,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { type BulkAction, BulkActionBar, createBulkDeleteAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -50,6 +43,7 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton, SkeletonCard } from "@/components/ui/skeleton"
@@ -70,7 +64,6 @@ import {
 } from "@/lib/api/hooks/notifications"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
-import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/notifications/")({
@@ -84,14 +77,8 @@ export const Route = createFileRoute("/_app/notifications/")({
   } => ({
     q: typeof search.q === "string" && search.q ? search.q : undefined,
     page: Number(search.page) > 1 ? Number(search.page) : undefined,
-    category:
-      typeof search.category === "string" && search.category && search.category !== "all"
-        ? search.category
-        : undefined,
-    read:
-      typeof search.read === "string" && (search.read === "unread" || search.read === "read")
-        ? search.read
-        : undefined,
+    category: typeof search.category === "string" && search.category && search.category !== "all" ? search.category : undefined,
+    read: typeof search.read === "string" && (search.read === "unread" || search.read === "read") ? search.read : undefined,
   }),
   component: NotificationsPage,
 })
@@ -465,12 +452,7 @@ function NotificationsPage() {
   const queryClient = useQueryClient()
   const searchInputRef = useRef<HTMLInputElement>(null)
 
-  const {
-    q: searchParam,
-    page: pageParam,
-    category: categoryParam,
-    read: readParam,
-  } = Route.useSearch()
+  const { q: searchParam, page: pageParam, category: categoryParam, read: readParam } = Route.useSearch()
   const navigate = Route.useNavigate()
 
   // Derive filter state from URL search params
@@ -711,14 +693,8 @@ function NotificationsPage() {
         breadcrumbs={breadcrumbs}
         actions={
           <div className="flex gap-2">
-            <Button
-              variant={autoRefresh ? "default" : "outline"}
-              size="sm"
-              onClick={toggleAutoRefresh}
-            >
-              {autoRefresh && (
-                <span className="mr-2 h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
-              )}
+            <Button variant={autoRefresh ? "default" : "outline"} size="sm" onClick={toggleAutoRefresh}>
+              {autoRefresh && <span className="mr-2 h-2 w-2 animate-pulse rounded-full bg-emerald-500" />}
               Live
             </Button>
             <Tooltip>
@@ -747,137 +723,63 @@ function NotificationsPage() {
 
       <PageSection delay={0.1}>
         <SectionErrorBoundary name="Notifications List">
-        {isEmptyUnfiltered ? (
-          <EmptyState
-            icon={BellOff}
-            title="No notifications yet"
-            description="You'll see notifications here when events happen — like team updates, device alerts, or support ticket replies."
-          />
-        ) : (
-          <>
-            {/* Search & filters */}
-            <div className="space-y-3">
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="relative max-w-sm flex-1">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input ref={searchInputRef} placeholder="Search notifications..." value={searchInput} onChange={(e) => setSearchInput(e.target.value)} className="pl-9 pr-8" />
-                  {searchInput ? (
-                    <button
-                      type="button"
-                      onClick={() => setSearchInput("")}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
-                    >
-                      <X className="h-3.5 w-3.5" />
-                      <span className="sr-only">Clear search</span>
-                    </button>
-                  ) : (
-                    <kbd className="pointer-events-none absolute right-8 top-1/2 -translate-y-1/2 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">
-                      /
-                    </kbd>
-                  )}
-                </div>
-                <Select
-                  value={readStatusFilter}
-                  onValueChange={(v) =>
-                    navigate({
-                      search: (prev) => ({
-                        ...prev,
-                        read: v !== "all" ? v : undefined,
-                        page: undefined,
-                      }),
-                    })
-                  }
-                >
-                  <SelectTrigger className="w-[150px]" aria-label="Filter by read status">
-                    <SelectValue placeholder="All status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {READ_STATUS_OPTIONS.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {hasActiveFilters && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-xs text-muted-foreground"
-                    onClick={() => {
-                      setSearchInput("")
+          {isEmptyUnfiltered ? (
+            <EmptyState
+              icon={BellOff}
+              title="No notifications yet"
+              description="You'll see notifications here when events happen — like team updates, device alerts, or support ticket replies."
+            />
+          ) : (
+            <>
+              {/* Search & filters */}
+              <div className="space-y-3">
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="relative max-w-sm flex-1">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input ref={searchInputRef} placeholder="Search notifications..." value={searchInput} onChange={(e) => setSearchInput(e.target.value)} className="pl-9 pr-8" />
+                    {searchInput ? (
+                      <button
+                        type="button"
+                        onClick={() => setSearchInput("")}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                        <span className="sr-only">Clear search</span>
+                      </button>
+                    ) : (
+                      <kbd className="pointer-events-none absolute right-8 top-1/2 -translate-y-1/2 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">
+                        /
+                      </kbd>
+                    )}
+                  </div>
+                  <Select
+                    value={readStatusFilter}
+                    onValueChange={(v) =>
                       navigate({
-                        search: {
-                          q: undefined,
-                          category: undefined,
-                          read: undefined,
+                        search: (prev) => ({
+                          ...prev,
+                          read: v !== "all" ? v : undefined,
                           page: undefined,
-                        },
+                        }),
                       })
-                    }}
+                    }
                   >
-                    Clear all filters
-                  </Button>
-                )}
-              </div>
-
-              <div className="flex flex-wrap items-center gap-2">
-                <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all notifications" />
-                {CATEGORIES.map(({ value, label }) => {
-                  const count = value === "all" ? notifications.length : (categoryCounts[value] ?? 0)
-                  const isActive = activeCategory === value
-                  return (
+                    <SelectTrigger className="w-[150px]" aria-label="Filter by read status">
+                      <SelectValue placeholder="All status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {READ_STATUS_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {hasActiveFilters && (
                     <Button
-                      key={value}
-                      variant={isActive ? "default" : "outline"}
+                      variant="ghost"
                       size="sm"
-                      onClick={() =>
-                        navigate({
-                          search: (prev) => ({
-                            ...prev,
-                            category: value !== "all" ? value : undefined,
-                            page: undefined,
-                          }),
-                        })
-                      }
-                      className="gap-1.5 text-xs"
-                    >
-                      {label}
-                      {count > 0 && (
-                        <Badge
-                          variant={isActive ? "secondary" : "outline"}
-                          className={cn("ml-0.5 h-5 min-w-5 justify-center px-1.5 text-[0.6rem]", isActive && "bg-primary-foreground/20 text-primary-foreground")}
-                        >
-                          {count}
-                        </Badge>
-                      )}
-                    </Button>
-                  )
-                })}
-              </div>
-            </div>
-
-            <div className="sr-only" aria-live="polite" aria-atomic="true">
-              {!isLoading && `Showing ${filteredNotifications.length} of ${total} notifications, page ${page}`}
-            </div>
-
-            <div className="mt-4 space-y-3" aria-busy={isLoading}>
-              {isLoading ? (
-                <div className="space-y-3">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Skeleton key={i} className="h-16 w-full rounded-lg" />
-                  ))}
-                </div>
-              ) : isEmptyFiltered ? (
-                <EmptyState
-                  icon={BellOff}
-                  title="No notifications match your filters"
-                  description="Try adjusting your search or filter criteria to find what you're looking for."
-                  variant="no-results"
-                  action={
-                    <Button
-                      variant="outline"
-                      size="sm"
+                      className="text-xs text-muted-foreground"
                       onClick={() => {
                         setSearchInput("")
                         navigate({
@@ -890,95 +792,169 @@ function NotificationsPage() {
                         })
                       }}
                     >
-                      Clear filters
+                      Clear all filters
                     </Button>
-                  }
-                />
-              ) : (
-                <AnimatePresence mode="popLayout" initial={false}>
-                  {filteredNotifications.map((notification) => (
-                    <motion.div
-                      key={notification.id}
-                      layout
-                      initial={{ opacity: 0, y: -8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, x: -40, transition: { duration: 0.2 } }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <NotificationCard
-                        notification={notification}
-                        onRequestDelete={setDeleteId}
-                        onMarkRead={handleMarkRead}
-                        selected={selectedIds.has(notification.id)}
-                        onToggleSelect={() => toggleOne(notification.id)}
-                      />
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              )}
-            </div>
+                  )}
+                </div>
 
-            <div className="mt-6 flex items-center justify-center gap-4">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Rows per page</span>
-                <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
-                  <SelectTrigger className="h-8 w-[70px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PAGE_SIZES.map((size) => (
-                      <SelectItem key={size} value={String(size)}>
-                        {size}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all notifications" />
+                  {CATEGORIES.map(({ value, label }) => {
+                    const count = value === "all" ? notifications.length : (categoryCounts[value] ?? 0)
+                    const isActive = activeCategory === value
+                    return (
+                      <Button
+                        key={value}
+                        variant={isActive ? "default" : "outline"}
+                        size="sm"
+                        onClick={() =>
+                          navigate({
+                            search: (prev) => ({
+                              ...prev,
+                              category: value !== "all" ? value : undefined,
+                              page: undefined,
+                            }),
+                          })
+                        }
+                        className="gap-1.5 text-xs"
+                      >
+                        {label}
+                        {count > 0 && (
+                          <Badge
+                            variant={isActive ? "secondary" : "outline"}
+                            className={cn("ml-0.5 h-5 min-w-5 justify-center px-1.5 text-[0.6rem]", isActive && "bg-primary-foreground/20 text-primary-foreground")}
+                          >
+                            {count}
+                          </Badge>
+                        )}
+                      </Button>
+                    )
+                  })}
+                </div>
               </div>
-              {totalPages > 1 && (
-                <>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={page <= 1}
-                    onClick={() =>
-                      navigate({
-                        search: (prev) => ({
-                          ...prev,
-                          page: page - 1 > 1 ? page - 1 : undefined,
-                        }),
-                      })
+
+              <div className="sr-only" aria-live="polite" aria-atomic="true">
+                {!isLoading && `Showing ${filteredNotifications.length} of ${total} notifications, page ${page}`}
+              </div>
+
+              <div className="mt-4 space-y-3" aria-busy={isLoading}>
+                {isLoading ? (
+                  <div className="space-y-3">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Skeleton key={i} className="h-16 w-full rounded-lg" />
+                    ))}
+                  </div>
+                ) : isEmptyFiltered ? (
+                  <EmptyState
+                    icon={BellOff}
+                    title="No notifications match your filters"
+                    description="Try adjusting your search or filter criteria to find what you're looking for."
+                    variant="no-results"
+                    action={
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSearchInput("")
+                          navigate({
+                            search: {
+                              q: undefined,
+                              category: undefined,
+                              read: undefined,
+                              page: undefined,
+                            },
+                          })
+                        }}
+                      >
+                        Clear filters
+                      </Button>
                     }
-                  >
-                    <ChevronLeft className="mr-1 h-4 w-4" />
-                    Previous
-                  </Button>
-                  <span className="text-sm text-muted-foreground">
-                    Page {page} of {totalPages}
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={page >= totalPages}
-                    onClick={() =>
-                      navigate({
-                        search: (prev) => ({ ...prev, page: page + 1 }),
-                      })
-                    }
-                  >
-                    Next
-                    <ChevronRight className="ml-1 h-4 w-4" />
-                  </Button>
-                </>
-              )}
-            </div>
-          </>
-        )}
+                  />
+                ) : (
+                  <AnimatePresence mode="popLayout" initial={false}>
+                    {filteredNotifications.map((notification) => (
+                      <motion.div
+                        key={notification.id}
+                        layout
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, x: -40, transition: { duration: 0.2 } }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <NotificationCard
+                          notification={notification}
+                          onRequestDelete={setDeleteId}
+                          onMarkRead={handleMarkRead}
+                          selected={selectedIds.has(notification.id)}
+                          onToggleSelect={() => toggleOne(notification.id)}
+                        />
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                )}
+              </div>
+
+              <div className="mt-6 flex items-center justify-center gap-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">Rows per page</span>
+                  <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
+                    <SelectTrigger className="h-8 w-[70px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PAGE_SIZES.map((size) => (
+                        <SelectItem key={size} value={String(size)}>
+                          {size}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {totalPages > 1 && (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={page <= 1}
+                      onClick={() =>
+                        navigate({
+                          search: (prev) => ({
+                            ...prev,
+                            page: page - 1 > 1 ? page - 1 : undefined,
+                          }),
+                        })
+                      }
+                    >
+                      <ChevronLeft className="mr-1 h-4 w-4" />
+                      Previous
+                    </Button>
+                    <span className="text-sm text-muted-foreground">
+                      Page {page} of {totalPages}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={page >= totalPages}
+                      onClick={() =>
+                        navigate({
+                          search: (prev) => ({ ...prev, page: page + 1 }),
+                        })
+                      }
+                    >
+                      Next
+                      <ChevronRight className="ml-1 h-4 w-4" />
+                    </Button>
+                  </>
+                )}
+              </div>
+            </>
+          )}
         </SectionErrorBoundary>
       </PageSection>
 
       <PageSection delay={0.2}>
         <SectionErrorBoundary name="Notification Preferences">
-        <NotificationPreferences />
+          <NotificationPreferences />
         </SectionErrorBoundary>
       </PageSection>
 

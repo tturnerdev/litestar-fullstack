@@ -1,12 +1,7 @@
 import { Shield, ShieldOff } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 
-export function E911StatusBadge({
-  registered,
-}: {
-  registered: boolean
-  registrationId?: string | null
-}) {
+export function E911StatusBadge({ registered }: { registered: boolean; registrationId?: string | null }) {
   if (registered) {
     return (
       <Badge variant="default" className="bg-emerald-600 text-white shadow-sm">

@@ -1,16 +1,10 @@
 import { useNavigate } from "@tanstack/react-router"
 import { Eye, MoreVertical, Pencil, Trash2 } from "lucide-react"
 import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { DeleteExtensionDialog } from "@/components/voice/delete-extension-dialog"
 import { EditExtensionDialog } from "@/components/voice/edit-extension-dialog"
-import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import type { Extension } from "@/lib/api/hooks/voice"
 
 interface ExtensionRowActionsProps {
@@ -48,21 +42,14 @@ export function ExtensionRowActions({ extension }: ExtensionRowActionsProps) {
             Edit extension
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem
-            variant="destructive"
-            onClick={() => setDeleteOpen(true)}
-          >
+          <DropdownMenuItem variant="destructive" onClick={() => setDeleteOpen(true)}>
             <Trash2 className="mr-2 h-4 w-4" />
             Delete extension
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <EditExtensionDialog
-        extension={extension}
-        open={editOpen}
-        onOpenChange={setEditOpen}
-      />
+      <EditExtensionDialog extension={extension} open={editOpen} onOpenChange={setEditOpen} />
 
       <DeleteExtensionDialog
         extensionId={extension.id}

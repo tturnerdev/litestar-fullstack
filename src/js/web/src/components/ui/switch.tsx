@@ -1,6 +1,6 @@
 "use client"
 
-import * as React from "react"
+import type * as React from "react"
 
 import { cn } from "@/lib/utils"
 
@@ -27,10 +27,7 @@ function Switch({ className, checked = false, onCheckedChange, disabled, ...prop
     >
       <span
         data-state={checked ? "checked" : "unchecked"}
-        className={cn(
-          "pointer-events-none block h-4 w-4 rounded-full bg-background shadow-lg ring-0 transition-transform",
-          checked ? "translate-x-4" : "translate-x-0",
-        )}
+        className={cn("pointer-events-none block h-4 w-4 rounded-full bg-background shadow-lg ring-0 transition-transform", checked ? "translate-x-4" : "translate-x-0")}
       />
     </button>
   )

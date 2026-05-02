@@ -1,5 +1,5 @@
-import { useCallback } from "react"
 import { BellOff, BellRing, Loader2 } from "lucide-react"
+import { useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDndSettings, useToggleDnd } from "@/lib/api/hooks/voice"
@@ -19,13 +19,7 @@ interface DndQuickToggleProps {
   compact?: boolean
 }
 
-export function DndQuickToggle({
-  extensionId,
-  variant = "ghost",
-  size = "sm",
-  showLabel = false,
-  compact = false,
-}: DndQuickToggleProps) {
+export function DndQuickToggle({ extensionId, variant = "ghost", size = "sm", showLabel = false, compact = false }: DndQuickToggleProps) {
   const { data, isLoading } = useDndSettings(extensionId)
   const toggleMutation = useToggleDnd(extensionId)
 
@@ -51,9 +45,7 @@ export function DndQuickToggle({
   const resolvedSize = compact ? "icon" : size
   const modeLabel = data.mode ? DND_MODE_LABELS[data.mode] : undefined
 
-  const tooltipText = isEnabled
-    ? `Disable DND${modeLabel ? ` (${modeLabel})` : ""}`
-    : "Enable Do Not Disturb"
+  const tooltipText = isEnabled ? `Disable DND${modeLabel ? ` (${modeLabel})` : ""}` : "Enable Do Not Disturb"
 
   return (
     <Tooltip>
@@ -64,11 +56,7 @@ export function DndQuickToggle({
           onClick={handleToggle}
           onKeyDown={handleKeyDown}
           disabled={isPending}
-          className={cn(
-            "relative",
-            compact && "h-7 w-7",
-            isEnabled && variant !== "destructive" && !isPending && "bg-destructive/10 hover:bg-destructive/20",
-          )}
+          className={cn("relative", compact && "h-7 w-7", isEnabled && variant !== "destructive" && !isPending && "bg-destructive/10 hover:bg-destructive/20")}
         >
           {/* Pulsing red dot when DND is enabled */}
           {isEnabled && !isPending && (
@@ -82,18 +70,10 @@ export function DndQuickToggle({
           {isPending ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
-            <span className="transition-opacity duration-200">
-              {isEnabled ? (
-                <BellOff className="h-4 w-4" />
-              ) : (
-                <BellRing className="h-4 w-4" />
-              )}
-            </span>
+            <span className="transition-opacity duration-200">{isEnabled ? <BellOff className="h-4 w-4" /> : <BellRing className="h-4 w-4" />}</span>
           )}
 
-          {showLabel && !compact && (
-            <span className="ml-2">{isEnabled ? "DND On" : "DND Off"}</span>
-          )}
+          {showLabel && !compact && <span className="ml-2">{isEnabled ? "DND On" : "DND Off"}</span>}
         </Button>
       </TooltipTrigger>
       <TooltipContent>{tooltipText}</TooltipContent>

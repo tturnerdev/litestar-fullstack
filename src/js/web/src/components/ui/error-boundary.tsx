@@ -1,6 +1,6 @@
-import { Component, type ErrorInfo, type ReactNode, useState } from "react"
-import { AlertCircle, ChevronDown, ChevronRight, ClipboardCopy, Home, RefreshCw } from "lucide-react"
 import { motion } from "framer-motion"
+import { AlertCircle, ChevronDown, ChevronRight, ClipboardCopy, Home, RefreshCw } from "lucide-react"
+import { Component, type ErrorInfo, type ReactNode, useState } from "react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -32,13 +32,7 @@ function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
   const errorCode = generateErrorCode(error.message)
 
   const handleCopyError = async () => {
-    const details = [
-      `Error Code: ${errorCode}`,
-      `Message: ${error.message}`,
-      error.stack ? `\nStack Trace:\n${error.stack}` : "",
-    ]
-      .filter(Boolean)
-      .join("\n")
+    const details = [`Error Code: ${errorCode}`, `Message: ${error.message}`, error.stack ? `\nStack Trace:\n${error.stack}` : ""].filter(Boolean).join("\n")
 
     try {
       await navigator.clipboard.writeText(details)
@@ -50,12 +44,7 @@ function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
 
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-gradient-to-b from-destructive/5 to-transparent px-4 py-12">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.3, ease: "easeOut" }}
-        className="w-full max-w-md"
-      >
+      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3, ease: "easeOut" }} className="w-full max-w-md">
         <Card className="border-border/60 bg-card/80 shadow-xl shadow-destructive/10">
           <CardHeader className="text-center">
             <div className="mx-auto mb-2 flex h-14 w-14 items-center justify-center rounded-full bg-destructive/10">
@@ -75,9 +64,7 @@ function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
                   </Button>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                  <pre className="mt-2 max-h-40 overflow-auto rounded-md bg-muted/60 p-3 text-xs text-muted-foreground">
-                    {error.stack}
-                  </pre>
+                  <pre className="mt-2 max-h-40 overflow-auto rounded-md bg-muted/60 p-3 text-xs text-muted-foreground">{error.stack}</pre>
                 </CollapsibleContent>
               </Collapsible>
             )}

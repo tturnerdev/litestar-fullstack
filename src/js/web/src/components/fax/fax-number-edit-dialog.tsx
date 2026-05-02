@@ -5,31 +5,10 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { type FaxNumber, useUpdateFaxNumber } from "@/lib/api/hooks/fax"
 
 const editFaxNumberSchema = z.object({
@@ -108,8 +87,7 @@ export function FaxNumberEditDialog({ faxNumber, trigger, open: controlledOpen, 
         <DialogHeader>
           <DialogTitle>Edit Fax Number</DialogTitle>
           <DialogDescription>
-            Update the label and status for{" "}
-            <span className="font-mono font-medium text-foreground">{faxNumber.number}</span>.
+            Update the label and status for <span className="font-mono font-medium text-foreground">{faxNumber.number}</span>.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -121,14 +99,9 @@ export function FaxNumberEditDialog({ faxNumber, trigger, open: controlledOpen, 
                 <FormItem>
                   <FormLabel>Label</FormLabel>
                   <FormControl>
-                    <Input
-                      {...field}
-                      placeholder="e.g. Main Fax, Billing Dept"
-                    />
+                    <Input {...field} placeholder="e.g. Main Fax, Billing Dept" />
                   </FormControl>
-                  <FormDescription>
-                    A friendly name to identify this fax number.
-                  </FormDescription>
+                  <FormDescription>A friendly name to identify this fax number.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -144,10 +117,7 @@ export function FaxNumberEditDialog({ faxNumber, trigger, open: controlledOpen, 
                       <SelectTrigger>
                         <SelectValue>
                           <span className="flex items-center gap-2">
-                            <Badge
-                              variant={field.value === "true" ? "default" : "secondary"}
-                              className="pointer-events-none"
-                            >
+                            <Badge variant={field.value === "true" ? "default" : "secondary"} className="pointer-events-none">
                               {field.value === "true" ? "Active" : "Inactive"}
                             </Badge>
                           </span>
@@ -157,13 +127,17 @@ export function FaxNumberEditDialog({ faxNumber, trigger, open: controlledOpen, 
                     <SelectContent>
                       <SelectItem value="true">
                         <div className="flex items-center gap-2">
-                          <Badge variant="default" className="pointer-events-none">Active</Badge>
+                          <Badge variant="default" className="pointer-events-none">
+                            Active
+                          </Badge>
                           <span className="text-xs text-muted-foreground">Number can send and receive faxes</span>
                         </div>
                       </SelectItem>
                       <SelectItem value="false">
                         <div className="flex items-center gap-2">
-                          <Badge variant="secondary" className="pointer-events-none">Inactive</Badge>
+                          <Badge variant="secondary" className="pointer-events-none">
+                            Inactive
+                          </Badge>
                           <span className="text-xs text-muted-foreground">Number is disabled</span>
                         </div>
                       </SelectItem>
@@ -175,29 +149,16 @@ export function FaxNumberEditDialog({ faxNumber, trigger, open: controlledOpen, 
             />
             {form.formState.errors.root && (
               <div className="rounded-md bg-destructive/10 border border-destructive/20 p-3">
-                <p className="text-destructive text-sm">
-                  {form.formState.errors.root.message}
-                </p>
+                <p className="text-destructive text-sm">{form.formState.errors.root.message}</p>
               </div>
             )}
             <div className="flex justify-end gap-3 pt-2">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => setOpen(false)}
-              >
+              <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                disabled={form.formState.isSubmitting || updateFaxNumber.isPending}
-              >
-                {(form.formState.isSubmitting || updateFaxNumber.isPending) && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
-                {form.formState.isSubmitting || updateFaxNumber.isPending
-                  ? "Saving..."
-                  : "Save Changes"}
+              <Button type="submit" disabled={form.formState.isSubmitting || updateFaxNumber.isPending}>
+                {(form.formState.isSubmitting || updateFaxNumber.isPending) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {form.formState.isSubmitting || updateFaxNumber.isPending ? "Saving..." : "Save Changes"}
               </Button>
             </div>
           </form>

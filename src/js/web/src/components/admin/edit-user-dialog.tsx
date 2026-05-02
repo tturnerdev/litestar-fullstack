@@ -1,22 +1,15 @@
-import { useState, useEffect, useMemo } from "react"
 import { CheckCircle, Loader2, Shield, UserCog, XCircle } from "lucide-react"
+import { useEffect, useMemo, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { Switch } from "@/components/ui/switch"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAdminUpdateUser } from "@/lib/api/hooks/admin"
-import type { AdminUserSummary, AdminUserDetail } from "@/lib/generated/api"
+import type { AdminUserDetail, AdminUserSummary } from "@/lib/generated/api"
 
 type UserLike = AdminUserSummary | AdminUserDetail
 
@@ -28,7 +21,7 @@ interface EditUserDialogProps {
 
 export function EditUserDialog({ user, open, onOpenChange }: EditUserDialogProps) {
   const [name, setName] = useState(user.name ?? "")
-  const [username, setUsername] = useState("username" in user ? (user as AdminUserDetail).username ?? "" : "")
+  const [username, setUsername] = useState("username" in user ? ((user as AdminUserDetail).username ?? "") : "")
   const [isActive, setIsActive] = useState(user.isActive ?? true)
   const [isSuperuser, setIsSuperuser] = useState(user.isSuperuser ?? false)
   const updateUser = useAdminUpdateUser(user.id)
@@ -36,7 +29,7 @@ export function EditUserDialog({ user, open, onOpenChange }: EditUserDialogProps
   useEffect(() => {
     if (open) {
       setName(user.name ?? "")
-      setUsername("username" in user ? (user as AdminUserDetail).username ?? "" : "")
+      setUsername("username" in user ? ((user as AdminUserDetail).username ?? "") : "")
       setIsActive(user.isActive ?? true)
       setIsSuperuser(user.isSuperuser ?? false)
     }
@@ -44,9 +37,7 @@ export function EditUserDialog({ user, open, onOpenChange }: EditUserDialogProps
 
   const isDirty = useMemo(() => {
     const nameChanged = name !== (user.name ?? "")
-    const usernameChanged = "username" in user
-      ? username !== ((user as AdminUserDetail).username ?? "")
-      : false
+    const usernameChanged = "username" in user ? username !== ((user as AdminUserDetail).username ?? "") : false
     const activeChanged = isActive !== (user.isActive ?? true)
     const superuserChanged = isSuperuser !== (user.isSuperuser ?? false)
     return nameChanged || usernameChanged || activeChanged || superuserChanged

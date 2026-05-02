@@ -1,5 +1,27 @@
 import { useQuery } from "@tanstack/react-query"
-import { BarChart3, Bell, Building2, Cable, Clock, GitBranch, Home, LifeBuoy, ListTodo, MapPin, Monitor, Phone, Printer, Search, Settings, ShieldAlert, ShieldCheck, Tags, Users, Voicemail, Webhook } from "lucide-react"
+import {
+  BarChart3,
+  Bell,
+  Building2,
+  Cable,
+  Clock,
+  GitBranch,
+  Home,
+  LifeBuoy,
+  ListTodo,
+  MapPin,
+  Monitor,
+  Phone,
+  Printer,
+  Search,
+  Settings,
+  ShieldAlert,
+  ShieldCheck,
+  Tags,
+  Users,
+  Voicemail,
+  Webhook,
+} from "lucide-react"
 import type * as React from "react"
 import { useEffect, useMemo } from "react"
 import { NavMain, type NavMainItem } from "@/components/nav-main"
@@ -140,17 +162,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         title: "Schedules",
         to: "/schedules",
         icon: Clock,
-        items: [
-          { title: "All schedules", to: "/schedules" },
-        ],
+        items: [{ title: "All schedules", to: "/schedules" }],
       },
       {
         title: "E911",
         to: "/e911",
         icon: ShieldAlert,
-        items: [
-          { title: "All registrations", to: "/e911" },
-        ],
+        items: [{ title: "All registrations", to: "/e911" }],
       },
       {
         title: "Call Routing",

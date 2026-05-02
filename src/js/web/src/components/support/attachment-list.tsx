@@ -46,10 +46,7 @@ export function AttachmentList({ attachments, className }: AttachmentListProps) 
     return [...nonInlineAttachments].sort((a, b) => order[getFileCategory(a.contentType)] - order[getFileCategory(b.contentType)])
   }, [nonInlineAttachments])
 
-  const totalBytes = useMemo(
-    () => nonInlineAttachments.reduce((sum, a) => sum + a.fileSizeBytes, 0),
-    [nonInlineAttachments],
-  )
+  const totalBytes = useMemo(() => nonInlineAttachments.reduce((sum, a) => sum + a.fileSizeBytes, 0), [nonInlineAttachments])
 
   if (nonInlineAttachments.length === 0) return null
 
@@ -64,7 +61,11 @@ export function AttachmentList({ attachments, className }: AttachmentListProps) 
           {nonInlineAttachments.length > 1 && (
             <Button variant="ghost" size="sm" className="h-7 gap-1.5 text-xs" asChild>
               <a
-                href={nonInlineAttachments.length === 1 ? (nonInlineAttachments[0].url ?? `/api/support/attachments/${nonInlineAttachments[0].id}`) : `/api/support/attachments/download-all?ids=${nonInlineAttachments.map((a) => a.id).join(",")}`}
+                href={
+                  nonInlineAttachments.length === 1
+                    ? (nonInlineAttachments[0].url ?? `/api/support/attachments/${nonInlineAttachments[0].id}`)
+                    : `/api/support/attachments/download-all?ids=${nonInlineAttachments.map((a) => a.id).join(",")}`
+                }
                 download
               >
                 <DownloadCloud className="h-3.5 w-3.5" />
@@ -91,22 +92,14 @@ export function AttachmentList({ attachments, className }: AttachmentListProps) 
                 )}
               >
                 {isImage && attachment.url ? (
-                  <img
-                    src={attachment.url}
-                    alt={attachment.fileName}
-                    className="h-8 w-8 shrink-0 rounded object-cover"
-                  />
+                  <img src={attachment.url} alt={attachment.fileName} className="h-8 w-8 shrink-0 rounded object-cover" />
                 ) : (
                   <Icon className={cn("h-4 w-4 shrink-0", iconStylesByCategory[category])} />
                 )}
                 {isPreviewable ? (
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <button
-                        type="button"
-                        onClick={() => setPreviewAttachment(attachment)}
-                        className="max-w-[180px] truncate text-left hover:underline"
-                      >
+                      <button type="button" onClick={() => setPreviewAttachment(attachment)} className="max-w-[180px] truncate text-left hover:underline">
                         {attachment.fileName}
                       </button>
                     </TooltipTrigger>
@@ -120,9 +113,7 @@ export function AttachmentList({ attachments, className }: AttachmentListProps) 
                     <TooltipContent>{attachment.fileName}</TooltipContent>
                   </Tooltip>
                 )}
-                <span className="text-xs text-muted-foreground">
-                  {formatBytes(attachment.fileSizeBytes)}
-                </span>
+                <span className="text-xs text-muted-foreground">{formatBytes(attachment.fileSizeBytes)}</span>
                 <a
                   href={downloadUrl}
                   download={attachment.fileName}
@@ -145,17 +136,13 @@ export function AttachmentList({ attachments, className }: AttachmentListProps) 
           attachment={previewAttachment}
           onClose={() => setPreviewAttachment(null)}
           onPrev={(() => {
-            const previewableAttachments = sortedAttachments.filter(
-              (a) => a.contentType.startsWith("image/") || a.contentType === "application/pdf",
-            )
+            const previewableAttachments = sortedAttachments.filter((a) => a.contentType.startsWith("image/") || a.contentType === "application/pdf")
             const idx = previewableAttachments.findIndex((a) => a.id === previewAttachment.id)
             if (idx > 0) return () => setPreviewAttachment(previewableAttachments[idx - 1])
             return undefined
           })()}
           onNext={(() => {
-            const previewableAttachments = sortedAttachments.filter(
-              (a) => a.contentType.startsWith("image/") || a.contentType === "application/pdf",
-            )
+            const previewableAttachments = sortedAttachments.filter((a) => a.contentType.startsWith("image/") || a.contentType === "application/pdf")
             const idx = previewableAttachments.findIndex((a) => a.id === previewAttachment.id)
             if (idx < previewableAttachments.length - 1) return () => setPreviewAttachment(previewableAttachments[idx + 1])
             return undefined

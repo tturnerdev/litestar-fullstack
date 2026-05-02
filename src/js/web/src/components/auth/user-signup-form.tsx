@@ -137,7 +137,16 @@ export function UserSignupForm({ className, redirectUrl, ...props }: UserSignupF
                   <FormControl>
                     <div className="relative">
                       <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/60" />
-                      <Input className="pl-9" placeholder="name@example.com" autoCapitalize="none" autoComplete="email" autoCorrect="off" {...field} type="email" disabled={isLoading} />
+                      <Input
+                        className="pl-9"
+                        placeholder="name@example.com"
+                        autoCapitalize="none"
+                        autoComplete="email"
+                        autoCorrect="off"
+                        {...field}
+                        type="email"
+                        disabled={isLoading}
+                      />
                     </div>
                   </FormControl>
                   <FormMessage />

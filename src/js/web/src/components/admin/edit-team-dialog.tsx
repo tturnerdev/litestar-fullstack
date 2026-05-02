@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react"
 import { Loader2, Users } from "lucide-react"
+import { useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
@@ -21,14 +21,7 @@ interface EditTeamDialogProps {
   onOpenChange: (open: boolean) => void
 }
 
-export function EditTeamDialog({
-  teamId,
-  currentName,
-  currentDescription,
-  currentIsActive,
-  open,
-  onOpenChange,
-}: EditTeamDialogProps) {
+export function EditTeamDialog({ teamId, currentName, currentDescription, currentIsActive, open, onOpenChange }: EditTeamDialogProps) {
   const [name, setName] = useState(currentName)
   const [description, setDescription] = useState(currentDescription ?? "")
   const [isActive, setIsActive] = useState(currentIsActive ?? true)
@@ -85,13 +78,7 @@ export function EditTeamDialog({
                 Name <span className="text-destructive">*</span>
               </Label>
               <p className="text-xs text-muted-foreground">Team display name</p>
-              <Input
-                id="team-name"
-                value={name}
-                onChange={(e) => setName(e.target.value.slice(0, NAME_MAX))}
-                required
-                maxLength={NAME_MAX}
-              />
+              <Input id="team-name" value={name} onChange={(e) => setName(e.target.value.slice(0, NAME_MAX))} required maxLength={NAME_MAX} />
               <p className="text-right text-xs text-muted-foreground">
                 {name.length}/{NAME_MAX}
               </p>

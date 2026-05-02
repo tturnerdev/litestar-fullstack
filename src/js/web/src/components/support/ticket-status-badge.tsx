@@ -4,10 +4,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 
-const statusConfig: Record<
-  string,
-  { label: string; description: string; className: string; dotColor: string; icon: LucideIcon }
-> = {
+const statusConfig: Record<string, { label: string; description: string; className: string; dotColor: string; icon: LucideIcon }> = {
   open: {
     label: "Open",
     description: "Open: Awaiting initial review by support",
@@ -65,13 +62,7 @@ export function TicketStatusBadge({ status }: { status: string }) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Badge
-          variant="outline"
-          className={cn(
-            "animate-in fade-in-0 zoom-in-95 text-xs gap-1.5 duration-200",
-            config.className,
-          )}
-        >
+        <Badge variant="outline" className={cn("animate-in fade-in-0 zoom-in-95 text-xs gap-1.5 duration-200", config.className)}>
           <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", config.dotColor)} />
           <Icon className="h-3 w-3 shrink-0" />
           <span>{config.label}</span>

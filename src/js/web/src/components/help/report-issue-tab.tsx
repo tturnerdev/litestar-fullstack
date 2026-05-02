@@ -16,9 +16,9 @@ export type IssueCategory = (typeof CATEGORIES)[number]
 
 const CATEGORY_ICONS: Record<IssueCategory, React.ElementType> = {
   "Error / Bug": Bug,
-  "Comment": MessageSquare,
+  Comment: MessageSquare,
   "Feature Request": Lightbulb,
-  "Other": HelpCircle,
+  Other: HelpCircle,
 }
 
 const MAX_DESCRIPTION_LENGTH = 2000
@@ -172,13 +172,7 @@ export function ReportIssueTab({ formData, onFormDataChange, onCaptureScreenshot
         <Label htmlFor="report-title">
           Title <span className="text-destructive">*</span>
         </Label>
-        <Input
-          id="report-title"
-          placeholder="Brief summary of the issue"
-          value={formData.title}
-          onChange={(e) => updateField("title", e.target.value)}
-          required
-        />
+        <Input id="report-title" placeholder="Brief summary of the issue" value={formData.title} onChange={(e) => updateField("title", e.target.value)} required />
         <p className="text-xs text-muted-foreground">Concise summary of the issue or request</p>
       </div>
 
@@ -224,13 +218,7 @@ export function ReportIssueTab({ formData, onFormDataChange, onCaptureScreenshot
         />
         <div className="flex items-center justify-between">
           <p className="text-xs text-muted-foreground">Be as specific as possible</p>
-          <span
-            className={`text-xs ${
-              formData.description.length > MAX_DESCRIPTION_LENGTH * 0.9
-                ? "text-destructive"
-                : "text-muted-foreground"
-            }`}
-          >
+          <span className={`text-xs ${formData.description.length > MAX_DESCRIPTION_LENGTH * 0.9 ? "text-destructive" : "text-muted-foreground"}`}>
             {formData.description.length}/{MAX_DESCRIPTION_LENGTH}
           </span>
         </div>
@@ -244,11 +232,7 @@ export function ReportIssueTab({ formData, onFormDataChange, onCaptureScreenshot
         <div className="rounded-md border-2 border-dashed border-border/60 p-4">
           {formData.screenshot ? (
             <div className="relative inline-block">
-              <img
-                src={formData.screenshot}
-                alt="Captured screenshot"
-                className="max-h-40 rounded-md border border-border object-contain"
-              />
+              <img src={formData.screenshot} alt="Captured screenshot" className="max-h-40 rounded-md border border-border object-contain" />
               <button
                 type="button"
                 onClick={() => updateField("screenshot", null)}
@@ -273,9 +257,7 @@ export function ReportIssueTab({ formData, onFormDataChange, onCaptureScreenshot
                   </>
                 )}
               </Button>
-              <p className="text-xs text-muted-foreground">
-                Captures the current portal view behind this dialog
-              </p>
+              <p className="text-xs text-muted-foreground">Captures the current portal view behind this dialog</p>
             </div>
           )}
         </div>
@@ -293,14 +275,7 @@ export function ReportIssueTab({ formData, onFormDataChange, onCaptureScreenshot
           </Button>
           <span className="text-xs text-muted-foreground">Max 10MB per file</span>
         </div>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept={ACCEPTED_EXTENSIONS}
-          multiple
-          onChange={handleFileChange}
-          className="hidden"
-        />
+        <input ref={fileInputRef} type="file" accept={ACCEPTED_EXTENSIONS} multiple onChange={handleFileChange} className="hidden" />
         {formData.files.length > 0 && (
           <>
             <ul className="space-y-1">
@@ -310,11 +285,7 @@ export function ReportIssueTab({ formData, onFormDataChange, onCaptureScreenshot
                     {file.name}
                     <span className="ml-2 text-xs text-muted-foreground">{formatBytes(file.size)}</span>
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => removeFile(index)}
-                    className="shrink-0 text-muted-foreground transition-colors hover:text-destructive"
-                  >
+                  <button type="button" onClick={() => removeFile(index)} className="shrink-0 text-muted-foreground transition-colors hover:text-destructive">
                     <X className="size-4" />
                   </button>
                 </li>
@@ -351,7 +322,9 @@ export function ReportIssueTab({ formData, onFormDataChange, onCaptureScreenshot
             {attachmentCount > 0 && (
               <div className="flex items-center gap-2">
                 <span className="text-muted-foreground">Attachments:</span>
-                <span>{attachmentCount} {attachmentCount === 1 ? "item" : "items"}</span>
+                <span>
+                  {attachmentCount} {attachmentCount === 1 ? "item" : "items"}
+                </span>
               </div>
             )}
           </div>

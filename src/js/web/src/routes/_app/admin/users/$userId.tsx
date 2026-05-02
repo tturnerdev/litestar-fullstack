@@ -19,10 +19,10 @@ import {
   Shield,
   ShieldAlert,
   Trash2,
-  User as UserIcon,
   UserCheck,
-  UserX,
+  User as UserIcon,
   Users,
+  UserX,
   X,
 } from "lucide-react"
 import { useCallback, useMemo, useRef, useState } from "react"
@@ -44,36 +44,23 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { CopyButton } from "@/components/ui/copy-button"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Separator } from "@/components/ui/separator"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { CopyButton } from "@/components/ui/copy-button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { useAdminUpdateUser, useAdminUser } from "@/lib/api/hooks/admin"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { useAdminUpdateUser, useAdminUser } from "@/lib/api/hooks/admin"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 
 export const Route = createFileRoute("/_app/admin/users/$userId")({
@@ -95,15 +82,7 @@ function getInitials(name: string | null | undefined, email: string): string {
 
 // -- Reusable sub-components ------------------------------------------------
 
-function TimestampField({
-  label,
-  value,
-  icon: Icon,
-}: {
-  label: string
-  value: string | null | undefined
-  icon?: React.ComponentType<{ className?: string }>
-}) {
+function TimestampField({ label, value, icon: Icon }: { label: string; value: string | null | undefined; icon?: React.ComponentType<{ className?: string }> }) {
   if (!value) {
     return (
       <div>
@@ -173,10 +152,7 @@ function AdminUserDetailPage() {
 
   const formDirty = useMemo(() => {
     if (!editing || !data) return false
-    return (
-      editName !== (data.name ?? "") ||
-      editUsername !== (data.username ?? "")
-    )
+    return editName !== (data.name ?? "") || editUsername !== (data.username ?? "")
   }, [editing, data, editName, editUsername])
 
   const blocker = useBlocker({
@@ -249,7 +225,11 @@ function AdminUserDetailPage() {
             icon={AlertCircle}
             title="Unable to load user"
             description="The user may have been deleted or you may not have permission to view them."
-            action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+            action={
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
+                Try again
+              </Button>
+            }
           />
         </PageSection>
       </PageContainer>
@@ -382,10 +362,7 @@ function AdminUserDetailPage() {
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="text-destructive focus:text-destructive"
-                  onClick={() => setDeleteOpen(true)}
-                >
+                <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setDeleteOpen(true)}>
                   <Trash2 className="mr-2 h-4 w-4" />
                   Delete User
                 </DropdownMenuItem>
@@ -399,112 +376,105 @@ function AdminUserDetailPage() {
       {/* Hero section */}
       <PageSection>
         <SectionErrorBoundary name="User Profile">
-        <Card className="overflow-hidden">
-          <div className="h-24 bg-gradient-to-r from-primary/20 via-primary/10 to-transparent" />
-          <CardContent className="relative -mt-12 pb-6">
-            <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-end">
-              <div className="rounded-full bg-background p-1 shadow-md ring-2 ring-background">
-                <Avatar className="h-24 w-24 text-3xl">
-                  <AvatarImage src={undefined} alt={displayName} />
-                  <AvatarFallback className="bg-primary/10 text-primary text-3xl font-semibold">
-                    {initials}
-                  </AvatarFallback>
-                </Avatar>
-              </div>
+          <Card className="overflow-hidden">
+            <div className="h-24 bg-gradient-to-r from-primary/20 via-primary/10 to-transparent" />
+            <CardContent className="relative -mt-12 pb-6">
+              <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-end">
+                <div className="rounded-full bg-background p-1 shadow-md ring-2 ring-background">
+                  <Avatar className="h-24 w-24 text-3xl">
+                    <AvatarImage src={undefined} alt={displayName} />
+                    <AvatarFallback className="bg-primary/10 text-primary text-3xl font-semibold">{initials}</AvatarFallback>
+                  </Avatar>
+                </div>
 
-              <div className="flex-1 space-y-1.5 text-center sm:pb-1 sm:text-left">
-                <div className="flex flex-col items-center gap-2 sm:flex-row sm:flex-wrap">
-                  <h2 className="text-2xl font-semibold tracking-tight">{displayName}</h2>
-                  <Badge
-                    variant={data.isActive ? "default" : "secondary"}
-                    className={
-                      data.isActive
-                        ? "gap-1 bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400"
-                        : "gap-1"
-                    }
-                  >
-                    {data.isActive ? (
-                      <>
-                        <UserCheck className="h-3 w-3" />
-                        Active
-                      </>
-                    ) : (
-                      <>
-                        <UserX className="h-3 w-3" />
-                        Inactive
-                      </>
+                <div className="flex-1 space-y-1.5 text-center sm:pb-1 sm:text-left">
+                  <div className="flex flex-col items-center gap-2 sm:flex-row sm:flex-wrap">
+                    <h2 className="text-2xl font-semibold tracking-tight">{displayName}</h2>
+                    <Badge
+                      variant={data.isActive ? "default" : "secondary"}
+                      className={data.isActive ? "gap-1 bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400" : "gap-1"}
+                    >
+                      {data.isActive ? (
+                        <>
+                          <UserCheck className="h-3 w-3" />
+                          Active
+                        </>
+                      ) : (
+                        <>
+                          <UserX className="h-3 w-3" />
+                          Inactive
+                        </>
+                      )}
+                    </Badge>
+                    {data.isSuperuser && (
+                      <Badge variant="destructive" className="gap-1">
+                        <ShieldAlert className="h-3 w-3" />
+                        Superuser
+                      </Badge>
                     )}
-                  </Badge>
-                  {data.isSuperuser && (
-                    <Badge variant="destructive" className="gap-1">
-                      <ShieldAlert className="h-3 w-3" />
-                      Superuser
-                    </Badge>
-                  )}
-                  {roleNames.map((role) => (
-                    <Badge key={role} variant="outline" className="gap-1 capitalize">
-                      <KeyRound className="h-3 w-3" />
-                      {role}
-                    </Badge>
-                  ))}
-                </div>
+                    {roleNames.map((role) => (
+                      <Badge key={role} variant="outline" className="gap-1 capitalize">
+                        <KeyRound className="h-3 w-3" />
+                        {role}
+                      </Badge>
+                    ))}
+                  </div>
 
-                <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-sm text-muted-foreground sm:justify-start">
-                  <span className="inline-flex items-center gap-1.5">
-                    <Mail className="h-3.5 w-3.5" />
-                    {data.email}
-                    <CopyButton value={data.email} label="email" />
-                  </span>
-                  {data.username && (
+                  <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-sm text-muted-foreground sm:justify-start">
                     <span className="inline-flex items-center gap-1.5">
-                      <UserIcon className="h-3.5 w-3.5" />
-                      @{data.username}
+                      <Mail className="h-3.5 w-3.5" />
+                      {data.email}
+                      <CopyButton value={data.email} label="email" />
                     </span>
-                  )}
-                  {data.phone && (
-                    <span className="inline-flex items-center gap-1.5">
-                      <Phone className="h-3.5 w-3.5" />
-                      {data.phone}
-                    </span>
-                  )}
+                    {data.username && (
+                      <span className="inline-flex items-center gap-1.5">
+                        <UserIcon className="h-3.5 w-3.5" />@{data.username}
+                      </span>
+                    )}
+                    {data.phone && (
+                      <span className="inline-flex items-center gap-1.5">
+                        <Phone className="h-3.5 w-3.5" />
+                        {data.phone}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <Separator className="my-4" />
+              <Separator className="my-4" />
 
-            <div className="flex flex-wrap items-center justify-center gap-4 sm:justify-start">
-              {securityIndicators.map((indicator) => {
-                const Icon = indicator.icon
-                return (
-                  <Tooltip key={indicator.label}>
-                    <TooltipTrigger asChild>
-                      <div
-                        className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium transition-colors ${
-                          indicator.enabled
-                            ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400"
-                            : "border-border bg-muted/50 text-muted-foreground"
-                        }`}
-                      >
-                        <Icon className="h-3 w-3" />
-                        {indicator.label}
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{indicator.enabled ? indicator.enabledText : indicator.disabledText}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                )
-              })}
+              <div className="flex flex-wrap items-center justify-center gap-4 sm:justify-start">
+                {securityIndicators.map((indicator) => {
+                  const Icon = indicator.icon
+                  return (
+                    <Tooltip key={indicator.label}>
+                      <TooltipTrigger asChild>
+                        <div
+                          className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium transition-colors ${
+                            indicator.enabled
+                              ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400"
+                              : "border-border bg-muted/50 text-muted-foreground"
+                          }`}
+                        >
+                          <Icon className="h-3 w-3" />
+                          {indicator.label}
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{indicator.enabled ? indicator.enabledText : indicator.disabledText}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  )
+                })}
 
-              {/* User ID with copy */}
-              <div className="ml-auto hidden items-center gap-1 text-xs text-muted-foreground sm:flex">
-                <span className="font-mono">{userId.slice(0, 8)}...</span>
-                <CopyButton value={userId} label="user ID" />
+                {/* User ID with copy */}
+                <div className="ml-auto hidden items-center gap-1 text-xs text-muted-foreground sm:flex">
+                  <span className="font-mono">{userId.slice(0, 8)}...</span>
+                  <CopyButton value={userId} label="user ID" />
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
         </SectionErrorBoundary>
       </PageSection>
 
@@ -513,127 +483,127 @@ function AdminUserDetailPage() {
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Account Info */}
           <SectionErrorBoundary name="Account Info">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <UserIcon className="h-5 w-5 text-muted-foreground" />
-                <CardTitle>Account Info</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {editing && formDirty && (
-                <div className="mb-4 flex items-center gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-400">
-                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-500" />
-                  You have unsaved changes
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <UserIcon className="h-5 w-5 text-muted-foreground" />
+                  <CardTitle>Account Info</CardTitle>
                 </div>
-              )}
-              <div className="grid gap-4 text-sm sm:grid-cols-2">
-                <div>
-                  <p className="text-muted-foreground">Email</p>
-                  <div className="flex items-center gap-1">
-                    <p>{data.email}</p>
-                    <CopyButton value={data.email} label="email" />
+              </CardHeader>
+              <CardContent>
+                {editing && formDirty && (
+                  <div className="mb-4 flex items-center gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-400">
+                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-500" />
+                    You have unsaved changes
+                  </div>
+                )}
+                <div className="grid gap-4 text-sm sm:grid-cols-2">
+                  <div>
+                    <p className="text-muted-foreground">Email</p>
+                    <div className="flex items-center gap-1">
+                      <p>{data.email}</p>
+                      <CopyButton value={data.email} label="email" />
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground" htmlFor="edit-user-username">
+                      Username
+                    </Label>
+                    {editing ? (
+                      <Input
+                        id="edit-user-username"
+                        value={editUsername}
+                        onChange={(e) => setEditUsername(e.target.value)}
+                        placeholder="Username"
+                        className="mt-1"
+                        disabled={updateUser.isPending}
+                      />
+                    ) : (
+                      <p>{data.username ?? "---"}</p>
+                    )}
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground" htmlFor="edit-user-name">
+                      Name
+                    </Label>
+                    {editing ? (
+                      <Input
+                        id="edit-user-name"
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        placeholder="Full name"
+                        className="mt-1"
+                        disabled={updateUser.isPending}
+                      />
+                    ) : (
+                      <p>{data.name ?? "---"}</p>
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Phone</p>
+                    <p>{data.phone ?? "---"}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Email verified</p>
+                    <div className="flex items-center gap-2">
+                      <Badge variant={data.isVerified ? "default" : "outline"}>{data.isVerified ? "Verified" : "Unverified"}</Badge>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 px-2 text-xs"
+                        onClick={() => updateUser.mutate({ is_verified: !data.isVerified })}
+                        disabled={updateUser.isPending}
+                      >
+                        {data.isVerified ? "Revoke" : "Verify"}
+                      </Button>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">MFA enabled</p>
+                    <p>{data.isTwoFactorEnabled ? "Yes" : "No"}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Has password</p>
+                    <p>{data.hasPassword ? "Yes" : "No (OAuth only)"}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">User ID</p>
+                    <div className="flex items-center gap-1">
+                      <p className="font-mono text-xs">{userId.slice(0, 8)}...</p>
+                      <CopyButton value={userId} label="user ID" />
+                    </div>
                   </div>
                 </div>
-                <div>
-                  <Label className="text-muted-foreground" htmlFor="edit-user-username">Username</Label>
-                  {editing ? (
-                    <Input
-                      id="edit-user-username"
-                      value={editUsername}
-                      onChange={(e) => setEditUsername(e.target.value)}
-                      placeholder="Username"
-                      className="mt-1"
-                      disabled={updateUser.isPending}
-                    />
-                  ) : (
-                    <p>{data.username ?? "---"}</p>
-                  )}
-                </div>
-                <div>
-                  <Label className="text-muted-foreground" htmlFor="edit-user-name">Name</Label>
-                  {editing ? (
-                    <Input
-                      id="edit-user-name"
-                      value={editName}
-                      onChange={(e) => setEditName(e.target.value)}
-                      placeholder="Full name"
-                      className="mt-1"
-                      disabled={updateUser.isPending}
-                    />
-                  ) : (
-                    <p>{data.name ?? "---"}</p>
-                  )}
-                </div>
-                <div>
-                  <p className="text-muted-foreground">Phone</p>
-                  <p>{data.phone ?? "---"}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">Email verified</p>
-                  <div className="flex items-center gap-2">
-                    <Badge variant={data.isVerified ? "default" : "outline"}>
-                      {data.isVerified ? "Verified" : "Unverified"}
-                    </Badge>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 px-2 text-xs"
-                      onClick={() => updateUser.mutate({ is_verified: !data.isVerified })}
-                      disabled={updateUser.isPending}
-                    >
-                      {data.isVerified ? "Revoke" : "Verify"}
-                    </Button>
-                  </div>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">MFA enabled</p>
-                  <p>{data.isTwoFactorEnabled ? "Yes" : "No"}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">Has password</p>
-                  <p>{data.hasPassword ? "Yes" : "No (OAuth only)"}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">User ID</p>
-                  <div className="flex items-center gap-1">
-                    <p className="font-mono text-xs">{userId.slice(0, 8)}...</p>
-                    <CopyButton value={userId} label="user ID" />
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
           </SectionErrorBoundary>
 
           {/* Activity */}
           <SectionErrorBoundary name="Activity">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Clock className="h-5 w-5 text-muted-foreground" />
-                <CardTitle>Activity</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 text-sm sm:grid-cols-2">
-                <div>
-                  <p className="text-muted-foreground">Login count</p>
-                  <p className="flex items-center gap-1.5 text-xl font-semibold">
-                    <LogIn className="h-4 w-4 text-muted-foreground" />
-                    {data.loginCount ?? 0}
-                  </p>
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-muted-foreground" />
+                  <CardTitle>Activity</CardTitle>
                 </div>
-                <TimestampField label="Last login" value={data.joinedAt} icon={Calendar} />
-                <TimestampField label="Joined" value={data.joinedAt} icon={Calendar} />
-                <TimestampField label="Last updated" value={data.updatedAt} icon={Clock} />
-                <TimestampField label="Created" value={data.createdAt} icon={Calendar} />
-                {data.verifiedAt && (
-                  <TimestampField label="Verified at" value={data.verifiedAt} icon={BadgeCheck} />
-                )}
-              </div>
-            </CardContent>
-          </Card>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 text-sm sm:grid-cols-2">
+                  <div>
+                    <p className="text-muted-foreground">Login count</p>
+                    <p className="flex items-center gap-1.5 text-xl font-semibold">
+                      <LogIn className="h-4 w-4 text-muted-foreground" />
+                      {data.loginCount ?? 0}
+                    </p>
+                  </div>
+                  <TimestampField label="Last login" value={data.joinedAt} icon={Calendar} />
+                  <TimestampField label="Joined" value={data.joinedAt} icon={Calendar} />
+                  <TimestampField label="Last updated" value={data.updatedAt} icon={Clock} />
+                  <TimestampField label="Created" value={data.createdAt} icon={Calendar} />
+                  {data.verifiedAt && <TimestampField label="Verified at" value={data.verifiedAt} icon={BadgeCheck} />}
+                </div>
+              </CardContent>
+            </Card>
           </SectionErrorBoundary>
         </div>
       </PageSection>
@@ -642,96 +612,64 @@ function AdminUserDetailPage() {
 
       {/* Admin Actions */}
       <PageSection delay={0.15}>
-        <SectionHeading
-          icon={Shield}
-          title="Admin Actions"
-          description="Toggle account properties and manage permissions."
-        />
+        <SectionHeading icon={Shield} title="Admin Actions" description="Toggle account properties and manage permissions." />
         <SectionErrorBoundary name="Admin Actions">
-        <Card>
-          <CardContent className="divide-y pt-6">
-            {/* Active toggle */}
-            <div className="flex items-center justify-between py-4 first:pt-0 last:pb-0">
-              <div className="space-y-0.5">
-                <p className="text-sm font-medium">Account active</p>
-                <p className="text-xs text-muted-foreground">
-                  {data.isActive ? "User can sign in and access the platform." : "User is deactivated and cannot sign in."}
-                </p>
+          <Card>
+            <CardContent className="divide-y pt-6">
+              {/* Active toggle */}
+              <div className="flex items-center justify-between py-4 first:pt-0 last:pb-0">
+                <div className="space-y-0.5">
+                  <p className="text-sm font-medium">Account active</p>
+                  <p className="text-xs text-muted-foreground">{data.isActive ? "User can sign in and access the platform." : "User is deactivated and cannot sign in."}</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Badge
+                    variant={data.isActive ? "default" : "secondary"}
+                    className={data.isActive ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" : ""}
+                  >
+                    {data.isActive ? "Active" : "Inactive"}
+                  </Badge>
+                  <Switch checked={data.isActive ?? false} onCheckedChange={() => updateUser.mutate({ is_active: !data.isActive })} disabled={updateUser.isPending} />
+                </div>
               </div>
-              <div className="flex items-center gap-3">
-                <Badge
-                  variant={data.isActive ? "default" : "secondary"}
-                  className={
-                    data.isActive
-                      ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
-                      : ""
-                  }
-                >
-                  {data.isActive ? "Active" : "Inactive"}
-                </Badge>
-                <Switch
-                  checked={data.isActive ?? false}
-                  onCheckedChange={() => updateUser.mutate({ is_active: !data.isActive })}
-                  disabled={updateUser.isPending}
-                />
-              </div>
-            </div>
 
-            {/* Superuser toggle */}
-            <div className="flex items-center justify-between py-4 first:pt-0 last:pb-0">
-              <div className="space-y-0.5">
-                <p className="text-sm font-medium">Superuser privileges</p>
-                <p className="text-xs text-muted-foreground">
-                  {data.isSuperuser ? "Full administrative access to all resources." : "Standard user privileges."}
-                </p>
+              {/* Superuser toggle */}
+              <div className="flex items-center justify-between py-4 first:pt-0 last:pb-0">
+                <div className="space-y-0.5">
+                  <p className="text-sm font-medium">Superuser privileges</p>
+                  <p className="text-xs text-muted-foreground">{data.isSuperuser ? "Full administrative access to all resources." : "Standard user privileges."}</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  {data.isSuperuser && <Badge variant="destructive">Superuser</Badge>}
+                  <Switch checked={data.isSuperuser ?? false} onCheckedChange={() => updateUser.mutate({ is_superuser: !data.isSuperuser })} disabled={updateUser.isPending} />
+                </div>
               </div>
-              <div className="flex items-center gap-3">
-                {data.isSuperuser && (
-                  <Badge variant="destructive">Superuser</Badge>
-                )}
-                <Switch
-                  checked={data.isSuperuser ?? false}
-                  onCheckedChange={() => updateUser.mutate({ is_superuser: !data.isSuperuser })}
-                  disabled={updateUser.isPending}
-                />
-              </div>
-            </div>
 
-            {/* Verification toggle */}
-            <div className="flex items-center justify-between py-4 first:pt-0 last:pb-0">
-              <div className="space-y-0.5">
-                <p className="text-sm font-medium">Email verified</p>
-                <p className="text-xs text-muted-foreground">
-                  {data.isVerified ? "Email address has been confirmed." : "Email address is unverified."}
-                </p>
+              {/* Verification toggle */}
+              <div className="flex items-center justify-between py-4 first:pt-0 last:pb-0">
+                <div className="space-y-0.5">
+                  <p className="text-sm font-medium">Email verified</p>
+                  <p className="text-xs text-muted-foreground">{data.isVerified ? "Email address has been confirmed." : "Email address is unverified."}</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Badge variant={data.isVerified ? "default" : "outline"}>{data.isVerified ? "Verified" : "Unverified"}</Badge>
+                  <Switch checked={data.isVerified ?? false} onCheckedChange={() => updateUser.mutate({ is_verified: !data.isVerified })} disabled={updateUser.isPending} />
+                </div>
               </div>
-              <div className="flex items-center gap-3">
-                <Badge variant={data.isVerified ? "default" : "outline"}>
-                  {data.isVerified ? "Verified" : "Unverified"}
-                </Badge>
-                <Switch
-                  checked={data.isVerified ?? false}
-                  onCheckedChange={() => updateUser.mutate({ is_verified: !data.isVerified })}
-                  disabled={updateUser.isPending}
-                />
-              </div>
-            </div>
 
-            {/* Role management link */}
-            <div className="flex items-center justify-between py-4 first:pt-0 last:pb-0">
-              <div className="space-y-0.5">
-                <p className="text-sm font-medium">Roles</p>
-                <p className="text-xs text-muted-foreground">
-                  {roleNames.length > 0 ? `Assigned: ${roleNames.join(", ")}` : "No roles assigned."}
-                </p>
+              {/* Role management link */}
+              <div className="flex items-center justify-between py-4 first:pt-0 last:pb-0">
+                <div className="space-y-0.5">
+                  <p className="text-sm font-medium">Roles</p>
+                  <p className="text-xs text-muted-foreground">{roleNames.length > 0 ? `Assigned: ${roleNames.join(", ")}` : "No roles assigned."}</p>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => setRolesOpen(true)}>
+                  <KeyRound className="mr-2 h-4 w-4" />
+                  Manage roles
+                </Button>
               </div>
-              <Button variant="outline" size="sm" onClick={() => setRolesOpen(true)}>
-                <KeyRound className="mr-2 h-4 w-4" />
-                Manage roles
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
         </SectionErrorBoundary>
       </PageSection>
 
@@ -750,32 +688,28 @@ function AdminUserDetailPage() {
           }
         />
         <SectionErrorBoundary name="Roles">
-        <Card>
-          <CardContent className="pt-6">
-            {(data.roles ?? []).length === 0 ? (
-              <p className="text-sm text-muted-foreground">No roles assigned.</p>
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                {(data.roles ?? []).map((role) => (
-                  <Badge key={role.roleId} variant="secondary" className="gap-1.5 px-3 py-1.5">
-                    <KeyRound className="h-3 w-3" />
-                    {role.roleName}
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span className="ml-1 text-xs text-muted-foreground">
-                          (since {formatRelativeTimeShort(role.assignedAt)})
-                        </span>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        Assigned {formatDateTime(role.assignedAt)}
-                      </TooltipContent>
-                    </Tooltip>
-                  </Badge>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+          <Card>
+            <CardContent className="pt-6">
+              {(data.roles ?? []).length === 0 ? (
+                <p className="text-sm text-muted-foreground">No roles assigned.</p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {(data.roles ?? []).map((role) => (
+                    <Badge key={role.roleId} variant="secondary" className="gap-1.5 px-3 py-1.5">
+                      <KeyRound className="h-3 w-3" />
+                      {role.roleName}
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="ml-1 text-xs text-muted-foreground">(since {formatRelativeTimeShort(role.assignedAt)})</span>
+                        </TooltipTrigger>
+                        <TooltipContent>Assigned {formatDateTime(role.assignedAt)}</TooltipContent>
+                      </Tooltip>
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </SectionErrorBoundary>
       </PageSection>
 
@@ -783,60 +717,54 @@ function AdminUserDetailPage() {
 
       {/* Team Memberships */}
       <PageSection delay={0.25}>
-        <SectionHeading
-          icon={Users}
-          title="Teams"
-          description={`Member of ${(data.teams ?? []).length} team${(data.teams ?? []).length !== 1 ? "s" : ""}.`}
-        />
+        <SectionHeading icon={Users} title="Teams" description={`Member of ${(data.teams ?? []).length} team${(data.teams ?? []).length !== 1 ? "s" : ""}.`} />
         <SectionErrorBoundary name="Teams">
-        <Card>
-          <CardContent className="pt-6">
-            {(data.teams ?? []).length === 0 ? (
-              <p className="text-sm text-muted-foreground">Not a member of any teams.</p>
-            ) : (
-              <div className="overflow-x-auto">
-              <Table aria-label="User team memberships">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Team</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>Owner</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {(data.teams ?? []).map((team) => (
-                    <TableRow key={team.teamId}>
-                      <TableCell className="font-medium">{team.teamName}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="capitalize">
-                          {team.role ?? "member"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {team.isOwner ? (
-                          <Badge className="gap-1 bg-amber-100 text-amber-700 hover:bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400">
-                            Owner
-                          </Badge>
-                        ) : (
-                          <span className="text-muted-foreground">No</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button asChild variant="ghost" size="sm">
-                          <Link to="/admin/teams/$teamId" params={{ teamId: team.teamId }}>
-                            View team
-                          </Link>
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+          <Card>
+            <CardContent className="pt-6">
+              {(data.teams ?? []).length === 0 ? (
+                <p className="text-sm text-muted-foreground">Not a member of any teams.</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table aria-label="User team memberships">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Team</TableHead>
+                        <TableHead>Role</TableHead>
+                        <TableHead>Owner</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {(data.teams ?? []).map((team) => (
+                        <TableRow key={team.teamId}>
+                          <TableCell className="font-medium">{team.teamName}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="capitalize">
+                              {team.role ?? "member"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {team.isOwner ? (
+                              <Badge className="gap-1 bg-amber-100 text-amber-700 hover:bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400">Owner</Badge>
+                            ) : (
+                              <span className="text-muted-foreground">No</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button asChild variant="ghost" size="sm">
+                              <Link to="/admin/teams/$teamId" params={{ teamId: team.teamId }}>
+                                View team
+                              </Link>
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </SectionErrorBoundary>
       </PageSection>
 
@@ -845,43 +773,37 @@ function AdminUserDetailPage() {
         <>
           <Separator />
           <PageSection delay={0.3}>
-            <SectionHeading
-              icon={Link2}
-              title="Linked OAuth Accounts"
-              description="External identity providers linked to this user."
-            />
+            <SectionHeading icon={Link2} title="Linked OAuth Accounts" description="External identity providers linked to this user." />
             <SectionErrorBoundary name="OAuth Accounts">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="overflow-x-auto">
-                <Table aria-label="Linked OAuth accounts">
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Provider</TableHead>
-                      <TableHead>Account email</TableHead>
-                      <TableHead>Account ID</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {(data.oauthAccounts ?? []).map((account) => (
-                      <TableRow key={account.id}>
-                        <TableCell className="font-medium capitalize">{account.oauthName}</TableCell>
-                        <TableCell>{account.accountEmail}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1">
-                            <span className="font-mono text-xs text-muted-foreground">
-                              {account.accountId}
-                            </span>
-                            <CopyButton value={account.accountId} label="account ID" />
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-                </div>
-              </CardContent>
-            </Card>
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="overflow-x-auto">
+                    <Table aria-label="Linked OAuth accounts">
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Provider</TableHead>
+                          <TableHead>Account email</TableHead>
+                          <TableHead>Account ID</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {(data.oauthAccounts ?? []).map((account) => (
+                          <TableRow key={account.id}>
+                            <TableCell className="font-medium capitalize">{account.oauthName}</TableCell>
+                            <TableCell>{account.accountEmail}</TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-1">
+                                <span className="font-mono text-xs text-muted-foreground">{account.accountId}</span>
+                                <CopyButton value={account.accountId} label="account ID" />
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
           </PageSection>
         </>
@@ -892,7 +814,7 @@ function AdminUserDetailPage() {
       {/* Recent Activity Timeline */}
       <PageSection delay={0.35}>
         <SectionErrorBoundary name="Recent Activity">
-        <UserActivityTimeline userId={userId} />
+          <UserActivityTimeline userId={userId} />
         </SectionErrorBoundary>
       </PageSection>
 
@@ -901,15 +823,15 @@ function AdminUserDetailPage() {
       {/* Activity History (Audit Trail) */}
       <PageSection delay={0.4}>
         <SectionErrorBoundary name="Activity History">
-        <Card>
-          <CardHeader>
-            <CardTitle>Activity History</CardTitle>
-            <CardDescription>Audit trail for this user</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <EntityActivityPanel targetType="user" targetId={userId} />
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Activity History</CardTitle>
+              <CardDescription>Audit trail for this user</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <EntityActivityPanel targetType="user" targetId={userId} />
+            </CardContent>
+          </Card>
         </SectionErrorBoundary>
       </PageSection>
 
@@ -918,25 +840,25 @@ function AdminUserDetailPage() {
       {/* Danger Zone */}
       <PageSection delay={0.45}>
         <SectionErrorBoundary name="Danger Zone">
-        <Card className="border-destructive/30">
-          <CardHeader>
-            <CardTitle className="text-destructive">Danger Zone</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium">Delete this user</p>
-                <p className="text-sm text-muted-foreground">
-                  Permanently remove <strong>{data.email}</strong> and all associated data. This action cannot be undone.
-                </p>
+          <Card className="border-destructive/30">
+            <CardHeader>
+              <CardTitle className="text-destructive">Danger Zone</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium">Delete this user</p>
+                  <p className="text-sm text-muted-foreground">
+                    Permanently remove <strong>{data.email}</strong> and all associated data. This action cannot be undone.
+                  </p>
+                </div>
+                <Button variant="destructive" size="sm" onClick={() => setDeleteOpen(true)}>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
+                </Button>
               </div>
-              <Button variant="destructive" size="sm" onClick={() => setDeleteOpen(true)}>
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
         </SectionErrorBoundary>
       </PageSection>
 
@@ -949,9 +871,7 @@ function AdminUserDetailPage() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
-            <AlertDialogDescription>
-              You have unsaved changes to this user. Are you sure you want to leave? Your changes will be lost.
-            </AlertDialogDescription>
+            <AlertDialogDescription>You have unsaved changes to this user. Are you sure you want to leave? Your changes will be lost.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => blocker.reset?.()}>Stay on page</AlertDialogCancel>

@@ -93,9 +93,7 @@ export function useFaxNumbers(page = 1, pageSize = 25) {
   return useQuery({
     queryKey: ["fax", "numbers", page, pageSize],
     queryFn: async () => {
-      return apiFetch<PaginatedResponse<FaxNumber>>(
-        `/api/fax/numbers?currentPage=${page}&pageSize=${pageSize}`,
-      )
+      return apiFetch<PaginatedResponse<FaxNumber>>(`/api/fax/numbers?currentPage=${page}&pageSize=${pageSize}`)
     },
   })
 }
@@ -160,9 +158,7 @@ export function useFaxEmailRoutes(faxNumberId: string, page = 1, pageSize = 25) 
   return useQuery({
     queryKey: ["fax", "emailRoutes", faxNumberId, page, pageSize],
     queryFn: async () => {
-      return apiFetch<PaginatedResponse<FaxEmailRoute>>(
-        `/api/fax/numbers/${faxNumberId}/email-routes?currentPage=${page}&pageSize=${pageSize}`,
-      )
+      return apiFetch<PaginatedResponse<FaxEmailRoute>>(`/api/fax/numbers/${faxNumberId}/email-routes?currentPage=${page}&pageSize=${pageSize}`)
     },
     enabled: !!faxNumberId,
   })
@@ -259,9 +255,7 @@ export function useFaxMessages(params: {
       if (search) searchParams.set("search", search)
       if (orderBy) searchParams.set("orderBy", orderBy)
       if (sortOrder) searchParams.set("sortOrder", sortOrder)
-      return apiFetch<PaginatedResponse<FaxMessage>>(
-        `/api/fax/messages?${searchParams.toString()}`,
-      )
+      return apiFetch<PaginatedResponse<FaxMessage>>(`/api/fax/messages?${searchParams.toString()}`)
     },
     ...(refetchInterval !== undefined ? { refetchInterval } : {}),
   })
@@ -332,14 +326,10 @@ export function useAllFaxEmailRoutes() {
   return useQuery({
     queryKey: ["fax", "emailRoutes", "all"],
     queryFn: async () => {
-      const numbersResp = await apiFetch<PaginatedResponse<FaxNumber>>(
-        "/api/fax/numbers?currentPage=1&pageSize=200",
-      )
+      const numbersResp = await apiFetch<PaginatedResponse<FaxNumber>>("/api/fax/numbers?currentPage=1&pageSize=200")
       const allRoutes: FaxEmailRouteWithNumber[] = []
       for (const num of numbersResp.items) {
-        const routesResp = await apiFetch<PaginatedResponse<FaxEmailRoute>>(
-          `/api/fax/numbers/${num.id}/email-routes?currentPage=1&pageSize=200`,
-        )
+        const routesResp = await apiFetch<PaginatedResponse<FaxEmailRoute>>(`/api/fax/numbers/${num.id}/email-routes?currentPage=1&pageSize=200`)
         for (const route of routesResp.items) {
           allRoutes.push({
             ...route,
@@ -360,12 +350,7 @@ export function useAllFaxEmailRoutes() {
 export function useSendFax() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (payload: {
-      faxNumberId: string
-      destinationNumber: string
-      subject?: string
-      body?: string
-    }) => {
+    mutationFn: async (payload: { faxNumberId: string; destinationNumber: string; subject?: string; body?: string }) => {
       return apiFetch<FaxMessage>("/api/fax/send", {
         method: "POST",
         body: JSON.stringify(payload),

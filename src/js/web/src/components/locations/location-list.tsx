@@ -1,18 +1,6 @@
 import { Link } from "@tanstack/react-router"
-import { useCallback, useEffect, useMemo, useState } from "react"
 import { AlertCircle, Building2, Download, Eye, MapPin, MoreVertical, Pencil, Search, Trash2, X } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { Badge } from "@/components/ui/badge"
-import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { EmptyState } from "@/components/ui/empty-state"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
-import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,12 +11,23 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { buttonVariants } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
+import { Button, buttonVariants } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { EmptyState } from "@/components/ui/empty-state"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
+import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { useAuthStore } from "@/lib/auth"
-import { type Location, useBulkDeleteLocations, useDeleteLocation, useLocations } from "@/lib/api/hooks/locations"
-import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
+import { type Location, useBulkDeleteLocations, useDeleteLocation, useLocations } from "@/lib/api/hooks/locations"
+import { useAuthStore } from "@/lib/auth"
+import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
+import { cn } from "@/lib/utils"
 
 const getId = (loc: Location) => loc.id
 
@@ -120,16 +119,19 @@ export function LocationList({
   const [pageSize, setPageSize] = useState(getStoredPageSize)
 
   // Persist page size preference
-  const handlePageSizeChange = useCallback((value: string) => {
-    const size = Number(value)
-    setPageSize(size)
-    navigate({ search: (prev) => ({ ...prev, page: undefined }), replace: true })
-    try {
-      localStorage.setItem(PAGE_SIZE_STORAGE_KEY, value)
-    } catch {
-      // localStorage unavailable
-    }
-  }, [navigate])
+  const handlePageSizeChange = useCallback(
+    (value: string) => {
+      const size = Number(value)
+      setPageSize(size)
+      navigate({ search: (prev) => ({ ...prev, page: undefined }), replace: true })
+      try {
+        localStorage.setItem(PAGE_SIZE_STORAGE_KEY, value)
+      } catch {
+        // localStorage unavailable
+      }
+    },
+    [navigate],
+  )
 
   const teamId = currentTeam?.id ?? ""
 
@@ -199,11 +201,7 @@ export function LocationList({
         },
         { label: "Delete Selected" },
       ),
-      createExportAction<Location>(
-        "locations-selected",
-        csvHeaders,
-        (ids) => locations.filter((loc) => ids.includes(loc.id)),
-      ),
+      createExportAction<Location>("locations-selected", csvHeaders, (ids) => locations.filter((loc) => ids.includes(loc.id))),
     ],
     [bulk, locations],
   )
@@ -245,13 +243,7 @@ export function LocationList({
   }, [page, totalPages, navigate])
 
   if (!currentTeam) {
-    return (
-      <EmptyState
-        icon={Building2}
-        title="Select a team first"
-        description="Locations belong to teams. Please select a team from the sidebar to view and manage locations."
-      />
-    )
+    return <EmptyState icon={Building2} title="Select a team first" description="Locations belong to teams. Please select a team from the sidebar to view and manage locations." />
   }
 
   if (isLoading) {
@@ -310,12 +302,7 @@ export function LocationList({
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative max-w-md flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Search locations..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              className="pl-10 pr-8"
-            />
+            <Input placeholder="Search locations..." value={searchInput} onChange={(e) => setSearchInput(e.target.value)} className="pl-10 pr-8" />
             {searchInput && (
               <button
                 type="button"
@@ -327,15 +314,18 @@ export function LocationList({
               </button>
             )}
           </div>
-          <Select value={typeFilter} onValueChange={(v) => {
-            navigate({
-              search: (prev) => ({
-                ...prev,
-                type: v !== "all" ? v : undefined,
-                page: undefined,
-              }),
-            })
-          }}>
+          <Select
+            value={typeFilter}
+            onValueChange={(v) => {
+              navigate({
+                search: (prev) => ({
+                  ...prev,
+                  type: v !== "all" ? v : undefined,
+                  page: undefined,
+                }),
+              })
+            }}
+          >
             <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder="All types" />
             </SelectTrigger>
@@ -392,66 +382,41 @@ export function LocationList({
         {/* Table */}
         {locations.length > 0 ? (
           <>
-          <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
-            <Table aria-label="Locations" aria-busy={isLoading || isRefetching}>
-              <TableHeader className="sticky top-0 z-10 bg-background">
-                <TableRow>
-                  <TableHead className="w-10">
-                    <Checkbox
-                      checked={allSelected}
-                      indeterminate={someSelected && !allSelected}
-                      onChange={toggleAll}
-                      aria-label="Select all locations"
+            <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
+              <Table aria-label="Locations" aria-busy={isLoading || isRefetching}>
+                <TableHeader className="sticky top-0 z-10 bg-background">
+                  <TableRow>
+                    <TableHead className="w-10">
+                      <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all locations" />
+                    </TableHead>
+                    <SortableHeader label="Name" sortKey="name" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                    {isColumnVisible("type") && <SortableHeader label="Type" sortKey="location_type" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />}
+                    {isColumnVisible("address") && <TableHead>Address</TableHead>}
+                    {isColumnVisible("subLocations") && <TableHead>Sub-locations</TableHead>}
+                    {isColumnVisible("description") && <TableHead>Description</TableHead>}
+                    <TableHead className="w-16 text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {locations.map((location, index) => (
+                    <LocationRow
+                      key={location.id}
+                      location={location}
+                      index={index}
+                      selected={selectedIds.has(location.id)}
+                      onToggle={() => toggleOne(location.id)}
+                      onRowClick={() => handleRowClick(location.id)}
+                      teamId={teamId}
+                      cellClass={cellClass}
+                      isColumnVisible={isColumnVisible}
                     />
-                  </TableHead>
-                  <SortableHeader
-                    label="Name"
-                    sortKey="name"
-                    currentSort={sortKey}
-                    currentDirection={sortDir}
-                    onSort={handleSort}
-                  />
-                  {isColumnVisible("type") && (
-                    <SortableHeader
-                      label="Type"
-                      sortKey="location_type"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                    />
-                  )}
-                  {isColumnVisible("address") && (
-                    <TableHead>Address</TableHead>
-                  )}
-                  {isColumnVisible("subLocations") && (
-                    <TableHead>Sub-locations</TableHead>
-                  )}
-                  {isColumnVisible("description") && (
-                    <TableHead>Description</TableHead>
-                  )}
-                  <TableHead className="w-16 text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {locations.map((location, index) => (
-                  <LocationRow
-                    key={location.id}
-                    location={location}
-                    index={index}
-                    selected={selectedIds.has(location.id)}
-                    onToggle={() => toggleOne(location.id)}
-                    onRowClick={() => handleRowClick(location.id)}
-                    teamId={teamId}
-                    cellClass={cellClass}
-                    isColumnVisible={isColumnVisible}
-                  />
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-          <div className="sr-only" aria-live="polite" aria-atomic="true">
-            {!isLoading && `Showing ${locations.length} of ${total} results, page ${page}`}
-          </div>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+            <div className="sr-only" aria-live="polite" aria-atomic="true">
+              {!isLoading && `Showing ${locations.length} of ${total} results, page ${page}`}
+            </div>
           </>
         ) : (
           <EmptyState
@@ -536,12 +501,7 @@ export function LocationList({
       </div>
 
       {/* Bulk action bar */}
-      <BulkActionBar
-        selectedCount={selectedIds.size}
-        selectedIds={Array.from(selectedIds)}
-        onClearSelection={() => setSelectedIds(new Set())}
-        actions={bulkActions}
-      />
+      <BulkActionBar selectedCount={selectedIds.size} selectedIds={Array.from(selectedIds)} onClearSelection={() => setSelectedIds(new Set())} actions={bulkActions} />
     </>
   )
 }
@@ -592,163 +552,142 @@ function LocationRow({
 
   return (
     <>
-    <TableRow
-      data-state={selected ? "selected" : undefined}
-      className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`}
-      onClick={(e) => {
-        // Don't navigate when clicking on checkbox or dropdown
-        const target = e.target as HTMLElement
-        if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) {
-          return
-        }
-        onRowClick()
-      }}
-    >
-      <TableCell className={cellClass}>
-        <Checkbox
-          checked={selected}
-          onChange={(e) => {
-            e.stopPropagation()
-            onToggle()
-          }}
-          aria-label={`Select ${location.name}`}
-        />
-      </TableCell>
-      <TableCell className={cellClass}>
-        <Link
-          to="/locations/$locationId"
-          params={{ locationId: location.id }}
-          className="font-medium hover:underline"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {location.name}
-        </Link>
-      </TableCell>
-      {isColumnVisible("type") && (
+      <TableRow
+        data-state={selected ? "selected" : undefined}
+        className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`}
+        onClick={(e) => {
+          // Don't navigate when clicking on checkbox or dropdown
+          const target = e.target as HTMLElement
+          if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) {
+            return
+          }
+          onRowClick()
+        }}
+      >
         <TableCell className={cellClass}>
-          <Badge variant={isAddressed ? "default" : "secondary"} className="inline-flex items-center gap-1 text-[10px]">
-            {isAddressed ? (
-              <>
-                <Building2 className="h-3 w-3" />
-                Addressed
-              </>
-            ) : (
-              <>
-                <MapPin className="h-3 w-3" />
-                Physical
-              </>
-            )}
-          </Badge>
+          <Checkbox
+            checked={selected}
+            onChange={(e) => {
+              e.stopPropagation()
+              onToggle()
+            }}
+            aria-label={`Select ${location.name}`}
+          />
         </TableCell>
-      )}
-      {isColumnVisible("address") && (
         <TableCell className={cellClass}>
-          {addressSummary ? (
-            <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
-              <MapPin className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70" />
-              {isAddressLong ? (
+          <Link to="/locations/$locationId" params={{ locationId: location.id }} className="font-medium hover:underline" onClick={(e) => e.stopPropagation()}>
+            {location.name}
+          </Link>
+        </TableCell>
+        {isColumnVisible("type") && (
+          <TableCell className={cellClass}>
+            <Badge variant={isAddressed ? "default" : "secondary"} className="inline-flex items-center gap-1 text-[10px]">
+              {isAddressed ? (
+                <>
+                  <Building2 className="h-3 w-3" />
+                  Addressed
+                </>
+              ) : (
+                <>
+                  <MapPin className="h-3 w-3" />
+                  Physical
+                </>
+              )}
+            </Badge>
+          </TableCell>
+        )}
+        {isColumnVisible("address") && (
+          <TableCell className={cellClass}>
+            {addressSummary ? (
+              <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+                <MapPin className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70" />
+                {isAddressLong ? (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="truncate max-w-[200px]">{addressSummary}</span>
+                    </TooltipTrigger>
+                    <TooltipContent>{addressSummary}</TooltipContent>
+                  </Tooltip>
+                ) : (
+                  <span>{addressSummary}</span>
+                )}
+              </span>
+            ) : (
+              <span className="text-sm text-muted-foreground/50">--</span>
+            )}
+          </TableCell>
+        )}
+        {isColumnVisible("subLocations") && (
+          <TableCell className={cellClass}>
+            {isAddressed ? (
+              <span className="text-sm text-muted-foreground">{childCount > 0 ? `${childCount} sub-location${childCount !== 1 ? "s" : ""}` : "--"}</span>
+            ) : (
+              <span className="text-sm text-muted-foreground/50">--</span>
+            )}
+          </TableCell>
+        )}
+        {isColumnVisible("description") && (
+          <TableCell className={cellClass}>
+            {truncatedDescription ? (
+              isDescriptionTruncated ? (
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <span className="truncate max-w-[200px]">{addressSummary}</span>
+                    <span className="text-sm text-muted-foreground cursor-default">{truncatedDescription}</span>
                   </TooltipTrigger>
-                  <TooltipContent>{addressSummary}</TooltipContent>
+                  <TooltipContent className="max-w-xs">{description}</TooltipContent>
                 </Tooltip>
               ) : (
-                <span>{addressSummary}</span>
-              )}
-            </span>
-          ) : (
-            <span className="text-sm text-muted-foreground/50">--</span>
-          )}
-        </TableCell>
-      )}
-      {isColumnVisible("subLocations") && (
-        <TableCell className={cellClass}>
-          {isAddressed ? (
-            <span className="text-sm text-muted-foreground">
-              {childCount > 0 ? `${childCount} sub-location${childCount !== 1 ? "s" : ""}` : "--"}
-            </span>
-          ) : (
-            <span className="text-sm text-muted-foreground/50">--</span>
-          )}
-        </TableCell>
-      )}
-      {isColumnVisible("description") && (
-        <TableCell className={cellClass}>
-          {truncatedDescription ? (
-            isDescriptionTruncated ? (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="text-sm text-muted-foreground cursor-default">{truncatedDescription}</span>
-                </TooltipTrigger>
-                <TooltipContent className="max-w-xs">{description}</TooltipContent>
-              </Tooltip>
+                <span className="text-sm text-muted-foreground">{truncatedDescription}</span>
+              )
             ) : (
-              <span className="text-sm text-muted-foreground">{truncatedDescription}</span>
-            )
-          ) : (
-            <span className="text-sm text-muted-foreground/50">--</span>
-          )}
+              <span className="text-sm text-muted-foreground/50">--</span>
+            )}
+          </TableCell>
+        )}
+        <TableCell className={cn("text-right", cellClass)}>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" data-slot="dropdown" onClick={(e) => e.stopPropagation()}>
+                <MoreVertical className="h-4 w-4" />
+                <span className="sr-only">Actions for {location.name}</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild>
+                <Link to="/locations/$locationId" params={{ locationId: location.id }}>
+                  <Eye className="mr-2 h-4 w-4" />
+                  View details
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/locations/$locationId" params={{ locationId: location.id }} search={{ edit: true }}>
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Edit
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem variant="destructive" onClick={() => setShowDeleteConfirm(true)}>
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </TableCell>
-      )}
-      <TableCell className={cn("text-right", cellClass)}>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0"
-              data-slot="dropdown"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <MoreVertical className="h-4 w-4" />
-              <span className="sr-only">Actions for {location.name}</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem asChild>
-              <Link to="/locations/$locationId" params={{ locationId: location.id }}>
-                <Eye className="mr-2 h-4 w-4" />
-                View details
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link to="/locations/$locationId" params={{ locationId: location.id }} search={{ edit: true }}>
-                <Pencil className="mr-2 h-4 w-4" />
-                Edit
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              variant="destructive"
-              onClick={() => setShowDeleteConfirm(true)}
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
+      </TableRow>
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete location</AlertDialogTitle>
+            <AlertDialogDescription>Are you sure you want to delete &quot;{location.name}&quot;? This action cannot be undone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction className={buttonVariants({ variant: "destructive" })} onClick={handleDelete}>
               Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </TableCell>
-    </TableRow>
-    <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Delete location</AlertDialogTitle>
-          <AlertDialogDescription>
-            Are you sure you want to delete &quot;{location.name}&quot;? This action cannot be undone.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            className={buttonVariants({ variant: "destructive" })}
-            onClick={handleDelete}
-          >
-            Delete
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }

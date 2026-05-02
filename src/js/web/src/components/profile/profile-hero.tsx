@@ -39,38 +39,41 @@ export function ProfileHero({ user }: ProfileHeroProps) {
     fileInputRef.current?.click()
   }, [])
 
-  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+  const handleFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0]
+      if (!file) return
 
-    // Reset input so re-selecting the same file triggers onChange
-    e.target.value = ""
+      // Reset input so re-selecting the same file triggers onChange
+      e.target.value = ""
 
-    if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
-      toast.error("Invalid file type", {
-        description: "Please select a JPEG, PNG, GIF, or WebP image.",
+      if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
+        toast.error("Invalid file type", {
+          description: "Please select a JPEG, PNG, GIF, or WebP image.",
+        })
+        return
+      }
+
+      if (file.size > MAX_FILE_SIZE) {
+        toast.error("File too large", {
+          description: "Avatar image must be under 5 MB.",
+        })
+        return
+      }
+
+      // Clean up previous preview URL
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl)
+      }
+
+      const objectUrl = URL.createObjectURL(file)
+      setPreviewUrl(objectUrl)
+      toast.info("Avatar upload coming soon", {
+        description: "Avatar uploads are not yet available. Your selection has been previewed locally.",
       })
-      return
-    }
-
-    if (file.size > MAX_FILE_SIZE) {
-      toast.error("File too large", {
-        description: "Avatar image must be under 5 MB.",
-      })
-      return
-    }
-
-    // Clean up previous preview URL
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl)
-    }
-
-    const objectUrl = URL.createObjectURL(file)
-    setPreviewUrl(objectUrl)
-    toast.info("Avatar upload coming soon", {
-      description: "Avatar uploads are not yet available. Your selection has been previewed locally.",
-    })
-  }, [previewUrl])
+    },
+    [previewUrl],
+  )
 
   const avatarSrc = previewUrl ?? user.avatarUrl ?? undefined
 
@@ -106,14 +109,7 @@ export function ProfileHero({ user }: ProfileHeroProps) {
       <CardContent className="relative -mt-12 pb-6">
         <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-end">
           <div className="rounded-full bg-background p-1 shadow-md ring-2 ring-background">
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleFileChange}
-              aria-label="Upload avatar image"
-            />
+            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} aria-label="Upload avatar image" />
             <button
               type="button"
               onClick={handleAvatarClick}
@@ -121,12 +117,8 @@ export function ProfileHero({ user }: ProfileHeroProps) {
               aria-label="Change avatar"
             >
               <Avatar className="h-24 w-24 text-3xl">
-                {avatarSrc ? (
-                  <AvatarImage src={avatarSrc} alt={displayName} />
-                ) : null}
-                <AvatarFallback className="bg-primary/10 text-primary text-3xl font-semibold">
-                  {initials}
-                </AvatarFallback>
+                {avatarSrc ? <AvatarImage src={avatarSrc} alt={displayName} /> : null}
+                <AvatarFallback className="bg-primary/10 text-primary text-3xl font-semibold">{initials}</AvatarFallback>
               </Avatar>
               <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/0 transition-colors duration-200 group-hover:bg-black/50">
                 <Camera className="h-6 w-6 text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
@@ -143,12 +135,13 @@ export function ProfileHero({ user }: ProfileHeroProps) {
                   Verified
                 </Badge>
               )}
-              {roleNames.length > 0 && roleNames.map((role) => (
-                <Badge key={role} variant="outline" className="gap-1 capitalize">
-                  <KeyRound className="h-3 w-3" />
-                  {role}
-                </Badge>
-              ))}
+              {roleNames.length > 0 &&
+                roleNames.map((role) => (
+                  <Badge key={role} variant="outline" className="gap-1 capitalize">
+                    <KeyRound className="h-3 w-3" />
+                    {role}
+                  </Badge>
+                ))}
             </div>
 
             <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-sm text-muted-foreground sm:justify-start">
@@ -158,8 +151,7 @@ export function ProfileHero({ user }: ProfileHeroProps) {
               </span>
               {user.username && (
                 <span className="inline-flex items-center gap-1.5">
-                  <UserIcon className="h-3.5 w-3.5" />
-                  @{user.username}
+                  <UserIcon className="h-3.5 w-3.5" />@{user.username}
                 </span>
               )}
               {user.phone && (
@@ -180,7 +172,9 @@ export function ProfileHero({ user }: ProfileHeroProps) {
             return (
               <Tooltip key={indicator.label}>
                 <TooltipTrigger asChild>
-                  <div className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium transition-colors ${indicator.enabled ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400" : "border-border bg-muted/50 text-muted-foreground"}`}>
+                  <div
+                    className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium transition-colors ${indicator.enabled ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400" : "border-border bg-muted/50 text-muted-foreground"}`}
+                  >
                     <Icon className="h-3 w-3" />
                     {indicator.label}
                   </div>

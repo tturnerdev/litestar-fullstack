@@ -48,6 +48,7 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { FilterDropdown, type FilterOption } from "@/components/ui/filter-dropdown"
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
@@ -61,7 +62,6 @@ import { useAuthStore } from "@/lib/auth"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { client } from "@/lib/generated/api/client.gen"
-import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { useSettingsStore } from "@/lib/settings-store"
 import { cn } from "@/lib/utils"
 
@@ -270,10 +270,7 @@ function SupportPage() {
 
   // Column visibility
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(loadColumnVisibility)
-  const isColumnVisible = useCallback(
-    (col: string) => columnVisibility[col] !== false,
-    [columnVisibility],
-  )
+  const isColumnVisible = useCallback((col: string) => columnVisibility[col] !== false, [columnVisibility])
   const toggleColumn = useCallback((col: string) => {
     setColumnVisibility((prev) => {
       const updated = { ...prev, [col]: prev[col] !== false ? false : true }
@@ -877,14 +874,8 @@ function SupportPage() {
         actions={
           <div className="flex items-center gap-2">
             <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
-            <Button
-              variant={autoRefresh ? "default" : "outline"}
-              size="sm"
-              onClick={toggleAutoRefresh}
-            >
-              {autoRefresh && (
-                <span className="mr-2 h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
-              )}
+            <Button variant={autoRefresh ? "default" : "outline"} size="sm" onClick={toggleAutoRefresh}>
+              {autoRefresh && <span className="mr-2 h-2 w-2 animate-pulse rounded-full bg-emerald-500" />}
               Live
             </Button>
             <DropdownMenu>
@@ -898,11 +889,7 @@ function SupportPage() {
                 <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {TOGGLEABLE_COLUMNS.map((col) => (
-                  <DropdownMenuCheckboxItem
-                    key={col.key}
-                    checked={isColumnVisible(col.key)}
-                    onCheckedChange={() => toggleColumn(col.key)}
-                  >
+                  <DropdownMenuCheckboxItem key={col.key} checked={isColumnVisible(col.key)} onCheckedChange={() => toggleColumn(col.key)}>
                     {col.label}
                   </DropdownMenuCheckboxItem>
                 ))}
@@ -1006,38 +993,38 @@ function SupportPage() {
 
       {/* Summary stats */}
       <SectionErrorBoundary name="Ticket Statistics">
-      <div className="flex flex-wrap items-center gap-2">
-        {isLoading ? (
-          <>
-            <Skeleton className="h-7 w-28 rounded-full" />
-            <Skeleton className="h-7 w-32 rounded-full" />
-            <Skeleton className="h-7 w-28 rounded-full" />
-            <Skeleton className="h-7 w-24 rounded-full" />
-          </>
-        ) : (
-          <>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-700 dark:text-blue-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
-              Open
-              <span className="ml-0.5 font-semibold">{ticketStats.open}</span>
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-700 dark:text-amber-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-              In Progress
-              <span className="ml-0.5 font-semibold">{ticketStats.inProgress}</span>
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              Resolved
-              <span className="ml-0.5 font-semibold">{ticketStats.resolved}</span>
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground">
-              Total
-              <span className="ml-0.5 font-semibold text-foreground">{ticketStats.total}</span>
-            </span>
-          </>
-        )}
-      </div>
+        <div className="flex flex-wrap items-center gap-2">
+          {isLoading ? (
+            <>
+              <Skeleton className="h-7 w-28 rounded-full" />
+              <Skeleton className="h-7 w-32 rounded-full" />
+              <Skeleton className="h-7 w-28 rounded-full" />
+              <Skeleton className="h-7 w-24 rounded-full" />
+            </>
+          ) : (
+            <>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-700 dark:text-blue-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+                Open
+                <span className="ml-0.5 font-semibold">{ticketStats.open}</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-700 dark:text-amber-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                In Progress
+                <span className="ml-0.5 font-semibold">{ticketStats.inProgress}</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                Resolved
+                <span className="ml-0.5 font-semibold">{ticketStats.resolved}</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground">
+                Total
+                <span className="ml-0.5 font-semibold text-foreground">{ticketStats.total}</span>
+              </span>
+            </>
+          )}
+        </div>
       </SectionErrorBoundary>
 
       {/* Search & filters */}
@@ -1117,154 +1104,168 @@ function SupportPage() {
       {/* Content */}
       <PageSection delay={0.1}>
         <SectionErrorBoundary name="Tickets Table">
-        {isLoading ? (
-          <SkeletonTable rows={6} />
-        ) : isError ? (
-          <EmptyState
-            icon={AlertCircle}
-            title="Unable to load tickets"
-            description="Something went wrong while fetching your tickets. Please try again."
-            action={
-              <Button variant="outline" size="sm" onClick={() => refetch()}>
-                Try again
-              </Button>
-            }
-          />
-        ) : !hasAnyTickets && !hasAnyFilters ? (
-          <EmptyState
-            icon={LifeBuoy}
-            title="No tickets yet"
-            description="Create your first support ticket to get help from our team. We're here to assist you with any questions or issues."
-            action={
-              <Button size="sm" asChild>
-                <Link to="/support/new">
-                  <Plus className="mr-2 h-4 w-4" /> Create your first ticket
-                </Link>
-              </Button>
-            }
-          />
-        ) : !hasData ? (
-          <EmptyState
-            icon={LifeBuoy}
-            variant="no-results"
-            title="No results found"
-            description="No tickets match your current filters. Try adjusting your search or filters."
-            action={
-              <Button variant="outline" size="sm" onClick={clearAllFilters}>
-                Clear all filters
-              </Button>
-            }
-          />
-        ) : (
-          <div className="space-y-3">
-            {/* Result count & pagination info */}
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">
-                {data ? data.total : filteredItems.length} ticket
-                {(data?.total ?? filteredItems.length) === 1 ? "" : "s"}
-                {activeFilterCount > 0 && " (filtered)"}
-              </p>
-              {totalPages > 1 && (
-                <p className="text-xs text-muted-foreground">
-                  Page {page} of {totalPages}
+          {isLoading ? (
+            <SkeletonTable rows={6} />
+          ) : isError ? (
+            <EmptyState
+              icon={AlertCircle}
+              title="Unable to load tickets"
+              description="Something went wrong while fetching your tickets. Please try again."
+              action={
+                <Button variant="outline" size="sm" onClick={() => refetch()}>
+                  Try again
+                </Button>
+              }
+            />
+          ) : !hasAnyTickets && !hasAnyFilters ? (
+            <EmptyState
+              icon={LifeBuoy}
+              title="No tickets yet"
+              description="Create your first support ticket to get help from our team. We're here to assist you with any questions or issues."
+              action={
+                <Button size="sm" asChild>
+                  <Link to="/support/new">
+                    <Plus className="mr-2 h-4 w-4" /> Create your first ticket
+                  </Link>
+                </Button>
+              }
+            />
+          ) : !hasData ? (
+            <EmptyState
+              icon={LifeBuoy}
+              variant="no-results"
+              title="No results found"
+              description="No tickets match your current filters. Try adjusting your search or filters."
+              action={
+                <Button variant="outline" size="sm" onClick={clearAllFilters}>
+                  Clear all filters
+                </Button>
+              }
+            />
+          ) : (
+            <div className="space-y-3">
+              {/* Result count & pagination info */}
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">
+                  {data ? data.total : filteredItems.length} ticket
+                  {(data?.total ?? filteredItems.length) === 1 ? "" : "s"}
+                  {activeFilterCount > 0 && " (filtered)"}
                 </p>
-              )}
-            </div>
-
-            {/* Table */}
-            <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
-              <Table aria-label="Support tickets" aria-busy={isLoading || isRefetching}>
-                <TableHeader className="sticky top-0 z-10 bg-background">
-                  <TableRow>
-                    <TableHead className="w-10">
-                      <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all tickets" />
-                    </TableHead>
-                    <TableHead className="w-[100px]">Ticket</TableHead>
-                    <SortableHeader label="Subject" sortKey="subject" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
-                    {isColumnVisible("status") && (
-                      <SortableHeader label="Status" sortKey="status" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
-                    )}
-                    {isColumnVisible("priority") && (
-                      <SortableHeader label="Priority" sortKey="priority" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
-                    )}
-                    {isColumnVisible("category") && (
-                      <TableHead className="hidden md:table-cell">Category</TableHead>
-                    )}
-                    {isColumnVisible("created") && (
-                      <SortableHeader label="Created" sortKey="created_at" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
-                    )}
-                    {isColumnVisible("updated") && (
-                      <SortableHeader label="Updated" sortKey="updated_at" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
-                    )}
-                    <TableHead className="w-16 text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredItems.map((ticket, index) => (
-                    <TicketRow
-                      key={ticket.id}
-                      ticket={ticket}
-                      index={index}
-                      selected={selectedIds.has(ticket.id)}
-                      onToggle={() => toggleOne(ticket.id)}
-                      onRowClick={() => handleRowClick(ticket.id)}
-                      onDelete={() => handleDeleteTicket(ticket.id)}
-                      cellClass={cellClass}
-                      isColumnVisible={isColumnVisible}
-                    />
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-            <div className="sr-only" aria-live="polite" aria-atomic="true">
-              {!isLoading && `Showing ${filteredItems.length} of ${data?.total ?? 0} results, page ${page}`}
-            </div>
-
-            {/* Pagination */}
-            <div className="flex items-center justify-end gap-4 pt-2">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Rows per page</span>
-                <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
-                  <SelectTrigger className="h-8 w-[70px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PAGE_SIZES.map((size) => (
-                      <SelectItem key={size} value={String(size)}>
-                        {size}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {totalPages > 1 && (
+                  <p className="text-xs text-muted-foreground">
+                    Page {page} of {totalPages}
+                  </p>
+                )}
               </div>
-              {totalPages > 1 && (
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" onClick={() => updateSearch({ page: Math.max(1, page - 1) })} disabled={page <= 1}>
-                    Previous
-                    <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&larr;</kbd>
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => updateSearch({ page: Math.min(totalPages, page + 1) })} disabled={page >= totalPages}>
-                    Next
-                    <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&rarr;</kbd>
-                  </Button>
-                </div>
-              )}
-            </div>
 
-            {/* Keyboard shortcut hints */}
-            <div className="hidden items-center justify-center gap-4 pt-1 text-[11px] text-muted-foreground/60 lg:flex">
-              <span className="inline-flex items-center gap-1.5">
-                <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded border border-border/50 bg-muted/50 px-1 font-mono text-[10px] font-medium">/</kbd>
-                Search
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded border border-border/50 bg-muted/50 px-1 font-mono text-[10px] font-medium">&larr;</kbd>
-                <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded border border-border/50 bg-muted/50 px-1 font-mono text-[10px] font-medium">&rarr;</kbd>
-                Navigate pages
-              </span>
+              {/* Table */}
+              <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
+                <Table aria-label="Support tickets" aria-busy={isLoading || isRefetching}>
+                  <TableHeader className="sticky top-0 z-10 bg-background">
+                    <TableRow>
+                      <TableHead className="w-10">
+                        <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all tickets" />
+                      </TableHead>
+                      <TableHead className="w-[100px]">Ticket</TableHead>
+                      <SortableHeader label="Subject" sortKey="subject" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                      {isColumnVisible("status") && <SortableHeader label="Status" sortKey="status" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />}
+                      {isColumnVisible("priority") && (
+                        <SortableHeader label="Priority" sortKey="priority" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
+                      )}
+                      {isColumnVisible("category") && <TableHead className="hidden md:table-cell">Category</TableHead>}
+                      {isColumnVisible("created") && (
+                        <SortableHeader
+                          label="Created"
+                          sortKey="created_at"
+                          currentSort={sortKey}
+                          currentDirection={sortDir}
+                          onSort={handleSort}
+                          className="hidden md:table-cell"
+                        />
+                      )}
+                      {isColumnVisible("updated") && (
+                        <SortableHeader
+                          label="Updated"
+                          sortKey="updated_at"
+                          currentSort={sortKey}
+                          currentDirection={sortDir}
+                          onSort={handleSort}
+                          className="hidden md:table-cell"
+                        />
+                      )}
+                      <TableHead className="w-16 text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredItems.map((ticket, index) => (
+                      <TicketRow
+                        key={ticket.id}
+                        ticket={ticket}
+                        index={index}
+                        selected={selectedIds.has(ticket.id)}
+                        onToggle={() => toggleOne(ticket.id)}
+                        onRowClick={() => handleRowClick(ticket.id)}
+                        onDelete={() => handleDeleteTicket(ticket.id)}
+                        cellClass={cellClass}
+                        isColumnVisible={isColumnVisible}
+                      />
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              <div className="sr-only" aria-live="polite" aria-atomic="true">
+                {!isLoading && `Showing ${filteredItems.length} of ${data?.total ?? 0} results, page ${page}`}
+              </div>
+
+              {/* Pagination */}
+              <div className="flex items-center justify-end gap-4 pt-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">Rows per page</span>
+                  <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
+                    <SelectTrigger className="h-8 w-[70px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PAGE_SIZES.map((size) => (
+                        <SelectItem key={size} value={String(size)}>
+                          {size}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {totalPages > 1 && (
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm" onClick={() => updateSearch({ page: Math.max(1, page - 1) })} disabled={page <= 1}>
+                      Previous
+                      <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&larr;</kbd>
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => updateSearch({ page: Math.min(totalPages, page + 1) })} disabled={page >= totalPages}>
+                      Next
+                      <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&rarr;</kbd>
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              {/* Keyboard shortcut hints */}
+              <div className="hidden items-center justify-center gap-4 pt-1 text-[11px] text-muted-foreground/60 lg:flex">
+                <span className="inline-flex items-center gap-1.5">
+                  <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded border border-border/50 bg-muted/50 px-1 font-mono text-[10px] font-medium">/</kbd>
+                  Search
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded border border-border/50 bg-muted/50 px-1 font-mono text-[10px] font-medium">
+                    &larr;
+                  </kbd>
+                  <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded border border-border/50 bg-muted/50 px-1 font-mono text-[10px] font-medium">
+                    &rarr;
+                  </kbd>
+                  Navigate pages
+                </span>
+              </div>
             </div>
-          </div>
-        )}
+          )}
         </SectionErrorBoundary>
       </PageSection>
 

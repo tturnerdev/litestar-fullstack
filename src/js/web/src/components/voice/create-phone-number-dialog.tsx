@@ -1,5 +1,5 @@
+import { Flag, Globe, Hash, Loader2, MapPin } from "lucide-react"
 import { useRef, useState } from "react"
-import { Hash, Loader2, MapPin, Globe, Flag } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
@@ -69,8 +69,16 @@ export function CreatePhoneNumberDialog({ trigger }: { trigger: React.ReactNode 
   const isFormValid = number.trim() && !numberError
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm() }}>
-      <DialogTrigger asChild ref={triggerRef}>{trigger}</DialogTrigger>
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        setOpen(v)
+        if (!v) resetForm()
+      }}
+    >
+      <DialogTrigger asChild ref={triggerRef}>
+        {trigger}
+      </DialogTrigger>
       <DialogContent>
         <form onSubmit={handleSubmit}>
           <DialogHeader>
@@ -85,28 +93,12 @@ export function CreatePhoneNumberDialog({ trigger }: { trigger: React.ReactNode 
               <Label htmlFor="pn-number">
                 Phone Number <span className="text-destructive">*</span>
               </Label>
-              <Input
-                id="pn-number"
-                placeholder="+15551234567"
-                value={number}
-                onChange={(e) => handleNumberChange(e.target.value)}
-                required
-                aria-invalid={!!numberError}
-              />
-              {numberError ? (
-                <p className="text-xs text-destructive">{numberError}</p>
-              ) : (
-                <p className="text-xs text-muted-foreground">Enter in E.164 format, e.g., +15551234567</p>
-              )}
+              <Input id="pn-number" placeholder="+15551234567" value={number} onChange={(e) => handleNumberChange(e.target.value)} required aria-invalid={!!numberError} />
+              {numberError ? <p className="text-xs text-destructive">{numberError}</p> : <p className="text-xs text-muted-foreground">Enter in E.164 format, e.g., +15551234567</p>}
             </div>
             <div className="grid gap-2">
               <Label htmlFor="pn-label">Label</Label>
-              <Input
-                id="pn-label"
-                placeholder="Main Line"
-                value={label}
-                onChange={(e) => setLabel(e.target.value)}
-              />
+              <Input id="pn-label" placeholder="Main Line" value={label} onChange={(e) => setLabel(e.target.value)} />
               <p className="text-xs text-muted-foreground">Optional friendly name for this number</p>
             </div>
             <div className="grid gap-2">
@@ -130,21 +122,14 @@ export function CreatePhoneNumberDialog({ trigger }: { trigger: React.ReactNode 
             </div>
             <div className="grid gap-2">
               <Label htmlFor="pn-caller-id">Caller ID Name</Label>
-              <Input
-                id="pn-caller-id"
-                placeholder="Acme Corp"
-                value={callerIdName}
-                onChange={(e) => setCallerIdName(e.target.value)}
-              />
+              <Input id="pn-caller-id" placeholder="Acme Corp" value={callerIdName} onChange={(e) => setCallerIdName(e.target.value)} />
               <p className="text-xs text-muted-foreground">Name displayed to the recipient on outgoing calls</p>
             </div>
             {(number.trim() || callerIdName.trim()) && (
               <div className="rounded-lg border bg-muted/50 p-3">
                 <p className="mb-1 text-xs font-medium text-muted-foreground">Preview</p>
                 <p className="text-sm">
-                  {number.trim() && (
-                    <span>Number: {number.trim()}</span>
-                  )}
+                  {number.trim() && <span>Number: {number.trim()}</span>}
                   {number.trim() && <span className="text-muted-foreground"> &bull; </span>}
                   <span>Type: {getTypeLabel(numberType)}</span>
                   {callerIdName.trim() && (

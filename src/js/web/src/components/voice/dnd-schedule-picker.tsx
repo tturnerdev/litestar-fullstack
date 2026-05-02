@@ -1,9 +1,9 @@
+import { CalendarClock, Check, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { CalendarClock, Check, X } from "lucide-react"
 
 const DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
@@ -22,18 +22,9 @@ interface DndSchedulePickerProps {
   onDaysChange: (days: number[]) => void
 }
 
-export function DndSchedulePicker({
-  startTime,
-  endTime,
-  selectedDays,
-  onStartTimeChange,
-  onEndTimeChange,
-  onDaysChange,
-}: DndSchedulePickerProps) {
+export function DndSchedulePicker({ startTime, endTime, selectedDays, onStartTimeChange, onEndTimeChange, onDaysChange }: DndSchedulePickerProps) {
   function toggleDay(day: number) {
-    const next = selectedDays.includes(day)
-      ? selectedDays.filter((d) => d !== day)
-      : [...selectedDays, day].sort()
+    const next = selectedDays.includes(day) ? selectedDays.filter((d) => d !== day) : [...selectedDays, day].sort()
     onDaysChange(next)
   }
 
@@ -79,27 +70,15 @@ export function DndSchedulePicker({
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="schedule-start">Start time</Label>
-            <Input
-              id="schedule-start"
-              type="time"
-              value={startTime}
-              onChange={(e) => onStartTimeChange(e.target.value)}
-            />
+            <Input id="schedule-start" type="time" value={startTime} onChange={(e) => onStartTimeChange(e.target.value)} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="schedule-end">End time</Label>
-            <Input
-              id="schedule-end"
-              type="time"
-              value={endTime}
-              onChange={(e) => onEndTimeChange(e.target.value)}
-            />
+            <Input id="schedule-end" type="time" value={endTime} onChange={(e) => onEndTimeChange(e.target.value)} />
           </div>
         </div>
 
-        {durationText && (
-          <p className="text-xs text-muted-foreground">{durationText}</p>
-        )}
+        {durationText && <p className="text-xs text-muted-foreground">{durationText}</p>}
       </div>
 
       <Separator />
@@ -124,9 +103,7 @@ export function DndSchedulePicker({
           ))}
         </div>
 
-        {weeklyHoursText && (
-          <p className="text-xs font-medium text-muted-foreground">{weeklyHoursText}</p>
-        )}
+        {weeklyHoursText && <p className="text-xs font-medium text-muted-foreground">{weeklyHoursText}</p>}
       </div>
 
       <Separator />
@@ -143,9 +120,7 @@ export function DndSchedulePicker({
                 type="button"
                 onClick={() => applyPreset(key as keyof typeof PRESETS)}
                 className={`inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-xs font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
-                  active
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-input bg-background text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  active ? "border-primary bg-primary/10 text-primary" : "border-input bg-background text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                 }`}
               >
                 {active && <Check className="h-3 w-3" />}
@@ -170,9 +145,7 @@ function ScheduleVisual({ startTime, endTime, selectedDays }: { startTime: strin
   const startMinutes = timeToMinutes(startTime)
   const endMinutes = timeToMinutes(endTime)
   const startPercent = (startMinutes / 1440) * 100
-  const widthPercent = startMinutes < endMinutes
-    ? ((endMinutes - startMinutes) / 1440) * 100
-    : ((1440 - startMinutes + endMinutes) / 1440) * 100
+  const widthPercent = startMinutes < endMinutes ? ((endMinutes - startMinutes) / 1440) * 100 : ((1440 - startMinutes + endMinutes) / 1440) * 100
 
   const tooltipLabel = `${formatTime12h(startTime)} - ${formatTime12h(endTime)}`
 
@@ -184,9 +157,7 @@ function ScheduleVisual({ startTime, endTime, selectedDays }: { startTime: strin
           const isSelected = selectedDays.includes(index)
           return (
             <div key={label} className="flex items-center gap-2">
-              <span className={`w-8 text-xs ${isSelected ? "font-medium" : "text-muted-foreground"}`}>
-                {label}
-              </span>
+              <span className={`w-8 text-xs ${isSelected ? "font-medium" : "text-muted-foreground"}`}>{label}</span>
               <div className="relative h-4 flex-1 rounded bg-muted">
                 {isSelected && (
                   <Tooltip>
@@ -200,7 +171,9 @@ function ScheduleVisual({ startTime, endTime, selectedDays }: { startTime: strin
                       />
                     </TooltipTrigger>
                     <TooltipContent>
-                      <span>{label}: {tooltipLabel}</span>
+                      <span>
+                        {label}: {tooltipLabel}
+                      </span>
                     </TooltipContent>
                   </Tooltip>
                 )}

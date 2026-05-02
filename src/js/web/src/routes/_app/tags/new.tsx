@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
-import { useCallback, useMemo, useRef, useState } from "react"
 import { Hash, Loader2, Tags } from "lucide-react"
+import { useCallback, useMemo, useRef, useState } from "react"
+import { toast } from "sonner"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,18 +12,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { useDocumentTitle } from "@/hooks/use-document-title"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { PageContainer, PageHeader } from "@/components/ui/page-layout"
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
-import { useCreateTag, type TagCreate } from "@/lib/api/hooks/tags"
+import { Textarea } from "@/components/ui/textarea"
+import { useDocumentTitle } from "@/hooks/use-document-title"
+import { type TagCreate, useCreateTag } from "@/lib/api/hooks/tags"
 import { cn } from "@/lib/utils"
-import { toast } from "sonner"
 
 export const Route = createFileRoute("/_app/tags/new")({
   component: NewTagPage,
@@ -101,155 +101,139 @@ function NewTagPage() {
 
   return (
     <>
-    <PageContainer className="flex-1 space-y-8">
-      <PageHeader
-        eyebrow="Tags"
-        title="New Tag"
-        description="Create a new tag for organizing resources."
-        breadcrumbs={
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem><BreadcrumbLink asChild><Link to="/home">Home</Link></BreadcrumbLink></BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem><BreadcrumbLink asChild><Link to="/tags">Tags</Link></BreadcrumbLink></BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem><BreadcrumbPage>New Tag</BreadcrumbPage></BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        }
-      />
+      <PageContainer className="flex-1 space-y-8">
+        <PageHeader
+          eyebrow="Tags"
+          title="New Tag"
+          description="Create a new tag for organizing resources."
+          breadcrumbs={
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link to="/home">Home</Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link to="/tags">Tags</Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>New Tag</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          }
+        />
 
-      <SectionErrorBoundary name="Create Tag Form">
-      <Card className="max-w-xl">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Tags className="h-5 w-5" />
-            Tag Details
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Name field */}
-            <div className="space-y-2">
-              <Label htmlFor="tag-name">
-                Name <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="tag-name"
-                placeholder="e.g., Production, Priority, VIP"
-                value={name}
-                onChange={handleNameChange}
-                maxLength={NAME_MAX}
-                required
-                autoFocus
-              />
-              <div className="flex items-center justify-between">
-                <p className="text-xs text-muted-foreground">
-                  The display name shown when tagging resources.
-                </p>
-                <p className={cn("text-xs", name.length >= NAME_MAX ? "text-destructive" : "text-muted-foreground")}>
-                  {name.length}/{NAME_MAX}
-                </p>
-              </div>
-            </div>
-
-            {/* Slug preview */}
-            {name.trim() !== "" && (
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 rounded-md border border-dashed px-3 py-2">
-                  <Hash className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                  <span className="text-sm text-muted-foreground">Slug:</span>
-                  <code className="text-sm font-mono">{slug || "—"}</code>
+        <SectionErrorBoundary name="Create Tag Form">
+          <Card className="max-w-xl">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Tags className="h-5 w-5" />
+                Tag Details
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Name field */}
+                <div className="space-y-2">
+                  <Label htmlFor="tag-name">
+                    Name <span className="text-red-500">*</span>
+                  </Label>
+                  <Input id="tag-name" placeholder="e.g., Production, Priority, VIP" value={name} onChange={handleNameChange} maxLength={NAME_MAX} required autoFocus />
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-muted-foreground">The display name shown when tagging resources.</p>
+                    <p className={cn("text-xs", name.length >= NAME_MAX ? "text-destructive" : "text-muted-foreground")}>
+                      {name.length}/{NAME_MAX}
+                    </p>
+                  </div>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  URL-friendly identifier, auto-generated from name.
-                </p>
-              </div>
-            )}
 
-            {/* Description field */}
-            <div className="space-y-2">
-              <Label htmlFor="tag-description">Description</Label>
-              <Textarea
-                id="tag-description"
-                placeholder="Optional description for this tag..."
-                value={description}
-                onChange={handleDescriptionChange}
-                maxLength={DESC_MAX}
-                rows={3}
-                className="resize-none"
-              />
-              <div className="flex items-center justify-between">
-                <p className="text-xs text-muted-foreground">
-                  Optional notes about when or how to use this tag.
-                </p>
-                <p className={cn("shrink-0 text-xs", description.length >= DESC_MAX ? "text-destructive" : "text-muted-foreground")}>
-                  {description.length}/{DESC_MAX}
-                </p>
-              </div>
-            </div>
+                {/* Slug preview */}
+                {name.trim() !== "" && (
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 rounded-md border border-dashed px-3 py-2">
+                      <Hash className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                      <span className="text-sm text-muted-foreground">Slug:</span>
+                      <code className="text-sm font-mono">{slug || "—"}</code>
+                    </div>
+                    <p className="text-xs text-muted-foreground">URL-friendly identifier, auto-generated from name.</p>
+                  </div>
+                )}
 
-            {/* Color picker */}
-            <div className="space-y-2">
-              <Label>Color</Label>
-              <div className="flex flex-wrap gap-2">
-                {TAG_COLORS.map((color) => (
-                  <button
-                    key={color.value}
-                    type="button"
-                    title={color.name}
-                    className={cn(
-                      "h-8 w-8 rounded-full border-2 transition-all duration-150 hover:scale-110",
-                      selectedColor === color.value
-                        ? "border-foreground ring-2 ring-foreground/20"
-                        : "border-transparent",
-                    )}
-                    style={{ backgroundColor: color.value }}
-                    onClick={() =>
-                      setSelectedColor((prev) => (prev === color.value ? null : color.value))
-                    }
+                {/* Description field */}
+                <div className="space-y-2">
+                  <Label htmlFor="tag-description">Description</Label>
+                  <Textarea
+                    id="tag-description"
+                    placeholder="Optional description for this tag..."
+                    value={description}
+                    onChange={handleDescriptionChange}
+                    maxLength={DESC_MAX}
+                    rows={3}
+                    className="resize-none"
                   />
-                ))}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Choose a color to visually distinguish this tag. Click again to deselect.
-              </p>
-            </div>
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-muted-foreground">Optional notes about when or how to use this tag.</p>
+                    <p className={cn("shrink-0 text-xs", description.length >= DESC_MAX ? "text-destructive" : "text-muted-foreground")}>
+                      {description.length}/{DESC_MAX}
+                    </p>
+                  </div>
+                </div>
 
-            <div className="flex items-center justify-end gap-2 pt-2">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => router.navigate({ to: "/tags" })}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={!isValid || createTag.isPending}>
-                {createTag.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Create Tag
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-      </SectionErrorBoundary>
-    </PageContainer>
+                {/* Color picker */}
+                <div className="space-y-2">
+                  <Label>Color</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {TAG_COLORS.map((color) => (
+                      <button
+                        key={color.value}
+                        type="button"
+                        title={color.name}
+                        className={cn(
+                          "h-8 w-8 rounded-full border-2 transition-all duration-150 hover:scale-110",
+                          selectedColor === color.value ? "border-foreground ring-2 ring-foreground/20" : "border-transparent",
+                        )}
+                        style={{ backgroundColor: color.value }}
+                        onClick={() => setSelectedColor((prev) => (prev === color.value ? null : color.value))}
+                      />
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground">Choose a color to visually distinguish this tag. Click again to deselect.</p>
+                </div>
 
-    {/* -- Unsaved changes dialog ---------------------------------------- */}
-    <AlertDialog open={blocker.status === "blocked"} onOpenChange={() => blocker.reset?.()}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
-          <AlertDialogDescription>
-            You have unsaved changes to this tag. Are you sure you want to leave? Your changes will be lost.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => blocker.reset?.()}>Stay on page</AlertDialogCancel>
-          <AlertDialogAction onClick={() => blocker.proceed?.()}>Discard changes</AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+                <div className="flex items-center justify-end gap-2 pt-2">
+                  <Button type="button" variant="ghost" onClick={() => router.navigate({ to: "/tags" })}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={!isValid || createTag.isPending}>
+                    {createTag.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Create Tag
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </SectionErrorBoundary>
+      </PageContainer>
+
+      {/* -- Unsaved changes dialog ---------------------------------------- */}
+      <AlertDialog open={blocker.status === "blocked"} onOpenChange={() => blocker.reset?.()}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
+            <AlertDialogDescription>You have unsaved changes to this tag. Are you sure you want to leave? Your changes will be lost.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => blocker.reset?.()}>Stay on page</AlertDialogCancel>
+            <AlertDialogAction onClick={() => blocker.proceed?.()}>Discard changes</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }

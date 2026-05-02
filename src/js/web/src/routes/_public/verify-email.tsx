@@ -72,12 +72,7 @@ function VerifyEmailPage() {
     <div className="relative flex min-h-screen w-full">
       <AuthHeroPanel showTestimonial={false} description="Verify your email to access all features." />
       <div className="flex flex-1 flex-col items-center justify-center bg-brand-gray-light px-4 py-12 dark:bg-background">
-        <motion.div
-          className="w-full max-w-md"
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
-        >
+        <motion.div className="w-full max-w-md" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}>
           {/* Header icon based on status */}
           <div className="mb-8 flex flex-col items-center space-y-3">
             {status === "verifying" && (
@@ -107,12 +102,8 @@ function VerifyEmailPage() {
               {status === "error" && "Verification Failed"}
             </h1>
 
-            {status === "verifying" && (
-              <p className="text-center text-sm text-muted-foreground">Please wait while we verify your email address...</p>
-            )}
-            {status === "success" && (
-              <p className="text-center text-sm text-muted-foreground">Your email has been verified. Redirecting...</p>
-            )}
+            {status === "verifying" && <p className="text-center text-sm text-muted-foreground">Please wait while we verify your email address...</p>}
+            {status === "success" && <p className="text-center text-sm text-muted-foreground">Your email has been verified. Redirecting...</p>}
           </div>
 
           {(status === "success" || status === "error") && (
@@ -224,12 +215,7 @@ export function ResendVerificationPage() {
     <div className="relative flex min-h-screen w-full">
       <AuthHeroPanel showTestimonial={false} description="Verify your email to access all features." />
       <div className="flex flex-1 flex-col items-center justify-center bg-brand-gray-light px-4 py-12 dark:bg-background">
-        <motion.div
-          className="w-full max-w-md"
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
-        >
+        <motion.div className="w-full max-w-md" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}>
           <div className="mb-8 flex flex-col items-center space-y-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 shadow-sm">
               <Mail className="h-6 w-6 text-primary" />

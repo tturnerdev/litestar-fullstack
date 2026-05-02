@@ -1,7 +1,4 @@
-import { toast } from "sonner"
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import {
   AlertCircle,
   AlertTriangle,
@@ -20,15 +17,10 @@ import {
   X,
   XCircle,
 } from "lucide-react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -44,28 +36,23 @@ import {
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Skeleton, SkeletonCard } from "@/components/ui/skeleton"
+import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import {
-  useE911Registrations,
-  useDeleteE911Registration,
-  useValidateE911Registration,
-  useUnregisteredPhoneNumbers,
-  type E911Registration,
-  type UnregisteredPhoneNumber,
-} from "@/lib/api/hooks/e911"
-import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
-import { useAuthStore } from "@/lib/auth"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
-import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
+import {
+  type E911Registration,
+  type UnregisteredPhoneNumber,
+  useDeleteE911Registration,
+  useE911Registrations,
+  useUnregisteredPhoneNumbers,
+  useValidateE911Registration,
+} from "@/lib/api/hooks/e911"
+import { useAuthStore } from "@/lib/auth"
+import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { useSettingsStore } from "@/lib/settings-store"
 import { cn } from "@/lib/utils"
 
@@ -81,10 +68,7 @@ export const Route = createFileRoute("/_app/e911/")({
     q: typeof search.q === "string" && search.q ? search.q : undefined,
     page: Number(search.page) > 1 ? Number(search.page) : undefined,
     sort: typeof search.sort === "string" && search.sort ? search.sort : undefined,
-    order:
-      typeof search.order === "string" && (search.order === "asc" || search.order === "desc")
-        ? search.order
-        : undefined,
+    order: typeof search.order === "string" && (search.order === "asc" || search.order === "desc") ? search.order : undefined,
   }),
   component: E911Page,
 })
@@ -189,28 +173,14 @@ function E911Row({
         />
       </TableCell>
       <TableCell className={cellClass}>
-        <Link
-          to="/e911/$registrationId"
-          params={{ registrationId: reg.id }}
-          className="group flex flex-col gap-0.5"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <span className="font-medium group-hover:underline font-mono text-sm">
-            {reg.phoneNumberDisplay ?? "No number"}
-          </span>
-          {reg.phoneNumberLabel && (
-            <span className="text-xs text-muted-foreground">{reg.phoneNumberLabel}</span>
-          )}
+        <Link to="/e911/$registrationId" params={{ registrationId: reg.id }} className="group flex flex-col gap-0.5" onClick={(e) => e.stopPropagation()}>
+          <span className="font-medium group-hover:underline font-mono text-sm">{reg.phoneNumberDisplay ?? "No number"}</span>
+          {reg.phoneNumberLabel && <span className="text-xs text-muted-foreground">{reg.phoneNumberLabel}</span>}
         </Link>
       </TableCell>
       {isColumnVisible("address") && (
         <TableCell className={cellClass}>
-          <Link
-            to="/e911/$registrationId"
-            params={{ registrationId: reg.id }}
-            className="group-hover:underline text-sm"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <Link to="/e911/$registrationId" params={{ registrationId: reg.id }} className="group-hover:underline text-sm" onClick={(e) => e.stopPropagation()}>
             {reg.addressLine1}
             {reg.addressLine2 ? `, ${reg.addressLine2}` : ""}
           </Link>
@@ -218,7 +188,9 @@ function E911Row({
       )}
       {isColumnVisible("cityState") && (
         <TableCell className={cn("hidden md:table-cell", cellClass)}>
-          <span className="text-sm">{reg.city}, {reg.state} {reg.postalCode}</span>
+          <span className="text-sm">
+            {reg.city}, {reg.state} {reg.postalCode}
+          </span>
         </TableCell>
       )}
       {isColumnVisible("validated") && (
@@ -248,13 +220,7 @@ function E911Row({
       <TableCell className={cn("text-right", cellClass)}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0"
-              data-slot="dropdown"
-              onClick={(e) => e.stopPropagation()}
-            >
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" data-slot="dropdown" onClick={(e) => e.stopPropagation()}>
               <MoreVertical className="h-4 w-4" />
               <span className="sr-only">Actions for {reg.phoneNumberDisplay ?? reg.id}</span>
             </Button>
@@ -275,18 +241,17 @@ function E911Row({
             {!reg.validated && (
               <DropdownMenuItem
                 disabled={validateMutation.isPending}
-                onClick={() => validateMutation.mutate(undefined, {
-                  onSuccess: () => toast.success("E911 registration validated"),
-                  onError: (err) => toast.error("Failed to validate E911 registration", {
-                    description: err instanceof Error ? err.message : undefined,
-                  }),
-                })}
+                onClick={() =>
+                  validateMutation.mutate(undefined, {
+                    onSuccess: () => toast.success("E911 registration validated"),
+                    onError: (err) =>
+                      toast.error("Failed to validate E911 registration", {
+                        description: err instanceof Error ? err.message : undefined,
+                      }),
+                  })
+                }
               >
-                {validateMutation.isPending ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <CheckCircle2 className="mr-2 h-4 w-4" />
-                )}
+                {validateMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
                 Validate
               </DropdownMenuItem>
             )}
@@ -294,12 +259,15 @@ function E911Row({
             <DropdownMenuItem
               variant="destructive"
               disabled={deleteMutation.isPending}
-              onClick={() => deleteMutation.mutate(reg.id, {
-                onSuccess: () => toast.success("E911 registration deleted"),
-                onError: (err) => toast.error("Failed to delete E911 registration", {
-                  description: err instanceof Error ? err.message : undefined,
-                }),
-              })}
+              onClick={() =>
+                deleteMutation.mutate(reg.id, {
+                  onSuccess: () => toast.success("E911 registration deleted"),
+                  onError: (err) =>
+                    toast.error("Failed to delete E911 registration", {
+                      description: err instanceof Error ? err.message : undefined,
+                    }),
+                })
+              }
             >
               <Trash2 className="mr-2 h-4 w-4" />
               Delete
@@ -321,21 +289,13 @@ function E911Page() {
   const cellClass = compactMode ? "py-1 px-2 text-xs" : ""
 
   const { currentTeam } = useAuthStore()
-  const {
-    q: searchParam,
-    page: pageParam,
-    sort: sortParam,
-    order: orderParam,
-  } = Route.useSearch()
+  const { q: searchParam, page: pageParam, sort: sortParam, order: orderParam } = Route.useSearch()
   const navigate = Route.useNavigate()
   const teamId = currentTeam?.id ?? ""
 
   // Column visibility
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(loadColumnVisibility)
-  const isColumnVisible = useCallback(
-    (col: string) => columnVisibility[col] !== false,
-    [columnVisibility],
-  )
+  const isColumnVisible = useCallback((col: string) => columnVisibility[col] !== false, [columnVisibility])
   const toggleColumn = useCallback((col: string) => {
     setColumnVisibility((prev) => {
       const updated = { ...prev, [col]: prev[col] !== false ? false : true }
@@ -373,27 +333,33 @@ function E911Page() {
 
   const [pageSize, setPageSize] = useState(getStoredPageSize)
 
-  const handlePageSizeChange = useCallback((value: string) => {
-    const size = Number(value)
-    setPageSize(size)
-    navigate({ search: (prev) => ({ ...prev, page: undefined }), replace: true })
-    try {
-      localStorage.setItem(PAGE_SIZE_STORAGE_KEY, String(size))
-    } catch {
-      /* localStorage unavailable */
-    }
-  }, [navigate])
+  const handlePageSizeChange = useCallback(
+    (value: string) => {
+      const size = Number(value)
+      setPageSize(size)
+      navigate({ search: (prev) => ({ ...prev, page: undefined }), replace: true })
+      try {
+        localStorage.setItem(PAGE_SIZE_STORAGE_KEY, String(size))
+      } catch {
+        /* localStorage unavailable */
+      }
+    },
+    [navigate],
+  )
 
-  const handleSort = useCallback((key: string) => {
-    const next = nextSortDirection(sortKey, sortDir, key)
-    navigate({
-      search: (prev) => ({
-        ...prev,
-        sort: next.sort || undefined,
-        order: next.direction || undefined,
-      }),
-    })
-  }, [sortKey, sortDir, navigate])
+  const handleSort = useCallback(
+    (key: string) => {
+      const next = nextSortDirection(sortKey, sortDir, key)
+      navigate({
+        search: (prev) => ({
+          ...prev,
+          sort: next.sort || undefined,
+          order: next.direction || undefined,
+        }),
+      })
+    },
+    [sortKey, sortDir, navigate],
+  )
 
   const searchInputRef = useRef<HTMLInputElement>(null)
 
@@ -476,11 +442,7 @@ function E911Page() {
           deleteMutation.reset()
         },
       ),
-      createExportAction<E911Registration>(
-        "e911-registrations-selected",
-        csvHeaders,
-        (ids) => items.filter((r) => ids.includes(r.id)),
-      ),
+      createExportAction<E911Registration>("e911-registrations-selected", csvHeaders, (ids) => items.filter((r) => ids.includes(r.id))),
     ],
     [items, deleteMutation],
   )
@@ -549,11 +511,7 @@ function E911Page() {
                 <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {TOGGLEABLE_COLUMNS.map((col) => (
-                  <DropdownMenuCheckboxItem
-                    key={col.key}
-                    checked={isColumnVisible(col.key)}
-                    onCheckedChange={() => toggleColumn(col.key)}
-                  >
+                  <DropdownMenuCheckboxItem key={col.key} checked={isColumnVisible(col.key)} onCheckedChange={() => toggleColumn(col.key)}>
                     {col.label}
                   </DropdownMenuCheckboxItem>
                 ))}
@@ -576,32 +534,32 @@ function E911Page() {
 
       {/* Summary stats */}
       <SectionErrorBoundary name="E911 Registration Summary">
-      <div className="flex flex-wrap items-center gap-2">
-        {isLoading ? (
-          <>
-            <Skeleton className="h-7 w-24 rounded-full" />
-            <Skeleton className="h-7 w-24 rounded-full" />
-            <Skeleton className="h-7 w-24 rounded-full" />
-          </>
-        ) : (
-          <>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground">
-              Total
-              <span className="ml-0.5 font-semibold text-foreground">{registrationStats.total}</span>
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              Validated
-              <span className="ml-0.5 font-semibold">{registrationStats.validated}</span>
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-700 dark:text-amber-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-              Pending
-              <span className="ml-0.5 font-semibold">{registrationStats.pending}</span>
-            </span>
-          </>
-        )}
-      </div>
+        <div className="flex flex-wrap items-center gap-2">
+          {isLoading ? (
+            <>
+              <Skeleton className="h-7 w-24 rounded-full" />
+              <Skeleton className="h-7 w-24 rounded-full" />
+              <Skeleton className="h-7 w-24 rounded-full" />
+            </>
+          ) : (
+            <>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground">
+                Total
+                <span className="ml-0.5 font-semibold text-foreground">{registrationStats.total}</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                Validated
+                <span className="ml-0.5 font-semibold">{registrationStats.validated}</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-700 dark:text-amber-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                Pending
+                <span className="ml-0.5 font-semibold">{registrationStats.pending}</span>
+              </span>
+            </>
+          )}
+        </div>
       </SectionErrorBoundary>
 
       {/* Search */}
@@ -609,13 +567,7 @@ function E911Page() {
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative max-w-sm flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              ref={searchInputRef}
-              placeholder="Search by address..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              className="pl-9 pr-8"
-            />
+            <Input ref={searchInputRef} placeholder="Search by address..." value={searchInput} onChange={(e) => setSearchInput(e.target.value)} className="pl-9 pr-8" />
             {searchInput && (
               <button
                 type="button"
@@ -647,7 +599,8 @@ function E911Page() {
                   {(unregistered ?? []).map((pn: UnregisteredPhoneNumber) => (
                     <Badge key={pn.id} variant="outline" className="border-amber-500/40 text-amber-600 dark:text-amber-400">
                       <AlertTriangle className="mr-1 h-3 w-3" />
-                      {pn.number}{pn.label ? ` (${pn.label})` : ""}
+                      {pn.number}
+                      {pn.label ? ` (${pn.label})` : ""}
                     </Badge>
                   ))}
                 </div>
@@ -660,197 +613,160 @@ function E911Page() {
       {/* Registrations table */}
       <PageSection delay={0.1}>
         <SectionErrorBoundary name="E911 Registrations Table">
-        {isLoading ? (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <SkeletonCard key={i} />
-            ))}
-          </div>
-        ) : isError ? (
-          <EmptyState
-            icon={AlertCircle}
-            title="Unable to load E911 registrations"
-            description="Something went wrong while fetching your E911 registrations. Please try again."
-            action={
-              <Button variant="outline" size="sm" onClick={() => refetch()}>
-                Try again
-              </Button>
-            }
-          />
-        ) : !hasData && !search ? (
-          <EmptyState
-            icon={ShieldAlert}
-            title="No E911 registrations"
-            description="Register E911 addresses for your phone numbers to ensure emergency services can locate callers."
-            action={
-              teamId ? (
-                <Button size="sm" asChild>
-                  <Link to="/e911/new">
-                    <Plus className="mr-2 h-4 w-4" /> Register Address
-                  </Link>
+          {isLoading ? (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <SkeletonCard key={i} />
+              ))}
+            </div>
+          ) : isError ? (
+            <EmptyState
+              icon={AlertCircle}
+              title="Unable to load E911 registrations"
+              description="Something went wrong while fetching your E911 registrations. Please try again."
+              action={
+                <Button variant="outline" size="sm" onClick={() => refetch()}>
+                  Try again
                 </Button>
-              ) : undefined
-            }
-          />
-        ) : !hasData ? (
-          <EmptyState
-            icon={ShieldAlert}
-            variant="no-results"
-            title="No results found"
-            description="No E911 registrations match your search. Try adjusting your query."
-            action={
-              <Button variant="outline" size="sm" onClick={() => setSearchInput("")}>
-                Clear search
-              </Button>
-            }
-          />
-        ) : (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <p className="text-xs text-muted-foreground">
-                {data?.total ?? items.length} registration{(data?.total ?? items.length) === 1 ? "" : "s"}
-              </p>
-              {totalPages > 1 && (
+              }
+            />
+          ) : !hasData && !search ? (
+            <EmptyState
+              icon={ShieldAlert}
+              title="No E911 registrations"
+              description="Register E911 addresses for your phone numbers to ensure emergency services can locate callers."
+              action={
+                teamId ? (
+                  <Button size="sm" asChild>
+                    <Link to="/e911/new">
+                      <Plus className="mr-2 h-4 w-4" /> Register Address
+                    </Link>
+                  </Button>
+                ) : undefined
+              }
+            />
+          ) : !hasData ? (
+            <EmptyState
+              icon={ShieldAlert}
+              variant="no-results"
+              title="No results found"
+              description="No E911 registrations match your search. Try adjusting your query."
+              action={
+                <Button variant="outline" size="sm" onClick={() => setSearchInput("")}>
+                  Clear search
+                </Button>
+              }
+            />
+          ) : (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
                 <p className="text-xs text-muted-foreground">
-                  Page {page} of {totalPages}
+                  {data?.total ?? items.length} registration{(data?.total ?? items.length) === 1 ? "" : "s"}
                 </p>
-              )}
-            </div>
-
-            <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
-              <Table aria-label="E911 Registrations" aria-busy={isLoading || isRefetching}>
-                <TableHeader className="sticky top-0 z-10 bg-background">
-                  <TableRow>
-                    <TableHead className="w-10">
-                      <Checkbox
-                        checked={allSelected}
-                        indeterminate={someSelected && !allSelected}
-                        onChange={toggleAll}
-                        aria-label="Select all registrations"
-                      />
-                    </TableHead>
-                    <SortableHeader
-                      label="Phone Number"
-                      sortKey="phone_number_display"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                    />
-                    {isColumnVisible("address") && (
-                      <SortableHeader
-                        label="Address"
-                        sortKey="address_line1"
-                        currentSort={sortKey}
-                        currentDirection={sortDir}
-                        onSort={handleSort}
-                      />
-                    )}
-                    {isColumnVisible("cityState") && (
-                      <SortableHeader
-                        label="City / State"
-                        sortKey="city"
-                        currentSort={sortKey}
-                        currentDirection={sortDir}
-                        onSort={handleSort}
-                        className="hidden md:table-cell"
-                      />
-                    )}
-                    {isColumnVisible("validated") && (
-                      <SortableHeader
-                        label="Validated"
-                        sortKey="validated"
-                        currentSort={sortKey}
-                        currentDirection={sortDir}
-                        onSort={handleSort}
-                      />
-                    )}
-                    {isColumnVisible("carrierRegId") && (
-                      <TableHead className="hidden md:table-cell">Carrier Reg ID</TableHead>
-                    )}
-                    <TableHead className="w-16 text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {items.map((reg: E911Registration, index: number) => (
-                    <E911Row
-                      key={reg.id}
-                      reg={reg}
-                      index={index}
-                      selected={selectedIds.has(reg.id)}
-                      onToggle={() => toggleOne(reg.id)}
-                      onRowClick={() => handleRowClick(reg.id)}
-                      cellClass={cellClass}
-                      isColumnVisible={isColumnVisible}
-                    />
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-            <div className="sr-only" aria-live="polite" aria-atomic="true">
-              {!isLoading && `Showing ${items.length} of ${data?.total ?? items.length} results, page ${page}`}
-            </div>
-
-            {/* Pagination */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">Rows per page</span>
-                <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
-                  <SelectTrigger className="h-8 w-[70px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PAGE_SIZES.map((size) => (
-                      <SelectItem key={size} value={String(size)}>
-                        {size}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {totalPages > 1 && (
+                  <p className="text-xs text-muted-foreground">
+                    Page {page} of {totalPages}
+                  </p>
+                )}
               </div>
-              {totalPages > 1 && (
+
+              <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
+                <Table aria-label="E911 Registrations" aria-busy={isLoading || isRefetching}>
+                  <TableHeader className="sticky top-0 z-10 bg-background">
+                    <TableRow>
+                      <TableHead className="w-10">
+                        <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all registrations" />
+                      </TableHead>
+                      <SortableHeader label="Phone Number" sortKey="phone_number_display" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                      {isColumnVisible("address") && (
+                        <SortableHeader label="Address" sortKey="address_line1" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                      )}
+                      {isColumnVisible("cityState") && (
+                        <SortableHeader label="City / State" sortKey="city" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
+                      )}
+                      {isColumnVisible("validated") && (
+                        <SortableHeader label="Validated" sortKey="validated" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                      )}
+                      {isColumnVisible("carrierRegId") && <TableHead className="hidden md:table-cell">Carrier Reg ID</TableHead>}
+                      <TableHead className="w-16 text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {items.map((reg: E911Registration, index: number) => (
+                      <E911Row
+                        key={reg.id}
+                        reg={reg}
+                        index={index}
+                        selected={selectedIds.has(reg.id)}
+                        onToggle={() => toggleOne(reg.id)}
+                        onRowClick={() => handleRowClick(reg.id)}
+                        cellClass={cellClass}
+                        isColumnVisible={isColumnVisible}
+                      />
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              <div className="sr-only" aria-live="polite" aria-atomic="true">
+                {!isLoading && `Showing ${items.length} of ${data?.total ?? items.length} results, page ${page}`}
+              </div>
+
+              {/* Pagination */}
+              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      navigate({
-                        search: (prev) => ({
-                          ...prev,
-                          page: page - 1 > 1 ? page - 1 : undefined,
-                        }),
-                      })
-                    }
-                    disabled={page <= 1}
-                  >
-                    Previous
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      navigate({
-                        search: (prev) => ({ ...prev, page: page + 1 }),
-                      })
-                    }
-                    disabled={page >= totalPages}
-                  >
-                    Next
-                  </Button>
+                  <span className="text-xs text-muted-foreground">Rows per page</span>
+                  <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
+                    <SelectTrigger className="h-8 w-[70px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PAGE_SIZES.map((size) => (
+                        <SelectItem key={size} value={String(size)}>
+                          {size}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-              )}
+                {totalPages > 1 && (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        navigate({
+                          search: (prev) => ({
+                            ...prev,
+                            page: page - 1 > 1 ? page - 1 : undefined,
+                          }),
+                        })
+                      }
+                      disabled={page <= 1}
+                    >
+                      Previous
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        navigate({
+                          search: (prev) => ({ ...prev, page: page + 1 }),
+                        })
+                      }
+                      disabled={page >= totalPages}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
         </SectionErrorBoundary>
       </PageSection>
 
       {/* Bulk action bar */}
-      <BulkActionBar
-        selectedCount={selectedIds.size}
-        selectedIds={Array.from(selectedIds)}
-        onClearSelection={() => setSelectedIds(new Set())}
-        actions={bulkActions}
-      />
+      <BulkActionBar selectedCount={selectedIds.size} selectedIds={Array.from(selectedIds)} onClearSelection={() => setSelectedIds(new Set())} actions={bulkActions} />
     </PageContainer>
   )
 }

@@ -1,18 +1,14 @@
 import { Link } from "@tanstack/react-router"
 import { AlertCircle, TrendingUp } from "lucide-react"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { EmptyState } from "@/components/ui/empty-state"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAdminUsers } from "@/lib/api/hooks/admin"
 
-const RANK_COLORS = [
-  "bg-amber-400 text-amber-950",
-  "bg-gray-300 text-gray-700",
-  "bg-amber-600 text-amber-50",
-] as const
+const RANK_COLORS = ["bg-amber-400 text-amber-950", "bg-gray-300 text-gray-700", "bg-amber-600 text-amber-50"] as const
 
 function getRankStyle(index: number): string {
   if (index < 3) return RANK_COLORS[index]
@@ -70,14 +66,16 @@ export function TopUsersCard() {
         icon={AlertCircle}
         title="Unable to load user activity"
         description="Something went wrong. Please try again."
-        action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+        action={
+          <Button variant="outline" size="sm" onClick={() => refetch()}>
+            Try again
+          </Button>
+        }
       />
     )
   }
 
-  const sorted = [...data.items]
-    .sort((a, b) => (b.loginCount ?? 0) - (a.loginCount ?? 0))
-    .slice(0, 5)
+  const sorted = [...data.items].sort((a, b) => (b.loginCount ?? 0) - (a.loginCount ?? 0)).slice(0, 5)
 
   const maxCount = sorted[0]?.loginCount ?? 1
 
@@ -88,9 +86,7 @@ export function TopUsersCard() {
         <CardDescription>By login count</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {sorted.length === 0 && (
-          <p className="text-muted-foreground text-sm">No user activity yet.</p>
-        )}
+        {sorted.length === 0 && <p className="text-muted-foreground text-sm">No user activity yet.</p>}
         {sorted.map((user, index) => {
           const count = user.loginCount ?? 0
           const pct = maxCount > 0 ? (count / maxCount) * 100 : 0
@@ -101,9 +97,7 @@ export function TopUsersCard() {
               params={{ userId: user.id }}
               className="flex items-center gap-3 hover:bg-muted/50 rounded-lg px-2 py-1.5 -mx-2 transition-colors"
             >
-              <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${getRankStyle(index)}`}>
-                {index + 1}
-              </span>
+              <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${getRankStyle(index)}`}>{index + 1}</span>
               <Avatar className="size-8 text-xs">
                 <AvatarFallback>{getInitials(user.name, user.email)}</AvatarFallback>
               </Avatar>
@@ -123,10 +117,7 @@ export function TopUsersCard() {
                   </Tooltip>
                 )}
                 <div className="mt-1 h-1.5 w-full rounded-full bg-muted">
-                  <div
-                    className={`h-1.5 rounded-full ${getBarColor(index)} transition-all duration-500`}
-                    style={{ width: `${pct}%` }}
-                  />
+                  <div className={`h-1.5 rounded-full ${getBarColor(index)} transition-all duration-500`} style={{ width: `${pct}%` }} />
                 </div>
               </div>
               <span className="flex items-center gap-1 text-xs font-medium tabular-nums text-muted-foreground whitespace-nowrap">

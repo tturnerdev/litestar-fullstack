@@ -1,21 +1,4 @@
-import {
-  Bold,
-  Code,
-  Eye,
-  Heading2,
-  ImageIcon,
-  Italic,
-  Link2,
-  List,
-  ListOrdered,
-  Maximize2,
-  Minimize2,
-  Minus,
-  Pencil,
-  Quote,
-  Strikethrough,
-  Table,
-} from "lucide-react"
+import { Bold, Code, Eye, Heading2, ImageIcon, Italic, Link2, List, ListOrdered, Maximize2, Minimize2, Minus, Pencil, Quote, Strikethrough, Table } from "lucide-react"
 import { useCallback, useRef, useState } from "react"
 import { MarkdownRenderer } from "@/components/support/markdown-renderer"
 import { Button } from "@/components/ui/button"
@@ -41,11 +24,7 @@ interface ToolbarAction {
   action: (textarea: HTMLTextAreaElement) => { text: string; selectionStart: number; selectionEnd: number }
 }
 
-function wrapSelection(
-  textarea: HTMLTextAreaElement,
-  before: string,
-  after: string,
-): { text: string; selectionStart: number; selectionEnd: number } {
+function wrapSelection(textarea: HTMLTextAreaElement, before: string, after: string): { text: string; selectionStart: number; selectionEnd: number } {
   const { selectionStart, selectionEnd, value } = textarea
   const selected = value.substring(selectionStart, selectionEnd)
   const replacement = `${before}${selected || "text"}${after}`
@@ -55,20 +34,14 @@ function wrapSelection(
   return { text: newText, selectionStart: cursorStart, selectionEnd: cursorEnd }
 }
 
-function insertAtCursor(
-  textarea: HTMLTextAreaElement,
-  insertion: string,
-): { text: string; selectionStart: number; selectionEnd: number } {
+function insertAtCursor(textarea: HTMLTextAreaElement, insertion: string): { text: string; selectionStart: number; selectionEnd: number } {
   const { selectionStart, selectionEnd, value } = textarea
   const newText = value.substring(0, selectionStart) + insertion + value.substring(selectionEnd)
   const cursor = selectionStart + insertion.length
   return { text: newText, selectionStart: cursor, selectionEnd: cursor }
 }
 
-function prefixLine(
-  textarea: HTMLTextAreaElement,
-  prefix: string,
-): { text: string; selectionStart: number; selectionEnd: number } {
+function prefixLine(textarea: HTMLTextAreaElement, prefix: string): { text: string; selectionStart: number; selectionEnd: number } {
   const { selectionStart, value } = textarea
   const lineStart = value.lastIndexOf("\n", selectionStart - 1) + 1
   const newText = value.substring(0, lineStart) + prefix + value.substring(lineStart)
@@ -239,19 +212,14 @@ export function MarkdownEditor({
         <div className="flex items-center gap-0.5">
           {toolbarActions.map((action, index) => (
             <span key={action.label} className="contents">
-              {(index === 5 || index === 7 || index === 10) && (
-                <Separator orientation="vertical" className="mx-1 h-5" />
-              )}
+              {(index === 5 || index === 7 || index === 10) && <Separator orientation="vertical" className="mx-1 h-5" />}
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className={cn(
-                      "h-7 w-7 p-0",
-                      activeFormats.has(action.label) && "bg-accent text-accent-foreground",
-                    )}
+                    className={cn("h-7 w-7 p-0", activeFormats.has(action.label) && "bg-accent text-accent-foreground")}
                     onClick={() => {
                       setActiveTab("write")
                       applyAction(action.action)
@@ -264,9 +232,7 @@ export function MarkdownEditor({
                 </TooltipTrigger>
                 <TooltipContent>
                   {action.label}
-                  {action.shortcut && (
-                    <span className="ml-2 text-muted-foreground">{action.shortcut}</span>
-                  )}
+                  {action.shortcut && <span className="ml-2 text-muted-foreground">{action.shortcut}</span>}
                 </TooltipContent>
               </Tooltip>
             </span>
@@ -275,19 +241,8 @@ export function MarkdownEditor({
         <div className="flex items-center gap-1">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="h-7 w-7 p-0"
-                onClick={() => setIsFullscreen((prev) => !prev)}
-                disabled={disabled}
-              >
-                {isFullscreen ? (
-                  <Minimize2 className="h-3.5 w-3.5" />
-                ) : (
-                  <Maximize2 className="h-3.5 w-3.5" />
-                )}
+              <Button type="button" variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => setIsFullscreen((prev) => !prev)} disabled={disabled}>
+                {isFullscreen ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
                 <span className="sr-only">{isFullscreen ? "Exit fullscreen" : "Fullscreen"}</span>
               </Button>
             </TooltipTrigger>
@@ -356,19 +311,14 @@ export function MarkdownEditor({
           )}
         </div>
         <div className="flex justify-end px-1 pt-1">
-          <span className="text-xs text-muted-foreground">{wordCount} {wordCount === 1 ? "word" : "words"}</span>
+          <span className="text-xs text-muted-foreground">
+            {wordCount} {wordCount === 1 ? "word" : "words"}
+          </span>
         </div>
       </TabsContent>
       <TabsContent value="preview" className="mt-0">
-        <div
-          className="rounded-b-lg border border-border/80 bg-card/80 px-3 py-2"
-          style={{ minHeight }}
-        >
-          {value.trim() ? (
-            <MarkdownRenderer content={value} />
-          ) : (
-            <p className="text-sm text-muted-foreground">Nothing to preview</p>
-          )}
+        <div className="rounded-b-lg border border-border/80 bg-card/80 px-3 py-2" style={{ minHeight }}>
+          {value.trim() ? <MarkdownRenderer content={value} /> : <p className="text-sm text-muted-foreground">Nothing to preview</p>}
         </div>
       </TabsContent>
     </Tabs>

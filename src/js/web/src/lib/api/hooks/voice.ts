@@ -184,8 +184,7 @@ export function useCreatePhoneNumber() {
 export function useDeletePhoneNumber() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (phoneNumberId: string) =>
-      apiFetch<void>(`/api/voice/phone-numbers/${phoneNumberId}`, { method: "DELETE" }),
+    mutationFn: (phoneNumberId: string) => apiFetch<void>(`/api/voice/phone-numbers/${phoneNumberId}`, { method: "DELETE" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["voice", "phone-numbers"] })
       toast.success("Phone number deleted")
@@ -272,20 +271,13 @@ export function useCreateExtension() {
 export function useSyncExtensions() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: () =>
-      apiFetch<{ created: number; updated: number; errors: string[]; connectionName: string | null }>(
-        "/api/voice/extensions/sync",
-        { method: "POST" },
-      ),
+    mutationFn: () => apiFetch<{ created: number; updated: number; errors: string[]; connectionName: string | null }>("/api/voice/extensions/sync", { method: "POST" }),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["voice", "extensions"] })
       const parts = []
       if (data.created > 0) parts.push(`${data.created} created`)
       if (data.updated > 0) parts.push(`${data.updated} updated`)
-      toast.success(
-        `PBX sync complete${data.connectionName ? ` (${data.connectionName})` : ""}`,
-        { description: parts.join(", ") || "No changes needed" },
-      )
+      toast.success(`PBX sync complete${data.connectionName ? ` (${data.connectionName})` : ""}`, { description: parts.join(", ") || "No changes needed" })
       if (data.errors.length > 0) {
         toast.warning(`${data.errors.length} error(s) during sync`, {
           description: data.errors.slice(0, 3).join("; "),
@@ -324,8 +316,7 @@ export function useUpdateExtension(id: string) {
 export function useDeleteExtension() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (extensionId: string) =>
-      apiFetch<void>(`/api/voice/extensions/${extensionId}`, { method: "DELETE" }),
+    mutationFn: (extensionId: string) => apiFetch<void>(`/api/voice/extensions/${extensionId}`, { method: "DELETE" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["voice", "extensions"] })
       toast.success("Extension deleted")
@@ -639,10 +630,7 @@ export function useBulkMarkVoicemailRead(extensionId: string) {
     mutationFn: async (messageIds: string[]) => {
       await Promise.all(
         messageIds.map((messageId) =>
-          apiFetch<VoicemailMessage>(
-            `/api/voice/extensions/${extensionId}/voicemail/messages/${messageId}`,
-            { method: "PATCH", body: JSON.stringify({ isRead: true }) },
-          ),
+          apiFetch<VoicemailMessage>(`/api/voice/extensions/${extensionId}/voicemail/messages/${messageId}`, { method: "PATCH", body: JSON.stringify({ isRead: true }) }),
         ),
       )
     },
@@ -662,14 +650,7 @@ export function useBulkDeleteVoicemailMessages(extensionId: string) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (messageIds: string[]) => {
-      await Promise.all(
-        messageIds.map((messageId) =>
-          apiFetch<void>(
-            `/api/voice/extensions/${extensionId}/voicemail/messages/${messageId}`,
-            { method: "DELETE" },
-          ),
-        ),
-      )
+      await Promise.all(messageIds.map((messageId) => apiFetch<void>(`/api/voice/extensions/${extensionId}/voicemail/messages/${messageId}`, { method: "DELETE" })))
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["voice", "voicemail-messages", extensionId] })

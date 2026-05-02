@@ -572,99 +572,99 @@ function ConnectionDetailPage() {
       {/* Connection Health */}
       <PageSection>
         <SectionErrorBoundary name="Connection Health">
-        {(() => {
-          const health = deriveHealthLevel(data.status, data.lastError, data.isEnabled)
-          const config = healthConfig[health]
-          const ProviderIcon = providerIcons[data.provider.toLowerCase()] ?? connectionTypeIcons[data.connectionType] ?? Plug
-          const providerDisplayName = providerLabels[data.provider.toLowerCase()] ?? data.provider
+          {(() => {
+            const health = deriveHealthLevel(data.status, data.lastError, data.isEnabled)
+            const config = healthConfig[health]
+            const ProviderIcon = providerIcons[data.provider.toLowerCase()] ?? connectionTypeIcons[data.connectionType] ?? Plug
+            const providerDisplayName = providerLabels[data.provider.toLowerCase()] ?? data.provider
 
-          return (
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Activity className="h-5 w-5 text-muted-foreground" />
-                    <CardTitle>Connection Health</CardTitle>
-                  </div>
-                  <Button size="sm" variant="outline" onClick={() => testConnection.mutate()} disabled={testConnection.isPending || editing}>
-                    {testConnection.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plug className="mr-2 h-4 w-4" />}
-                    Test Connection
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                  {/* Health status indicator */}
-                  <div className="space-y-1.5">
-                    <p className="text-muted-foreground text-sm">Status</p>
-                    <div className={`inline-flex items-center gap-2 rounded-md px-3 py-1.5 ${config.bgClass}`}>
-                      <span className={`inline-block h-2.5 w-2.5 rounded-full ${config.dotClass} ${health === "healthy" ? "animate-pulse" : ""}`} />
-                      <span className={`text-sm font-medium ${config.textClass}`}>{config.label}</span>
-                    </div>
-                  </div>
-
-                  {/* Provider badge */}
-                  <div className="space-y-1.5">
-                    <p className="text-muted-foreground text-sm">Provider</p>
+            return (
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="gap-1.5 text-sm">
-                        <ProviderIcon className="h-3.5 w-3.5" />
-                        {providerDisplayName}
-                      </Badge>
-                      <Badge variant="secondary" className="text-xs">
-                        {typeLabels[data.connectionType] ?? data.connectionType}
-                      </Badge>
+                      <Activity className="h-5 w-5 text-muted-foreground" />
+                      <CardTitle>Connection Health</CardTitle>
                     </div>
+                    <Button size="sm" variant="outline" onClick={() => testConnection.mutate()} disabled={testConnection.isPending || editing}>
+                      {testConnection.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plug className="mr-2 h-4 w-4" />}
+                      Test Connection
+                    </Button>
                   </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                    {/* Health status indicator */}
+                    <div className="space-y-1.5">
+                      <p className="text-muted-foreground text-sm">Status</p>
+                      <div className={`inline-flex items-center gap-2 rounded-md px-3 py-1.5 ${config.bgClass}`}>
+                        <span className={`inline-block h-2.5 w-2.5 rounded-full ${config.dotClass} ${health === "healthy" ? "animate-pulse" : ""}`} />
+                        <span className={`text-sm font-medium ${config.textClass}`}>{config.label}</span>
+                      </div>
+                    </div>
 
-                  {/* Last health check */}
-                  <div className="space-y-1.5">
-                    <p className="text-muted-foreground text-sm">Last Health Check</p>
-                    {data.lastHealthCheck ? (
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <p className="cursor-default text-sm">{formatRelativeTimeShort(data.lastHealthCheck)}</p>
-                        </TooltipTrigger>
-                        <TooltipContent>{formatDateTime(data.lastHealthCheck)}</TooltipContent>
-                      </Tooltip>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">Never checked</p>
-                    )}
-                  </div>
+                    {/* Provider badge */}
+                    <div className="space-y-1.5">
+                      <p className="text-muted-foreground text-sm">Provider</p>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="gap-1.5 text-sm">
+                          <ProviderIcon className="h-3.5 w-3.5" />
+                          {providerDisplayName}
+                        </Badge>
+                        <Badge variant="secondary" className="text-xs">
+                          {typeLabels[data.connectionType] ?? data.connectionType}
+                        </Badge>
+                      </div>
+                    </div>
 
-                  {/* Enabled / Disabled */}
-                  <div className="space-y-1.5">
-                    <p className="text-muted-foreground text-sm">Enabled</p>
-                    <div className="flex items-center gap-1.5">
-                      {data.isEnabled ? (
-                        <>
-                          <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                          <span className="text-sm">Active</span>
-                        </>
+                    {/* Last health check */}
+                    <div className="space-y-1.5">
+                      <p className="text-muted-foreground text-sm">Last Health Check</p>
+                      {data.lastHealthCheck ? (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <p className="cursor-default text-sm">{formatRelativeTimeShort(data.lastHealthCheck)}</p>
+                          </TooltipTrigger>
+                          <TooltipContent>{formatDateTime(data.lastHealthCheck)}</TooltipContent>
+                        </Tooltip>
                       ) : (
-                        <>
-                          <XCircle className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm text-muted-foreground">Disabled</span>
-                        </>
+                        <p className="text-sm text-muted-foreground">Never checked</p>
                       )}
                     </div>
-                  </div>
-                </div>
 
-                {/* Last error display */}
-                {data.lastError && (
-                  <div className="mt-4">
-                    <Alert variant="destructive">
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertTitle>Last Error</AlertTitle>
-                      <AlertDescription className="font-mono text-xs">{data.lastError}</AlertDescription>
-                    </Alert>
+                    {/* Enabled / Disabled */}
+                    <div className="space-y-1.5">
+                      <p className="text-muted-foreground text-sm">Enabled</p>
+                      <div className="flex items-center gap-1.5">
+                        {data.isEnabled ? (
+                          <>
+                            <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                            <span className="text-sm">Active</span>
+                          </>
+                        ) : (
+                          <>
+                            <XCircle className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm text-muted-foreground">Disabled</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          )
-        })()}
+
+                  {/* Last error display */}
+                  {data.lastError && (
+                    <div className="mt-4">
+                      <Alert variant="destructive">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertTitle>Last Error</AlertTitle>
+                        <AlertDescription className="font-mono text-xs">{data.lastError}</AlertDescription>
+                      </Alert>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )
+          })()}
         </SectionErrorBoundary>
       </PageSection>
 
@@ -678,317 +678,317 @@ function ConnectionDetailPage() {
           <TabsContent value="overview" className="mt-6 space-y-6">
             {/* Connection Info */}
             <SectionErrorBoundary name="Connection Info">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Globe className="h-5 w-5 text-muted-foreground" />
-                  <CardTitle>Connection Info</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
-                  <div>
-                    <p className="text-muted-foreground">Name</p>
-                    {editing ? (
-                      <Input value={editValues.name} onChange={(e) => updateEditValue("name", e.target.value)} className="mt-1 h-8" autoFocus />
-                    ) : (
-                      <p className="font-medium">{data.name}</p>
-                    )}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Globe className="h-5 w-5 text-muted-foreground" />
+                    <CardTitle>Connection Info</CardTitle>
                   </div>
-                  <div>
-                    <p className="text-muted-foreground">Type</p>
-                    <p>{typeLabels[data.connectionType] ?? data.connectionType}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Provider</p>
-                    <p>{data.provider}</p>
-                  </div>
-                  <div className="md:col-span-2 lg:col-span-3">
-                    <p className="text-muted-foreground">Description</p>
-                    {editing ? (
-                      <Textarea
-                        value={editValues.description}
-                        onChange={(e) => updateEditValue("description", e.target.value)}
-                        className="mt-1"
-                        rows={2}
-                        placeholder="Optional description"
-                      />
-                    ) : (
-                      <p>{data.description || "---"}</p>
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Status</p>
-                    <div className="mt-0.5">
-                      <StatusBadge status={data.status} />
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
+                    <div>
+                      <p className="text-muted-foreground">Name</p>
+                      {editing ? (
+                        <Input value={editValues.name} onChange={(e) => updateEditValue("name", e.target.value)} className="mt-1 h-8" autoFocus />
+                      ) : (
+                        <p className="font-medium">{data.name}</p>
+                      )}
                     </div>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Enabled</p>
-                    {editing ? (
-                      <div className="mt-1 flex items-center gap-2">
-                        <Switch checked={editValues.isEnabled} onCheckedChange={(checked) => updateEditValue("isEnabled", checked)} aria-label="Toggle enabled" />
-                        <span className="text-sm">{editValues.isEnabled ? "Yes" : "No"}</span>
+                    <div>
+                      <p className="text-muted-foreground">Type</p>
+                      <p>{typeLabels[data.connectionType] ?? data.connectionType}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Provider</p>
+                      <p>{data.provider}</p>
+                    </div>
+                    <div className="md:col-span-2 lg:col-span-3">
+                      <p className="text-muted-foreground">Description</p>
+                      {editing ? (
+                        <Textarea
+                          value={editValues.description}
+                          onChange={(e) => updateEditValue("description", e.target.value)}
+                          className="mt-1"
+                          rows={2}
+                          placeholder="Optional description"
+                        />
+                      ) : (
+                        <p>{data.description || "---"}</p>
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Status</p>
+                      <div className="mt-0.5">
+                        <StatusBadge status={data.status} />
                       </div>
-                    ) : (
-                      <p>{data.isEnabled ? "Yes" : "No"}</p>
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Connection ID</p>
-                    <div className="flex items-center gap-1">
-                      <p className="font-mono text-xs">{connectionId}</p>
-                      <CopyButton value={connectionId} label="connection ID" />
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Enabled</p>
+                      {editing ? (
+                        <div className="mt-1 flex items-center gap-2">
+                          <Switch checked={editValues.isEnabled} onCheckedChange={(checked) => updateEditValue("isEnabled", checked)} aria-label="Toggle enabled" />
+                          <span className="text-sm">{editValues.isEnabled ? "Yes" : "No"}</span>
+                        </div>
+                      ) : (
+                        <p>{data.isEnabled ? "Yes" : "No"}</p>
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Connection ID</p>
+                      <div className="flex items-center gap-1">
+                        <p className="font-mono text-xs">{connectionId}</p>
+                        <CopyButton value={connectionId} label="connection ID" />
+                      </div>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
 
             {/* Server Configuration */}
             <SectionErrorBoundary name="Server Configuration">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Server className="h-5 w-5 text-muted-foreground" />
-                  <CardTitle>Server Configuration</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
-                  <div>
-                    <p className="text-muted-foreground">Host</p>
-                    {editing ? (
-                      <Input
-                        value={editValues.host}
-                        onChange={(e) => updateEditValue("host", e.target.value)}
-                        className="mt-1 h-8 font-mono text-xs"
-                        placeholder="e.g. 192.168.1.1 or example.com"
-                      />
-                    ) : (
-                      <div className="flex items-center gap-1">
-                        <p className="font-mono text-xs">{data.host || "---"}</p>
-                        {data.host && <CopyButton value={data.host} label="host" />}
-                      </div>
-                    )}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Server className="h-5 w-5 text-muted-foreground" />
+                    <CardTitle>Server Configuration</CardTitle>
                   </div>
-                  <div>
-                    <p className="text-muted-foreground">Port</p>
-                    {editing ? (
-                      <Input
-                        type="number"
-                        value={editValues.port}
-                        onChange={(e) => updateEditValue("port", e.target.value)}
-                        className="mt-1 h-8 font-mono text-xs"
-                        placeholder="e.g. 443"
-                        min={1}
-                        max={65535}
-                      />
-                    ) : (
-                      <p className="font-mono text-xs">{data.port != null ? String(data.port) : "---"}</p>
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">SSL / TLS</p>
-                    <div className="flex items-center gap-1.5">
-                      {(editing ? editValues.port === "443" : data.port === 443) ? (
-                        <>
-                          <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
-                          <span>Likely (port 443)</span>
-                        </>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
+                    <div>
+                      <p className="text-muted-foreground">Host</p>
+                      {editing ? (
+                        <Input
+                          value={editValues.host}
+                          onChange={(e) => updateEditValue("host", e.target.value)}
+                          className="mt-1 h-8 font-mono text-xs"
+                          placeholder="e.g. 192.168.1.1 or example.com"
+                        />
                       ) : (
-                        <span className="text-muted-foreground">Not determined</span>
+                        <div className="flex items-center gap-1">
+                          <p className="font-mono text-xs">{data.host || "---"}</p>
+                          {data.host && <CopyButton value={data.host} label="host" />}
+                        </div>
                       )}
                     </div>
+                    <div>
+                      <p className="text-muted-foreground">Port</p>
+                      {editing ? (
+                        <Input
+                          type="number"
+                          value={editValues.port}
+                          onChange={(e) => updateEditValue("port", e.target.value)}
+                          className="mt-1 h-8 font-mono text-xs"
+                          placeholder="e.g. 443"
+                          min={1}
+                          max={65535}
+                        />
+                      ) : (
+                        <p className="font-mono text-xs">{data.port != null ? String(data.port) : "---"}</p>
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">SSL / TLS</p>
+                      <div className="flex items-center gap-1.5">
+                        {(editing ? editValues.port === "443" : data.port === 443) ? (
+                          <>
+                            <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
+                            <span>Likely (port 443)</span>
+                          </>
+                        ) : (
+                          <span className="text-muted-foreground">Not determined</span>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
 
             {/* Authentication */}
             <SectionErrorBoundary name="Authentication">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Key className="h-5 w-5 text-muted-foreground" />
-                  <CardTitle>Authentication</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
-                  <div>
-                    <p className="text-muted-foreground">Auth Type</p>
-                    <p>{authTypeLabels[data.authType] ?? data.authType}</p>
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Key className="h-5 w-5 text-muted-foreground" />
+                    <CardTitle>Authentication</CardTitle>
                   </div>
-                  {data.credentialFields.length > 0 && (
-                    <div className="md:col-span-2 lg:col-span-3">
-                      <p className="text-muted-foreground">Credentials</p>
-                      <div className="mt-1.5 flex flex-wrap gap-2">
-                        {data.credentialFields.map((field) => (
-                          <Badge key={field} variant="outline" className="gap-1.5 font-mono text-xs">
-                            <Lock className="h-3 w-3 text-muted-foreground" />
-                            {field}
-                          </Badge>
-                        ))}
-                      </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
+                    <div>
+                      <p className="text-muted-foreground">Auth Type</p>
+                      <p>{authTypeLabels[data.authType] ?? data.authType}</p>
                     </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+                    {data.credentialFields.length > 0 && (
+                      <div className="md:col-span-2 lg:col-span-3">
+                        <p className="text-muted-foreground">Credentials</p>
+                        <div className="mt-1.5 flex flex-wrap gap-2">
+                          {data.credentialFields.map((field) => (
+                            <Badge key={field} variant="outline" className="gap-1.5 font-mono text-xs">
+                              <Lock className="h-3 w-3 text-muted-foreground" />
+                              {field}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
 
             {/* Settings */}
             <SectionErrorBoundary name="Settings">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Settings className="h-5 w-5 text-muted-foreground" />
-                  <CardTitle>Settings</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Key-value display */}
-                {settingsEntries.length > 0 && (
-                  <div className="rounded-md border">
-                    <div className="grid grid-cols-[minmax(120px,1fr)_2fr] text-sm">
-                      {settingsEntries.map(([key, value], idx) => (
-                        <div key={key} className="contents">
-                          <div className={`px-3 py-2 font-mono text-xs text-muted-foreground ${idx !== settingsEntries.length - 1 ? "border-b" : ""}`}>{key}</div>
-                          <div className={`border-l px-3 py-2 font-mono text-xs ${idx !== settingsEntries.length - 1 ? "border-b" : ""}`}>
-                            {typeof value === "object" ? JSON.stringify(value) : String(value ?? "---")}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Settings className="h-5 w-5 text-muted-foreground" />
+                    <CardTitle>Settings</CardTitle>
                   </div>
-                )}
-                {settingsEntries.length === 0 && !settingsDirty && <p className="text-sm text-muted-foreground">No settings configured.</p>}
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Key-value display */}
+                  {settingsEntries.length > 0 && (
+                    <div className="rounded-md border">
+                      <div className="grid grid-cols-[minmax(120px,1fr)_2fr] text-sm">
+                        {settingsEntries.map(([key, value], idx) => (
+                          <div key={key} className="contents">
+                            <div className={`px-3 py-2 font-mono text-xs text-muted-foreground ${idx !== settingsEntries.length - 1 ? "border-b" : ""}`}>{key}</div>
+                            <div className={`border-l px-3 py-2 font-mono text-xs ${idx !== settingsEntries.length - 1 ? "border-b" : ""}`}>
+                              {typeof value === "object" ? JSON.stringify(value) : String(value ?? "---")}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {settingsEntries.length === 0 && !settingsDirty && <p className="text-sm text-muted-foreground">No settings configured.</p>}
 
-                <Separator />
+                  <Separator />
 
-                {/* Raw JSON editor */}
-                <div className="space-y-2">
-                  <Label htmlFor="settings-json">Configuration JSON</Label>
-                  <Textarea
-                    id="settings-json"
-                    value={currentSettingsText}
-                    onChange={(e) => {
-                      setSettingsText(e.target.value)
-                      setSettingsError(null)
-                      setSettingsDirty(true)
-                    }}
-                    rows={8}
-                    className="font-mono text-xs"
-                    placeholder='{"key": "value"}'
-                  />
-                  {settingsError && <p className="text-destructive text-sm">{settingsError}</p>}
-                </div>
-                <div className="flex items-center justify-end gap-2">
-                  <Button
-                    variant="ghost"
-                    onClick={() => {
-                      setSettingsText(null)
-                      setSettingsError(null)
-                      setSettingsDirty(false)
-                    }}
-                    disabled={!settingsDirty || updateConnection.isPending}
-                  >
-                    Reset
-                  </Button>
-                  <Button onClick={handleSaveSettings} disabled={!settingsDirty || updateConnection.isPending}>
-                    {updateConnection.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Save Settings
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                  {/* Raw JSON editor */}
+                  <div className="space-y-2">
+                    <Label htmlFor="settings-json">Configuration JSON</Label>
+                    <Textarea
+                      id="settings-json"
+                      value={currentSettingsText}
+                      onChange={(e) => {
+                        setSettingsText(e.target.value)
+                        setSettingsError(null)
+                        setSettingsDirty(true)
+                      }}
+                      rows={8}
+                      className="font-mono text-xs"
+                      placeholder='{"key": "value"}'
+                    />
+                    {settingsError && <p className="text-destructive text-sm">{settingsError}</p>}
+                  </div>
+                  <div className="flex items-center justify-end gap-2">
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        setSettingsText(null)
+                        setSettingsError(null)
+                        setSettingsDirty(false)
+                      }}
+                      disabled={!settingsDirty || updateConnection.isPending}
+                    >
+                      Reset
+                    </Button>
+                    <Button onClick={handleSaveSettings} disabled={!settingsDirty || updateConnection.isPending}>
+                      {updateConnection.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Save Settings
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
 
             {/* Managed Devices */}
             <SectionErrorBoundary name="Managed Devices">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Cpu className="h-5 w-5 text-muted-foreground" />
-                  <CardTitle>Managed Devices</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {devicesQuery.isLoading ? (
-                  <div className="space-y-2">
-                    {Array.from({ length: 3 }).map((_, i) => (
-                      <Skeleton key={i} className="h-8 w-full" />
-                    ))}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Cpu className="h-5 w-5 text-muted-foreground" />
+                    <CardTitle>Managed Devices</CardTitle>
                   </div>
-                ) : managedDevices.length === 0 ? (
-                  <EmptyState icon={Cpu} title="No devices managed by this connection" description="Devices linked to this connection will appear here." />
-                ) : (
-                  <Table aria-label="Connection devices">
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>IP Address</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {managedDevices.map((device) => (
-                        <TableRow key={device.id}>
-                          <TableCell>
-                            <Link to="/devices/$deviceId" params={{ deviceId: device.id }} className="font-medium text-primary hover:underline">
-                              {device.name}
-                            </Link>
-                          </TableCell>
-                          <TableCell>{deviceTypeLabels[device.deviceType] ?? device.deviceType}</TableCell>
-                          <TableCell>
-                            <DeviceStatusBadge status={device.status} />
-                          </TableCell>
-                          <TableCell className="font-mono text-xs">{device.ipAddress || "---"}</TableCell>
-                        </TableRow>
+                </CardHeader>
+                <CardContent>
+                  {devicesQuery.isLoading ? (
+                    <div className="space-y-2">
+                      {Array.from({ length: 3 }).map((_, i) => (
+                        <Skeleton key={i} className="h-8 w-full" />
                       ))}
-                    </TableBody>
-                  </Table>
-                )}
-              </CardContent>
-            </Card>
+                    </div>
+                  ) : managedDevices.length === 0 ? (
+                    <EmptyState icon={Cpu} title="No devices managed by this connection" description="Devices linked to this connection will appear here." />
+                  ) : (
+                    <Table aria-label="Connection devices">
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Name</TableHead>
+                          <TableHead>Type</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>IP Address</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {managedDevices.map((device) => (
+                          <TableRow key={device.id}>
+                            <TableCell>
+                              <Link to="/devices/$deviceId" params={{ deviceId: device.id }} className="font-medium text-primary hover:underline">
+                                {device.name}
+                              </Link>
+                            </TableCell>
+                            <TableCell>{deviceTypeLabels[device.deviceType] ?? device.deviceType}</TableCell>
+                            <TableCell>
+                              <DeviceStatusBadge status={device.status} />
+                            </TableCell>
+                            <TableCell className="font-mono text-xs">{device.ipAddress || "---"}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  )}
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
 
             {/* Metadata */}
             <SectionErrorBoundary name="Metadata">
-            <Card>
-              <CardHeader>
-                <CardTitle>Metadata</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-4">
-                  <TimestampField label="Created" value={data.createdAt} />
-                  <TimestampField label="Updated" value={data.updatedAt} />
-                  <TimestampField label="Last Health Check" value={data.lastHealthCheck} />
-                  <div>
-                    <p className="text-muted-foreground text-sm">Team</p>
-                    <div className="flex items-center gap-1">
-                      <Link to="/teams/$teamId" params={{ teamId: data.teamId }} className="font-mono text-xs text-primary hover:underline">
-                        {data.teamId.slice(0, 8)}...
-                      </Link>
-                      <CopyButton value={data.teamId} label="team ID" />
+              <Card>
+                <CardHeader>
+                  <CardTitle>Metadata</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-4">
+                    <TimestampField label="Created" value={data.createdAt} />
+                    <TimestampField label="Updated" value={data.updatedAt} />
+                    <TimestampField label="Last Health Check" value={data.lastHealthCheck} />
+                    <div>
+                      <p className="text-muted-foreground text-sm">Team</p>
+                      <div className="flex items-center gap-1">
+                        <Link to="/teams/$teamId" params={{ teamId: data.teamId }} className="font-mono text-xs text-primary hover:underline">
+                          {data.teamId.slice(0, 8)}...
+                        </Link>
+                        <CopyButton value={data.teamId} label="team ID" />
+                      </div>
                     </div>
                   </div>
-                </div>
-                {data.lastError && (
-                  <div className="mt-4">
-                    <Alert variant="destructive">
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertTitle>Last Error</AlertTitle>
-                      <AlertDescription className="font-mono text-xs">{data.lastError}</AlertDescription>
-                    </Alert>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                  {data.lastError && (
+                    <div className="mt-4">
+                      <Alert variant="destructive">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertTitle>Last Error</AlertTitle>
+                        <AlertDescription className="font-mono text-xs">{data.lastError}</AlertDescription>
+                      </Alert>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
           </TabsContent>
 
@@ -1008,22 +1008,22 @@ function ConnectionDetailPage() {
       {/* Danger Zone */}
       <PageSection delay={0.3}>
         <SectionErrorBoundary name="Danger Zone">
-        <Card className="border-destructive/30">
-          <CardHeader>
-            <CardTitle className="text-destructive">Danger Zone</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium text-sm">Delete this connection</p>
-                <p className="text-sm text-muted-foreground">This action cannot be undone. All configuration and credentials will be permanently removed.</p>
+          <Card className="border-destructive/30">
+            <CardHeader>
+              <CardTitle className="text-destructive">Danger Zone</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-sm">Delete this connection</p>
+                  <p className="text-sm text-muted-foreground">This action cannot be undone. All configuration and credentials will be permanently removed.</p>
+                </div>
+                <Button variant="destructive" size="sm" onClick={() => setDeleteOpen(true)}>
+                  <Trash2 className="mr-2 h-4 w-4" /> Delete
+                </Button>
               </div>
-              <Button variant="destructive" size="sm" onClick={() => setDeleteOpen(true)}>
-                <Trash2 className="mr-2 h-4 w-4" /> Delete
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
         </SectionErrorBoundary>
       </PageSection>
 

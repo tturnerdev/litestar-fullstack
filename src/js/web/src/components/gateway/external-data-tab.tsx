@@ -79,9 +79,7 @@ function DataGrid({ data }: { data: Record<string, unknown> }) {
       {complex.map(([key, val]) => (
         <div key={key}>
           <p className="mb-1 text-sm font-medium text-muted-foreground">{formatKey(key)}</p>
-          <pre className="overflow-x-auto rounded-md bg-muted/50 p-3 font-mono text-xs">
-            {JSON.stringify(val, null, 2)}
-          </pre>
+          <pre className="overflow-x-auto rounded-md bg-muted/50 p-3 font-mono text-xs">{JSON.stringify(val, null, 2)}</pre>
         </div>
       ))}
     </div>
@@ -181,15 +179,7 @@ interface ExternalDataTabProps {
   onRefresh: () => void
 }
 
-export function ExternalDataTab({
-  hasIdentifier,
-  noIdentifierMessage,
-  sources,
-  isLoading,
-  isRefetching,
-  isError,
-  onRefresh,
-}: ExternalDataTabProps) {
+export function ExternalDataTab({ hasIdentifier, noIdentifierMessage, sources, isLoading, isRefetching, isError, onRefresh }: ExternalDataTabProps) {
   if (!hasIdentifier) {
     return <NoIdentifierMessage message={noIdentifierMessage} />
   }
@@ -197,20 +187,9 @@ export function ExternalDataTab({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
-          Data fetched from external providers. This data is not stored locally.
-        </p>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onRefresh}
-          disabled={isLoading || isRefetching}
-        >
-          {isLoading || isRefetching ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <RefreshCw className="mr-2 h-4 w-4" />
-          )}
+        <p className="text-sm text-muted-foreground">Data fetched from external providers. This data is not stored locally.</p>
+        <Button variant="outline" size="sm" onClick={onRefresh} disabled={isLoading || isRefetching}>
+          {isLoading || isRefetching ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
           Refresh
         </Button>
       </div>
@@ -222,19 +201,19 @@ export function ExternalDataTab({
           icon={AlertCircle}
           title="Failed to load external data"
           description="Something went wrong. Please try again."
-          action={<Button variant="outline" size="sm" onClick={() => onRefresh()}>Try again</Button>}
+          action={
+            <Button variant="outline" size="sm" onClick={() => onRefresh()}>
+              Try again
+            </Button>
+          }
         />
       ) : sources && Object.keys(sources).length > 0 ? (
-        Object.entries(sources).map(([name, source]) => (
-          <SourceCard key={name} source={source} />
-        ))
+        Object.entries(sources).map(([name, source]) => <SourceCard key={name} source={source} />)
       ) : (
         <Card>
           <CardContent className="flex items-center gap-3 py-8">
             <Info className="h-5 w-5 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">
-              No external data sources returned results. Click Refresh to try again.
-            </p>
+            <p className="text-sm text-muted-foreground">No external data sources returned results. Click Refresh to try again.</p>
           </CardContent>
         </Card>
       )}

@@ -14,8 +14,8 @@ import {
   LogOut,
   Monitor,
   Moon,
-  PanelLeftClose,
   Palette,
+  PanelLeftClose,
   RotateCcw,
   Shield,
   Smartphone,
@@ -26,29 +26,22 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 import { NotificationPreferences } from "@/components/settings/notification-preferences"
 import { Badge } from "@/components/ui/badge"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
-import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDocumentTitle } from "@/hooks/use-document-title"
-import { cn } from "@/lib/utils"
 import { useNotificationPreferencesStore } from "@/lib/notification-preferences-store"
 import { useSettingsStore } from "@/lib/settings-store"
 import { useTheme } from "@/lib/theme-context"
+import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/settings")({
   component: SettingsPage,
@@ -130,9 +123,7 @@ function SettingsPage() {
                 onClick={() => scrollToSection(id)}
                 className={cn(
                   "flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                  activeSection === id
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                  activeSection === id ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground",
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -154,7 +145,12 @@ function SettingsPage() {
         {/* Main content */}
         <div className="min-w-0 flex-1 space-y-8 pb-16">
           <PageSection delay={0.1}>
-            <div ref={(el) => { sectionRefs.current.appearance = el }} className="scroll-mt-24">
+            <div
+              ref={(el) => {
+                sectionRefs.current.appearance = el
+              }}
+              className="scroll-mt-24"
+            >
               <SectionErrorBoundary name="Appearance">
                 <AppearanceSection onNavigate={() => setActiveSection("appearance")} />
               </SectionErrorBoundary>
@@ -162,7 +158,12 @@ function SettingsPage() {
           </PageSection>
 
           <PageSection delay={0.15}>
-            <div ref={(el) => { sectionRefs.current.notifications = el }} className="scroll-mt-24">
+            <div
+              ref={(el) => {
+                sectionRefs.current.notifications = el
+              }}
+              className="scroll-mt-24"
+            >
               <SectionErrorBoundary name="Notifications">
                 <NotificationPreferences />
               </SectionErrorBoundary>
@@ -170,7 +171,12 @@ function SettingsPage() {
           </PageSection>
 
           <PageSection delay={0.2}>
-            <div ref={(el) => { sectionRefs.current.display = el }} className="scroll-mt-24">
+            <div
+              ref={(el) => {
+                sectionRefs.current.display = el
+              }}
+              className="scroll-mt-24"
+            >
               <SectionErrorBoundary name="Display Preferences">
                 <DisplaySection />
               </SectionErrorBoundary>
@@ -178,7 +184,12 @@ function SettingsPage() {
           </PageSection>
 
           <PageSection delay={0.25}>
-            <div ref={(el) => { sectionRefs.current.accessibility = el }} className="scroll-mt-24">
+            <div
+              ref={(el) => {
+                sectionRefs.current.accessibility = el
+              }}
+              className="scroll-mt-24"
+            >
               <SectionErrorBoundary name="Accessibility">
                 <AccessibilitySection />
               </SectionErrorBoundary>
@@ -186,7 +197,12 @@ function SettingsPage() {
           </PageSection>
 
           <PageSection delay={0.3}>
-            <div ref={(el) => { sectionRefs.current.sessions = el }} className="scroll-mt-24">
+            <div
+              ref={(el) => {
+                sectionRefs.current.sessions = el
+              }}
+              className="scroll-mt-24"
+            >
               <SectionErrorBoundary name="Active Sessions">
                 <ActiveSessionsSection />
               </SectionErrorBoundary>
@@ -194,7 +210,12 @@ function SettingsPage() {
           </PageSection>
 
           <PageSection delay={0.35}>
-            <div ref={(el) => { sectionRefs.current.shortcuts = el }} className="scroll-mt-24">
+            <div
+              ref={(el) => {
+                sectionRefs.current.shortcuts = el
+              }}
+              className="scroll-mt-24"
+            >
               <SectionErrorBoundary name="Keyboard Shortcuts">
                 <KeyboardShortcutsSection />
               </SectionErrorBoundary>
@@ -230,19 +251,12 @@ function ThemePreviewCard({
       htmlFor={`theme-${mode}`}
       className={cn(
         "group flex cursor-pointer flex-col gap-3 rounded-xl border-2 p-4 transition-all duration-200",
-        isActive
-          ? "border-primary bg-primary/5 shadow-sm shadow-primary/10"
-          : "border-border/40 hover:border-border hover:bg-accent/50",
+        isActive ? "border-primary bg-primary/5 shadow-sm shadow-primary/10" : "border-border/40 hover:border-border hover:bg-accent/50",
       )}
     >
       <RadioGroupItem value={mode} id={`theme-${mode}`} className="sr-only" />
       {/* Mini preview */}
-      <div
-        className={cn(
-          "relative flex h-20 w-full overflow-hidden rounded-lg border border-border/60",
-          previewBg,
-        )}
-      >
+      <div className={cn("relative flex h-20 w-full overflow-hidden rounded-lg border border-border/60", previewBg)}>
         {/* Sidebar preview */}
         <div className={cn("h-full w-6 border-r border-border/30", mode === "dark" ? "bg-zinc-800" : "bg-zinc-100")}>
           <div className={cn("mx-1 mt-2 h-1 w-4 rounded-full", previewAccent)} />
@@ -318,11 +332,7 @@ function AppearanceSection({ onNavigate }: { onNavigate: () => void }) {
       <CardContent className="space-y-6">
         <div className="space-y-3">
           <Label className="text-sm font-medium">Theme</Label>
-          <RadioGroup
-            value={mode}
-            onValueChange={handleThemeChange}
-            className="grid grid-cols-3 gap-3"
-          >
+          <RadioGroup value={mode} onValueChange={handleThemeChange} className="grid grid-cols-3 gap-3">
             <ThemePreviewCard mode="light" isActive={mode === "light"} icon={Sun} label="Light" />
             <ThemePreviewCard mode="dark" isActive={mode === "dark"} icon={Moon} label="Dark" />
             <ThemePreviewCard mode="system" isActive={mode === "system"} icon={Monitor} label="System" />
@@ -415,9 +425,7 @@ function DisplaySection() {
               <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
               Date format
             </Label>
-            <p className="text-sm text-muted-foreground">
-              {dateFormat === "relative" ? 'Show dates like "2h ago" or "yesterday".' : 'Show dates like "Apr 28, 2026".'}
-            </p>
+            <p className="text-sm text-muted-foreground">{dateFormat === "relative" ? 'Show dates like "2h ago" or "yesterday".' : 'Show dates like "Apr 28, 2026".'}</p>
           </div>
           <Select value={dateFormat} onValueChange={handleDateFormatChange}>
             <SelectTrigger className="w-32">
@@ -450,11 +458,7 @@ function DisplaySection() {
  * ----------------------------------------------------------------------- */
 
 function AccessibilitySection() {
-  const {
-    reducedMotion, setReducedMotion,
-    highContrast, setHighContrast,
-    fontSize, setFontSize,
-  } = useSettingsStore()
+  const { reducedMotion, setReducedMotion, highContrast, setHighContrast, fontSize, setFontSize } = useSettingsStore()
 
   useEffect(() => {
     document.documentElement.classList.toggle("motion-reduce", reducedMotion)
@@ -465,8 +469,7 @@ function AccessibilitySection() {
   }, [highContrast])
 
   useEffect(() => {
-    document.documentElement.style.fontSize =
-      fontSize === "large" ? "112.5%" : fontSize === "x-large" ? "125%" : ""
+    document.documentElement.style.fontSize = fontSize === "large" ? "112.5%" : fontSize === "x-large" ? "125%" : ""
   }, [fontSize])
 
   const handleReducedMotionChange = useCallback(
@@ -533,11 +536,7 @@ function AccessibilitySection() {
               Font size
             </Label>
             <p className="text-sm text-muted-foreground">
-              {fontSize === "large"
-                ? "Text is 12% larger than default."
-                : fontSize === "x-large"
-                  ? "Text is 25% larger than default."
-                  : "Standard text size across the interface."}
+              {fontSize === "large" ? "Text is 12% larger than default." : fontSize === "x-large" ? "Text is 25% larger than default." : "Standard text size across the interface."}
             </p>
           </div>
           <Select value={fontSize} onValueChange={handleFontSizeChange}>
@@ -636,9 +635,7 @@ function ActiveSessionsSection() {
           </div>
           Active Sessions
         </CardTitle>
-        <CardDescription>
-          Devices and browsers where you are currently signed in.
-        </CardDescription>
+        <CardDescription>Devices and browsers where you are currently signed in.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
@@ -647,26 +644,11 @@ function ActiveSessionsSection() {
             return (
               <div
                 key={session.id}
-                className={cn(
-                  "flex items-center justify-between rounded-lg border p-4",
-                  session.isCurrent
-                    ? "border-emerald-500/30 bg-emerald-500/5"
-                    : "border-border/60",
-                )}
+                className={cn("flex items-center justify-between rounded-lg border p-4", session.isCurrent ? "border-emerald-500/30 bg-emerald-500/5" : "border-border/60")}
               >
                 <div className="flex items-center gap-3">
-                  <div
-                    className={cn(
-                      "flex h-10 w-10 items-center justify-center rounded-lg",
-                      session.isCurrent ? "bg-emerald-500/10" : "bg-muted",
-                    )}
-                  >
-                    <Icon
-                      className={cn(
-                        "h-5 w-5",
-                        session.isCurrent ? "text-emerald-500" : "text-muted-foreground",
-                      )}
-                    />
+                  <div className={cn("flex h-10 w-10 items-center justify-center rounded-lg", session.isCurrent ? "bg-emerald-500/10" : "bg-muted")}>
+                    <Icon className={cn("h-5 w-5", session.isCurrent ? "text-emerald-500" : "text-muted-foreground")} />
                   </div>
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
@@ -688,12 +670,7 @@ function ActiveSessionsSection() {
                   </div>
                 </div>
                 {!session.isCurrent && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleSignOut(session.id)}
-                    className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                  >
+                  <Button variant="outline" size="sm" onClick={() => handleSignOut(session.id)} className="text-destructive hover:bg-destructive/10 hover:text-destructive">
                     <LogOut className="mr-1.5 h-3.5 w-3.5" />
                     Sign out
                   </Button>
@@ -706,15 +683,8 @@ function ActiveSessionsSection() {
         <Separator />
 
         <div className="flex items-center justify-between">
-          <p className="text-xs text-muted-foreground">
-            Session management is limited to the current session. Full session history and remote sign-out coming soon.
-          </p>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleSignOutAll}
-            className="shrink-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
-          >
+          <p className="text-xs text-muted-foreground">Session management is limited to the current session. Full session history and remote sign-out coming soon.</p>
+          <Button variant="outline" size="sm" onClick={handleSignOutAll} className="shrink-0 text-destructive hover:bg-destructive/10 hover:text-destructive">
             <LogOut className="mr-1.5 h-3.5 w-3.5" />
             Sign out all other sessions
           </Button>
@@ -785,15 +755,10 @@ function KeyboardShortcutsSection() {
         <div className="space-y-6">
           {SHORTCUTS.map((group) => (
             <div key={group.category}>
-              <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                {group.category}
-              </h4>
+              <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">{group.category}</h4>
               <div className="space-y-1">
                 {group.items.map((shortcut) => (
-                  <div
-                    key={shortcut.description}
-                    className="flex items-center justify-between rounded-lg px-3 py-2.5 transition-colors hover:bg-muted/50"
-                  >
+                  <div key={shortcut.description} className="flex items-center justify-between rounded-lg px-3 py-2.5 transition-colors hover:bg-muted/50">
                     <span className="text-sm text-foreground">{shortcut.description}</span>
                     <div className="flex items-center gap-1">
                       {shortcut.keys.map((key, i) => (

@@ -3,11 +3,11 @@ import { useEffect, useRef, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
-import { EmptyState } from "@/components/ui/empty-state"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { useUpdateVoicemailSettings, useUploadVoicemailGreeting, useVoicemailSettings } from "@/lib/api/hooks/voice"
@@ -75,7 +75,11 @@ export function VoicemailSettingsForm({ extensionId }: { extensionId: string }) 
         icon={AlertCircle}
         title="Unable to load voicemail settings"
         description="Something went wrong. Please try again."
-        action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+        action={
+          <Button variant="outline" size="sm" onClick={() => refetch()}>
+            Try again
+          </Button>
+        }
       />
     )
   }
@@ -147,9 +151,7 @@ export function VoicemailSettingsForm({ extensionId }: { extensionId: string }) 
             <CardTitle>Voicemail Settings</CardTitle>
             <CardDescription>Configure how voicemail works for this extension.</CardDescription>
           </div>
-          <Badge variant={currentEnabled ? "default" : "outline"}>
-            {currentEnabled ? "Enabled" : "Disabled"}
-          </Badge>
+          <Badge variant={currentEnabled ? "default" : "outline"}>{currentEnabled ? "Enabled" : "Disabled"}</Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -173,12 +175,11 @@ export function VoicemailSettingsForm({ extensionId }: { extensionId: string }) 
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
             <Label>Voicemail enabled</Label>
-            <p className={`text-xs text-muted-foreground transition-opacity ${!currentEnabled ? "opacity-50" : ""}`}>When disabled, callers will not be able to leave voicemails on this extension.</p>
+            <p className={`text-xs text-muted-foreground transition-opacity ${!currentEnabled ? "opacity-50" : ""}`}>
+              When disabled, callers will not be able to leave voicemails on this extension.
+            </p>
           </div>
-          <Switch
-            checked={!!currentEnabled}
-            onCheckedChange={(v) => toggle(setIsEnabled, v)}
-          />
+          <Switch checked={!!currentEnabled} onCheckedChange={(v) => toggle(setIsEnabled, v)} />
         </div>
 
         <div className="space-y-2">
@@ -223,24 +224,9 @@ export function VoicemailSettingsForm({ extensionId }: { extensionId: string }) 
             <Label>Custom greeting</Label>
             <p className="text-xs text-muted-foreground">Upload an audio file to use as your personal greeting.</p>
             <div className="flex items-center gap-3">
-              {data.greetingFilePath ? (
-                <Badge variant="secondary">Greeting uploaded</Badge>
-              ) : (
-                <span className="text-sm text-muted-foreground">No custom greeting uploaded.</span>
-              )}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="audio/*"
-                className="hidden"
-                onChange={handleGreetingUpload}
-              />
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploadMutation.isPending}
-              >
+              {data.greetingFilePath ? <Badge variant="secondary">Greeting uploaded</Badge> : <span className="text-sm text-muted-foreground">No custom greeting uploaded.</span>}
+              <input ref={fileInputRef} type="file" accept="audio/*" className="hidden" onChange={handleGreetingUpload} />
+              <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={uploadMutation.isPending}>
                 <Upload className="mr-1 h-4 w-4" />
                 {uploadMutation.isPending ? "Uploading..." : "Upload greeting"}
               </Button>
@@ -264,20 +250,14 @@ export function VoicemailSettingsForm({ extensionId }: { extensionId: string }) 
                 setDirty(true)
               }}
             />
-            {currentMaxLength && Number(currentMaxLength) > 0 && (
-              <span className="text-xs text-muted-foreground">= {formatDurationHuman(Number(currentMaxLength))}</span>
-            )}
+            {currentMaxLength && Number(currentMaxLength) > 0 && <span className="text-xs text-muted-foreground">= {formatDurationHuman(Number(currentMaxLength))}</span>}
           </div>
         </div>
 
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label htmlFor="vm-pin">Access PIN</Label>
-            {pin && (
-              <span className={`text-xs ${pin.length >= 4 && pin.length <= 6 ? "text-muted-foreground" : "text-destructive"}`}>
-                {pin.length}/4-6 digits
-              </span>
-            )}
+            {pin && <span className={`text-xs ${pin.length >= 4 && pin.length <= 6 ? "text-muted-foreground" : "text-destructive"}`}>{pin.length}/4-6 digits</span>}
           </div>
           <p className="text-xs text-muted-foreground">Used to access voicemail remotely by phone. Must be 4-6 digits.</p>
           <Input
@@ -317,27 +297,24 @@ export function VoicemailSettingsForm({ extensionId }: { extensionId: string }) 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label>Email notification</Label>
-              <p className={`text-xs text-muted-foreground transition-opacity ${!currentEmailNotif ? "opacity-50" : ""}`}>Send an email alert whenever a new voicemail is received on this extension.</p>
+              <p className={`text-xs text-muted-foreground transition-opacity ${!currentEmailNotif ? "opacity-50" : ""}`}>
+                Send an email alert whenever a new voicemail is received on this extension.
+              </p>
             </div>
-            <Switch
-              checked={!!currentEmailNotif}
-              onCheckedChange={(v) => toggle(setEmailNotification, v)}
-            />
+            <Switch checked={!!currentEmailNotif} onCheckedChange={(v) => toggle(setEmailNotification, v)} />
           </div>
 
           {currentEmailNotif && (
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="vm-email-address">Notification email</Label>
-                {emailRequired && (
-                  <span className="text-xs text-destructive">Required when notifications are enabled</span>
-                )}
+                {emailRequired && <span className="text-xs text-destructive">Required when notifications are enabled</span>}
               </div>
               <p className="text-xs text-muted-foreground">Email address where voicemail notifications will be sent.</p>
               <Input
                 id="vm-email-address"
                 type="email"
-                placeholder={isAdminOrSuper ? "Enter email address" : user?.email ?? "Enter email address"}
+                placeholder={isAdminOrSuper ? "Enter email address" : (user?.email ?? "Enter email address")}
                 className={emailRequired ? "border-destructive focus-visible:ring-destructive" : ""}
                 value={currentEmailAddress}
                 onChange={(e) => {
@@ -351,12 +328,11 @@ export function VoicemailSettingsForm({ extensionId }: { extensionId: string }) 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label>Attach audio to email</Label>
-              <p className={`text-xs text-muted-foreground transition-opacity ${!currentAttachAudio ? "opacity-50" : ""}`}>Include the voicemail recording as an audio attachment in the notification email.</p>
+              <p className={`text-xs text-muted-foreground transition-opacity ${!currentAttachAudio ? "opacity-50" : ""}`}>
+                Include the voicemail recording as an audio attachment in the notification email.
+              </p>
             </div>
-            <Switch
-              checked={!!currentAttachAudio}
-              onCheckedChange={(v) => toggle(setEmailAttachAudio, v)}
-            />
+            <Switch checked={!!currentAttachAudio} onCheckedChange={(v) => toggle(setEmailAttachAudio, v)} />
           </div>
         </div>
 
@@ -388,21 +364,18 @@ export function VoicemailSettingsForm({ extensionId }: { extensionId: string }) 
                 setDirty(true)
               }}
             />
-            {currentAutoDelete && Number(currentAutoDelete) >= 7 && (
-              <span className="text-xs text-muted-foreground">{formatRetention(Number(currentAutoDelete))}</span>
-            )}
+            {currentAutoDelete && Number(currentAutoDelete) >= 7 && <span className="text-xs text-muted-foreground">{formatRetention(Number(currentAutoDelete))}</span>}
           </div>
         </div>
 
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
             <Label>Transcription</Label>
-            <p className={`text-xs text-muted-foreground transition-opacity ${!currentTranscription ? "opacity-50" : ""}`}>Automatically convert voicemail audio to text so you can read messages without listening.</p>
+            <p className={`text-xs text-muted-foreground transition-opacity ${!currentTranscription ? "opacity-50" : ""}`}>
+              Automatically convert voicemail audio to text so you can read messages without listening.
+            </p>
           </div>
-          <Switch
-            checked={!!currentTranscription}
-            onCheckedChange={(v) => toggle(setTranscriptionEnabled, v)}
-          />
+          <Switch checked={!!currentTranscription} onCheckedChange={(v) => toggle(setTranscriptionEnabled, v)} />
         </div>
 
         <Separator />

@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react"
 import { BookOpen, ExternalLink, FileCode, Globe, MessageSquare, Radio, Search } from "lucide-react"
+import { useMemo, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
@@ -82,11 +82,7 @@ export function ResourcesTab() {
     return sections
       .map((section) => ({
         ...section,
-        items: section.items.filter(
-          (item) =>
-            item.label.toLowerCase().includes(q) ||
-            item.description.toLowerCase().includes(q),
-        ),
+        items: section.items.filter((item) => item.label.toLowerCase().includes(q) || item.description.toLowerCase().includes(q)),
       }))
       .filter((section) => section.items.length > 0)
   }, [search])
@@ -95,24 +91,15 @@ export function ResourcesTab() {
     <div className="space-y-3 pt-2">
       <div className="relative">
         <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          placeholder="Filter resources..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="h-8 pl-8 text-xs"
-        />
+        <Input placeholder="Filter resources..." value={search} onChange={(e) => setSearch(e.target.value)} className="h-8 pl-8 text-xs" />
       </div>
 
-      {filteredSections.length === 0 && (
-        <p className="py-6 text-center text-xs text-muted-foreground">No resources match your search.</p>
-      )}
+      {filteredSections.length === 0 && <p className="py-6 text-center text-xs text-muted-foreground">No resources match your search.</p>}
 
       {filteredSections.map((section, sectionIdx) => (
         <div key={section.title}>
           {sectionIdx > 0 && <Separator className="mb-3" />}
-          <p className="mb-1 px-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/70">
-            {section.title}
-          </p>
+          <p className="mb-1 px-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/70">{section.title}</p>
           <div className="space-y-0.5">
             {section.items.map((resource) => (
               <a
@@ -133,9 +120,7 @@ export function ResourcesTab() {
                         {resource.badge}
                       </Badge>
                     )}
-                    {resource.external && (
-                      <ExternalLink className="size-3 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
-                    )}
+                    {resource.external && <ExternalLink className="size-3 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />}
                   </div>
                   <p className="text-xs text-muted-foreground">{resource.description}</p>
                 </div>

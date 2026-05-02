@@ -49,10 +49,7 @@ export function FilterDropdown({ label, options, selected, onChange }: FilterDro
       <PopoverContent align="start" className="w-52 p-2">
         <div className="space-y-1">
           {options.map((option) => (
-            <label
-              key={option.value}
-              className="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground"
-            >
+            <label key={option.value} className="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground">
               <Checkbox checked={selected.includes(option.value)} onChange={() => handleToggle(option.value)} />
               {option.label}
             </label>

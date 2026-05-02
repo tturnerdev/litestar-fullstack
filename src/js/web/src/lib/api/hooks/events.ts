@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef } from "react"
 import { useQueryClient } from "@tanstack/react-query"
+import { useCallback, useEffect, useRef } from "react"
 import { toast } from "sonner"
 import { client } from "@/lib/generated/api/client.gen"
 
@@ -68,11 +68,7 @@ const BASE_RECONNECT_DELAY_MS = 1_000
  * via the provided callback.  Using `fetch` instead of `EventSource` lets us
  * send a Bearer token in the `Authorization` header.
  */
-async function readSSEStream(
-  response: Response,
-  onEvent: (eventType: string, data: string) => void,
-  signal: AbortSignal,
-): Promise<void> {
+async function readSSEStream(response: Response, onEvent: (eventType: string, data: string) => void, signal: AbortSignal): Promise<void> {
   const reader = response.body?.getReader()
   if (!reader) return
 

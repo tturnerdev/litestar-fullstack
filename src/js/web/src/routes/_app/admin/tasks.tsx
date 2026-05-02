@@ -1,5 +1,5 @@
+import { useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
-import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   AlertCircle,
   Calendar,
@@ -17,6 +17,11 @@ import {
   Trash2,
   XCircle,
 } from "lucide-react"
+import { useCallback, useEffect, useMemo, useState } from "react"
+import { toast } from "sonner"
+import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
+import { AdminNav } from "@/components/admin/admin-nav"
+import { TaskStatusBadge } from "@/components/tasks/task-status-badge"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,16 +32,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { toast } from "sonner"
-import { useQueryClient } from "@tanstack/react-query"
-import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
-import { TaskStatusBadge } from "@/components/tasks/task-status-badge"
-import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
-import { AdminNav } from "@/components/admin/admin-nav"
 import { type BulkAction, BulkActionBar } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -48,28 +48,15 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { SkeletonTable } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import {
-  useAdminTasks,
-  useAdminTaskStats,
-  useAdminCancelTask,
-  useAdminDeleteTask,
-  type AdminTaskSummary,
-  type AdminTasksParams,
-} from "@/lib/api/hooks/admin"
-import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
-import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
-import { DataFreshness } from "@/components/ui/data-freshness"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { type AdminTaskSummary, type AdminTasksParams, useAdminCancelTask, useAdminDeleteTask, useAdminTaskStats, useAdminTasks } from "@/lib/api/hooks/admin"
+import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 
 export const Route = createFileRoute("/_app/admin/tasks")({
   component: AdminTasksPage,
@@ -161,16 +148,12 @@ function loadColumnVisibility(): ColumnVisibility {
 // -- Helpers ------------------------------------------------------------------
 
 function formatTaskType(taskType: string): string {
-  return taskType
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase())
+  return taskType.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
 function formatEntityType(entityType: string | null | undefined): string {
   if (!entityType) return "--"
-  return entityType
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase())
+  return entityType.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
 // -- Stats Summary ------------------------------------------------------------
@@ -270,9 +253,7 @@ function TaskStatsSummary() {
           <Loader2 className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">
-            {((stats.byStatus.pending ?? 0) + (stats.byStatus.running ?? 0)).toLocaleString()}
-          </div>
+          <div className="text-2xl font-bold">{((stats.byStatus.pending ?? 0) + (stats.byStatus.running ?? 0)).toLocaleString()}</div>
           <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
             <span>{stats.byStatus.pending ?? 0} pending</span>
             <span>{stats.byStatus.running ?? 0} running</span>
@@ -351,18 +332,9 @@ function AdminTaskRow({
         />
       </TableCell>
       <TableCell>
-        <Link
-          to="/tasks/$taskId"
-          params={{ taskId: task.id }}
-          className="group flex flex-col gap-0.5"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <span className="font-medium group-hover:underline text-sm">
-            {formatTaskType(task.taskType)}
-          </span>
-          {task.initiatedByName && (
-            <span className="text-xs text-muted-foreground">by {task.initiatedByName}</span>
-          )}
+        <Link to="/tasks/$taskId" params={{ taskId: task.id }} className="group flex flex-col gap-0.5" onClick={(e) => e.stopPropagation()}>
+          <span className="font-medium group-hover:underline text-sm">{formatTaskType(task.taskType)}</span>
+          {task.initiatedByName && <span className="text-xs text-muted-foreground">by {task.initiatedByName}</span>}
         </Link>
       </TableCell>
       <TableCell>
@@ -375,18 +347,12 @@ function AdminTaskRow({
               <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
                 <div
                   className={`h-full rounded-full transition-all duration-300 ${
-                    task.status === "failed"
-                      ? "bg-red-500"
-                      : task.status === "completed"
-                        ? "bg-green-500"
-                        : "bg-blue-500"
+                    task.status === "failed" ? "bg-red-500" : task.status === "completed" ? "bg-green-500" : "bg-blue-500"
                   }`}
                   style={{ width: `${Math.min(task.progress, 100)}%` }}
                 />
               </div>
-              <span className="text-xs font-medium text-muted-foreground w-8 text-right">
-                {Math.round(task.progress)}%
-              </span>
+              <span className="text-xs font-medium text-muted-foreground w-8 text-right">{Math.round(task.progress)}%</span>
             </div>
           ) : (
             <span className="text-xs text-muted-foreground">--</span>
@@ -408,9 +374,7 @@ function AdminTaskRow({
           {task.startedAt ? (
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="cursor-default text-xs text-muted-foreground">
-                  {formatRelativeTimeShort(task.startedAt)}
-                </span>
+                <span className="cursor-default text-xs text-muted-foreground">{formatRelativeTimeShort(task.startedAt)}</span>
               </TooltipTrigger>
               <TooltipContent>{formatDateTime(task.startedAt)}</TooltipContent>
             </Tooltip>
@@ -424,9 +388,7 @@ function AdminTaskRow({
           {task.completedAt ? (
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="cursor-default text-xs text-muted-foreground">
-                  {formatRelativeTimeShort(task.completedAt)}
-                </span>
+                <span className="cursor-default text-xs text-muted-foreground">{formatRelativeTimeShort(task.completedAt)}</span>
               </TooltipTrigger>
               <TooltipContent>{formatDateTime(task.completedAt)}</TooltipContent>
             </Tooltip>
@@ -438,13 +400,7 @@ function AdminTaskRow({
       <TableCell className="text-right">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0"
-              data-slot="dropdown"
-              onClick={(e) => e.stopPropagation()}
-            >
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" data-slot="dropdown" onClick={(e) => e.stopPropagation()}>
               <MoreVertical className="h-4 w-4" />
               <span className="sr-only">Actions for task {task.id}</span>
             </Button>
@@ -459,11 +415,7 @@ function AdminTaskRow({
             {isActive && (
               <>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  variant="destructive"
-                  disabled={cancelMutation.isPending}
-                  onClick={() => cancelMutation.mutate(task.id)}
-                >
+                <DropdownMenuItem variant="destructive" disabled={cancelMutation.isPending} onClick={() => cancelMutation.mutate(task.id)}>
                   <XCircle className="mr-2 h-4 w-4" />
                   Cancel task
                 </DropdownMenuItem>
@@ -472,10 +424,7 @@ function AdminTaskRow({
             {isTerminal && (
               <>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  variant="destructive"
-                  onClick={() => setShowDeleteDialog(true)}
-                >
+                <DropdownMenuItem variant="destructive" onClick={() => setShowDeleteDialog(true)}>
                   <Trash2 className="mr-2 h-4 w-4" />
                   Delete task
                 </DropdownMenuItem>
@@ -489,9 +438,7 @@ function AdminTaskRow({
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Delete task</AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to delete this task? This action cannot be undone.
-              </AlertDialogDescription>
+              <AlertDialogDescription>Are you sure you want to delete this task? This action cannot be undone.</AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel disabled={deleteMutation.isPending}>Cancel</AlertDialogCancel>
@@ -545,10 +492,7 @@ function AdminTasksPage() {
 
   // Column visibility
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(loadColumnVisibility)
-  const isColumnVisible = useCallback(
-    (col: string) => columnVisibility[col] !== false,
-    [columnVisibility],
-  )
+  const isColumnVisible = useCallback((col: string) => columnVisibility[col] !== false, [columnVisibility])
   const toggleColumn = useCallback((col: string) => {
     setColumnVisibility((prev) => {
       const updated = { ...prev, [col]: prev[col] !== false ? false : true }
@@ -743,11 +687,7 @@ function AdminTasksPage() {
                 <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {TOGGLEABLE_COLUMNS.map((col) => (
-                  <DropdownMenuCheckboxItem
-                    key={col.key}
-                    checked={isColumnVisible(col.key)}
-                    onCheckedChange={() => toggleColumn(col.key)}
-                  >
+                  <DropdownMenuCheckboxItem key={col.key} checked={isColumnVisible(col.key)} onCheckedChange={() => toggleColumn(col.key)}>
                     {col.label}
                   </DropdownMenuCheckboxItem>
                 ))}
@@ -809,21 +749,12 @@ function AdminTasksPage() {
             </SelectContent>
           </Select>
           {hasAnyFilters && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-xs text-muted-foreground"
-              onClick={clearAllFilters}
-            >
+            <Button variant="ghost" size="sm" className="text-xs text-muted-foreground" onClick={clearAllFilters}>
               Clear all filters
             </Button>
           )}
           <div className="ml-auto">
-            <DataFreshness
-              dataUpdatedAt={dataUpdatedAt}
-              onRefresh={() => refetch()}
-              isRefreshing={isRefetching}
-            />
+            <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
           </div>
         </div>
       </PageSection>
@@ -831,147 +762,137 @@ function AdminTasksPage() {
       {/* Content */}
       <PageSection delay={0.1}>
         <SectionErrorBoundary name="Task List">
-        {isLoading ? (
-          <SkeletonTable rows={6} />
-        ) : isError ? (
-          <EmptyState
-            icon={AlertCircle}
-            title="Unable to load tasks"
-            description="Something went wrong while fetching background tasks. Please try again."
-            action={
-              <Button variant="outline" size="sm" onClick={() => refetch()}>
-                Try again
-              </Button>
-            }
-          />
-        ) : !hasData && !hasAnyFilters ? (
-          <EmptyState
-            icon={ListTodo}
-            title="No background tasks"
-            description="Background tasks will appear here when bulk operations, imports, exports, or syncs are initiated across any team."
-          />
-        ) : !hasData ? (
-          <EmptyState
-            icon={ListTodo}
-            variant="no-results"
-            title="No results found"
-            description="No tasks match your current filters. Try adjusting your filters."
-            action={
-              <Button variant="outline" size="sm" onClick={clearAllFilters}>
-                Clear all filters
-              </Button>
-            }
-          />
-        ) : (
-          <div className="space-y-3">
-            {/* Result count & pagination info */}
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">
-                {data?.total ?? items.length} task{(data?.total ?? items.length) === 1 ? "" : "s"}
-                {hasAnyFilters && " (filtered)"}
-              </p>
-              {totalPages > 1 && (
-                <p className="text-xs text-muted-foreground">
-                  Page {page} of {totalPages}
+          {isLoading ? (
+            <SkeletonTable rows={6} />
+          ) : isError ? (
+            <EmptyState
+              icon={AlertCircle}
+              title="Unable to load tasks"
+              description="Something went wrong while fetching background tasks. Please try again."
+              action={
+                <Button variant="outline" size="sm" onClick={() => refetch()}>
+                  Try again
+                </Button>
+              }
+            />
+          ) : !hasData && !hasAnyFilters ? (
+            <EmptyState
+              icon={ListTodo}
+              title="No background tasks"
+              description="Background tasks will appear here when bulk operations, imports, exports, or syncs are initiated across any team."
+            />
+          ) : !hasData ? (
+            <EmptyState
+              icon={ListTodo}
+              variant="no-results"
+              title="No results found"
+              description="No tasks match your current filters. Try adjusting your filters."
+              action={
+                <Button variant="outline" size="sm" onClick={clearAllFilters}>
+                  Clear all filters
+                </Button>
+              }
+            />
+          ) : (
+            <div className="space-y-3">
+              {/* Result count & pagination info */}
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">
+                  {data?.total ?? items.length} task{(data?.total ?? items.length) === 1 ? "" : "s"}
+                  {hasAnyFilters && " (filtered)"}
                 </p>
-              )}
-            </div>
-
-            {/* Table */}
-            <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
-              <Table aria-label="Admin background tasks">
-                <TableHeader className="sticky top-0 z-10 bg-background">
-                  <TableRow>
-                    <TableHead className="w-10">
-                      <Checkbox
-                        checked={allSelected}
-                        indeterminate={someSelected && !allSelected}
-                        onChange={toggleAll}
-                        aria-label="Select all tasks"
-                      />
-                    </TableHead>
-                    <TableHead>Task Type</TableHead>
-                    <TableHead>Status</TableHead>
-                    {isColumnVisible("progress") && <TableHead>Progress</TableHead>}
-                    {isColumnVisible("team") && <TableHead>Team</TableHead>}
-                    {isColumnVisible("entity") && <TableHead>Entity</TableHead>}
-                    {isColumnVisible("started") && <TableHead>Started</TableHead>}
-                    {isColumnVisible("completed") && <TableHead>Completed</TableHead>}
-                    <TableHead className="w-16 text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {items.map((task, index) => (
-                    <AdminTaskRow
-                      key={task.id}
-                      task={task}
-                      index={index}
-                      selected={selectedIds.has(task.id)}
-                      onToggle={() => toggleOne(task.id)}
-                      onRowClick={() => handleRowClick(task.id)}
-                      isColumnVisible={isColumnVisible}
-                    />
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-
-            {/* Pagination */}
-            <div className="flex items-center justify-end gap-4">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Rows per page</span>
-                <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
-                  <SelectTrigger className="h-8 w-[70px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PAGE_SIZES.map((size) => (
-                      <SelectItem key={size} value={String(size)}>
-                        {size}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {totalPages > 1 && (
+                  <p className="text-xs text-muted-foreground">
+                    Page {page} of {totalPages}
+                  </p>
+                )}
               </div>
-              {totalPages > 1 && (
+
+              {/* Table */}
+              <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
+                <Table aria-label="Admin background tasks">
+                  <TableHeader className="sticky top-0 z-10 bg-background">
+                    <TableRow>
+                      <TableHead className="w-10">
+                        <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all tasks" />
+                      </TableHead>
+                      <TableHead>Task Type</TableHead>
+                      <TableHead>Status</TableHead>
+                      {isColumnVisible("progress") && <TableHead>Progress</TableHead>}
+                      {isColumnVisible("team") && <TableHead>Team</TableHead>}
+                      {isColumnVisible("entity") && <TableHead>Entity</TableHead>}
+                      {isColumnVisible("started") && <TableHead>Started</TableHead>}
+                      {isColumnVisible("completed") && <TableHead>Completed</TableHead>}
+                      <TableHead className="w-16 text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {items.map((task, index) => (
+                      <AdminTaskRow
+                        key={task.id}
+                        task={task}
+                        index={index}
+                        selected={selectedIds.has(task.id)}
+                        onToggle={() => toggleOne(task.id)}
+                        onRowClick={() => handleRowClick(task.id)}
+                        isColumnVisible={isColumnVisible}
+                      />
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Pagination */}
+              <div className="flex items-center justify-end gap-4">
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setPage((p) => Math.max(1, p - 1))
-                      setSelectedIds(new Set())
-                    }}
-                    disabled={page <= 1}
-                  >
-                    Previous
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setPage((p) => Math.min(totalPages, p + 1))
-                      setSelectedIds(new Set())
-                    }}
-                    disabled={page >= totalPages}
-                  >
-                    Next
-                  </Button>
+                  <span className="text-sm text-muted-foreground">Rows per page</span>
+                  <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
+                    <SelectTrigger className="h-8 w-[70px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PAGE_SIZES.map((size) => (
+                        <SelectItem key={size} value={String(size)}>
+                          {size}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-              )}
+                {totalPages > 1 && (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setPage((p) => Math.max(1, p - 1))
+                        setSelectedIds(new Set())
+                      }}
+                      disabled={page <= 1}
+                    >
+                      Previous
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setPage((p) => Math.min(totalPages, p + 1))
+                        setSelectedIds(new Set())
+                      }}
+                      disabled={page >= totalPages}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
         </SectionErrorBoundary>
       </PageSection>
 
       {/* Bulk action bar */}
-      <BulkActionBar
-        selectedCount={selectedIds.size}
-        selectedIds={Array.from(selectedIds)}
-        onClearSelection={() => setSelectedIds(new Set())}
-        actions={bulkActions}
-      />
+      <BulkActionBar selectedCount={selectedIds.size} selectedIds={Array.from(selectedIds)} onClearSelection={() => setSelectedIds(new Set())} actions={bulkActions} />
     </PageContainer>
   )
 }

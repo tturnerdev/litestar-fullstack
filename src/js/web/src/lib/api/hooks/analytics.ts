@@ -83,9 +83,7 @@ async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
 }
 
 function buildQueryString(params: Record<string, string | number | undefined>): string {
-  const entries = Object.entries(params).filter(
-    ([, v]) => v !== undefined && v !== "",
-  )
+  const entries = Object.entries(params).filter(([, v]) => v !== undefined && v !== "")
   if (entries.length === 0) return ""
   return `?${entries.map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`).join("&")}`
 }
@@ -108,34 +106,10 @@ export interface UseCallRecordsFilters {
 }
 
 export function useCallRecords(filters: UseCallRecordsFilters = {}) {
-  const {
-    page = 1,
-    pageSize = 25,
-    startDate,
-    endDate,
-    direction,
-    disposition,
-    source,
-    destination,
-    minDuration,
-    maxDuration,
-  } = filters
+  const { page = 1, pageSize = 25, startDate, endDate, direction, disposition, source, destination, minDuration, maxDuration } = filters
 
   return useQuery({
-    queryKey: [
-      "analytics",
-      "cdrs",
-      page,
-      pageSize,
-      startDate,
-      endDate,
-      direction,
-      disposition,
-      source,
-      destination,
-      minDuration,
-      maxDuration,
-    ],
+    queryKey: ["analytics", "cdrs", page, pageSize, startDate, endDate, direction, disposition, source, destination, minDuration, maxDuration],
     queryFn: () =>
       apiFetch<PaginatedResponse<CallRecord>>(
         `/api/analytics/cdrs${buildQueryString({
@@ -188,11 +162,7 @@ export function useAnalyticsSummary(startDate?: string, endDate?: string) {
 // Call Volume (time-series)
 // ---------------------------------------------------------------------------
 
-export function useAnalyticsVolume(
-  startDate?: string,
-  endDate?: string,
-  interval: "hour" | "day" | "week" | "month" = "day",
-) {
+export function useAnalyticsVolume(startDate?: string, endDate?: string, interval: "hour" | "day" | "week" | "month" = "day") {
   return useQuery({
     queryKey: ["analytics", "volume", startDate, endDate, interval],
     queryFn: () =>

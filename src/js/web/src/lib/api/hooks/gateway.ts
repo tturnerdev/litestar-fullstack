@@ -1,14 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
-import { client } from "@/lib/generated/api/client.gen"
 import {
-  gatewayLookupNumber,
-  gatewayLookupExtension,
-  gatewayLookupDevice,
-  type NumberGatewayResponse,
-  type ExtensionGatewayResponse,
   type DeviceGatewayResponse,
+  type ExtensionGatewayResponse,
+  gatewayLookupDevice,
+  gatewayLookupExtension,
+  gatewayLookupNumber,
+  type NumberGatewayResponse,
 } from "@/lib/generated/api"
+import { client } from "@/lib/generated/api/client.gen"
 
 // ---------------------------------------------------------------------------
 // Phone Number Lookup

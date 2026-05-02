@@ -1,5 +1,4 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { useState } from "react"
 import {
   AlertCircle,
   ArrowLeft,
@@ -18,7 +17,10 @@ import {
   User,
   XCircle,
 } from "lucide-react"
+import { useState } from "react"
+import { toast } from "sonner"
 import { TaskStatusBadge } from "@/components/tasks/task-status-badge"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,37 +31,18 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { CopyButton } from "@/components/ui/copy-button"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { useTask, useCancelTask, useRetryTask } from "@/lib/api/hooks/tasks"
-import { toast } from "sonner"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { useCancelTask, useRetryTask, useTask } from "@/lib/api/hooks/tasks"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 
 export const Route = createFileRoute("/_app/tasks/$taskId/")({
@@ -69,44 +52,28 @@ export const Route = createFileRoute("/_app/tasks/$taskId/")({
 // -- Helpers ------------------------------------------------------------------
 
 function formatTaskType(taskType: string): string {
-  return taskType
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase())
+  return taskType.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
 function formatEntityType(entityType: string | null | undefined): string {
   if (!entityType) return "--"
-  return entityType
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase())
+  return entityType.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
 // -- Timestamp field ----------------------------------------------------------
 
-function TimestampField({
-  label,
-  icon: Icon,
-  value,
-}: {
-  label: string
-  icon: React.ComponentType<{ className?: string }>
-  value: string | null | undefined
-}) {
+function TimestampField({ label, icon: Icon, value }: { label: string; icon: React.ComponentType<{ className?: string }>; value: string | null | undefined }) {
   return (
     <div className="flex items-start gap-2.5">
       <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center">
         <Icon className="h-3.5 w-3.5 text-muted-foreground" />
       </div>
       <div className="min-w-0">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          {label}
-        </p>
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
         {value ? (
           <Tooltip>
             <TooltipTrigger asChild>
-              <p className="mt-0.5 cursor-default text-sm">
-                {formatRelativeTimeShort(value)}
-              </p>
+              <p className="mt-0.5 cursor-default text-sm">{formatRelativeTimeShort(value)}</p>
             </TooltipTrigger>
             <TooltipContent>{formatDateTime(value)}</TooltipContent>
           </Tooltip>
@@ -120,15 +87,7 @@ function TimestampField({
 
 // -- JSON Viewer section ------------------------------------------------------
 
-function JsonSection({
-  title,
-  data,
-  defaultOpen,
-}: {
-  title: string
-  data: Record<string, unknown> | null | undefined
-  defaultOpen?: boolean
-}) {
+function JsonSection({ title, data, defaultOpen }: { title: string; data: Record<string, unknown> | null | undefined; defaultOpen?: boolean }) {
   const [open, setOpen] = useState(defaultOpen ?? false)
 
   if (!data || Object.keys(data).length === 0) return null
@@ -141,11 +100,7 @@ function JsonSection({
         <CollapsibleTrigger asChild>
           <CardHeader className="cursor-pointer select-none pb-2 hover:bg-muted/30 transition-colors rounded-t-xl">
             <CardTitle className="flex items-center gap-2 text-base">
-              {open ? (
-                <ChevronDown className="h-4 w-4 text-muted-foreground" />
-              ) : (
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              )}
+              {open ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
               <FileJson className="h-4 w-4 text-muted-foreground" />
               {title}
             </CardTitle>
@@ -157,9 +112,7 @@ function JsonSection({
               <div className="absolute right-2 top-2">
                 <CopyButton value={formatted} label={title} />
               </div>
-              <pre className="overflow-x-auto rounded-md bg-muted/50 p-4 text-xs font-mono leading-relaxed">
-                {formatted}
-              </pre>
+              <pre className="overflow-x-auto rounded-md bg-muted/50 p-4 text-xs font-mono leading-relaxed">{formatted}</pre>
             </div>
           </CardContent>
         </CollapsibleContent>
@@ -220,9 +173,7 @@ function TaskNotFound({ message }: { message: string }) {
           <AlertCircle className="h-8 w-8 text-muted-foreground" />
         </div>
         <h2 className="mt-4 text-lg font-semibold">Unable to load task</h2>
-        <p className="mt-1 max-w-sm text-center text-sm text-muted-foreground">
-          {message}
-        </p>
+        <p className="mt-1 max-w-sm text-center text-sm text-muted-foreground">{message}</p>
         <Button variant="outline" size="sm" asChild className="mt-6">
           <Link to="/tasks">
             <ArrowLeft className="mr-2 h-4 w-4" /> Back to Tasks
@@ -250,15 +201,11 @@ function TaskDetailPage() {
   }
 
   if (isError) {
-    return (
-      <TaskNotFound message="We couldn't load this task. It may have been deleted or you may not have permission to view it." />
-    )
+    return <TaskNotFound message="We couldn't load this task. It may have been deleted or you may not have permission to view it." />
   }
 
   if (!task) {
-    return (
-      <TaskNotFound message="This task could not be found. It may have been deleted." />
-    )
+    return <TaskNotFound message="This task could not be found. It may have been deleted." />
   }
 
   const isActive = task.status === "pending" || task.status === "running"
@@ -297,16 +244,14 @@ function TaskDetailPage() {
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => retryMutation.mutate(taskId, {
-                  onSuccess: () => toast.success("Task retry initiated successfully"),
-                })}
+                onClick={() =>
+                  retryMutation.mutate(taskId, {
+                    onSuccess: () => toast.success("Task retry initiated successfully"),
+                  })
+                }
                 disabled={retryMutation.isPending}
               >
-                {retryMutation.isPending ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <RotateCcw className="mr-2 h-4 w-4" />
-                )}
+                {retryMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RotateCcw className="mr-2 h-4 w-4" />}
                 Retry
               </Button>
             )}
@@ -318,11 +263,7 @@ function TaskDetailPage() {
                 onClick={() => setShowCancelDialog(true)}
                 disabled={cancelMutation.isPending}
               >
-                {cancelMutation.isPending ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <XCircle className="mr-2 h-4 w-4" />
-                )}
+                {cancelMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <XCircle className="mr-2 h-4 w-4" />}
                 Cancel Task
               </Button>
             )}
@@ -344,10 +285,7 @@ function TaskDetailPage() {
                   Copy Task ID
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="text-destructive focus:text-destructive"
-                  onClick={() => setShowDeleteDialog(true)}
-                >
+                <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setShowDeleteDialog(true)}>
                   <Trash2 className="mr-2 h-4 w-4" />
                   Delete Task
                 </DropdownMenuItem>
@@ -365,37 +303,27 @@ function TaskDetailPage() {
           {task.progress != null && task.progress > 0 && (
             <PageSection delay={0.05}>
               <SectionErrorBoundary name="Task Progress">
-              <Card className="border-border/60 bg-card/80">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base">Progress</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">
-                        {task.status === "completed"
-                          ? "Complete"
-                          : task.status === "failed"
-                            ? "Failed"
-                            : "In progress..."}
-                      </span>
-                      <span className="font-medium">{Math.round(task.progress)}%</span>
+                <Card className="border-border/60 bg-card/80">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">Progress</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">{task.status === "completed" ? "Complete" : task.status === "failed" ? "Failed" : "In progress..."}</span>
+                        <span className="font-medium">{Math.round(task.progress)}%</span>
+                      </div>
+                      <div className="h-2.5 overflow-hidden rounded-full bg-muted">
+                        <div
+                          className={`h-full rounded-full transition-all duration-500 ${
+                            task.status === "failed" ? "bg-red-500" : task.status === "completed" ? "bg-green-500" : "bg-blue-500"
+                          }`}
+                          style={{ width: `${Math.min(task.progress, 100)}%` }}
+                        />
+                      </div>
                     </div>
-                    <div className="h-2.5 overflow-hidden rounded-full bg-muted">
-                      <div
-                        className={`h-full rounded-full transition-all duration-500 ${
-                          task.status === "failed"
-                            ? "bg-red-500"
-                            : task.status === "completed"
-                              ? "bg-green-500"
-                              : "bg-blue-500"
-                        }`}
-                        style={{ width: `${Math.min(task.progress, 100)}%` }}
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
               </SectionErrorBoundary>
             </PageSection>
           )}
@@ -404,11 +332,11 @@ function TaskDetailPage() {
           {task.status === "failed" && task.errorMessage && (
             <PageSection delay={0.1}>
               <SectionErrorBoundary name="Task Error">
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Task Failed</AlertTitle>
-                <AlertDescription>{task.errorMessage}</AlertDescription>
-              </Alert>
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Task Failed</AlertTitle>
+                  <AlertDescription>{task.errorMessage}</AlertDescription>
+                </Alert>
               </SectionErrorBoundary>
             </PageSection>
           )}
@@ -416,7 +344,7 @@ function TaskDetailPage() {
           {/* Payload section */}
           <PageSection delay={0.15}>
             <SectionErrorBoundary name="Task Payload">
-            <JsonSection title="Payload" data={task.payload} defaultOpen={!task.result} />
+              <JsonSection title="Payload" data={task.payload} defaultOpen={!task.result} />
             </SectionErrorBoundary>
           </PageSection>
 
@@ -424,7 +352,7 @@ function TaskDetailPage() {
           {task.result && (
             <PageSection delay={0.2}>
               <SectionErrorBoundary name="Task Result">
-              <JsonSection title="Result" data={task.result} defaultOpen />
+                <JsonSection title="Result" data={task.result} defaultOpen />
               </SectionErrorBoundary>
             </PageSection>
           )}
@@ -434,106 +362,88 @@ function TaskDetailPage() {
         <div className="space-y-4">
           <PageSection delay={0.1}>
             <SectionErrorBoundary name="Task Details">
-            <Card className="border-border/60 bg-card/80">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base">Details</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Status */}
-                <div className="space-y-1">
-                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    Status
-                  </p>
-                  <TaskStatusBadge status={task.status} />
-                </div>
-
-                {/* Task Type */}
-                <div className="flex items-start gap-2.5">
-                  <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center">
-                    <Layers className="h-3.5 w-3.5 text-muted-foreground" />
+              <Card className="border-border/60 bg-card/80">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">Details</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Status */}
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Status</p>
+                    <TaskStatusBadge status={task.status} />
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                      Task Type
-                    </p>
-                    <p className="mt-0.5 text-sm">{formatTaskType(task.taskType)}</p>
-                  </div>
-                </div>
 
-                {/* Entity */}
-                {task.entityType && (
+                  {/* Task Type */}
                   <div className="flex items-start gap-2.5">
                     <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center">
-                      <Hash className="h-3.5 w-3.5 text-muted-foreground" />
+                      <Layers className="h-3.5 w-3.5 text-muted-foreground" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                        Entity
-                      </p>
-                      <p className="mt-0.5 text-sm">{formatEntityType(task.entityType)}</p>
-                      {task.entityId && (
-                        <p className="mt-0.5 font-mono text-xs text-muted-foreground">
-                          {task.entityId}
-                        </p>
-                      )}
+                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Task Type</p>
+                      <p className="mt-0.5 text-sm">{formatTaskType(task.taskType)}</p>
                     </div>
                   </div>
-                )}
 
-                {/* Initiated By */}
-                {task.initiatedByName && (
-                  <div className="flex items-start gap-2.5">
-                    <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center">
-                      <User className="h-3.5 w-3.5 text-muted-foreground" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                        Initiated By
-                      </p>
-                      <p className="mt-0.5 text-sm">{task.initiatedByName}</p>
-                    </div>
-                  </div>
-                )}
-
-                {/* SAQ Job Key */}
-                {task.saqJobKey && (
-                  <div className="flex items-start gap-2.5">
-                    <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center">
-                      <Hash className="h-3.5 w-3.5 text-muted-foreground" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                        Job Key
-                      </p>
-                      <div className="mt-0.5 flex items-center gap-1">
-                        <p className="font-mono text-xs text-muted-foreground truncate">
-                          {task.saqJobKey}
-                        </p>
-                        <CopyButton value={task.saqJobKey} label="job key" />
+                  {/* Entity */}
+                  {task.entityType && (
+                    <div className="flex items-start gap-2.5">
+                      <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center">
+                        <Hash className="h-3.5 w-3.5 text-muted-foreground" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Entity</p>
+                        <p className="mt-0.5 text-sm">{formatEntityType(task.entityType)}</p>
+                        {task.entityId && <p className="mt-0.5 font-mono text-xs text-muted-foreground">{task.entityId}</p>}
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {/* Timestamps */}
-                <div className="border-t border-border/40 pt-4 space-y-3">
-                  <TimestampField label="Created" icon={Calendar} value={task.createdAt} />
-                  <TimestampField label="Started" icon={Clock} value={task.startedAt} />
-                  <TimestampField label="Completed" icon={Clock} value={task.completedAt} />
-                  <TimestampField label="Updated" icon={Calendar} value={task.updatedAt} />
-                </div>
+                  {/* Initiated By */}
+                  {task.initiatedByName && (
+                    <div className="flex items-start gap-2.5">
+                      <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center">
+                        <User className="h-3.5 w-3.5 text-muted-foreground" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Initiated By</p>
+                        <p className="mt-0.5 text-sm">{task.initiatedByName}</p>
+                      </div>
+                    </div>
+                  )}
 
-                {/* Task ID */}
-                <div className="border-t border-border/40 pt-4">
-                  <div className="flex items-center gap-1">
-                    <p className="font-mono text-[10px] text-muted-foreground/60 truncate">
-                      {task.id}
-                    </p>
-                    <CopyButton value={task.id} label="task ID" />
+                  {/* SAQ Job Key */}
+                  {task.saqJobKey && (
+                    <div className="flex items-start gap-2.5">
+                      <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center">
+                        <Hash className="h-3.5 w-3.5 text-muted-foreground" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Job Key</p>
+                        <div className="mt-0.5 flex items-center gap-1">
+                          <p className="font-mono text-xs text-muted-foreground truncate">{task.saqJobKey}</p>
+                          <CopyButton value={task.saqJobKey} label="job key" />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Timestamps */}
+                  <div className="border-t border-border/40 pt-4 space-y-3">
+                    <TimestampField label="Created" icon={Calendar} value={task.createdAt} />
+                    <TimestampField label="Started" icon={Clock} value={task.startedAt} />
+                    <TimestampField label="Completed" icon={Clock} value={task.completedAt} />
+                    <TimestampField label="Updated" icon={Calendar} value={task.updatedAt} />
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+
+                  {/* Task ID */}
+                  <div className="border-t border-border/40 pt-4">
+                    <div className="flex items-center gap-1">
+                      <p className="font-mono text-[10px] text-muted-foreground/60 truncate">{task.id}</p>
+                      <CopyButton value={task.id} label="task ID" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
           </PageSection>
         </div>
@@ -545,22 +455,21 @@ function TaskDetailPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Cancel this task?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will attempt to cancel the running task. Depending on its current state,
-              some work may have already been completed and cannot be undone.
+              This will attempt to cancel the running task. Depending on its current state, some work may have already been completed and cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Keep Running</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={() => cancelMutation.mutate(taskId, {
-                onSuccess: () => toast.success("Task cancelled successfully"),
-              })}
+              onClick={() =>
+                cancelMutation.mutate(taskId, {
+                  onSuccess: () => toast.success("Task cancelled successfully"),
+                })
+              }
               disabled={cancelMutation.isPending}
             >
-              {cancelMutation.isPending && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              )}
+              {cancelMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Cancel Task
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -572,9 +481,7 @@ function TaskDetailPage() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete this task?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete this task record. This action cannot be undone.
-            </AlertDialogDescription>
+            <AlertDialogDescription>This will permanently delete this task record. This action cannot be undone.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>

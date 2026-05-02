@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useState } from "react"
 import { Monitor, Moon, Sun } from "lucide-react"
+import { useCallback, useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { useTheme } from "@/lib/theme-context"
 import type { ThemeMode } from "@/lib/theme-context"
+import { useTheme } from "@/lib/theme-context"
 
 const MODE_CYCLE: ThemeMode[] = ["light", "dark", "system"]
 
@@ -45,24 +45,14 @@ export function ThemeToggle() {
           aria-label={`Current theme: ${config.label}. Switch to ${MODE_CONFIG[nextMode].label} mode`}
         >
           <Icon
-            className={[
-              "size-4 transition-transform duration-300",
-              isPulsing ? "animate-pulse" : "",
-            ].join(" ")}
+            className={["size-4 transition-transform duration-300", isPulsing ? "animate-pulse" : ""].join(" ")}
             style={{ transform: isPulsing ? "rotate(180deg)" : "rotate(0deg)" }}
           />
-          <span
-            className={[
-              "absolute bottom-0.5 right-0.5 size-1.5 rounded-full ring-1 ring-sidebar transition-colors duration-300",
-              config.dotColor,
-            ].join(" ")}
-          />
+          <span className={["absolute bottom-0.5 right-0.5 size-1.5 rounded-full ring-1 ring-sidebar transition-colors duration-300", config.dotColor].join(" ")} />
           <span className="sr-only">Toggle theme</span>
         </Button>
       </TooltipTrigger>
-      <TooltipContent side="right">
-        Switch to {MODE_CONFIG[nextMode].label.toLowerCase()} mode
-      </TooltipContent>
+      <TooltipContent side="right">Switch to {MODE_CONFIG[nextMode].label.toLowerCase()} mode</TooltipContent>
     </Tooltip>
   )
 }

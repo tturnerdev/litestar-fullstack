@@ -4,17 +4,12 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAdminUser } from "@/lib/api/hooks/admin"
-import {
-  addMemberToTeam,
-  listTeams,
-  type Team,
-  type TeamRoles,
-} from "@/lib/generated/api"
+import { addMemberToTeam, listTeams, type Team, type TeamRoles } from "@/lib/generated/api"
 
 interface JoinTeamDialogProps {
   userId: string
@@ -125,9 +120,7 @@ export function JoinTeamDialog({ userId, userName, open, onOpenChange }: JoinTea
                 <UserPlus className="h-5 w-5 text-muted-foreground" />
                 Join Team
               </DialogTitle>
-              <DialogDescription>
-                Add {userName} to a team. Select a team and role below.
-              </DialogDescription>
+              <DialogDescription>Add {userName} to a team. Select a team and role below.</DialogDescription>
             </DialogHeader>
 
             <div className="rounded-lg bg-muted/50 p-3">
@@ -157,9 +150,7 @@ export function JoinTeamDialog({ userId, userName, open, onOpenChange }: JoinTea
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               </div>
             ) : availableTeams.length === 0 ? (
-              <p className="py-4 text-sm text-muted-foreground">
-                This user is already a member of all available teams.
-              </p>
+              <p className="py-4 text-sm text-muted-foreground">This user is already a member of all available teams.</p>
             ) : (
               <div className="space-y-4">
                 <div className="space-y-2">
@@ -179,11 +170,7 @@ export function JoinTeamDialog({ userId, userName, open, onOpenChange }: JoinTea
                           <div className="flex flex-col">
                             <span>{team.name}</span>
                             {team.description && (
-                              <span className="text-xs text-muted-foreground">
-                                {team.description.length > 60
-                                  ? `${team.description.slice(0, 60)}...`
-                                  : team.description}
-                              </span>
+                              <span className="text-xs text-muted-foreground">{team.description.length > 60 ? `${team.description.slice(0, 60)}...` : team.description}</span>
                             )}
                           </div>
                         </SelectItem>
@@ -205,15 +192,11 @@ export function JoinTeamDialog({ userId, userName, open, onOpenChange }: JoinTea
                           type="button"
                           onClick={() => setSelectedRole(option.value)}
                           className={`flex flex-col items-start gap-1 rounded-lg border p-3 text-left transition-colors ${
-                            isSelected
-                              ? "border-primary bg-primary/5"
-                              : "border-border hover:border-muted-foreground/30 hover:bg-muted/30"
+                            isSelected ? "border-primary bg-primary/5" : "border-border hover:border-muted-foreground/30 hover:bg-muted/30"
                           }`}
                         >
                           <div className="flex items-center gap-2">
-                            <option.icon
-                              className={`h-4 w-4 ${isSelected ? "text-primary" : "text-muted-foreground"}`}
-                            />
+                            <option.icon className={`h-4 w-4 ${isSelected ? "text-primary" : "text-muted-foreground"}`} />
                             <span className="text-sm font-medium">{option.label}</span>
                           </div>
                           <span className="text-xs text-muted-foreground">{option.description}</span>
@@ -229,10 +212,7 @@ export function JoinTeamDialog({ userId, userName, open, onOpenChange }: JoinTea
               <Button variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
-              <Button
-                onClick={handleJoin}
-                disabled={!selectedTeamId || joinMutation.isPending}
-              >
+              <Button onClick={handleJoin} disabled={!selectedTeamId || joinMutation.isPending}>
                 {joinMutation.isPending ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

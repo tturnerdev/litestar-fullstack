@@ -1,23 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from "react"
 import { createFileRoute } from "@tanstack/react-router"
+import { AlertCircle, AlertTriangle, Check, Cpu, Download, Loader2, Plus, Search, Trash2, X } from "lucide-react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
-import { cn } from "@/lib/utils"
-import {
-  AlertCircle,
-  AlertTriangle,
-  Check,
-  Cpu,
-  Download,
-  Loader2,
-  Plus,
-  Search,
-  Trash2,
-  X,
-} from "lucide-react"
-import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
-import { Badge } from "@/components/ui/badge"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,45 +15,29 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { Badge } from "@/components/ui/badge"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { DataFreshness } from "@/components/ui/data-freshness"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { SkeletonTable } from "@/components/ui/skeleton"
-import { Switch } from "@/components/ui/switch"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
+import { Switch } from "@/components/ui/switch"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Textarea } from "@/components/ui/textarea"
-import { DataFreshness } from "@/components/ui/data-freshness"
-import { EmptyState } from "@/components/ui/empty-state"
-import {
-  useAdminDeviceTemplates,
-  useAdminDeviceTemplate,
-  useCreateDeviceTemplate,
-  useUpdateDeviceTemplate,
-  useDeleteDeviceTemplate,
-} from "@/lib/api/hooks/device-templates"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
-import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
+import { useAdminDeviceTemplate, useAdminDeviceTemplates, useCreateDeviceTemplate, useDeleteDeviceTemplate, useUpdateDeviceTemplate } from "@/lib/api/hooks/device-templates"
+import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { formatDateTime } from "@/lib/date-utils"
 import type { DeviceTemplateList } from "@/lib/generated/api"
+import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/admin/device-templates")({
   component: AdminDeviceTemplatesPage,
@@ -144,17 +114,7 @@ const emptyForm: TemplateFormState = {
   isActive: true,
 }
 
-function TemplateFormDialog({
-  mode,
-  templateId,
-  open,
-  onOpenChange,
-}: {
-  mode: "create" | "edit"
-  templateId?: string
-  open: boolean
-  onOpenChange: (open: boolean) => void
-}) {
+function TemplateFormDialog({ mode, templateId, open, onOpenChange }: { mode: "create" | "edit"; templateId?: string; open: boolean; onOpenChange: (open: boolean) => void }) {
   const [form, setForm] = useState<TemplateFormState>(emptyForm)
   const [wireframeError, setWireframeError] = useState<string | null>(null)
   const [variablesError, setVariablesError] = useState<string | null>(null)
@@ -261,9 +221,7 @@ function TemplateFormDialog({
         <DialogHeader>
           <DialogTitle>{mode === "create" ? "Create Device Template" : "Edit Device Template"}</DialogTitle>
           <DialogDescription>
-            {mode === "create"
-              ? "Define a new device template with wireframe layout and provisioning configuration."
-              : "Update the device template configuration."}
+            {mode === "create" ? "Define a new device template with wireframe layout and provisioning configuration." : "Update the device template configuration."}
           </DialogDescription>
         </DialogHeader>
 
@@ -271,40 +229,22 @@ function TemplateFormDialog({
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="manufacturer">Manufacturer</Label>
-              <Input
-                id="manufacturer"
-                value={form.manufacturer}
-                onChange={(e) => setForm((f) => ({ ...f, manufacturer: e.target.value }))}
-                placeholder="e.g. Yealink"
-              />
+              <Input id="manufacturer" value={form.manufacturer} onChange={(e) => setForm((f) => ({ ...f, manufacturer: e.target.value }))} placeholder="e.g. Yealink" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="model">Model</Label>
-              <Input
-                id="model"
-                value={form.model}
-                onChange={(e) => setForm((f) => ({ ...f, model: e.target.value }))}
-                placeholder="e.g. T31P"
-              />
+              <Input id="model" value={form.model} onChange={(e) => setForm((f) => ({ ...f, model: e.target.value }))} placeholder="e.g. T31P" />
             </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="displayName">Display Name</Label>
-              <Input
-                id="displayName"
-                value={form.displayName}
-                onChange={(e) => setForm((f) => ({ ...f, displayName: e.target.value }))}
-                placeholder="e.g. Yealink T31P"
-              />
+              <Input id="displayName" value={form.displayName} onChange={(e) => setForm((f) => ({ ...f, displayName: e.target.value }))} placeholder="e.g. Yealink T31P" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="deviceType">Device Type</Label>
-              <Select
-                value={form.deviceType}
-                onValueChange={(v) => setForm((f) => ({ ...f, deviceType: v }))}
-              >
+              <Select value={form.deviceType} onValueChange={(v) => setForm((f) => ({ ...f, deviceType: v }))}>
                 <SelectTrigger id="deviceType">
                   <SelectValue />
                 </SelectTrigger>
@@ -365,20 +305,11 @@ function TemplateFormDialog({
 
           <div className="space-y-2">
             <Label htmlFor="imageUrl">Image URL (optional)</Label>
-            <Input
-              id="imageUrl"
-              value={form.imageUrl}
-              onChange={(e) => setForm((f) => ({ ...f, imageUrl: e.target.value }))}
-              placeholder="https://..."
-            />
+            <Input id="imageUrl" value={form.imageUrl} onChange={(e) => setForm((f) => ({ ...f, imageUrl: e.target.value }))} placeholder="https://..." />
           </div>
 
           <div className="flex items-center gap-3">
-            <Switch
-              id="isActive"
-              checked={form.isActive}
-              onCheckedChange={(c) => setForm((f) => ({ ...f, isActive: c }))}
-            />
+            <Switch id="isActive" checked={form.isActive} onCheckedChange={(c) => setForm((f) => ({ ...f, isActive: c }))} />
             <Label htmlFor="isActive">Active</Label>
           </div>
         </div>
@@ -491,11 +422,7 @@ function AdminDeviceTemplatesPage() {
         breadcrumbs={<AdminBreadcrumbs />}
         actions={
           <div className="flex items-center gap-2">
-            <DataFreshness
-              dataUpdatedAt={dataUpdatedAt}
-              onRefresh={() => refetch()}
-              isRefreshing={isRefetching}
-            />
+            <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
             <Button variant="outline" size="sm" onClick={handleExport} disabled={!templates.length}>
               <Download className="mr-2 h-4 w-4" />
               Export
@@ -507,193 +434,153 @@ function AdminDeviceTemplatesPage() {
 
       <PageSection>
         <SectionErrorBoundary name="Device Templates">
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-500/10">
-                  <Cpu className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-500/10">
+                    <Cpu className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+                  </div>
+                  <div>
+                    <CardTitle>Templates</CardTitle>
+                    <CardDescription>
+                      {total} template{total !== 1 ? "s" : ""} total
+                    </CardDescription>
+                  </div>
                 </div>
-                <div>
-                  <CardTitle>Templates</CardTitle>
-                  <CardDescription>
-                    {total} template{total !== 1 ? "s" : ""} total
-                  </CardDescription>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="relative max-w-sm">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    placeholder="Search templates..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="pl-9 pr-8"
-                  />
-                  {search && (
-                    <button
-                      type="button"
-                      onClick={() => setSearch("")}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
-                    >
-                      <X className="h-3.5 w-3.5" />
-                      <span className="sr-only">Clear search</span>
-                    </button>
-                  )}
-                </div>
-                <Button size="sm" onClick={() => setCreateOpen(true)}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create Template
-                </Button>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {isLoading ? (
-              <SkeletonTable rows={5} />
-            ) : isError ? (
-              <EmptyState
-                icon={AlertCircle}
-                title="Unable to load device templates"
-                description="Something went wrong. Please try again."
-                action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
-              />
-            ) : templates.length === 0 ? (
-              <EmptyState
-                icon={Cpu}
-                title="No device templates"
-                description={search ? "No templates match your search." : "Create your first device template to get started."}
-                action={
-                  search ? (
-                    <Button variant="outline" size="sm" onClick={() => setSearch("")}>
-                      Clear search
-                    </Button>
-                  ) : (
-                    <Button size="sm" onClick={() => setCreateOpen(true)}>
-                      <Plus className="mr-2 h-4 w-4" />
-                      Create Template
-                    </Button>
-                  )
-                }
-              />
-            ) : (
-              <>
-                <div className="overflow-x-auto">
-                <Table aria-label="Device templates">
-                  <TableHeader>
-                    <TableRow>
-                      <SortableHeader
-                        label="Display Name"
-                        sortKey="displayName"
-                        currentSort={sortKey}
-                        currentDirection={sortDir}
-                        onSort={handleSort}
-                      />
-                      <TableHead>Manufacturer</TableHead>
-                      <TableHead>Model</TableHead>
-                      <SortableHeader
-                        label="Type"
-                        sortKey="deviceType"
-                        currentSort={sortKey}
-                        currentDirection={sortDir}
-                        onSort={handleSort}
-                      />
-                      <TableHead>Active</TableHead>
-                      <SortableHeader
-                        label="Created"
-                        sortKey="created"
-                        currentSort={sortKey}
-                        currentDirection={sortDir}
-                        onSort={handleSort}
-                      />
-                      <TableHead className="w-[60px]" />
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {templates.map((tmpl, index) => (
-                      <TableRow
-                        key={tmpl.id}
-                        className={cn(
-                          "cursor-pointer hover:bg-muted/50 transition-colors",
-                          index % 2 === 1 && "bg-muted/20",
-                        )}
-                        onClick={() => setEditId(tmpl.id)}
+                <div className="flex items-center gap-3">
+                  <div className="relative max-w-sm">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input placeholder="Search templates..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 pr-8" />
+                    {search && (
+                      <button
+                        type="button"
+                        onClick={() => setSearch("")}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
                       >
-                        <TableCell className="font-medium">{tmpl.displayName}</TableCell>
-                        <TableCell className="text-muted-foreground">{tmpl.manufacturer}</TableCell>
-                        <TableCell className="text-muted-foreground">{tmpl.model}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline">{deviceTypeLabels[tmpl.deviceType] ?? tmpl.deviceType}</Badge>
-                        </TableCell>
-                        <TableCell>
-                          {tmpl.isActive ? (
-                            <Check className="h-4 w-4 text-emerald-500" />
-                          ) : (
-                            <X className="h-4 w-4 text-muted-foreground" />
-                          )}
-                        </TableCell>
-                        <TableCell className="text-muted-foreground text-sm">
-                          {formatDateTime(tmpl.createdAt)}
-                        </TableCell>
-                        <TableCell>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                                <span className="sr-only">Delete</span>
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent onClick={(e) => e.stopPropagation()}>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle className="flex items-center gap-2">
-                                  <AlertTriangle className="h-5 w-5 text-destructive" />
-                                  Delete Device Template
-                                </AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Are you sure you want to delete the template{" "}
-                                  <span className="font-medium text-foreground">
-                                    {tmpl.displayName}
-                                  </span>
-                                  ? This action cannot be undone.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel disabled={deleteMutation.isPending}>
-                                  Cancel
-                                </AlertDialogCancel>
-                                <AlertDialogAction
-                                  className={buttonVariants({ variant: "destructive" })}
-                                  disabled={deleteMutation.isPending}
-                                  onClick={() => {
-                                    deleteMutation.mutate(tmpl.id, {
-                                      onSuccess: () => {
-                                        toast.success("Device template deleted")
-                                      },
-                                      onError: (err) => {
-                                        toast.error("Failed to delete device template", {
-                                          description: err instanceof Error ? err.message : undefined,
-                                        })
-                                      },
-                                    })
-                                  }}
-                                >
-                                  {deleteMutation.isPending ? "Deleting..." : "Delete Template"}
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                        <X className="h-3.5 w-3.5" />
+                        <span className="sr-only">Clear search</span>
+                      </button>
+                    )}
+                  </div>
+                  <Button size="sm" onClick={() => setCreateOpen(true)}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Create Template
+                  </Button>
                 </div>
-                <div className="flex items-center justify-between">
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {isLoading ? (
+                <SkeletonTable rows={5} />
+              ) : isError ? (
+                <EmptyState
+                  icon={AlertCircle}
+                  title="Unable to load device templates"
+                  description="Something went wrong. Please try again."
+                  action={
+                    <Button variant="outline" size="sm" onClick={() => refetch()}>
+                      Try again
+                    </Button>
+                  }
+                />
+              ) : templates.length === 0 ? (
+                <EmptyState
+                  icon={Cpu}
+                  title="No device templates"
+                  description={search ? "No templates match your search." : "Create your first device template to get started."}
+                  action={
+                    search ? (
+                      <Button variant="outline" size="sm" onClick={() => setSearch("")}>
+                        Clear search
+                      </Button>
+                    ) : (
+                      <Button size="sm" onClick={() => setCreateOpen(true)}>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Create Template
+                      </Button>
+                    )
+                  }
+                />
+              ) : (
+                <>
+                  <div className="overflow-x-auto">
+                    <Table aria-label="Device templates">
+                      <TableHeader>
+                        <TableRow>
+                          <SortableHeader label="Display Name" sortKey="displayName" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                          <TableHead>Manufacturer</TableHead>
+                          <TableHead>Model</TableHead>
+                          <SortableHeader label="Type" sortKey="deviceType" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                          <TableHead>Active</TableHead>
+                          <SortableHeader label="Created" sortKey="created" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                          <TableHead className="w-[60px]" />
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {templates.map((tmpl, index) => (
+                          <TableRow
+                            key={tmpl.id}
+                            className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")}
+                            onClick={() => setEditId(tmpl.id)}
+                          >
+                            <TableCell className="font-medium">{tmpl.displayName}</TableCell>
+                            <TableCell className="text-muted-foreground">{tmpl.manufacturer}</TableCell>
+                            <TableCell className="text-muted-foreground">{tmpl.model}</TableCell>
+                            <TableCell>
+                              <Badge variant="outline">{deviceTypeLabels[tmpl.deviceType] ?? tmpl.deviceType}</Badge>
+                            </TableCell>
+                            <TableCell>{tmpl.isActive ? <Check className="h-4 w-4 text-emerald-500" /> : <X className="h-4 w-4 text-muted-foreground" />}</TableCell>
+                            <TableCell className="text-muted-foreground text-sm">{formatDateTime(tmpl.createdAt)}</TableCell>
+                            <TableCell>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={(e) => e.stopPropagation()}>
+                                    <Trash2 className="h-4 w-4" />
+                                    <span className="sr-only">Delete</span>
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle className="flex items-center gap-2">
+                                      <AlertTriangle className="h-5 w-5 text-destructive" />
+                                      Delete Device Template
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Are you sure you want to delete the template <span className="font-medium text-foreground">{tmpl.displayName}</span>? This action cannot be
+                                      undone.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel disabled={deleteMutation.isPending}>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction
+                                      className={buttonVariants({ variant: "destructive" })}
+                                      disabled={deleteMutation.isPending}
+                                      onClick={() => {
+                                        deleteMutation.mutate(tmpl.id, {
+                                          onSuccess: () => {
+                                            toast.success("Device template deleted")
+                                          },
+                                          onError: (err) => {
+                                            toast.error("Failed to delete device template", {
+                                              description: err instanceof Error ? err.message : undefined,
+                                            })
+                                          },
+                                        })
+                                      }}
+                                    >
+                                      {deleteMutation.isPending ? "Deleting..." : "Delete Template"}
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                  <div className="flex items-center justify-between">
                     <p className="text-xs text-muted-foreground">
                       {total} template{total !== 1 ? "s" : ""}
                       {totalPages > 1 && ` · Page ${page} of ${totalPages}`}
@@ -716,30 +603,20 @@ function AdminDeviceTemplatesPage() {
                       </div>
                       {totalPages > 1 && (
                         <div className="flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setPage((p) => Math.max(1, p - 1))}
-                            disabled={page <= 1}
-                          >
+                          <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>
                             Previous
                           </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                            disabled={page >= totalPages}
-                          >
+                          <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>
                             Next
                           </Button>
                         </div>
                       )}
                     </div>
                   </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
+                </>
+              )}
+            </CardContent>
+          </Card>
         </SectionErrorBoundary>
       </PageSection>
 

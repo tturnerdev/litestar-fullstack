@@ -553,73 +553,49 @@ function FaxEmailRoutesPage() {
 
       <PageSection>
         <SectionErrorBoundary name="Email Routes">
-        {isLoading ? (
-          <SkeletonTable rows={5} />
-        ) : isError ? (
-          <EmptyState
-            icon={AlertCircle}
-            title="Unable to load email routes"
-            description="Something went wrong while fetching email routes. Please try refreshing the page."
-            action={
-              <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
-                Refresh page
-              </Button>
-            }
-          />
-        ) : routes && routes.length > 0 ? (
-          <div className="space-y-4">
-            {/* Filters */}
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="relative max-w-sm flex-1">
-                <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  placeholder="Search by email or fax number..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="pl-9 pr-9"
-                  aria-label="Search email routes"
-                />
-                {search && (
-                  <button
-                    type="button"
-                    onClick={() => setSearch("")}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                    aria-label="Clear search"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
-              <FilterDropdown label="Status" options={statusFilterOptions} selected={statusFilter} onChange={setStatusFilter} />
-              {activeFilterCount > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-xs text-muted-foreground"
-                  onClick={() => {
-                    setSearch("")
-                    setStatusFilter([])
-                  }}
-                >
-                  Clear filters
+          {isLoading ? (
+            <SkeletonTable rows={5} />
+          ) : isError ? (
+            <EmptyState
+              icon={AlertCircle}
+              title="Unable to load email routes"
+              description="Something went wrong while fetching email routes. Please try refreshing the page."
+              action={
+                <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+                  Refresh page
                 </Button>
-              )}
-              <p className="ml-auto text-sm text-muted-foreground">
-                {activeFilterCount > 0
-                  ? `Showing ${sortedRoutes.length} of ${routes.length} routes`
-                  : `${routes.filter((r) => r.isActive).length} of ${routes.length} routes active`}
-              </p>
-            </div>
-
-            {sortedRoutes.length === 0 ? (
-              <EmptyState
-                icon={Search}
-                title="No matching routes"
-                description="No email routes match your current filters. Try adjusting your search or filter criteria."
-                action={
+              }
+            />
+          ) : routes && routes.length > 0 ? (
+            <div className="space-y-4">
+              {/* Filters */}
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="relative max-w-sm flex-1">
+                  <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by email or fax number..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="pl-9 pr-9"
+                    aria-label="Search email routes"
+                  />
+                  {search && (
+                    <button
+                      type="button"
+                      onClick={() => setSearch("")}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      aria-label="Clear search"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+                <FilterDropdown label="Status" options={statusFilterOptions} selected={statusFilter} onChange={setStatusFilter} />
+                {activeFilterCount > 0 && (
                   <Button
-                    variant="outline"
+                    variant="ghost"
                     size="sm"
+                    className="text-xs text-muted-foreground"
                     onClick={() => {
                       setSearch("")
                       setStatusFilter([])
@@ -627,143 +603,167 @@ function FaxEmailRoutesPage() {
                   >
                     Clear filters
                   </Button>
-                }
-              />
-            ) : (
-              <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
-                <Table aria-label="Email routes">
-                  <TableHeader className="sticky top-0 z-10 bg-background">
-                    <TableRow>
-                      <TableHead className="w-10">
-                        <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all email routes" />
-                      </TableHead>
-                      <SortableHeader label="Email Address" sortKey="email" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
-                      <SortableHeader label="Fax Number" sortKey="faxNumber" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
-                      <SortableHeader label="Status" sortKey="status" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
-                      <TableHead>Failure Alerts</TableHead>
-                      <SortableHeader label="Created" sortKey="created" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
-                      <TableHead className="w-16 text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {sortedRoutes.map((route, index) => (
-                      <TableRow
-                        key={route.id}
-                        data-state={selectedIds.has(route.id) ? "selected" : undefined}
-                        className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 ? "bg-muted/20" : "")}
-                        onClick={(e) => {
-                          const target = e.target as HTMLElement
-                          if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) {
-                            return
-                          }
-                          setEditRoute(route)
-                        }}
-                      >
-                        <TableCell>
-                          <Checkbox
-                            checked={selectedIds.has(route.id)}
-                            onChange={(e) => {
-                              e.stopPropagation()
-                              toggleOne(route.id)
-                            }}
-                            aria-label={`Select route for ${route.emailAddress}`}
-                          />
-                        </TableCell>
-                        <TableCell className="font-mono text-sm">
-                          <span className="inline-flex items-center gap-1">
-                            {route.emailAddress}
-                            <CopyButton value={route.emailAddress} label="email address" />
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <span className="inline-flex items-center gap-1">
-                            <Link
-                              to="/fax/numbers/$faxNumberId"
-                              params={{ faxNumberId: route.faxNumberId }}
-                              className="text-sm text-primary hover:underline"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <span className="font-mono">{route.faxNumber}</span>
-                              {route.faxNumberLabel && <span className="ml-1.5 text-muted-foreground">({route.faxNumberLabel})</span>}
-                            </Link>
-                            <CopyButton value={route.faxNumber} label="fax number" />
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={route.isActive ? "default" : "secondary"}>{route.isActive ? "Active" : "Inactive"}</Badge>
-                        </TableCell>
-                        <TableCell>
-                          {route.notifyOnFailure ? (
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <span className="inline-flex items-center gap-1 text-sm text-emerald-600 dark:text-emerald-400">
-                                  <Bell className="h-3.5 w-3.5" /> On
-                                </span>
-                              </TooltipTrigger>
-                              <TooltipContent>Failure notifications enabled</TooltipContent>
-                            </Tooltip>
-                          ) : (
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
-                                  <BellOff className="h-3.5 w-3.5" /> Off
-                                </span>
-                              </TooltipTrigger>
-                              <TooltipContent>Failure notifications disabled</TooltipContent>
-                            </Tooltip>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">{formatDateTime(route.createdAt, "--")}</TableCell>
-                        <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8" data-slot="dropdown" onClick={(e) => e.stopPropagation()}>
-                                <MoreVertical className="h-4 w-4" />
-                                <span className="sr-only">Actions for {route.emailAddress}</span>
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => navigator.clipboard.writeText(route.id)}>
-                                <Copy className="mr-2 h-4 w-4" />
-                                Copy Route ID
-                              </DropdownMenuItem>
-                              <DropdownMenuItem asChild>
-                                <Link to="/fax/numbers/$faxNumberId" params={{ faxNumberId: route.faxNumberId }}>
-                                  <Eye className="mr-2 h-4 w-4" />
-                                  View fax number
-                                </Link>
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => setEditRoute(route)}>
-                                <Pencil className="mr-2 h-4 w-4" />
-                                Edit
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setDeleteRoute(route)}>
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                )}
+                <p className="ml-auto text-sm text-muted-foreground">
+                  {activeFilterCount > 0
+                    ? `Showing ${sortedRoutes.length} of ${routes.length} routes`
+                    : `${routes.filter((r) => r.isActive).length} of ${routes.length} routes active`}
+                </p>
               </div>
-            )}
-          </div>
-        ) : (
-          <EmptyState
-            icon={Mail}
-            title="No email routes configured"
-            description="Email routes deliver incoming faxes to an email address. Add your first route to get started."
-            action={
-              <Button size="sm" onClick={() => setShowCreateDialog(true)}>
-                <MailPlus className="mr-2 h-4 w-4" /> New Route
-              </Button>
-            }
-          />
-        )}
+
+              {sortedRoutes.length === 0 ? (
+                <EmptyState
+                  icon={Search}
+                  title="No matching routes"
+                  description="No email routes match your current filters. Try adjusting your search or filter criteria."
+                  action={
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setSearch("")
+                        setStatusFilter([])
+                      }}
+                    >
+                      Clear filters
+                    </Button>
+                  }
+                />
+              ) : (
+                <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
+                  <Table aria-label="Email routes">
+                    <TableHeader className="sticky top-0 z-10 bg-background">
+                      <TableRow>
+                        <TableHead className="w-10">
+                          <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all email routes" />
+                        </TableHead>
+                        <SortableHeader label="Email Address" sortKey="email" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                        <SortableHeader label="Fax Number" sortKey="faxNumber" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                        <SortableHeader label="Status" sortKey="status" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                        <TableHead>Failure Alerts</TableHead>
+                        <SortableHeader label="Created" sortKey="created" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                        <TableHead className="w-16 text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {sortedRoutes.map((route, index) => (
+                        <TableRow
+                          key={route.id}
+                          data-state={selectedIds.has(route.id) ? "selected" : undefined}
+                          className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 ? "bg-muted/20" : "")}
+                          onClick={(e) => {
+                            const target = e.target as HTMLElement
+                            if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) {
+                              return
+                            }
+                            setEditRoute(route)
+                          }}
+                        >
+                          <TableCell>
+                            <Checkbox
+                              checked={selectedIds.has(route.id)}
+                              onChange={(e) => {
+                                e.stopPropagation()
+                                toggleOne(route.id)
+                              }}
+                              aria-label={`Select route for ${route.emailAddress}`}
+                            />
+                          </TableCell>
+                          <TableCell className="font-mono text-sm">
+                            <span className="inline-flex items-center gap-1">
+                              {route.emailAddress}
+                              <CopyButton value={route.emailAddress} label="email address" />
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            <span className="inline-flex items-center gap-1">
+                              <Link
+                                to="/fax/numbers/$faxNumberId"
+                                params={{ faxNumberId: route.faxNumberId }}
+                                className="text-sm text-primary hover:underline"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <span className="font-mono">{route.faxNumber}</span>
+                                {route.faxNumberLabel && <span className="ml-1.5 text-muted-foreground">({route.faxNumberLabel})</span>}
+                              </Link>
+                              <CopyButton value={route.faxNumber} label="fax number" />
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={route.isActive ? "default" : "secondary"}>{route.isActive ? "Active" : "Inactive"}</Badge>
+                          </TableCell>
+                          <TableCell>
+                            {route.notifyOnFailure ? (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="inline-flex items-center gap-1 text-sm text-emerald-600 dark:text-emerald-400">
+                                    <Bell className="h-3.5 w-3.5" /> On
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent>Failure notifications enabled</TooltipContent>
+                              </Tooltip>
+                            ) : (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
+                                    <BellOff className="h-3.5 w-3.5" /> Off
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent>Failure notifications disabled</TooltipContent>
+                              </Tooltip>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">{formatDateTime(route.createdAt, "--")}</TableCell>
+                          <TableCell className="text-right">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-8 w-8" data-slot="dropdown" onClick={(e) => e.stopPropagation()}>
+                                  <MoreVertical className="h-4 w-4" />
+                                  <span className="sr-only">Actions for {route.emailAddress}</span>
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => navigator.clipboard.writeText(route.id)}>
+                                  <Copy className="mr-2 h-4 w-4" />
+                                  Copy Route ID
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild>
+                                  <Link to="/fax/numbers/$faxNumberId" params={{ faxNumberId: route.faxNumberId }}>
+                                    <Eye className="mr-2 h-4 w-4" />
+                                    View fax number
+                                  </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setEditRoute(route)}>
+                                  <Pencil className="mr-2 h-4 w-4" />
+                                  Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setDeleteRoute(route)}>
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </div>
+          ) : (
+            <EmptyState
+              icon={Mail}
+              title="No email routes configured"
+              description="Email routes deliver incoming faxes to an email address. Add your first route to get started."
+              action={
+                <Button size="sm" onClick={() => setShowCreateDialog(true)}>
+                  <MailPlus className="mr-2 h-4 w-4" /> New Route
+                </Button>
+              }
+            />
+          )}
         </SectionErrorBoundary>
       </PageSection>
 

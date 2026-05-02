@@ -39,8 +39,8 @@ export function PhoneNumberDeleteDialog({ phoneNumberId, phoneNumber, open, onOp
         <DialogHeader>
           <DialogTitle>Delete phone number</DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete <span className="font-medium text-foreground">{phoneNumber}</span>? This action cannot be undone. Any associated
-            extensions and forwarding rules will also be removed.
+            Are you sure you want to delete <span className="font-medium text-foreground">{phoneNumber}</span>? This action cannot be undone. Any associated extensions and
+            forwarding rules will also be removed.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>

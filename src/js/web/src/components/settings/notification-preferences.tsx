@@ -1,20 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion"
-import {
-  AlertCircle,
-  Bell,
-  HardDrive,
-  Headphones,
-  ListTodo,
-  Lock,
-  Mail,
-  Monitor,
-  Phone,
-  Printer,
-  Server,
-  Shield,
-  Users,
-} from "lucide-react"
 import type { LucideIcon } from "lucide-react"
+import { AlertCircle, Bell, HardDrive, Headphones, ListTodo, Lock, Mail, Monitor, Phone, Printer, Server, Shield, Users } from "lucide-react"
 import { useCallback } from "react"
 import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
@@ -26,12 +12,9 @@ import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { cn } from "@/lib/utils"
 import { useNotificationPreferences, useUpdateNotificationPreferences } from "@/lib/api/hooks/notifications"
-import {
-  type NotificationPreferencesState,
-  useNotificationPreferencesStore,
-} from "@/lib/notification-preferences-store"
+import { type NotificationPreferencesState, useNotificationPreferencesStore } from "@/lib/notification-preferences-store"
+import { cn } from "@/lib/utils"
 
 const EMAIL_CATEGORY_CONFIG = [
   {
@@ -228,7 +211,11 @@ function EmailNotificationPreferences() {
         icon={AlertCircle}
         title="Unable to load notification preferences"
         description="Something went wrong. Please try again."
-        action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+        action={
+          <Button variant="outline" size="sm" onClick={() => refetch()}>
+            Try again
+          </Button>
+        }
       />
     )
   }
@@ -297,21 +284,13 @@ function EmailNotificationPreferences() {
                       <Icon className={cn("h-4 w-4", emailEnabled ? color : "text-muted-foreground")} />
                     </div>
                     <div className="space-y-0.5">
-                      <Label
-                        htmlFor={`category-${key}`}
-                        className={cn("text-sm font-medium", !emailEnabled && "text-muted-foreground")}
-                      >
+                      <Label htmlFor={`category-${key}`} className={cn("text-sm font-medium", !emailEnabled && "text-muted-foreground")}>
                         {label}
                       </Label>
                       <p className="text-xs text-muted-foreground">{description}</p>
                     </div>
                   </div>
-                  <Switch
-                    id={`category-${key}`}
-                    checked={enabled}
-                    disabled={!emailEnabled}
-                    onCheckedChange={(checked) => handleCategoryToggle(key, label, checked)}
-                  />
+                  <Switch id={`category-${key}`} checked={enabled} disabled={!emailEnabled} onCheckedChange={(checked) => handleCategoryToggle(key, label, checked)} />
                 </motion.div>
               )
             })}
@@ -349,9 +328,7 @@ function InAppNotificationPreferences() {
             </div>
             <div>
               <CardTitle>Notification Preferences</CardTitle>
-              <CardDescription className="mt-1">
-                Control which in-app notification categories are shown to you
-              </CardDescription>
+              <CardDescription className="mt-1">Control which in-app notification categories are shown to you</CardDescription>
             </div>
           </div>
           <span className="rounded-full bg-blue-500/10 px-2.5 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400">
@@ -372,11 +349,7 @@ function InAppNotificationPreferences() {
                   animate={{ opacity: 1, y: 0 }}
                   className={cn(
                     "flex items-center justify-between rounded-lg border p-4 transition-colors",
-                    locked
-                      ? "border-border/40 bg-muted/20"
-                      : enabled
-                        ? "border-border/60"
-                        : "border-border/40",
+                    locked ? "border-border/40 bg-muted/20" : enabled ? "border-border/60" : "border-border/40",
                   )}
                 >
                   <div className="flex items-center gap-3">
@@ -384,10 +357,7 @@ function InAppNotificationPreferences() {
                       <Icon className={cn("h-4 w-4", color)} />
                     </div>
                     <div className="space-y-0.5">
-                      <Label
-                        htmlFor={`inapp-${key}`}
-                        className="flex items-center gap-1.5 text-sm font-medium"
-                      >
+                      <Label htmlFor={`inapp-${key}`} className="flex items-center gap-1.5 text-sm font-medium">
                         {label}
                         {locked && (
                           <Tooltip>
@@ -397,9 +367,7 @@ function InAppNotificationPreferences() {
                                 Required
                               </Badge>
                             </TooltipTrigger>
-                            <TooltipContent>
-                              System alerts cannot be disabled for safety reasons
-                            </TooltipContent>
+                            <TooltipContent>System alerts cannot be disabled for safety reasons</TooltipContent>
                           </Tooltip>
                         )}
                       </Label>
@@ -407,18 +375,9 @@ function InAppNotificationPreferences() {
                     </div>
                   </div>
                   {locked ? (
-                    <Switch
-                      id={`inapp-${key}`}
-                      checked
-                      disabled
-                      aria-label={`${label} notifications (always enabled)`}
-                    />
+                    <Switch id={`inapp-${key}`} checked disabled aria-label={`${label} notifications (always enabled)`} />
                   ) : (
-                    <Switch
-                      id={`inapp-${key}`}
-                      checked={enabled}
-                      onCheckedChange={(checked) => handleToggle(key, label, checked)}
-                    />
+                    <Switch id={`inapp-${key}`} checked={enabled} onCheckedChange={(checked) => handleToggle(key, label, checked)} />
                   )}
                 </motion.div>
               )

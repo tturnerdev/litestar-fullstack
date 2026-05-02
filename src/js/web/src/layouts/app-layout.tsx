@@ -2,12 +2,12 @@ import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-route
 import { useCallback, useMemo, useState } from "react"
 import { toast } from "sonner"
 import { AppSidebar } from "@/components/app-sidebar"
-import { SessionTimeoutWarning } from "@/components/session-timeout-warning"
-import { ActiveTaskIndicator } from "@/components/tasks/active-task-indicator"
 import { HelpMenu } from "@/components/help/help-menu"
 import { KeyboardShortcutsDialog } from "@/components/keyboard-shortcuts-dialog"
 import { NotificationBell } from "@/components/notifications/notification-bell"
 import { GlobalSearch } from "@/components/search/global-search"
+import { SessionTimeoutWarning } from "@/components/session-timeout-warning"
+import { ActiveTaskIndicator } from "@/components/tasks/active-task-indicator"
 import { Separator } from "@/components/ui/separator"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import type { KeyboardShortcut, SequenceShortcut } from "@/hooks/use-keyboard-shortcuts"
@@ -100,7 +100,8 @@ export function AppLayout() {
     shortcuts,
     sequences,
     onSequenceStart: (prefix) => {
-      if (prefix === "g") toast("Go to…", { id: "keyboard-go-to", description: "Press a key to navigate (h=home, t=teams, d=devices, v=voice, f=fax, s=support, ...)", duration: 1500 })
+      if (prefix === "g")
+        toast("Go to…", { id: "keyboard-go-to", description: "Press a key to navigate (h=home, t=teams, d=devices, v=voice, f=fax, s=support, ...)", duration: 1500 })
     },
     onSequenceEnd: () => toast.dismiss("keyboard-go-to"),
   })
@@ -130,14 +131,22 @@ export function AppLayout() {
       { keys: ["g", ","], description: "Go to Settings" },
     ]
     if (user?.isSuperuser) {
-      navigation.push(
-        { keys: ["g", "a"], description: "Go to Admin" },
-        { keys: ["g", "c"], description: "Go to Connections" },
-      )
+      navigation.push({ keys: ["g", "a"], description: "Go to Admin" }, { keys: ["g", "c"], description: "Go to Connections" })
     }
     return [
       { category: "Navigation", shortcuts: navigation },
-      { category: "Actions", shortcuts: [{ keys: [`${modKey}+K`], description: "Open search" }, { keys: [`${modKey}+B`], description: "Toggle sidebar" }, { keys: [`${modKey}+Shift+N`], description: "New ticket" }, { keys: ["n"], description: "Create new item (context-dependent)" }, { keys: ["/"], description: "Focus search input" }, { keys: ["←"], description: "Previous page" }, { keys: ["→"], description: "Next page" }] },
+      {
+        category: "Actions",
+        shortcuts: [
+          { keys: [`${modKey}+K`], description: "Open search" },
+          { keys: [`${modKey}+B`], description: "Toggle sidebar" },
+          { keys: [`${modKey}+Shift+N`], description: "New ticket" },
+          { keys: ["n"], description: "Create new item (context-dependent)" },
+          { keys: ["/"], description: "Focus search input" },
+          { keys: ["←"], description: "Previous page" },
+          { keys: ["→"], description: "Next page" },
+        ],
+      },
       { category: "Help", shortcuts: [{ keys: ["?"], description: "Show keyboard shortcuts" }] },
     ]
   }, [modKey, user?.isSuperuser])

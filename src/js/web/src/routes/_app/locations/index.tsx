@@ -1,24 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { useCallback, useState } from "react"
 import { Home, Plus, SlidersHorizontal } from "lucide-react"
+import { useCallback, useState } from "react"
 import { LocationList } from "@/components/locations/location-list"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useSettingsStore } from "@/lib/settings-store"
@@ -37,10 +23,7 @@ export const Route = createFileRoute("/_app/locations/")({
     page: Number(search.page) > 1 ? Number(search.page) : undefined,
     type: typeof search.type === "string" && search.type ? search.type : undefined,
     sort: typeof search.sort === "string" && search.sort ? search.sort : undefined,
-    order:
-      typeof search.order === "string" && (search.order === "asc" || search.order === "desc")
-        ? search.order
-        : undefined,
+    order: typeof search.order === "string" && (search.order === "asc" || search.order === "desc") ? search.order : undefined,
   }),
   component: LocationsPage,
 })
@@ -76,10 +59,7 @@ function LocationsPage() {
 
   // Column visibility
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(loadColumnVisibility)
-  const isColumnVisible = useCallback(
-    (col: string) => columnVisibility[col] !== false,
-    [columnVisibility],
-  )
+  const isColumnVisible = useCallback((col: string) => columnVisibility[col] !== false, [columnVisibility])
   const toggleColumn = useCallback((col: string) => {
     setColumnVisibility((prev) => {
       const updated = { ...prev, [col]: prev[col] !== false ? false : true }
@@ -126,11 +106,7 @@ function LocationsPage() {
                 <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {TOGGLEABLE_COLUMNS.map((col) => (
-                  <DropdownMenuCheckboxItem
-                    key={col.key}
-                    checked={isColumnVisible(col.key)}
-                    onCheckedChange={() => toggleColumn(col.key)}
-                  >
+                  <DropdownMenuCheckboxItem key={col.key} checked={isColumnVisible(col.key)} onCheckedChange={() => toggleColumn(col.key)}>
                     {col.label}
                   </DropdownMenuCheckboxItem>
                 ))}
@@ -145,12 +121,7 @@ function LocationsPage() {
         }
       />
       <PageSection>
-        <LocationList
-          searchParams={searchParams}
-          navigate={navigate}
-          cellClass={cellClass}
-          isColumnVisible={isColumnVisible}
-        />
+        <LocationList searchParams={searchParams} navigate={navigate} cellClass={cellClass} isColumnVisible={isColumnVisible} />
       </PageSection>
     </PageContainer>
   )

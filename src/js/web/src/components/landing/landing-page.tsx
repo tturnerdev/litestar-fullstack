@@ -147,12 +147,7 @@ export function LandingPage() {
           </motion.div>
 
           {/* Feature cards */}
-          <motion.div
-            className="mt-20 grid w-full max-w-2xl grid-cols-1 gap-4 sm:grid-cols-2"
-            initial="hidden"
-            animate="visible"
-            variants={staggerContainer}
-          >
+          <motion.div className="mt-20 grid w-full max-w-2xl grid-cols-1 gap-4 sm:grid-cols-2" initial="hidden" animate="visible" variants={staggerContainer}>
             {features.map((feature) => (
               <motion.div key={feature.title} variants={fadeUp}>
                 <Card hover className="h-full">

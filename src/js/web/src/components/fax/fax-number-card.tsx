@@ -26,30 +26,16 @@ export function FaxNumberCard({ faxNumber }: FaxNumberCardProps) {
           <div className="min-w-0">
             <Tooltip>
               <TooltipTrigger asChild>
-                <CardTitle className="text-sm truncate">
-                  {faxNumber.label ?? formatPhoneNumber(faxNumber.number)}
-                </CardTitle>
+                <CardTitle className="text-sm truncate">{faxNumber.label ?? formatPhoneNumber(faxNumber.number)}</CardTitle>
               </TooltipTrigger>
               <TooltipContent>{faxNumber.label ?? formatPhoneNumber(faxNumber.number)}</TooltipContent>
             </Tooltip>
-            {faxNumber.label && (
-              <p className="text-xs text-muted-foreground font-mono">
-                {formatPhoneNumber(faxNumber.number)}
-              </p>
-            )}
+            {faxNumber.label && <p className="text-xs text-muted-foreground font-mono">{formatPhoneNumber(faxNumber.number)}</p>}
           </div>
         </div>
         <div className="flex items-center gap-1.5">
-          <span
-            className={`inline-block h-2.5 w-2.5 rounded-full ${
-              faxNumber.isActive
-                ? "bg-emerald-500 animate-pulse"
-                : "bg-gray-400"
-            }`}
-          />
-          <span className="text-xs font-medium text-muted-foreground">
-            {faxNumber.isActive ? "Active" : "Inactive"}
-          </span>
+          <span className={`inline-block h-2.5 w-2.5 rounded-full ${faxNumber.isActive ? "bg-emerald-500 animate-pulse" : "bg-gray-400"}`} />
+          <span className="text-xs font-medium text-muted-foreground">{faxNumber.isActive ? "Active" : "Inactive"}</span>
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -64,9 +50,7 @@ export function FaxNumberCard({ faxNumber }: FaxNumberCardProps) {
                       <span>No email routes</span>
                     </span>
                   </TooltipTrigger>
-                  <TooltipContent>
-                    Incoming faxes will not be forwarded to any email address
-                  </TooltipContent>
+                  <TooltipContent>Incoming faxes will not be forwarded to any email address</TooltipContent>
                 </Tooltip>
               </>
             ) : (

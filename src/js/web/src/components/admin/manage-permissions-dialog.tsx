@@ -1,6 +1,5 @@
-import { Fragment, useCallback, useEffect, useMemo, useState } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { toast } from "sonner"
+import type { LucideIcon } from "lucide-react"
 import {
   BarChart3,
   Cable,
@@ -21,7 +20,8 @@ import {
   Users,
   XCircle,
 } from "lucide-react"
-import type { LucideIcon } from "lucide-react"
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react"
+import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -29,14 +29,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAdminUser } from "@/lib/api/hooks/admin"
-import {
-  listTeamPermissions,
-  updateTeamPermissions,
-  type TeamRolePermission,
-  type TeamRolePermissionEntry,
-  type FeatureArea,
-  type TeamRoles,
-} from "@/lib/generated/api"
+import { type FeatureArea, listTeamPermissions, type TeamRolePermission, type TeamRolePermissionEntry, type TeamRoles, updateTeamPermissions } from "@/lib/generated/api"
 
 interface ManagePermissionsDialogProps {
   userId: string
@@ -77,9 +70,7 @@ function buildDefaultPermissions(): Record<string, Record<string, { canView: boo
 }
 
 /** Merge server permission rows onto the default matrix. */
-function mergeServerPermissions(
-  rows: TeamRolePermission[],
-): Record<string, Record<string, { canView: boolean; canEdit: boolean }>> {
+function mergeServerPermissions(rows: TeamRolePermission[]): Record<string, Record<string, { canView: boolean; canEdit: boolean }>> {
   const matrix = buildDefaultPermissions()
   for (const row of rows) {
     if (matrix[row.role] && matrix[row.role][row.featureArea]) {
@@ -93,9 +84,7 @@ function mergeServerPermissions(
 }
 
 /** Flatten the matrix back to an array of permission entries for the PUT body. */
-function matrixToEntries(
-  matrix: Record<string, Record<string, { canView: boolean; canEdit: boolean }>>,
-): TeamRolePermissionEntry[] {
+function matrixToEntries(matrix: Record<string, Record<string, { canView: boolean; canEdit: boolean }>>): TeamRolePermissionEntry[] {
   const entries: TeamRolePermissionEntry[] = []
   for (const role of ROLES) {
     for (const area of FEATURE_AREAS) {
@@ -129,10 +118,7 @@ export function ManagePermissionsDialog({ userId, open, onOpenChange }: ManagePe
     }
   }, [open])
 
-  const editingTeam = useMemo(
-    () => teams.find((t) => t.teamId === editingTeamId),
-    [teams, editingTeamId],
-  )
+  const editingTeam = useMemo(() => teams.find((t) => t.teamId === editingTeamId), [teams, editingTeamId])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -143,9 +129,7 @@ export function ManagePermissionsDialog({ userId, open, onOpenChange }: ManagePe
             Manage Permissions
           </DialogTitle>
           <DialogDescription>
-            {editingTeamId
-              ? `Edit role permissions for ${editingTeam?.teamName ?? "team"}.`
-              : "View and edit the effective permissions for this user based on their team roles."}
+            {editingTeamId ? `Edit role permissions for ${editingTeam?.teamName ?? "team"}.` : "View and edit the effective permissions for this user based on their team roles."}
           </DialogDescription>
         </DialogHeader>
 
@@ -164,9 +148,7 @@ export function ManagePermissionsDialog({ userId, open, onOpenChange }: ManagePe
           />
         ) : teams.length === 0 ? (
           <div className="py-4 space-y-3">
-            <p className="text-sm text-muted-foreground">
-              This user is not a member of any teams, so no team-level permissions apply.
-            </p>
+            <p className="text-sm text-muted-foreground">This user is not a member of any teams, so no team-level permissions apply.</p>
             {user?.isSuperuser && (
               <div className="flex items-center gap-2 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-800 dark:border-blue-900 dark:bg-blue-950 dark:text-blue-200">
                 <Lock className="h-4 w-4 shrink-0" />
@@ -210,19 +192,7 @@ export function ManagePermissionsDialog({ userId, open, onOpenChange }: ManagePe
 
 // -- Team permission summary (read-only overview with edit button) -----------
 
-function TeamPermissionSummary({
-  teamId,
-  teamName,
-  role,
-  isOwner,
-  onEdit,
-}: {
-  teamId: string
-  teamName: string
-  role: string
-  isOwner: boolean
-  onEdit: () => void
-}) {
+function TeamPermissionSummary({ teamId, teamName, role, isOwner, onEdit }: { teamId: string; teamName: string; role: string; isOwner: boolean; onEdit: () => void }) {
   const { data: permissions, isLoading } = useQuery({
     queryKey: ["team-permissions", teamId],
     queryFn: async () => {
@@ -240,10 +210,7 @@ function TeamPermissionSummary({
 
   const rolePerms = matrix[role] ?? matrix.MEMBER ?? {}
 
-  const allowed = Object.values(rolePerms).reduce(
-    (acc, p) => acc + (p.canView ? 1 : 0) + (p.canEdit ? 1 : 0),
-    0,
-  )
+  const allowed = Object.values(rolePerms).reduce((acc, p) => acc + (p.canView ? 1 : 0) + (p.canEdit ? 1 : 0), 0)
   const total = Object.keys(rolePerms).length * 2
 
   return (
@@ -317,17 +284,7 @@ function TeamPermissionSummary({
 
 // -- Team permission editor (editable grid) ---------------------------------
 
-function TeamPermissionEditor({
-  teamId,
-  teamName,
-  onBack,
-  onSaved,
-}: {
-  teamId: string
-  teamName: string
-  onBack: () => void
-  onSaved: () => void
-}) {
+function TeamPermissionEditor({ teamId, teamName, onBack, onSaved }: { teamId: string; teamName: string; onBack: () => void; onSaved: () => void }) {
   const queryClient = useQueryClient()
 
   const { data: serverPermissions, isLoading } = useQuery({
@@ -341,9 +298,7 @@ function TeamPermissionEditor({
   })
 
   // Local editable state
-  const [matrix, setMatrix] = useState<
-    Record<string, Record<string, { canView: boolean; canEdit: boolean }>>
-  >(() => buildDefaultPermissions())
+  const [matrix, setMatrix] = useState<Record<string, Record<string, { canView: boolean; canEdit: boolean }>>>(() => buildDefaultPermissions())
   const [initialized, setInitialized] = useState(false)
 
   // Seed local state from server data once loaded
@@ -359,27 +314,24 @@ function TeamPermissionEditor({
     setInitialized(false)
   }, [teamId])
 
-  const togglePermission = useCallback(
-    (role: string, featureArea: string, field: "canView" | "canEdit") => {
-      setMatrix((prev) => {
-        const next = { ...prev }
-        next[role] = { ...next[role] }
-        next[role][featureArea] = { ...next[role][featureArea] }
-        const current = next[role][featureArea][field]
-        next[role][featureArea][field] = !current
-        // If disabling view, also disable edit
-        if (field === "canView" && current) {
-          next[role][featureArea].canEdit = false
-        }
-        // If enabling edit, also enable view
-        if (field === "canEdit" && !current) {
-          next[role][featureArea].canView = true
-        }
-        return next
-      })
-    },
-    [],
-  )
+  const togglePermission = useCallback((role: string, featureArea: string, field: "canView" | "canEdit") => {
+    setMatrix((prev) => {
+      const next = { ...prev }
+      next[role] = { ...next[role] }
+      next[role][featureArea] = { ...next[role][featureArea] }
+      const current = next[role][featureArea][field]
+      next[role][featureArea][field] = !current
+      // If disabling view, also disable edit
+      if (field === "canView" && current) {
+        next[role][featureArea].canEdit = false
+      }
+      // If enabling edit, also enable view
+      if (field === "canEdit" && !current) {
+        next[role][featureArea].canView = true
+      }
+      return next
+    })
+  }, [])
 
   const saveMutation = useMutation({
     mutationFn: async () => {
@@ -416,8 +368,7 @@ function TeamPermissionEditor({
       <div className="flex items-center gap-2 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-800 dark:border-blue-900 dark:bg-blue-950 dark:text-blue-200">
         <Info className="h-4 w-4 shrink-0" />
         <span>
-          Editing permissions for <strong>{teamName}</strong>. Changes affect all users with the
-          corresponding role in this team.
+          Editing permissions for <strong>{teamName}</strong>. Changes affect all users with the corresponding role in this team.
         </span>
       </div>
 
@@ -491,11 +442,7 @@ function TeamPermissionEditor({
           Back
         </Button>
         <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
-          {saveMutation.isPending ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <Save className="mr-2 h-4 w-4" />
-          )}
+          {saveMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
           Save permissions
         </Button>
       </DialogFooter>
@@ -508,16 +455,10 @@ function PermissionIndicator({ allowed }: { allowed: boolean }) {
     <Tooltip>
       <TooltipTrigger asChild>
         <span className="inline-flex items-center justify-center">
-          {allowed ? (
-            <CheckCircle2 className="h-4 w-4 text-green-500" />
-          ) : (
-            <XCircle className="h-4 w-4 text-muted-foreground/40" />
-          )}
+          {allowed ? <CheckCircle2 className="h-4 w-4 text-green-500" /> : <XCircle className="h-4 w-4 text-muted-foreground/40" />}
         </span>
       </TooltipTrigger>
-      <TooltipContent>
-        {allowed ? "Allowed" : "Not allowed"}
-      </TooltipContent>
+      <TooltipContent>{allowed ? "Allowed" : "Not allowed"}</TooltipContent>
     </Tooltip>
   )
 }

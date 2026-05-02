@@ -1,23 +1,11 @@
-import {
-  AlertCircle,
-  Globe,
-  KeyRound,
-  LogIn,
-  LogOut,
-  RefreshCw,
-  Shield,
-  ShieldAlert,
-  ShieldCheck,
-  ShieldOff,
-  UserPen,
-} from "lucide-react"
+import { AlertCircle, Globe, KeyRound, LogIn, LogOut, RefreshCw, Shield, ShieldAlert, ShieldCheck, ShieldOff, UserPen } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { EmptyState } from "@/components/ui/empty-state"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { useSecurityActivity, type SecurityActivityEntry } from "@/lib/api/hooks/profile"
+import { type SecurityActivityEntry, useSecurityActivity } from "@/lib/api/hooks/profile"
 import { formatFullDateTime, formatRelativeTime } from "@/lib/date-utils"
 
 /** Map action strings to icons and color classes for visual distinction. */
@@ -116,7 +104,11 @@ export function RecentSecurityActivity() {
         icon={AlertCircle}
         title="Unable to load security activity"
         description="Something went wrong. Please try again."
-        action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+        action={
+          <Button variant="outline" size="sm" onClick={() => refetch()}>
+            Try again
+          </Button>
+        }
       />
     )
   }
@@ -132,9 +124,7 @@ export function RecentSecurityActivity() {
               <Shield className="h-4 w-4 text-muted-foreground" />
               Recent Security Activity
             </CardTitle>
-            <CardDescription>
-              Your most recent security-related events, including logins, password changes, and MFA activity.
-            </CardDescription>
+            <CardDescription>Your most recent security-related events, including logins, password changes, and MFA activity.</CardDescription>
           </div>
           <button
             type="button"

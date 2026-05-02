@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
+import { AlertTriangle, Building2, ChevronRight, Loader2, MapPin, Phone, Shield } from "lucide-react"
 import { useRef, useState } from "react"
-import { AlertTriangle, ChevronRight, Loader2, MapPin, Phone, Shield, Building2 } from "lucide-react"
-import { useDocumentTitle } from "@/hooks/use-document-title"
+import { toast } from "sonner"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,36 +12,18 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader } from "@/components/ui/page-layout"
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useAuth } from "@/hooks/use-auth"
-import {
-  useCreateE911Registration,
-  useUnregisteredPhoneNumbers,
-  type E911RegistrationCreate,
-  type UnregisteredPhoneNumber,
-} from "@/lib/api/hooks/e911"
-import { toast } from "sonner"
-import { useLocations, type Location } from "@/lib/api/hooks/locations"
+import { useDocumentTitle } from "@/hooks/use-document-title"
+import { type E911RegistrationCreate, type UnregisteredPhoneNumber, useCreateE911Registration, useUnregisteredPhoneNumbers } from "@/lib/api/hooks/e911"
+import { type Location, useLocations } from "@/lib/api/hooks/locations"
 
 export const Route = createFileRoute("/_app/e911/new")({
   component: NewE911RegistrationPage,
@@ -120,15 +102,9 @@ function NewE911RegistrationPage() {
     return (touched[field] || submitAttempted) && !value.trim()
   }
 
-  const postalCodeFormatError =
-    (touched.postalCode || submitAttempted) &&
-    postalCode.trim() !== "" &&
-    !/^\d{5}(-\d{4})?$/.test(postalCode.trim())
+  const postalCodeFormatError = (touched.postalCode || submitAttempted) && postalCode.trim() !== "" && !/^\d{5}(-\d{4})?$/.test(postalCode.trim())
 
-  const stateFormatError =
-    (touched.state || submitAttempted) &&
-    state.trim() !== "" &&
-    !/^[A-Za-z]{2}$/.test(state.trim())
+  const stateFormatError = (touched.state || submitAttempted) && state.trim() !== "" && !/^[A-Za-z]{2}$/.test(state.trim())
 
   const isValid =
     addressLine1.trim() !== "" &&
@@ -219,179 +195,158 @@ function NewE911RegistrationPage() {
         <div className="flex gap-6">
           {/* Main form */}
           <SectionErrorBoundary name="Create E911 Registration Form">
-          <Card className="min-w-0 flex-1">
-            <CardHeader>
-              <CardTitle className="text-lg">Registration Details</CardTitle>
-              <CardDescription>
-                Fields marked with <span className="text-destructive">*</span> are required.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Phone number select */}
-                <div className="space-y-2">
-                  <Label htmlFor="phone-number">Phone Number</Label>
-                  <Select value={phoneNumberId} onValueChange={setPhoneNumberId}>
-                    <SelectTrigger id="phone-number">
-                      <SelectValue placeholder="Select a phone number" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(unregistered ?? []).map((pn: UnregisteredPhoneNumber) => (
-                        <SelectItem key={pn.id} value={pn.id}>
-                          {pn.number}{pn.label ? ` (${pn.label})` : ""}
-                        </SelectItem>
-                      ))}
-                      {(!unregistered || unregistered.length === 0) && (
-                        <SelectItem value="__empty" disabled>
-                          No unregistered numbers available
-                        </SelectItem>
+            <Card className="min-w-0 flex-1">
+              <CardHeader>
+                <CardTitle className="text-lg">Registration Details</CardTitle>
+                <CardDescription>
+                  Fields marked with <span className="text-destructive">*</span> are required.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  {/* Phone number select */}
+                  <div className="space-y-2">
+                    <Label htmlFor="phone-number">Phone Number</Label>
+                    <Select value={phoneNumberId} onValueChange={setPhoneNumberId}>
+                      <SelectTrigger id="phone-number">
+                        <SelectValue placeholder="Select a phone number" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(unregistered ?? []).map((pn: UnregisteredPhoneNumber) => (
+                          <SelectItem key={pn.id} value={pn.id}>
+                            {pn.number}
+                            {pn.label ? ` (${pn.label})` : ""}
+                          </SelectItem>
+                        ))}
+                        {(!unregistered || unregistered.length === 0) && (
+                          <SelectItem value="__empty" disabled>
+                            No unregistered numbers available
+                          </SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">Associate an unregistered phone number with this address. You can also assign one later.</p>
+                  </div>
+
+                  {/* Location select (prefill) */}
+                  <div className="space-y-2">
+                    <Label htmlFor="location">Copy from Location</Label>
+                    <Select value={locationId} onValueChange={handleLocationSelect}>
+                      <SelectTrigger id="location">
+                        <SelectValue placeholder="Select a location to prefill address" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">-- None --</SelectItem>
+                        {locations.map((loc: Location) => (
+                          <SelectItem key={loc.id} value={loc.id}>
+                            {loc.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">Optionally prefill the address from an existing location.</p>
+                  </div>
+
+                  {/* Address Line 1 */}
+                  <div className="space-y-2">
+                    <Label htmlFor="address-line-1">Address Line 1 *</Label>
+                    <Input
+                      id="address-line-1"
+                      value={addressLine1}
+                      onChange={(e) => setAddressLine1(e.target.value)}
+                      onBlur={() => handleBlur("addressLine1")}
+                      placeholder="123 Main St"
+                      aria-invalid={showError("addressLine1", addressLine1)}
+                      autoFocus
+                    />
+                    {showError("addressLine1", addressLine1) ? (
+                      <p className="text-xs text-destructive">Address line 1 is required</p>
+                    ) : (
+                      <p className="text-xs text-muted-foreground">The street address where the phone is located.</p>
+                    )}
+                  </div>
+
+                  {/* Address Line 2 */}
+                  <div className="space-y-2">
+                    <Label htmlFor="address-line-2">Address Line 2</Label>
+                    <Input id="address-line-2" value={addressLine2} onChange={(e) => setAddressLine2(e.target.value)} placeholder="Suite 100, Floor 2, etc." />
+                  </div>
+
+                  {/* City / State row */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="city">City *</Label>
+                      <Input
+                        id="city"
+                        value={city}
+                        onChange={(e) => setCity(e.target.value)}
+                        onBlur={() => handleBlur("city")}
+                        placeholder="Springfield"
+                        aria-invalid={showError("city", city)}
+                      />
+                      {showError("city", city) && <p className="text-xs text-destructive">City is required</p>}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="state">State *</Label>
+                      <Input
+                        id="state"
+                        value={state}
+                        onChange={(e) => setState(e.target.value)}
+                        onBlur={() => handleBlur("state")}
+                        placeholder="IL"
+                        maxLength={2}
+                        aria-invalid={showError("state", state) || !!stateFormatError}
+                      />
+                      {showError("state", state) ? (
+                        <p className="text-xs text-destructive">State is required</p>
+                      ) : stateFormatError ? (
+                        <p className="text-xs text-destructive">Enter a valid 2-letter state code</p>
+                      ) : (
+                        <p className="text-xs text-muted-foreground">2-letter code (e.g. IL, CA)</p>
                       )}
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground">
-                    Associate an unregistered phone number with this address. You can also assign one later.
-                  </p>
-                </div>
-
-                {/* Location select (prefill) */}
-                <div className="space-y-2">
-                  <Label htmlFor="location">Copy from Location</Label>
-                  <Select value={locationId} onValueChange={handleLocationSelect}>
-                    <SelectTrigger id="location">
-                      <SelectValue placeholder="Select a location to prefill address" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">-- None --</SelectItem>
-                      {locations.map((loc: Location) => (
-                        <SelectItem key={loc.id} value={loc.id}>
-                          {loc.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground">
-                    Optionally prefill the address from an existing location.
-                  </p>
-                </div>
-
-                {/* Address Line 1 */}
-                <div className="space-y-2">
-                  <Label htmlFor="address-line-1">Address Line 1 *</Label>
-                  <Input
-                    id="address-line-1"
-                    value={addressLine1}
-                    onChange={(e) => setAddressLine1(e.target.value)}
-                    onBlur={() => handleBlur("addressLine1")}
-                    placeholder="123 Main St"
-                    aria-invalid={showError("addressLine1", addressLine1)}
-                    autoFocus
-                  />
-                  {showError("addressLine1", addressLine1) ? (
-                    <p className="text-xs text-destructive">Address line 1 is required</p>
-                  ) : (
-                    <p className="text-xs text-muted-foreground">
-                      The street address where the phone is located.
-                    </p>
-                  )}
-                </div>
-
-                {/* Address Line 2 */}
-                <div className="space-y-2">
-                  <Label htmlFor="address-line-2">Address Line 2</Label>
-                  <Input
-                    id="address-line-2"
-                    value={addressLine2}
-                    onChange={(e) => setAddressLine2(e.target.value)}
-                    placeholder="Suite 100, Floor 2, etc."
-                  />
-                </div>
-
-                {/* City / State row */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="city">City *</Label>
-                    <Input
-                      id="city"
-                      value={city}
-                      onChange={(e) => setCity(e.target.value)}
-                      onBlur={() => handleBlur("city")}
-                      placeholder="Springfield"
-                      aria-invalid={showError("city", city)}
-                    />
-                    {showError("city", city) && (
-                      <p className="text-xs text-destructive">City is required</p>
-                    )}
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="state">State *</Label>
-                    <Input
-                      id="state"
-                      value={state}
-                      onChange={(e) => setState(e.target.value)}
-                      onBlur={() => handleBlur("state")}
-                      placeholder="IL"
-                      maxLength={2}
-                      aria-invalid={showError("state", state) || !!stateFormatError}
-                    />
-                    {showError("state", state) ? (
-                      <p className="text-xs text-destructive">State is required</p>
-                    ) : stateFormatError ? (
-                      <p className="text-xs text-destructive">Enter a valid 2-letter state code</p>
-                    ) : (
-                      <p className="text-xs text-muted-foreground">2-letter code (e.g. IL, CA)</p>
-                    )}
-                  </div>
-                </div>
 
-                {/* Postal Code / Country row */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="postal-code">Postal Code *</Label>
-                    <Input
-                      id="postal-code"
-                      value={postalCode}
-                      onChange={(e) => setPostalCode(e.target.value)}
-                      onBlur={() => handleBlur("postalCode")}
-                      placeholder="62701"
-                      aria-invalid={showError("postalCode", postalCode) || !!postalCodeFormatError}
-                    />
-                    {showError("postalCode", postalCode) ? (
-                      <p className="text-xs text-destructive">Postal code is required</p>
-                    ) : postalCodeFormatError ? (
-                      <p className="text-xs text-destructive">Enter a valid ZIP code (e.g. 62701 or 62701-1234)</p>
-                    ) : (
-                      <p className="text-xs text-muted-foreground">5-digit ZIP or ZIP+4</p>
-                    )}
+                  {/* Postal Code / Country row */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="postal-code">Postal Code *</Label>
+                      <Input
+                        id="postal-code"
+                        value={postalCode}
+                        onChange={(e) => setPostalCode(e.target.value)}
+                        onBlur={() => handleBlur("postalCode")}
+                        placeholder="62701"
+                        aria-invalid={showError("postalCode", postalCode) || !!postalCodeFormatError}
+                      />
+                      {showError("postalCode", postalCode) ? (
+                        <p className="text-xs text-destructive">Postal code is required</p>
+                      ) : postalCodeFormatError ? (
+                        <p className="text-xs text-destructive">Enter a valid ZIP code (e.g. 62701 or 62701-1234)</p>
+                      ) : (
+                        <p className="text-xs text-muted-foreground">5-digit ZIP or ZIP+4</p>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="country">Country</Label>
+                      <Input id="country" value={country} onChange={(e) => setCountry(e.target.value)} placeholder="US" />
+                      <p className="text-xs text-muted-foreground">Defaults to US</p>
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="country">Country</Label>
-                    <Input
-                      id="country"
-                      value={country}
-                      onChange={(e) => setCountry(e.target.value)}
-                      placeholder="US"
-                    />
-                    <p className="text-xs text-muted-foreground">Defaults to US</p>
-                  </div>
-                </div>
 
-                {/* Actions */}
-                <div className="flex items-center justify-end gap-2 pt-2">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => router.navigate({ to: "/e911" })}
-                  >
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={!isValid || createMutation.isPending}>
-                    {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Register Address
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
+                  {/* Actions */}
+                  <div className="flex items-center justify-end gap-2 pt-2">
+                    <Button type="button" variant="ghost" onClick={() => router.navigate({ to: "/e911" })}>
+                      Cancel
+                    </Button>
+                    <Button type="submit" disabled={!isValid || createMutation.isPending}>
+                      {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Register Address
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
           </SectionErrorBoundary>
 
           {/* Sidebar tips */}
@@ -426,9 +381,7 @@ function NewE911RegistrationPage() {
               <AlertTriangle className="h-5 w-5 text-amber-500" />
               Unsaved Changes
             </AlertDialogTitle>
-            <AlertDialogDescription>
-              You have unsaved changes on this form. If you leave now, your progress will be lost.
-            </AlertDialogDescription>
+            <AlertDialogDescription>You have unsaved changes on this form. If you leave now, your progress will be lost.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => blocker.reset?.()}>Stay on Page</AlertDialogCancel>

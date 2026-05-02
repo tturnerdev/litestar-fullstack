@@ -139,13 +139,7 @@ export function GettingStarted() {
         <div className="flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-primary" />
           <CardTitle className="text-lg">Getting Started</CardTitle>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="ml-auto h-6 w-6 text-muted-foreground hover:text-foreground"
-            onClick={handleDismiss}
-            aria-label="Dismiss getting started"
-          >
+          <Button variant="ghost" size="icon" className="ml-auto h-6 w-6 text-muted-foreground hover:text-foreground" onClick={handleDismiss} aria-label="Dismiss getting started">
             <X className="h-3.5 w-3.5" />
           </Button>
         </div>
@@ -153,10 +147,7 @@ export function GettingStarted() {
           Complete these steps to get the most out of the platform ({completedCount} of {items.length})
         </CardDescription>
         <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-muted">
-          <div
-            className="h-full rounded-full bg-primary transition-all duration-500"
-            style={{ width: `${progressPercent}%` }}
-          />
+          <div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${progressPercent}%` }} />
         </div>
       </CardHeader>
       <CardContent className="space-y-1">

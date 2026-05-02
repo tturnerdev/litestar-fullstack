@@ -1,5 +1,4 @@
 import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   AlertCircle,
   AlertTriangle,
@@ -30,29 +29,13 @@ import {
   Users,
   X,
 } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { toast } from "sonner"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { TicketConversation } from "@/components/support/ticket-conversation"
 import { TicketPriorityBadge } from "@/components/support/ticket-priority-badge"
 import { TicketReplyForm } from "@/components/support/ticket-reply-form"
 import { TicketStatusBadge } from "@/components/support/ticket-status-badge"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -63,48 +46,27 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { Badge } from "@/components/ui/badge"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
+import { CopyButton } from "@/components/ui/copy-button"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
-import { CopyButton } from "@/components/ui/copy-button"
-import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
-import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import {
-  useCloseTicket,
-  useDeleteTicket,
-  useReopenTicket,
-  useTicket,
-  useTicketMessages,
-  useUpdateTicket,
-} from "@/lib/api/hooks/support"
-import type { Ticket as TicketType, TicketMessage as TicketMessageType } from "@/lib/api/hooks/support"
-import { useAdminUsers } from "@/lib/api/hooks/admin"
-import { useTags, type Tag as TagType } from "@/lib/api/hooks/tags"
 import { useDocumentTitle } from "@/hooks/use-document-title"
-import { toast } from "sonner"
+import { useAdminUsers } from "@/lib/api/hooks/admin"
+import type { TicketMessage as TicketMessageType, Ticket as TicketType } from "@/lib/api/hooks/support"
+import { useCloseTicket, useDeleteTicket, useReopenTicket, useTicket, useTicketMessages, useUpdateTicket } from "@/lib/api/hooks/support"
+import { type Tag as TagType, useTags } from "@/lib/api/hooks/tags"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 
 const UNASSIGNED_VALUE = "__unassigned__"
@@ -138,30 +100,18 @@ const statuses = [
 
 // ── Timestamp field ─────────────────────────────────────────────────────
 
-function TimestampField({
-  label,
-  icon: Icon,
-  value,
-}: {
-  label: string
-  icon: React.ComponentType<{ className?: string }>
-  value: string | null | undefined
-}) {
+function TimestampField({ label, icon: Icon, value }: { label: string; icon: React.ComponentType<{ className?: string }>; value: string | null | undefined }) {
   return (
     <div className="flex items-start gap-2.5">
       <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center">
         <Icon className="h-3.5 w-3.5 text-muted-foreground" />
       </div>
       <div className="min-w-0">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          {label}
-        </p>
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
         {value ? (
           <Tooltip>
             <TooltipTrigger asChild>
-              <p className="mt-0.5 cursor-default text-sm">
-                {formatRelativeTimeShort(value)}
-              </p>
+              <p className="mt-0.5 cursor-default text-sm">{formatRelativeTimeShort(value)}</p>
             </TooltipTrigger>
             <TooltipContent>{formatDateTime(value)}</TooltipContent>
           </Tooltip>
@@ -181,13 +131,7 @@ interface TicketTag {
   slug: string
 }
 
-function TicketTagManager({
-  ticketId,
-  initialTags,
-}: {
-  ticketId: string
-  initialTags: TicketTag[]
-}) {
+function TicketTagManager({ ticketId, initialTags }: { ticketId: string; initialTags: TicketTag[] }) {
   const [tagPopoverOpen, setTagPopoverOpen] = useState(false)
   const [tagSearch, setTagSearch] = useState("")
   const [assignedTags, setAssignedTags] = useState<TicketTag[]>(initialTags)
@@ -201,10 +145,7 @@ function TicketTagManager({
   const { data: tagsData } = useTags({ page: 1, pageSize: 100, search: tagSearch })
   const availableTags: TagType[] = tagsData?.items ?? []
 
-  const assignedIds = useMemo(
-    () => new Set(assignedTags.map((t) => t.id)),
-    [assignedTags],
-  )
+  const assignedIds = useMemo(() => new Set(assignedTags.map((t) => t.id)), [assignedTags])
 
   const handleToggleTag = useCallback(
     (tag: TagType) => {
@@ -260,44 +201,27 @@ function TicketTagManager({
           <div className="flex h-5 w-5 shrink-0 items-center justify-center">
             <Tag className="h-3.5 w-3.5 text-muted-foreground" />
           </div>
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Tags
-          </p>
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Tags</p>
         </div>
         <Popover open={tagPopoverOpen} onOpenChange={setTagPopoverOpen}>
           <PopoverTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-6 w-6 p-0"
-              aria-label="Add tag"
-            >
+            <Button variant="ghost" size="sm" className="h-6 w-6 p-0" aria-label="Add tag">
               <Plus className="h-3.5 w-3.5" />
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-64 p-0" align="end">
             <Command shouldFilter={false}>
-              <CommandInput
-                placeholder="Search tags..."
-                value={tagSearch}
-                onValueChange={setTagSearch}
-              />
+              <CommandInput placeholder="Search tags..." value={tagSearch} onValueChange={setTagSearch} />
               <CommandList>
                 <CommandEmpty>No tags found.</CommandEmpty>
                 <CommandGroup>
                   {availableTags.map((tag) => {
                     const isSelected = assignedIds.has(tag.id)
                     return (
-                      <CommandItem
-                        key={tag.id}
-                        value={tag.id}
-                        onSelect={() => handleToggleTag(tag)}
-                      >
+                      <CommandItem key={tag.id} value={tag.id} onSelect={() => handleToggleTag(tag)}>
                         <div
                           className={`mr-2 flex h-4 w-4 shrink-0 items-center justify-center rounded-sm border ${
-                            isSelected
-                              ? "border-primary bg-primary text-primary-foreground"
-                              : "border-muted-foreground/30"
+                            isSelected ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/30"
                           }`}
                         >
                           {isSelected && <Check className="h-3 w-3" />}
@@ -316,18 +240,9 @@ function TicketTagManager({
       {assignedTags.length > 0 ? (
         <div className="flex flex-wrap gap-1.5 pl-7">
           {assignedTags.map((tag) => (
-            <Badge
-              key={tag.id}
-              variant="secondary"
-              className="gap-1 px-2 py-0.5 text-[10px]"
-            >
+            <Badge key={tag.id} variant="secondary" className="gap-1 px-2 py-0.5 text-[10px]">
               {tag.name}
-              <button
-                type="button"
-                className="ml-0.5 rounded-full p-0 hover:bg-muted-foreground/20"
-                onClick={() => handleRemoveTag(tag.id)}
-                aria-label={`Remove tag ${tag.name}`}
-              >
+              <button type="button" className="ml-0.5 rounded-full p-0 hover:bg-muted-foreground/20" onClick={() => handleRemoveTag(tag.id)} aria-label={`Remove tag ${tag.name}`}>
                 <X className="h-3 w-3" />
               </button>
             </Badge>
@@ -406,102 +321,74 @@ function getAgeColor(ms: number, isResolved: boolean): SlaColor {
   return "red"
 }
 
-function SlaIndicatorRow({
-  label,
-  value,
-  color,
-}: {
-  label: string
-  value: string
-  color: SlaColor
-}) {
+function SlaIndicatorRow({ label, value, color }: { label: string; value: string; color: SlaColor }) {
   return (
     <div className="flex items-center justify-between gap-2">
       <span className="text-xs text-muted-foreground">{label}</span>
-      <span
-        className={`rounded-md px-1.5 py-0.5 text-xs font-semibold tabular-nums ${getSlaIndicatorClasses(color)}`}
-      >
-        {value}
-      </span>
+      <span className={`rounded-md px-1.5 py-0.5 text-xs font-semibold tabular-nums ${getSlaIndicatorClasses(color)}`}>{value}</span>
     </div>
   )
 }
 
-function SlaIndicators({
-  ticket,
-  messages,
-}: {
-  ticket: TicketType
-  messages: TicketMessageType[]
-}) {
-  const { age, ageColor, firstResponse, firstResponseColor, resolution, resolutionColor } =
-    useMemo(() => {
-      if (!ticket.createdAt) {
-        return {
-          age: null,
-          ageColor: "green" as SlaColor,
-          firstResponse: null,
-          firstResponseColor: "green" as SlaColor,
-          resolution: null,
-          resolutionColor: "green" as SlaColor,
-        }
-      }
-
-      const createdMs = new Date(ticket.createdAt).getTime()
-      const nowMs = Date.now()
-      const isResolved = ticket.status === "resolved" || ticket.status === "closed"
-
-      // Age: time since creation (or until resolution/close)
-      const endMs = ticket.resolvedAt
-        ? new Date(ticket.resolvedAt).getTime()
-        : ticket.closedAt
-          ? new Date(ticket.closedAt).getTime()
-          : nowMs
-      const ageMs = endMs - createdMs
-      const computedAge = ageMs > 0 ? ageMs : 0
-      const computedAgeColor = getAgeColor(computedAge, isResolved)
-
-      // First response: first non-system message after ticket creation
-      let computedFirstResponse: number | null = null
-      let computedFirstResponseColor: SlaColor = "green"
-      const nonSystemMessages = messages.filter((m) => !m.isSystemMessage && m.createdAt)
-      if (nonSystemMessages.length > 1) {
-        // The first message is the ticket body itself; the second is the first response
-        const firstReply = nonSystemMessages
-          .slice(1)
-          .sort(
-            (a, b) =>
-              new Date(a.createdAt!).getTime() - new Date(b.createdAt!).getTime(),
-          )[0]
-        if (firstReply?.createdAt) {
-          const replyMs = new Date(firstReply.createdAt).getTime() - createdMs
-          if (replyMs > 0) {
-            computedFirstResponse = replyMs
-            computedFirstResponseColor = getFirstResponseColor(replyMs)
-          }
-        }
-      }
-
-      // Resolution time
-      let computedResolution: number | null = null
-      let computedResolutionColor: SlaColor = "green"
-      if (ticket.resolvedAt) {
-        const resMs = new Date(ticket.resolvedAt).getTime() - createdMs
-        if (resMs > 0) {
-          computedResolution = resMs
-          computedResolutionColor = getResolutionColor(resMs)
-        }
-      }
-
+function SlaIndicators({ ticket, messages }: { ticket: TicketType; messages: TicketMessageType[] }) {
+  const { age, ageColor, firstResponse, firstResponseColor, resolution, resolutionColor } = useMemo(() => {
+    if (!ticket.createdAt) {
       return {
-        age: computedAge,
-        ageColor: computedAgeColor,
-        firstResponse: computedFirstResponse,
-        firstResponseColor: computedFirstResponseColor,
-        resolution: computedResolution,
-        resolutionColor: computedResolutionColor,
+        age: null,
+        ageColor: "green" as SlaColor,
+        firstResponse: null,
+        firstResponseColor: "green" as SlaColor,
+        resolution: null,
+        resolutionColor: "green" as SlaColor,
       }
-    }, [ticket, messages])
+    }
+
+    const createdMs = new Date(ticket.createdAt).getTime()
+    const nowMs = Date.now()
+    const isResolved = ticket.status === "resolved" || ticket.status === "closed"
+
+    // Age: time since creation (or until resolution/close)
+    const endMs = ticket.resolvedAt ? new Date(ticket.resolvedAt).getTime() : ticket.closedAt ? new Date(ticket.closedAt).getTime() : nowMs
+    const ageMs = endMs - createdMs
+    const computedAge = ageMs > 0 ? ageMs : 0
+    const computedAgeColor = getAgeColor(computedAge, isResolved)
+
+    // First response: first non-system message after ticket creation
+    let computedFirstResponse: number | null = null
+    let computedFirstResponseColor: SlaColor = "green"
+    const nonSystemMessages = messages.filter((m) => !m.isSystemMessage && m.createdAt)
+    if (nonSystemMessages.length > 1) {
+      // The first message is the ticket body itself; the second is the first response
+      const firstReply = nonSystemMessages.slice(1).sort((a, b) => new Date(a.createdAt!).getTime() - new Date(b.createdAt!).getTime())[0]
+      if (firstReply?.createdAt) {
+        const replyMs = new Date(firstReply.createdAt).getTime() - createdMs
+        if (replyMs > 0) {
+          computedFirstResponse = replyMs
+          computedFirstResponseColor = getFirstResponseColor(replyMs)
+        }
+      }
+    }
+
+    // Resolution time
+    let computedResolution: number | null = null
+    let computedResolutionColor: SlaColor = "green"
+    if (ticket.resolvedAt) {
+      const resMs = new Date(ticket.resolvedAt).getTime() - createdMs
+      if (resMs > 0) {
+        computedResolution = resMs
+        computedResolutionColor = getResolutionColor(resMs)
+      }
+    }
+
+    return {
+      age: computedAge,
+      ageColor: computedAgeColor,
+      firstResponse: computedFirstResponse,
+      firstResponseColor: computedFirstResponseColor,
+      resolution: computedResolution,
+      resolutionColor: computedResolutionColor,
+    }
+  }, [ticket, messages])
 
   if (age === null) return null
 
@@ -516,21 +403,13 @@ function SlaIndicators({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-2">
-        <SlaIndicatorRow
-          label={isResolved ? "Total age" : "Time open"}
-          value={formatDuration(age)}
-          color={ageColor}
-        />
+        <SlaIndicatorRow label={isResolved ? "Total age" : "Time open"} value={formatDuration(age)} color={ageColor} />
         <SlaIndicatorRow
           label="First response"
           value={firstResponse !== null ? formatDuration(firstResponse) : "--"}
           color={firstResponse !== null ? firstResponseColor : "green"}
         />
-        <SlaIndicatorRow
-          label="Resolution time"
-          value={resolution !== null ? formatDuration(resolution) : "--"}
-          color={resolution !== null ? resolutionColor : "green"}
-        />
+        <SlaIndicatorRow label="Resolution time" value={resolution !== null ? formatDuration(resolution) : "--"} color={resolution !== null ? resolutionColor : "green"} />
       </CardContent>
     </Card>
   )
@@ -557,10 +436,7 @@ const statusLabels: Record<string, string> = {
   closed: "Closed",
 }
 
-function buildTimelineEvents(
-  ticket: TicketType,
-  messages: TicketMessageType[],
-): TimelineEvent[] {
+function buildTimelineEvents(ticket: TicketType, messages: TicketMessageType[]): TimelineEvent[] {
   const events: TimelineEvent[] = []
 
   // 1. Created
@@ -581,9 +457,7 @@ function buildTimelineEvents(
   if (ticket.assignedTo) {
     const assigneeName = ticket.assignedTo.name ?? ticket.assignedTo.email
     // Place assignment slightly after creation
-    const ts = ticket.createdAt
-      ? new Date(new Date(ticket.createdAt).getTime() + 1).toISOString()
-      : ticket.updatedAt ?? ticket.createdAt ?? ""
+    const ts = ticket.createdAt ? new Date(new Date(ticket.createdAt).getTime() + 1).toISOString() : (ticket.updatedAt ?? ticket.createdAt ?? "")
     events.push({
       id: "assigned",
       type: "assigned",
@@ -612,12 +486,7 @@ function buildTimelineEvents(
   }
 
   // 4. Current status (if not open and not covered by resolved/closed)
-  if (
-    ticket.status !== "open" &&
-    ticket.status !== "resolved" &&
-    ticket.status !== "closed" &&
-    ticket.updatedAt
-  ) {
+  if (ticket.status !== "open" && ticket.status !== "resolved" && ticket.status !== "closed" && ticket.updatedAt) {
     events.push({
       id: "status-current",
       type: "status",
@@ -654,16 +523,9 @@ function buildTimelineEvents(
   }
 
   // 7. Last updated (only if distinct from created, resolved, closed)
-  if (
-    ticket.updatedAt &&
-    ticket.updatedAt !== ticket.createdAt &&
-    ticket.updatedAt !== ticket.resolvedAt &&
-    ticket.updatedAt !== ticket.closedAt
-  ) {
+  if (ticket.updatedAt && ticket.updatedAt !== ticket.createdAt && ticket.updatedAt !== ticket.resolvedAt && ticket.updatedAt !== ticket.closedAt) {
     // Check if we already have a status event at this timestamp
-    const hasStatusAtUpdated = events.some(
-      (e) => e.type === "status" && e.timestamp === ticket.updatedAt,
-    )
+    const hasStatusAtUpdated = events.some((e) => e.type === "status" && e.timestamp === ticket.updatedAt)
     if (!hasStatusAtUpdated) {
       events.push({
         id: "updated",
@@ -682,13 +544,7 @@ function buildTimelineEvents(
   return events
 }
 
-function TicketLifecycleTimeline({
-  ticket,
-  messages,
-}: {
-  ticket: TicketType
-  messages: TicketMessageType[]
-}) {
+function TicketLifecycleTimeline({ ticket, messages }: { ticket: TicketType; messages: TicketMessageType[] }) {
   const events = useMemo(() => buildTimelineEvents(ticket, messages), [ticket, messages])
 
   if (events.length === 0) {
@@ -709,28 +565,20 @@ function TicketLifecycleTimeline({
         return (
           <div key={event.id} className="relative flex gap-3 pb-5 last:pb-0">
             {/* Vertical connector line */}
-            {!isLast && (
-              <div className="absolute left-3 top-7 h-[calc(100%-12px)] w-px bg-border" />
-            )}
+            {!isLast && <div className="absolute left-3 top-7 h-[calc(100%-12px)] w-px bg-border" />}
 
             {/* Dot with icon */}
-            <div
-              className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-white ${event.dotColor}`}
-            >
+            <div className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-white ${event.dotColor}`}>
               <Icon className="h-3 w-3" />
             </div>
 
             {/* Content */}
             <div className="min-w-0 flex-1 space-y-0.5">
               <p className="text-sm font-medium leading-snug">{event.label}</p>
-              {event.description && (
-                <p className="text-xs text-muted-foreground">{event.description}</p>
-              )}
+              {event.description && <p className="text-xs text-muted-foreground">{event.description}</p>}
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <p className="cursor-default text-xs text-muted-foreground/70">
-                    {formatRelativeTimeShort(event.timestamp)}
-                  </p>
+                  <p className="cursor-default text-xs text-muted-foreground/70">{formatRelativeTimeShort(event.timestamp)}</p>
                 </TooltipTrigger>
                 <TooltipContent>{formatDateTime(event.timestamp)}</TooltipContent>
               </Tooltip>
@@ -813,9 +661,7 @@ function TicketNotFound({ message }: { message: string }) {
           <AlertCircle className="h-8 w-8 text-muted-foreground" />
         </div>
         <h2 className="mt-4 text-lg font-semibold">Unable to load ticket</h2>
-        <p className="mt-1 max-w-sm text-center text-sm text-muted-foreground">
-          {message}
-        </p>
+        <p className="mt-1 max-w-sm text-center text-sm text-muted-foreground">{message}</p>
         <Button variant="outline" size="sm" asChild className="mt-6">
           <Link to="/support">
             <ArrowLeft className="mr-2 h-4 w-4" /> Back to Tickets
@@ -851,11 +697,7 @@ function TicketDetailPage() {
 
   const editDirty = useMemo(() => {
     if (!ticket || !editing) return false
-    return (
-      editSubject !== ticket.subject ||
-      editCategory !== (ticket.category ?? "") ||
-      editAssignedToId !== (ticket.assignedTo?.id ?? UNASSIGNED_VALUE)
-    )
+    return editSubject !== ticket.subject || editCategory !== (ticket.category ?? "") || editAssignedToId !== (ticket.assignedTo?.id ?? UNASSIGNED_VALUE)
   }, [editing, editSubject, editCategory, editAssignedToId, ticket])
 
   useBlocker({
@@ -907,15 +749,11 @@ function TicketDetailPage() {
   }
 
   if (isError) {
-    return (
-      <TicketNotFound message="We couldn't load this ticket. It may have been deleted or you may not have permission to view it. Try refreshing." />
-    )
+    return <TicketNotFound message="We couldn't load this ticket. It may have been deleted or you may not have permission to view it. Try refreshing." />
   }
 
   if (!ticket) {
-    return (
-      <TicketNotFound message="This ticket could not be found. It may have been deleted." />
-    )
+    return <TicketNotFound message="This ticket could not be found. It may have been deleted." />
   }
 
   const isClosed = ticket.status === "closed" || ticket.status === "resolved"
@@ -924,15 +762,9 @@ function TicketDetailPage() {
     <PageContainer className="flex-1 space-y-6">
       <PageHeader
         eyebrow="Helpdesk"
-        title={editing ? (
-          <Input
-            value={editSubject}
-            onChange={(e) => setEditSubject(e.target.value)}
-            className="h-9 text-lg font-semibold"
-            maxLength={200}
-            autoFocus
-          />
-        ) : ticket.subject}
+        title={
+          editing ? <Input value={editSubject} onChange={(e) => setEditSubject(e.target.value)} className="h-9 text-lg font-semibold" maxLength={200} autoFocus /> : ticket.subject
+        }
         description={
           <span className="inline-flex items-center gap-1">
             <span className="group/tktcopy inline-flex items-center gap-0.5">
@@ -969,24 +801,11 @@ function TicketDetailPage() {
           <div className="flex items-center gap-2">
             {editing ? (
               <>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleCancelEditing}
-                  disabled={updateTicket.isPending}
-                >
+                <Button variant="ghost" size="sm" onClick={handleCancelEditing} disabled={updateTicket.isPending}>
                   <X className="mr-2 h-4 w-4" /> Cancel
                 </Button>
-                <Button
-                  size="sm"
-                  onClick={handleSaveEditing}
-                  disabled={!editDirty || updateTicket.isPending}
-                >
-                  {updateTicket.isPending ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Check className="mr-2 h-4 w-4" />
-                  )}
+                <Button size="sm" onClick={handleSaveEditing} disabled={!editDirty || updateTicket.isPending}>
+                  {updateTicket.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
                   Save
                 </Button>
               </>
@@ -1019,35 +838,18 @@ function TicketDetailPage() {
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 {isClosed ? (
-                  <DropdownMenuItem
-                    onClick={() => reopenTicket.mutate()}
-                    disabled={reopenTicket.isPending}
-                  >
-                    {reopenTicket.isPending ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <Unlock className="mr-2 h-4 w-4" />
-                    )}
+                  <DropdownMenuItem onClick={() => reopenTicket.mutate()} disabled={reopenTicket.isPending}>
+                    {reopenTicket.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Unlock className="mr-2 h-4 w-4" />}
                     Reopen Ticket
                   </DropdownMenuItem>
                 ) : (
-                  <DropdownMenuItem
-                    onClick={() => closeTicket.mutate()}
-                    disabled={closeTicket.isPending}
-                  >
-                    {closeTicket.isPending ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <Lock className="mr-2 h-4 w-4" />
-                    )}
+                  <DropdownMenuItem onClick={() => closeTicket.mutate()} disabled={closeTicket.isPending}>
+                    {closeTicket.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Lock className="mr-2 h-4 w-4" />}
                     Close Ticket
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="text-destructive focus:text-destructive"
-                  onClick={() => setShowDeleteDialog(true)}
-                >
+                <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setShowDeleteDialog(true)}>
                   <Trash2 className="mr-2 h-4 w-4" />
                   Delete Ticket
                 </DropdownMenuItem>
@@ -1063,48 +865,34 @@ function TicketDetailPage() {
         <div className="min-w-0 space-y-6">
           <PageSection delay={0.05}>
             <SectionErrorBoundary name="Conversation">
-            <Card className="border-border/60 bg-card/80">
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                  Conversation
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  <TicketConversation ticketId={ticketId} />
-                  {!isClosed ? (
-                    <>
-                      <Separator />
-                      <TicketReplyForm ticketId={ticketId} />
-                    </>
-                  ) : (
-                    <div className="rounded-lg border border-dashed border-border/60 bg-muted/20 px-4 py-6 text-center">
-                      <p className="text-sm font-medium text-muted-foreground">
-                        This ticket is {ticket.status}.
-                      </p>
-                      <p className="mt-1 text-xs text-muted-foreground/70">
-                        Reopen it to continue the conversation.
-                      </p>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="mt-3"
-                        onClick={() => reopenTicket.mutate()}
-                        disabled={reopenTicket.isPending}
-                      >
-                        {reopenTicket.isPending ? (
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        ) : (
-                          <Unlock className="mr-2 h-4 w-4" />
-                        )}
-                        Reopen Ticket
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+              <Card className="border-border/60 bg-card/80">
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                    Conversation
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    <TicketConversation ticketId={ticketId} />
+                    {!isClosed ? (
+                      <>
+                        <Separator />
+                        <TicketReplyForm ticketId={ticketId} />
+                      </>
+                    ) : (
+                      <div className="rounded-lg border border-dashed border-border/60 bg-muted/20 px-4 py-6 text-center">
+                        <p className="text-sm font-medium text-muted-foreground">This ticket is {ticket.status}.</p>
+                        <p className="mt-1 text-xs text-muted-foreground/70">Reopen it to continue the conversation.</p>
+                        <Button size="sm" variant="outline" className="mt-3" onClick={() => reopenTicket.mutate()} disabled={reopenTicket.isPending}>
+                          {reopenTicket.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Unlock className="mr-2 h-4 w-4" />}
+                          Reopen Ticket
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
           </PageSection>
         </div>
@@ -1114,394 +902,309 @@ function TicketDetailPage() {
           {/* Status & Priority */}
           <PageSection delay={0.1}>
             <SectionErrorBoundary name="Ticket Details">
-            <Card className="border-border/60 bg-card/80">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Details
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Status */}
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Status</span>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button
-                        type="button"
-                        className="flex cursor-pointer items-center gap-1 rounded-md px-1 py-0.5 transition-colors hover:bg-muted/50"
-                      >
-                        <TicketStatusBadge status={ticket.status} />
-                        <ChevronDown className="h-3 w-3 text-muted-foreground" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Change Status</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      {statuses.map((s) => (
-                        <DropdownMenuItem
-                          key={s.value}
-                          disabled={ticket.status === s.value}
-                          onClick={() => {
-                            if (s.value === "closed") {
-                              closeTicket.mutate()
-                            } else if (
-                              (ticket.status === "closed" ||
-                                ticket.status === "resolved") &&
-                              s.value === "open"
-                            ) {
-                              reopenTicket.mutate()
-                            } else {
-                              updateTicket.mutate({ status: s.value })
-                            }
-                          }}
-                        >
-                          <TicketStatusBadge status={s.value} />
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-
-                <Separator />
-
-                {/* Priority */}
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Priority</span>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button
-                        type="button"
-                        className="flex cursor-pointer items-center gap-1 rounded-md px-1 py-0.5 transition-colors hover:bg-muted/50"
-                      >
-                        <TicketPriorityBadge priority={ticket.priority} />
-                        <ChevronDown className="h-3 w-3 text-muted-foreground" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Change Priority</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      {priorities.map((p) => (
-                        <DropdownMenuItem
-                          key={p}
-                          disabled={ticket.priority === p}
-                          onClick={() => updateTicket.mutate({ priority: p })}
-                        >
-                          <TicketPriorityBadge priority={p} />
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-
-                <Separator />
-
-                {/* Category */}
-                <div className="flex items-start gap-2.5">
-                  <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center">
-                    <Tag className="h-3.5 w-3.5 text-muted-foreground" />
+              <Card className="border-border/60 bg-card/80">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Details</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Status */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Status</span>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button type="button" className="flex cursor-pointer items-center gap-1 rounded-md px-1 py-0.5 transition-colors hover:bg-muted/50">
+                          <TicketStatusBadge status={ticket.status} />
+                          <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Change Status</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        {statuses.map((s) => (
+                          <DropdownMenuItem
+                            key={s.value}
+                            disabled={ticket.status === s.value}
+                            onClick={() => {
+                              if (s.value === "closed") {
+                                closeTicket.mutate()
+                              } else if ((ticket.status === "closed" || ticket.status === "resolved") && s.value === "open") {
+                                reopenTicket.mutate()
+                              } else {
+                                updateTicket.mutate({ status: s.value })
+                              }
+                            }}
+                          >
+                            <TicketStatusBadge status={s.value} />
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                      Category
-                    </p>
-                    {editing ? (
-                      <Select value={editCategory} onValueChange={setEditCategory}>
-                        <SelectTrigger className="mt-1 h-8 text-sm">
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="">None</SelectItem>
-                          {Object.entries(categoryLabels).map(([value, label]) => (
-                            <SelectItem key={value} value={value}>
-                              {label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <p className="mt-0.5 text-sm font-medium">
-                        {ticket.category
-                          ? (categoryLabels[ticket.category] ?? ticket.category)
-                          : "None"}
-                      </p>
-                    )}
-                  </div>
-                </div>
 
-                <Separator />
+                  <Separator />
 
-                {/* Reporter */}
-                <div className="flex items-start gap-2.5">
-                  <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center">
-                    <User className="h-3.5 w-3.5 text-muted-foreground" />
+                  {/* Priority */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Priority</span>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button type="button" className="flex cursor-pointer items-center gap-1 rounded-md px-1 py-0.5 transition-colors hover:bg-muted/50">
+                          <TicketPriorityBadge priority={ticket.priority} />
+                          <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Change Priority</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        {priorities.map((p) => (
+                          <DropdownMenuItem key={p} disabled={ticket.priority === p} onClick={() => updateTicket.mutate({ priority: p })}>
+                            <TicketPriorityBadge priority={p} />
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                      Created By
-                    </p>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <p className="mt-0.5 truncate text-sm font-medium" title={ticket.user?.name ?? ticket.user?.email ?? "Unknown"}>
-                          {ticket.user?.name ?? ticket.user?.email ?? "Unknown"}
-                        </p>
-                      </TooltipTrigger>
-                      <TooltipContent>{ticket.user?.name ?? ticket.user?.email ?? "Unknown"}</TooltipContent>
-                    </Tooltip>
-                    {ticket.user?.name && ticket.user?.email && (
+
+                  <Separator />
+
+                  {/* Category */}
+                  <div className="flex items-start gap-2.5">
+                    <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center">
+                      <Tag className="h-3.5 w-3.5 text-muted-foreground" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Category</p>
+                      {editing ? (
+                        <Select value={editCategory} onValueChange={setEditCategory}>
+                          <SelectTrigger className="mt-1 h-8 text-sm">
+                            <SelectValue placeholder="Select category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">None</SelectItem>
+                            {Object.entries(categoryLabels).map(([value, label]) => (
+                              <SelectItem key={value} value={value}>
+                                {label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <p className="mt-0.5 text-sm font-medium">{ticket.category ? (categoryLabels[ticket.category] ?? ticket.category) : "None"}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* Reporter */}
+                  <div className="flex items-start gap-2.5">
+                    <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center">
+                      <User className="h-3.5 w-3.5 text-muted-foreground" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Created By</p>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <p className="truncate text-xs text-muted-foreground" title={ticket.user.email}>
-                            {ticket.user.email}
+                          <p className="mt-0.5 truncate text-sm font-medium" title={ticket.user?.name ?? ticket.user?.email ?? "Unknown"}>
+                            {ticket.user?.name ?? ticket.user?.email ?? "Unknown"}
                           </p>
                         </TooltipTrigger>
-                        <TooltipContent>{ticket.user.email}</TooltipContent>
+                        <TooltipContent>{ticket.user?.name ?? ticket.user?.email ?? "Unknown"}</TooltipContent>
                       </Tooltip>
-                    )}
-                  </div>
-                </div>
-
-                {/* Assigned to */}
-                <div className="flex items-start gap-2.5">
-                  <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center">
-                    <Users className="h-3.5 w-3.5 text-muted-foreground" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                      Assigned To
-                    </p>
-                    {editing ? (
-                      <Select value={editAssignedToId} onValueChange={setEditAssignedToId}>
-                        <SelectTrigger className="mt-1 h-8 text-sm">
-                          <SelectValue placeholder="Select assignee" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value={UNASSIGNED_VALUE}>Unassigned</SelectItem>
-                          {(usersData?.items ?? []).map((u) => (
-                            <SelectItem key={u.id} value={u.id}>
-                              {u.name || u.email}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    ) : ticket.assignedTo ? (
-                      <>
+                      {ticket.user?.name && ticket.user?.email && (
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <p className="mt-0.5 truncate text-sm font-medium" title={ticket.assignedTo.name ?? ticket.assignedTo.email}>
-                              {ticket.assignedTo.name ?? ticket.assignedTo.email}
+                            <p className="truncate text-xs text-muted-foreground" title={ticket.user.email}>
+                              {ticket.user.email}
                             </p>
                           </TooltipTrigger>
-                          <TooltipContent>{ticket.assignedTo.name ?? ticket.assignedTo.email}</TooltipContent>
+                          <TooltipContent>{ticket.user.email}</TooltipContent>
                         </Tooltip>
-                        {ticket.assignedTo.name && ticket.assignedTo.email && (
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Assigned to */}
+                  <div className="flex items-start gap-2.5">
+                    <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center">
+                      <Users className="h-3.5 w-3.5 text-muted-foreground" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Assigned To</p>
+                      {editing ? (
+                        <Select value={editAssignedToId} onValueChange={setEditAssignedToId}>
+                          <SelectTrigger className="mt-1 h-8 text-sm">
+                            <SelectValue placeholder="Select assignee" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value={UNASSIGNED_VALUE}>Unassigned</SelectItem>
+                            {(usersData?.items ?? []).map((u) => (
+                              <SelectItem key={u.id} value={u.id}>
+                                {u.name || u.email}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : ticket.assignedTo ? (
+                        <>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <p className="truncate text-xs text-muted-foreground" title={ticket.assignedTo.email}>
-                                {ticket.assignedTo.email}
+                              <p className="mt-0.5 truncate text-sm font-medium" title={ticket.assignedTo.name ?? ticket.assignedTo.email}>
+                                {ticket.assignedTo.name ?? ticket.assignedTo.email}
                               </p>
                             </TooltipTrigger>
-                            <TooltipContent>{ticket.assignedTo.email}</TooltipContent>
+                            <TooltipContent>{ticket.assignedTo.name ?? ticket.assignedTo.email}</TooltipContent>
                           </Tooltip>
-                        )}
-                      </>
-                    ) : (
-                      <p className="mt-0.5 text-sm text-muted-foreground/70">
-                        Unassigned
-                      </p>
-                    )}
+                          {ticket.assignedTo.name && ticket.assignedTo.email && (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <p className="truncate text-xs text-muted-foreground" title={ticket.assignedTo.email}>
+                                  {ticket.assignedTo.email}
+                                </p>
+                              </TooltipTrigger>
+                              <TooltipContent>{ticket.assignedTo.email}</TooltipContent>
+                            </Tooltip>
+                          )}
+                        </>
+                      ) : (
+                        <p className="mt-0.5 text-sm text-muted-foreground/70">Unassigned</p>
+                      )}
+                    </div>
                   </div>
-                </div>
 
-                <Separator />
+                  <Separator />
 
-                {/* Messages count */}
-                <div className="flex items-start gap-2.5">
-                  <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center">
-                    <Mail className="h-3.5 w-3.5 text-muted-foreground" />
+                  {/* Messages count */}
+                  <div className="flex items-start gap-2.5">
+                    <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center">
+                      <Mail className="h-3.5 w-3.5 text-muted-foreground" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Messages</p>
+                      <p className="mt-0.5 text-sm font-medium">{ticket.messageCount}</p>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                      Messages
-                    </p>
-                    <p className="mt-0.5 text-sm font-medium">
-                      {ticket.messageCount}
-                    </p>
-                  </div>
-                </div>
 
-                <Separator />
+                  <Separator />
 
-                {/* Tags */}
-                <TicketTagManager
-                  ticketId={ticketId}
-                  initialTags={[]}
-                />
-              </CardContent>
-            </Card>
+                  {/* Tags */}
+                  <TicketTagManager ticketId={ticketId} initialTags={[]} />
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
           </PageSection>
 
           {/* SLA Metrics */}
           <PageSection delay={0.12}>
             <SectionErrorBoundary name="SLA Metrics">
-            <SlaIndicators ticket={ticket} messages={messagesData ?? []} />
+              <SlaIndicators ticket={ticket} messages={messagesData ?? []} />
             </SectionErrorBoundary>
           </PageSection>
 
           {/* Timestamps & ID */}
           <PageSection delay={0.15}>
             <SectionErrorBoundary name="Ticket Timeline">
-            <Card className="border-border/60 bg-card/80">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Timeline
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <TimestampField
-                  label="Created"
-                  icon={Calendar}
-                  value={ticket.createdAt}
-                />
-                {ticket.updatedAt && ticket.updatedAt !== ticket.createdAt && (
-                  <TimestampField
-                    label="Updated"
-                    icon={Clock}
-                    value={ticket.updatedAt}
-                  />
-                )}
-                {ticket.closedAt && (
-                  <TimestampField
-                    label="Closed"
-                    icon={Lock}
-                    value={ticket.closedAt}
-                  />
-                )}
-                {ticket.resolvedAt && (
-                  <TimestampField
-                    label="Resolved"
-                    icon={Lock}
-                    value={ticket.resolvedAt}
-                  />
-                )}
+              <Card className="border-border/60 bg-card/80">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Timeline</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <TimestampField label="Created" icon={Calendar} value={ticket.createdAt} />
+                  {ticket.updatedAt && ticket.updatedAt !== ticket.createdAt && <TimestampField label="Updated" icon={Clock} value={ticket.updatedAt} />}
+                  {ticket.closedAt && <TimestampField label="Closed" icon={Lock} value={ticket.closedAt} />}
+                  {ticket.resolvedAt && <TimestampField label="Resolved" icon={Lock} value={ticket.resolvedAt} />}
 
-                <Separator />
+                  <Separator />
 
-                {/* Ticket ID with copy */}
-                <div className="flex items-start gap-2.5">
-                  <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center">
-                    <Hash className="h-3.5 w-3.5 text-muted-foreground" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                      Ticket Number
-                    </p>
-                    <div className="mt-0.5 flex items-center gap-1">
-                      <p className="font-mono text-xs">{ticket.ticketNumber}</p>
-                      <CopyButton
-                        value={ticket.ticketNumber}
-                        label="ticket number"
-                      />
+                  {/* Ticket ID with copy */}
+                  <div className="flex items-start gap-2.5">
+                    <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center">
+                      <Hash className="h-3.5 w-3.5 text-muted-foreground" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Ticket Number</p>
+                      <div className="mt-0.5 flex items-center gap-1">
+                        <p className="font-mono text-xs">{ticket.ticketNumber}</p>
+                        <CopyButton value={ticket.ticketNumber} label="ticket number" />
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Ticket UUID with copy */}
-                <div className="flex items-start gap-2.5">
-                  <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center">
-                    <Hash className="h-3.5 w-3.5 text-muted-foreground" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                      Ticket ID
-                    </p>
-                    <div className="mt-0.5 flex items-center gap-1">
-                      <p className="truncate font-mono text-xs">{ticketId}</p>
-                      <CopyButton value={ticketId} label="ticket ID" />
+                  {/* Ticket UUID with copy */}
+                  <div className="flex items-start gap-2.5">
+                    <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center">
+                      <Hash className="h-3.5 w-3.5 text-muted-foreground" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Ticket ID</p>
+                      <div className="mt-0.5 flex items-center gap-1">
+                        <p className="truncate font-mono text-xs">{ticketId}</p>
+                        <CopyButton value={ticketId} label="ticket ID" />
+                      </div>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
           </PageSection>
 
           {/* Lifecycle Timeline */}
           <PageSection delay={0.18}>
             <SectionErrorBoundary name="Lifecycle">
-            <Card className="border-border/60 bg-card/80">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                  <History className="h-4 w-4" />
-                  Lifecycle
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <TicketLifecycleTimeline
-                  ticket={ticket}
-                  messages={messagesData ?? []}
-                />
-              </CardContent>
-            </Card>
+              <Card className="border-border/60 bg-card/80">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                    <History className="h-4 w-4" />
+                    Lifecycle
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <TicketLifecycleTimeline ticket={ticket} messages={messagesData ?? []} />
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
           </PageSection>
 
           {/* Activity Log — collapsed by default, lazy-loads when expanded */}
           <PageSection delay={0.22}>
             <SectionErrorBoundary name="Activity Log">
-            <Collapsible open={activityOpen} onOpenChange={setActivityOpen}>
-              <Card className="border-border/60 bg-card/80">
-                <CollapsibleTrigger asChild>
-                  <CardHeader className="cursor-pointer select-none pb-3 transition-colors hover:bg-muted/30">
-                    <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                      <History className="h-4 w-4" />
-                      Activity Log
-                      <ChevronRight
-                        className={`ml-auto h-4 w-4 transition-transform duration-200 ${activityOpen ? "rotate-90" : ""}`}
-                      />
-                    </CardTitle>
-                  </CardHeader>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <CardContent className="pt-0">
-                    <EntityActivityPanel
-                      targetType="ticket"
-                      targetId={ticketId}
-                      enabled={activityOpen}
-                    />
-                  </CardContent>
-                </CollapsibleContent>
-              </Card>
-            </Collapsible>
+              <Collapsible open={activityOpen} onOpenChange={setActivityOpen}>
+                <Card className="border-border/60 bg-card/80">
+                  <CollapsibleTrigger asChild>
+                    <CardHeader className="cursor-pointer select-none pb-3 transition-colors hover:bg-muted/30">
+                      <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                        <History className="h-4 w-4" />
+                        Activity Log
+                        <ChevronRight className={`ml-auto h-4 w-4 transition-transform duration-200 ${activityOpen ? "rotate-90" : ""}`} />
+                      </CardTitle>
+                    </CardHeader>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <CardContent className="pt-0">
+                      <EntityActivityPanel targetType="ticket" targetId={ticketId} enabled={activityOpen} />
+                    </CardContent>
+                  </CollapsibleContent>
+                </Card>
+              </Collapsible>
             </SectionErrorBoundary>
           </PageSection>
 
           {/* Danger zone */}
           <PageSection delay={0.27}>
             <SectionErrorBoundary name="Danger Zone">
-            <Card className="border-destructive/30">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-destructive">
-                  Danger Zone
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">
-                    Permanently delete this ticket and all of its messages. This
-                    action cannot be undone.
-                  </p>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    className="w-full"
-                    onClick={() => setShowDeleteDialog(true)}
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" /> Delete Ticket
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+              <Card className="border-destructive/30">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-destructive">Danger Zone</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground">Permanently delete this ticket and all of its messages. This action cannot be undone.</p>
+                    <Button variant="destructive" size="sm" className="w-full" onClick={() => setShowDeleteDialog(true)}>
+                      <Trash2 className="mr-2 h-4 w-4" /> Delete Ticket
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
           </PageSection>
         </div>
@@ -1516,18 +1219,11 @@ function TicketDetailPage() {
               Delete ticket?
             </AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete ticket{" "}
-              <span className="font-medium text-foreground">
-                {ticket.ticketNumber}
-              </span>{" "}
-              and all of its messages. This action cannot be undone.
+              This will permanently delete ticket <span className="font-medium text-foreground">{ticket.ticketNumber}</span> and all of its messages. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel
-              onClick={() => setShowDeleteDialog(false)}
-              disabled={deleteTicket.isPending}
-            >
+            <AlertDialogCancel onClick={() => setShowDeleteDialog(false)} disabled={deleteTicket.isPending}>
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
@@ -1542,9 +1238,7 @@ function TicketDetailPage() {
                 })
               }}
             >
-              {deleteTicket.isPending && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              )}
+              {deleteTicket.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Delete Ticket
             </AlertDialogAction>
           </AlertDialogFooter>

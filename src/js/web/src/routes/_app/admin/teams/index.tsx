@@ -1,21 +1,8 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
-import { useCallback, useEffect, useMemo, useState } from "react"
-import {
-  AlertCircle,
-  CheckCircle2,
-  Download,
-  Eye,
-  MoreVertical,
-  Pencil,
-  Search,
-  Trash2,
-  Users,
-  Users2,
-  X,
-  XCircle,
-} from "lucide-react"
-import { toast } from "sonner"
 import { useQueryClient } from "@tanstack/react-query"
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
+import { AlertCircle, CheckCircle2, Download, Eye, MoreVertical, Pencil, Search, Trash2, Users, Users2, X, XCircle } from "lucide-react"
+import { useCallback, useEffect, useMemo, useState } from "react"
+import { toast } from "sonner"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { DeleteTeamDialog } from "@/components/admin/delete-team-dialog"
@@ -24,25 +11,25 @@ import { Badge } from "@/components/ui/badge"
 import { type BulkAction, BulkActionBar } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { EmptyState } from "@/components/ui/empty-state"
 import { FilterDropdown, type FilterOption } from "@/components/ui/filter-dropdown"
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { SkeletonTable } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { DataFreshness } from "@/components/ui/data-freshness"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
-import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { useAdminTeams } from "@/lib/api/hooks/admin"
-import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
-import { adminDeleteTeam } from "@/lib/generated/api"
+import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import type { AdminTeamSummary } from "@/lib/generated/api"
+import { adminDeleteTeam } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/admin/teams/")({
   component: AdminTeamsPage,
@@ -81,7 +68,6 @@ const statusOptions: FilterOption[] = [
 ]
 
 // -- Helpers ------------------------------------------------------------------
-
 
 function ActiveStatusIndicator({ isActive }: { isActive: boolean | undefined }) {
   if (isActive) {
@@ -297,12 +283,7 @@ function AdminTeamsPage() {
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative max-w-sm flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Search by team name or slug..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 pr-8"
-            />
+            <Input placeholder="Search by team name or slug..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 pr-8" />
             {search && (
               <button
                 type="button"
@@ -314,12 +295,7 @@ function AdminTeamsPage() {
               </button>
             )}
           </div>
-          <FilterDropdown
-            label="Status"
-            options={statusOptions}
-            selected={statusFilter}
-            onChange={setStatusFilter}
-          />
+          <FilterDropdown label="Status" options={statusOptions} selected={statusFilter} onChange={setStatusFilter} />
           {activeFilterCount > 0 && (
             <Button
               variant="ghost"
@@ -333,11 +309,7 @@ function AdminTeamsPage() {
             </Button>
           )}
           <div className="ml-auto">
-            <DataFreshness
-              dataUpdatedAt={dataUpdatedAt}
-              onRefresh={() => refetch()}
-              isRefreshing={isRefetching}
-            />
+            <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
           </div>
         </div>
       </PageSection>
@@ -359,11 +331,7 @@ function AdminTeamsPage() {
               }
             />
           ) : !hasAnyTeams && !search ? (
-            <EmptyState
-              icon={Users2}
-              title="No teams yet"
-              description="Teams will appear here once they are created in the system."
-            />
+            <EmptyState icon={Users2} title="No teams yet" description="Teams will appear here once they are created in the system." />
           ) : !hasData ? (
             <EmptyState
               icon={Users2}
@@ -405,51 +373,13 @@ function AdminTeamsPage() {
                   <TableHeader className="sticky top-0 z-10 bg-background">
                     <TableRow>
                       <TableHead className="w-10">
-                        <Checkbox
-                          checked={allSelected}
-                          indeterminate={someSelected && !allSelected}
-                          onChange={toggleAll}
-                          aria-label="Select all teams"
-                        />
+                        <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all teams" />
                       </TableHead>
-                      <SortableHeader
-                        label="Team"
-                        sortKey="name"
-                        currentSort={sortKey}
-                        currentDirection={sortDir}
-                        onSort={handleSort}
-                      />
-                      <SortableHeader
-                        label="Slug"
-                        sortKey="slug"
-                        currentSort={sortKey}
-                        currentDirection={sortDir}
-                        onSort={handleSort}
-                        className="hidden md:table-cell"
-                      />
-                      <SortableHeader
-                        label="Members"
-                        sortKey="member_count"
-                        currentSort={sortKey}
-                        currentDirection={sortDir}
-                        onSort={handleSort}
-                      />
-                      <SortableHeader
-                        label="Status"
-                        sortKey="is_active"
-                        currentSort={sortKey}
-                        currentDirection={sortDir}
-                        onSort={handleSort}
-                        className="hidden md:table-cell"
-                      />
-                      <SortableHeader
-                        label="Created"
-                        sortKey="created_at"
-                        currentSort={sortKey}
-                        currentDirection={sortDir}
-                        onSort={handleSort}
-                        className="hidden lg:table-cell"
-                      />
+                      <SortableHeader label="Team" sortKey="name" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                      <SortableHeader label="Slug" sortKey="slug" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
+                      <SortableHeader label="Members" sortKey="member_count" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                      <SortableHeader label="Status" sortKey="is_active" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
+                      <SortableHeader label="Created" sortKey="created_at" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden lg:table-cell" />
                       <TableHead className="w-16 text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -520,31 +450,14 @@ function AdminTeamsPage() {
       </PageSection>
 
       {/* Bulk action bar */}
-      <BulkActionBar
-        selectedCount={selectedIds.size}
-        selectedIds={Array.from(selectedIds)}
-        onClearSelection={() => setSelectedIds(new Set())}
-        actions={bulkActions}
-      />
+      <BulkActionBar selectedCount={selectedIds.size} selectedIds={Array.from(selectedIds)} onClearSelection={() => setSelectedIds(new Set())} actions={bulkActions} />
     </PageContainer>
   )
 }
 
 // -- Table row ----------------------------------------------------------------
 
-function TeamRow({
-  team,
-  index,
-  selected,
-  onToggle,
-  onRowClick,
-}: {
-  team: AdminTeamSummary
-  index: number
-  selected: boolean
-  onToggle: () => void
-  onRowClick: () => void
-}) {
+function TeamRow({ team, index, selected, onToggle, onRowClick }: { team: AdminTeamSummary; index: number; selected: boolean; onToggle: () => void; onRowClick: () => void }) {
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
 
@@ -572,12 +485,7 @@ function TeamRow({
           />
         </TableCell>
         <TableCell>
-          <Link
-            to="/admin/teams/$teamId"
-            params={{ teamId: team.id }}
-            className="group flex items-center gap-3"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <Link to="/admin/teams/$teamId" params={{ teamId: team.id }} className="group flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
             <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10 text-primary">
               <Users className="h-4 w-4" />
             </div>
@@ -606,9 +514,7 @@ function TeamRow({
         <TableCell className="hidden lg:table-cell">
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className="cursor-default text-xs text-muted-foreground">
-                {formatRelativeTimeShort(team.createdAt)}
-              </span>
+              <span className="cursor-default text-xs text-muted-foreground">{formatRelativeTimeShort(team.createdAt)}</span>
             </TooltipTrigger>
             <TooltipContent>{formatDateTime(team.createdAt)}</TooltipContent>
           </Tooltip>
@@ -616,13 +522,7 @@ function TeamRow({
         <TableCell className="text-right">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                data-slot="dropdown"
-                onClick={(e) => e.stopPropagation()}
-              >
+              <Button variant="ghost" size="icon" className="h-8 w-8" data-slot="dropdown" onClick={(e) => e.stopPropagation()}>
                 <MoreVertical className="h-4 w-4" />
                 <span className="sr-only">Actions for {team.name}</span>
               </Button>
@@ -648,14 +548,7 @@ function TeamRow({
         </TableCell>
       </TableRow>
 
-      <EditTeamDialog
-        teamId={team.id}
-        currentName={team.name}
-        currentDescription={null}
-        currentIsActive={team.isActive}
-        open={editOpen}
-        onOpenChange={setEditOpen}
-      />
+      <EditTeamDialog teamId={team.id} currentName={team.name} currentDescription={null} currentIsActive={team.isActive} open={editOpen} onOpenChange={setEditOpen} />
       <DeleteTeamDialog teamId={team.id} teamName={team.name} open={deleteOpen} onOpenChange={setDeleteOpen} />
     </>
   )

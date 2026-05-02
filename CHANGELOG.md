@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.248.0 (2026-05-03)
+
+### Fixed
+- **Biome formatting and lint auto-fix** across 232 frontend files — consistent code formatting, import organization, and auto-fixable lint issues resolved
+
 ## v0.247.0 (2026-05-03)
 
 ### Added

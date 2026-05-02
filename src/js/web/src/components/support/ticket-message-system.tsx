@@ -1,11 +1,4 @@
-import {
-  AlertTriangle,
-  ArrowRightLeft,
-  CheckCircle,
-  Info,
-  RotateCcw,
-  UserCheck,
-} from "lucide-react"
+import { AlertTriangle, ArrowRightLeft, CheckCircle, Info, RotateCcw, UserCheck } from "lucide-react"
 import { useMemo } from "react"
 import type { TicketMessage } from "@/lib/api/hooks/support"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
@@ -74,10 +67,7 @@ function getMessageStyle(text: string): SystemMessageStyle {
 }
 
 export function TicketMessageSystem({ message }: TicketMessageSystemProps) {
-  const style = useMemo(
-    () => getMessageStyle(message.bodyMarkdown),
-    [message.bodyMarkdown],
-  )
+  const style = useMemo(() => getMessageStyle(message.bodyMarkdown), [message.bodyMarkdown])
 
   const actorName = message.author?.name
 
@@ -86,23 +76,16 @@ export function TicketMessageSystem({ message }: TicketMessageSystemProps) {
       {/* Left divider line */}
       <div className="h-px flex-1 bg-border/30" />
 
-      <div
-        className={`mx-3 flex items-center gap-2 rounded-full border px-4 py-1.5 ${style.bgTint} ${style.borderTint}`}
-      >
+      <div className={`mx-3 flex items-center gap-2 rounded-full border px-4 py-1.5 ${style.bgTint} ${style.borderTint}`}>
         <span className={style.tint}>{style.icon}</span>
         <span className="text-xs text-muted-foreground">
-          {actorName && (
-            <span className="font-medium text-foreground/80">{actorName} </span>
-          )}
+          {actorName && <span className="font-medium text-foreground/80">{actorName} </span>}
           {message.bodyMarkdown}
         </span>
         {message.createdAt && (
           <>
             <span className="text-muted-foreground/30">·</span>
-            <span
-              className="text-xs text-muted-foreground/60"
-              title={formatDateTime(message.createdAt, "")}
-            >
+            <span className="text-xs text-muted-foreground/60" title={formatDateTime(message.createdAt, "")}>
               {formatRelativeTimeShort(message.createdAt)}
             </span>
           </>

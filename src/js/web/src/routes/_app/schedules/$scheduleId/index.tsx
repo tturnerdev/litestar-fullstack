@@ -1,5 +1,4 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
-import { useEffect, useMemo, useState } from "react"
 import {
   AlertCircle,
   AlertTriangle,
@@ -19,6 +18,9 @@ import {
   Trash2,
   XCircle,
 } from "lucide-react"
+import { useEffect, useMemo, useState } from "react"
+import { toast } from "sonner"
+import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,29 +31,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { EmptyState } from "@/components/ui/empty-state"
 import { CopyButton } from "@/components/ui/copy-button"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -59,23 +49,20 @@ import { Switch } from "@/components/ui/switch"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { formatDateTime, formatRelativeTime } from "@/lib/date-utils"
+import { useDocumentTitle } from "@/hooks/use-document-title"
+import { useTimeConditions } from "@/lib/api/hooks/call-routing"
 import {
-  useSchedule,
-  useUpdateSchedule,
-  useDeleteSchedule,
-  useCheckSchedule,
-  useCreateScheduleEntry,
-  useDeleteScheduleEntry,
   type Schedule,
   type ScheduleEntry,
   type ScheduleEntryCreate,
+  useCheckSchedule,
+  useCreateScheduleEntry,
+  useDeleteSchedule,
+  useDeleteScheduleEntry,
+  useSchedule,
+  useUpdateSchedule,
 } from "@/lib/api/hooks/schedules"
-import { toast } from "sonner"
-import { useTimeConditions } from "@/lib/api/hooks/call-routing"
-import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
-import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
-import { useDocumentTitle } from "@/hooks/use-document-title"
+import { formatDateTime, formatRelativeTime } from "@/lib/date-utils"
 
 export const Route = createFileRoute("/_app/schedules/$scheduleId/")({
   component: ScheduleDetailPage,
@@ -157,13 +144,7 @@ function CurrentStatusBadge({ scheduleId }: { scheduleId: string }) {
 
 // -- Add Entry Row (inline form) ----------------------------------------------
 
-function AddWeeklyEntryRow({
-  scheduleId,
-  dayOfWeek,
-}: {
-  scheduleId: string
-  dayOfWeek: number
-}) {
+function AddWeeklyEntryRow({ scheduleId, dayOfWeek }: { scheduleId: string; dayOfWeek: number }) {
   const createEntry = useCreateScheduleEntry(scheduleId)
   const [adding, setAdding] = useState(false)
   const [startTime, setStartTime] = useState("09:00")
@@ -202,29 +183,13 @@ function AddWeeklyEntryRow({
 
   return (
     <div className="flex items-center gap-2">
-      <Input
-        type="time"
-        value={startTime}
-        onChange={(e) => setStartTime(e.target.value)}
-        className="h-7 w-28 text-xs"
-      />
+      <Input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="h-7 w-28 text-xs" />
       <span className="text-xs text-muted-foreground">to</span>
-      <Input
-        type="time"
-        value={endTime}
-        onChange={(e) => setEndTime(e.target.value)}
-        className="h-7 w-28 text-xs"
-      />
+      <Input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="h-7 w-28 text-xs" />
       <Button size="sm" className="h-7 text-xs" onClick={handleSave} disabled={createEntry.isPending}>
         {createEntry.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : "Save"}
       </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        className="h-7 text-xs"
-        onClick={handleMarkClosed}
-        disabled={createEntry.isPending}
-      >
+      <Button variant="outline" size="sm" className="h-7 text-xs" onClick={handleMarkClosed} disabled={createEntry.isPending}>
         Closed
       </Button>
       <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setAdding(false)}>
@@ -236,13 +201,7 @@ function AddWeeklyEntryRow({
 
 // -- Existing entry display ---------------------------------------------------
 
-function EntryDisplay({
-  entry,
-  scheduleId,
-}: {
-  entry: ScheduleEntry
-  scheduleId: string
-}) {
+function EntryDisplay({ entry, scheduleId }: { entry: ScheduleEntry; scheduleId: string }) {
   const deleteEntry = useDeleteScheduleEntry(scheduleId)
   const [confirmDelete, setConfirmDelete] = useState(false)
 
@@ -253,13 +212,7 @@ function EntryDisplay({
   }
 
   const deleteButton = (
-    <Button
-      variant="ghost"
-      size="sm"
-      className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
-      onClick={() => setConfirmDelete(true)}
-      disabled={deleteEntry.isPending}
-    >
+    <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive" onClick={() => setConfirmDelete(true)} disabled={deleteEntry.isPending}>
       {deleteEntry.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
     </Button>
   )
@@ -272,17 +225,11 @@ function EntryDisplay({
             <AlertTriangle className="h-5 w-5 text-destructive" />
             Delete schedule entry?
           </AlertDialogTitle>
-          <AlertDialogDescription>
-            This will permanently remove this schedule entry. This action cannot be undone.
-          </AlertDialogDescription>
+          <AlertDialogDescription>This will permanently remove this schedule entry. This action cannot be undone.</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={deleteEntry.isPending}>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            className={buttonVariants({ variant: "destructive" })}
-            onClick={handleDelete}
-            disabled={deleteEntry.isPending}
-          >
+          <AlertDialogAction className={buttonVariants({ variant: "destructive" })} onClick={handleDelete} disabled={deleteEntry.isPending}>
             {deleteEntry.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {deleteEntry.isPending ? "Deleting..." : "Delete"}
           </AlertDialogAction>
@@ -427,19 +374,13 @@ function DeleteScheduleDialog({
               <AlertTriangle className="h-5 w-5 text-destructive" />
               Delete "{scheduleName}"?
             </AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete this schedule and all its entries. This action cannot be undone.
-            </AlertDialogDescription>
+            <AlertDialogDescription>This will permanently delete this schedule and all its entries. This action cannot be undone.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setOpen(false)} disabled={isPending}>
               Cancel
             </AlertDialogCancel>
-            <AlertDialogAction
-              className={buttonVariants({ variant: "destructive" })}
-              onClick={onDelete}
-              disabled={isPending}
-            >
+            <AlertDialogAction className={buttonVariants({ variant: "destructive" })} onClick={onDelete} disabled={isPending}>
               {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isPending ? "Deleting..." : "Delete"}
             </AlertDialogAction>
@@ -473,11 +414,7 @@ function formatHourLabel(hour: number): string {
   return m > 0 ? `${display}:${String(m).padStart(2, "0")} ${suffix}` : `${display} ${suffix}`
 }
 
-function WeeklyViewGrid({
-  weeklyEntries,
-}: {
-  weeklyEntries: Map<number, ScheduleEntry[]>
-}) {
+function WeeklyViewGrid({ weeklyEntries }: { weeklyEntries: Map<number, ScheduleEntry[]> }) {
   const hasAnyEntries = Array.from(weeklyEntries.values()).some((entries) => entries.length > 0)
 
   if (!hasAnyEntries) {
@@ -485,9 +422,7 @@ function WeeklyViewGrid({
       <div className="flex flex-col items-center justify-center py-12 text-center">
         <Calendar className="mb-3 h-10 w-10 text-muted-foreground/40" />
         <p className="text-sm font-medium text-muted-foreground">No schedule entries</p>
-        <p className="text-xs text-muted-foreground/70">
-          Add hours using the list view to see them displayed here.
-        </p>
+        <p className="text-xs text-muted-foreground/70">Add hours using the list view to see them displayed here.</p>
       </div>
     )
   }
@@ -505,10 +440,7 @@ function WeeklyViewGrid({
           <div className="grid grid-cols-[60px_repeat(7,1fr)] border-b border-border/60">
             <div /> {/* empty corner cell */}
             {DAY_ABBREVIATIONS.map((day) => (
-              <div
-                key={day}
-                className="px-1 py-2 text-center text-xs font-semibold text-muted-foreground"
-              >
+              <div key={day} className="px-1 py-2 text-center text-xs font-semibold text-muted-foreground">
                 {day}
               </div>
             ))}
@@ -533,18 +465,10 @@ function WeeklyViewGrid({
             {DAY_ABBREVIATIONS.map((_, dayIndex) => {
               const entries = weeklyEntries.get(dayIndex) ?? []
               return (
-                <div
-                  key={dayIndex}
-                  className="relative border-l border-border/40"
-                  style={{ height: `${GRID_TOTAL_HOURS * 28}px` }}
-                >
+                <div key={dayIndex} className="relative border-l border-border/40" style={{ height: `${GRID_TOTAL_HOURS * 28}px` }}>
                   {/* Hour grid lines */}
                   {hourLabels.slice(0, -1).map((hour) => (
-                    <div
-                      key={hour}
-                      className="absolute left-0 right-0 border-b border-border/20"
-                      style={{ top: `${(hour - GRID_START_HOUR) * 28}px`, height: "28px" }}
-                    />
+                    <div key={hour} className="absolute left-0 right-0 border-b border-border/20" style={{ top: `${(hour - GRID_START_HOUR) * 28}px`, height: "28px" }} />
                   ))}
 
                   {/* Entry blocks */}
@@ -560,9 +484,7 @@ function WeeklyViewGrid({
                                 height: `${GRID_TOTAL_HOURS * 28}px`,
                               }}
                             >
-                              <span className="block px-1 pt-0.5 text-[9px] font-medium text-red-500 dark:text-red-400">
-                                Closed
-                              </span>
+                              <span className="block px-1 pt-0.5 text-[9px] font-medium text-red-500 dark:text-red-400">Closed</span>
                             </div>
                           </TooltipTrigger>
                           <TooltipContent side="top">
@@ -684,9 +606,7 @@ function ScheduleDetailPage() {
 
   const holidayEntries = useMemo(() => {
     if (!data?.entries) return []
-    return data.entries
-      .filter((e) => e.date != null)
-      .sort((a, b) => (a.date ?? "").localeCompare(b.date ?? ""))
+    return data.entries.filter((e) => e.date != null).sort((a, b) => (a.date ?? "").localeCompare(b.date ?? ""))
   }, [data?.entries])
 
   const showHolidays = data && (data.scheduleType === "holiday" || data.scheduleType === "custom")
@@ -763,7 +683,11 @@ function ScheduleDetailPage() {
             icon={AlertCircle}
             title="Unable to load schedule"
             description="Something went wrong. Please try again."
-            action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+            action={
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
+                Try again
+              </Button>
+            }
           />
         </PageSection>
       </PageContainer>
@@ -802,11 +726,7 @@ function ScheduleDetailPage() {
         actions={
           <div className="flex items-center gap-3">
             <CurrentStatusBadge scheduleId={scheduleId} />
-            {data.isDefault && (
-              <Badge className="gap-1 bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400">
-                Default
-              </Badge>
-            )}
+            {data.isDefault && <Badge className="gap-1 bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400">Default</Badge>}
             {!editing && (
               <Button variant="outline" size="sm" onClick={() => startEditing(data)}>
                 <Pencil className="mr-2 h-4 w-4" /> Edit
@@ -825,7 +745,12 @@ function ScheduleDetailPage() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => { navigator.clipboard.writeText(scheduleId); toast.success("Copied schedule ID") }}>
+                <DropdownMenuItem
+                  onClick={() => {
+                    navigator.clipboard.writeText(scheduleId)
+                    toast.success("Copied schedule ID")
+                  }}
+                >
                   <Copy className="mr-2 h-4 w-4" />
                   Copy Schedule ID
                 </DropdownMenuItem>
@@ -841,13 +766,7 @@ function ScheduleDetailPage() {
       />
 
       {/* Delete dialog triggered from dropdown menu */}
-      <DeleteScheduleDialog
-        scheduleName={data.name}
-        onDelete={handleDelete}
-        isPending={deleteSchedule.isPending}
-        open={showDeleteFromMenu}
-        onOpenChange={setShowDeleteFromMenu}
-      />
+      <DeleteScheduleDialog scheduleName={data.name} onDelete={handleDelete} isPending={deleteSchedule.isPending} open={showDeleteFromMenu} onOpenChange={setShowDeleteFromMenu} />
 
       <PageSection>
         <div className="grid gap-6 md:grid-cols-[1.1fr_0.9fr]">
@@ -855,212 +774,206 @@ function ScheduleDetailPage() {
           <div className="space-y-6">
             {/* Schedule Information */}
             <SectionErrorBoundary name="Schedule Information">
-            <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <Clock className="h-5 w-5 text-muted-foreground" />
-                  Schedule Information
-                </CardTitle>
-                {editing && (
-                  <div className="flex gap-2">
-                    <Button variant="ghost" size="sm" onClick={() => setEditing(false)}>
-                      Cancel
-                    </Button>
-                    <Button size="sm" onClick={handleSave} disabled={updateSchedule.isPending}>
-                      {updateSchedule.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      Save
-                    </Button>
-                  </div>
-                )}
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {editing ? (
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label>Name</Label>
-                      <Input value={editName} onChange={(e) => setEditName(e.target.value)} />
+              <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Clock className="h-5 w-5 text-muted-foreground" />
+                    Schedule Information
+                  </CardTitle>
+                  {editing && (
+                    <div className="flex gap-2">
+                      <Button variant="ghost" size="sm" onClick={() => setEditing(false)}>
+                        Cancel
+                      </Button>
+                      <Button size="sm" onClick={handleSave} disabled={updateSchedule.isPending}>
+                        {updateSchedule.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Save
+                      </Button>
                     </div>
-                    <div className="space-y-2">
-                      <Label>Type</Label>
-                      <Select value={editType} onValueChange={(v) => setEditType(v as Schedule["scheduleType"])}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="business_hours">Business Hours</SelectItem>
-                          <SelectItem value="holiday">Holiday</SelectItem>
-                          <SelectItem value="custom">Custom</SelectItem>
-                        </SelectContent>
-                      </Select>
+                  )}
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {editing ? (
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label>Name</Label>
+                        <Input value={editName} onChange={(e) => setEditName(e.target.value)} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Type</Label>
+                        <Select value={editType} onValueChange={(v) => setEditType(v as Schedule["scheduleType"])}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="business_hours">Business Hours</SelectItem>
+                            <SelectItem value="holiday">Holiday</SelectItem>
+                            <SelectItem value="custom">Custom</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Timezone</Label>
+                        <Select value={editTimezone} onValueChange={setEditTimezone}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select timezone" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {COMMON_TIMEZONES.map((tz) => (
+                              <SelectItem key={tz} value={tz}>
+                                {tz.replace(/_/g, " ")}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Switch checked={editDefault} onCheckedChange={setEditDefault} id="edit-default" />
+                        <Label htmlFor="edit-default">Default schedule</Label>
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label>Timezone</Label>
-                      <Select value={editTimezone} onValueChange={setEditTimezone}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select timezone" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {COMMON_TIMEZONES.map((tz) => (
-                            <SelectItem key={tz} value={tz}>
-                              {tz.replace(/_/g, " ")}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                  ) : (
+                    <div className="grid gap-4 text-sm md:grid-cols-2">
+                      <InfoField label="Name" value={data.name} />
+                      <InfoField label="Type" value={scheduleTypeLabels[data.scheduleType] ?? data.scheduleType} />
+                      <InfoField label="Timezone" value={data.timezone.replace(/_/g, " ")} />
+                      <InfoField label="Default" value={data.isDefault ? "Yes" : "No"} />
                     </div>
-                    <div className="flex items-center gap-3">
-                      <Switch checked={editDefault} onCheckedChange={setEditDefault} id="edit-default" />
-                      <Label htmlFor="edit-default">Default schedule</Label>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="grid gap-4 text-sm md:grid-cols-2">
-                    <InfoField label="Name" value={data.name} />
-                    <InfoField label="Type" value={scheduleTypeLabels[data.scheduleType] ?? data.scheduleType} />
-                    <InfoField label="Timezone" value={data.timezone.replace(/_/g, " ")} />
-                    <InfoField label="Default" value={data.isDefault ? "Yes" : "No"} />
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                  )}
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
 
             {/* Weekly Hours */}
             {(data.scheduleType === "business_hours" || data.scheduleType === "custom") && (
               <SectionErrorBoundary name="Weekly Hours">
-              <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5 text-muted-foreground" />
-                    Weekly Hours
-                  </CardTitle>
-                  <CardDescription>Define operating hours for each day of the week.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Tabs value={tab} onValueChange={(value) => navigate({ search: () => ({ tab: value }), replace: true })}>
-                    <TabsList className="mb-4">
-                      <TabsTrigger value="list" className="gap-1.5">
-                        <List className="h-3.5 w-3.5" />
-                        List
-                      </TabsTrigger>
-                      <TabsTrigger value="weekly" className="gap-1.5">
-                        <Grid3x3 className="h-3.5 w-3.5" />
-                        Weekly View
-                      </TabsTrigger>
-                    </TabsList>
+                <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Calendar className="h-5 w-5 text-muted-foreground" />
+                      Weekly Hours
+                    </CardTitle>
+                    <CardDescription>Define operating hours for each day of the week.</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Tabs value={tab} onValueChange={(value) => navigate({ search: () => ({ tab: value }), replace: true })}>
+                      <TabsList className="mb-4">
+                        <TabsTrigger value="list" className="gap-1.5">
+                          <List className="h-3.5 w-3.5" />
+                          List
+                        </TabsTrigger>
+                        <TabsTrigger value="weekly" className="gap-1.5">
+                          <Grid3x3 className="h-3.5 w-3.5" />
+                          Weekly View
+                        </TabsTrigger>
+                      </TabsList>
 
-                    <TabsContent value="list">
-                      <div className="overflow-x-auto">
-                      <Table aria-label="Weekly schedule entries">
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="w-32">Day</TableHead>
-                            <TableHead>Hours</TableHead>
-                            <TableHead className="w-32 text-right">Actions</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {DAY_NAMES.map((day, index) => {
-                            const entries = weeklyEntries.get(index) ?? []
-                            return (
-                              <TableRow key={index}>
-                                <TableCell className="font-medium">{day}</TableCell>
-                                <TableCell>
-                                  {entries.length === 0 ? (
-                                    <span className="text-sm text-muted-foreground">No hours set</span>
-                                  ) : (
-                                    <div className="flex flex-col gap-1">
-                                      {entries.map((entry) => (
-                                        <EntryDisplay key={entry.id} entry={entry} scheduleId={scheduleId} />
-                                      ))}
-                                    </div>
-                                  )}
-                                </TableCell>
-                                <TableCell className="text-right">
-                                  <AddWeeklyEntryRow scheduleId={scheduleId} dayOfWeek={index} />
-                                </TableCell>
+                      <TabsContent value="list">
+                        <div className="overflow-x-auto">
+                          <Table aria-label="Weekly schedule entries">
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead className="w-32">Day</TableHead>
+                                <TableHead>Hours</TableHead>
+                                <TableHead className="w-32 text-right">Actions</TableHead>
                               </TableRow>
-                            )
-                          })}
-                        </TableBody>
-                      </Table>
-                      </div>
-                    </TabsContent>
+                            </TableHeader>
+                            <TableBody>
+                              {DAY_NAMES.map((day, index) => {
+                                const entries = weeklyEntries.get(index) ?? []
+                                return (
+                                  <TableRow key={index}>
+                                    <TableCell className="font-medium">{day}</TableCell>
+                                    <TableCell>
+                                      {entries.length === 0 ? (
+                                        <span className="text-sm text-muted-foreground">No hours set</span>
+                                      ) : (
+                                        <div className="flex flex-col gap-1">
+                                          {entries.map((entry) => (
+                                            <EntryDisplay key={entry.id} entry={entry} scheduleId={scheduleId} />
+                                          ))}
+                                        </div>
+                                      )}
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                      <AddWeeklyEntryRow scheduleId={scheduleId} dayOfWeek={index} />
+                                    </TableCell>
+                                  </TableRow>
+                                )
+                              })}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      </TabsContent>
 
-                    <TabsContent value="weekly">
-                      <WeeklyViewGrid weeklyEntries={weeklyEntries} />
-                    </TabsContent>
-                  </Tabs>
-                </CardContent>
-              </Card>
+                      <TabsContent value="weekly">
+                        <WeeklyViewGrid weeklyEntries={weeklyEntries} />
+                      </TabsContent>
+                    </Tabs>
+                  </CardContent>
+                </Card>
               </SectionErrorBoundary>
             )}
 
             {/* Holidays */}
             {showHolidays && (
               <SectionErrorBoundary name="Holidays">
-              <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5 text-muted-foreground" />
-                    Holidays
-                  </CardTitle>
-                  <CardDescription>Define specific dates with special hours or closures.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {holidayEntries.length > 0 ? (
-                    <div className="overflow-x-auto">
-                    <Table aria-label="Holiday entries">
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Date</TableHead>
-                          <TableHead>Label</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead className="w-16 text-right">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {holidayEntries.map((entry) => (
-                          <HolidayRow key={entry.id} entry={entry} scheduleId={scheduleId} />
-                        ))}
-                      </TableBody>
-                    </Table>
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground py-4 text-center">No holidays configured.</p>
-                  )}
-                  <AddHolidayEntry scheduleId={scheduleId} />
-                </CardContent>
-              </Card>
+                <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Calendar className="h-5 w-5 text-muted-foreground" />
+                      Holidays
+                    </CardTitle>
+                    <CardDescription>Define specific dates with special hours or closures.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {holidayEntries.length > 0 ? (
+                      <div className="overflow-x-auto">
+                        <Table aria-label="Holiday entries">
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Date</TableHead>
+                              <TableHead>Label</TableHead>
+                              <TableHead>Status</TableHead>
+                              <TableHead className="w-16 text-right">Actions</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {holidayEntries.map((entry) => (
+                              <HolidayRow key={entry.id} entry={entry} scheduleId={scheduleId} />
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground py-4 text-center">No holidays configured.</p>
+                    )}
+                    <AddHolidayEntry scheduleId={scheduleId} />
+                  </CardContent>
+                </Card>
               </SectionErrorBoundary>
             )}
 
             {/* Danger Zone */}
             <SectionErrorBoundary name="Danger Zone">
-            <Card className="border-destructive/30 bg-card/80 shadow-md">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-destructive">
-                  <AlertTriangle className="h-4 w-4" />
-                  Danger Zone
-                </CardTitle>
-                <CardDescription>Irreversible and destructive actions for this schedule.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between rounded-lg border border-destructive/20 bg-destructive/5 p-4">
-                  <div>
-                    <p className="font-medium text-sm">Delete this schedule</p>
-                    <p className="text-xs text-muted-foreground">
-                      Once deleted, this schedule and all entries cannot be recovered.
-                    </p>
+              <Card className="border-destructive/30 bg-card/80 shadow-md">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-destructive">
+                    <AlertTriangle className="h-4 w-4" />
+                    Danger Zone
+                  </CardTitle>
+                  <CardDescription>Irreversible and destructive actions for this schedule.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between rounded-lg border border-destructive/20 bg-destructive/5 p-4">
+                    <div>
+                      <p className="font-medium text-sm">Delete this schedule</p>
+                      <p className="text-xs text-muted-foreground">Once deleted, this schedule and all entries cannot be recovered.</p>
+                    </div>
+                    <DeleteScheduleDialog scheduleName={data.name} onDelete={handleDelete} isPending={deleteSchedule.isPending} />
                   </div>
-                  <DeleteScheduleDialog
-                    scheduleName={data.name}
-                    onDelete={handleDelete}
-                    isPending={deleteSchedule.isPending}
-                  />
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
           </div>
 
@@ -1068,78 +981,74 @@ function ScheduleDetailPage() {
           <div className="space-y-4">
             {/* Metadata card */}
             <SectionErrorBoundary name="Metadata">
-            <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  Metadata
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-1">
-                  <p className="text-xs font-medium text-muted-foreground">Schedule ID</p>
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs break-all">{data.id}</span>
-                    <CopyButton value={data.id} label="schedule ID" />
-                  </div>
-                </div>
-                {data.createdAt && (
+              <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    Metadata
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
                   <div className="space-y-1">
-                    <p className="text-xs font-medium text-muted-foreground">Created</p>
-                    <p className="text-sm" title={formatDateTime(data.createdAt)}>
-                      {formatRelativeTime(data.createdAt)}
-                    </p>
+                    <p className="text-xs font-medium text-muted-foreground">Schedule ID</p>
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-xs break-all">{data.id}</span>
+                      <CopyButton value={data.id} label="schedule ID" />
+                    </div>
                   </div>
-                )}
-                {data.updatedAt && (
+                  {data.createdAt && (
+                    <div className="space-y-1">
+                      <p className="text-xs font-medium text-muted-foreground">Created</p>
+                      <p className="text-sm" title={formatDateTime(data.createdAt)}>
+                        {formatRelativeTime(data.createdAt)}
+                      </p>
+                    </div>
+                  )}
+                  {data.updatedAt && (
+                    <div className="space-y-1">
+                      <p className="text-xs font-medium text-muted-foreground">Last Updated</p>
+                      <p className="text-sm" title={formatDateTime(data.updatedAt)}>
+                        {formatRelativeTime(data.updatedAt)}
+                      </p>
+                    </div>
+                  )}
                   <div className="space-y-1">
-                    <p className="text-xs font-medium text-muted-foreground">Last Updated</p>
-                    <p className="text-sm" title={formatDateTime(data.updatedAt)}>
-                      {formatRelativeTime(data.updatedAt)}
-                    </p>
+                    <p className="text-xs font-medium text-muted-foreground">Team ID</p>
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-xs break-all">{data.teamId}</span>
+                      <CopyButton value={data.teamId} label="team ID" />
+                    </div>
                   </div>
-                )}
-                <div className="space-y-1">
-                  <p className="text-xs font-medium text-muted-foreground">Team ID</p>
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs break-all">{data.teamId}</span>
-                    <CopyButton value={data.teamId} label="team ID" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
 
             {/* Quick Stats card */}
             <SectionErrorBoundary name="Summary">
-            <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  Summary
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Weekly entries</span>
-                  <span className="font-medium text-sm">
-                    {data.entries?.filter((e) => e.dayOfWeek != null).length ?? 0}
-                  </span>
-                </div>
-                <Separator />
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Holiday entries</span>
-                  <span className="font-medium text-sm">
-                    {data.entries?.filter((e) => e.date != null).length ?? 0}
-                  </span>
-                </div>
-                <Separator />
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Total entries</span>
-                  <span className="font-medium text-sm">{data.entries?.length ?? 0}</span>
-                </div>
-              </CardContent>
-            </Card>
+              <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    Summary
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Weekly entries</span>
+                    <span className="font-medium text-sm">{data.entries?.filter((e) => e.dayOfWeek != null).length ?? 0}</span>
+                  </div>
+                  <Separator />
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Holiday entries</span>
+                    <span className="font-medium text-sm">{data.entries?.filter((e) => e.date != null).length ?? 0}</span>
+                  </div>
+                  <Separator />
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Total entries</span>
+                    <span className="font-medium text-sm">{data.entries?.length ?? 0}</span>
+                  </div>
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
 
             {/* Related Resources */}
@@ -1149,17 +1058,17 @@ function ScheduleDetailPage() {
 
             {/* Activity History (Audit Trail) */}
             <SectionErrorBoundary name="Activity History">
-            <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  Activity History
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <EntityActivityPanel targetType="schedule" targetId={scheduleId} />
-              </CardContent>
-            </Card>
+              <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    Activity History
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <EntityActivityPanel targetType="schedule" targetId={scheduleId} />
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
           </div>
         </div>
@@ -1173,9 +1082,7 @@ function ScheduleDetailPage() {
 function RelatedResourcesSection({ scheduleId }: { scheduleId: string }) {
   const timeConditionsQuery = useTimeConditions({ pageSize: 100 })
 
-  const linkedTimeConditions = (timeConditionsQuery.data?.items ?? []).filter(
-    (tc) => tc.scheduleId === scheduleId,
-  )
+  const linkedTimeConditions = (timeConditionsQuery.data?.items ?? []).filter((tc) => tc.scheduleId === scheduleId)
 
   const isLoading = timeConditionsQuery.isLoading
   const hasTimeConditions = linkedTimeConditions.length > 0
@@ -1215,12 +1122,8 @@ function RelatedResourcesSection({ scheduleId }: { scheduleId: string }) {
         <CardContent>
           <div className="flex flex-col items-center gap-2 py-6 text-center">
             <Link2 className="h-8 w-8 text-muted-foreground/50" />
-            <p className="text-sm text-muted-foreground">
-              No time conditions are currently using this schedule.
-            </p>
-            <p className="text-xs text-muted-foreground/70">
-              Schedules are typically referenced by time conditions for call routing rules.
-            </p>
+            <p className="text-sm text-muted-foreground">No time conditions are currently using this schedule.</p>
+            <p className="text-xs text-muted-foreground/70">Schedules are typically referenced by time conditions for call routing rules.</p>
           </div>
         </CardContent>
       </Card>
@@ -1234,15 +1137,11 @@ function RelatedResourcesSection({ scheduleId }: { scheduleId: string }) {
           <Link2 className="h-4 w-4" />
           Related Resources
         </CardTitle>
-        <CardDescription>
-          Entities using this schedule for call routing
-        </CardDescription>
+        <CardDescription>Entities using this schedule for call routing</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            Time Conditions
-          </p>
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Time Conditions</p>
           <div className="space-y-2">
             {linkedTimeConditions.map((tc) => (
               <Link
@@ -1255,9 +1154,7 @@ function RelatedResourcesSection({ scheduleId }: { scheduleId: string }) {
                   <Clock className="h-4 w-4 text-primary" />
                   <div>
                     <p className="text-sm font-medium group-hover:text-primary">{tc.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      Override: {tc.overrideMode}
-                    </p>
+                    <p className="text-xs text-muted-foreground">Override: {tc.overrideMode}</p>
                   </div>
                 </div>
                 <ArrowRight className="h-4 w-4 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" />
@@ -1317,16 +1214,13 @@ function HolidayRow({ entry, scheduleId }: { entry: ScheduleEntry; scheduleId: s
                 Delete holiday entry?
               </AlertDialogTitle>
               <AlertDialogDescription>
-                This will permanently remove the holiday entry{entry.label ? ` "${entry.label}"` : ""}{entry.date ? ` on ${entry.date}` : ""}. This action cannot be undone.
+                This will permanently remove the holiday entry{entry.label ? ` "${entry.label}"` : ""}
+                {entry.date ? ` on ${entry.date}` : ""}. This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel disabled={deleteEntry.isPending}>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                className={buttonVariants({ variant: "destructive" })}
-                onClick={handleDelete}
-                disabled={deleteEntry.isPending}
-              >
+              <AlertDialogAction className={buttonVariants({ variant: "destructive" })} onClick={handleDelete} disabled={deleteEntry.isPending}>
                 {deleteEntry.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {deleteEntry.isPending ? "Deleting..." : "Delete"}
               </AlertDialogAction>
@@ -1340,15 +1234,7 @@ function HolidayRow({ entry, scheduleId }: { entry: ScheduleEntry; scheduleId: s
 
 // -- Info Field helper --------------------------------------------------------
 
-function InfoField({
-  label,
-  value,
-  mono,
-}: {
-  label: string
-  value?: string | null
-  mono?: boolean
-}) {
+function InfoField({ label, value, mono }: { label: string; value?: string | null; mono?: boolean }) {
   return (
     <div>
       <p className="text-muted-foreground">{label}</p>

@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router"
-import { BarChart3, Laptop, TicketPlus, Users, type LucideIcon } from "lucide-react"
+import { BarChart3, Laptop, type LucideIcon, TicketPlus, Users } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 
 interface QuickShortcut {
@@ -53,14 +53,10 @@ export function QuickShortcutsRow() {
         <Link key={shortcut.key} to={shortcut.to}>
           <Card className="group cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-md">
             <CardContent className="flex flex-col items-center gap-2.5 px-3 py-4">
-              <div
-                className={`flex h-10 w-10 items-center justify-center rounded-lg transition-colors ${shortcut.iconBg} ${shortcut.iconText}`}
-              >
+              <div className={`flex h-10 w-10 items-center justify-center rounded-lg transition-colors ${shortcut.iconBg} ${shortcut.iconText}`}>
                 <shortcut.icon className="h-5 w-5" />
               </div>
-              <span className="text-center text-xs font-medium text-muted-foreground group-hover:text-foreground">
-                {shortcut.label}
-              </span>
+              <span className="text-center text-xs font-medium text-muted-foreground group-hover:text-foreground">{shortcut.label}</span>
             </CardContent>
           </Card>
         </Link>

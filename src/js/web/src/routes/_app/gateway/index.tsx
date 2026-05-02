@@ -1,72 +1,23 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import {
-  AlertCircle,
-  CheckCircle2,
-  Clock,
-  Download,
-  Hash,
-  History,
-  Info,
-  Layers,
-  Loader2,
-  Monitor,
-  Phone,
-  Search,
-  ShieldAlert,
-  Trash2,
-  XCircle,
-} from "lucide-react"
+import { AlertCircle, CheckCircle2, Clock, Download, Hash, History, Info, Layers, Loader2, Monitor, Phone, Search, ShieldAlert, Trash2, XCircle } from "lucide-react"
 import { useCallback, useRef, useState } from "react"
-import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Badge } from "@/components/ui/badge"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { SkeletonCard } from "@/components/ui/skeleton"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
-import {
-  useGatewayLookupDevice,
-  useGatewayLookupExtension,
-  useGatewayLookupNumber,
-} from "@/lib/api/hooks/gateway"
 import { useDocumentTitle } from "@/hooks/use-document-title"
-import type {
-  DeviceGatewayResponse,
-  ExtensionGatewayResponse,
-  NumberGatewayResponse,
-  SourceResult,
-} from "@/lib/generated/api"
-import {
-  gatewayLookupDevice,
-  gatewayLookupExtension,
-  gatewayLookupNumber,
-} from "@/lib/generated/api"
+import { useGatewayLookupDevice, useGatewayLookupExtension, useGatewayLookupNumber } from "@/lib/api/hooks/gateway"
+import type { DeviceGatewayResponse, ExtensionGatewayResponse, NumberGatewayResponse, SourceResult } from "@/lib/generated/api"
+import { gatewayLookupDevice, gatewayLookupExtension, gatewayLookupNumber } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/gateway/")({
   component: GatewayPage,
@@ -105,15 +56,7 @@ function useRecentSearches(key: string, max = 10) {
   return { items, add, clear }
 }
 
-function RecentSearches({
-  items,
-  onSelect,
-  onClear,
-}: {
-  items: string[]
-  onSelect: (term: string) => void
-  onClear: () => void
-}) {
+function RecentSearches({ items, onSelect, onClear }: { items: string[]; onSelect: (term: string) => void; onClear: () => void }) {
   if (items.length === 0) return null
   return (
     <div className="rounded-md border border-border bg-card p-3 space-y-2">
@@ -122,12 +65,7 @@ function RecentSearches({
           <History className="h-3 w-3" />
           Recent searches
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-6 px-2 text-xs text-muted-foreground hover:text-destructive"
-          onClick={onClear}
-        >
+        <Button variant="ghost" size="sm" className="h-6 px-2 text-xs text-muted-foreground hover:text-destructive" onClick={onClear}>
           <Trash2 className="mr-1 h-3 w-3" />
           Clear
         </Button>
@@ -220,9 +158,7 @@ function DataSection({ data, nested = false }: { data: Record<string, unknown>; 
     <dl className={nested ? "space-y-1 pl-4 border-l border-border/40" : "space-y-2"}>
       {entries.map(([key, value]) => (
         <div key={key} className="flex flex-col gap-0.5 sm:flex-row sm:gap-3">
-          <dt className="min-w-[140px] shrink-0 text-sm font-medium text-muted-foreground">
-            {formatKey(key)}
-          </dt>
+          <dt className="min-w-[140px] shrink-0 text-sm font-medium text-muted-foreground">{formatKey(key)}</dt>
           <dd className="text-sm break-all">
             <DataValue value={value} />
           </dd>
@@ -248,9 +184,7 @@ function SourceCard({ name, result }: { name: string; result: SourceResult }) {
       </CardHeader>
       <CardContent>
         {result.error ? (
-          <div className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
-            {result.error}
-          </div>
+          <div className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">{result.error}</div>
         ) : result.data && Object.keys(result.data).length > 0 ? (
           <DataSection data={result.data} />
         ) : (
@@ -290,33 +224,16 @@ function LookupResults({
   }
 
   if (isError) {
-    return (
-      <EmptyState
-        icon={AlertCircle}
-        title="Lookup failed"
-        description={error?.message ?? "An unexpected error occurred. Please try again."}
-      />
-    )
+    return <EmptyState icon={AlertCircle} title="Lookup failed" description={error?.message ?? "An unexpected error occurred. Please try again."} />
   }
 
   if (!hasSearched) {
-    return (
-      <EmptyState
-        icon={Search}
-        title="Enter a value to look up"
-        description="Search across all configured connections to find matching records."
-      />
-    )
+    return <EmptyState icon={Search} title="Enter a value to look up" description="Search across all configured connections to find matching records." />
   }
 
   if (!sources || Object.keys(sources).length === 0) {
     return (
-      <EmptyState
-        icon={Search}
-        variant="no-results"
-        title="No sources returned"
-        description="No connections returned results for this lookup. Verify the value and try again."
-      />
+      <EmptyState icon={Search} variant="no-results" title="No sources returned" description="No connections returned results for this lookup. Verify the value and try again." />
     )
   }
 
@@ -403,13 +320,7 @@ function PhoneNumberTab() {
           </div>
         )}
       </div>
-      <LookupResults
-        sources={query.data?.sources}
-        isLoading={query.isFetching}
-        isError={query.isError}
-        error={query.error}
-        hasSearched={query.isSuccess || query.isError}
-      />
+      <LookupResults sources={query.data?.sources} isLoading={query.isFetching} isError={query.isError} error={query.error} hasSearched={query.isSuccess || query.isError} />
     </div>
   )
 }
@@ -479,13 +390,7 @@ function ExtensionTab() {
           </div>
         )}
       </div>
-      <LookupResults
-        sources={query.data?.sources}
-        isLoading={query.isFetching}
-        isError={query.isError}
-        error={query.error}
-        hasSearched={query.isSuccess || query.isError}
-      />
+      <LookupResults sources={query.data?.sources} isLoading={query.isFetching} isError={query.isError} error={query.error} hasSearched={query.isSuccess || query.isError} />
     </div>
   )
 }
@@ -555,13 +460,7 @@ function DeviceTab() {
           </div>
         )}
       </div>
-      <LookupResults
-        sources={query.data?.sources}
-        isLoading={query.isFetching}
-        isError={query.isError}
-        error={query.error}
-        hasSearched={query.isSuccess || query.isError}
-      />
+      <LookupResults sources={query.data?.sources} isLoading={query.isFetching} isError={query.isError} error={query.error} hasSearched={query.isSuccess || query.isError} />
     </div>
   )
 }
@@ -585,10 +484,7 @@ function parseBatchInput(raw: string): string[] {
     .filter((line) => line.length > 0)
 }
 
-async function executeSingleLookup(
-  type: BatchLookupType,
-  value: string,
-): Promise<{ sources?: Record<string, SourceResult>; error?: string }> {
+async function executeSingleLookup(type: BatchLookupType, value: string): Promise<{ sources?: Record<string, SourceResult>; error?: string }> {
   try {
     if (type === "phone") {
       const res = await gatewayLookupNumber({ path: { phone_number: value } })
@@ -630,11 +526,8 @@ function escapeCsvField(value: string): string {
 }
 
 function exportBatchCsv(results: BatchResultEntry[], lookupType: BatchLookupType) {
-  const headerLabel =
-    lookupType === "phone" ? "Phone Number" : lookupType === "extension" ? "Extension" : "MAC Address"
-  const rows = [
-    [headerLabel, "Status", "Summary", "Sources", "Error"].map(escapeCsvField).join(","),
-  ]
+  const headerLabel = lookupType === "phone" ? "Phone Number" : lookupType === "extension" ? "Extension" : "MAC Address"
+  const rows = [[headerLabel, "Status", "Summary", "Sources", "Error"].map(escapeCsvField).join(",")]
   for (const r of results) {
     const sourcesDetail = r.sources
       ? Object.entries(r.sources)
@@ -648,9 +541,7 @@ function exportBatchCsv(results: BatchResultEntry[], lookupType: BatchLookupType
           })
           .join(" | ")
       : ""
-    rows.push(
-      [r.input, r.status, r.summary, sourcesDetail, r.error ?? ""].map(escapeCsvField).join(","),
-    )
+    rows.push([r.input, r.status, r.summary, sourcesDetail, r.error ?? ""].map(escapeCsvField).join(","))
   }
   const blob = new Blob([rows.join("\n")], { type: "text/csv;charset=utf-8;" })
   const url = URL.createObjectURL(blob)
@@ -728,9 +619,7 @@ function BatchTab() {
     for (let i = 0; i < entries.length; i++) {
       if (abortRef.current) break
 
-      setResults((prev) =>
-        prev.map((r, idx) => (idx === i ? { ...r, status: "loading" } : r)),
-      )
+      setResults((prev) => prev.map((r, idx) => (idx === i ? { ...r, status: "loading" } : r)))
 
       const { sources, error } = await executeSingleLookup(lookupType, entries[i])
 
@@ -766,9 +655,7 @@ function BatchTab() {
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base">Batch Lookup</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Look up multiple values at once. Enter one value per line.
-          </p>
+          <p className="text-sm text-muted-foreground">Look up multiple values at once. Enter one value per line.</p>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
@@ -853,10 +740,7 @@ function BatchTab() {
                 <span>{Math.round((progress.completed / progress.total) * 100)}%</span>
               </div>
               <div className="h-2 w-full overflow-hidden rounded-full bg-secondary">
-                <div
-                  className="h-full bg-primary transition-all duration-300 ease-out"
-                  style={{ width: `${(progress.completed / progress.total) * 100}%` }}
-                />
+                <div className="h-full bg-primary transition-all duration-300 ease-out" style={{ width: `${(progress.completed / progress.total) * 100}%` }} />
               </div>
             </div>
           )}
@@ -870,8 +754,7 @@ function BatchTab() {
               <CardTitle className="text-base">Results</CardTitle>
               {!isRunning && (
                 <p className="text-sm text-muted-foreground">
-                  {completedResults.filter((r) => r.status === "ok").length} succeeded,{" "}
-                  {completedResults.filter((r) => r.status === "error").length} failed
+                  {completedResults.filter((r) => r.status === "ok").length} succeeded, {completedResults.filter((r) => r.status === "error").length} failed
                 </p>
               )}
             </div>

@@ -1,15 +1,8 @@
 import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
-import { useEffect, useMemo, useRef, useState } from "react"
 import { AlertCircle, AlertTriangle, Loader2 } from "lucide-react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { EmptyState } from "@/components/ui/empty-state"
@@ -19,8 +12,8 @@ import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-lay
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
-import { useTeam, useUpdateTeam } from "@/lib/api/hooks/teams"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { useTeam, useUpdateTeam } from "@/lib/api/hooks/teams"
 import { cn } from "@/lib/utils"
 
 // ── Field limits ──────────────────────────────────────────────────────
@@ -88,11 +81,7 @@ function EditTeamPage() {
   const formDirty = useMemo(() => {
     if (!data || !initialized) return false
     const originalTags = (data.tags ?? []).map((t: { name: string }) => t.name).join(", ")
-    return (
-      name !== data.name ||
-      description !== (data.description ?? "") ||
-      tagsInput !== originalTags
-    )
+    return name !== data.name || description !== (data.description ?? "") || tagsInput !== originalTags
   }, [name, description, tagsInput, data, initialized])
 
   // Ref to skip blocking after a successful submit
@@ -202,7 +191,11 @@ function EditTeamPage() {
             icon={AlertCircle}
             title="Unable to load team"
             description="Something went wrong. Please try again."
-            action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+            action={
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
+                Try again
+              </Button>
+            }
           />
         </PageSection>
       </PageContainer>
@@ -234,7 +227,9 @@ function EditTeamPage() {
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link to="/teams/$teamId" params={{ teamId }}>{data.name}</Link>
+                  <Link to="/teams/$teamId" params={{ teamId }}>
+                    {data.name}
+                  </Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
@@ -248,90 +243,84 @@ function EditTeamPage() {
 
       <PageSection>
         <SectionErrorBoundary name="Edit Team Form">
-        <Card className="max-w-2xl">
-          <CardHeader>
-            <CardTitle className="text-lg">Team Details</CardTitle>
-            <CardDescription>
-              Fields marked with <span className="text-destructive">*</span> are required.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Name */}
-              <div className="space-y-2">
-                <Label htmlFor="team-name">
-                  Name <RequiredMark />
-                </Label>
-                <Input
-                  id="team-name"
-                  placeholder="e.g., Engineering"
-                  value={name}
-                  onChange={(e) => handleNameChange(e.target.value)}
-                  onBlur={handleNameBlur}
-                  aria-invalid={!!nameError}
-                  maxLength={NAME_MAX}
-                  required
-                />
-                <div className="flex items-center justify-between">
-                  {nameError ? (
-                    <FieldError message={nameError} />
-                  ) : (
-                    <FieldHint>A descriptive name for the team.</FieldHint>
-                  )}
-                  <p className={cn("shrink-0 text-xs", name.length >= NAME_MAX ? "text-destructive" : name.length >= NAME_MAX * 0.8 ? "text-amber-500" : "text-muted-foreground")}>
-                    {name.length}/{NAME_MAX}
-                  </p>
+          <Card className="max-w-2xl">
+            <CardHeader>
+              <CardTitle className="text-lg">Team Details</CardTitle>
+              <CardDescription>
+                Fields marked with <span className="text-destructive">*</span> are required.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Name */}
+                <div className="space-y-2">
+                  <Label htmlFor="team-name">
+                    Name <RequiredMark />
+                  </Label>
+                  <Input
+                    id="team-name"
+                    placeholder="e.g., Engineering"
+                    value={name}
+                    onChange={(e) => handleNameChange(e.target.value)}
+                    onBlur={handleNameBlur}
+                    aria-invalid={!!nameError}
+                    maxLength={NAME_MAX}
+                    required
+                  />
+                  <div className="flex items-center justify-between">
+                    {nameError ? <FieldError message={nameError} /> : <FieldHint>A descriptive name for the team.</FieldHint>}
+                    <p
+                      className={cn("shrink-0 text-xs", name.length >= NAME_MAX ? "text-destructive" : name.length >= NAME_MAX * 0.8 ? "text-amber-500" : "text-muted-foreground")}
+                    >
+                      {name.length}/{NAME_MAX}
+                    </p>
+                  </div>
                 </div>
-              </div>
 
-              {/* Description */}
-              <div className="space-y-2">
-                <Label htmlFor="team-description">Description</Label>
-                <Textarea
-                  id="team-description"
-                  placeholder="Optional description of this team"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  maxLength={DESC_MAX}
-                  rows={3}
-                />
-                <div className="flex items-center justify-between">
-                  <FieldHint>Optional notes about the purpose of this team.</FieldHint>
-                  <p className={cn("shrink-0 text-xs", description.length >= DESC_MAX ? "text-destructive" : description.length >= DESC_MAX * 0.8 ? "text-amber-500" : "text-muted-foreground")}>
-                    {description.length}/{DESC_MAX}
-                  </p>
+                {/* Description */}
+                <div className="space-y-2">
+                  <Label htmlFor="team-description">Description</Label>
+                  <Textarea
+                    id="team-description"
+                    placeholder="Optional description of this team"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    maxLength={DESC_MAX}
+                    rows={3}
+                  />
+                  <div className="flex items-center justify-between">
+                    <FieldHint>Optional notes about the purpose of this team.</FieldHint>
+                    <p
+                      className={cn(
+                        "shrink-0 text-xs",
+                        description.length >= DESC_MAX ? "text-destructive" : description.length >= DESC_MAX * 0.8 ? "text-amber-500" : "text-muted-foreground",
+                      )}
+                    >
+                      {description.length}/{DESC_MAX}
+                    </p>
+                  </div>
                 </div>
-              </div>
 
-              {/* Tags */}
-              <div className="space-y-2">
-                <Label htmlFor="team-tags">Tags</Label>
-                <Input
-                  id="team-tags"
-                  placeholder="e.g., engineering, backend, platform"
-                  value={tagsInput}
-                  onChange={(e) => setTagsInput(e.target.value)}
-                />
-                <FieldHint>Comma-separated list of tags to categorize this team.</FieldHint>
-              </div>
+                {/* Tags */}
+                <div className="space-y-2">
+                  <Label htmlFor="team-tags">Tags</Label>
+                  <Input id="team-tags" placeholder="e.g., engineering, backend, platform" value={tagsInput} onChange={(e) => setTagsInput(e.target.value)} />
+                  <FieldHint>Comma-separated list of tags to categorize this team.</FieldHint>
+                </div>
 
-              {/* Submit */}
-              <div className="flex items-center justify-end gap-2 pt-2">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={() => router.navigate({ to: "/teams/$teamId", params: { teamId } })}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={!isValid || updateTeam.isPending}>
-                  {updateTeam.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Save Changes
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+                {/* Submit */}
+                <div className="flex items-center justify-end gap-2 pt-2">
+                  <Button type="button" variant="ghost" onClick={() => router.navigate({ to: "/teams/$teamId", params: { teamId } })}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={!isValid || updateTeam.isPending}>
+                    {updateTeam.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Save Changes
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
         </SectionErrorBoundary>
       </PageSection>
 

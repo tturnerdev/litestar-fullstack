@@ -1,17 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
-import {
-  Cable,
-  Calendar,
-  ChevronRight,
-  FileText,
-  Headset,
-  type LucideIcon,
-  MapPin,
-  Monitor,
-  Phone,
-  Tag,
-} from "lucide-react"
+import { Cable, Calendar, ChevronRight, FileText, Headset, type LucideIcon, MapPin, Monitor, Phone, Tag } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useConnections } from "@/lib/api/hooks/connections"
@@ -167,9 +156,7 @@ export function FeatureAreasGrid() {
             >
               <Card className="group cursor-pointer border-border/40 transition-all hover:border-border hover:shadow-sm">
                 <CardContent className="flex items-center gap-4 p-4">
-                  <div
-                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors ${area.iconBg} ${area.iconBgHover} ${area.iconText}`}
-                  >
+                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors ${area.iconBg} ${area.iconBgHover} ${area.iconText}`}>
                     <area.icon className="h-5 w-5" />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -183,9 +170,7 @@ export function FeatureAreasGrid() {
                             0 <span className="text-primary/60">Set up</span>
                           </span>
                         ) : (
-                          <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground animate-in fade-in duration-500">
-                            {count.total}
-                          </span>
+                          <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground animate-in fade-in duration-500">{count.total}</span>
                         )
                       ) : null}
                     </div>

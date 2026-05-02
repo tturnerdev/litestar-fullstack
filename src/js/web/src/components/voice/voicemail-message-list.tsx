@@ -21,6 +21,7 @@ import { nextSortDirection, SortableHeader, type SortDirection } from "@/compone
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { VoicemailPlayer } from "@/components/voice/voicemail-player"
+import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import {
   useBulkDeleteVoicemailMessages,
   useBulkMarkVoicemailRead,
@@ -31,7 +32,6 @@ import {
 } from "@/lib/api/hooks/voice"
 import { formatDateTime, formatFullDateTime } from "@/lib/date-utils"
 import { formatDuration } from "@/lib/format-utils"
-import { useDebouncedValue } from "@/hooks/use-debounced-value"
 
 const PAGE_SIZE = 15
 
@@ -75,11 +75,7 @@ export function VoicemailMessageList({ extensionId }: VoicemailMessageListProps)
     // Filter by search
     if (debouncedSearch) {
       const q = debouncedSearch.toLowerCase()
-      items = items.filter(
-        (m) =>
-          (m.callerName && m.callerName.toLowerCase().includes(q)) ||
-          m.callerNumber.toLowerCase().includes(q),
-      )
+      items = items.filter((m) => (m.callerName && m.callerName.toLowerCase().includes(q)) || m.callerNumber.toLowerCase().includes(q))
     }
 
     return items
@@ -154,7 +150,11 @@ export function VoicemailMessageList({ extensionId }: VoicemailMessageListProps)
         icon={AlertCircle}
         title="Unable to load voicemail messages"
         description="Something went wrong. Please try again."
-        action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+        action={
+          <Button variant="outline" size="sm" onClick={() => refetch()}>
+            Try again
+          </Button>
+        }
       />
     )
   }
@@ -177,9 +177,7 @@ export function VoicemailMessageList({ extensionId }: VoicemailMessageListProps)
   function handleBulkMarkUnread() {
     const ids = Array.from(selectedIds)
     // Use individual mutations for mark-as-unread since the bulk hook only marks as read
-    Promise.all(
-      ids.map((messageId) => markReadMutation.mutateAsync({ messageId, isRead: false })),
-    ).then(() => setSelectedIds(new Set()))
+    Promise.all(ids.map((messageId) => markReadMutation.mutateAsync({ messageId, isRead: false }))).then(() => setSelectedIds(new Set()))
   }
 
   function restoreFocusToSearch() {
@@ -252,9 +250,7 @@ export function VoicemailMessageList({ extensionId }: VoicemailMessageListProps)
         <div className="flex flex-row items-center justify-between">
           <div className="flex items-center gap-3">
             <CardTitle>Messages ({data.total})</CardTitle>
-            {unreadCount > 0 && (
-              <Badge variant="secondary">{unreadCount} unread</Badge>
-            )}
+            {unreadCount > 0 && <Badge variant="secondary">{unreadCount} unread</Badge>}
           </div>
         </div>
 
@@ -262,12 +258,7 @@ export function VoicemailMessageList({ extensionId }: VoicemailMessageListProps)
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative max-w-sm flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Search by caller name or number..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 pr-8"
-            />
+            <Input placeholder="Search by caller name or number..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 pr-8" />
             {search && (
               <button
                 type="button"
@@ -297,38 +288,19 @@ export function VoicemailMessageList({ extensionId }: VoicemailMessageListProps)
           <div className="flex items-center gap-2 rounded-md border border-border/60 bg-muted/30 px-3 py-2">
             <Badge variant="outline">{selectedCount} selected</Badge>
             <div className="ml-auto flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleBulkMarkRead}
-                disabled={bulkMarkReadMutation.isPending}
-              >
+              <Button variant="outline" size="sm" onClick={handleBulkMarkRead} disabled={bulkMarkReadMutation.isPending}>
                 <MailOpen className="mr-1 h-4 w-4" />
                 Mark as read
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleBulkMarkUnread}
-                disabled={markReadMutation.isPending}
-              >
+              <Button variant="outline" size="sm" onClick={handleBulkMarkUnread} disabled={markReadMutation.isPending}>
                 <Mail className="mr-1 h-4 w-4" />
                 Mark as unread
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setBulkDeleteOpen(true)}
-                disabled={bulkDeleteMutation.isPending}
-              >
+              <Button variant="outline" size="sm" onClick={() => setBulkDeleteOpen(true)} disabled={bulkDeleteMutation.isPending}>
                 <Trash2 className="mr-1 h-4 w-4" />
                 Delete selected
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setSelectedIds(new Set())}
-              >
+              <Button variant="ghost" size="sm" onClick={() => setSelectedIds(new Set())}>
                 <X className="mr-1 h-3.5 w-3.5" />
                 Clear
               </Button>
@@ -348,11 +320,7 @@ export function VoicemailMessageList({ extensionId }: VoicemailMessageListProps)
             icon={Search}
             variant="no-results"
             title="No matching messages"
-            description={
-              debouncedSearch
-                ? `No messages match "${debouncedSearch}". Try a different search term.`
-                : "No unread messages found."
-            }
+            description={debouncedSearch ? `No messages match "${debouncedSearch}". Try a different search term.` : "No unread messages found."}
             action={
               <Button
                 variant="outline"
@@ -373,35 +341,12 @@ export function VoicemailMessageList({ extensionId }: VoicemailMessageListProps)
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-10">
-                      <Checkbox
-                        checked={allSelected}
-                        indeterminate={someSelected && !allSelected}
-                        onChange={toggleAll}
-                        aria-label="Select all messages"
-                      />
+                      <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all messages" />
                     </TableHead>
                     <TableHead className="w-10" />
-                    <SortableHeader
-                      label="Caller"
-                      sortKey="caller"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                    />
-                    <SortableHeader
-                      label="Duration"
-                      sortKey="duration"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                    />
-                    <SortableHeader
-                      label="Received"
-                      sortKey="received"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                    />
+                    <SortableHeader label="Caller" sortKey="caller" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                    <SortableHeader label="Duration" sortKey="duration" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                    <SortableHeader label="Received" sortKey="received" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
                     <TableHead>Transcription</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
@@ -444,7 +389,12 @@ export function VoicemailMessageList({ extensionId }: VoicemailMessageListProps)
       </CardContent>
 
       {/* Bulk delete confirmation */}
-      <AlertDialog open={bulkDeleteOpen} onOpenChange={(open) => { if (!bulkDeleteMutation.isPending) setBulkDeleteOpen(open) }}>
+      <AlertDialog
+        open={bulkDeleteOpen}
+        onOpenChange={(open) => {
+          if (!bulkDeleteMutation.isPending) setBulkDeleteOpen(open)
+        }}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2 text-destructive">
@@ -452,8 +402,7 @@ export function VoicemailMessageList({ extensionId }: VoicemailMessageListProps)
               Delete voicemail messages
             </AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete {selectedIds.size} voicemail{" "}
-              {selectedIds.size === 1 ? "message" : "messages"}. This action cannot be undone.
+              This will permanently delete {selectedIds.size} voicemail {selectedIds.size === 1 ? "message" : "messages"}. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -480,24 +429,23 @@ export function VoicemailMessageList({ extensionId }: VoicemailMessageListProps)
       </AlertDialog>
 
       {/* Single delete confirmation */}
-      <AlertDialog open={singleDeleteId !== null} onOpenChange={(open) => { if (!open && !deleteMutation.isPending) setSingleDeleteId(null) }}>
+      <AlertDialog
+        open={singleDeleteId !== null}
+        onOpenChange={(open) => {
+          if (!open && !deleteMutation.isPending) setSingleDeleteId(null)
+        }}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2 text-destructive">
               <AlertTriangle className="size-5" />
               Delete voicemail
             </AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete this voicemail message. This action cannot be undone.
-            </AlertDialogDescription>
+            <AlertDialogDescription>This will permanently delete this voicemail message. This action cannot be undone.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={deleteMutation.isPending}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteConfirm}
-              disabled={deleteMutation.isPending}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
+            <AlertDialogAction onClick={handleDeleteConfirm} disabled={deleteMutation.isPending} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               {deleteMutation.isPending ? (
                 <>
                   <Loader2 className="mr-1 size-4 animate-spin" />
@@ -530,11 +478,7 @@ interface MessageRowProps {
 
 function MessageRow({ message, isExpanded, isSelected, isEvenRow, onExpand, onDelete, onToggleRead, onToggleSelect }: MessageRowProps) {
   const callerDisplay = message.callerName ?? message.callerNumber
-  const transcriptionPreview = message.transcription
-    ? message.transcription.length > 60
-      ? `${message.transcription.slice(0, 60)}...`
-      : message.transcription
-    : null
+  const transcriptionPreview = message.transcription ? (message.transcription.length > 60 ? `${message.transcription.slice(0, 60)}...` : message.transcription) : null
 
   return (
     <>
@@ -562,9 +506,7 @@ function MessageRow({ message, isExpanded, isSelected, isEvenRow, onExpand, onDe
         <TableCell>
           <div>
             <span className={!message.isRead ? "font-semibold" : ""}>{callerDisplay}</span>
-            {message.callerName && (
-              <p className="font-mono text-xs text-muted-foreground">{message.callerNumber}</p>
-            )}
+            {message.callerName && <p className="font-mono text-xs text-muted-foreground">{message.callerNumber}</p>}
           </div>
         </TableCell>
         <TableCell className="tabular-nums">{formatDuration(message.durationSeconds)}</TableCell>
@@ -580,7 +522,11 @@ function MessageRow({ message, isExpanded, isSelected, isEvenRow, onExpand, onDe
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-            {message.isUrgent && <Badge variant="destructive" className="text-xs">Urgent</Badge>}
+            {message.isUrgent && (
+              <Badge variant="destructive" className="text-xs">
+                Urgent
+              </Badge>
+            )}
           </div>
         </TableCell>
         <TableCell className="max-w-xs text-sm text-muted-foreground">
@@ -630,10 +576,7 @@ function MessageRow({ message, isExpanded, isSelected, isEvenRow, onExpand, onDe
         <TableRow>
           <TableCell colSpan={7} className="bg-muted/30 px-6 py-4">
             <div className="space-y-4">
-              <VoicemailPlayer
-                audioUrl={message.audioFilePath}
-                durationSeconds={message.durationSeconds}
-              />
+              <VoicemailPlayer audioUrl={message.audioFilePath} durationSeconds={message.durationSeconds} />
               {message.transcription && (
                 <div className="space-y-1">
                   <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Transcription</p>

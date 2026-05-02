@@ -1,13 +1,4 @@
-import {
-  ChevronLeft,
-  ChevronRight,
-  Download,
-  FileText,
-  Maximize2,
-  X,
-  ZoomIn,
-  ZoomOut,
-} from "lucide-react"
+import { ChevronLeft, ChevronRight, Download, FileText, Maximize2, X, ZoomIn, ZoomOut } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -96,7 +87,9 @@ export function AttachmentPreview({ attachment, onClose, onPrev, onNext }: Attac
         <div className="flex items-center justify-between border-b px-4 py-3">
           <div className="flex items-center gap-2 min-w-0">
             <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
-            <h3 className="truncate text-sm font-medium" title={attachment.fileName}>{attachment.fileName}</h3>
+            <h3 className="truncate text-sm font-medium" title={attachment.fileName}>
+              {attachment.fileName}
+            </h3>
           </div>
           <div className="flex items-center gap-2">
             <Tooltip>
@@ -133,31 +126,17 @@ export function AttachmentPreview({ attachment, onClose, onPrev, onNext }: Attac
             <div className="flex items-center gap-1">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 w-7 p-0"
-                    onClick={handleZoomOut}
-                    disabled={zoom <= MIN_ZOOM}
-                  >
+                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={handleZoomOut} disabled={zoom <= MIN_ZOOM}>
                     <ZoomOut className="h-3.5 w-3.5" />
                     <span className="sr-only">Zoom out</span>
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Zoom out (-)</TooltipContent>
               </Tooltip>
-              <span className="min-w-[3rem] text-center text-xs text-muted-foreground">
-                {Math.round(zoom * 100)}%
-              </span>
+              <span className="min-w-[3rem] text-center text-xs text-muted-foreground">{Math.round(zoom * 100)}%</span>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 w-7 p-0"
-                    onClick={handleZoomIn}
-                    disabled={zoom >= MAX_ZOOM}
-                  >
+                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={handleZoomIn} disabled={zoom >= MAX_ZOOM}>
                     <ZoomIn className="h-3.5 w-3.5" />
                     <span className="sr-only">Zoom in</span>
                   </Button>
@@ -166,13 +145,7 @@ export function AttachmentPreview({ attachment, onClose, onPrev, onNext }: Attac
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 w-7 p-0"
-                    onClick={handleFitToWindow}
-                    disabled={zoom === DEFAULT_ZOOM}
-                  >
+                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={handleFitToWindow} disabled={zoom === DEFAULT_ZOOM}>
                     <Maximize2 className="h-3.5 w-3.5" />
                     <span className="sr-only">Fit to window</span>
                   </Button>
@@ -234,12 +207,7 @@ export function AttachmentPreview({ attachment, onClose, onPrev, onNext }: Attac
           {isPdf && (
             <div className="relative min-h-[200px]">
               {!isLoaded && <Skeleton className="absolute inset-0 rounded" />}
-              <iframe
-                src={downloadUrl}
-                title={attachment.fileName}
-                className="h-[70vh] w-full rounded"
-                onLoad={() => setIsLoaded(true)}
-              />
+              <iframe src={downloadUrl} title={attachment.fileName} className="h-[70vh] w-full rounded" onLoad={() => setIsLoaded(true)} />
             </div>
           )}
           {!isImage && !isPdf && (
@@ -256,15 +224,15 @@ export function AttachmentPreview({ attachment, onClose, onPrev, onNext }: Attac
             <kbd className="rounded bg-muted px-1 py-0.5 font-mono text-[10px]">Esc</kbd> close
             {isImage && (
               <>
-                {" "}&middot;{" "}
-                <kbd className="rounded bg-muted px-1 py-0.5 font-mono text-[10px]">+</kbd>
+                {" "}
+                &middot; <kbd className="rounded bg-muted px-1 py-0.5 font-mono text-[10px]">+</kbd>
                 <kbd className="rounded bg-muted px-1 py-0.5 font-mono text-[10px]">-</kbd> zoom
               </>
             )}
             {(onPrev || onNext) && (
               <>
-                {" "}&middot;{" "}
-                <kbd className="rounded bg-muted px-1 py-0.5 font-mono text-[10px]">&larr;</kbd>
+                {" "}
+                &middot; <kbd className="rounded bg-muted px-1 py-0.5 font-mono text-[10px]">&larr;</kbd>
                 <kbd className="rounded bg-muted px-1 py-0.5 font-mono text-[10px]">&rarr;</kbd> navigate
               </>
             )}

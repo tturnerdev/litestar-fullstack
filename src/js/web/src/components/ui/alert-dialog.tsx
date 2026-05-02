@@ -1,20 +1,9 @@
 "use client"
 
-import * as React from "react"
-
-import { cn } from "@/lib/utils"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogOverlay,
-  DialogPortal,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
+import type * as React from "react"
 import { buttonVariants } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogPortal, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { cn } from "@/lib/utils"
 
 /**
  * AlertDialog built on top of the existing Dialog primitive.

@@ -1,7 +1,7 @@
 import { Check, Copy, ExternalLink } from "lucide-react"
 import { useId, useState } from "react"
-import Markdown from "react-markdown"
 import type { Components } from "react-markdown"
+import Markdown from "react-markdown"
 import rehypeSanitize from "rehype-sanitize"
 import remarkGfm from "remark-gfm"
 import { cn } from "@/lib/utils"
@@ -23,20 +23,14 @@ function CodeBlock({ className, children }: { className?: string; children?: Rea
 
   return (
     <div className="group/code relative">
-      <pre className={cn("overflow-x-auto rounded-lg border bg-muted/50 p-4 text-sm", className)}>
-        {children}
-      </pre>
+      <pre className={cn("overflow-x-auto rounded-lg border bg-muted/50 p-4 text-sm", className)}>{children}</pre>
       <button
         type="button"
         onClick={handleCopy}
         className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-md border bg-background opacity-0 shadow-sm transition-opacity group-hover/code:opacity-100 hover:bg-muted focus:opacity-100"
         title="Copy code"
       >
-        {copied ? (
-          <Check className="h-3.5 w-3.5 text-green-500" />
-        ) : (
-          <Copy className="h-3.5 w-3.5 text-muted-foreground" />
-        )}
+        {copied ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5 text-muted-foreground" />}
       </button>
     </div>
   )
@@ -66,8 +60,7 @@ function useMarkdownComponents(): Components {
     // -- Code: inline vs block --
     code({ className, children, ...props }) {
       const match = /language-(\w+)/.exec(className ?? "")
-      const isBlock =
-        typeof children === "string" && children.includes("\n")
+      const isBlock = typeof children === "string" && children.includes("\n")
 
       if (isBlock || match) {
         return (
@@ -78,13 +71,7 @@ function useMarkdownComponents(): Components {
       }
 
       return (
-        <code
-          className={cn(
-            "rounded bg-muted px-1.5 py-0.5 font-mono text-[0.85em]",
-            className,
-          )}
-          {...props}
-        >
+        <code className={cn("rounded bg-muted px-1.5 py-0.5 font-mono text-[0.85em]", className)} {...props}>
           {children}
         </code>
       )
@@ -98,13 +85,7 @@ function useMarkdownComponents(): Components {
     // -- Blockquote --
     blockquote({ children, className, ...props }) {
       return (
-        <blockquote
-          className={cn(
-            "border-l-4 border-primary/30 bg-muted/30 pl-4 py-2 italic text-muted-foreground [&>p]:mb-0",
-            className,
-          )}
-          {...props}
-        >
+        <blockquote className={cn("border-l-4 border-primary/30 bg-muted/30 pl-4 py-2 italic text-muted-foreground [&>p]:mb-0", className)} {...props}>
           {children}
         </blockquote>
       )
@@ -114,10 +95,7 @@ function useMarkdownComponents(): Components {
     table({ children, className, ...props }) {
       return (
         <div className="my-4 w-full overflow-x-auto rounded-lg border">
-          <table
-            className={cn("w-full border-collapse text-sm", className)}
-            {...props}
-          >
+          <table className={cn("w-full border-collapse text-sm", className)} {...props}>
             {children}
           </table>
         </div>
@@ -132,23 +110,14 @@ function useMarkdownComponents(): Components {
     },
     tr({ children, className, ...props }) {
       return (
-        <tr
-          className={cn("border-b last:border-0 even:bg-muted/30", className)}
-          {...props}
-        >
+        <tr className={cn("border-b last:border-0 even:bg-muted/30", className)} {...props}>
           {children}
         </tr>
       )
     },
     th({ children, className, ...props }) {
       return (
-        <th
-          className={cn(
-            "px-3 py-2 text-left font-medium text-muted-foreground",
-            className,
-          )}
-          {...props}
-        >
+        <th className={cn("px-3 py-2 text-left font-medium text-muted-foreground", className)} {...props}>
           {children}
         </th>
       )
@@ -163,23 +132,17 @@ function useMarkdownComponents(): Components {
 
     // -- Links: external icon for external URLs --
     a({ href, children, className, ...props }) {
-      const isExternal =
-        href != null && (href.startsWith("http://") || href.startsWith("https://"))
+      const isExternal = href != null && (href.startsWith("http://") || href.startsWith("https://"))
 
       return (
         <a
           href={href}
-          className={cn(
-            "text-primary underline decoration-primary/30 underline-offset-2 hover:decoration-primary/60 transition-colors",
-            className,
-          )}
+          className={cn("text-primary underline decoration-primary/30 underline-offset-2 hover:decoration-primary/60 transition-colors", className)}
           {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
           {...props}
         >
           {children}
-          {isExternal && (
-            <ExternalLink className="ml-1 inline-block h-3 w-3 align-baseline" />
-          )}
+          {isExternal && <ExternalLink className="ml-1 inline-block h-3 w-3 align-baseline" />}
         </a>
       )
     },
@@ -192,19 +155,9 @@ function useMarkdownComponents(): Components {
 
       if (isChecked || isUnchecked) {
         return (
-          <li
-            className={cn("flex items-start gap-2 list-none", className)}
-            {...props}
-          >
-            <input
-              type="checkbox"
-              checked={isChecked}
-              readOnly
-              className="mt-1 h-4 w-4 rounded border-muted-foreground/40 accent-primary pointer-events-none"
-            />
-            <span className={isChecked ? "line-through text-muted-foreground" : ""}>
-              {stripCheckbox(children)}
-            </span>
+          <li className={cn("flex items-start gap-2 list-none", className)} {...props}>
+            <input type="checkbox" checked={isChecked} readOnly className="mt-1 h-4 w-4 rounded border-muted-foreground/40 accent-primary pointer-events-none" />
+            <span className={isChecked ? "line-through text-muted-foreground" : ""}>{stripCheckbox(children)}</span>
           </li>
         )
       }
@@ -230,15 +183,8 @@ function useMarkdownComponents(): Components {
 // Heading factory
 // ---------------------------------------------------------------------------
 
-function createHeading(
-  Tag: "h1" | "h2" | "h3" | "h4" | "h5" | "h6",
-  baseId: string,
-): Components[typeof Tag] {
-  function HeadingComponent({
-    children,
-    className,
-    ...props
-  }: React.JSX.IntrinsicElements[typeof Tag]) {
+function createHeading(Tag: "h1" | "h2" | "h3" | "h4" | "h5" | "h6", baseId: string): Components[typeof Tag] {
+  function HeadingComponent({ children, className, ...props }: React.JSX.IntrinsicElements[typeof Tag]) {
     const text = extractText(children)
     const slug = `${baseId}-${text
       .toLowerCase()
@@ -312,11 +258,7 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
         className,
       )}
     >
-      <Markdown
-        remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeSanitize]}
-        components={components}
-      >
+      <Markdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]} components={components}>
         {content}
       </Markdown>
     </div>

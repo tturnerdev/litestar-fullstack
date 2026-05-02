@@ -115,13 +115,7 @@ export function BulkActionBar({ selectedCount, selectedIds, onClearSelection, ac
             ) : (
               <div className="flex items-center gap-2">
                 {actions.map((action) => (
-                  <Button
-                    key={action.key}
-                    variant={action.variant ?? "outline"}
-                    size="sm"
-                    onClick={() => handleActionClick(action)}
-                    disabled={executing}
-                  >
+                  <Button key={action.key} variant={action.variant ?? "outline"} size="sm" onClick={() => handleActionClick(action)} disabled={executing}>
                     {action.icon}
                     {action.label}
                   </Button>
@@ -138,8 +132,7 @@ export function BulkActionBar({ selectedCount, selectedIds, onClearSelection, ac
           <AlertDialogHeader>
             <AlertDialogTitle>{pendingAction?.confirm?.title ?? "Confirm"}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete {selectedIds.length}{" "}
-              {selectedIds.length === 1 ? "item" : "items"}. This action cannot be undone.
+              This will permanently delete {selectedIds.length} {selectedIds.length === 1 ? "item" : "items"}. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -171,11 +164,7 @@ export function BulkActionBar({ selectedCount, selectedIds, onClearSelection, ac
  * @param deleteFn     - Function that deletes a single item by ID.
  * @param invalidateFn - Called once after all deletes complete.
  */
-export function createBulkDeleteAction(
-  deleteFn: (id: string) => Promise<void>,
-  invalidateFn: () => void,
-  opts?: { label?: string },
-): BulkAction {
+export function createBulkDeleteAction(deleteFn: (id: string) => Promise<void>, invalidateFn: () => void, opts?: { label?: string }): BulkAction {
   return {
     key: "delete",
     label: opts?.label ?? "Delete Selected",
@@ -213,11 +202,7 @@ export function createBulkDeleteAction(
  * @param headers  - Column definitions for the CSV.
  * @param getItems - Function that returns items matching the given IDs.
  */
-export function createExportAction<T>(
-  filename: string,
-  headers: Array<{ label: string; accessor: (row: T) => unknown }>,
-  getItems: (ids: string[]) => T[],
-): BulkAction {
+export function createExportAction<T>(filename: string, headers: Array<{ label: string; accessor: (row: T) => unknown }>, getItems: (ids: string[]) => T[]): BulkAction {
   return {
     key: "export",
     label: "Export Selected",

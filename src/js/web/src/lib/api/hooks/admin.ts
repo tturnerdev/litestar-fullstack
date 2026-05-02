@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
-import { client } from "@/lib/generated/api/client.gen"
 import {
   type AdminDeviceStats,
   type AdminDeviceSummary,
@@ -18,12 +17,12 @@ import {
   type AdminListTicketsData,
   type AdminListUsersData,
   type AdminPhoneNumberSummary,
-  type AdminTrends,
   type AdminSupportStats,
   type AdminSystemStatus,
   type AdminTeamDetail,
   type AdminTeamSummary,
   type AdminTicketSummary,
+  type AdminTrends,
   type AdminUserDetail,
   type AdminUserSummary,
   type AdminVoiceStats,
@@ -55,14 +54,15 @@ import {
   getDashboardStats,
   getDashboardTrends,
   getRecentActivity,
-  listRoles,
   type ListRolesData,
+  listRoles,
   type RecentActivity,
-  revokeRole,
   type Role,
+  revokeRole,
   type TeamRoles,
   updateTeamMember,
 } from "@/lib/generated/api"
+import { client } from "@/lib/generated/api/client.gen"
 
 export function useAdminDashboardStats() {
   return useQuery({
@@ -105,13 +105,7 @@ export function useAdminSystemStatus(options?: { refetchInterval?: number | fals
   })
 }
 
-export function useAdminUsers(params?: {
-  page?: number
-  pageSize?: number
-  search?: string
-  orderBy?: string
-  sortOrder?: "asc" | "desc"
-}) {
+export function useAdminUsers(params?: { page?: number; pageSize?: number; search?: string; orderBy?: string; sortOrder?: "asc" | "desc" }) {
   const { page = 1, pageSize = 25, search, orderBy, sortOrder } = params ?? {}
   return useQuery({
     queryKey: ["admin", "users", page, pageSize, search, orderBy, sortOrder],
@@ -130,13 +124,7 @@ export function useAdminUsers(params?: {
   })
 }
 
-export function useAdminTeams(params?: {
-  page?: number
-  pageSize?: number
-  search?: string
-  orderBy?: string
-  sortOrder?: "asc" | "desc"
-}) {
+export function useAdminTeams(params?: { page?: number; pageSize?: number; search?: string; orderBy?: string; sortOrder?: "asc" | "desc" }) {
   const { page = 1, pageSize = 25, search, orderBy, sortOrder } = params ?? {}
   return useQuery({
     queryKey: ["admin", "teams", page, pageSize, search, orderBy, sortOrder],
@@ -167,33 +155,9 @@ export function useAdminAuditLogs(params: {
   orderBy?: string
   sortOrder?: "asc" | "desc"
 }) {
-  const {
-    page = 1,
-    pageSize = 50,
-    search,
-    actions,
-    actorEmail,
-    targetTypes,
-    startDate,
-    endDate,
-    orderBy,
-    sortOrder,
-  } = params
+  const { page = 1, pageSize = 50, search, actions, actorEmail, targetTypes, startDate, endDate, orderBy, sortOrder } = params
   return useQuery({
-    queryKey: [
-      "admin",
-      "audit",
-      page,
-      pageSize,
-      search,
-      actions,
-      actorEmail,
-      targetTypes,
-      startDate,
-      endDate,
-      orderBy,
-      sortOrder,
-    ],
+    queryKey: ["admin", "audit", page, pageSize, search, actions, actorEmail, targetTypes, startDate, endDate, orderBy, sortOrder],
     queryFn: async () => {
       const query = {
         currentPage: page,
@@ -748,11 +712,7 @@ export function useAdminSupportStats() {
   })
 }
 
-export function useTargetAuditLogs(
-  targetType: string,
-  targetId: string,
-  options?: { enabled?: boolean; page?: number; pageSize?: number },
-) {
+export function useTargetAuditLogs(targetType: string, targetId: string, options?: { enabled?: boolean; page?: number; pageSize?: number }) {
   const { enabled = true, page = 1, pageSize = 25 } = options ?? {}
   return useQuery({
     queryKey: ["admin", "audit", "target", targetType, targetId, page, pageSize],

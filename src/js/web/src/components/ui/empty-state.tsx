@@ -30,18 +30,8 @@ export function EmptyState({ icon: Icon, title, description, action, variant = "
         className,
       )}
     >
-      <div
-        className={cn(
-          "mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full",
-          isNoResults ? "bg-muted/60" : "bg-primary/10",
-        )}
-      >
-        <Icon
-          className={cn(
-            "h-7 w-7",
-            isNoResults ? "text-muted-foreground/60" : "text-primary/70",
-          )}
-        />
+      <div className={cn("mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full", isNoResults ? "bg-muted/60" : "bg-primary/10")}>
+        <Icon className={cn("h-7 w-7", isNoResults ? "text-muted-foreground/60" : "text-primary/70")} />
       </div>
       <h3 className="mb-1 text-lg font-semibold tracking-tight">{title}</h3>
       <p className="mb-6 max-w-sm text-sm text-muted-foreground">{description}</p>

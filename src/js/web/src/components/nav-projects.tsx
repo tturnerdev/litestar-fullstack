@@ -68,16 +68,10 @@ export function NavProjects({
 
     return (
       <SidebarMenuItem key={item.name}>
-        <SidebarMenuButton
-          asChild
-          isActive={active}
-          className="transition-colors duration-150 hover:bg-sidebar-accent"
-        >
+        <SidebarMenuButton asChild isActive={active} className="transition-colors duration-150 hover:bg-sidebar-accent">
           <Link to={item.to} params={item.params}>
             <Avatar className="size-5 shrink-0">
-              <AvatarFallback className={`text-[9px] font-semibold ${color}`}>
-                {initials}
-              </AvatarFallback>
+              <AvatarFallback className={`text-[9px] font-semibold ${color}`}>{initials}</AvatarFallback>
             </Avatar>
             <span className="flex-1 truncate">{item.name}</span>
             {item.memberCount != null && (

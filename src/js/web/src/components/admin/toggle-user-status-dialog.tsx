@@ -50,23 +50,22 @@ export function ToggleUserStatusDialog({ userId, userEmail, userName, isActive, 
           <AlertDialogDescription asChild>
             <div className="space-y-3 text-sm text-muted-foreground">
               <p>
-                {isActive
-                  ? "Are you sure you want to deactivate "
-                  : "Are you sure you want to activate "}
-                {userName && (
-                  <span className="font-medium text-foreground">{userName}</span>
-                )}
-                {userName && " "}
-                (<span className="font-medium text-foreground">{userEmail}</span>)?
+                {isActive ? "Are you sure you want to deactivate " : "Are you sure you want to activate "}
+                {userName && <span className="font-medium text-foreground">{userName}</span>}
+                {userName && " "}(<span className="font-medium text-foreground">{userEmail}</span>)?
               </p>
 
               {/* Status transition indicator */}
               <div className="flex items-center gap-2 rounded-md border bg-muted/50 px-3 py-2 text-sm">
-                <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${isActive ? "bg-green-500/10 text-green-600" : "bg-red-500/10 text-red-600"}`}>
+                <span
+                  className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${isActive ? "bg-green-500/10 text-green-600" : "bg-red-500/10 text-red-600"}`}
+                >
                   {isActive ? "Active" : "Inactive"}
                 </span>
                 <ArrowRight className="size-3.5 text-muted-foreground" />
-                <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${isActive ? "bg-red-500/10 text-red-600" : "bg-green-500/10 text-green-600"}`}>
+                <span
+                  className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${isActive ? "bg-red-500/10 text-red-600" : "bg-green-500/10 text-green-600"}`}
+                >
                   {isActive ? "Inactive" : "Active"}
                 </span>
               </div>

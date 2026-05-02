@@ -121,21 +121,11 @@ export function TeamSettings({ team, teamId, isOwner }: TeamSettingsProps) {
         <div className="flex items-center justify-between rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-2.5">
           <p className="text-sm font-medium text-amber-700 dark:text-amber-400">You have unsaved changes</p>
           <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 gap-1.5 px-2.5 text-xs"
-              onClick={() => form.reset()}
-            >
+            <Button variant="ghost" size="sm" className="h-7 gap-1.5 px-2.5 text-xs" onClick={() => form.reset()}>
               <Undo2 className="h-3.5 w-3.5" />
               Discard
             </Button>
-            <Button
-              size="sm"
-              className="h-7 gap-1.5 px-2.5 text-xs"
-              disabled={updateMutation.isPending}
-              onClick={form.handleSubmit((data) => updateMutation.mutate(data))}
-            >
+            <Button size="sm" className="h-7 gap-1.5 px-2.5 text-xs" disabled={updateMutation.isPending} onClick={form.handleSubmit((data) => updateMutation.mutate(data))}>
               {updateMutation.isPending ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : <Save className="mr-1 h-3.5 w-3.5" />}
               Save
             </Button>
@@ -195,11 +185,7 @@ export function TeamSettings({ team, teamId, isOwner }: TeamSettingsProps) {
               />
               <div className="flex justify-end">
                 <Button type="submit" disabled={!isDirty || updateMutation.isPending} size="sm">
-                  {updateMutation.isPending ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Save className="mr-2 h-4 w-4" />
-                  )}
+                  {updateMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                   {updateMutation.isPending ? "Saving..." : "Save changes"}
                 </Button>
               </div>
@@ -222,9 +208,7 @@ export function TeamSettings({ team, teamId, isOwner }: TeamSettingsProps) {
             <div className="flex items-center justify-between rounded-lg border border-destructive/20 bg-destructive/5 p-4">
               <div className="space-y-1">
                 <p className="font-medium text-sm">Delete this team</p>
-                <p className="text-muted-foreground text-xs">
-                  Once deleted, all team data, memberships, and associated resources will be permanently removed.
-                </p>
+                <p className="text-muted-foreground text-xs">Once deleted, all team data, memberships, and associated resources will be permanently removed.</p>
               </div>
               <Button variant="destructive" size="sm" onClick={() => setDeleteDialogOpen(true)}>
                 <Trash2 className="mr-2 h-4 w-4" />
@@ -252,7 +236,9 @@ export function TeamSettings({ team, teamId, isOwner }: TeamSettingsProps) {
           <div className="rounded-lg bg-destructive/10 p-3 space-y-1.5">
             <p className="text-sm font-medium text-destructive">The following will happen:</p>
             <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-              <li>All {memberCount} member{memberCount !== 1 ? "s" : ""} will lose access</li>
+              <li>
+                All {memberCount} member{memberCount !== 1 ? "s" : ""} will lose access
+              </li>
               <li>Pending invitations will be revoked</li>
               <li>Team resources will be removed</li>
             </ul>
@@ -261,12 +247,7 @@ export function TeamSettings({ team, teamId, isOwner }: TeamSettingsProps) {
             <p className="text-sm text-muted-foreground">
               To confirm, type <strong className="text-foreground">{team.name}</strong> below:
             </p>
-            <Input
-              value={deleteConfirmation}
-              onChange={(e) => setDeleteConfirmation(e.target.value)}
-              placeholder={team.name}
-              autoComplete="off"
-            />
+            <Input value={deleteConfirmation} onChange={(e) => setDeleteConfirmation(e.target.value)} placeholder={team.name} autoComplete="off" />
           </div>
           <Separator />
           <AlertDialogFooter>

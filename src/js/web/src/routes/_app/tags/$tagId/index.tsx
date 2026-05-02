@@ -1,21 +1,8 @@
 import { createFileRoute, Link, useBlocker, useNavigate } from "@tanstack/react-router"
+import { AlertCircle, AlertTriangle, ArrowLeft, Clock, Copy, Home, Loader2, MoreHorizontal, Pencil, Save, Tags, Trash2, X } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
-import {
-  AlertCircle,
-  AlertTriangle,
-  ArrowLeft,
-  Clock,
-  Copy,
-  Home,
-  Loader2,
-  MoreHorizontal,
-  Pencil,
-  Save,
-  Tags,
-  Trash2,
-  X,
-} from "lucide-react"
+import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,34 +14,20 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { CopyButton } from "@/components/ui/copy-button"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
-import { Skeleton, SkeletonCard } from "@/components/ui/skeleton"
-import { CopyButton } from "@/components/ui/copy-button"
-import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
+import { Skeleton, SkeletonCard } from "@/components/ui/skeleton"
 import { useDocumentTitle } from "@/hooks/use-document-title"
-import { formatRelativeTime, formatDateTime } from "@/lib/date-utils"
-import { useTag, useUpdateTag, useDeleteTag } from "@/lib/api/hooks/tags"
+import { useDeleteTag, useTag, useUpdateTag } from "@/lib/api/hooks/tags"
+import { formatDateTime, formatRelativeTime } from "@/lib/date-utils"
 
 export const Route = createFileRoute("/_app/tags/$tagId/")({
   component: TagDetailPage,
@@ -71,7 +44,7 @@ function TagDetailPage() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [name, setName] = useState("")
 
-  useDocumentTitle(isLoading ? "Tag" : tag?.name ?? "Tag")
+  useDocumentTitle(isLoading ? "Tag" : (tag?.name ?? "Tag"))
 
   // Sync form data when tag loads or changes
   const syncForm = useCallback(() => {
@@ -243,10 +216,7 @@ function TagDetailPage() {
                     Edit
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    className="text-destructive focus:text-destructive"
-                    onClick={() => setShowDeleteDialog(true)}
-                  >
+                  <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setShowDeleteDialog(true)}>
                     <Trash2 className="mr-2 h-4 w-4" />
                     Delete
                   </DropdownMenuItem>
@@ -259,162 +229,136 @@ function TagDetailPage() {
         {/* Tag Details Card */}
         <PageSection>
           <SectionErrorBoundary name="Tag Details">
-          <Card className="max-w-xl">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <Tags className="h-4 w-4 text-muted-foreground" />
-                  Tag Details
-                </CardTitle>
-                <div className="flex items-center gap-2">
-                  {editing ? (
-                    <>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={handleCancel}
-                        disabled={updateTag.isPending}
-                      >
-                        <X className="mr-2 h-4 w-4" /> Cancel
-                      </Button>
-                      <Button
-                        size="sm"
-                        onClick={handleSave}
-                        disabled={updateTag.isPending || !isValid}
-                      >
-                        {updateTag.isPending ? (
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        ) : (
-                          <Save className="mr-2 h-4 w-4" />
-                        )}
-                        {updateTag.isPending ? "Saving..." : "Save changes"}
-                      </Button>
-                    </>
-                  ) : (
-                    <Button size="sm" onClick={handleEdit}>
-                      <Pencil className="mr-2 h-4 w-4" /> Edit
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {editing && formDirty && (
-                <div className="flex items-center gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-400">
-                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-500" />
-                  You have unsaved changes
-                </div>
-              )}
-
-              {/* Name */}
-              <div className="space-y-2">
-                <Label htmlFor="tag-name">Name</Label>
-                {editing ? (
-                  <>
-                    <Input
-                      id="tag-name"
-                      placeholder="e.g., Production, Priority, VIP"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      maxLength={50}
-                      autoFocus
-                    />
-                    <div className="flex items-center justify-end">
-                      <span
-                        className={`text-xs ${name.length >= 50 ? "text-destructive" : name.length > 40 ? "text-amber-500" : "text-muted-foreground"}`}
-                      >
-                        {name.length}/50
-                      </span>
-                    </div>
-                  </>
-                ) : (
+            <Card className="max-w-xl">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Tags className="h-4 w-4 text-muted-foreground" />
+                    Tag Details
+                  </CardTitle>
                   <div className="flex items-center gap-2">
-                    <Badge variant="secondary" className="text-sm">
-                      {tag.name}
-                    </Badge>
+                    {editing ? (
+                      <>
+                        <Button size="sm" variant="outline" onClick={handleCancel} disabled={updateTag.isPending}>
+                          <X className="mr-2 h-4 w-4" /> Cancel
+                        </Button>
+                        <Button size="sm" onClick={handleSave} disabled={updateTag.isPending || !isValid}>
+                          {updateTag.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                          {updateTag.isPending ? "Saving..." : "Save changes"}
+                        </Button>
+                      </>
+                    ) : (
+                      <Button size="sm" onClick={handleEdit}>
+                        <Pencil className="mr-2 h-4 w-4" /> Edit
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {editing && formDirty && (
+                  <div className="flex items-center gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-400">
+                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-500" />
+                    You have unsaved changes
                   </div>
                 )}
-              </div>
 
-              {/* Slug */}
-              <div className="space-y-2">
-                <Label>Slug</Label>
-                <p className="font-mono text-sm text-muted-foreground">
-                  {tag.slug}
-                </p>
-              </div>
-
-              {/* Tag ID */}
-              <div className="space-y-2">
-                <Label>Tag ID</Label>
-                <div className="flex items-center gap-1">
-                  <p className="font-mono text-xs text-muted-foreground">
-                    {tag.id}
-                  </p>
-                  <CopyButton value={tag.id} label="tag ID" />
+                {/* Name */}
+                <div className="space-y-2">
+                  <Label htmlFor="tag-name">Name</Label>
+                  {editing ? (
+                    <>
+                      <Input id="tag-name" placeholder="e.g., Production, Priority, VIP" value={name} onChange={(e) => setName(e.target.value)} maxLength={50} autoFocus />
+                      <div className="flex items-center justify-end">
+                        <span className={`text-xs ${name.length >= 50 ? "text-destructive" : name.length > 40 ? "text-amber-500" : "text-muted-foreground"}`}>
+                          {name.length}/50
+                        </span>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary" className="text-sm">
+                        {tag.name}
+                      </Badge>
+                    </div>
+                  )}
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+
+                {/* Slug */}
+                <div className="space-y-2">
+                  <Label>Slug</Label>
+                  <p className="font-mono text-sm text-muted-foreground">{tag.slug}</p>
+                </div>
+
+                {/* Tag ID */}
+                <div className="space-y-2">
+                  <Label>Tag ID</Label>
+                  <div className="flex items-center gap-1">
+                    <p className="font-mono text-xs text-muted-foreground">{tag.id}</p>
+                    <CopyButton value={tag.id} label="tag ID" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </SectionErrorBoundary>
         </PageSection>
 
         {/* Activity Section */}
         <PageSection>
           <SectionErrorBoundary name="Activity">
-          <Card className="max-w-xl">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-muted-foreground" />
-                Activity
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                {tag.createdAt && (
-                  <div className="space-y-1">
-                    <p className="text-xs font-medium text-muted-foreground">Created</p>
-                    <p className="text-sm">{formatRelativeTime(tag.createdAt)}</p>
-                    <p className="text-xs text-muted-foreground">{formatDateTime(tag.createdAt)}</p>
-                  </div>
-                )}
-                {tag.updatedAt && (
-                  <div className="space-y-1">
-                    <p className="text-xs font-medium text-muted-foreground">Last Updated</p>
-                    <p className="text-sm">{formatRelativeTime(tag.updatedAt)}</p>
-                    <p className="text-xs text-muted-foreground">{formatDateTime(tag.updatedAt)}</p>
-                  </div>
-                )}
-              </div>
-              <div className="border-t pt-4">
-                <EntityActivityPanel targetType="tag" targetId={tagId} />
-              </div>
-            </CardContent>
-          </Card>
+            <Card className="max-w-xl">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  Activity
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  {tag.createdAt && (
+                    <div className="space-y-1">
+                      <p className="text-xs font-medium text-muted-foreground">Created</p>
+                      <p className="text-sm">{formatRelativeTime(tag.createdAt)}</p>
+                      <p className="text-xs text-muted-foreground">{formatDateTime(tag.createdAt)}</p>
+                    </div>
+                  )}
+                  {tag.updatedAt && (
+                    <div className="space-y-1">
+                      <p className="text-xs font-medium text-muted-foreground">Last Updated</p>
+                      <p className="text-sm">{formatRelativeTime(tag.updatedAt)}</p>
+                      <p className="text-xs text-muted-foreground">{formatDateTime(tag.updatedAt)}</p>
+                    </div>
+                  )}
+                </div>
+                <div className="border-t pt-4">
+                  <EntityActivityPanel targetType="tag" targetId={tagId} />
+                </div>
+              </CardContent>
+            </Card>
           </SectionErrorBoundary>
         </PageSection>
         {/* Danger Zone */}
         <PageSection delay={0.3}>
           <SectionErrorBoundary name="Danger Zone">
-          <Card className="max-w-xl border-destructive/30">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-destructive">
-                <AlertTriangle className="h-4 w-4" />
-                Danger Zone
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-sm">Delete this tag</p>
-                  <p className="text-sm text-muted-foreground">This action cannot be undone. Any resources currently using this tag will have it removed.</p>
+            <Card className="max-w-xl border-destructive/30">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-destructive">
+                  <AlertTriangle className="h-4 w-4" />
+                  Danger Zone
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-sm">Delete this tag</p>
+                    <p className="text-sm text-muted-foreground">This action cannot be undone. Any resources currently using this tag will have it removed.</p>
+                  </div>
+                  <Button variant="destructive" size="sm" onClick={() => setShowDeleteDialog(true)}>
+                    <Trash2 className="mr-2 h-4 w-4" /> Delete
+                  </Button>
                 </div>
-                <Button variant="destructive" size="sm" onClick={() => setShowDeleteDialog(true)}>
-                  <Trash2 className="mr-2 h-4 w-4" /> Delete
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
           </SectionErrorBoundary>
         </PageSection>
       </PageContainer>
@@ -425,23 +369,13 @@ function TagDetailPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete tag &apos;{tag.name}&apos;?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this tag? This action cannot be
-              undone. Any resources currently using this tag will have it
-              removed.
+              Are you sure you want to delete this tag? This action cannot be undone. Any resources currently using this tag will have it removed.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteTag.isPending}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              disabled={deleteTag.isPending}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {deleteTag.isPending && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              )}
+            <AlertDialogCancel disabled={deleteTag.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} disabled={deleteTag.isPending} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {deleteTag.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -449,25 +383,15 @@ function TagDetailPage() {
       </AlertDialog>
 
       {/* Unsaved changes dialog */}
-      <AlertDialog
-        open={blocker.status === "blocked"}
-        onOpenChange={() => blocker.reset?.()}
-      >
+      <AlertDialog open={blocker.status === "blocked"} onOpenChange={() => blocker.reset?.()}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
-            <AlertDialogDescription>
-              You have unsaved changes to this tag. Are you sure you want to
-              leave? Your changes will be lost.
-            </AlertDialogDescription>
+            <AlertDialogDescription>You have unsaved changes to this tag. Are you sure you want to leave? Your changes will be lost.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => blocker.reset?.()}>
-              Stay on page
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={() => blocker.proceed?.()}>
-              Discard changes
-            </AlertDialogAction>
+            <AlertDialogCancel onClick={() => blocker.reset?.()}>Stay on page</AlertDialogCancel>
+            <AlertDialogAction onClick={() => blocker.proceed?.()}>Discard changes</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

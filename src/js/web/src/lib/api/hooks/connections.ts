@@ -82,8 +82,7 @@ export interface UseConnectionsOptions {
 }
 
 export function useConnections(pageOrOptions: number | UseConnectionsOptions = 1, pageSizeArg = 20) {
-  const opts: UseConnectionsOptions =
-    typeof pageOrOptions === "number" ? { page: pageOrOptions, pageSize: pageSizeArg } : pageOrOptions
+  const opts: UseConnectionsOptions = typeof pageOrOptions === "number" ? { page: pageOrOptions, pageSize: pageSizeArg } : pageOrOptions
   const { page = 1, pageSize = 20, search, teamId, orderBy, sortOrder, refetchInterval } = opts
 
   return useQuery({

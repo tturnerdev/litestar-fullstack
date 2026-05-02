@@ -5,7 +5,17 @@ import { ChevronRight, type LucideIcon } from "lucide-react"
 import { useCallback, useState } from "react"
 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuBadge, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem } from "@/components/ui/sidebar"
+import {
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuBadge,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
+} from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
 
 const NAV_STORAGE_KEY = "nav-sections-expanded"
@@ -86,20 +96,18 @@ export function NavMain({ items, label = "Platform" }: { items: NavMainItem[]; l
                   <Link to={item.to}>
                     <span className="relative shrink-0">
                       {item.icon && <item.icon />}
-                      {badgeText != null && (
-                        <span className="absolute -top-1 -right-1 hidden size-2 rounded-full bg-primary group-data-[collapsible=icon]:block" />
-                      )}
+                      {badgeText != null && <span className="absolute -top-1 -right-1 hidden size-2 rounded-full bg-primary group-data-[collapsible=icon]:block" />}
                     </span>
                     <span className="group-data-[collapsible=icon]:hidden">{item.title}</span>
                   </Link>
                 </SidebarMenuButton>
                 {badgeText != null && (
-                  <SidebarMenuBadge className={cn(
-                    "rounded-full px-1.5 text-[10px] font-semibold leading-tight",
-                    variant === "default"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-muted-foreground",
-                  )}>
+                  <SidebarMenuBadge
+                    className={cn(
+                      "rounded-full px-1.5 text-[10px] font-semibold leading-tight",
+                      variant === "default" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
+                    )}
+                  >
                     {badgeText}
                   </SidebarMenuBadge>
                 )}
@@ -109,22 +117,14 @@ export function NavMain({ items, label = "Platform" }: { items: NavMainItem[]; l
 
           const collapsibleVariant = item.badgeVariant ?? "muted"
           return (
-            <Collapsible
-              key={item.title}
-              asChild
-              open={expandedSections[item.title] ?? true}
-              onOpenChange={(open) => handleToggle(item.title, open)}
-              className="group/collapsible"
-            >
+            <Collapsible key={item.title} asChild open={expandedSections[item.title] ?? true} onOpenChange={(open) => handleToggle(item.title, open)} className="group/collapsible">
               <SidebarMenuItem>
                 <CollapsibleTrigger asChild>
                   <SidebarMenuButton asChild tooltip={item.title}>
                     <Link to={item.to}>
                       <span className="relative shrink-0">
                         {item.icon && <item.icon />}
-                        {badgeText != null && (
-                          <span className="absolute -top-1 -right-1 hidden size-2 rounded-full bg-primary group-data-[collapsible=icon]:block" />
-                        )}
+                        {badgeText != null && <span className="absolute -top-1 -right-1 hidden size-2 rounded-full bg-primary group-data-[collapsible=icon]:block" />}
                       </span>
                       <span className="group-data-[collapsible=icon]:hidden">{item.title}</span>
                       <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 group-data-[collapsible=icon]:hidden" />
@@ -132,12 +132,12 @@ export function NavMain({ items, label = "Platform" }: { items: NavMainItem[]; l
                   </SidebarMenuButton>
                 </CollapsibleTrigger>
                 {badgeText != null && (
-                  <SidebarMenuBadge className={cn(
-                    "rounded-full px-1.5 text-[10px] font-semibold leading-tight",
-                    collapsibleVariant === "default"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-muted-foreground",
-                  )}>
+                  <SidebarMenuBadge
+                    className={cn(
+                      "rounded-full px-1.5 text-[10px] font-semibold leading-tight",
+                      collapsibleVariant === "default" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
+                    )}
+                  >
                     {badgeText}
                   </SidebarMenuBadge>
                 )}

@@ -1,14 +1,5 @@
-import { useState } from "react"
 import { AlertTriangle, Loader2, Power, RefreshCw, RotateCcw, Trash2 } from "lucide-react"
-import { Button, buttonVariants } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { useState } from "react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,8 +10,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { Button, buttonVariants } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Separator } from "@/components/ui/separator"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { formatRelativeTimeShort } from "@/lib/date-utils"
 import { cn } from "@/lib/utils"
 
@@ -139,11 +132,7 @@ export function RebootButton({ onReboot, isPending, lastRebootedAt, size = "defa
               {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
               Reboot
             </Button>
-            {lastRebootedAt && (
-              <span className="mt-1 text-xs text-muted-foreground">
-                Last rebooted: {formatRelativeTimeShort(lastRebootedAt)}
-              </span>
-            )}
+            {lastRebootedAt && <span className="mt-1 text-xs text-muted-foreground">Last rebooted: {formatRelativeTimeShort(lastRebootedAt)}</span>}
           </div>
         </TooltipTrigger>
         <TooltipContent>Send a reboot command to the device</TooltipContent>
@@ -316,9 +305,7 @@ function ActionCard({ icon, iconBgClass, label, subtitle, tooltip, disabled, onC
             disabled && "pointer-events-none opacity-50",
           )}
         >
-          <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-md", iconBgClass)}>
-            {icon}
-          </div>
+          <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-md", iconBgClass)}>{icon}</div>
           <div className="min-w-0">
             <p className="text-sm font-medium leading-none">{label}</p>
             <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>
@@ -366,9 +353,7 @@ export function DeviceActions({
   const [toggleOpen, setToggleOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
 
-  const rebootSubtitle = lastRebootedAt
-    ? `Restart device · Last: ${formatRelativeTimeShort(lastRebootedAt)}`
-    : "Restart device"
+  const rebootSubtitle = lastRebootedAt ? `Restart device · Last: ${formatRelativeTimeShort(lastRebootedAt)}` : "Restart device"
 
   return (
     <>
@@ -378,7 +363,9 @@ export function DeviceActions({
           <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">Operations</p>
           <div className="grid grid-cols-2 gap-3">
             <ActionCard
-              icon={rebootPending ? <Loader2 className="h-4 w-4 animate-spin text-blue-700 dark:text-blue-300" /> : <RefreshCw className="h-4 w-4 text-blue-700 dark:text-blue-300" />}
+              icon={
+                rebootPending ? <Loader2 className="h-4 w-4 animate-spin text-blue-700 dark:text-blue-300" /> : <RefreshCw className="h-4 w-4 text-blue-700 dark:text-blue-300" />
+              }
               iconBgClass="bg-blue-100 dark:bg-blue-950"
               label="Reboot"
               subtitle={rebootSubtitle}
@@ -387,7 +374,13 @@ export function DeviceActions({
               onClick={() => setRebootOpen(true)}
             />
             <ActionCard
-              icon={reprovisionPending ? <Loader2 className="h-4 w-4 animate-spin text-amber-700 dark:text-amber-300" /> : <RotateCcw className="h-4 w-4 text-amber-700 dark:text-amber-300" />}
+              icon={
+                reprovisionPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin text-amber-700 dark:text-amber-300" />
+                ) : (
+                  <RotateCcw className="h-4 w-4 text-amber-700 dark:text-amber-300" />
+                )
+              }
               iconBgClass="bg-amber-100 dark:bg-amber-950"
               label="Reprovision"
               subtitle="Push config"
@@ -405,7 +398,13 @@ export function DeviceActions({
           <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">Management</p>
           <div className="grid grid-cols-2 gap-3">
             <ActionCard
-              icon={togglePending ? <Loader2 className={cn("h-4 w-4 animate-spin", isActive ? "text-red-700 dark:text-red-300" : "text-green-700 dark:text-green-300")} /> : <Power className={cn("h-4 w-4", isActive ? "text-red-700 dark:text-red-300" : "text-green-700 dark:text-green-300")} />}
+              icon={
+                togglePending ? (
+                  <Loader2 className={cn("h-4 w-4 animate-spin", isActive ? "text-red-700 dark:text-red-300" : "text-green-700 dark:text-green-300")} />
+                ) : (
+                  <Power className={cn("h-4 w-4", isActive ? "text-red-700 dark:text-red-300" : "text-green-700 dark:text-green-300")} />
+                )
+              }
               iconBgClass={isActive ? "bg-red-100 dark:bg-red-950" : "bg-green-100 dark:bg-green-950"}
               label={isActive ? "Deactivate" : "Activate"}
               subtitle={isActive ? "Disable device" : "Enable device"}

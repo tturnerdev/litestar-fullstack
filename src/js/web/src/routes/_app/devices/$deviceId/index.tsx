@@ -1,5 +1,4 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
-import { useEffect, useState } from "react"
 import {
   Activity,
   AlertCircle,
@@ -27,72 +26,40 @@ import {
   Users,
   Wrench,
 } from "lucide-react"
+import { useEffect, useState } from "react"
+import { toast } from "sonner"
+import { DeleteButton, RebootButton, ReprovisionButton, ToggleActiveButton } from "@/components/devices/device-actions"
+import { DeviceDiagnosticTab } from "@/components/devices/device-diagnostic-tab"
+import { DeviceLineConfig } from "@/components/devices/device-line-config"
+import { ExternalDataTab } from "@/components/gateway/external-data-tab"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { TaskStatusBadge } from "@/components/tasks/task-status-badge"
-import { RebootButton, ReprovisionButton, ToggleActiveButton, DeleteButton } from "@/components/devices/device-actions"
-import { DeviceLineConfig } from "@/components/devices/device-line-config"
 import { Badge } from "@/components/ui/badge"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { CopyButton } from "@/components/ui/copy-button"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
-import { CopyButton } from "@/components/ui/copy-button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { toast } from "sonner"
 import { useDocumentTitle } from "@/hooks/use-document-title"
-import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
-import {
-  useDeleteDevice,
-  useDevice,
-  useDeviceLines,
-  useRebootDevice,
-  useReprovisionDevice,
-  useUpdateDevice,
-} from "@/lib/api/hooks/devices"
 import { useConnections } from "@/lib/api/hooks/connections"
-import { useTasks } from "@/lib/api/hooks/tasks"
+import { useDeleteDevice, useDevice, useDeviceLines, useRebootDevice, useReprovisionDevice, useUpdateDevice } from "@/lib/api/hooks/devices"
 import { useGatewayLookupDevice } from "@/lib/api/hooks/gateway"
 import { useLocations } from "@/lib/api/hooks/locations"
+import { useTasks } from "@/lib/api/hooks/tasks"
 import { useTeam } from "@/lib/api/hooks/teams"
 import { useAuthStore } from "@/lib/auth"
-import { ExternalDataTab } from "@/components/gateway/external-data-tab"
-import { DeviceDiagnosticTab } from "@/components/devices/device-diagnostic-tab"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import type { Device } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/devices/$deviceId/")({
@@ -118,10 +85,7 @@ function deriveDeviceHealth(status: string): DeviceHealthLevel {
   return "offline"
 }
 
-const deviceHealthConfig: Record<
-  DeviceHealthLevel,
-  { label: string; dotClass: string; bgClass: string; textClass: string }
-> = {
+const deviceHealthConfig: Record<DeviceHealthLevel, { label: string; dotClass: string; bgClass: string; textClass: string }> = {
   online: {
     label: "Online",
     dotClass: "bg-emerald-500",
@@ -177,9 +141,7 @@ const deviceTypeLabels: Record<string, string> = {
 // ── Task helpers ───────────────────────────────────────────────────────
 
 function formatTaskType(taskType: string): string {
-  return taskType
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase())
+  return taskType.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
 function formatDuration(startedAt: string | null | undefined, completedAt: string | null | undefined): string {
@@ -198,13 +160,7 @@ function formatDuration(startedAt: string | null | undefined, completedAt: strin
 
 // ── Timestamp with tooltip ──────────────────────────────────────────────
 
-function TimestampField({
-  label,
-  value,
-}: {
-  label: string
-  value: string | null | undefined
-}) {
+function TimestampField({ label, value }: { label: string; value: string | null | undefined }) {
   if (!value) {
     return (
       <div>
@@ -394,7 +350,11 @@ function DeviceDetailPage() {
             icon={AlertCircle}
             title="Unable to load device"
             description="Something went wrong. Please try again."
-            action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+            action={
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
+                Try again
+              </Button>
+            }
           />
         </PageSection>
       </PageContainer>
@@ -438,10 +398,7 @@ function DeviceDetailPage() {
         actions={
           <div className="flex items-center gap-3">
             {!data.isActive && (
-              <Badge
-                variant="outline"
-                className="border-muted-foreground/30 text-muted-foreground"
-              >
+              <Badge variant="outline" className="border-muted-foreground/30 text-muted-foreground">
                 Disabled
               </Badge>
             )}
@@ -450,16 +407,8 @@ function DeviceDetailPage() {
                 <Pencil className="mr-2 h-4 w-4" /> Edit
               </Button>
             )}
-            <RebootButton
-              onReboot={() => rebootDevice.mutate()}
-              isPending={rebootDevice.isPending}
-              size="sm"
-            />
-            <ReprovisionButton
-              onReprovision={() => reprovisionDevice.mutate()}
-              isPending={reprovisionDevice.isPending}
-              size="sm"
-            />
+            <RebootButton onReboot={() => rebootDevice.mutate()} isPending={rebootDevice.isPending} size="sm" />
+            <ReprovisionButton onReprovision={() => reprovisionDevice.mutate()} isPending={reprovisionDevice.isPending} size="sm" />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm">
@@ -479,10 +428,7 @@ function DeviceDetailPage() {
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="text-destructive focus:text-destructive"
-                  onClick={() => handleDelete()}
-                >
+                <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => handleDelete()}>
                   <Trash2 className="mr-2 h-4 w-4" />
                   Delete Device
                 </DropdownMenuItem>
@@ -502,12 +448,8 @@ function DeviceDetailPage() {
             <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
               {/* Status indicator */}
               <div className="flex items-center gap-2.5">
-                <span
-                  className={`inline-block h-3 w-3 rounded-full ${config.dotClass} ${health === "online" ? "animate-pulse" : ""}`}
-                />
-                <span className={`text-sm font-semibold ${config.textClass}`}>
-                  {statusLabel}
-                </span>
+                <span className={`inline-block h-3 w-3 rounded-full ${config.dotClass} ${health === "online" ? "animate-pulse" : ""}`} />
+                <span className={`text-sm font-semibold ${config.textClass}`}>{statusLabel}</span>
               </div>
 
               <div className="hidden sm:block h-4 w-px bg-border" />
@@ -519,9 +461,7 @@ function DeviceDetailPage() {
                 {data.lastSeenAt ? (
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <span className="cursor-default font-medium">
-                        {formatRelativeTimeShort(data.lastSeenAt)}
-                      </span>
+                      <span className="cursor-default font-medium">{formatRelativeTimeShort(data.lastSeenAt)}</span>
                     </TooltipTrigger>
                     <TooltipContent>{formatDateTime(data.lastSeenAt)}</TooltipContent>
                   </Tooltip>
@@ -578,535 +518,476 @@ function DeviceDetailPage() {
           <TabsContent value="overview" className="mt-6 space-y-6">
             {/* Device Info */}
             <SectionErrorBoundary name="Device Info">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <Cpu className="h-5 w-5 text-muted-foreground" />
-                  Device Info
-                </CardTitle>
-                {editing && (
-                  <div className="flex gap-2">
-                    <Button variant="ghost" size="sm" onClick={() => setEditing(false)}>
-                      Cancel
-                    </Button>
-                    <Button size="sm" onClick={handleInfoSave} disabled={updateDevice.isPending}>
-                      {updateDevice.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      Save
-                    </Button>
-                  </div>
-                )}
-              </CardHeader>
-              <CardContent>
-                {editing ? (
-                  <div className="space-y-4">
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                      <div className="space-y-2">
-                        <Label>Name</Label>
-                        <Input value={editName} onChange={(e) => setEditName(e.target.value)} />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Manufacturer</Label>
-                        <Input value={editManufacturer} onChange={(e) => setEditManufacturer(e.target.value)} placeholder="e.g. Polycom" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Model</Label>
-                        <Input value={editModel} onChange={(e) => setEditModel(e.target.value)} placeholder="e.g. VVX 450" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>MAC Address</Label>
-                        <Input value={editMacAddress} onChange={(e) => setEditMacAddress(e.target.value)} placeholder="AA:BB:CC:DD:EE:FF" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>IP Address</Label>
-                        <Input value={editIpAddress} onChange={(e) => setEditIpAddress(e.target.value)} placeholder="192.168.1.100" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Location</Label>
-                        <Select
-                          value={editLocationId ?? "__none__"}
-                          onValueChange={(v) => setEditLocationId(v === "__none__" ? null : v)}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a location" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="__none__">None</SelectItem>
-                            {(locationsQuery.data?.items ?? []).map((loc) => (
-                              <SelectItem key={loc.id} value={loc.id}>
-                                {loc.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Connection</Label>
-                        <Select
-                          value={editConnectionId ?? "__none__"}
-                          onValueChange={(v) => setEditConnectionId(v === "__none__" ? null : v)}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a connection" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="__none__">None</SelectItem>
-                            {(connectionsQuery.data?.items ?? []).map((conn) => (
-                              <SelectItem key={conn.id} value={conn.id}>
-                                {conn.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Cpu className="h-5 w-5 text-muted-foreground" />
+                    Device Info
+                  </CardTitle>
+                  {editing && (
+                    <div className="flex gap-2">
+                      <Button variant="ghost" size="sm" onClick={() => setEditing(false)}>
+                        Cancel
+                      </Button>
+                      <Button size="sm" onClick={handleInfoSave} disabled={updateDevice.isPending}>
+                        {updateDevice.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Save
+                      </Button>
+                    </div>
+                  )}
+                </CardHeader>
+                <CardContent>
+                  {editing ? (
+                    <div className="space-y-4">
+                      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        <div className="space-y-2">
+                          <Label>Name</Label>
+                          <Input value={editName} onChange={(e) => setEditName(e.target.value)} />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Manufacturer</Label>
+                          <Input value={editManufacturer} onChange={(e) => setEditManufacturer(e.target.value)} placeholder="e.g. Polycom" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Model</Label>
+                          <Input value={editModel} onChange={(e) => setEditModel(e.target.value)} placeholder="e.g. VVX 450" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>MAC Address</Label>
+                          <Input value={editMacAddress} onChange={(e) => setEditMacAddress(e.target.value)} placeholder="AA:BB:CC:DD:EE:FF" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>IP Address</Label>
+                          <Input value={editIpAddress} onChange={(e) => setEditIpAddress(e.target.value)} placeholder="192.168.1.100" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Location</Label>
+                          <Select value={editLocationId ?? "__none__"} onValueChange={(v) => setEditLocationId(v === "__none__" ? null : v)}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a location" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="__none__">None</SelectItem>
+                              {(locationsQuery.data?.items ?? []).map((loc) => (
+                                <SelectItem key={loc.id} value={loc.id}>
+                                  {loc.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Connection</Label>
+                          <Select value={editConnectionId ?? "__none__"} onValueChange={(v) => setEditConnectionId(v === "__none__" ? null : v)}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a connection" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="__none__">None</SelectItem>
+                              {(connectionsQuery.data?.items ?? []).map((conn) => (
+                                <SelectItem key={conn.id} value={conn.id}>
+                                  {conn.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ) : (
-                  <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
-                    <div>
-                      <p className="text-muted-foreground">Name</p>
-                      <p className="font-medium">{data.name}</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Type</p>
-                      <p>{deviceTypeLabels[data.deviceType] ?? data.deviceType}</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Model</p>
-                      <p>{data.deviceModel || "---"}</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Manufacturer</p>
-                      <p>{data.manufacturer || "---"}</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Active</p>
-                      <div className="mt-0.5 flex items-center gap-2">
-                        <p>{data.isActive ? "Yes" : "No"}</p>
-                        <ToggleActiveButton
-                          isActive={data.isActive ?? true}
-                          onToggle={() => updateDevice.mutate({ isActive: !data.isActive })}
-                          isPending={updateDevice.isPending}
-                          size="sm"
-                        />
+                  ) : (
+                    <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
+                      <div>
+                        <p className="text-muted-foreground">Name</p>
+                        <p className="font-medium">{data.name}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Type</p>
+                        <p>{deviceTypeLabels[data.deviceType] ?? data.deviceType}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Model</p>
+                        <p>{data.deviceModel || "---"}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Manufacturer</p>
+                        <p>{data.manufacturer || "---"}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Active</p>
+                        <div className="mt-0.5 flex items-center gap-2">
+                          <p>{data.isActive ? "Yes" : "No"}</p>
+                          <ToggleActiveButton
+                            isActive={data.isActive ?? true}
+                            onToggle={() => updateDevice.mutate({ isActive: !data.isActive })}
+                            isPending={updateDevice.isPending}
+                            size="sm"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground flex items-center gap-1">
+                          <MapPin className="h-3.5 w-3.5" />
+                          Location
+                        </p>
+                        {data.locationId && data.locationName ? (
+                          <Link to="/locations/$locationId" params={{ locationId: data.locationId }} className="font-medium text-primary hover:underline">
+                            {data.locationName}
+                          </Link>
+                        ) : (
+                          <p className="text-muted-foreground">None</p>
+                        )}
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground flex items-center gap-1">
+                          <Network className="h-3.5 w-3.5" />
+                          Connection
+                        </p>
+                        {data.connectionId && data.connectionName ? (
+                          <Link to="/connections/$connectionId" params={{ connectionId: data.connectionId }} className="font-medium text-primary hover:underline">
+                            {data.connectionName}
+                          </Link>
+                        ) : (
+                          <p className="text-muted-foreground">None</p>
+                        )}
                       </div>
                     </div>
-                    <div>
-                      <p className="text-muted-foreground flex items-center gap-1">
-                        <MapPin className="h-3.5 w-3.5" />
-                        Location
-                      </p>
-                      {data.locationId && data.locationName ? (
-                        <Link
-                          to="/locations/$locationId"
-                          params={{ locationId: data.locationId }}
-                          className="font-medium text-primary hover:underline"
-                        >
-                          {data.locationName}
-                        </Link>
-                      ) : (
-                        <p className="text-muted-foreground">None</p>
-                      )}
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground flex items-center gap-1">
-                        <Network className="h-3.5 w-3.5" />
-                        Connection
-                      </p>
-                      {data.connectionId && data.connectionName ? (
-                        <Link
-                          to="/connections/$connectionId"
-                          params={{ connectionId: data.connectionId }}
-                          className="font-medium text-primary hover:underline"
-                        >
-                          {data.connectionName}
-                        </Link>
-                      ) : (
-                        <p className="text-muted-foreground">None</p>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                  )}
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
 
             {/* Network */}
             <SectionErrorBoundary name="Network">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Network className="h-5 w-5 text-muted-foreground" />
-                  <CardTitle>Network</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
-                  <div>
-                    <p className="text-muted-foreground">MAC Address</p>
-                    <div className="flex items-center gap-1">
-                      <p className="font-mono text-xs">{data.macAddress || "---"}</p>
-                      {data.macAddress && (
-                        <CopyButton value={data.macAddress} label="MAC address" />
-                      )}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Network className="h-5 w-5 text-muted-foreground" />
+                    <CardTitle>Network</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
+                    <div>
+                      <p className="text-muted-foreground">MAC Address</p>
+                      <div className="flex items-center gap-1">
+                        <p className="font-mono text-xs">{data.macAddress || "---"}</p>
+                        {data.macAddress && <CopyButton value={data.macAddress} label="MAC address" />}
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">IP Address</p>
+                      <div className="flex items-center gap-1">
+                        <p className="font-mono text-xs">{data.ipAddress || "---"}</p>
+                        {data.ipAddress && <CopyButton value={data.ipAddress} label="IP address" />}
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Firmware Version</p>
+                      <p className="font-mono text-xs">{data.firmwareVersion || "---"}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">SIP Username</p>
+                      <p className="font-mono text-xs">{data.sipUsername}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">SIP Server</p>
+                      <p className="font-mono text-xs">{data.sipServer}</p>
                     </div>
                   </div>
-                  <div>
-                    <p className="text-muted-foreground">IP Address</p>
-                    <div className="flex items-center gap-1">
-                      <p className="font-mono text-xs">{data.ipAddress || "---"}</p>
-                      {data.ipAddress && (
-                        <CopyButton value={data.ipAddress} label="IP address" />
-                      )}
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Firmware Version</p>
-                    <p className="font-mono text-xs">{data.firmwareVersion || "---"}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">SIP Username</p>
-                    <p className="font-mono text-xs">{data.sipUsername}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">SIP Server</p>
-                    <p className="font-mono text-xs">{data.sipServer}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
 
             {/* Lines / Extensions */}
             <SectionErrorBoundary name="Lines / Extensions">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Phone className="h-5 w-5 text-muted-foreground" />
-                  <CardTitle>Lines / Extensions</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {linesQuery.isLoading ? (
-                  <p className="text-sm text-muted-foreground">Loading lines...</p>
-                ) : lines.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">
-                    No lines assigned. Go to the Lines tab to configure line assignments.
-                  </p>
-                ) : (
-                  <div className="space-y-2">
-                    {lines.map((line) => (
-                      <div
-                        key={line.id}
-                        className="flex items-center justify-between rounded-md border px-3 py-2"
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-muted font-mono text-xs font-medium">
-                            {line.lineNumber}
-                          </span>
-                          <span className="text-sm font-medium">{line.label}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="text-xs">
-                            {line.lineType}
-                          </Badge>
-                          {line.isActive === false && (
-                            <Badge variant="outline" className="border-muted-foreground/30 text-xs text-muted-foreground">
-                              Inactive
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    ))}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Phone className="h-5 w-5 text-muted-foreground" />
+                    <CardTitle>Lines / Extensions</CardTitle>
                   </div>
-                )}
-              </CardContent>
-            </Card>
+                </CardHeader>
+                <CardContent>
+                  {linesQuery.isLoading ? (
+                    <p className="text-sm text-muted-foreground">Loading lines...</p>
+                  ) : lines.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">No lines assigned. Go to the Lines tab to configure line assignments.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {lines.map((line) => (
+                        <div key={line.id} className="flex items-center justify-between rounded-md border px-3 py-2">
+                          <div className="flex items-center gap-3">
+                            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-muted font-mono text-xs font-medium">{line.lineNumber}</span>
+                            <span className="text-sm font-medium">{line.label}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-xs">
+                              {line.lineType}
+                            </Badge>
+                            {line.isActive === false && (
+                              <Badge variant="outline" className="border-muted-foreground/30 text-xs text-muted-foreground">
+                                Inactive
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
 
             {/* Related Resources */}
             <SectionErrorBoundary name="Related Resources">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Link2 className="h-5 w-5 text-muted-foreground" />
-                  <CardTitle>Related Resources</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {/* Team */}
-                  {data.teamId ? (
-                    <Link
-                      to="/teams/$teamId"
-                      params={{ teamId: data.teamId }}
-                      className="group flex items-center gap-3 rounded-lg border border-border/60 px-4 py-3 transition-colors hover:bg-muted/50 hover:border-primary/30"
-                    >
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                        <Users className="h-4.5 w-4.5" />
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Link2 className="h-5 w-5 text-muted-foreground" />
+                    <CardTitle>Related Resources</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {/* Team */}
+                    {data.teamId ? (
+                      <Link
+                        to="/teams/$teamId"
+                        params={{ teamId: data.teamId }}
+                        className="group flex items-center gap-3 rounded-lg border border-border/60 px-4 py-3 transition-colors hover:bg-muted/50 hover:border-primary/30"
+                      >
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                          <Users className="h-4.5 w-4.5" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs text-muted-foreground">Team</p>
+                          <p className="truncate text-sm font-medium group-hover:text-primary">{teamQuery.data?.name ?? "Loading..."}</p>
+                        </div>
+                        <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+                      </Link>
+                    ) : (
+                      <div className="flex items-center gap-3 rounded-lg border border-dashed border-border/60 px-4 py-3">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground/50">
+                          <Users className="h-4.5 w-4.5" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs text-muted-foreground">Team</p>
+                          <p className="text-sm text-muted-foreground">Not assigned</p>
+                        </div>
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs text-muted-foreground">Team</p>
-                        <p className="truncate text-sm font-medium group-hover:text-primary">
-                          {teamQuery.data?.name ?? "Loading..."}
-                        </p>
-                      </div>
-                      <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
-                    </Link>
-                  ) : (
-                    <div className="flex items-center gap-3 rounded-lg border border-dashed border-border/60 px-4 py-3">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground/50">
-                        <Users className="h-4.5 w-4.5" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs text-muted-foreground">Team</p>
-                        <p className="text-sm text-muted-foreground">Not assigned</p>
-                      </div>
-                    </div>
-                  )}
+                    )}
 
-                  {/* Location */}
-                  {data.locationId ? (
-                    <Link
-                      to="/locations/$locationId"
-                      params={{ locationId: data.locationId }}
-                      className="group flex items-center gap-3 rounded-lg border border-border/60 px-4 py-3 transition-colors hover:bg-muted/50 hover:border-primary/30"
-                    >
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                        <MapPin className="h-4.5 w-4.5" />
+                    {/* Location */}
+                    {data.locationId ? (
+                      <Link
+                        to="/locations/$locationId"
+                        params={{ locationId: data.locationId }}
+                        className="group flex items-center gap-3 rounded-lg border border-border/60 px-4 py-3 transition-colors hover:bg-muted/50 hover:border-primary/30"
+                      >
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                          <MapPin className="h-4.5 w-4.5" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs text-muted-foreground">Location</p>
+                          <p className="truncate text-sm font-medium group-hover:text-primary">{data.locationName ?? data.locationId.slice(0, 8)}</p>
+                        </div>
+                        <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+                      </Link>
+                    ) : (
+                      <div className="flex items-center gap-3 rounded-lg border border-dashed border-border/60 px-4 py-3">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground/50">
+                          <MapPin className="h-4.5 w-4.5" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs text-muted-foreground">Location</p>
+                          <p className="text-sm text-muted-foreground">Not assigned</p>
+                        </div>
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs text-muted-foreground">Location</p>
-                        <p className="truncate text-sm font-medium group-hover:text-primary">
-                          {data.locationName ?? data.locationId.slice(0, 8)}
-                        </p>
-                      </div>
-                      <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
-                    </Link>
-                  ) : (
-                    <div className="flex items-center gap-3 rounded-lg border border-dashed border-border/60 px-4 py-3">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground/50">
-                        <MapPin className="h-4.5 w-4.5" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs text-muted-foreground">Location</p>
-                        <p className="text-sm text-muted-foreground">Not assigned</p>
-                      </div>
-                    </div>
-                  )}
+                    )}
 
-                  {/* Connection */}
-                  {data.connectionId ? (
-                    <Link
-                      to="/connections/$connectionId"
-                      params={{ connectionId: data.connectionId }}
-                      className="group flex items-center gap-3 rounded-lg border border-border/60 px-4 py-3 transition-colors hover:bg-muted/50 hover:border-primary/30"
-                    >
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-violet-500/10 text-violet-600 dark:text-violet-400">
-                        <Network className="h-4.5 w-4.5" />
+                    {/* Connection */}
+                    {data.connectionId ? (
+                      <Link
+                        to="/connections/$connectionId"
+                        params={{ connectionId: data.connectionId }}
+                        className="group flex items-center gap-3 rounded-lg border border-border/60 px-4 py-3 transition-colors hover:bg-muted/50 hover:border-primary/30"
+                      >
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-violet-500/10 text-violet-600 dark:text-violet-400">
+                          <Network className="h-4.5 w-4.5" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs text-muted-foreground">Connection</p>
+                          <p className="truncate text-sm font-medium group-hover:text-primary">{data.connectionName ?? data.connectionId.slice(0, 8)}</p>
+                        </div>
+                        <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+                      </Link>
+                    ) : (
+                      <div className="flex items-center gap-3 rounded-lg border border-dashed border-border/60 px-4 py-3">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground/50">
+                          <Network className="h-4.5 w-4.5" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs text-muted-foreground">Connection</p>
+                          <p className="text-sm text-muted-foreground">Not assigned</p>
+                        </div>
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs text-muted-foreground">Connection</p>
-                        <p className="truncate text-sm font-medium group-hover:text-primary">
-                          {data.connectionName ?? data.connectionId.slice(0, 8)}
-                        </p>
-                      </div>
-                      <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
-                    </Link>
-                  ) : (
-                    <div className="flex items-center gap-3 rounded-lg border border-dashed border-border/60 px-4 py-3">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground/50">
-                        <Network className="h-4.5 w-4.5" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs text-muted-foreground">Connection</p>
-                        <p className="text-sm text-muted-foreground">Not assigned</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                    )}
+                  </div>
 
-                {/* Extensions from line assignments */}
-                {(() => {
-                  const assignedLines = lines.filter((l) => l.extensionId)
-                  if (assignedLines.length === 0) return null
-                  return (
-                    <div className="mt-4 border-t pt-4">
-                      <p className="mb-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                        Assigned Extensions
-                      </p>
-                      <div className="space-y-1.5">
-                        {assignedLines.map((line) => (
-                          <Link
-                            key={line.id}
-                            to="/voice/extensions/$extensionId"
-                            params={{ extensionId: line.extensionId! }}
-                            className="group flex items-center gap-3 rounded-md px-3 py-2 transition-colors hover:bg-muted/50"
-                          >
-                            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400">
-                              <Phone className="h-3.5 w-3.5" />
-                            </div>
-                            <div className="flex min-w-0 flex-1 items-center gap-2">
-                              <span className="font-mono text-sm font-medium group-hover:text-primary">
-                                {line.extensionNumber ?? "Ext"}
-                              </span>
-                              {line.extensionDisplayName && (
-                                <span className="truncate text-sm text-muted-foreground">
-                                  {line.extensionDisplayName}
-                                </span>
-                              )}
-                              <Badge variant="outline" className="ml-auto text-[10px] shrink-0">
-                                Line {line.lineNumber}
-                              </Badge>
-                            </div>
-                            <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
-                          </Link>
-                        ))}
+                  {/* Extensions from line assignments */}
+                  {(() => {
+                    const assignedLines = lines.filter((l) => l.extensionId)
+                    if (assignedLines.length === 0) return null
+                    return (
+                      <div className="mt-4 border-t pt-4">
+                        <p className="mb-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">Assigned Extensions</p>
+                        <div className="space-y-1.5">
+                          {assignedLines.map((line) => (
+                            <Link
+                              key={line.id}
+                              to="/voice/extensions/$extensionId"
+                              params={{ extensionId: line.extensionId! }}
+                              className="group flex items-center gap-3 rounded-md px-3 py-2 transition-colors hover:bg-muted/50"
+                            >
+                              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                                <Phone className="h-3.5 w-3.5" />
+                              </div>
+                              <div className="flex min-w-0 flex-1 items-center gap-2">
+                                <span className="font-mono text-sm font-medium group-hover:text-primary">{line.extensionNumber ?? "Ext"}</span>
+                                {line.extensionDisplayName && <span className="truncate text-sm text-muted-foreground">{line.extensionDisplayName}</span>}
+                                <Badge variant="outline" className="ml-auto text-[10px] shrink-0">
+                                  Line {line.lineNumber}
+                                </Badge>
+                              </div>
+                              <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+                            </Link>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )
-                })()}
-              </CardContent>
-            </Card>
+                    )
+                  })()}
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
 
             {/* Recent Tasks */}
             <SectionErrorBoundary name="Recent Tasks">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <ClipboardList className="h-5 w-5 text-muted-foreground" />
-                  <CardTitle>Recent Tasks</CardTitle>
-                </div>
-                <Button variant="ghost" size="sm" asChild>
-                  <Link to="/tasks">View all</Link>
-                </Button>
-              </CardHeader>
-              <CardContent>
-                {tasksQuery.isLoading ? (
-                  <div className="space-y-2">
-                    {Array.from({ length: 3 }).map((_, i) => (
-                      <Skeleton key={i} className="h-10 w-full rounded-md" />
-                    ))}
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <ClipboardList className="h-5 w-5 text-muted-foreground" />
+                    <CardTitle>Recent Tasks</CardTitle>
                   </div>
-                ) : !tasksQuery.data?.items?.length ? (
-                  <p className="text-sm text-muted-foreground py-4 text-center">
-                    No background tasks have been run for this device yet.
-                  </p>
-                ) : (
-                  <Table aria-label="Device tasks">
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Type</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead className="hidden sm:table-cell">Progress</TableHead>
-                        <TableHead className="hidden md:table-cell">Started</TableHead>
-                        <TableHead className="hidden md:table-cell">Duration</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {tasksQuery.data.items.map((task) => (
-                        <TableRow key={task.id} className="hover:bg-muted/50 transition-colors">
-                          <TableCell>
-                            <Link
-                              to="/tasks/$taskId"
-                              params={{ taskId: task.id }}
-                              className="font-medium text-sm hover:underline"
-                            >
-                              {formatTaskType(task.taskType)}
-                            </Link>
-                          </TableCell>
-                          <TableCell>
-                            <TaskStatusBadge status={task.status} />
-                          </TableCell>
-                          <TableCell className="hidden sm:table-cell">
-                            {task.progress != null && task.progress > 0 ? (
-                              <div className="flex items-center gap-2 min-w-[80px]">
-                                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
-                                  <div
-                                    className={`h-full rounded-full transition-all duration-300 ${
-                                      task.status === "failed"
-                                        ? "bg-red-500"
-                                        : task.status === "completed"
-                                          ? "bg-green-500"
-                                          : "bg-blue-500"
-                                    }`}
-                                    style={{ width: `${Math.min(task.progress, 100)}%` }}
-                                  />
-                                </div>
-                                <span className="text-xs font-medium text-muted-foreground w-8 text-right">
-                                  {Math.round(task.progress)}%
-                                </span>
-                              </div>
-                            ) : (
-                              <span className="text-xs text-muted-foreground">--</span>
-                            )}
-                          </TableCell>
-                          <TableCell className="hidden md:table-cell">
-                            {task.startedAt ? (
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <span className="cursor-default text-xs text-muted-foreground">
-                                    {formatRelativeTimeShort(task.startedAt)}
-                                  </span>
-                                </TooltipTrigger>
-                                <TooltipContent>{formatDateTime(task.startedAt)}</TooltipContent>
-                              </Tooltip>
-                            ) : (
-                              <span className="text-xs text-muted-foreground">--</span>
-                            )}
-                          </TableCell>
-                          <TableCell className="hidden md:table-cell">
-                            <span className="text-xs text-muted-foreground">
-                              {formatDuration(task.startedAt, task.completedAt)}
-                            </span>
-                          </TableCell>
-                        </TableRow>
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link to="/tasks">View all</Link>
+                  </Button>
+                </CardHeader>
+                <CardContent>
+                  {tasksQuery.isLoading ? (
+                    <div className="space-y-2">
+                      {Array.from({ length: 3 }).map((_, i) => (
+                        <Skeleton key={i} className="h-10 w-full rounded-md" />
                       ))}
-                    </TableBody>
-                  </Table>
-                )}
-              </CardContent>
-            </Card>
+                    </div>
+                  ) : !tasksQuery.data?.items?.length ? (
+                    <p className="text-sm text-muted-foreground py-4 text-center">No background tasks have been run for this device yet.</p>
+                  ) : (
+                    <Table aria-label="Device tasks">
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Type</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead className="hidden sm:table-cell">Progress</TableHead>
+                          <TableHead className="hidden md:table-cell">Started</TableHead>
+                          <TableHead className="hidden md:table-cell">Duration</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {tasksQuery.data.items.map((task) => (
+                          <TableRow key={task.id} className="hover:bg-muted/50 transition-colors">
+                            <TableCell>
+                              <Link to="/tasks/$taskId" params={{ taskId: task.id }} className="font-medium text-sm hover:underline">
+                                {formatTaskType(task.taskType)}
+                              </Link>
+                            </TableCell>
+                            <TableCell>
+                              <TaskStatusBadge status={task.status} />
+                            </TableCell>
+                            <TableCell className="hidden sm:table-cell">
+                              {task.progress != null && task.progress > 0 ? (
+                                <div className="flex items-center gap-2 min-w-[80px]">
+                                  <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+                                    <div
+                                      className={`h-full rounded-full transition-all duration-300 ${
+                                        task.status === "failed" ? "bg-red-500" : task.status === "completed" ? "bg-green-500" : "bg-blue-500"
+                                      }`}
+                                      style={{ width: `${Math.min(task.progress, 100)}%` }}
+                                    />
+                                  </div>
+                                  <span className="text-xs font-medium text-muted-foreground w-8 text-right">{Math.round(task.progress)}%</span>
+                                </div>
+                              ) : (
+                                <span className="text-xs text-muted-foreground">--</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              {task.startedAt ? (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span className="cursor-default text-xs text-muted-foreground">{formatRelativeTimeShort(task.startedAt)}</span>
+                                  </TooltipTrigger>
+                                  <TooltipContent>{formatDateTime(task.startedAt)}</TooltipContent>
+                                </Tooltip>
+                              ) : (
+                                <span className="text-xs text-muted-foreground">--</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              <span className="text-xs text-muted-foreground">{formatDuration(task.startedAt, task.completedAt)}</span>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  )}
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
 
             {/* Metadata */}
             <SectionErrorBoundary name="Metadata">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Fingerprint className="h-5 w-5 text-muted-foreground" />
-                  <CardTitle>Metadata</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-4">
-                  <div>
-                    <p className="text-muted-foreground text-sm">Device ID</p>
-                    <div className="flex items-center gap-1">
-                      <p className="font-mono text-xs">{deviceId}</p>
-                      <CopyButton value={deviceId} label="device ID" />
-                    </div>
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Fingerprint className="h-5 w-5 text-muted-foreground" />
+                    <CardTitle>Metadata</CardTitle>
                   </div>
-                  <TimestampField label="Last Seen" value={data.lastSeenAt} />
-                  <TimestampField label="Provisioned" value={data.provisionedAt} />
-                  {data.teamId && (
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-4">
                     <div>
-                      <p className="text-muted-foreground text-sm">Team</p>
+                      <p className="text-muted-foreground text-sm">Device ID</p>
                       <div className="flex items-center gap-1">
-                        <Link
-                          to="/teams/$teamId"
-                          params={{ teamId: data.teamId }}
-                          className="font-mono text-xs text-primary hover:underline"
-                        >
-                          {data.teamId.slice(0, 8)}...
-                        </Link>
-                        <CopyButton value={data.teamId} label="team ID" />
+                        <p className="font-mono text-xs">{deviceId}</p>
+                        <CopyButton value={deviceId} label="device ID" />
                       </div>
                     </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+                    <TimestampField label="Last Seen" value={data.lastSeenAt} />
+                    <TimestampField label="Provisioned" value={data.provisionedAt} />
+                    {data.teamId && (
+                      <div>
+                        <p className="text-muted-foreground text-sm">Team</p>
+                        <div className="flex items-center gap-1">
+                          <Link to="/teams/$teamId" params={{ teamId: data.teamId }} className="font-mono text-xs text-primary hover:underline">
+                            {data.teamId.slice(0, 8)}...
+                          </Link>
+                          <CopyButton value={data.teamId} label="team ID" />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
           </TabsContent>
 
@@ -1144,11 +1025,7 @@ function DeviceDetailPage() {
           </TabsContent>
 
           <TabsContent value="activity" className="mt-6">
-            <EntityActivityPanel
-              targetType="device"
-              targetId={deviceId}
-              enabled={tab === "activity"}
-            />
+            <EntityActivityPanel targetType="device" targetId={deviceId} enabled={tab === "activity"} />
           </TabsContent>
         </Tabs>
       </PageSection>
@@ -1156,34 +1033,25 @@ function DeviceDetailPage() {
       {/* Danger Zone */}
       <PageSection delay={0.25}>
         <SectionErrorBoundary name="Danger Zone">
-        <Card className="border-destructive/30">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-destructive">
-              <AlertTriangle className="h-4 w-4" />
-              Danger Zone
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium text-sm">Delete this device</p>
-                <p className="text-sm text-muted-foreground">
-                  This action cannot be undone. All line assignments and configuration will be
-                  permanently removed.
-                </p>
+          <Card className="border-destructive/30">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-destructive">
+                <AlertTriangle className="h-4 w-4" />
+                Danger Zone
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-sm">Delete this device</p>
+                  <p className="text-sm text-muted-foreground">This action cannot be undone. All line assignments and configuration will be permanently removed.</p>
+                </div>
+                <DeleteButton deviceName={data.name} onDelete={handleDelete} isPending={deleteDevice.isPending} size="sm" />
               </div>
-              <DeleteButton
-                deviceName={data.name}
-                onDelete={handleDelete}
-                isPending={deleteDevice.isPending}
-                size="sm"
-              />
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
         </SectionErrorBoundary>
       </PageSection>
-
     </PageContainer>
   )
 }
@@ -1286,9 +1154,7 @@ function SettingsTab({ deviceId, data }: SettingsTabProps) {
             <Shield className="h-5 w-5 text-muted-foreground" />
             <CardTitle>Phone Authentication</CardTitle>
           </div>
-          <p className="text-sm text-muted-foreground">
-            Credentials used for Live View screenshot capture and device management.
-          </p>
+          <p className="text-sm text-muted-foreground">Credentials used for Live View screenshot capture and device management.</p>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">

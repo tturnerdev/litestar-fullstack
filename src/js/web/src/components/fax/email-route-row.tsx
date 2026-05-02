@@ -71,11 +71,7 @@ export function EmailRouteRow({ route, faxNumberId, onDelete, isDeleting, onTest
           <Tooltip>
             <TooltipTrigger asChild>
               <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={handleCopy} aria-label="Copy email address">
-                {copied ? (
-                  <Check className="h-3.5 w-3.5 text-green-500" />
-                ) : (
-                  <Copy className="h-3.5 w-3.5 text-muted-foreground" />
-                )}
+                {copied ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5 text-muted-foreground" />}
               </Button>
             </TooltipTrigger>
             <TooltipContent>Copy email address</TooltipContent>
@@ -84,21 +80,13 @@ export function EmailRouteRow({ route, faxNumberId, onDelete, isDeleting, onTest
       </TableCell>
       <TableCell>
         <div className="flex items-center gap-2">
-          <Switch
-            checked={route.isActive}
-            onCheckedChange={handleToggleActive}
-            disabled={updateRoute.isPending}
-          />
+          <Switch checked={route.isActive} onCheckedChange={handleToggleActive} disabled={updateRoute.isPending} />
           <span className="text-sm text-muted-foreground">{route.isActive ? "Active" : "Inactive"}</span>
         </div>
       </TableCell>
       <TableCell>
         <div className="flex items-center gap-2">
-          <Switch
-            checked={route.notifyOnFailure}
-            onCheckedChange={() => updateRoute.mutate({ notifyOnFailure: !route.notifyOnFailure })}
-            disabled={updateRoute.isPending}
-          />
+          <Switch checked={route.notifyOnFailure} onCheckedChange={() => updateRoute.mutate({ notifyOnFailure: !route.notifyOnFailure })} disabled={updateRoute.isPending} />
           <span className="text-sm text-muted-foreground">{route.notifyOnFailure ? "Enabled" : "Disabled"}</span>
         </div>
       </TableCell>
@@ -119,17 +107,9 @@ export function EmailRouteRow({ route, faxNumberId, onDelete, isDeleting, onTest
                 size="sm"
                 onClick={handleDeleteClick}
                 disabled={isDeleting}
-                className={
-                  confirmingDelete
-                    ? "animate-in fade-in duration-150"
-                    : "text-destructive hover:text-destructive hover:bg-destructive/10"
-                }
+                className={confirmingDelete ? "animate-in fade-in duration-150" : "text-destructive hover:text-destructive hover:bg-destructive/10"}
               >
-                {confirmingDelete ? (
-                  <span className="text-xs font-medium">Confirm?</span>
-                ) : (
-                  <Trash2 className="h-4 w-4" />
-                )}
+                {confirmingDelete ? <span className="text-xs font-medium">Confirm?</span> : <Trash2 className="h-4 w-4" />}
               </Button>
             </TooltipTrigger>
             <TooltipContent>{confirmingDelete ? "Click again to confirm" : "Remove this email route"}</TooltipContent>

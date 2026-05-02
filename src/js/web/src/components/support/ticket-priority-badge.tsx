@@ -4,10 +4,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 
-const priorityConfig: Record<
-  string,
-  { label: string; description: string; className: string; icon: LucideIcon; pulse?: boolean }
-> = {
+const priorityConfig: Record<string, { label: string; description: string; className: string; icon: LucideIcon; pulse?: boolean }> = {
   low: {
     label: "Low",
     description: "Low: Can be addressed when convenient",
@@ -52,15 +49,7 @@ export function TicketPriorityBadge({ priority, size = "default" }: TicketPriori
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Badge
-          variant="outline"
-          className={cn(
-            "text-xs gap-1",
-            config.className,
-            config.pulse && "animate-pulse",
-            size === "sm" && "px-1.5",
-          )}
-        >
+        <Badge variant="outline" className={cn("text-xs gap-1", config.className, config.pulse && "animate-pulse", size === "sm" && "px-1.5")}>
           <Icon className="h-3 w-3 shrink-0" />
           {size === "default" && <span>{config.label}</span>}
         </Badge>

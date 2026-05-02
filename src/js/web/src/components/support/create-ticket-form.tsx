@@ -18,6 +18,7 @@ import {
 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
+import { toast } from "sonner"
 import { z } from "zod"
 import { AttachmentUpload, type PendingFile } from "@/components/support/attachment-upload"
 import { MarkdownEditor } from "@/components/support/markdown-editor"
@@ -39,7 +40,6 @@ import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { useCreateTicket } from "@/lib/api/hooks/support"
 import { cn } from "@/lib/utils"
-import { toast } from "sonner"
 
 // ── Field limits ──────────────────────────────────────────────────────
 
@@ -194,7 +194,12 @@ export function CreateTicketForm() {
                 </FormControl>
                 <div className="flex items-center justify-between">
                   <FormDescription>A clear, concise title helps our team triage faster.</FormDescription>
-                  <p className={cn("shrink-0 text-xs", field.value.length >= SUBJECT_MAX ? "text-destructive" : field.value.length >= SUBJECT_MAX * 0.8 ? "text-amber-500" : "text-muted-foreground")}>
+                  <p
+                    className={cn(
+                      "shrink-0 text-xs",
+                      field.value.length >= SUBJECT_MAX ? "text-destructive" : field.value.length >= SUBJECT_MAX * 0.8 ? "text-amber-500" : "text-muted-foreground",
+                    )}
+                  >
                     {field.value.length}/{SUBJECT_MAX}
                   </p>
                 </div>
@@ -222,9 +227,7 @@ export function CreateTicketForm() {
                           onClick={() => field.onChange(isSelected ? "" : cat.value)}
                           className={cn(
                             "flex items-center gap-2 rounded-lg border px-3 py-2.5 text-left text-sm transition-all",
-                            isSelected
-                              ? "border-primary bg-primary/5 ring-1 ring-primary/20"
-                              : "border-border/60 bg-card hover:border-border hover:bg-muted/40",
+                            isSelected ? "border-primary bg-primary/5 ring-1 ring-primary/20" : "border-border/60 bg-card hover:border-border hover:bg-muted/40",
                           )}
                         >
                           <cat.icon className={cn("h-4 w-4 shrink-0", isSelected ? "text-primary" : "text-muted-foreground")} />
@@ -260,9 +263,7 @@ export function CreateTicketForm() {
                           onClick={() => field.onChange(prio.value)}
                           className={cn(
                             "flex w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-all",
-                            isSelected
-                              ? "border-primary bg-primary/5 ring-1 ring-primary/20"
-                              : "border-border/60 bg-card hover:border-border hover:bg-muted/40",
+                            isSelected ? "border-primary bg-primary/5 ring-1 ring-primary/20" : "border-border/60 bg-card hover:border-border hover:bg-muted/40",
                           )}
                         >
                           <prio.icon className={cn("h-4 w-4 shrink-0", prio.iconClass)} />
@@ -279,11 +280,7 @@ export function CreateTicketForm() {
                       )
                     })}
                   </div>
-                  <FormDescription>
-                    {selectedPriority
-                      ? `${selectedPriority.label}: ${selectedPriority.description}.`
-                      : "Choose based on business impact."}
-                  </FormDescription>
+                  <FormDescription>{selectedPriority ? `${selectedPriority.label}: ${selectedPriority.description}.` : "Choose based on business impact."}</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -300,18 +297,16 @@ export function CreateTicketForm() {
                   Description <RequiredIndicator />
                 </FormLabel>
                 <FormControl>
-                  <MarkdownEditor
-                    value={field.value}
-                    onChange={field.onChange}
-                    placeholder="Describe your issue in detail... (Markdown supported)"
-                    minHeight="180px"
-                  />
+                  <MarkdownEditor value={field.value} onChange={field.onChange} placeholder="Describe your issue in detail... (Markdown supported)" minHeight="180px" />
                 </FormControl>
                 <div className="flex items-center justify-between">
-                  <FormDescription>
-                    Include steps to reproduce, expected behavior, and any error messages. Markdown formatting is supported.
-                  </FormDescription>
-                  <p className={cn("shrink-0 text-xs", field.value.length >= DESC_MAX ? "text-destructive" : field.value.length >= DESC_MAX * 0.8 ? "text-amber-500" : "text-muted-foreground")}>
+                  <FormDescription>Include steps to reproduce, expected behavior, and any error messages. Markdown formatting is supported.</FormDescription>
+                  <p
+                    className={cn(
+                      "shrink-0 text-xs",
+                      field.value.length >= DESC_MAX ? "text-destructive" : field.value.length >= DESC_MAX * 0.8 ? "text-amber-500" : "text-muted-foreground",
+                    )}
+                  >
                     {field.value.length}/{DESC_MAX}
                   </p>
                 </div>
@@ -323,9 +318,7 @@ export function CreateTicketForm() {
           {/* Attachments */}
           <div>
             <p className="mb-1 text-sm font-medium">Attachments</p>
-            <p className="mb-3 text-xs text-muted-foreground">
-              Screenshots, logs, or other files that help explain the issue. Max 10 MB per file.
-            </p>
+            <p className="mb-3 text-xs text-muted-foreground">Screenshots, logs, or other files that help explain the issue. Max 10 MB per file.</p>
             <AttachmentUpload files={attachments} onFilesChange={setAttachments} />
           </div>
 
@@ -360,9 +353,7 @@ export function CreateTicketForm() {
               <AlertTriangle className="h-5 w-5 text-amber-500" />
               Unsaved Changes
             </AlertDialogTitle>
-            <AlertDialogDescription>
-              You have unsaved changes on this form. If you leave now, your progress will be lost.
-            </AlertDialogDescription>
+            <AlertDialogDescription>You have unsaved changes on this form. If you leave now, your progress will be lost.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => blocker.reset?.()}>Stay on Page</AlertDialogCancel>

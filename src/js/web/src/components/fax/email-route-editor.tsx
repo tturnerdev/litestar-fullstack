@@ -20,11 +20,7 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { SkeletonTable } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import {
-  useCreateFaxEmailRoute,
-  useDeleteFaxEmailRoute,
-  useFaxEmailRoutes,
-} from "@/lib/api/hooks/fax"
+import { useCreateFaxEmailRoute, useDeleteFaxEmailRoute, useFaxEmailRoutes } from "@/lib/api/hooks/fax"
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -38,10 +34,7 @@ export function EmailRouteEditor({ faxNumberId }: { faxNumberId: string }) {
 
   const emailTouched = newEmail.trim().length > 0
   const emailValid = EMAIL_REGEX.test(newEmail.trim())
-  const emailDuplicate =
-    emailTouched &&
-    emailValid &&
-    data?.items.some((r) => r.emailAddress.toLowerCase() === newEmail.trim().toLowerCase())
+  const emailDuplicate = emailTouched && emailValid && data?.items.some((r) => r.emailAddress.toLowerCase() === newEmail.trim().toLowerCase())
 
   const activeCount = data?.items.filter((r) => r.isActive).length ?? 0
   const totalCount = data?.items.length ?? 0
@@ -102,7 +95,11 @@ export function EmailRouteEditor({ faxNumberId }: { faxNumberId: string }) {
         icon={AlertCircle}
         title="Unable to load email routes"
         description="Something went wrong. Please try again."
-        action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+        action={
+          <Button variant="outline" size="sm" onClick={() => refetch()}>
+            Try again
+          </Button>
+        }
       />
     )
   }
@@ -121,9 +118,7 @@ export function EmailRouteEditor({ faxNumberId }: { faxNumberId: string }) {
                   </Badge>
                 )}
               </div>
-              <p className="text-sm text-muted-foreground mt-1">
-                Configure where incoming faxes are delivered via email.
-              </p>
+              <p className="text-sm text-muted-foreground mt-1">Configure where incoming faxes are delivered via email.</p>
             </div>
             <div className="flex flex-col gap-1">
               <div className="flex gap-2 items-center">
@@ -141,19 +136,11 @@ export function EmailRouteEditor({ faxNumberId }: { faxNumberId: string }) {
                   />
                   {emailTouched && (
                     <span className="absolute right-2 top-1/2 -translate-y-1/2">
-                      {emailValid && !emailDuplicate ? (
-                        <Check className="h-4 w-4 text-green-500" />
-                      ) : (
-                        <X className="h-4 w-4 text-destructive" />
-                      )}
+                      {emailValid && !emailDuplicate ? <Check className="h-4 w-4 text-green-500" /> : <X className="h-4 w-4 text-destructive" />}
                     </span>
                   )}
                 </div>
-                <Button
-                  size="sm"
-                  onClick={handleAddRoute}
-                  disabled={createRoute.isPending || !newEmail.trim()}
-                >
+                <Button size="sm" onClick={handleAddRoute} disabled={createRoute.isPending || !newEmail.trim()}>
                   <Plus className="mr-2 h-4 w-4" /> Add Email
                 </Button>
               </div>
@@ -163,45 +150,43 @@ export function EmailRouteEditor({ faxNumberId }: { faxNumberId: string }) {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="overflow-x-auto">
-          <Table aria-label="Email routing rules">
-            <TableHeader>
-              <TableRow>
-                <TableHead>Email Address</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Notify on Failure</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.items.length === 0 && (
+            <Table aria-label="Email routing rules">
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center text-muted-foreground">
-                    <div className="flex flex-col items-center gap-3 py-8">
-                      <div className="rounded-full bg-muted p-3">
-                        <MailPlus className="h-8 w-8 text-muted-foreground/60" />
-                      </div>
-                      <div className="space-y-1">
-                        <p className="font-medium text-foreground">No email routes configured</p>
-                        <p className="text-sm max-w-xs mx-auto">
-                          Add an email address above to start receiving incoming faxes directly in your inbox.
-                        </p>
-                      </div>
-                    </div>
-                  </TableCell>
+                  <TableHead>Email Address</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Notify on Failure</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
-              )}
-              {data.items.map((route) => (
-                <EmailRouteRow
-                  key={route.id}
-                  route={route}
-                  faxNumberId={faxNumberId}
-                  onDelete={() => setRouteToDelete({ id: route.id, email: route.emailAddress })}
-                  isDeleting={deleteRoute.isPending}
-                  onTestRoute={() => handleTestRoute(route.emailAddress)}
-                />
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {data.items.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center text-muted-foreground">
+                      <div className="flex flex-col items-center gap-3 py-8">
+                        <div className="rounded-full bg-muted p-3">
+                          <MailPlus className="h-8 w-8 text-muted-foreground/60" />
+                        </div>
+                        <div className="space-y-1">
+                          <p className="font-medium text-foreground">No email routes configured</p>
+                          <p className="text-sm max-w-xs mx-auto">Add an email address above to start receiving incoming faxes directly in your inbox.</p>
+                        </div>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+                {data.items.map((route) => (
+                  <EmailRouteRow
+                    key={route.id}
+                    route={route}
+                    faxNumberId={faxNumberId}
+                    onDelete={() => setRouteToDelete({ id: route.id, email: route.emailAddress })}
+                    isDeleting={deleteRoute.isPending}
+                    onTestRoute={() => handleTestRoute(route.emailAddress)}
+                  />
+                ))}
+              </TableBody>
+            </Table>
           </div>
           {data.items.length > 0 && (
             <div className="flex items-center justify-between">
@@ -215,14 +200,7 @@ export function EmailRouteEditor({ faxNumberId }: { faxNumberId: string }) {
                   <span className="text-muted-foreground">{totalCount - activeCount} inactive</span>
                 </span>
               </div>
-              {totalCount > 1 && (
-                <BulkToggleButton
-                  faxNumberId={faxNumberId}
-                  routes={data.items}
-                  allActive={allActive}
-                  allInactive={allInactive}
-                />
-              )}
+              {totalCount > 1 && <BulkToggleButton faxNumberId={faxNumberId} routes={data.items} allActive={allActive} allInactive={allInactive} />}
             </div>
           )}
         </CardContent>
@@ -233,17 +211,13 @@ export function EmailRouteEditor({ faxNumberId }: { faxNumberId: string }) {
           <AlertDialogHeader>
             <AlertDialogTitle>Remove email route?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently remove{" "}
-              <span className="font-mono font-medium text-foreground">{routeToDelete?.email}</span> from
-              the routing list. Incoming faxes will no longer be delivered to this address.
+              This will permanently remove <span className="font-mono font-medium text-foreground">{routeToDelete?.email}</span> from the routing list. Incoming faxes will no
+              longer be delivered to this address.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setRouteToDelete(null)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleConfirmDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
+            <AlertDialogAction onClick={handleConfirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               Remove
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -253,16 +227,7 @@ export function EmailRouteEditor({ faxNumberId }: { faxNumberId: string }) {
   )
 }
 
-function BulkToggleButton({
-  faxNumberId,
-  routes,
-  allActive,
-}: {
-  faxNumberId: string
-  routes: Array<{ id: string; isActive: boolean }>
-  allActive: boolean
-  allInactive: boolean
-}) {
+function BulkToggleButton({ faxNumberId, routes, allActive }: { faxNumberId: string; routes: Array<{ id: string; isActive: boolean }>; allActive: boolean; allInactive: boolean }) {
   const queryClient = useQueryClient()
   const [pending, setPending] = useState(false)
   const targetActive = !allActive

@@ -1,7 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router"
-import { Fragment, useCallback, useEffect, useMemo, useState } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { toast } from "sonner"
+import { createFileRoute, Link } from "@tanstack/react-router"
+import type { LucideIcon } from "lucide-react"
 import {
   AlertCircle,
   BarChart3,
@@ -23,8 +22,8 @@ import {
   ShieldAlert,
   XCircle,
 } from "lucide-react"
-import type { LucideIcon } from "lucide-react"
-import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react"
+import { toast } from "sonner"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { Button } from "@/components/ui/button"
@@ -32,20 +31,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Checkbox } from "@/components/ui/checkbox"
 import { EmptyState } from "@/components/ui/empty-state"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useAdminTeams } from "@/lib/api/hooks/admin"
-import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
-import {
-  listTeamPermissions,
-  updateTeamPermissions,
-  type FeatureArea,
-  type TeamRolePermission,
-  type TeamRolePermissionEntry,
-  type TeamRoles,
-} from "@/lib/generated/api"
+import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
+import { type FeatureArea, listTeamPermissions, type TeamRolePermission, type TeamRolePermissionEntry, type TeamRoles, updateTeamPermissions } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/admin/roles")({
   component: AdminRolesPage,
@@ -117,9 +110,7 @@ function buildDefaultPermissions(): Record<string, Record<string, { canView: boo
   return result
 }
 
-function mergeServerPermissions(
-  rows: TeamRolePermission[],
-): Record<string, Record<string, { canView: boolean; canEdit: boolean }>> {
+function mergeServerPermissions(rows: TeamRolePermission[]): Record<string, Record<string, { canView: boolean; canEdit: boolean }>> {
   const matrix = buildDefaultPermissions()
   for (const row of rows) {
     if (matrix[row.role] && matrix[row.role][row.featureArea]) {
@@ -132,9 +123,7 @@ function mergeServerPermissions(
   return matrix
 }
 
-function matrixToEntries(
-  matrix: Record<string, Record<string, { canView: boolean; canEdit: boolean }>>,
-): TeamRolePermissionEntry[] {
+function matrixToEntries(matrix: Record<string, Record<string, { canView: boolean; canEdit: boolean }>>): TeamRolePermissionEntry[] {
   const entries: TeamRolePermissionEntry[] = []
   for (const role of ROLES) {
     for (const area of FEATURE_AREAS) {
@@ -152,9 +141,7 @@ function matrixToEntries(
   return entries
 }
 
-function countPermissions(
-  matrix: Record<string, Record<string, { canView: boolean; canEdit: boolean }>>,
-): { allowed: number; total: number } {
+function countPermissions(matrix: Record<string, Record<string, { canView: boolean; canEdit: boolean }>>): { allowed: number; total: number } {
   let allowed = 0
   let total = 0
   for (const role of ROLES) {
@@ -228,9 +215,8 @@ function AdminRolesPage() {
           <div>
             <p className="font-medium">How permissions work</p>
             <p className="mt-1 text-xs">
-              Each team has its own permission matrix that controls what <strong>ADMIN</strong> and{" "}
-              <strong>MEMBER</strong> roles can access. Permissions are checked per feature area (Devices,
-              Voice, Fax, etc.) with separate View and Edit grants. Superusers bypass all permission checks.
+              Each team has its own permission matrix that controls what <strong>ADMIN</strong> and <strong>MEMBER</strong> roles can access. Permissions are checked per feature
+              area (Devices, Voice, Fax, etc.) with separate View and Edit grants. Superusers bypass all permission checks.
             </p>
           </div>
         </div>
@@ -255,20 +241,12 @@ function AdminRolesPage() {
             }
           />
         ) : teams.length === 0 ? (
-          <EmptyState
-            icon={Shield}
-            title="No teams found"
-            description="Create a team first to configure role permissions."
-          />
+          <EmptyState icon={Shield} title="No teams found" description="Create a team first to configure role permissions." />
         ) : (
           <div className="space-y-6">
             {teams.map((team) => (
               <SectionErrorBoundary key={team.id} name={`${team.name} permissions`}>
-                <TeamPermissionCard
-                  teamId={team.id}
-                  teamName={team.name}
-                  memberCount={team.memberCount}
-                />
+                <TeamPermissionCard teamId={team.id} teamName={team.name} memberCount={team.memberCount} />
               </SectionErrorBoundary>
             ))}
           </div>
@@ -281,9 +259,8 @@ function AdminRolesPage() {
           <CardHeader>
             <CardTitle>Permissions Reference</CardTitle>
             <CardDescription>
-              A quick-reference guide showing the default capabilities for each system role. Superusers
-              have full access and bypass all permission checks. Team-level overrides configured above
-              take precedence for Admin and Member roles.
+              A quick-reference guide showing the default capabilities for each system role. Superusers have full access and bypass all permission checks. Team-level overrides
+              configured above take precedence for Admin and Member roles.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -305,10 +282,7 @@ function AdminRolesPage() {
                 </TableHeader>
                 <TableBody>
                   {permissionMatrix.map((row, idx) => (
-                    <TableRow
-                      key={row.permission}
-                      className={idx % 2 === 0 ? "bg-muted/30" : ""}
-                    >
+                    <TableRow key={row.permission} className={idx % 2 === 0 ? "bg-muted/30" : ""}>
                       <TableCell className="text-sm font-medium">{row.permission}</TableCell>
                       <TableCell className="text-center">
                         <PermissionIndicator allowed={row.superuser} />
@@ -333,15 +307,7 @@ function AdminRolesPage() {
 
 // -- Per-team permission card ------------------------------------------------
 
-function TeamPermissionCard({
-  teamId,
-  teamName,
-  memberCount,
-}: {
-  teamId: string
-  teamName: string
-  memberCount?: number
-}) {
+function TeamPermissionCard({ teamId, teamName, memberCount }: { teamId: string; teamName: string; memberCount?: number }) {
   const queryClient = useQueryClient()
   const [isEditing, setIsEditing] = useState(false)
 
@@ -381,27 +347,24 @@ function TeamPermissionCard({
   const currentMatrix = isEditing ? editMatrix : serverMatrix
   const { allowed, total } = countPermissions(currentMatrix)
 
-  const togglePermission = useCallback(
-    (role: string, featureArea: string, field: "canView" | "canEdit") => {
-      setEditMatrix((prev) => {
-        const next = { ...prev }
-        next[role] = { ...next[role] }
-        next[role][featureArea] = { ...next[role][featureArea] }
-        const current = next[role][featureArea][field]
-        next[role][featureArea][field] = !current
-        // Disabling view also disables edit
-        if (field === "canView" && current) {
-          next[role][featureArea].canEdit = false
-        }
-        // Enabling edit also enables view
-        if (field === "canEdit" && !current) {
-          next[role][featureArea].canView = true
-        }
-        return next
-      })
-    },
-    [],
-  )
+  const togglePermission = useCallback((role: string, featureArea: string, field: "canView" | "canEdit") => {
+    setEditMatrix((prev) => {
+      const next = { ...prev }
+      next[role] = { ...next[role] }
+      next[role][featureArea] = { ...next[role][featureArea] }
+      const current = next[role][featureArea][field]
+      next[role][featureArea][field] = !current
+      // Disabling view also disables edit
+      if (field === "canView" && current) {
+        next[role][featureArea].canEdit = false
+      }
+      // Enabling edit also enables view
+      if (field === "canEdit" && !current) {
+        next[role][featureArea].canView = true
+      }
+      return next
+    })
+  }, [])
 
   const saveMutation = useMutation({
     mutationFn: async () => {
@@ -439,41 +402,23 @@ function TeamPermissionCard({
             </div>
             <div>
               <CardTitle className="text-base">
-                <Link
-                  to="/admin/teams/$teamId"
-                  params={{ teamId }}
-                  className="hover:underline"
-                >
+                <Link to="/admin/teams/$teamId" params={{ teamId }} className="hover:underline">
                   {teamName}
                 </Link>
               </CardTitle>
               <p className="text-xs text-muted-foreground">
-                {memberCount ?? 0} member{(memberCount ?? 0) !== 1 ? "s" : ""} &middot;{" "}
-                {allowed}/{total} permissions granted
+                {memberCount ?? 0} member{(memberCount ?? 0) !== 1 ? "s" : ""} &middot; {allowed}/{total} permissions granted
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             {isEditing ? (
               <>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleCancel}
-                  disabled={saveMutation.isPending}
-                >
+                <Button variant="outline" size="sm" onClick={handleCancel} disabled={saveMutation.isPending}>
                   Cancel
                 </Button>
-                <Button
-                  size="sm"
-                  onClick={() => saveMutation.mutate()}
-                  disabled={saveMutation.isPending}
-                >
-                  {saveMutation.isPending ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Save className="mr-2 h-4 w-4" />
-                  )}
+                <Button size="sm" onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
+                  {saveMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                   Save
                 </Button>
               </>
@@ -507,9 +452,7 @@ function TeamPermissionCard({
                               <TooltipTrigger asChild>
                                 <Info className="h-3 w-3 shrink-0 cursor-help" />
                               </TooltipTrigger>
-                              <TooltipContent>
-                                Allows reading and listing resources in this category
-                              </TooltipContent>
+                              <TooltipContent>Allows reading and listing resources in this category</TooltipContent>
                             </Tooltip>
                           </div>
                         </div>
@@ -523,9 +466,7 @@ function TeamPermissionCard({
                               <TooltipTrigger asChild>
                                 <Info className="h-3 w-3 shrink-0 cursor-help" />
                               </TooltipTrigger>
-                              <TooltipContent>
-                                Allows creating, updating, and deleting. Automatically includes View access
-                              </TooltipContent>
+                              <TooltipContent>Allows creating, updating, and deleting. Automatically includes View access</TooltipContent>
                             </Tooltip>
                           </div>
                         </div>
@@ -596,16 +537,10 @@ function PermissionIndicator({ allowed }: { allowed: boolean }) {
     <Tooltip>
       <TooltipTrigger asChild>
         <span className="inline-flex items-center justify-center">
-          {allowed ? (
-            <CheckCircle2 className="h-4 w-4 text-green-500" />
-          ) : (
-            <XCircle className="h-4 w-4 text-muted-foreground/40" />
-          )}
+          {allowed ? <CheckCircle2 className="h-4 w-4 text-green-500" /> : <XCircle className="h-4 w-4 text-muted-foreground/40" />}
         </span>
       </TooltipTrigger>
-      <TooltipContent>
-        {allowed ? "Allowed" : "Not allowed"}
-      </TooltipContent>
+      <TooltipContent>{allowed ? "Allowed" : "Not allowed"}</TooltipContent>
     </Tooltip>
   )
 }

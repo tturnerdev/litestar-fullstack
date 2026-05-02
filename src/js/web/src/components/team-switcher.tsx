@@ -67,15 +67,23 @@ export function TeamSwitcher({ teams, currentTeam, onTeamSelect }: { teams: Team
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <DropdownMenu onOpenChange={(open) => { if (!open) setSearch("") }}>
+        <DropdownMenu
+          onOpenChange={(open) => {
+            if (!open) setSearch("")
+          }}
+        >
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton size="lg" className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
               <div className={`flex aspect-square size-8 shrink-0 items-center justify-center rounded-lg ${activeColor}`}>
                 <span className="text-xs font-semibold">{activeInitials}</span>
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
-                <span className="truncate font-medium" title={activeTeam.name}>{activeTeam.name}</span>
-                <span className="truncate text-xs text-muted-foreground" title={subtitle}>{subtitle}</span>
+                <span className="truncate font-medium" title={activeTeam.name}>
+                  {activeTeam.name}
+                </span>
+                <span className="truncate text-xs text-muted-foreground" title={subtitle}>
+                  {subtitle}
+                </span>
               </div>
               <ChevronsUpDown className="ml-auto group-data-[collapsible=icon]:hidden" />
             </SidebarMenuButton>
@@ -99,9 +107,7 @@ export function TeamSwitcher({ teams, currentTeam, onTeamSelect }: { teams: Team
                 <DropdownMenuSeparator />
               </>
             )}
-            {filteredTeams.length === 0 && (
-              <div className="px-2 py-4 text-center text-xs text-muted-foreground">No teams found</div>
-            )}
+            {filteredTeams.length === 0 && <div className="px-2 py-4 text-center text-xs text-muted-foreground">No teams found</div>}
             {filteredTeams.map((team, index) => {
               const isActive = team.id === activeTeam.id
               const color = getTeamColor(team.id ?? team.name)
@@ -111,7 +117,9 @@ export function TeamSwitcher({ teams, currentTeam, onTeamSelect }: { teams: Team
                   <div className={`flex size-6 items-center justify-center rounded-md ${color}`}>
                     <span className="text-[10px] font-semibold">{initials}</span>
                   </div>
-                  <span className="flex-1 truncate" title={team.name}>{team.name}</span>
+                  <span className="flex-1 truncate" title={team.name}>
+                    {team.name}
+                  </span>
                   {isActive && <Check className="ml-auto size-4 text-primary" />}
                   {!search && <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>}
                 </DropdownMenuItem>

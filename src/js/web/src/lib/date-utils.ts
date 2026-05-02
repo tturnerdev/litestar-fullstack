@@ -77,4 +77,3 @@ export function formatDateLong(dateStr: string): string {
     return dateStr
   }
 }
-

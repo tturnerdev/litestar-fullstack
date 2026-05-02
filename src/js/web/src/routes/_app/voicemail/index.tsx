@@ -1,6 +1,4 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
-import { useCallback, useEffect, useMemo, useState } from "react"
-import { z } from "zod"
 import {
   AlertCircle,
   AlertTriangle,
@@ -20,6 +18,8 @@ import {
   Voicemail,
   X,
 } from "lucide-react"
+import { useCallback, useEffect, useMemo, useState } from "react"
+import { z } from "zod"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,54 +30,26 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { DataFreshness } from "@/components/ui/data-freshness"
 import { Badge } from "@/components/ui/badge"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { DataFreshness } from "@/components/ui/data-freshness"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { FilterDropdown, type FilterOption } from "@/components/ui/filter-dropdown"
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Skeleton, SkeletonCard } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { VoicemailPlayer } from "@/components/voice/voicemail-player"
-import { useDocumentTitle } from "@/hooks/use-document-title"
-import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
-import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
-import { formatDateTime, formatFullDateTime } from "@/lib/date-utils"
-import { formatDuration } from "@/lib/format-utils"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import {
   useBulkDeleteVoicemailMessages,
   useBulkMarkVoicemailRead,
@@ -89,6 +61,9 @@ import {
   type VoicemailBox,
   type VoicemailMessage,
 } from "@/lib/api/hooks/voicemail"
+import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
+import { formatDateTime, formatFullDateTime } from "@/lib/date-utils"
+import { formatDuration } from "@/lib/format-utils"
 
 const searchSchema = z.object({
   tab: z.string().optional(),
@@ -166,10 +141,7 @@ function VoicemailInboxPage() {
       />
 
       <PageSection>
-        <Tabs
-          value={tab}
-          onValueChange={(value) => navigate({ search: { tab: value }, replace: true })}
-        >
+        <Tabs value={tab} onValueChange={(value) => navigate({ search: { tab: value }, replace: true })}>
           <TabsList>
             <TabsTrigger value="messages">All Messages</TabsTrigger>
             <TabsTrigger value="boxes">Voicemail Boxes</TabsTrigger>
@@ -231,14 +203,7 @@ function MessagesTab() {
     [sortKey, sortDir],
   )
 
-  const isReadParam =
-    readFilter.length === 1
-      ? readFilter[0] === "read"
-        ? true
-        : readFilter[0] === "unread"
-          ? false
-          : null
-      : null
+  const isReadParam = readFilter.length === 1 ? (readFilter[0] === "read" ? true : readFilter[0] === "unread" ? false : null) : null
 
   const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useVoicemailMessages({
     page,
@@ -258,9 +223,7 @@ function MessagesTab() {
     ? allItems.filter((m) => {
         const q = debouncedSearch.toLowerCase()
         return (
-          m.callerNumber.toLowerCase().includes(q) ||
-          (m.callerName && m.callerName.toLowerCase().includes(q)) ||
-          (m.transcription && m.transcription.toLowerCase().includes(q))
+          m.callerNumber.toLowerCase().includes(q) || (m.callerName && m.callerName.toLowerCase().includes(q)) || (m.transcription && m.transcription.toLowerCase().includes(q))
         )
       })
     : allItems
@@ -415,18 +378,9 @@ function MessagesTab() {
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative max-w-sm flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search by caller or transcription..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 pr-8"
-          />
+          <Input placeholder="Search by caller or transcription..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 pr-8" />
           {search && (
-            <button
-              type="button"
-              onClick={() => setSearch("")}
-              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
-            >
+            <button type="button" onClick={() => setSearch("")} className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground">
               <X className="h-3.5 w-3.5" />
               <span className="sr-only">Clear search</span>
             </button>
@@ -481,11 +435,7 @@ function MessagesTab() {
           </Button>
         )}
         <div className="ml-auto flex items-center gap-2">
-          <DataFreshness
-            dataUpdatedAt={dataUpdatedAt}
-            onRefresh={() => refetch()}
-            isRefreshing={isRefetching}
-          />
+          <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
           <Button variant="outline" size="sm" onClick={handleExportAll} disabled={items.length === 0}>
             <Download className="mr-2 h-4 w-4" />
             Export
@@ -497,21 +447,11 @@ function MessagesTab() {
       {someSelected && (
         <div className="flex items-center gap-2">
           <Badge variant="outline">{selectedIds.size} selected</Badge>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleBulkMarkRead}
-            disabled={bulkMarkReadMutation.isPending}
-          >
+          <Button variant="outline" size="sm" onClick={handleBulkMarkRead} disabled={bulkMarkReadMutation.isPending}>
             <MailOpen className="mr-1 h-4 w-4" />
             Mark read
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setBulkDeleteOpen(true)}
-            disabled={bulkDeleteMutation.isPending}
-          >
+          <Button variant="outline" size="sm" onClick={() => setBulkDeleteOpen(true)} disabled={bulkDeleteMutation.isPending}>
             <Trash2 className="mr-1 h-4 w-4" />
             Delete
           </Button>
@@ -523,9 +463,7 @@ function MessagesTab() {
           icon={Inbox}
           title="No voicemail messages"
           description={
-            activeFilterCount > 0
-              ? "No messages match your current filters. Try adjusting your search."
-              : "When callers leave voicemails, their messages will appear here."
+            activeFilterCount > 0 ? "No messages match your current filters. Try adjusting your search." : "When callers leave voicemails, their messages will appear here."
           }
           action={
             activeFilterCount > 0 ? (
@@ -565,41 +503,14 @@ function MessagesTab() {
               <TableHeader className="sticky top-0 z-10 bg-background">
                 <TableRow>
                   <TableHead className="w-10">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 w-6 p-0"
-                      onClick={toggleSelectAll}
-                    >
-                      {allSelected ? (
-                        <CheckSquare className="h-4 w-4" />
-                      ) : (
-                        <Square className="h-4 w-4" />
-                      )}
+                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={toggleSelectAll}>
+                      {allSelected ? <CheckSquare className="h-4 w-4" /> : <Square className="h-4 w-4" />}
                     </Button>
                   </TableHead>
                   <TableHead className="w-10" />
-                  <SortableHeader
-                    label="Caller"
-                    sortKey="caller"
-                    currentSort={sortKey}
-                    currentDirection={sortDir}
-                    onSort={handleSort}
-                  />
-                  <SortableHeader
-                    label="Duration"
-                    sortKey="duration"
-                    currentSort={sortKey}
-                    currentDirection={sortDir}
-                    onSort={handleSort}
-                  />
-                  <SortableHeader
-                    label="Date/Time"
-                    sortKey="date"
-                    currentSort={sortKey}
-                    currentDirection={sortDir}
-                    onSort={handleSort}
-                  />
+                  <SortableHeader label="Caller" sortKey="caller" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                  <SortableHeader label="Duration" sortKey="duration" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                  <SortableHeader label="Date/Time" sortKey="date" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
                   <TableHead>Status</TableHead>
                   <TableHead className="w-16 text-right">Actions</TableHead>
                 </TableRow>
@@ -621,38 +532,22 @@ function MessagesTab() {
                           toggleSelect(msg.id)
                         }}
                       >
-                        {selectedIds.has(msg.id) ? (
-                          <CheckSquare className="h-4 w-4" />
-                        ) : (
-                          <Square className="h-4 w-4" />
-                        )}
+                        {selectedIds.has(msg.id) ? <CheckSquare className="h-4 w-4" /> : <Square className="h-4 w-4" />}
                       </Button>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
-                        {!msg.isRead && (
-                          <div className="h-2.5 w-2.5 animate-pulse rounded-full bg-primary" />
-                        )}
-                        {msg.isUrgent && (
-                          <AlertTriangle className="h-3.5 w-3.5 text-destructive" />
-                        )}
+                        {!msg.isRead && <div className="h-2.5 w-2.5 animate-pulse rounded-full bg-primary" />}
+                        {msg.isUrgent && <AlertTriangle className="h-3.5 w-3.5 text-destructive" />}
                       </div>
                     </TableCell>
                     <TableCell>
                       <div>
-                        <span className={!msg.isRead ? "font-semibold" : ""}>
-                          {msg.callerName ?? msg.callerNumber}
-                        </span>
-                        {msg.callerName && (
-                          <p className="font-mono text-xs text-muted-foreground">
-                            {msg.callerNumber}
-                          </p>
-                        )}
+                        <span className={!msg.isRead ? "font-semibold" : ""}>{msg.callerName ?? msg.callerNumber}</span>
+                        {msg.callerName && <p className="font-mono text-xs text-muted-foreground">{msg.callerNumber}</p>}
                       </div>
                     </TableCell>
-                    <TableCell className="tabular-nums">
-                      {formatDuration(msg.durationSeconds)}
-                    </TableCell>
+                    <TableCell className="tabular-nums">{formatDuration(msg.durationSeconds)}</TableCell>
                     <TableCell>
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -684,21 +579,13 @@ function MessagesTab() {
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0"
-                            data-slot="dropdown"
-                            onClick={(e) => e.stopPropagation()}
-                          >
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0" data-slot="dropdown" onClick={(e) => e.stopPropagation()}>
                             <MoreVertical className="h-4 w-4" />
                             <span className="sr-only">Actions for message from {msg.callerName ?? msg.callerNumber}</span>
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() => handleOpenDetail(msg)}
-                          >
+                          <DropdownMenuItem onClick={() => handleOpenDetail(msg)}>
                             <Play className="mr-2 h-4 w-4" />
                             Play message
                           </DropdownMenuItem>
@@ -723,10 +610,7 @@ function MessagesTab() {
                             )}
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            variant="destructive"
-                            onClick={() => setSingleDeleteId(msg.id)}
-                          >
+                          <DropdownMenuItem variant="destructive" onClick={() => setSingleDeleteId(msg.id)}>
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete
                           </DropdownMenuItem>
@@ -757,21 +641,11 @@ function MessagesTab() {
             </div>
             {totalPages > 1 && (
               <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={page <= 1}
-                >
+                <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>
                   Previous
                   <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&larr;</kbd>
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={page >= totalPages}
-                >
+                <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>
                   Next
                   <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&rarr;</kbd>
                 </Button>
@@ -814,14 +688,11 @@ function MessagesTab() {
               Delete voicemail messages
             </AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete {selectedIds.size} voicemail{" "}
-              {selectedIds.size === 1 ? "message" : "messages"}. This action cannot be undone.
+              This will permanently delete {selectedIds.size} voicemail {selectedIds.size === 1 ? "message" : "messages"}. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={bulkDeleteMutation.isPending}>
-              Cancel
-            </AlertDialogCancel>
+            <AlertDialogCancel disabled={bulkDeleteMutation.isPending}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleBulkDeleteConfirm}
               disabled={bulkDeleteMutation.isPending}
@@ -835,8 +706,7 @@ function MessagesTab() {
               ) : (
                 <>
                   <Trash2 className="mr-1 size-4" />
-                  Delete {selectedIds.size}{" "}
-                  {selectedIds.size === 1 ? "message" : "messages"}
+                  Delete {selectedIds.size} {selectedIds.size === 1 ? "message" : "messages"}
                 </>
               )}
             </AlertDialogAction>
@@ -857,15 +727,10 @@ function MessagesTab() {
               <AlertTriangle className="size-5" />
               Delete voicemail
             </AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete this voicemail message. This action cannot be
-              undone.
-            </AlertDialogDescription>
+            <AlertDialogDescription>This will permanently delete this voicemail message. This action cannot be undone.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteMutation.isPending}>
-              Cancel
-            </AlertDialogCancel>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleSingleDeleteConfirm}
               disabled={deleteMutation.isPending}
@@ -918,9 +783,7 @@ function MessageDetailDialog({
             Voicemail from {callerDisplay}
           </DialogTitle>
           <DialogDescription>
-            {message.callerName && (
-              <span className="font-mono text-xs">{message.callerNumber}</span>
-            )}
+            {message.callerName && <span className="font-mono text-xs">{message.callerNumber}</span>}
             {message.callerName && " — "}
             {formatFullDateTime(message.receivedAt)} — {formatDuration(message.durationSeconds)}
           </DialogDescription>
@@ -929,26 +792,17 @@ function MessageDetailDialog({
         <div className="space-y-4">
           {/* Status badges */}
           <div className="flex items-center gap-2">
-            {message.isRead ? (
-              <Badge variant="outline">Read</Badge>
-            ) : (
-              <Badge variant="secondary">Unread</Badge>
-            )}
+            {message.isRead ? <Badge variant="outline">Read</Badge> : <Badge variant="secondary">Unread</Badge>}
             {message.isUrgent && <Badge variant="destructive">Urgent</Badge>}
           </div>
 
           {/* Audio player */}
-          <VoicemailPlayer
-            audioUrl={message.audioFilePath}
-            durationSeconds={message.durationSeconds}
-          />
+          <VoicemailPlayer audioUrl={message.audioFilePath} durationSeconds={message.durationSeconds} />
 
           {/* Transcription */}
           {message.transcription && (
             <div className="space-y-1">
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Transcription
-              </p>
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Transcription</p>
               <div className="rounded-lg bg-muted/30 p-3">
                 <p className="text-sm leading-relaxed">{message.transcription}</p>
               </div>
@@ -957,11 +811,7 @@ function MessageDetailDialog({
 
           {/* Actions */}
           <div className="flex items-center gap-2 border-t pt-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onMarkRead(!message.isRead)}
-            >
+            <Button variant="outline" size="sm" onClick={() => onMarkRead(!message.isRead)}>
               {message.isRead ? (
                 <>
                   <Mail className="mr-1.5 h-4 w-4" />
@@ -1104,18 +954,9 @@ function BoxesTab() {
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative max-w-sm flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search by extension or email..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 pr-8"
-          />
+          <Input placeholder="Search by extension or email..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 pr-8" />
           {search && (
-            <button
-              type="button"
-              onClick={() => setSearch("")}
-              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
-            >
+            <button type="button" onClick={() => setSearch("")} className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground">
               <X className="h-3.5 w-3.5" />
               <span className="sr-only">Clear search</span>
             </button>
@@ -1170,11 +1011,7 @@ function BoxesTab() {
         <EmptyState
           icon={Voicemail}
           title="No voicemail boxes"
-          description={
-            search
-              ? "No voicemail boxes match your search."
-              : "Voicemail boxes will appear here once configured on extensions."
-          }
+          description={search ? "No voicemail boxes match your search." : "Voicemail boxes will appear here once configured on extensions."}
           action={
             search ? (
               <Button variant="outline" size="sm" onClick={() => setSearch("")}>
@@ -1201,23 +1038,11 @@ function BoxesTab() {
             <Table aria-label="Voicemail boxes">
               <TableHeader className="sticky top-0 z-10 bg-background">
                 <TableRow>
-                  <SortableHeader
-                    label="Extension"
-                    sortKey="name"
-                    currentSort={sortKey}
-                    currentDirection={sortDir}
-                    onSort={handleSort}
-                  />
+                  <SortableHeader label="Extension" sortKey="name" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
                   <TableHead>Email</TableHead>
                   <TableHead>Enabled</TableHead>
                   <TableHead>Transcription</TableHead>
-                  <SortableHeader
-                    label="Unread"
-                    sortKey="unread"
-                    currentSort={sortKey}
-                    currentDirection={sortDir}
-                    onSort={handleSort}
-                  />
+                  <SortableHeader label="Unread" sortKey="unread" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
                   <TableHead className="w-16 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -1247,21 +1072,11 @@ function BoxesTab() {
             </div>
             {totalPages > 1 && (
               <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={page <= 1}
-                >
+                <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>
                   Previous
                   <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&larr;</kbd>
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={page >= totalPages}
-                >
+                <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>
                   Next
                   <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&rarr;</kbd>
                 </Button>
@@ -1292,15 +1107,8 @@ function BoxRow({ box }: { box: VoicemailBox }) {
         }}
       >
         <TableCell>
-          <Link
-            to="/voicemail/$boxId"
-            params={{ boxId: box.id }}
-            className="group flex flex-col gap-0.5"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <span className="font-mono font-medium group-hover:underline">
-              {box.extensionNumber ?? box.mailboxNumber}
-            </span>
+          <Link to="/voicemail/$boxId" params={{ boxId: box.id }} className="group flex flex-col gap-0.5" onClick={(e) => e.stopPropagation()}>
+            <span className="font-mono font-medium group-hover:underline">{box.extensionNumber ?? box.mailboxNumber}</span>
           </Link>
         </TableCell>
         <TableCell>
@@ -1341,13 +1149,7 @@ function BoxRow({ box }: { box: VoicemailBox }) {
         <TableCell className="text-right">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0"
-                data-slot="dropdown"
-                onClick={(e) => e.stopPropagation()}
-              >
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" data-slot="dropdown" onClick={(e) => e.stopPropagation()}>
                 <MoreVertical className="h-4 w-4" />
                 <span className="sr-only">Actions for {box.extensionNumber ?? box.mailboxNumber}</span>
               </Button>
@@ -1360,10 +1162,7 @@ function BoxRow({ box }: { box: VoicemailBox }) {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                variant="destructive"
-                onClick={() => setShowDeleteConfirm(true)}
-              >
+              <DropdownMenuItem variant="destructive" onClick={() => setShowDeleteConfirm(true)}>
                 <Trash2 className="mr-2 h-4 w-4" />
                 Delete
               </DropdownMenuItem>
@@ -1380,21 +1179,18 @@ function BoxRow({ box }: { box: VoicemailBox }) {
               Delete voicemail box
             </AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete the voicemail box for{" "}
-              <span className="font-medium text-foreground">
-                {box.extensionNumber ?? box.mailboxNumber}
-              </span>
-              {" "}and all associated messages. This action cannot be undone.
+              This will permanently delete the voicemail box for <span className="font-medium text-foreground">{box.extensionNumber ?? box.mailboxNumber}</span> and all associated
+              messages. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteBoxMutation.isPending}>
-              Cancel
-            </AlertDialogCancel>
+            <AlertDialogCancel disabled={deleteBoxMutation.isPending}>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => deleteBoxMutation.mutate(box.id, {
-                onSuccess: () => setShowDeleteConfirm(false),
-              })}
+              onClick={() =>
+                deleteBoxMutation.mutate(box.id, {
+                  onSuccess: () => setShowDeleteConfirm(false),
+                })
+              }
               disabled={deleteBoxMutation.isPending}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >

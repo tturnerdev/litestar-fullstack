@@ -1,5 +1,4 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   AlertCircle,
   Calendar,
@@ -21,6 +20,8 @@ import {
   X,
   XCircle,
 } from "lucide-react"
+import { useCallback, useEffect, useMemo, useState } from "react"
+import { toast } from "sonner"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,14 +33,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -55,24 +49,18 @@ import {
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import {
-  useSchedules,
-  useDeleteSchedule,
-  useCheckSchedule,
-  type Schedule,
-} from "@/lib/api/hooks/schedules"
-import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
-import { formatDateTime } from "@/lib/date-utils"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
-import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
+import { type Schedule, useCheckSchedule, useDeleteSchedule, useSchedules } from "@/lib/api/hooks/schedules"
+import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
+import { formatDateTime } from "@/lib/date-utils"
 import { useSettingsStore } from "@/lib/settings-store"
 import { cn } from "@/lib/utils"
-import { toast } from "sonner"
 
 export const Route = createFileRoute("/_app/schedules/")({
   validateSearch: (
@@ -86,10 +74,7 @@ export const Route = createFileRoute("/_app/schedules/")({
     q: typeof search.q === "string" && search.q ? search.q : undefined,
     page: Number(search.page) > 1 ? Number(search.page) : undefined,
     sort: typeof search.sort === "string" && search.sort ? search.sort : undefined,
-    order:
-      typeof search.order === "string" && (search.order === "asc" || search.order === "desc")
-        ? search.order
-        : undefined,
+    order: typeof search.order === "string" && (search.order === "asc" || search.order === "desc") ? search.order : undefined,
   }),
   component: SchedulesPage,
 })
@@ -207,20 +192,12 @@ function SchedulesPage() {
   const compactMode = useSettingsStore((s) => s.compactMode)
   const cellClass = compactMode ? "py-1 px-2 text-xs" : ""
 
-  const {
-    q: searchParam,
-    page: pageParam,
-    sort: sortParam,
-    order: orderParam,
-  } = Route.useSearch()
+  const { q: searchParam, page: pageParam, sort: sortParam, order: orderParam } = Route.useSearch()
   const navigate = Route.useNavigate()
 
   // Column visibility
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(loadColumnVisibility)
-  const isColumnVisible = useCallback(
-    (col: string) => columnVisibility[col] !== false,
-    [columnVisibility],
-  )
+  const isColumnVisible = useCallback((col: string) => columnVisibility[col] !== false, [columnVisibility])
   const toggleColumn = useCallback((col: string) => {
     setColumnVisibility((prev) => {
       const updated = { ...prev, [col]: prev[col] !== false ? false : true }
@@ -359,11 +336,7 @@ function SchedulesPage() {
         () => refetch(),
         { label: "Delete Selected" },
       ),
-      createExportAction<Schedule>(
-        "schedules-selected",
-        csvHeaders,
-        (ids) => filteredItems.filter((s) => ids.includes(s.id)),
-      ),
+      createExportAction<Schedule>("schedules-selected", csvHeaders, (ids) => filteredItems.filter((s) => ids.includes(s.id))),
     ],
     [deleteSchedule, refetch, filteredItems],
   )
@@ -415,11 +388,7 @@ function SchedulesPage() {
                 <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {TOGGLEABLE_COLUMNS.map((col) => (
-                  <DropdownMenuCheckboxItem
-                    key={col.key}
-                    checked={isColumnVisible(col.key)}
-                    onCheckedChange={() => toggleColumn(col.key)}
-                  >
+                  <DropdownMenuCheckboxItem key={col.key} checked={isColumnVisible(col.key)} onCheckedChange={() => toggleColumn(col.key)}>
                     {col.label}
                   </DropdownMenuCheckboxItem>
                 ))}
@@ -440,34 +409,34 @@ function SchedulesPage() {
 
       {/* Summary stats */}
       <SectionErrorBoundary name="Schedule Status Summary">
-      <div className="flex flex-wrap items-center gap-2">
-        {isLoading ? (
-          <>
-            <Skeleton className="h-7 w-24 rounded-full" />
-            <Skeleton className="h-7 w-24 rounded-full" />
-            <Skeleton className="h-7 w-24 rounded-full" />
-          </>
-        ) : (
-          <>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground">
-              Total
-              <span className="ml-0.5 font-semibold text-foreground">{scheduleStats.total}</span>
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              Active
-              <span className="ml-0.5 font-semibold">{scheduleStats.active}</span>
-            </span>
-            {scheduleStats.inactive > 0 && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-zinc-400/30 bg-zinc-400/10 px-3 py-1 text-xs font-medium text-zinc-600 dark:text-zinc-400">
-                <span className="h-1.5 w-1.5 rounded-full bg-zinc-400" />
-                Inactive
-                <span className="ml-0.5 font-semibold">{scheduleStats.inactive}</span>
+        <div className="flex flex-wrap items-center gap-2">
+          {isLoading ? (
+            <>
+              <Skeleton className="h-7 w-24 rounded-full" />
+              <Skeleton className="h-7 w-24 rounded-full" />
+              <Skeleton className="h-7 w-24 rounded-full" />
+            </>
+          ) : (
+            <>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground">
+                Total
+                <span className="ml-0.5 font-semibold text-foreground">{scheduleStats.total}</span>
               </span>
-            )}
-          </>
-        )}
-      </div>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                Active
+                <span className="ml-0.5 font-semibold">{scheduleStats.active}</span>
+              </span>
+              {scheduleStats.inactive > 0 && (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-zinc-400/30 bg-zinc-400/10 px-3 py-1 text-xs font-medium text-zinc-600 dark:text-zinc-400">
+                  <span className="h-1.5 w-1.5 rounded-full bg-zinc-400" />
+                  Inactive
+                  <span className="ml-0.5 font-semibold">{scheduleStats.inactive}</span>
+                </span>
+              )}
+            </>
+          )}
+        </div>
       </SectionErrorBoundary>
 
       {/* Search */}
@@ -475,12 +444,7 @@ function SchedulesPage() {
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative max-w-sm flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Search schedules..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              className="pl-9 pr-8"
-            />
+            <Input placeholder="Search schedules..." value={searchInput} onChange={(e) => setSearchInput(e.target.value)} className="pl-9 pr-8" />
             {searchInput && (
               <button
                 type="button"
@@ -498,196 +462,167 @@ function SchedulesPage() {
       {/* Content */}
       <PageSection delay={0.1}>
         <SectionErrorBoundary name="Schedules Table">
-        {isLoading ? (
-          <SkeletonTable rows={6} />
-        ) : isError ? (
-          <EmptyState
-            icon={AlertCircle}
-            title="Unable to load schedules"
-            description="Something went wrong while fetching your schedules. Please try again."
-            action={
-              <Button variant="outline" size="sm" onClick={() => refetch()}>
-                Try again
-              </Button>
-            }
-          />
-        ) : schedules.length === 0 && !hasActiveFilters ? (
-          <EmptyState
-            icon={Calendar}
-            title="No schedules yet"
-            description="Create your first schedule to define business hours, holidays, or custom operating windows."
-            action={
-              <Button size="sm" asChild>
-                <Link to="/schedules/new">
-                  <Plus className="mr-2 h-4 w-4" /> New schedule
-                </Link>
-              </Button>
-            }
-          />
-        ) : schedules.length === 0 ? (
-          <EmptyState
-            icon={Calendar}
-            variant="no-results"
-            title="No results found"
-            description="No schedules match your current search. Try adjusting your search terms."
-            action={
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setSearchInput("")
-                  navigate({
-                    search: {
-                      q: undefined,
-                      sort: undefined,
-                      order: undefined,
-                      page: undefined,
-                    },
-                  })
-                }}
-              >
-                Clear search
-              </Button>
-            }
-          />
-        ) : (
-          <div className="space-y-3">
-            {/* Result count & pagination info */}
-            <div className="flex items-center justify-between">
-              <p className="text-xs text-muted-foreground">
-                {total} schedule{total === 1 ? "" : "s"}
-                {hasActiveFilters && " (filtered)"}
-              </p>
-              {totalPages > 1 && (
+          {isLoading ? (
+            <SkeletonTable rows={6} />
+          ) : isError ? (
+            <EmptyState
+              icon={AlertCircle}
+              title="Unable to load schedules"
+              description="Something went wrong while fetching your schedules. Please try again."
+              action={
+                <Button variant="outline" size="sm" onClick={() => refetch()}>
+                  Try again
+                </Button>
+              }
+            />
+          ) : schedules.length === 0 && !hasActiveFilters ? (
+            <EmptyState
+              icon={Calendar}
+              title="No schedules yet"
+              description="Create your first schedule to define business hours, holidays, or custom operating windows."
+              action={
+                <Button size="sm" asChild>
+                  <Link to="/schedules/new">
+                    <Plus className="mr-2 h-4 w-4" /> New schedule
+                  </Link>
+                </Button>
+              }
+            />
+          ) : schedules.length === 0 ? (
+            <EmptyState
+              icon={Calendar}
+              variant="no-results"
+              title="No results found"
+              description="No schedules match your current search. Try adjusting your search terms."
+              action={
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSearchInput("")
+                    navigate({
+                      search: {
+                        q: undefined,
+                        sort: undefined,
+                        order: undefined,
+                        page: undefined,
+                      },
+                    })
+                  }}
+                >
+                  Clear search
+                </Button>
+              }
+            />
+          ) : (
+            <div className="space-y-3">
+              {/* Result count & pagination info */}
+              <div className="flex items-center justify-between">
                 <p className="text-xs text-muted-foreground">
-                  Page {page} of {totalPages}
+                  {total} schedule{total === 1 ? "" : "s"}
+                  {hasActiveFilters && " (filtered)"}
                 </p>
-              )}
-            </div>
-
-            {/* Table */}
-            <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
-              <Table aria-label="Schedules" aria-busy={isLoading || isRefetching}>
-                <TableHeader className="sticky top-0 z-10 bg-background">
-                  <TableRow>
-                    <TableHead className="w-10">
-                      <Checkbox
-                        checked={allSelected}
-                        indeterminate={someSelected && !allSelected}
-                        onChange={toggleAll}
-                        aria-label="Select all schedules"
-                      />
-                    </TableHead>
-                    <SortableHeader
-                      label="Name"
-                      sortKey="name"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                    />
-                    {isColumnVisible("type") && (
-                      <TableHead className="hidden md:table-cell">Type</TableHead>
-                    )}
-                    {isColumnVisible("timezone") && (
-                      <SortableHeader
-                        label="Timezone"
-                        sortKey="timezone"
-                        currentSort={sortKey}
-                        currentDirection={sortDir}
-                        onSort={handleSort}
-                        className="hidden md:table-cell"
-                      />
-                    )}
-                    {isColumnVisible("entries") && (
-                      <TableHead className="hidden lg:table-cell">Entries</TableHead>
-                    )}
-                    {isColumnVisible("status") && (
-                      <TableHead>Status</TableHead>
-                    )}
-                    <TableHead className="w-16 text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredItems.map((schedule, index) => (
-                    <ScheduleRow
-                      key={schedule.id}
-                      schedule={schedule}
-                      index={index}
-                      selected={selectedIds.has(schedule.id)}
-                      onToggle={() => toggleOne(schedule.id)}
-                      onRowClick={() => handleRowClick(schedule.id)}
-                      cellClass={cellClass}
-                      isColumnVisible={isColumnVisible}
-                    />
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-            <div className="sr-only" aria-live="polite" aria-atomic="true">
-              {!isLoading && `Showing ${filteredItems.length} of ${total} results, page ${page}`}
-            </div>
-
-            {/* Pagination */}
-            <div className="flex items-center justify-end gap-4">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Rows per page</span>
-                <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
-                  <SelectTrigger className="h-8 w-[70px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PAGE_SIZES.map((size) => (
-                      <SelectItem key={size} value={String(size)}>
-                        {size}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {totalPages > 1 && (
+                  <p className="text-xs text-muted-foreground">
+                    Page {page} of {totalPages}
+                  </p>
+                )}
               </div>
-              {totalPages > 1 && (
+
+              {/* Table */}
+              <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
+                <Table aria-label="Schedules" aria-busy={isLoading || isRefetching}>
+                  <TableHeader className="sticky top-0 z-10 bg-background">
+                    <TableRow>
+                      <TableHead className="w-10">
+                        <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all schedules" />
+                      </TableHead>
+                      <SortableHeader label="Name" sortKey="name" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                      {isColumnVisible("type") && <TableHead className="hidden md:table-cell">Type</TableHead>}
+                      {isColumnVisible("timezone") && (
+                        <SortableHeader label="Timezone" sortKey="timezone" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
+                      )}
+                      {isColumnVisible("entries") && <TableHead className="hidden lg:table-cell">Entries</TableHead>}
+                      {isColumnVisible("status") && <TableHead>Status</TableHead>}
+                      <TableHead className="w-16 text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredItems.map((schedule, index) => (
+                      <ScheduleRow
+                        key={schedule.id}
+                        schedule={schedule}
+                        index={index}
+                        selected={selectedIds.has(schedule.id)}
+                        onToggle={() => toggleOne(schedule.id)}
+                        onRowClick={() => handleRowClick(schedule.id)}
+                        cellClass={cellClass}
+                        isColumnVisible={isColumnVisible}
+                      />
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              <div className="sr-only" aria-live="polite" aria-atomic="true">
+                {!isLoading && `Showing ${filteredItems.length} of ${total} results, page ${page}`}
+              </div>
+
+              {/* Pagination */}
+              <div className="flex items-center justify-end gap-4">
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      navigate({
-                        search: (prev) => ({
-                          ...prev,
-                          page: page - 1 > 1 ? page - 1 : undefined,
-                        }),
-                      })
-                    }
-                    disabled={page <= 1}
-                  >
-                    Previous
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      navigate({
-                        search: (prev) => ({ ...prev, page: page + 1 }),
-                      })
-                    }
-                    disabled={page >= totalPages}
-                  >
-                    Next
-                  </Button>
+                  <span className="text-sm text-muted-foreground">Rows per page</span>
+                  <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
+                    <SelectTrigger className="h-8 w-[70px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PAGE_SIZES.map((size) => (
+                        <SelectItem key={size} value={String(size)}>
+                          {size}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-              )}
+                {totalPages > 1 && (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        navigate({
+                          search: (prev) => ({
+                            ...prev,
+                            page: page - 1 > 1 ? page - 1 : undefined,
+                          }),
+                        })
+                      }
+                      disabled={page <= 1}
+                    >
+                      Previous
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        navigate({
+                          search: (prev) => ({ ...prev, page: page + 1 }),
+                        })
+                      }
+                      disabled={page >= totalPages}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
         </SectionErrorBoundary>
       </PageSection>
 
       {/* Bulk action bar */}
-      <BulkActionBar
-        selectedCount={selectedIds.size}
-        selectedIds={Array.from(selectedIds)}
-        onClearSelection={() => setSelectedIds(new Set())}
-        actions={bulkActions}
-      />
+      <BulkActionBar selectedCount={selectedIds.size} selectedIds={Array.from(selectedIds)} onClearSelection={() => setSelectedIds(new Set())} actions={bulkActions} />
     </PageContainer>
   )
 }
@@ -751,12 +686,7 @@ function ScheduleRow({
         />
       </TableCell>
       <TableCell className={cellClass}>
-        <Link
-          to="/schedules/$scheduleId"
-          params={{ scheduleId: schedule.id }}
-          className="group flex items-center gap-2"
-          onClick={(e) => e.stopPropagation()}
-        >
+        <Link to="/schedules/$scheduleId" params={{ scheduleId: schedule.id }} className="group flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
           {(() => {
             const TypeIcon = scheduleTypeIcons[schedule.scheduleType] ?? Clock
             return <TypeIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -808,13 +738,7 @@ function ScheduleRow({
       <TableCell className={cn("text-right", cellClass)}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              data-slot="dropdown"
-              onClick={(e) => e.stopPropagation()}
-            >
+            <Button variant="ghost" size="icon" className="h-8 w-8" data-slot="dropdown" onClick={(e) => e.stopPropagation()}>
               <MoreVertical className="h-4 w-4" />
               <span className="sr-only">Actions</span>
             </Button>
@@ -842,10 +766,7 @@ function ScheduleRow({
               Copy Schedule ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem
-              className="text-destructive focus:text-destructive"
-              onClick={() => setItemToDelete({ id: schedule.id, name: schedule.name })}
-            >
+            <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setItemToDelete({ id: schedule.id, name: schedule.name })}>
               <Trash2 className="mr-2 h-4 w-4" />
               Delete
             </DropdownMenuItem>

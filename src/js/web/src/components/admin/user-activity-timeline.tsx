@@ -103,7 +103,11 @@ export function UserActivityTimeline({ userId }: { userId: string }) {
         icon={AlertCircle}
         title="Unable to load activity"
         description="Something went wrong while fetching the audit trail."
-        action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+        action={
+          <Button variant="outline" size="sm" onClick={() => refetch()}>
+            Try again
+          </Button>
+        }
       />
     )
   }
@@ -136,11 +140,12 @@ export function UserActivityTimeline({ userId }: { userId: string }) {
             <button
               key={pill.key}
               type="button"
-              onClick={() => { setFilter(pill.key); setShowAll(false) }}
+              onClick={() => {
+                setFilter(pill.key)
+                setShowAll(false)
+              }}
               className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                filter === pill.key
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+                filter === pill.key ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"
               }`}
             >
               {pill.label}
@@ -212,9 +217,7 @@ export function UserActivityTimeline({ userId }: { userId: string }) {
                       </button>
                     )}
                     {hasDetails && isExpanded && (
-                      <pre className="mt-2 rounded-md bg-muted p-3 text-xs overflow-x-auto max-h-48 overflow-y-auto">
-                        {JSON.stringify(entry.details, null, 2)}
-                      </pre>
+                      <pre className="mt-2 rounded-md bg-muted p-3 text-xs overflow-x-auto max-h-48 overflow-y-auto">{JSON.stringify(entry.details, null, 2)}</pre>
                     )}
                   </div>
                 </div>

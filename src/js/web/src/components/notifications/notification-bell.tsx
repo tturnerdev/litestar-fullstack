@@ -1,34 +1,9 @@
 import { useNavigate } from "@tanstack/react-router"
-import {
-  Bell,
-  CheckCheck,
-  Laptop,
-  Loader2,
-  MessageSquare,
-  Phone,
-  Printer,
-  Settings,
-  Users,
-  X,
-} from "lucide-react"
+import { Bell, CheckCheck, Laptop, Loader2, MessageSquare, Phone, Printer, Settings, Users, X } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
-  type NotificationItem,
-  useDeleteNotification,
-  useMarkAllRead,
-  useMarkRead,
-  useNotifications,
-  useUnreadCount,
-} from "@/lib/api/hooks/notifications"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { type NotificationItem, useDeleteNotification, useMarkAllRead, useMarkRead, useNotifications, useUnreadCount } from "@/lib/api/hooks/notifications"
 import { formatRelativeTimeShort } from "@/lib/date-utils"
 import { cn } from "@/lib/utils"
 
@@ -97,13 +72,7 @@ function getCategoryColor(category: string) {
   }
 }
 
-function NotificationRow({
-  notification,
-  onClose,
-}: {
-  notification: NotificationItem
-  onClose: () => void
-}) {
+function NotificationRow({ notification, onClose }: { notification: NotificationItem; onClose: () => void }) {
   const navigate = useNavigate()
   const markRead = useMarkRead()
   const deleteNotification = useDeleteNotification()
@@ -154,7 +123,9 @@ function NotificationRow({
           </p>
           {!notification.isRead && <span className="h-2 w-2 shrink-0 rounded-full bg-primary" />}
         </div>
-        <p className="line-clamp-2 text-xs text-muted-foreground" title={notification.message}>{notification.message}</p>
+        <p className="line-clamp-2 text-xs text-muted-foreground" title={notification.message}>
+          {notification.message}
+        </p>
         <p className="mt-0.5 text-[0.65rem] text-muted-foreground/70">{relativeTime}</p>
       </div>
       <button
@@ -220,13 +191,7 @@ export function NotificationBell() {
         <div className="flex items-center justify-between border-b px-4 py-3">
           <DropdownMenuLabel className="p-0 text-base font-semibold">Notifications</DropdownMenuLabel>
           {unreadCount > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 gap-1.5 text-xs text-muted-foreground"
-              onClick={() => markAllRead.mutate()}
-              disabled={markAllRead.isPending}
-            >
+            <Button variant="ghost" size="sm" className="h-7 gap-1.5 text-xs text-muted-foreground" onClick={() => markAllRead.mutate()} disabled={markAllRead.isPending}>
               <CheckCheck className="h-3.5 w-3.5" />
               Mark all read
             </Button>

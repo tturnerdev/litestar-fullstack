@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
-import { useRef, useState } from "react"
 import { Calendar, ChevronRight, Clock, Globe, Loader2, SlidersHorizontal, Star } from "lucide-react"
+import { useRef, useState } from "react"
+import { toast } from "sonner"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,14 +12,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -28,9 +22,8 @@ import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { useDocumentTitle } from "@/hooks/use-document-title"
-import { useCreateSchedule, type ScheduleCreate } from "@/lib/api/hooks/schedules"
+import { type ScheduleCreate, useCreateSchedule } from "@/lib/api/hooks/schedules"
 import { useAuthStore } from "@/lib/auth"
-import { toast } from "sonner"
 
 export const Route = createFileRoute("/_app/schedules/new")({
   component: NewSchedulePage,
@@ -174,114 +167,86 @@ function NewSchedulePage() {
         <div className="flex gap-6">
           {/* Main form */}
           <SectionErrorBoundary name="Create Schedule Form">
-          <Card className="min-w-0 flex-1">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Clock className="h-5 w-5" />
-                Schedule Details
-              </CardTitle>
-              <CardDescription>
-                Configure the basic settings for your new schedule. You can add time entries after creation.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Name */}
-                <div className="space-y-2">
-                  <Label htmlFor="schedule-name">
-                    Name <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    id="schedule-name"
-                    placeholder="e.g., Main Office Hours"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                    autoFocus
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    A descriptive name for this schedule.
-                  </p>
-                </div>
-
-                {/* Schedule Type */}
-                <div className="space-y-2">
-                  <Label htmlFor="schedule-type">Schedule Type</Label>
-                  <Select
-                    value={scheduleType}
-                    onValueChange={(v) => setScheduleType(v as ScheduleCreate["scheduleType"])}
-                  >
-                    <SelectTrigger id="schedule-type">
-                      <SelectValue placeholder="Select a type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {SCHEDULE_TYPES.map((t) => (
-                        <SelectItem key={t.value} value={t.value}>
-                          {t.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground">
-                    Determines how this schedule is used in call routing and automation.
-                  </p>
-                </div>
-
-                {/* Timezone */}
-                <div className="space-y-2">
-                  <Label htmlFor="schedule-timezone">Timezone</Label>
-                  <Select value={timezone} onValueChange={setTimezone}>
-                    <SelectTrigger id="schedule-timezone">
-                      <SelectValue placeholder="Select a timezone" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {COMMON_TIMEZONES.map((tz) => (
-                        <SelectItem key={tz} value={tz}>
-                          {tz.replace(/_/g, " ")}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground">
-                    All schedule entries will be evaluated in this timezone.
-                  </p>
-                </div>
-
-                {/* Default toggle */}
-                <div className="flex items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="schedule-default" className="flex items-center gap-2">
-                      <Star className="h-4 w-4 text-amber-500" />
-                      Default Schedule
+            <Card className="min-w-0 flex-1">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Clock className="h-5 w-5" />
+                  Schedule Details
+                </CardTitle>
+                <CardDescription>Configure the basic settings for your new schedule. You can add time entries after creation.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  {/* Name */}
+                  <div className="space-y-2">
+                    <Label htmlFor="schedule-name">
+                      Name <span className="text-red-500">*</span>
                     </Label>
-                    <p className="text-xs text-muted-foreground">
-                      Mark this as the default schedule for the team.
-                    </p>
+                    <Input id="schedule-name" placeholder="e.g., Main Office Hours" value={name} onChange={(e) => setName(e.target.value)} required autoFocus />
+                    <p className="text-xs text-muted-foreground">A descriptive name for this schedule.</p>
                   </div>
-                  <Switch
-                    id="schedule-default"
-                    checked={isDefault}
-                    onCheckedChange={setIsDefault}
-                  />
-                </div>
 
-                {/* Actions */}
-                <div className="flex items-center justify-end gap-2 pt-2">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => router.navigate({ to: "/schedules" })}
-                  >
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={!isValid || createSchedule.isPending}>
-                    {createSchedule.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Create Schedule
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
+                  {/* Schedule Type */}
+                  <div className="space-y-2">
+                    <Label htmlFor="schedule-type">Schedule Type</Label>
+                    <Select value={scheduleType} onValueChange={(v) => setScheduleType(v as ScheduleCreate["scheduleType"])}>
+                      <SelectTrigger id="schedule-type">
+                        <SelectValue placeholder="Select a type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SCHEDULE_TYPES.map((t) => (
+                          <SelectItem key={t.value} value={t.value}>
+                            {t.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">Determines how this schedule is used in call routing and automation.</p>
+                  </div>
+
+                  {/* Timezone */}
+                  <div className="space-y-2">
+                    <Label htmlFor="schedule-timezone">Timezone</Label>
+                    <Select value={timezone} onValueChange={setTimezone}>
+                      <SelectTrigger id="schedule-timezone">
+                        <SelectValue placeholder="Select a timezone" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {COMMON_TIMEZONES.map((tz) => (
+                          <SelectItem key={tz} value={tz}>
+                            {tz.replace(/_/g, " ")}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">All schedule entries will be evaluated in this timezone.</p>
+                  </div>
+
+                  {/* Default toggle */}
+                  <div className="flex items-center justify-between rounded-lg border p-4">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="schedule-default" className="flex items-center gap-2">
+                        <Star className="h-4 w-4 text-amber-500" />
+                        Default Schedule
+                      </Label>
+                      <p className="text-xs text-muted-foreground">Mark this as the default schedule for the team.</p>
+                    </div>
+                    <Switch id="schedule-default" checked={isDefault} onCheckedChange={setIsDefault} />
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center justify-end gap-2 pt-2">
+                    <Button type="button" variant="ghost" onClick={() => router.navigate({ to: "/schedules" })}>
+                      Cancel
+                    </Button>
+                    <Button type="submit" disabled={!isValid || createSchedule.isPending}>
+                      {createSchedule.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Create Schedule
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
           </SectionErrorBoundary>
 
           {/* Sidebar tips */}
@@ -313,9 +278,7 @@ function NewSchedulePage() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
-            <AlertDialogDescription>
-              You have unsaved changes to this schedule. Are you sure you want to leave? Your changes will be lost.
-            </AlertDialogDescription>
+            <AlertDialogDescription>You have unsaved changes to this schedule. Are you sure you want to leave? Your changes will be lost.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => blocker.reset?.()}>Stay on page</AlertDialogCancel>

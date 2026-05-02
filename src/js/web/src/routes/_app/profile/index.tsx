@@ -1,6 +1,29 @@
 import { useQueryClient } from "@tanstack/react-query"
-import { Link, createFileRoute, useNavigate, useSearch } from "@tanstack/react-router"
-import { AlertCircle, ArrowRight, Bell, Calendar, CheckCircle2, ChevronRight, Circle, Download, Home, KeyRound, Link2, Mail, Monitor, Palette, Phone, Shield, ShieldAlert, ShieldCheck, Sparkles, User as UserIcon, Users, KeySquare } from "lucide-react"
+import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router"
+import {
+  AlertCircle,
+  ArrowRight,
+  Bell,
+  Calendar,
+  CheckCircle2,
+  ChevronRight,
+  Circle,
+  Download,
+  Home,
+  KeyRound,
+  KeySquare,
+  Link2,
+  Mail,
+  Monitor,
+  Palette,
+  Phone,
+  Shield,
+  ShieldAlert,
+  ShieldCheck,
+  Sparkles,
+  User as UserIcon,
+  Users,
+} from "lucide-react"
 import { useEffect, useMemo } from "react"
 import { toast } from "sonner"
 import { z } from "zod"
@@ -8,33 +31,26 @@ import { ActiveSessions } from "@/components/profile/active-sessions"
 import { ConnectedAccounts } from "@/components/profile/connected-accounts"
 import { MfaSection } from "@/components/profile/mfa-section"
 import { PasswordChangeCard } from "@/components/profile/password-change-card"
-import { RecentSecurityActivity } from "@/components/profile/recent-security-activity"
 import { PersonalInfoForm } from "@/components/profile/personal-info-form"
 import { ProfileHero } from "@/components/profile/profile-hero"
+import { RecentSecurityActivity } from "@/components/profile/recent-security-activity"
 import { Badge } from "@/components/ui/badge"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { EmptyState } from "@/components/ui/empty-state"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Separator } from "@/components/ui/separator"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { SkeletonCard } from "@/components/ui/skeleton"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useMfaStatus } from "@/lib/api/hooks/auth"
 import { useProfile } from "@/lib/api/hooks/profile"
-import { profileOAuthAccountsQueryKey } from "@/lib/generated/api/@tanstack/react-query.gen"
-import type { User } from "@/lib/generated/api/types.gen"
-import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useAuthStore } from "@/lib/auth"
 import { formatDateLong } from "@/lib/date-utils"
+import { profileOAuthAccountsQueryKey } from "@/lib/generated/api/@tanstack/react-query.gen"
+import type { User } from "@/lib/generated/api/types.gen"
 import { useNotificationPreferencesStore } from "@/lib/notification-preferences-store"
 import { useSettingsStore } from "@/lib/settings-store"
 import { useTheme } from "@/lib/theme-context"
@@ -173,16 +189,10 @@ function MfaSummaryCard() {
               <ShieldCheck className="h-6 w-6 text-green-600 dark:text-green-400" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="font-medium text-green-800 dark:text-green-300">
-                Two-factor authentication is enabled
-              </p>
+              <p className="font-medium text-green-800 dark:text-green-300">Two-factor authentication is enabled</p>
               <p className="mt-1 text-sm text-green-600 dark:text-green-400">
                 Your account is protected with an authenticator app.
-                {data?.confirmedAt && (
-                  <span className="block mt-1 text-xs">
-                    Enabled on {formatDateLong(data.confirmedAt)}.
-                  </span>
-                )}
+                {data?.confirmedAt && <span className="block mt-1 text-xs">Enabled on {formatDateLong(data.confirmedAt)}.</span>}
               </p>
             </div>
           </div>
@@ -192,12 +202,8 @@ function MfaSummaryCard() {
               <ShieldAlert className="h-6 w-6 text-amber-600 dark:text-amber-400" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="font-medium text-amber-800 dark:text-amber-300">
-                Two-factor authentication is not enabled
-              </p>
-              <p className="mt-1 text-sm text-amber-600 dark:text-amber-400">
-                We strongly recommend enabling MFA to add an extra layer of security to your account.
-              </p>
+              <p className="font-medium text-amber-800 dark:text-amber-300">Two-factor authentication is not enabled</p>
+              <p className="mt-1 text-sm text-amber-600 dark:text-amber-400">We strongly recommend enabling MFA to add an extra layer of security to your account.</p>
             </div>
           </div>
         )}
@@ -213,11 +219,7 @@ function MfaSummaryCard() {
           </div>
         )}
 
-        {!enabled && (
-          <p className="text-xs text-muted-foreground">
-            Scroll to the Security section below to set up MFA.
-          </p>
-        )}
+        {!enabled && <p className="text-xs text-muted-foreground">Scroll to the Security section below to set up MFA.</p>}
       </CardContent>
     </Card>
   )
@@ -324,15 +326,14 @@ function ProfileCompletenessCard({ user }: { user: User }) {
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="text-base">Profile completeness</CardTitle>
-        <CardDescription>{percentage}% complete &mdash; {totalSteps - completedCount} {totalSteps - completedCount === 1 ? "step" : "steps"} remaining</CardDescription>
+        <CardDescription>
+          {percentage}% complete &mdash; {totalSteps - completedCount} {totalSteps - completedCount === 1 ? "step" : "steps"} remaining
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Progress bar */}
         <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-          <div
-            className="h-full rounded-full bg-primary transition-all duration-500"
-            style={{ width: `${percentage}%` }}
-          />
+          <div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${percentage}%` }} />
         </div>
 
         {/* Steps checklist */}
@@ -387,15 +388,9 @@ function ApiKeysCard() {
           </div>
           <div className="text-center">
             <p className="text-sm font-medium">No API keys yet</p>
-            <p className="mt-1 max-w-sm text-xs text-muted-foreground">
-              API keys allow you to authenticate requests to the admin portal API without using your browser session.
-            </p>
+            <p className="mt-1 max-w-sm text-xs text-muted-foreground">API keys allow you to authenticate requests to the admin portal API without using your browser session.</p>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => toast.info("API key management coming soon")}
-          >
+          <Button variant="outline" size="sm" onClick={() => toast.info("API key management coming soon")}>
             <KeySquare className="mr-2 h-4 w-4" />
             Generate API Key
           </Button>
@@ -457,9 +452,7 @@ function DataExportCard({ user }: { user: User }) {
           <Download className="h-4 w-4 text-muted-foreground" />
           Your Data
         </CardTitle>
-        <CardDescription>
-          Download a copy of your personal data. This includes your profile information, preferences, and account activity.
-        </CardDescription>
+        <CardDescription>Download a copy of your personal data. This includes your profile information, preferences, and account activity.</CardDescription>
       </CardHeader>
       <CardContent>
         <Button variant="outline" size="sm" onClick={handleExport}>

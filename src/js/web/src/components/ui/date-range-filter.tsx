@@ -48,11 +48,7 @@ export function getPresetLabel(startDate: string, endDate: string): string | nul
  * Check whether a date string falls within a start/end range (inclusive).
  * If both start and end are empty, all dates pass.
  */
-export function isDateInRange(
-  dateStr: string | null | undefined,
-  startDate: string,
-  endDate: string,
-): boolean {
+export function isDateInRange(dateStr: string | null | undefined, startDate: string, endDate: string): boolean {
   if (!startDate && !endDate) return true
   if (!dateStr) return false
   const d = new Date(dateStr)
@@ -82,14 +78,7 @@ interface DateRangeFilterProps {
   label?: string
 }
 
-export function DateRangeFilter({
-  startDate,
-  endDate,
-  onStartDateChange,
-  onEndDateChange,
-  onPreset,
-  label = "Date range",
-}: DateRangeFilterProps) {
+export function DateRangeFilter({ startDate, endDate, onStartDateChange, onEndDateChange, onPreset, label = "Date range" }: DateRangeFilterProps) {
   const presetLabel = getPresetLabel(startDate, endDate)
   const hasDateFilter = Boolean(startDate || endDate)
 
@@ -100,10 +89,7 @@ export function DateRangeFilter({
           <Calendar className="size-3.5" />
           {presetLabel ?? label}
           {hasDateFilter && (
-            <Badge
-              variant="secondary"
-              className="ml-1 size-5 justify-center rounded-full px-0 text-[10px]"
-            >
+            <Badge variant="secondary" className="ml-1 size-5 justify-center rounded-full px-0 text-[10px]">
               1
             </Badge>
           )}
@@ -112,13 +98,7 @@ export function DateRangeFilter({
       <PopoverContent align="start" className="w-72 space-y-3 p-3">
         <div className="flex flex-wrap gap-1">
           {DATE_PRESETS.map((preset) => (
-            <Button
-              key={preset.label}
-              variant={presetLabel === preset.label ? "secondary" : "ghost"}
-              size="sm"
-              className="h-7 text-xs"
-              onClick={() => onPreset(preset.days)}
-            >
+            <Button key={preset.label} variant={presetLabel === preset.label ? "secondary" : "ghost"} size="sm" className="h-7 text-xs" onClick={() => onPreset(preset.days)}>
               {preset.label}
             </Button>
           ))}
@@ -127,34 +107,17 @@ export function DateRangeFilter({
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <label className="w-12 text-xs text-muted-foreground">From</label>
-            <Input
-              type="date"
-              className="h-8 text-xs"
-              value={startDate}
-              onChange={(e) => onStartDateChange(e.target.value)}
-              aria-label="From date"
-            />
+            <Input type="date" className="h-8 text-xs" value={startDate} onChange={(e) => onStartDateChange(e.target.value)} aria-label="From date" />
           </div>
           <div className="flex items-center gap-2">
             <label className="w-12 text-xs text-muted-foreground">To</label>
-            <Input
-              type="date"
-              className="h-8 text-xs"
-              value={endDate}
-              onChange={(e) => onEndDateChange(e.target.value)}
-              aria-label="To date"
-            />
+            <Input type="date" className="h-8 text-xs" value={endDate} onChange={(e) => onEndDateChange(e.target.value)} aria-label="To date" />
           </div>
         </div>
         {hasDateFilter && (
           <>
             <div className="-mx-3 h-px bg-border" />
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full justify-center text-xs"
-              onClick={() => onPreset(-1)}
-            >
+            <Button variant="ghost" size="sm" className="w-full justify-center text-xs" onClick={() => onPreset(-1)}>
               Clear dates
             </Button>
           </>

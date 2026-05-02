@@ -1,19 +1,19 @@
-import { useCallback, useEffect, useState } from "react"
 import { createFileRoute } from "@tanstack/react-router"
-import { useDocumentTitle } from "@/hooks/use-document-title"
 import { AlertCircle, Clock, Database, Info, Loader2, Network, Save } from "lucide-react"
+import { useCallback, useEffect, useState } from "react"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { DataFreshness } from "@/components/ui/data-freshness"
+import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
-import { Separator } from "@/components/ui/separator"
-import { DataFreshness } from "@/components/ui/data-freshness"
-import { EmptyState } from "@/components/ui/empty-state"
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
+import { Separator } from "@/components/ui/separator"
 import { SkeletonCard } from "@/components/ui/skeleton"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useAdminGatewaySettings, useUpdateAdminGatewaySettings } from "@/lib/api/hooks/gateway"
 
 export const Route = createFileRoute("/_app/admin/gateway")({
@@ -76,19 +76,13 @@ function AdminGatewayPage() {
   }, [data, initialized])
 
   // Track dirty state
-  const isDirty =
-    initialized &&
-    data != null &&
-    (timeout !== String(data.defaultTimeout) || cacheTtl !== String(data.defaultCacheTtl))
+  const isDirty = initialized && data != null && (timeout !== String(data.defaultTimeout) || cacheTtl !== String(data.defaultCacheTtl))
 
-  const handleFieldBlur = useCallback(
-    (field: "timeout" | "cacheTtl", value: string) => {
-      setTouched((prev) => ({ ...prev, [field]: true }))
-      const error = field === "timeout" ? validateTimeout(value) : validateCacheTtl(value)
-      setErrors((prev) => ({ ...prev, [field]: error }))
-    },
-    [],
-  )
+  const handleFieldBlur = useCallback((field: "timeout" | "cacheTtl", value: string) => {
+    setTouched((prev) => ({ ...prev, [field]: true }))
+    const error = field === "timeout" ? validateTimeout(value) : validateCacheTtl(value)
+    setErrors((prev) => ({ ...prev, [field]: error }))
+  }, [])
 
   const handleTimeoutChange = useCallback(
     (value: string) => {
@@ -144,13 +138,7 @@ function AdminGatewayPage() {
         title="Gateway"
         description="Configure default settings for the data gateway service."
         breadcrumbs={<AdminBreadcrumbs />}
-        actions={
-          <DataFreshness
-            dataUpdatedAt={dataUpdatedAt}
-            onRefresh={() => refetch()}
-            isRefreshing={isRefetching}
-          />
-        }
+        actions={<DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />}
       />
       <AdminNav />
 
@@ -167,177 +155,158 @@ function AdminGatewayPage() {
             icon={AlertCircle}
             title="Unable to load gateway settings"
             description="The server may be unreachable. Please try again."
-            action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+            action={
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
+                Try again
+              </Button>
+            }
           />
         ) : (
           <div className="grid gap-6 lg:grid-cols-3">
             {/* Settings form */}
             <SectionErrorBoundary name="Gateway Settings">
-            <Card className="lg:col-span-2">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <Network className="h-4 w-4 text-muted-foreground" />
-                  Gateway Defaults
-                </CardTitle>
-                <CardDescription>
-                  These values apply to all gateway queries unless overridden at the connection level.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* Default Timeout */}
-                  <div className="space-y-2">
-                    <Label htmlFor="gateway-timeout" className="flex items-center gap-2">
-                      <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-                      Default Request Timeout
-                    </Label>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        id="gateway-timeout"
-                        type="number"
-                        min={1}
-                        max={300}
-                        value={timeout}
-                        onChange={(e) => handleTimeoutChange(e.target.value)}
-                        onBlur={() => handleFieldBlur("timeout", timeout)}
-                        aria-invalid={!!errors.timeout}
-                        className="max-w-[200px]"
-                      />
-                      <span className="text-sm text-muted-foreground">seconds</span>
-                    </div>
-                    {errors.timeout ? (
-                      <FieldError message={errors.timeout} />
-                    ) : (
-                      <FieldHint>
-                        Maximum time to wait for each provider to respond. Applies to all gateway
-                        queries (number, extension, and device lookups).
-                      </FieldHint>
-                    )}
-                  </div>
-
-                  <Separator />
-
-                  {/* Default Cache TTL */}
-                  <div className="space-y-2">
-                    <Label htmlFor="gateway-cache-ttl" className="flex items-center gap-2">
-                      <Database className="h-3.5 w-3.5 text-muted-foreground" />
-                      Default Cache TTL
-                    </Label>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        id="gateway-cache-ttl"
-                        type="number"
-                        min={0}
-                        max={86400}
-                        value={cacheTtl}
-                        onChange={(e) => handleCacheTtlChange(e.target.value)}
-                        onBlur={() => handleFieldBlur("cacheTtl", cacheTtl)}
-                        aria-invalid={!!errors.cacheTtl}
-                        className="max-w-[200px]"
-                      />
-                      <span className="text-sm text-muted-foreground">seconds</span>
-                    </div>
-                    {errors.cacheTtl ? (
-                      <FieldError message={errors.cacheTtl} />
-                    ) : (
-                      <FieldHint>
-                        How long gateway responses are cached in Redis before being re-fetched from
-                        the provider. Set to 0 to disable caching.
-                      </FieldHint>
-                    )}
-                  </div>
-
-                  <Separator />
-
-                  {/* Submit */}
-                  <div className="flex items-center justify-end gap-2">
-                    <Button type="submit" disabled={!isValid || !isDirty || updateSettings.isPending}>
-                      {updateSettings.isPending ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <Card className="lg:col-span-2">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <Network className="h-4 w-4 text-muted-foreground" />
+                    Gateway Defaults
+                  </CardTitle>
+                  <CardDescription>These values apply to all gateway queries unless overridden at the connection level.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    {/* Default Timeout */}
+                    <div className="space-y-2">
+                      <Label htmlFor="gateway-timeout" className="flex items-center gap-2">
+                        <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                        Default Request Timeout
+                      </Label>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          id="gateway-timeout"
+                          type="number"
+                          min={1}
+                          max={300}
+                          value={timeout}
+                          onChange={(e) => handleTimeoutChange(e.target.value)}
+                          onBlur={() => handleFieldBlur("timeout", timeout)}
+                          aria-invalid={!!errors.timeout}
+                          className="max-w-[200px]"
+                        />
+                        <span className="text-sm text-muted-foreground">seconds</span>
+                      </div>
+                      {errors.timeout ? (
+                        <FieldError message={errors.timeout} />
                       ) : (
-                        <Save className="mr-2 h-4 w-4" />
+                        <FieldHint>Maximum time to wait for each provider to respond. Applies to all gateway queries (number, extension, and device lookups).</FieldHint>
                       )}
-                      Save Changes
-                    </Button>
-                  </div>
-                </form>
-              </CardContent>
-            </Card>
+                    </div>
+
+                    <Separator />
+
+                    {/* Default Cache TTL */}
+                    <div className="space-y-2">
+                      <Label htmlFor="gateway-cache-ttl" className="flex items-center gap-2">
+                        <Database className="h-3.5 w-3.5 text-muted-foreground" />
+                        Default Cache TTL
+                      </Label>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          id="gateway-cache-ttl"
+                          type="number"
+                          min={0}
+                          max={86400}
+                          value={cacheTtl}
+                          onChange={(e) => handleCacheTtlChange(e.target.value)}
+                          onBlur={() => handleFieldBlur("cacheTtl", cacheTtl)}
+                          aria-invalid={!!errors.cacheTtl}
+                          className="max-w-[200px]"
+                        />
+                        <span className="text-sm text-muted-foreground">seconds</span>
+                      </div>
+                      {errors.cacheTtl ? (
+                        <FieldError message={errors.cacheTtl} />
+                      ) : (
+                        <FieldHint>How long gateway responses are cached in Redis before being re-fetched from the provider. Set to 0 to disable caching.</FieldHint>
+                      )}
+                    </div>
+
+                    <Separator />
+
+                    {/* Submit */}
+                    <div className="flex items-center justify-end gap-2">
+                      <Button type="submit" disabled={!isValid || !isDirty || updateSettings.isPending}>
+                        {updateSettings.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                        Save Changes
+                      </Button>
+                    </div>
+                  </form>
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
 
             {/* Info sidebar */}
             <SectionErrorBoundary name="Gateway Information">
-            <div className="flex h-fit flex-col gap-4">
-              <Card className="border-border/40 bg-linear-to-br from-muted/30 to-muted/10">
-                <CardHeader className="space-y-1 pb-3">
-                  <div className="flex items-center gap-2">
-                    <Info className="h-4 w-4 text-muted-foreground" />
-                    <CardTitle className="text-sm">How It Works</CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <p className="text-xs leading-relaxed text-muted-foreground">
-                    The gateway service queries external providers (PBX systems, carriers, etc.)
-                    to look up phone numbers, extensions, and devices.
-                  </p>
-                  <p className="text-xs leading-relaxed text-muted-foreground">
-                    <span className="font-medium text-foreground">Request Timeout</span> controls
-                    how long the gateway waits for each provider before giving up. Increase this if
-                    providers are on slow networks.
-                  </p>
-                  <p className="text-xs leading-relaxed text-muted-foreground">
-                    <span className="font-medium text-foreground">Cache TTL</span> determines how
-                    long results are cached in Redis. Higher values reduce load on external systems
-                    but may serve stale data.
-                  </p>
-                </CardContent>
-              </Card>
+              <div className="flex h-fit flex-col gap-4">
+                <Card className="border-border/40 bg-linear-to-br from-muted/30 to-muted/10">
+                  <CardHeader className="space-y-1 pb-3">
+                    <div className="flex items-center gap-2">
+                      <Info className="h-4 w-4 text-muted-foreground" />
+                      <CardTitle className="text-sm">How It Works</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <p className="text-xs leading-relaxed text-muted-foreground">
+                      The gateway service queries external providers (PBX systems, carriers, etc.) to look up phone numbers, extensions, and devices.
+                    </p>
+                    <p className="text-xs leading-relaxed text-muted-foreground">
+                      <span className="font-medium text-foreground">Request Timeout</span> controls how long the gateway waits for each provider before giving up. Increase this if
+                      providers are on slow networks.
+                    </p>
+                    <p className="text-xs leading-relaxed text-muted-foreground">
+                      <span className="font-medium text-foreground">Cache TTL</span> determines how long results are cached in Redis. Higher values reduce load on external systems
+                      but may serve stale data.
+                    </p>
+                  </CardContent>
+                </Card>
 
-              <Card className="border-border/40">
-                <CardHeader className="space-y-1 pb-3">
-                  <div className="flex items-center gap-2">
-                    <Network className="h-4 w-4 text-muted-foreground" />
-                    <CardTitle className="text-sm">Per-Connection Overrides</CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <p className="text-xs leading-relaxed text-muted-foreground">
-                    Individual connections can override these defaults via the
-                    <span className="font-medium text-foreground"> Cache TTL </span>
-                    and
-                    <span className="font-medium text-foreground"> Timeout </span>
-                    fields in the connection edit form.
-                  </p>
-                  <p className="text-xs leading-relaxed text-muted-foreground">
-                    When a connection-level override is set, it takes precedence over the global
-                    default for that connection only.
-                  </p>
-                </CardContent>
-              </Card>
+                <Card className="border-border/40">
+                  <CardHeader className="space-y-1 pb-3">
+                    <div className="flex items-center gap-2">
+                      <Network className="h-4 w-4 text-muted-foreground" />
+                      <CardTitle className="text-sm">Per-Connection Overrides</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <p className="text-xs leading-relaxed text-muted-foreground">
+                      Individual connections can override these defaults via the
+                      <span className="font-medium text-foreground"> Cache TTL </span>
+                      and
+                      <span className="font-medium text-foreground"> Timeout </span>
+                      fields in the connection edit form.
+                    </p>
+                    <p className="text-xs leading-relaxed text-muted-foreground">
+                      When a connection-level override is set, it takes precedence over the global default for that connection only.
+                    </p>
+                  </CardContent>
+                </Card>
 
-              <Card className="border-border/40">
-                <CardHeader className="space-y-1 pb-3">
-                  <div className="flex items-center gap-2">
-                    <AlertCircle className="h-4 w-4 text-amber-500" />
-                    <CardTitle className="text-sm">Persistence Note</CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-xs leading-relaxed text-muted-foreground">
-                    Changes here apply immediately and persist until the server is restarted. To
-                    make settings permanent, also update the
-                    <code className="rounded bg-muted px-1 py-0.5 font-mono text-[10px]">
-                      GATEWAY_DEFAULT_TIMEOUT
-                    </code>{" "}
-                    and{" "}
-                    <code className="rounded bg-muted px-1 py-0.5 font-mono text-[10px]">
-                      GATEWAY_DEFAULT_CACHE_TTL
-                    </code>{" "}
-                    environment variables.
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
+                <Card className="border-border/40">
+                  <CardHeader className="space-y-1 pb-3">
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className="h-4 w-4 text-amber-500" />
+                      <CardTitle className="text-sm">Persistence Note</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-xs leading-relaxed text-muted-foreground">
+                      Changes here apply immediately and persist until the server is restarted. To make settings permanent, also update the
+                      <code className="rounded bg-muted px-1 py-0.5 font-mono text-[10px]">GATEWAY_DEFAULT_TIMEOUT</code> and{" "}
+                      <code className="rounded bg-muted px-1 py-0.5 font-mono text-[10px]">GATEWAY_DEFAULT_CACHE_TTL</code> environment variables.
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
             </SectionErrorBoundary>
           </div>
         )}

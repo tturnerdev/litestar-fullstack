@@ -55,20 +55,12 @@ export function PasswordChangeCard() {
     },
   })
 
-  const confirmError =
-    confirmPassword && newPassword !== confirmPassword
-      ? "Passwords do not match"
-      : undefined
+  const confirmError = confirmPassword && newPassword !== confirmPassword ? "Passwords do not match" : undefined
 
   const passwordsMatch = confirmPassword.length > 0 && newPassword === confirmPassword
 
   const passwordValidationError = newPassword ? validatePassword(newPassword) : null
-  const canSubmit =
-    currentPassword.length > 0 &&
-    newPassword.length > 0 &&
-    confirmPassword.length > 0 &&
-    newPassword === confirmPassword &&
-    !passwordValidationError
+  const canSubmit = currentPassword.length > 0 && newPassword.length > 0 && confirmPassword.length > 0 && newPassword === confirmPassword && !passwordValidationError
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -84,10 +76,7 @@ export function PasswordChangeCard() {
       <Card>
         <CardHeader>
           <CardTitle>Password</CardTitle>
-          <CardDescription>
-            Your account is linked via an external provider. To set a password, use the
-            &ldquo;Forgot password&rdquo; flow from the login page.
-          </CardDescription>
+          <CardDescription>Your account is linked via an external provider. To set a password, use the &ldquo;Forgot password&rdquo; flow from the login page.</CardDescription>
         </CardHeader>
       </Card>
     )
@@ -97,9 +86,7 @@ export function PasswordChangeCard() {
     <Card>
       <CardHeader>
         <CardTitle>Change password</CardTitle>
-        <CardDescription>
-          Update your password. You will need to enter your current password first.
-        </CardDescription>
+        <CardDescription>Update your password. You will need to enter your current password first.</CardDescription>
       </CardHeader>
       <CardContent>
         <AnimatePresence mode="wait">
@@ -112,37 +99,18 @@ export function PasswordChangeCard() {
               transition={{ type: "spring", stiffness: 300, damping: 24 }}
               className="flex flex-col items-center justify-center py-12 text-center"
             >
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: "spring", stiffness: 200, damping: 12, delay: 0.1 }}
-              >
+              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 200, damping: 12, delay: 0.1 }}>
                 <CheckCircle2 className="h-12 w-12 text-success" />
               </motion.div>
-              <motion.p
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.25 }}
-                className="mt-4 font-medium text-lg"
-              >
+              <motion.p initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="mt-4 font-medium text-lg">
                 Password updated
               </motion.p>
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.4 }}
-                className="mt-1 text-muted-foreground text-sm"
-              >
+              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="mt-1 text-muted-foreground text-sm">
                 Your new password is now active.
               </motion.p>
             </motion.div>
           ) : (
-            <motion.div
-              key="form"
-              initial={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
-            >
+            <motion.div key="form" initial={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="max-w-md space-y-4">
                   <ValidatedInput
@@ -165,9 +133,7 @@ export function PasswordChangeCard() {
                     onChange={(value) => setNewPassword(value)}
                   />
 
-                  {newPassword && (
-                    <PasswordStrength password={newPassword} showRequirements />
-                  )}
+                  {newPassword && <PasswordStrength password={newPassword} showRequirements />}
 
                   <ValidatedInput
                     label="Confirm new password"
@@ -188,16 +154,9 @@ export function PasswordChangeCard() {
                         animate={{ opacity: 1, height: "auto" }}
                         exit={{ opacity: 0, height: 0 }}
                         transition={{ duration: 0.2 }}
-                        className={cn(
-                          "flex items-center gap-1.5 text-sm",
-                          passwordsMatch ? "text-success" : "text-destructive",
-                        )}
+                        className={cn("flex items-center gap-1.5 text-sm", passwordsMatch ? "text-success" : "text-destructive")}
                       >
-                        {passwordsMatch ? (
-                          <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
-                        ) : (
-                          <XCircle className="h-3.5 w-3.5 shrink-0" />
-                        )}
+                        {passwordsMatch ? <CheckCircle2 className="h-3.5 w-3.5 shrink-0" /> : <XCircle className="h-3.5 w-3.5 shrink-0" />}
                         <span>{passwordsMatch ? "Passwords match" : "Passwords don't match"}</span>
                       </motion.div>
                     )}
@@ -206,11 +165,7 @@ export function PasswordChangeCard() {
 
                 <div className="flex justify-end">
                   <Button type="submit" disabled={!canSubmit || updatePassword.isPending}>
-                    {updatePassword.isPending ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <Lock className="mr-2 h-4 w-4" />
-                    )}
+                    {updatePassword.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Lock className="mr-2 h-4 w-4" />}
                     Update password
                   </Button>
                 </div>

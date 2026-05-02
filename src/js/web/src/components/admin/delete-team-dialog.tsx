@@ -1,5 +1,5 @@
-import { useCallback, useState } from "react"
 import { AlertTriangle, Loader2 } from "lucide-react"
+import { useCallback, useState } from "react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -67,8 +67,7 @@ export function DeleteTeamDialog({ teamId, teamName, open, onOpenChange, onDelet
               Delete Team
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete <span className="font-semibold">{teamName}</span>? This action cannot be
-              undone.
+              Are you sure you want to delete <span className="font-semibold">{teamName}</span>? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
         </div>
@@ -98,13 +97,7 @@ export function DeleteTeamDialog({ teamId, teamName, open, onOpenChange, onDelet
             <Label htmlFor="delete-confirm">
               Type <span className="font-semibold">{teamName}</span> to confirm
             </Label>
-            <Input
-              id="delete-confirm"
-              value={confirmation}
-              onChange={(e) => setConfirmation(e.target.value)}
-              placeholder={teamName}
-              autoComplete="off"
-            />
+            <Input id="delete-confirm" value={confirmation} onChange={(e) => setConfirmation(e.target.value)} placeholder={teamName} autoComplete="off" />
           </div>
         </div>
 
@@ -112,11 +105,7 @@ export function DeleteTeamDialog({ teamId, teamName, open, onOpenChange, onDelet
           <AlertDialogCancel onClick={() => handleOpenChange(false)} disabled={deleteTeam.isPending}>
             Cancel
           </AlertDialogCancel>
-          <AlertDialogAction
-            onClick={handleDelete}
-            disabled={!confirmed || deleteTeam.isPending}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-          >
+          <AlertDialogAction onClick={handleDelete} disabled={!confirmed || deleteTeam.isPending} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
             {deleteTeam.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {deleteTeam.isPending ? "Deleting..." : "Delete team"}
           </AlertDialogAction>

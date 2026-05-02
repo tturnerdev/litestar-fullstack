@@ -18,9 +18,7 @@ function StatusIndicator({ ok, label }: { ok: boolean; label?: string }) {
       <TooltipTrigger asChild>
         <span className="relative flex h-2.5 w-2.5">
           {ok && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-40" />}
-          <span
-            className={`relative inline-flex h-2.5 w-2.5 rounded-full ${ok ? "bg-emerald-500" : "bg-destructive"}`}
-          />
+          <span className={`relative inline-flex h-2.5 w-2.5 rounded-full ${ok ? "bg-emerald-500" : "bg-destructive"}`} />
         </span>
       </TooltipTrigger>
       <TooltipContent side="left" className="text-xs">
@@ -64,15 +62,17 @@ export function SystemHealthCard() {
         icon={AlertCircle}
         title="Unable to load system status"
         description="The server may be unreachable. Please try again."
-        action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+        action={
+          <Button variant="outline" size="sm" onClick={() => refetch()}>
+            Try again
+          </Button>
+        }
       />
     )
   }
 
   const dbOnline = data.databaseStatus === "online"
-  const connectionsHealthy = connections.length === 0 || connections.every(
-    (c) => c.isEnabled && ["connected", "healthy", "active"].includes(c.status.toLowerCase()),
-  )
+  const connectionsHealthy = connections.length === 0 || connections.every((c) => c.isEnabled && ["connected", "healthy", "active"].includes(c.status.toLowerCase()))
   const allHealthy = dbOnline && connectionsHealthy
 
   const services = [
@@ -102,11 +102,7 @@ export function SystemHealthCard() {
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-sm font-semibold">System Health</CardTitle>
           <Badge variant={allHealthy ? "outline" : "destructive"} className="gap-1 text-[10px]">
-            {allHealthy ? (
-              <CheckCircle2 className="h-3 w-3 text-emerald-500" />
-            ) : (
-              <XCircle className="h-3 w-3" />
-            )}
+            {allHealthy ? <CheckCircle2 className="h-3 w-3 text-emerald-500" /> : <XCircle className="h-3 w-3" />}
             {allHealthy ? "All Systems OK" : "Issue Detected"}
           </Badge>
         </CardHeader>
@@ -168,9 +164,7 @@ export function SystemHealthCard() {
                             {queue.queued} queued
                           </Badge>
                         )}
-                        {totalJobs === 0 && (
-                          <span className="text-[10px] text-muted-foreground">idle</span>
-                        )}
+                        {totalJobs === 0 && <span className="text-[10px] text-muted-foreground">idle</span>}
                       </div>
                     </div>
                   )
@@ -201,11 +195,7 @@ export function SystemHealthCard() {
             <div className="space-y-1.5">
               {connections.map((connection) => {
                 const isHealthy = connection.isEnabled && ["connected", "healthy", "active"].includes(connection.status.toLowerCase())
-                const statusLabel = !connection.isEnabled
-                  ? "Disabled"
-                  : isHealthy
-                    ? "Healthy"
-                    : connection.status.charAt(0).toUpperCase() + connection.status.slice(1)
+                const statusLabel = !connection.isEnabled ? "Disabled" : isHealthy ? "Healthy" : connection.status.charAt(0).toUpperCase() + connection.status.slice(1)
                 return (
                   <div key={connection.id} className="flex items-center justify-between rounded-md bg-muted/40 px-2.5 py-1.5">
                     <div className="flex items-center gap-2">

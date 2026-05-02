@@ -115,9 +115,7 @@ export function QuickActionsCard({ isSuperuser, teamCount }: QuickActionsCardPro
       <CardContent className="space-y-1.5">
         {actions.map((action, index) => (
           <div key={action.key}>
-            {isSuperuser && action.key === "admin-console" && (
-              <Separator className="my-2" />
-            )}
+            {isSuperuser && action.key === "admin-console" && <Separator className="my-2" />}
             <Link
               to={action.to}
               className="animate-in fade-in slide-in-from-left-2 group flex items-center gap-3 rounded-lg bg-background/60 p-3 fill-mode-both transition-all hover:bg-background hover:shadow-sm"
@@ -130,10 +128,14 @@ export function QuickActionsCard({ isSuperuser, teamCount }: QuickActionsCardPro
                 <span className="flex items-center text-sm font-medium">
                   {action.label}
                   {action.isNew && (
-                    <Badge variant="default" className="ml-2 h-4 text-[9px]">NEW</Badge>
+                    <Badge variant="default" className="ml-2 h-4 text-[9px]">
+                      NEW
+                    </Badge>
                   )}
                   {action.key === "browse-teams" && teamCount !== undefined && teamCount > 0 && (
-                    <Badge variant="secondary" className="ml-2 h-4 text-[9px]">{teamCount}</Badge>
+                    <Badge variant="secondary" className="ml-2 h-4 text-[9px]">
+                      {teamCount}
+                    </Badge>
                   )}
                 </span>
                 <p className="text-xs text-muted-foreground">{action.description}</p>

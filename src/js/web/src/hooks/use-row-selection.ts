@@ -19,10 +19,7 @@ export function useRowSelection(page: number): UseRowSelectionReturn {
     setSelectedIds(new Set())
   }, [page])
 
-  const isSelected = useCallback(
-    (id: string) => selectedIds.has(id),
-    [selectedIds],
-  )
+  const isSelected = useCallback((id: string) => selectedIds.has(id), [selectedIds])
 
   const toggle = useCallback((id: string) => {
     setSelectedIds((prev) => {
@@ -44,15 +41,9 @@ export function useRowSelection(page: number): UseRowSelectionReturn {
     setSelectedIds(new Set())
   }, [])
 
-  const isAllSelected = useCallback(
-    (ids: string[]) => ids.length > 0 && ids.every((id) => selectedIds.has(id)),
-    [selectedIds],
-  )
+  const isAllSelected = useCallback((ids: string[]) => ids.length > 0 && ids.every((id) => selectedIds.has(id)), [selectedIds])
 
-  const isPartiallySelected = useCallback(
-    (ids: string[]) => ids.some((id) => selectedIds.has(id)) && !ids.every((id) => selectedIds.has(id)),
-    [selectedIds],
-  )
+  const isPartiallySelected = useCallback((ids: string[]) => ids.some((id) => selectedIds.has(id)) && !ids.every((id) => selectedIds.has(id)), [selectedIds])
 
   return {
     selectedIds,

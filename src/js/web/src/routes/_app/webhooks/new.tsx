@@ -1,16 +1,7 @@
 import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
+import { Globe, Info, Key, Loader2, Minus, Plus, Send, Shield, Webhook } from "lucide-react"
 import { useCallback, useRef, useState } from "react"
-import {
-  Globe,
-  Info,
-  Key,
-  Loader2,
-  Minus,
-  Plus,
-  Send,
-  Shield,
-  Webhook,
-} from "lucide-react"
+import { toast } from "sonner"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,14 +12,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -39,9 +23,8 @@ import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useCreateWebhook } from "@/lib/api/hooks/webhooks"
-import { cn } from "@/lib/utils"
-import { toast } from "sonner"
 import type { WebhookCreate } from "@/lib/generated/api"
+import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/webhooks/new")({
   component: NewWebhookPage,
@@ -168,9 +151,7 @@ function NewWebhookPage() {
 
   // Event toggles
   const toggleEvent = useCallback((event: string) => {
-    setEvents((prev) =>
-      prev.includes(event) ? prev.filter((e) => e !== event) : [...prev, event],
-    )
+    setEvents((prev) => (prev.includes(event) ? prev.filter((e) => e !== event) : [...prev, event]))
   }, [])
 
   const selectAllEvents = useCallback(() => {
@@ -190,14 +171,9 @@ function NewWebhookPage() {
     setHeaders((prev) => prev.filter((_, i) => i !== index))
   }, [])
 
-  const updateHeader = useCallback(
-    (index: number, field: "key" | "value", val: string) => {
-      setHeaders((prev) =>
-        prev.map((h, i) => (i === index ? { ...h, [field]: val } : h)),
-      )
-    },
-    [],
-  )
+  const updateHeader = useCallback((index: number, field: "key" | "value", val: string) => {
+    setHeaders((prev) => prev.map((h, i) => (i === index ? { ...h, [field]: val } : h)))
+  }, [])
 
   // Validation
   const isValid = name.trim() !== "" && url.trim() !== ""
@@ -274,267 +250,173 @@ function NewWebhookPage() {
         <div className="flex gap-6">
           {/* Main form */}
           <SectionErrorBoundary name="Create Webhook Form">
-          <Card className="min-w-0 flex-1">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Webhook className="h-5 w-5" />
-                Webhook Details
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Name */}
-                <div className="space-y-2">
-                  <Label htmlFor="webhook-name">
-                    Name <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    id="webhook-name"
-                    placeholder="e.g., Slack Notifications"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    maxLength={NAME_MAX}
-                    required
-                    autoFocus
-                  />
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs text-muted-foreground">
-                      A friendly name to identify this webhook.
-                    </p>
-                    <p
-                      className={cn(
-                        "text-xs",
-                        name.length >= NAME_MAX
-                          ? "text-destructive"
-                          : "text-muted-foreground",
-                      )}
-                    >
-                      {name.length}/{NAME_MAX}
-                    </p>
-                  </div>
-                </div>
-
-                {/* URL */}
-                <div className="space-y-2">
-                  <Label htmlFor="webhook-url">
-                    URL <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    id="webhook-url"
-                    type="url"
-                    placeholder="https://example.com/webhook"
-                    value={url}
-                    onChange={(e) => setUrl(e.target.value)}
-                    maxLength={URL_MAX}
-                    required
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Must be an HTTPS URL that accepts POST requests with a JSON body.
-                  </p>
-                </div>
-
-                {/* Description */}
-                <div className="space-y-2">
-                  <Label htmlFor="webhook-description">Description</Label>
-                  <Textarea
-                    id="webhook-description"
-                    placeholder="What is this webhook used for?"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    maxLength={DESC_MAX}
-                    rows={2}
-                    className="resize-none"
-                  />
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs text-muted-foreground">
-                      Optional notes about this webhook's purpose.
-                    </p>
-                    <p
-                      className={cn(
-                        "shrink-0 text-xs",
-                        description.length >= DESC_MAX
-                          ? "text-destructive"
-                          : "text-muted-foreground",
-                      )}
-                    >
-                      {description.length}/{DESC_MAX}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Events */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label>Events</Label>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 px-2 text-xs"
-                        onClick={selectAllEvents}
-                      >
-                        Select all
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 px-2 text-xs"
-                        onClick={clearAllEvents}
-                        disabled={events.length === 0}
-                      >
-                        Clear
-                      </Button>
+            <Card className="min-w-0 flex-1">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Webhook className="h-5 w-5" />
+                  Webhook Details
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  {/* Name */}
+                  <div className="space-y-2">
+                    <Label htmlFor="webhook-name">
+                      Name <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      id="webhook-name"
+                      placeholder="e.g., Slack Notifications"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      maxLength={NAME_MAX}
+                      required
+                      autoFocus
+                    />
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs text-muted-foreground">A friendly name to identify this webhook.</p>
+                      <p className={cn("text-xs", name.length >= NAME_MAX ? "text-destructive" : "text-muted-foreground")}>
+                        {name.length}/{NAME_MAX}
+                      </p>
                     </div>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    Select which events should trigger this webhook. If none are
-                    selected, all events will be sent.
-                  </p>
-                  <div className="space-y-3 rounded-md border p-4">
-                    {EVENT_CATEGORIES.map((category) => (
-                      <div key={category.label}>
-                        <p className="mb-1.5 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                          {category.label}
-                        </p>
-                        <div className="grid grid-cols-2 gap-1.5">
-                          {category.events.map((event) => (
-                            <label
-                              key={event}
-                              className="flex items-center gap-2 cursor-pointer text-sm hover:bg-muted/50 rounded px-2 py-1"
-                            >
-                              <input
-                                type="checkbox"
-                                checked={events.includes(event)}
-                                onChange={() => toggleEvent(event)}
-                                className="rounded border-input"
-                              />
-                              <span className="text-xs font-mono">{event}</span>
-                            </label>
-                          ))}
-                        </div>
+
+                  {/* URL */}
+                  <div className="space-y-2">
+                    <Label htmlFor="webhook-url">
+                      URL <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      id="webhook-url"
+                      type="url"
+                      placeholder="https://example.com/webhook"
+                      value={url}
+                      onChange={(e) => setUrl(e.target.value)}
+                      maxLength={URL_MAX}
+                      required
+                    />
+                    <p className="text-xs text-muted-foreground">Must be an HTTPS URL that accepts POST requests with a JSON body.</p>
+                  </div>
+
+                  {/* Description */}
+                  <div className="space-y-2">
+                    <Label htmlFor="webhook-description">Description</Label>
+                    <Textarea
+                      id="webhook-description"
+                      placeholder="What is this webhook used for?"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      maxLength={DESC_MAX}
+                      rows={2}
+                      className="resize-none"
+                    />
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs text-muted-foreground">Optional notes about this webhook's purpose.</p>
+                      <p className={cn("shrink-0 text-xs", description.length >= DESC_MAX ? "text-destructive" : "text-muted-foreground")}>
+                        {description.length}/{DESC_MAX}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Events */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label>Events</Label>
+                      <div className="flex items-center gap-2">
+                        <Button type="button" variant="ghost" size="sm" className="h-6 px-2 text-xs" onClick={selectAllEvents}>
+                          Select all
+                        </Button>
+                        <Button type="button" variant="ghost" size="sm" className="h-6 px-2 text-xs" onClick={clearAllEvents} disabled={events.length === 0}>
+                          Clear
+                        </Button>
                       </div>
-                    ))}
-                  </div>
-                  {events.length > 0 && (
-                    <p className="text-xs text-muted-foreground">
-                      {events.length} event{events.length === 1 ? "" : "s"} selected
-                    </p>
-                  )}
-                </div>
-
-                {/* Secret */}
-                <div className="space-y-2">
-                  <Label htmlFor="webhook-secret">Secret</Label>
-                  <Input
-                    id="webhook-secret"
-                    type="password"
-                    placeholder="Optional signing secret"
-                    value={secret}
-                    onChange={(e) => setSecret(e.target.value)}
-                    maxLength={SECRET_MAX}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Used to sign payloads so you can verify they came from us.
-                    Keep this value secret.
-                  </p>
-                </div>
-
-                {/* Custom Headers */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label>Custom Headers</Label>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="h-7 gap-1 px-2 text-xs"
-                      onClick={addHeader}
-                    >
-                      <Plus className="h-3 w-3" />
-                      Add Header
-                    </Button>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Additional HTTP headers sent with each delivery.
-                  </p>
-                  {headers.length > 0 && (
-                    <div className="space-y-2">
-                      {headers.map((header, index) => (
-                        <div key={index} className="flex items-center gap-2">
-                          <Input
-                            placeholder="Header name"
-                            value={header.key}
-                            onChange={(e) =>
-                              updateHeader(index, "key", e.target.value)
-                            }
-                            className="flex-1 font-mono text-xs"
-                          />
-                          <Input
-                            placeholder="Value"
-                            value={header.value}
-                            onChange={(e) =>
-                              updateHeader(index, "value", e.target.value)
-                            }
-                            className="flex-1 font-mono text-xs"
-                          />
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 shrink-0"
-                            onClick={() => removeHeader(index)}
-                            aria-label="Remove header"
-                          >
-                            <Minus className="h-4 w-4" />
-                          </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Select which events should trigger this webhook. If none are selected, all events will be sent.</p>
+                    <div className="space-y-3 rounded-md border p-4">
+                      {EVENT_CATEGORIES.map((category) => (
+                        <div key={category.label}>
+                          <p className="mb-1.5 text-xs font-medium text-muted-foreground uppercase tracking-wider">{category.label}</p>
+                          <div className="grid grid-cols-2 gap-1.5">
+                            {category.events.map((event) => (
+                              <label key={event} className="flex items-center gap-2 cursor-pointer text-sm hover:bg-muted/50 rounded px-2 py-1">
+                                <input type="checkbox" checked={events.includes(event)} onChange={() => toggleEvent(event)} className="rounded border-input" />
+                                <span className="text-xs font-mono">{event}</span>
+                              </label>
+                            ))}
+                          </div>
                         </div>
                       ))}
                     </div>
-                  )}
-                </div>
-
-                {/* Active toggle */}
-                <div className="flex items-center gap-3 rounded-md border p-3">
-                  <Switch
-                    id="webhook-active"
-                    checked={isActive}
-                    onCheckedChange={setIsActive}
-                  />
-                  <div className="space-y-0.5">
-                    <Label htmlFor="webhook-active" className="cursor-pointer">
-                      Active
-                    </Label>
-                    <p className="text-xs text-muted-foreground">
-                      When disabled, deliveries are paused but the configuration
-                      is preserved.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="flex items-center justify-end gap-2 border-t pt-4">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => router.navigate({ to: "/webhooks" })}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={!isValid || createWebhook.isPending}
-                  >
-                    {createWebhook.isPending && (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {events.length > 0 && (
+                      <p className="text-xs text-muted-foreground">
+                        {events.length} event{events.length === 1 ? "" : "s"} selected
+                      </p>
                     )}
-                    Create Webhook
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
+                  </div>
+
+                  {/* Secret */}
+                  <div className="space-y-2">
+                    <Label htmlFor="webhook-secret">Secret</Label>
+                    <Input
+                      id="webhook-secret"
+                      type="password"
+                      placeholder="Optional signing secret"
+                      value={secret}
+                      onChange={(e) => setSecret(e.target.value)}
+                      maxLength={SECRET_MAX}
+                    />
+                    <p className="text-xs text-muted-foreground">Used to sign payloads so you can verify they came from us. Keep this value secret.</p>
+                  </div>
+
+                  {/* Custom Headers */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label>Custom Headers</Label>
+                      <Button type="button" variant="outline" size="sm" className="h-7 gap-1 px-2 text-xs" onClick={addHeader}>
+                        <Plus className="h-3 w-3" />
+                        Add Header
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Additional HTTP headers sent with each delivery.</p>
+                    {headers.length > 0 && (
+                      <div className="space-y-2">
+                        {headers.map((header, index) => (
+                          <div key={index} className="flex items-center gap-2">
+                            <Input placeholder="Header name" value={header.key} onChange={(e) => updateHeader(index, "key", e.target.value)} className="flex-1 font-mono text-xs" />
+                            <Input placeholder="Value" value={header.value} onChange={(e) => updateHeader(index, "value", e.target.value)} className="flex-1 font-mono text-xs" />
+                            <Button type="button" variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => removeHeader(index)} aria-label="Remove header">
+                              <Minus className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Active toggle */}
+                  <div className="flex items-center gap-3 rounded-md border p-3">
+                    <Switch id="webhook-active" checked={isActive} onCheckedChange={setIsActive} />
+                    <div className="space-y-0.5">
+                      <Label htmlFor="webhook-active" className="cursor-pointer">
+                        Active
+                      </Label>
+                      <p className="text-xs text-muted-foreground">When disabled, deliveries are paused but the configuration is preserved.</p>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center justify-end gap-2 border-t pt-4">
+                    <Button type="button" variant="ghost" onClick={() => router.navigate({ to: "/webhooks" })}>
+                      Cancel
+                    </Button>
+                    <Button type="submit" disabled={!isValid || createWebhook.isPending}>
+                      {createWebhook.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Create Webhook
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
           </SectionErrorBoundary>
 
           {/* Sidebar tips */}
@@ -548,18 +430,13 @@ function NewWebhookPage() {
             </CardHeader>
             <CardContent className="space-y-1.5">
               {tips.map((tip) => (
-                <div
-                  key={tip.title}
-                  className="group flex items-center gap-3 rounded-lg bg-background/60 p-3"
-                >
+                <div key={tip.title} className="group flex items-center gap-3 rounded-lg bg-background/60 p-3">
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                     <tip.icon className="h-4 w-4" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="font-medium text-sm">{tip.title}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {tip.description}
-                    </p>
+                    <p className="text-xs text-muted-foreground">{tip.description}</p>
                   </div>
                 </div>
               ))}
@@ -569,25 +446,15 @@ function NewWebhookPage() {
       </PageContainer>
 
       {/* Unsaved changes dialog */}
-      <AlertDialog
-        open={blocker.status === "blocked"}
-        onOpenChange={() => blocker.reset?.()}
-      >
+      <AlertDialog open={blocker.status === "blocked"} onOpenChange={() => blocker.reset?.()}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
-            <AlertDialogDescription>
-              You have unsaved changes to this webhook. Are you sure you want to
-              leave? Your changes will be lost.
-            </AlertDialogDescription>
+            <AlertDialogDescription>You have unsaved changes to this webhook. Are you sure you want to leave? Your changes will be lost.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => blocker.reset?.()}>
-              Stay on page
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={() => blocker.proceed?.()}>
-              Discard changes
-            </AlertDialogAction>
+            <AlertDialogCancel onClick={() => blocker.reset?.()}>Stay on page</AlertDialogCancel>
+            <AlertDialogAction onClick={() => blocker.proceed?.()}>Discard changes</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

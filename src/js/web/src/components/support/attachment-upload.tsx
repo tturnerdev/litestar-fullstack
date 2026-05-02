@@ -25,11 +25,31 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10 MB
 
 const ALLOWED_EXTENSIONS = new Set([
   // Images
-  "jpg", "jpeg", "png", "gif", "webp", "svg", "bmp", "ico",
+  "jpg",
+  "jpeg",
+  "png",
+  "gif",
+  "webp",
+  "svg",
+  "bmp",
+  "ico",
   // Documents
-  "pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "txt", "csv", "rtf",
+  "pdf",
+  "doc",
+  "docx",
+  "xls",
+  "xlsx",
+  "ppt",
+  "pptx",
+  "txt",
+  "csv",
+  "rtf",
   // Archives
-  "zip", "tar", "gz", "rar", "7z",
+  "zip",
+  "tar",
+  "gz",
+  "rar",
+  "7z",
 ])
 
 function getFileExtension(name: string): string {
@@ -60,13 +80,7 @@ function getFileTypeBorderColor(name: string): string {
 
 let fileIdCounter = 0
 
-export function AttachmentUpload({
-  files,
-  onFilesChange,
-  uploading = false,
-  disabled = false,
-  compact = false,
-}: AttachmentUploadProps) {
+export function AttachmentUpload({ files, onFilesChange, uploading = false, disabled = false, compact = false }: AttachmentUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isDragging, setIsDragging] = useState(false)
 
@@ -148,19 +162,8 @@ export function AttachmentUpload({
           disabled={disabled}
         />
         <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="relative"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={disabled || uploading}
-          >
-            {uploading ? (
-              <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <FileUp className="mr-2 h-3.5 w-3.5" />
-            )}
+          <Button type="button" variant="outline" size="sm" className="relative" onClick={() => fileInputRef.current?.click()} disabled={disabled || uploading}>
+            {uploading ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <FileUp className="mr-2 h-3.5 w-3.5" />}
             Attach files
             {files.length > 0 && (
               <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-medium text-primary-foreground">
@@ -169,13 +172,7 @@ export function AttachmentUpload({
             )}
           </Button>
           {files.length >= 2 && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
-              onClick={clearAll}
-            >
+            <Button type="button" variant="ghost" size="sm" className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground" onClick={clearAll}>
               <X className="h-3.5 w-3.5" />
             </Button>
           )}
@@ -199,11 +196,7 @@ export function AttachmentUpload({
                   <TooltipContent>{f.name}</TooltipContent>
                 </Tooltip>
                 <span className="text-muted-foreground">({formatBytes(f.size)})</span>
-                <button
-                  type="button"
-                  onClick={() => removeFile(f.id)}
-                  className="ml-0.5 rounded-sm p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground"
-                >
+                <button type="button" onClick={() => removeFile(f.id)} className="ml-0.5 rounded-sm p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground">
                   <X className="h-3 w-3" />
                 </button>
               </div>
@@ -234,30 +227,21 @@ export function AttachmentUpload({
         onClick={() => fileInputRef.current?.click()}
         className={cn(
           "flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-4 py-6 transition-all",
-          isDragging
-            ? "border-primary/50 bg-primary/5 [animation:border-dash_8s_linear_infinite]"
-            : "border-border/60 bg-muted/20 hover:border-border hover:bg-muted/40",
+          isDragging ? "border-primary/50 bg-primary/5 [animation:border-dash_8s_linear_infinite]" : "border-border/60 bg-muted/20 hover:border-border hover:bg-muted/40",
           disabled && "pointer-events-none opacity-50",
         )}
         style={
           isDragging
             ? {
-                backgroundImage:
-                  "repeating-linear-gradient(90deg, transparent, transparent 6px, hsl(var(--primary) / 0.08) 6px, hsl(var(--primary) / 0.08) 12px)",
+                backgroundImage: "repeating-linear-gradient(90deg, transparent, transparent 6px, hsl(var(--primary) / 0.08) 6px, hsl(var(--primary) / 0.08) 12px)",
                 backgroundSize: "12px 100%",
               }
             : undefined
         }
       >
-        {uploading ? (
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        ) : (
-          <FileUp className="h-6 w-6 text-muted-foreground" />
-        )}
+        {uploading ? <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /> : <FileUp className="h-6 w-6 text-muted-foreground" />}
         <div className="text-center">
-          <p className="text-sm font-medium">
-            {isDragging ? "Drop files here" : "Drag & drop files here"}
-          </p>
+          <p className="text-sm font-medium">{isDragging ? "Drop files here" : "Drag & drop files here"}</p>
           <p className="text-xs text-muted-foreground">or click to browse (max 10 MB per file)</p>
         </div>
       </div>
@@ -269,13 +253,7 @@ export function AttachmentUpload({
               {files.length} file{files.length !== 1 ? "s" : ""} selected
             </span>
             {files.length >= 2 && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="h-6 gap-1 px-2 text-xs text-muted-foreground hover:text-foreground"
-                onClick={clearAll}
-              >
+              <Button type="button" variant="ghost" size="sm" className="h-6 gap-1 px-2 text-xs text-muted-foreground hover:text-foreground" onClick={clearAll}>
                 <X className="h-3 w-3" />
                 Clear all
               </Button>
@@ -298,15 +276,9 @@ export function AttachmentUpload({
                   </TooltipTrigger>
                   <TooltipContent>{f.name}</TooltipContent>
                 </Tooltip>
-                <span className="shrink-0 text-xs text-muted-foreground">
-                  {formatBytes(f.size)}
-                </span>
+                <span className="shrink-0 text-xs text-muted-foreground">{formatBytes(f.size)}</span>
               </div>
-              <button
-                type="button"
-                onClick={() => removeFile(f.id)}
-                className="ml-2 rounded-sm p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-              >
+              <button type="button" onClick={() => removeFile(f.id)} className="ml-2 rounded-sm p-1 text-muted-foreground hover:bg-muted hover:text-foreground">
                 <X className="h-3.5 w-3.5" />
               </button>
             </div>

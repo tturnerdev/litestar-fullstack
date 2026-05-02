@@ -1,7 +1,7 @@
+import { useQueryClient } from "@tanstack/react-query"
+import { Link } from "@tanstack/react-router"
 import { Activity, AlertCircle, ArrowRight, MonitorSmartphone, Phone, RefreshCw, TicketCheck, Users, UsersRound, Voicemail } from "lucide-react"
 import { useEffect, useState } from "react"
-import { Link } from "@tanstack/react-router"
-import { useQueryClient } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { EmptyState } from "@/components/ui/empty-state"
@@ -85,7 +85,11 @@ export function OrganizationStats() {
           icon={AlertCircle}
           title="Unable to load platform statistics"
           description="The server may be unreachable. Please try again."
-          action={<Button variant="outline" size="sm" onClick={() => refetchStats()}>Try again</Button>}
+          action={
+            <Button variant="outline" size="sm" onClick={() => refetchStats()}>
+              Try again
+            </Button>
+          }
         />
       </div>
     )
@@ -174,18 +178,10 @@ export function OrganizationStats() {
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Platform Overview</h2>
         <div className="flex items-center gap-2">
-          {lastUpdatedLabel && (
-            <span className="text-xs text-muted-foreground">Updated {lastUpdatedLabel}</span>
-          )}
+          {lastUpdatedLabel && <span className="text-xs text-muted-foreground">Updated {lastUpdatedLabel}</span>}
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
-                onClick={handleRefresh}
-                disabled={isRefreshing}
-              >
+              <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground" onClick={handleRefresh} disabled={isRefreshing}>
                 <RefreshCw className={cn("h-3.5 w-3.5", isRefreshing && "animate-spin")} />
               </Button>
             </TooltipTrigger>
@@ -214,10 +210,7 @@ export function OrganizationStats() {
                 {"progressPercent" in stat && stat.progressPercent !== undefined && (
                   <div className="space-y-1">
                     <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-                      <div
-                        className="h-full rounded-full bg-purple-500 transition-all duration-500"
-                        style={{ width: `${stat.progressPercent}%` }}
-                      />
+                      <div className="h-full rounded-full bg-purple-500 transition-all duration-500" style={{ width: `${stat.progressPercent}%` }} />
                     </div>
                     <p className="text-[10px] text-muted-foreground">{stat.progressPercent}% verified</p>
                   </div>

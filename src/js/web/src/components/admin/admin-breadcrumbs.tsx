@@ -66,9 +66,7 @@ export function AdminBreadcrumbs({ currentLabel }: AdminBreadcrumbsProps) {
   // Strip trailing slash and split into segments after "/admin"
   const normalized = pathname.replace(/\/$/, "")
   const adminPrefix = "/admin"
-  const afterAdmin = normalized.startsWith(adminPrefix)
-    ? normalized.slice(adminPrefix.length)
-    : ""
+  const afterAdmin = normalized.startsWith(adminPrefix) ? normalized.slice(adminPrefix.length) : ""
   const segments = afterAdmin.split("/").filter(Boolean)
 
   // Build crumb entries: [{ label, to }]
@@ -98,20 +96,12 @@ export function AdminBreadcrumbs({ currentLabel }: AdminBreadcrumbsProps) {
         {/* Root: Admin — with dropdown to all admin sub-pages */}
         {crumbs.length === 0 ? (
           <BreadcrumbItem>
-            <BreadcrumbDropdownLink
-              label="Admin"
-              siblings={adminSiblings}
-              renderLink={renderAdminLink}
-            />
+            <BreadcrumbDropdownLink label="Admin" siblings={adminSiblings} renderLink={renderAdminLink} />
           </BreadcrumbItem>
         ) : (
           <>
             <BreadcrumbItem>
-              <BreadcrumbDropdownLink
-                label="Admin"
-                siblings={adminSiblings}
-                renderLink={renderAdminLink}
-              />
+              <BreadcrumbDropdownLink label="Admin" siblings={adminSiblings} renderLink={renderAdminLink} />
             </BreadcrumbItem>
 
             {crumbs.map((crumb, idx) => {

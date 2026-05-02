@@ -28,9 +28,7 @@ export function AdminSummaryStats() {
   const { data: connectionsData, isLoading: connectionsLoading } = useConnections({ page: 1, pageSize: 100 })
 
   const connections = connectionsData?.items ?? []
-  const activeConnections = connections.filter(
-    (c) => c.isEnabled && ["connected", "healthy", "active"].includes(c.status.toLowerCase()),
-  )
+  const activeConnections = connections.filter((c) => c.isEnabled && ["connected", "healthy", "active"].includes(c.status.toLowerCase()))
 
   const dbOnline = systemStatus?.databaseStatus === "online"
   const allConnectionsHealthy = connections.length === 0 || activeConnections.length === connections.length
@@ -69,27 +67,16 @@ export function AdminSummaryStats() {
       value: undefined as number | undefined,
       subtitle: systemHealthy ? "All systems operational" : "Issue detected",
       icon: systemHealthy ? CheckCircle2 : XCircle,
-      iconClassName: systemHealthy
-        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-        : "bg-red-500/10 text-red-600 dark:text-red-400",
+      iconClassName: systemHealthy ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "bg-red-500/10 text-red-600 dark:text-red-400",
       isLoading: systemLoading,
       href: "/admin/system",
       customValue: (
         <div className="flex items-center gap-2">
           <span className="relative flex h-2.5 w-2.5">
-            {systemHealthy && (
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-40" />
-            )}
-            <span
-              className={cn(
-                "relative inline-flex h-2.5 w-2.5 rounded-full",
-                systemHealthy ? "bg-emerald-500" : "bg-destructive",
-              )}
-            />
+            {systemHealthy && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-40" />}
+            <span className={cn("relative inline-flex h-2.5 w-2.5 rounded-full", systemHealthy ? "bg-emerald-500" : "bg-destructive")} />
           </span>
-          <span className="text-2xl font-semibold tracking-tight">
-            {systemHealthy ? "OK" : "Warn"}
-          </span>
+          <span className="text-2xl font-semibold tracking-tight">{systemHealthy ? "OK" : "Warn"}</span>
         </div>
       ),
     },
@@ -110,20 +97,11 @@ export function AdminSummaryStats() {
 
           const content = (
             <CardContent className="flex items-center gap-4 p-5">
-              <div
-                className={cn(
-                  "flex h-11 w-11 shrink-0 items-center justify-center rounded-lg",
-                  card.iconClassName,
-                )}
-              >
+              <div className={cn("flex h-11 w-11 shrink-0 items-center justify-center rounded-lg", card.iconClassName)}>
                 <Icon className="h-5 w-5" />
               </div>
               <div className="min-w-0 flex-1">
-                {card.customValue ? (
-                  card.customValue
-                ) : (
-                  <p className="text-2xl font-semibold tracking-tight">{card.value ?? 0}</p>
-                )}
+                {card.customValue ? card.customValue : <p className="text-2xl font-semibold tracking-tight">{card.value ?? 0}</p>}
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <p className="truncate text-sm text-muted-foreground">{card.label}</p>
@@ -137,17 +115,10 @@ export function AdminSummaryStats() {
           )
 
           return (
-            <motion.div
-              key={card.label}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.06, ease: "easeOut" }}
-            >
+            <motion.div key={card.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: index * 0.06, ease: "easeOut" }}>
               {card.href ? (
                 <Link to={card.href}>
-                  <Card className="relative overflow-hidden transition-all duration-200 hover:scale-[1.02] hover:shadow-md cursor-pointer">
-                    {content}
-                  </Card>
+                  <Card className="relative overflow-hidden transition-all duration-200 hover:scale-[1.02] hover:shadow-md cursor-pointer">{content}</Card>
                 </Link>
               ) : (
                 <Card className="relative overflow-hidden">{content}</Card>

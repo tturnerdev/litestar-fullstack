@@ -3,7 +3,6 @@ import { useMemo, useState } from "react"
 import { toast } from "sonner"
 import { Icons } from "@/components/icons"
 import { OAuthLinkButton } from "@/components/profile/oauth-link-button"
-import { EmptyState } from "@/components/ui/empty-state"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,6 +16,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/empty-state"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { useOAuthConfig } from "@/hooks/use-oauth-config"
 import { useOAuthAccounts, useStartOAuthLink, useUnlinkOAuthAccount } from "@/lib/api/hooks/auth"
@@ -53,7 +53,11 @@ export function ConnectedAccounts() {
         icon={AlertCircle}
         title="Unable to load connected accounts"
         description="Something went wrong. Please try again."
-        action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+        action={
+          <Button variant="outline" size="sm" onClick={() => refetch()}>
+            Try again
+          </Button>
+        }
       />
     )
   }
@@ -106,19 +110,12 @@ export function ConnectedAccounts() {
             </div>
             <div className="text-center">
               <p className="text-sm font-medium">No connected accounts</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Connect your accounts for easier sign-in and a more streamlined experience.
-              </p>
+              <p className="mt-1 text-sm text-muted-foreground">Connect your accounts for easier sign-in and a more streamlined experience.</p>
             </div>
             {availableProviders.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {availableProviders.map((provider) => (
-                  <OAuthLinkButton
-                    key={provider}
-                    provider={provider}
-                    onClick={() => handleLink(provider)}
-                    disabled={startLink.isPending}
-                  />
+                  <OAuthLinkButton key={provider} provider={provider} onClick={() => handleLink(provider)} disabled={startLink.isPending} />
                 ))}
               </div>
             )}
@@ -142,9 +139,7 @@ export function ConnectedAccounts() {
                         <p className="font-medium">{meta.label}</p>
                         <p className="text-muted-foreground text-sm">{account.email}</p>
                         <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
-                          {account.linkedAt && (
-                            <span>Connected {formatRelativeTimeShort(account.linkedAt)}</span>
-                          )}
+                          {account.linkedAt && <span>Connected {formatRelativeTimeShort(account.linkedAt)}</span>}
                           {account.lastLoginAt && (
                             <span className="flex items-center gap-1">
                               <LogIn className="h-3 w-3" />
@@ -163,10 +158,7 @@ export function ConnectedAccounts() {
                       <AlertDialogContent>
                         <AlertDialogHeader>
                           <AlertDialogTitle>Disconnect {meta.label}?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            You won't be able to sign in with this {meta.label} account anymore.
-                            You can always reconnect it later.
-                          </AlertDialogDescription>
+                          <AlertDialogDescription>You won't be able to sign in with this {meta.label} account anymore. You can always reconnect it later.</AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                           <AlertDialogCancel onClick={() => setUnlinkDialogOpen(false)}>Cancel</AlertDialogCancel>
@@ -188,12 +180,7 @@ export function ConnectedAccounts() {
             {availableProviders.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {availableProviders.map((provider) => (
-                  <OAuthLinkButton
-                    key={provider}
-                    provider={provider}
-                    onClick={() => handleLink(provider)}
-                    disabled={startLink.isPending}
-                  />
+                  <OAuthLinkButton key={provider} provider={provider} onClick={() => handleLink(provider)} disabled={startLink.isPending} />
                 ))}
               </div>
             )}

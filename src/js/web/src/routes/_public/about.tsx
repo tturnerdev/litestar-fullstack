@@ -1,17 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { motion, useMotionValue, useTransform } from "framer-motion"
-import {
-  ArrowLeft,
-  ArrowRight,
-  ExternalLink,
-  Github,
-  LifeBuoy,
-  Mail,
-  Monitor,
-  Phone,
-  Printer,
-  Star,
-} from "lucide-react"
+import { ArrowLeft, ArrowRight, ExternalLink, Github, LifeBuoy, Mail, Monitor, Phone, Printer, Star } from "lucide-react"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -23,49 +12,34 @@ export const Route = createFileRoute("/_public/about")({
 })
 
 // Konami code sequence
-const KONAMI_CODE = [
-  "ArrowUp",
-  "ArrowUp",
-  "ArrowDown",
-  "ArrowDown",
-  "ArrowLeft",
-  "ArrowRight",
-  "ArrowLeft",
-  "ArrowRight",
-  "b",
-  "a",
-]
+const KONAMI_CODE = ["ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown", "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight", "b", "a"]
 
 const productFeatures = [
   {
     icon: Phone,
     title: "Voice",
-    description:
-      "Enterprise voice communications with call routing, voicemail, and real-time analytics.",
+    description: "Enterprise voice communications with call routing, voicemail, and real-time analytics.",
     color: "text-blue-500",
     bg: "bg-blue-500/10",
   },
   {
     icon: Printer,
     title: "Fax",
-    description:
-      "Digital fax management with send, receive, and archival capabilities built for compliance.",
+    description: "Digital fax management with send, receive, and archival capabilities built for compliance.",
     color: "text-purple-500",
     bg: "bg-purple-500/10",
   },
   {
     icon: Monitor,
     title: "Devices",
-    description:
-      "Centralized device provisioning, monitoring, and lifecycle management across your fleet.",
+    description: "Centralized device provisioning, monitoring, and lifecycle management across your fleet.",
     color: "text-emerald-500",
     bg: "bg-emerald-500/10",
   },
   {
     icon: LifeBuoy,
     title: "Support",
-    description:
-      "Integrated ticketing and knowledge base to keep your team and customers connected.",
+    description: "Integrated ticketing and knowledge base to keep your team and customers connected.",
     color: "text-amber-500",
     bg: "bg-amber-500/10",
   },
@@ -158,12 +132,7 @@ function AboutPage() {
 
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: Visual-only mouse tracker for cursor-following gradient effect
-    <div
-      ref={containerRef}
-      onMouseMove={handleMouseMove}
-      role="presentation"
-      className="relative min-h-screen"
-    >
+    <div ref={containerRef} onMouseMove={handleMouseMove} role="presentation" className="relative min-h-screen">
       {/* Easter egg overlay */}
       {easterEggActive && (
         <motion.div
@@ -221,9 +190,7 @@ function AboutPage() {
               You found the secret!
             </motion.p>
           </div>
-          <p className="absolute bottom-10 text-center text-sm text-muted-foreground">
-            Press any key to exit
-          </p>
+          <p className="absolute bottom-10 text-center text-sm text-muted-foreground">Press any key to exit</p>
         </motion.div>
       )}
 
@@ -269,31 +236,19 @@ function AboutPage() {
               Admin Portal
             </Badge>
 
-            <h1 className="mb-4 font-heading text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">
-              Atrelix Communications
-            </h1>
+            <h1 className="mb-4 font-heading text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">Atrelix Communications</h1>
             <p className="mx-auto max-w-2xl text-lg text-muted-foreground md:text-xl">
-              A unified platform for enterprise voice, fax, device management,
-              and support -- built for teams that demand reliability.
+              A unified platform for enterprise voice, fax, device management, and support -- built for teams that demand reliability.
             </p>
 
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="mt-8 flex flex-wrap justify-center gap-3"
-            >
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="mt-8 flex flex-wrap justify-center gap-3">
               <Button asChild>
                 <Link to="/login">
                   Get Started <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
               <Button variant="outline" asChild>
-                <a
-                  href="https://github.com/litestar-org"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                <a href="https://github.com/litestar-org" target="_blank" rel="noopener noreferrer">
                   <Github className="mr-2 h-4 w-4" /> View on GitHub
                 </a>
               </Button>
@@ -304,23 +259,13 @@ function AboutPage() {
 
       {/* Features Section */}
       <PageContainer className="relative">
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-80px" }}
-          variants={staggerContainer}
-          className="mb-20"
-        >
+        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }} variants={staggerContainer} className="mb-20">
           <motion.div variants={staggerItem} className="mb-10 text-center">
             <Badge variant="outline" className="mb-3">
               Platform
             </Badge>
-            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
-              Everything your team needs
-            </h2>
-            <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
-              Four integrated product areas designed to work together seamlessly.
-            </p>
+            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">Everything your team needs</h2>
+            <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">Four integrated product areas designed to work together seamlessly.</p>
           </motion.div>
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -340,9 +285,7 @@ function AboutPage() {
                       <feature.icon className={`h-6 w-6 ${feature.color}`} />
                     </motion.div>
                     <h3 className="text-lg font-semibold">{feature.title}</h3>
-                    <p className="text-sm leading-relaxed text-muted-foreground">
-                      {feature.description}
-                    </p>
+                    <p className="text-sm leading-relaxed text-muted-foreground">{feature.description}</p>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -351,23 +294,13 @@ function AboutPage() {
         </motion.div>
 
         {/* Team Section */}
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-80px" }}
-          variants={staggerContainer}
-          className="mb-20"
-        >
+        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }} variants={staggerContainer} className="mb-20">
           <motion.div variants={staggerItem} className="mb-10 text-center">
             <Badge variant="outline" className="mb-3">
               Team
             </Badge>
-            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
-              Meet the people behind the platform
-            </h2>
-            <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
-              A dedicated team focused on building reliable communication tools.
-            </p>
+            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">Meet the people behind the platform</h2>
+            <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">A dedicated team focused on building reliable communication tools.</p>
           </motion.div>
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -375,16 +308,11 @@ function AboutPage() {
               <motion.div key={member.name} variants={staggerItem}>
                 <Card hover className="text-center">
                   <CardContent className="p-6">
-                    <motion.div
-                      whileHover={{ scale: 1.1 }}
-                      className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full text-xl font-bold ${member.color}`}
-                    >
+                    <motion.div whileHover={{ scale: 1.1 }} className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full text-xl font-bold ${member.color}`}>
                       {member.avatar}
                     </motion.div>
                     <h3 className="font-semibold">{member.name}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {member.role}
-                    </p>
+                    <p className="text-sm text-muted-foreground">{member.role}</p>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -393,23 +321,13 @@ function AboutPage() {
         </motion.div>
 
         {/* Contact Section */}
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-80px" }}
-          variants={staggerContainer}
-          className="mb-20"
-        >
+        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }} variants={staggerContainer} className="mb-20">
           <motion.div variants={staggerItem} className="mb-10 text-center">
             <Badge variant="outline" className="mb-3">
               Contact
             </Badge>
-            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
-              Get in touch
-            </h2>
-            <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
-              Questions, feedback, or need support? We are here to help.
-            </p>
+            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">Get in touch</h2>
+            <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">Questions, feedback, or need support? We are here to help.</p>
           </motion.div>
 
           <div className="mx-auto grid max-w-2xl gap-6 md:grid-cols-2">
@@ -421,14 +339,8 @@ function AboutPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold">Email Us</h3>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Reach out for general inquiries or partnership
-                      opportunities.
-                    </p>
-                    <a
-                      href="mailto:support@atrelix.com"
-                      className="mt-2 inline-flex items-center text-sm font-medium text-primary hover:underline"
-                    >
+                    <p className="mt-1 text-sm text-muted-foreground">Reach out for general inquiries or partnership opportunities.</p>
+                    <a href="mailto:support@atrelix.com" className="mt-2 inline-flex items-center text-sm font-medium text-primary hover:underline">
                       support@atrelix.com
                       <ExternalLink className="ml-1 h-3 w-3" />
                     </a>
@@ -445,13 +357,8 @@ function AboutPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold">Support Center</h3>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Browse our knowledge base or submit a support ticket.
-                    </p>
-                    <Link
-                      to="/login"
-                      className="mt-2 inline-flex items-center text-sm font-medium text-primary hover:underline"
-                    >
+                    <p className="mt-1 text-sm text-muted-foreground">Browse our knowledge base or submit a support ticket.</p>
+                    <Link to="/login" className="mt-2 inline-flex items-center text-sm font-medium text-primary hover:underline">
                       Open Support Portal
                       <ArrowRight className="ml-1 h-3 w-3" />
                     </Link>
@@ -473,48 +380,27 @@ function AboutPage() {
             </div>
 
             <nav className="flex flex-wrap items-center gap-6 text-sm">
-              <a
-                href="#"
-                className="text-muted-foreground transition-colors hover:text-foreground"
-              >
+              <a href="#" className="text-muted-foreground transition-colors hover:text-foreground">
                 Terms of Service
               </a>
-              <a
-                href="#"
-                className="text-muted-foreground transition-colors hover:text-foreground"
-              >
+              <a href="#" className="text-muted-foreground transition-colors hover:text-foreground">
                 Privacy Policy
               </a>
-              <Link
-                to="/login"
-                className="text-muted-foreground transition-colors hover:text-foreground"
-              >
+              <Link to="/login" className="text-muted-foreground transition-colors hover:text-foreground">
                 Sign In
               </Link>
-              <a
-                href="https://github.com/litestar-org"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-muted-foreground transition-colors hover:text-foreground"
-              >
+              <a href="https://github.com/litestar-org" target="_blank" rel="noopener noreferrer" className="text-muted-foreground transition-colors hover:text-foreground">
                 <Github className="h-4 w-4" />
               </a>
             </nav>
 
-            <p className="text-xs text-muted-foreground/60">
-              &copy; {new Date().getFullYear()} Atrelix. All rights reserved.
-            </p>
+            <p className="text-xs text-muted-foreground/60">&copy; {new Date().getFullYear()} Atrelix. All rights reserved.</p>
           </div>
         </PageContainer>
       </footer>
 
       {/* Hidden konami hint */}
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 2 }}
-        className="pb-4 text-center text-xs text-muted-foreground/30"
-      >
+      <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2 }} className="pb-4 text-center text-xs text-muted-foreground/30">
         Try the classic code...
       </motion.p>
     </div>

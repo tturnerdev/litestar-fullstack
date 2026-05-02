@@ -15,15 +15,15 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { BulkActionBar, type BulkAction } from "@/components/ui/bulk-action-bar"
+import { type BulkAction, BulkActionBar } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
-import { formatRelativeTimeShort } from "@/lib/date-utils"
 import { useAuthStore } from "@/lib/auth"
+import { formatRelativeTimeShort } from "@/lib/date-utils"
 import {
   deleteTeamInvitation,
   listTeamInvitations,
@@ -126,19 +126,14 @@ export function TeamMembers({ team, teamId, canManageMembers, isOwner }: TeamMem
 
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase()
-      result = result.filter(
-        (m) => (m.name && m.name.toLowerCase().includes(query)) || m.email.toLowerCase().includes(query),
-      )
+      result = result.filter((m) => (m.name && m.name.toLowerCase().includes(query)) || m.email.toLowerCase().includes(query))
     }
 
     return result
   }, [members, roleFilter, searchQuery])
 
   // ── Bulk selection helpers ──────────────────────────────────────────────
-  const selectableMembers = useMemo(
-    () => filteredMembers.filter((m) => !m.isOwner),
-    [filteredMembers],
-  )
+  const selectableMembers = useMemo(() => filteredMembers.filter((m) => !m.isOwner), [filteredMembers])
 
   const allSelected = selectableMembers.length > 0 && selectableMembers.every((m) => selected.has(m.userId))
   const someSelected = selectableMembers.some((m) => selected.has(m.userId)) && !allSelected
@@ -398,12 +393,7 @@ export function TeamMembers({ team, teamId, canManageMembers, isOwner }: TeamMem
             </div>
             {canManageMembers && selectableMembers.length > 0 && (
               <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer select-none">
-                <Checkbox
-                  checked={allSelected}
-                  indeterminate={someSelected}
-                  onChange={toggleAll}
-                  aria-label="Select all members"
-                />
+                <Checkbox checked={allSelected} indeterminate={someSelected} onChange={toggleAll} aria-label="Select all members" />
                 Select all
               </label>
             )}
@@ -413,12 +403,7 @@ export function TeamMembers({ team, teamId, canManageMembers, isOwner }: TeamMem
           {members.length >= 5 && (
             <div className="relative">
               <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search by name or email..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-8 pl-8 text-sm"
-              />
+              <Input placeholder="Search by name or email..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="h-8 pl-8 text-sm" />
             </div>
           )}
 
@@ -436,17 +421,9 @@ export function TeamMembers({ team, teamId, canManageMembers, isOwner }: TeamMem
                   className={`flex items-center justify-between rounded-xl border p-3 transition-colors ${isSelected ? "border-primary/40 bg-primary/5" : isSelf ? "border-primary/30 bg-primary/5" : "border-border/60 bg-background/60 hover:bg-muted/30"}`}
                 >
                   <div className="flex items-center gap-3">
-                    {canSelect && (
-                      <Checkbox
-                        checked={isSelected}
-                        onChange={() => toggleOne(member.userId)}
-                        aria-label={`Select ${member.name ?? member.email}`}
-                      />
-                    )}
+                    {canSelect && <Checkbox checked={isSelected} onChange={() => toggleOne(member.userId)} aria-label={`Select ${member.name ?? member.email}`} />}
                     <Avatar className={`h-9 w-9 ${colorClass}`}>
-                      <AvatarFallback className={`text-xs font-semibold ${colorClass}`}>
-                        {getMemberInitials(member.name, member.email)}
-                      </AvatarFallback>
+                      <AvatarFallback className={`text-xs font-semibold ${colorClass}`}>{getMemberInitials(member.name, member.email)}</AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col">
                       <div className="flex items-center gap-2">
@@ -472,10 +449,7 @@ export function TeamMembers({ team, teamId, canManageMembers, isOwner }: TeamMem
                         <DropdownMenuContent align="end" className="w-48">
                           <DropdownMenuLabel>Change role</DropdownMenuLabel>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() => updateRoleMutation.mutate({ userId: member.userId, role: "ADMIN" })}
-                            disabled={member.role === "ADMIN"}
-                          >
+                          <DropdownMenuItem onClick={() => updateRoleMutation.mutate({ userId: member.userId, role: "ADMIN" })} disabled={member.role === "ADMIN"}>
                             <Shield className="mr-2 h-4 w-4 text-blue-500" />
                             <div>
                               <p className="font-medium">Admin</p>
@@ -507,9 +481,7 @@ export function TeamMembers({ team, teamId, canManageMembers, isOwner }: TeamMem
                 </div>
               )
             })}
-            {filteredMembers.length === 0 && members.length > 0 && (
-              <div className="py-8 text-center text-sm text-muted-foreground">No members match the current filters.</div>
-            )}
+            {filteredMembers.length === 0 && members.length > 0 && <div className="py-8 text-center text-sm text-muted-foreground">No members match the current filters.</div>}
             {members.length === 0 && <div className="py-8 text-center text-sm text-muted-foreground">No members yet. Invite someone to get started.</div>}
           </div>
         </CardContent>
@@ -590,9 +562,7 @@ export function TeamMembers({ team, teamId, canManageMembers, isOwner }: TeamMem
           </AlertDialogHeader>
           <Separator />
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setRemoveMember(null)}>
-              Cancel
-            </AlertDialogCancel>
+            <AlertDialogCancel onClick={() => setRemoveMember(null)}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               className={buttonDestructiveClass}
               disabled={removeMemberMutation.isPending}
@@ -611,14 +581,7 @@ export function TeamMembers({ team, teamId, canManageMembers, isOwner }: TeamMem
         </AlertDialogContent>
       </AlertDialog>
 
-      {canManageMembers && (
-        <BulkActionBar
-          selectedCount={selected.size}
-          selectedIds={Array.from(selected)}
-          onClearSelection={() => setSelected(new Set())}
-          actions={bulkActions}
-        />
-      )}
+      {canManageMembers && <BulkActionBar selectedCount={selected.size} selectedIds={Array.from(selected)} onClearSelection={() => setSelected(new Set())} actions={bulkActions} />}
     </div>
   )
 }

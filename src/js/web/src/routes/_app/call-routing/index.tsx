@@ -1,43 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
+import { AlertCircle, Clock, Download, Eye, GitFork, Home, Loader2, Menu, MoreVertical, Pencil, Phone, Plus, Search, Trash2, Users, X } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
-import {
-  AlertCircle,
-  Clock,
-  Download,
-  Eye,
-  GitFork,
-  Home,
-  Loader2,
-  Menu,
-  MoreVertical,
-  Pencil,
-  Phone,
-  Plus,
-  Search,
-  Trash2,
-  Users,
-  X,
-} from "lucide-react"
 import { StatCard } from "@/components/home/stat-card"
-import { Badge } from "@/components/ui/badge"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -48,45 +12,44 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { Badge } from "@/components/ui/badge"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
+import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
+import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { SkeletonTable } from "@/components/ui/skeleton"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import {
-  useTimeConditions,
-  useCreateTimeCondition,
-  useDeleteTimeCondition,
-  useIvrMenus,
-  useCreateIvrMenu,
-  useDeleteIvrMenu,
-  useCallQueues,
-  useCreateCallQueue,
-  useDeleteCallQueue,
-  useRingGroups,
-  useCreateRingGroup,
-  useDeleteRingGroup,
-  type TimeCondition,
-  type IvrMenu,
-  type CallQueue,
-  type RingGroup,
-} from "@/lib/api/hooks/call-routing"
-import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
-import { client } from "@/lib/generated/api/client.gen"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
-import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
+import {
+  type CallQueue,
+  type IvrMenu,
+  type RingGroup,
+  type TimeCondition,
+  useCallQueues,
+  useCreateCallQueue,
+  useCreateIvrMenu,
+  useCreateRingGroup,
+  useCreateTimeCondition,
+  useDeleteCallQueue,
+  useDeleteIvrMenu,
+  useDeleteRingGroup,
+  useDeleteTimeCondition,
+  useIvrMenus,
+  useRingGroups,
+  useTimeConditions,
+} from "@/lib/api/hooks/call-routing"
+import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
+import { client } from "@/lib/generated/api/client.gen"
 
 // ---------------------------------------------------------------------------
 // Route definition
@@ -217,7 +180,9 @@ function NewTimeConditionDialog({ open, onOpenChange }: { open: boolean; onOpenC
             <p className="text-xs text-muted-foreground">Where calls are routed when the time condition does not match (e.g., after hours).</p>
           </div>
           <DialogFooter>
-            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
+            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
             <Button type="submit" disabled={!name.trim() || !matchDest.trim() || !noMatchDest.trim() || create.isPending}>
               {create.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Create
@@ -262,7 +227,9 @@ function NewIvrMenuDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
             <Input id="ivr-name" placeholder="e.g., Main Auto Attendant" value={name} onChange={(e) => setName(e.target.value)} required />
           </div>
           <DialogFooter>
-            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
+            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
             <Button type="submit" disabled={!name.trim() || create.isPending}>
               {create.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Create
@@ -317,7 +284,9 @@ function NewCallQueueDialog({ open, onOpenChange }: { open: boolean; onOpenChang
           <div className="space-y-2">
             <Label htmlFor="cq-strategy">Strategy</Label>
             <Select value={strategy} onValueChange={setStrategy}>
-              <SelectTrigger id="cq-strategy"><SelectValue placeholder="Select strategy" /></SelectTrigger>
+              <SelectTrigger id="cq-strategy">
+                <SelectValue placeholder="Select strategy" />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="ring_all">Ring All</SelectItem>
                 <SelectItem value="round_robin">Round Robin</SelectItem>
@@ -327,12 +296,12 @@ function NewCallQueueDialog({ open, onOpenChange }: { open: boolean; onOpenChang
                 <SelectItem value="linear">Linear</SelectItem>
               </SelectContent>
             </Select>
-            {strategyDescriptions[strategy] && (
-              <p className="text-xs text-muted-foreground">{strategyDescriptions[strategy]}</p>
-            )}
+            {strategyDescriptions[strategy] && <p className="text-xs text-muted-foreground">{strategyDescriptions[strategy]}</p>}
           </div>
           <DialogFooter>
-            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
+            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
             <Button type="submit" disabled={!name.trim() || !number.trim() || create.isPending}>
               {create.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Create
@@ -387,7 +356,9 @@ function NewRingGroupDialog({ open, onOpenChange }: { open: boolean; onOpenChang
           <div className="space-y-2">
             <Label htmlFor="rg-strategy">Strategy</Label>
             <Select value={strategy} onValueChange={setStrategy}>
-              <SelectTrigger id="rg-strategy"><SelectValue placeholder="Select strategy" /></SelectTrigger>
+              <SelectTrigger id="rg-strategy">
+                <SelectValue placeholder="Select strategy" />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="ring_all">Ring All</SelectItem>
                 <SelectItem value="round_robin">Round Robin</SelectItem>
@@ -395,12 +366,12 @@ function NewRingGroupDialog({ open, onOpenChange }: { open: boolean; onOpenChang
                 <SelectItem value="random">Random</SelectItem>
               </SelectContent>
             </Select>
-            {strategyDescriptions[strategy] && (
-              <p className="text-xs text-muted-foreground">{strategyDescriptions[strategy]}</p>
-            )}
+            {strategyDescriptions[strategy] && <p className="text-xs text-muted-foreground">{strategyDescriptions[strategy]}</p>}
           </div>
           <DialogFooter>
-            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
+            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
             <Button type="submit" disabled={!name.trim() || !number.trim() || create.isPending}>
               {create.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Create
@@ -425,10 +396,14 @@ function TimeConditionsTab() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [timeConditionToDelete, setTimeConditionToDelete] = useState<{ id: string; name: string } | null>(null)
 
-  useEffect(() => { setPage(1) }, [debouncedSearch])
+  useEffect(() => {
+    setPage(1)
+  }, [debouncedSearch])
 
   const { data, isLoading, isError, refetch } = useTimeConditions({
-    page, pageSize: 25, search: debouncedSearch || undefined,
+    page,
+    pageSize: 25,
+    search: debouncedSearch || undefined,
   })
   const deleteTimeCondition = useDeleteTimeCondition()
 
@@ -470,11 +445,7 @@ function TimeConditionsTab() {
         },
         () => setSelectedIds(new Set()),
       ),
-      createExportAction<TimeCondition>(
-        "time-conditions-selected",
-        timeConditionCsvHeaders,
-        (ids) => items.filter((tc) => ids.includes(tc.id)),
-      ),
+      createExportAction<TimeCondition>("time-conditions-selected", timeConditionCsvHeaders, (ids) => items.filter((tc) => ids.includes(tc.id))),
     ],
     [items],
   )
@@ -487,7 +458,8 @@ function TimeConditionsTab() {
           <Input placeholder="Search time conditions..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 pr-8" />
           {search && (
             <button type="button" onClick={() => setSearch("")} className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground">
-              <X className="h-3.5 w-3.5" /><span className="sr-only">Clear search</span>
+              <X className="h-3.5 w-3.5" />
+              <span className="sr-only">Clear search</span>
             </button>
           )}
         </div>
@@ -505,7 +477,16 @@ function TimeConditionsTab() {
       {isLoading ? (
         <SkeletonTable rows={5} />
       ) : isError ? (
-        <EmptyState icon={AlertCircle} title="Unable to load time conditions" description="Something went wrong. Please try again." action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>} />
+        <EmptyState
+          icon={AlertCircle}
+          title="Unable to load time conditions"
+          description="Something went wrong. Please try again."
+          action={
+            <Button variant="outline" size="sm" onClick={() => refetch()}>
+              Try again
+            </Button>
+          }
+        />
       ) : items.length === 0 ? (
         <EmptyState
           icon={Clock}
@@ -518,7 +499,9 @@ function TimeConditionsTab() {
           variant={search ? "no-results" : undefined}
           action={
             search ? (
-              <Button variant="outline" size="sm" onClick={() => setSearch("")}>Clear search</Button>
+              <Button variant="outline" size="sm" onClick={() => setSearch("")}>
+                Clear search
+              </Button>
             ) : (
               <Button size="sm" onClick={() => setDialogOpen(true)}>
                 <Plus className="mr-2 h-4 w-4" /> Create time condition
@@ -529,20 +512,22 @@ function TimeConditionsTab() {
       ) : (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <p className="text-xs text-muted-foreground">{total} time condition{total === 1 ? "" : "s"}{search && " (filtered)"}</p>
-            {totalPages > 1 && <p className="text-xs text-muted-foreground">Page {page} of {totalPages}</p>}
+            <p className="text-xs text-muted-foreground">
+              {total} time condition{total === 1 ? "" : "s"}
+              {search && " (filtered)"}
+            </p>
+            {totalPages > 1 && (
+              <p className="text-xs text-muted-foreground">
+                Page {page} of {totalPages}
+              </p>
+            )}
           </div>
           <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
             <Table aria-label="Time Conditions">
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-10">
-                    <Checkbox
-                      checked={allSelected}
-                      indeterminate={someSelected && !allSelected}
-                      onChange={toggleAll}
-                      aria-label="Select all time conditions"
-                    />
+                    <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all time conditions" />
                   </TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead className="hidden md:table-cell">Match Destination</TableHead>
@@ -553,26 +538,49 @@ function TimeConditionsTab() {
               </TableHeader>
               <TableBody>
                 {items.map((tc: TimeCondition, index: number) => (
-                  <TableRow key={tc.id} data-state={selectedIds.has(tc.id) ? "selected" : undefined} className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`} onClick={(e) => { const target = e.target as HTMLElement; if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) return; navigate({ to: "/call-routing/time-conditions/$timeConditionId", params: { timeConditionId: tc.id } }); }} tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter") navigate({ to: "/call-routing/time-conditions/$timeConditionId", params: { timeConditionId: tc.id } }) }}>
+                  <TableRow
+                    key={tc.id}
+                    data-state={selectedIds.has(tc.id) ? "selected" : undefined}
+                    className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`}
+                    onClick={(e) => {
+                      const target = e.target as HTMLElement
+                      if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) return
+                      navigate({ to: "/call-routing/time-conditions/$timeConditionId", params: { timeConditionId: tc.id } })
+                    }}
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") navigate({ to: "/call-routing/time-conditions/$timeConditionId", params: { timeConditionId: tc.id } })
+                    }}
+                  >
                     <TableCell>
                       <Checkbox
                         checked={selectedIds.has(tc.id)}
-                        onChange={(e) => { e.stopPropagation(); toggleOne(tc.id) }}
+                        onChange={(e) => {
+                          e.stopPropagation()
+                          toggleOne(tc.id)
+                        }}
                         aria-label={`Select ${tc.name}`}
                       />
                     </TableCell>
                     <TableCell>
-                      <Link to="/call-routing/time-conditions/$timeConditionId" params={{ timeConditionId: tc.id }} className="group flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                      <Link
+                        to="/call-routing/time-conditions/$timeConditionId"
+                        params={{ timeConditionId: tc.id }}
+                        className="group flex items-center gap-2"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <Clock className="h-4 w-4 text-muted-foreground" />
                         <span className="font-medium group-hover:underline">{tc.name}</span>
                       </Link>
                     </TableCell>
-                    <TableCell className="hidden md:table-cell"><span className="text-sm text-muted-foreground">{tc.matchDestination || "---"}</span></TableCell>
-                    <TableCell className="hidden md:table-cell"><span className="text-sm text-muted-foreground">{tc.noMatchDestination || "---"}</span></TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      <span className="text-sm text-muted-foreground">{tc.matchDestination || "---"}</span>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      <span className="text-sm text-muted-foreground">{tc.noMatchDestination || "---"}</span>
+                    </TableCell>
                     <TableCell className="hidden lg:table-cell">
-                      <Badge variant={tc.overrideMode === "none" ? "outline" : "default"}>
-                        {overrideModeLabels[tc.overrideMode] ?? tc.overrideMode}
-                      </Badge>
+                      <Badge variant={tc.overrideMode === "none" ? "outline" : "default"}>{overrideModeLabels[tc.overrideMode] ?? tc.overrideMode}</Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
@@ -586,7 +594,9 @@ function TimeConditionsTab() {
                           <DropdownMenuItem onClick={() => navigate({ to: "/call-routing/time-conditions/$timeConditionId", params: { timeConditionId: tc.id } })}>
                             <Eye className="mr-2 h-4 w-4" /> View details
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => navigate({ to: "/call-routing/time-conditions/$timeConditionId", params: { timeConditionId: tc.id }, search: { edit: true } })}>
+                          <DropdownMenuItem
+                            onClick={() => navigate({ to: "/call-routing/time-conditions/$timeConditionId", params: { timeConditionId: tc.id }, search: { edit: true } })}
+                          >
                             <Pencil className="mr-2 h-4 w-4" /> Edit
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
@@ -603,8 +613,12 @@ function TimeConditionsTab() {
           </div>
           {totalPages > 1 && (
             <div className="flex items-center justify-end gap-2">
-              <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>Previous</Button>
-              <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>Next</Button>
+              <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>
+                Previous
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>
+                Next
+              </Button>
             </div>
           )}
         </div>
@@ -612,12 +626,7 @@ function TimeConditionsTab() {
 
       <NewTimeConditionDialog open={dialogOpen} onOpenChange={setDialogOpen} />
 
-      <BulkActionBar
-        selectedCount={selectedIds.size}
-        selectedIds={Array.from(selectedIds)}
-        onClearSelection={() => setSelectedIds(new Set())}
-        actions={bulkActions}
-      />
+      <BulkActionBar selectedCount={selectedIds.size} selectedIds={Array.from(selectedIds)} onClearSelection={() => setSelectedIds(new Set())} actions={bulkActions} />
 
       <AlertDialog open={!!timeConditionToDelete} onOpenChange={(open) => !open && setTimeConditionToDelete(null)}>
         <AlertDialogContent>
@@ -665,10 +674,14 @@ function IvrMenusTab() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [ivrMenuToDelete, setIvrMenuToDelete] = useState<{ id: string; name: string } | null>(null)
 
-  useEffect(() => { setPage(1) }, [debouncedSearch])
+  useEffect(() => {
+    setPage(1)
+  }, [debouncedSearch])
 
   const { data, isLoading, isError, refetch } = useIvrMenus({
-    page, pageSize: 25, search: debouncedSearch || undefined,
+    page,
+    pageSize: 25,
+    search: debouncedSearch || undefined,
   })
   const deleteIvrMenu = useDeleteIvrMenu()
 
@@ -710,11 +723,7 @@ function IvrMenusTab() {
         },
         () => setSelectedIds(new Set()),
       ),
-      createExportAction<IvrMenu>(
-        "ivr-menus-selected",
-        ivrMenuCsvHeaders,
-        (ids) => items.filter((ivr) => ids.includes(ivr.id)),
-      ),
+      createExportAction<IvrMenu>("ivr-menus-selected", ivrMenuCsvHeaders, (ids) => items.filter((ivr) => ids.includes(ivr.id))),
     ],
     [items],
   )
@@ -727,7 +736,8 @@ function IvrMenusTab() {
           <Input placeholder="Search IVR menus..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 pr-8" />
           {search && (
             <button type="button" onClick={() => setSearch("")} className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground">
-              <X className="h-3.5 w-3.5" /><span className="sr-only">Clear search</span>
+              <X className="h-3.5 w-3.5" />
+              <span className="sr-only">Clear search</span>
             </button>
           )}
         </div>
@@ -745,7 +755,16 @@ function IvrMenusTab() {
       {isLoading ? (
         <SkeletonTable rows={5} />
       ) : isError ? (
-        <EmptyState icon={AlertCircle} title="Unable to load IVR menus" description="Something went wrong. Please try again." action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>} />
+        <EmptyState
+          icon={AlertCircle}
+          title="Unable to load IVR menus"
+          description="Something went wrong. Please try again."
+          action={
+            <Button variant="outline" size="sm" onClick={() => refetch()}>
+              Try again
+            </Button>
+          }
+        />
       ) : items.length === 0 ? (
         <EmptyState
           icon={Menu}
@@ -758,7 +777,9 @@ function IvrMenusTab() {
           variant={search ? "no-results" : undefined}
           action={
             search ? (
-              <Button variant="outline" size="sm" onClick={() => setSearch("")}>Clear search</Button>
+              <Button variant="outline" size="sm" onClick={() => setSearch("")}>
+                Clear search
+              </Button>
             ) : (
               <Button size="sm" onClick={() => setDialogOpen(true)}>
                 <Plus className="mr-2 h-4 w-4" /> Create IVR menu
@@ -769,20 +790,22 @@ function IvrMenusTab() {
       ) : (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <p className="text-xs text-muted-foreground">{total} IVR menu{total === 1 ? "" : "s"}{search && " (filtered)"}</p>
-            {totalPages > 1 && <p className="text-xs text-muted-foreground">Page {page} of {totalPages}</p>}
+            <p className="text-xs text-muted-foreground">
+              {total} IVR menu{total === 1 ? "" : "s"}
+              {search && " (filtered)"}
+            </p>
+            {totalPages > 1 && (
+              <p className="text-xs text-muted-foreground">
+                Page {page} of {totalPages}
+              </p>
+            )}
           </div>
           <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
             <Table aria-label="IVR Menus">
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-10">
-                    <Checkbox
-                      checked={allSelected}
-                      indeterminate={someSelected && !allSelected}
-                      onChange={toggleAll}
-                      aria-label="Select all IVR menus"
-                    />
+                    <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all IVR menus" />
                   </TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead className="hidden md:table-cell">Greeting</TableHead>
@@ -793,11 +816,27 @@ function IvrMenusTab() {
               </TableHeader>
               <TableBody>
                 {items.map((ivr: IvrMenu, index: number) => (
-                  <TableRow key={ivr.id} data-state={selectedIds.has(ivr.id) ? "selected" : undefined} className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`} onClick={(e) => { const target = e.target as HTMLElement; if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) return; navigate({ to: "/call-routing/ivr-menus/$ivrMenuId", params: { ivrMenuId: ivr.id } }); }} tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter") navigate({ to: "/call-routing/ivr-menus/$ivrMenuId", params: { ivrMenuId: ivr.id } }) }}>
+                  <TableRow
+                    key={ivr.id}
+                    data-state={selectedIds.has(ivr.id) ? "selected" : undefined}
+                    className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`}
+                    onClick={(e) => {
+                      const target = e.target as HTMLElement
+                      if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) return
+                      navigate({ to: "/call-routing/ivr-menus/$ivrMenuId", params: { ivrMenuId: ivr.id } })
+                    }}
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") navigate({ to: "/call-routing/ivr-menus/$ivrMenuId", params: { ivrMenuId: ivr.id } })
+                    }}
+                  >
                     <TableCell>
                       <Checkbox
                         checked={selectedIds.has(ivr.id)}
-                        onChange={(e) => { e.stopPropagation(); toggleOne(ivr.id) }}
+                        onChange={(e) => {
+                          e.stopPropagation()
+                          toggleOne(ivr.id)
+                        }}
                         aria-label={`Select ${ivr.name}`}
                       />
                     </TableCell>
@@ -807,9 +846,17 @@ function IvrMenusTab() {
                         <span className="font-medium group-hover:underline">{ivr.name}</span>
                       </Link>
                     </TableCell>
-                    <TableCell className="hidden md:table-cell"><Badge variant="outline">{ivr.greetingType}</Badge></TableCell>
-                    <TableCell className="hidden md:table-cell"><span className="text-sm text-muted-foreground">{ivr.options?.length ?? 0} option{(ivr.options?.length ?? 0) === 1 ? "" : "s"}</span></TableCell>
-                    <TableCell className="hidden lg:table-cell"><span className="text-sm text-muted-foreground">{ivr.timeoutSeconds}s</span></TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      <Badge variant="outline">{ivr.greetingType}</Badge>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      <span className="text-sm text-muted-foreground">
+                        {ivr.options?.length ?? 0} option{(ivr.options?.length ?? 0) === 1 ? "" : "s"}
+                      </span>
+                    </TableCell>
+                    <TableCell className="hidden lg:table-cell">
+                      <span className="text-sm text-muted-foreground">{ivr.timeoutSeconds}s</span>
+                    </TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -839,8 +886,12 @@ function IvrMenusTab() {
           </div>
           {totalPages > 1 && (
             <div className="flex items-center justify-end gap-2">
-              <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>Previous</Button>
-              <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>Next</Button>
+              <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>
+                Previous
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>
+                Next
+              </Button>
             </div>
           )}
         </div>
@@ -848,12 +899,7 @@ function IvrMenusTab() {
 
       <NewIvrMenuDialog open={dialogOpen} onOpenChange={setDialogOpen} />
 
-      <BulkActionBar
-        selectedCount={selectedIds.size}
-        selectedIds={Array.from(selectedIds)}
-        onClearSelection={() => setSelectedIds(new Set())}
-        actions={bulkActions}
-      />
+      <BulkActionBar selectedCount={selectedIds.size} selectedIds={Array.from(selectedIds)} onClearSelection={() => setSelectedIds(new Set())} actions={bulkActions} />
 
       <AlertDialog open={!!ivrMenuToDelete} onOpenChange={(open) => !open && setIvrMenuToDelete(null)}>
         <AlertDialogContent>
@@ -901,10 +947,14 @@ function CallQueuesTab() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [callQueueToDelete, setCallQueueToDelete] = useState<{ id: string; name: string } | null>(null)
 
-  useEffect(() => { setPage(1) }, [debouncedSearch])
+  useEffect(() => {
+    setPage(1)
+  }, [debouncedSearch])
 
   const { data, isLoading, isError, refetch } = useCallQueues({
-    page, pageSize: 25, search: debouncedSearch || undefined,
+    page,
+    pageSize: 25,
+    search: debouncedSearch || undefined,
   })
   const deleteCallQueue = useDeleteCallQueue()
 
@@ -946,11 +996,7 @@ function CallQueuesTab() {
         },
         () => setSelectedIds(new Set()),
       ),
-      createExportAction<CallQueue>(
-        "call-queues-selected",
-        callQueueCsvHeaders,
-        (ids) => items.filter((q) => ids.includes(q.id)),
-      ),
+      createExportAction<CallQueue>("call-queues-selected", callQueueCsvHeaders, (ids) => items.filter((q) => ids.includes(q.id))),
     ],
     [items],
   )
@@ -963,7 +1009,8 @@ function CallQueuesTab() {
           <Input placeholder="Search call queues..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 pr-8" />
           {search && (
             <button type="button" onClick={() => setSearch("")} className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground">
-              <X className="h-3.5 w-3.5" /><span className="sr-only">Clear search</span>
+              <X className="h-3.5 w-3.5" />
+              <span className="sr-only">Clear search</span>
             </button>
           )}
         </div>
@@ -981,7 +1028,16 @@ function CallQueuesTab() {
       {isLoading ? (
         <SkeletonTable rows={5} />
       ) : isError ? (
-        <EmptyState icon={AlertCircle} title="Unable to load call queues" description="Something went wrong. Please try again." action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>} />
+        <EmptyState
+          icon={AlertCircle}
+          title="Unable to load call queues"
+          description="Something went wrong. Please try again."
+          action={
+            <Button variant="outline" size="sm" onClick={() => refetch()}>
+              Try again
+            </Button>
+          }
+        />
       ) : items.length === 0 ? (
         <EmptyState
           icon={Phone}
@@ -994,7 +1050,9 @@ function CallQueuesTab() {
           variant={search ? "no-results" : undefined}
           action={
             search ? (
-              <Button variant="outline" size="sm" onClick={() => setSearch("")}>Clear search</Button>
+              <Button variant="outline" size="sm" onClick={() => setSearch("")}>
+                Clear search
+              </Button>
             ) : (
               <Button size="sm" onClick={() => setDialogOpen(true)}>
                 <Plus className="mr-2 h-4 w-4" /> Create call queue
@@ -1005,20 +1063,22 @@ function CallQueuesTab() {
       ) : (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <p className="text-xs text-muted-foreground">{total} call queue{total === 1 ? "" : "s"}{search && " (filtered)"}</p>
-            {totalPages > 1 && <p className="text-xs text-muted-foreground">Page {page} of {totalPages}</p>}
+            <p className="text-xs text-muted-foreground">
+              {total} call queue{total === 1 ? "" : "s"}
+              {search && " (filtered)"}
+            </p>
+            {totalPages > 1 && (
+              <p className="text-xs text-muted-foreground">
+                Page {page} of {totalPages}
+              </p>
+            )}
           </div>
           <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
             <Table aria-label="Call Queues">
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-10">
-                    <Checkbox
-                      checked={allSelected}
-                      indeterminate={someSelected && !allSelected}
-                      onChange={toggleAll}
-                      aria-label="Select all call queues"
-                    />
+                    <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all call queues" />
                   </TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead className="hidden md:table-cell">Number</TableHead>
@@ -1030,24 +1090,53 @@ function CallQueuesTab() {
               </TableHeader>
               <TableBody>
                 {items.map((q: CallQueue, index: number) => (
-                  <TableRow key={q.id} data-state={selectedIds.has(q.id) ? "selected" : undefined} className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`} onClick={(e) => { const target = e.target as HTMLElement; if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) return; navigate({ to: "/call-routing/call-queues/$callQueueId", params: { callQueueId: q.id } }); }} tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter") navigate({ to: "/call-routing/call-queues/$callQueueId", params: { callQueueId: q.id } }) }}>
+                  <TableRow
+                    key={q.id}
+                    data-state={selectedIds.has(q.id) ? "selected" : undefined}
+                    className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`}
+                    onClick={(e) => {
+                      const target = e.target as HTMLElement
+                      if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) return
+                      navigate({ to: "/call-routing/call-queues/$callQueueId", params: { callQueueId: q.id } })
+                    }}
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") navigate({ to: "/call-routing/call-queues/$callQueueId", params: { callQueueId: q.id } })
+                    }}
+                  >
                     <TableCell>
                       <Checkbox
                         checked={selectedIds.has(q.id)}
-                        onChange={(e) => { e.stopPropagation(); toggleOne(q.id) }}
+                        onChange={(e) => {
+                          e.stopPropagation()
+                          toggleOne(q.id)
+                        }}
                         aria-label={`Select ${q.name}`}
                       />
                     </TableCell>
                     <TableCell>
-                      <Link to="/call-routing/call-queues/$callQueueId" params={{ callQueueId: q.id }} className="group flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                      <Link
+                        to="/call-routing/call-queues/$callQueueId"
+                        params={{ callQueueId: q.id }}
+                        className="group flex items-center gap-2"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <Phone className="h-4 w-4 text-muted-foreground" />
                         <span className="font-medium group-hover:underline">{q.name}</span>
                       </Link>
                     </TableCell>
-                    <TableCell className="hidden md:table-cell"><span className="font-mono text-sm text-muted-foreground">{q.number}</span></TableCell>
-                    <TableCell><Badge variant="outline">{strategyLabels[q.strategy] ?? q.strategy}</Badge></TableCell>
-                    <TableCell className="hidden md:table-cell"><span className="text-sm text-muted-foreground">{q.members?.length ?? 0}</span></TableCell>
-                    <TableCell className="hidden lg:table-cell"><span className="text-sm text-muted-foreground">{q.ringTime}s</span></TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      <span className="font-mono text-sm text-muted-foreground">{q.number}</span>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{strategyLabels[q.strategy] ?? q.strategy}</Badge>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      <span className="text-sm text-muted-foreground">{q.members?.length ?? 0}</span>
+                    </TableCell>
+                    <TableCell className="hidden lg:table-cell">
+                      <span className="text-sm text-muted-foreground">{q.ringTime}s</span>
+                    </TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -1077,8 +1166,12 @@ function CallQueuesTab() {
           </div>
           {totalPages > 1 && (
             <div className="flex items-center justify-end gap-2">
-              <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>Previous</Button>
-              <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>Next</Button>
+              <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>
+                Previous
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>
+                Next
+              </Button>
             </div>
           )}
         </div>
@@ -1086,12 +1179,7 @@ function CallQueuesTab() {
 
       <NewCallQueueDialog open={dialogOpen} onOpenChange={setDialogOpen} />
 
-      <BulkActionBar
-        selectedCount={selectedIds.size}
-        selectedIds={Array.from(selectedIds)}
-        onClearSelection={() => setSelectedIds(new Set())}
-        actions={bulkActions}
-      />
+      <BulkActionBar selectedCount={selectedIds.size} selectedIds={Array.from(selectedIds)} onClearSelection={() => setSelectedIds(new Set())} actions={bulkActions} />
 
       <AlertDialog open={!!callQueueToDelete} onOpenChange={(open) => !open && setCallQueueToDelete(null)}>
         <AlertDialogContent>
@@ -1139,10 +1227,14 @@ function RingGroupsTab() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [ringGroupToDelete, setRingGroupToDelete] = useState<{ id: string; name: string } | null>(null)
 
-  useEffect(() => { setPage(1) }, [debouncedSearch])
+  useEffect(() => {
+    setPage(1)
+  }, [debouncedSearch])
 
   const { data, isLoading, isError, refetch } = useRingGroups({
-    page, pageSize: 25, search: debouncedSearch || undefined,
+    page,
+    pageSize: 25,
+    search: debouncedSearch || undefined,
   })
   const deleteRingGroup = useDeleteRingGroup()
 
@@ -1184,11 +1276,7 @@ function RingGroupsTab() {
         },
         () => setSelectedIds(new Set()),
       ),
-      createExportAction<RingGroup>(
-        "ring-groups-selected",
-        ringGroupCsvHeaders,
-        (ids) => items.filter((rg) => ids.includes(rg.id)),
-      ),
+      createExportAction<RingGroup>("ring-groups-selected", ringGroupCsvHeaders, (ids) => items.filter((rg) => ids.includes(rg.id))),
     ],
     [items],
   )
@@ -1201,7 +1289,8 @@ function RingGroupsTab() {
           <Input placeholder="Search ring groups..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 pr-8" />
           {search && (
             <button type="button" onClick={() => setSearch("")} className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground">
-              <X className="h-3.5 w-3.5" /><span className="sr-only">Clear search</span>
+              <X className="h-3.5 w-3.5" />
+              <span className="sr-only">Clear search</span>
             </button>
           )}
         </div>
@@ -1219,7 +1308,16 @@ function RingGroupsTab() {
       {isLoading ? (
         <SkeletonTable rows={5} />
       ) : isError ? (
-        <EmptyState icon={AlertCircle} title="Unable to load ring groups" description="Something went wrong. Please try again." action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>} />
+        <EmptyState
+          icon={AlertCircle}
+          title="Unable to load ring groups"
+          description="Something went wrong. Please try again."
+          action={
+            <Button variant="outline" size="sm" onClick={() => refetch()}>
+              Try again
+            </Button>
+          }
+        />
       ) : items.length === 0 ? (
         <EmptyState
           icon={Users}
@@ -1232,7 +1330,9 @@ function RingGroupsTab() {
           variant={search ? "no-results" : undefined}
           action={
             search ? (
-              <Button variant="outline" size="sm" onClick={() => setSearch("")}>Clear search</Button>
+              <Button variant="outline" size="sm" onClick={() => setSearch("")}>
+                Clear search
+              </Button>
             ) : (
               <Button size="sm" onClick={() => setDialogOpen(true)}>
                 <Plus className="mr-2 h-4 w-4" /> Create ring group
@@ -1243,20 +1343,22 @@ function RingGroupsTab() {
       ) : (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <p className="text-xs text-muted-foreground">{total} ring group{total === 1 ? "" : "s"}{search && " (filtered)"}</p>
-            {totalPages > 1 && <p className="text-xs text-muted-foreground">Page {page} of {totalPages}</p>}
+            <p className="text-xs text-muted-foreground">
+              {total} ring group{total === 1 ? "" : "s"}
+              {search && " (filtered)"}
+            </p>
+            {totalPages > 1 && (
+              <p className="text-xs text-muted-foreground">
+                Page {page} of {totalPages}
+              </p>
+            )}
           </div>
           <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
             <Table aria-label="Ring Groups">
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-10">
-                    <Checkbox
-                      checked={allSelected}
-                      indeterminate={someSelected && !allSelected}
-                      onChange={toggleAll}
-                      aria-label="Select all ring groups"
-                    />
+                    <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all ring groups" />
                   </TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead className="hidden md:table-cell">Number</TableHead>
@@ -1268,24 +1370,53 @@ function RingGroupsTab() {
               </TableHeader>
               <TableBody>
                 {items.map((rg: RingGroup, index: number) => (
-                  <TableRow key={rg.id} data-state={selectedIds.has(rg.id) ? "selected" : undefined} className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`} onClick={(e) => { const target = e.target as HTMLElement; if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) return; navigate({ to: "/call-routing/ring-groups/$ringGroupId", params: { ringGroupId: rg.id } }); }} tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter") navigate({ to: "/call-routing/ring-groups/$ringGroupId", params: { ringGroupId: rg.id } }) }}>
+                  <TableRow
+                    key={rg.id}
+                    data-state={selectedIds.has(rg.id) ? "selected" : undefined}
+                    className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`}
+                    onClick={(e) => {
+                      const target = e.target as HTMLElement
+                      if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) return
+                      navigate({ to: "/call-routing/ring-groups/$ringGroupId", params: { ringGroupId: rg.id } })
+                    }}
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") navigate({ to: "/call-routing/ring-groups/$ringGroupId", params: { ringGroupId: rg.id } })
+                    }}
+                  >
                     <TableCell>
                       <Checkbox
                         checked={selectedIds.has(rg.id)}
-                        onChange={(e) => { e.stopPropagation(); toggleOne(rg.id) }}
+                        onChange={(e) => {
+                          e.stopPropagation()
+                          toggleOne(rg.id)
+                        }}
                         aria-label={`Select ${rg.name}`}
                       />
                     </TableCell>
                     <TableCell>
-                      <Link to="/call-routing/ring-groups/$ringGroupId" params={{ ringGroupId: rg.id }} className="group flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                      <Link
+                        to="/call-routing/ring-groups/$ringGroupId"
+                        params={{ ringGroupId: rg.id }}
+                        className="group flex items-center gap-2"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <Users className="h-4 w-4 text-muted-foreground" />
                         <span className="font-medium group-hover:underline">{rg.name}</span>
                       </Link>
                     </TableCell>
-                    <TableCell className="hidden md:table-cell"><span className="font-mono text-sm text-muted-foreground">{rg.number}</span></TableCell>
-                    <TableCell><Badge variant="outline">{strategyLabels[rg.strategy] ?? rg.strategy}</Badge></TableCell>
-                    <TableCell className="hidden md:table-cell"><span className="text-sm text-muted-foreground">{rg.members?.length ?? 0}</span></TableCell>
-                    <TableCell className="hidden lg:table-cell"><span className="text-sm text-muted-foreground">{rg.ringTime}s</span></TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      <span className="font-mono text-sm text-muted-foreground">{rg.number}</span>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{strategyLabels[rg.strategy] ?? rg.strategy}</Badge>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      <span className="text-sm text-muted-foreground">{rg.members?.length ?? 0}</span>
+                    </TableCell>
+                    <TableCell className="hidden lg:table-cell">
+                      <span className="text-sm text-muted-foreground">{rg.ringTime}s</span>
+                    </TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -1315,8 +1446,12 @@ function RingGroupsTab() {
           </div>
           {totalPages > 1 && (
             <div className="flex items-center justify-end gap-2">
-              <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>Previous</Button>
-              <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>Next</Button>
+              <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>
+                Previous
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>
+                Next
+              </Button>
             </div>
           )}
         </div>
@@ -1324,12 +1459,7 @@ function RingGroupsTab() {
 
       <NewRingGroupDialog open={dialogOpen} onOpenChange={setDialogOpen} />
 
-      <BulkActionBar
-        selectedCount={selectedIds.size}
-        selectedIds={Array.from(selectedIds)}
-        onClearSelection={() => setSelectedIds(new Set())}
-        actions={bulkActions}
-      />
+      <BulkActionBar selectedCount={selectedIds.size} selectedIds={Array.from(selectedIds)} onClearSelection={() => setSelectedIds(new Set())} actions={bulkActions} />
 
       <AlertDialog open={!!ringGroupToDelete} onOpenChange={(open) => !open && setRingGroupToDelete(null)}>
         <AlertDialogContent>
@@ -1411,49 +1541,30 @@ function CallRoutingPage() {
 
   return (
     <PageContainer className="flex-1 space-y-8">
-      <PageHeader
-        eyebrow="Workspace"
-        title="Call Routing"
-        description="Manage time conditions, IVR menus, call queues, and ring groups."
-        breadcrumbs={breadcrumbs}
-      />
+      <PageHeader eyebrow="Workspace" title="Call Routing" description="Manage time conditions, IVR menus, call queues, and ring groups." breadcrumbs={breadcrumbs} />
 
       <PageSection>
         <SectionErrorBoundary name="Call Routing Summary">
-        <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-          <StatCard
-            label="Time Conditions"
-            value={tcData?.total}
-            icon={Clock}
-            iconClassName="bg-sky-500/10 text-sky-600 dark:text-sky-400"
-            isLoading={tcLoading}
-            index={0}
-          />
-          <StatCard
-            label="IVR Menus"
-            value={ivrData?.total}
-            icon={GitFork}
-            iconClassName="bg-violet-500/10 text-violet-600 dark:text-violet-400"
-            isLoading={ivrLoading}
-            index={1}
-          />
-          <StatCard
-            label="Call Queues"
-            value={cqData?.total}
-            icon={Phone}
-            iconClassName="bg-amber-500/10 text-amber-600 dark:text-amber-400"
-            isLoading={cqLoading}
-            index={2}
-          />
-          <StatCard
-            label="Ring Groups"
-            value={rgData?.total}
-            icon={Users}
-            iconClassName="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-            isLoading={rgLoading}
-            index={3}
-          />
-        </div>
+          <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+            <StatCard label="Time Conditions" value={tcData?.total} icon={Clock} iconClassName="bg-sky-500/10 text-sky-600 dark:text-sky-400" isLoading={tcLoading} index={0} />
+            <StatCard
+              label="IVR Menus"
+              value={ivrData?.total}
+              icon={GitFork}
+              iconClassName="bg-violet-500/10 text-violet-600 dark:text-violet-400"
+              isLoading={ivrLoading}
+              index={1}
+            />
+            <StatCard label="Call Queues" value={cqData?.total} icon={Phone} iconClassName="bg-amber-500/10 text-amber-600 dark:text-amber-400" isLoading={cqLoading} index={2} />
+            <StatCard
+              label="Ring Groups"
+              value={rgData?.total}
+              icon={Users}
+              iconClassName="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+              isLoading={rgLoading}
+              index={3}
+            />
+          </div>
         </SectionErrorBoundary>
       </PageSection>
 

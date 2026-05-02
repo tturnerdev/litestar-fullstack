@@ -329,8 +329,7 @@ export function useUpdateTimeCondition(id: string) {
 export function useDeleteTimeCondition() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (id: string) =>
-      apiFetch<void>(`/api/time-conditions/${id}`, { method: "DELETE" }),
+    mutationFn: (id: string) => apiFetch<void>(`/api/time-conditions/${id}`, { method: "DELETE" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call-routing", "time-conditions"] })
       toast.success("Time condition deleted")
@@ -427,8 +426,7 @@ export function useUpdateIvrMenu(id: string) {
 export function useDeleteIvrMenu() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (id: string) =>
-      apiFetch<void>(`/api/ivr-menus/${id}`, { method: "DELETE" }),
+    mutationFn: (id: string) => apiFetch<void>(`/api/ivr-menus/${id}`, { method: "DELETE" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call-routing", "ivr-menus"] })
       toast.success("IVR menu deleted")
@@ -486,8 +484,7 @@ export function useUpdateIvrMenuOption(menuId: string, optionId: string) {
 export function useDeleteIvrMenuOption(menuId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (optionId: string) =>
-      apiFetch<void>(`/api/ivr-menus/${menuId}/options/${optionId}`, { method: "DELETE" }),
+    mutationFn: (optionId: string) => apiFetch<void>(`/api/ivr-menus/${menuId}/options/${optionId}`, { method: "DELETE" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call-routing", "ivr-menu", menuId] })
       toast.success("Option removed")
@@ -589,8 +586,7 @@ export function useUpdateCallQueue(id: string) {
 export function useDeleteCallQueue() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (id: string) =>
-      apiFetch<void>(`/api/call-queues/${id}`, { method: "DELETE" }),
+    mutationFn: (id: string) => apiFetch<void>(`/api/call-queues/${id}`, { method: "DELETE" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call-routing", "call-queues"] })
       toast.success("Call queue deleted")
@@ -628,8 +624,7 @@ export function useCreateCallQueueMember(queueId: string) {
 export function useDeleteCallQueueMember(queueId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (memberId: string) =>
-      apiFetch<void>(`/api/call-queues/${queueId}/members/${memberId}`, { method: "DELETE" }),
+    mutationFn: (memberId: string) => apiFetch<void>(`/api/call-queues/${queueId}/members/${memberId}`, { method: "DELETE" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call-routing", "call-queue", queueId] })
       toast.success("Member removed")
@@ -751,8 +746,7 @@ export function useUpdateRingGroup(id: string) {
 export function useDeleteRingGroup() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (id: string) =>
-      apiFetch<void>(`/api/ring-groups/${id}`, { method: "DELETE" }),
+    mutationFn: (id: string) => apiFetch<void>(`/api/ring-groups/${id}`, { method: "DELETE" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call-routing", "ring-groups"] })
       toast.success("Ring group deleted")
@@ -790,8 +784,7 @@ export function useCreateRingGroupMember(groupId: string) {
 export function useDeleteRingGroupMember(groupId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (memberId: string) =>
-      apiFetch<void>(`/api/ring-groups/${groupId}/members/${memberId}`, { method: "DELETE" }),
+    mutationFn: (memberId: string) => apiFetch<void>(`/api/ring-groups/${groupId}/members/${memberId}`, { method: "DELETE" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call-routing", "ring-group", groupId] })
       toast.success("Member removed")

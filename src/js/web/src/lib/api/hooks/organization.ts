@@ -1,12 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
-import {
-  type DashboardStats,
-  getDashboardStats,
-  getOrganization,
-  updateOrganization,
-  type Organization,
-} from "@/lib/generated/api"
+import { type DashboardStats, getDashboardStats, getOrganization, type Organization, updateOrganization } from "@/lib/generated/api"
 
 export function useOrganization() {
   return useQuery({

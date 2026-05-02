@@ -1,19 +1,19 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import {
+  type AdminListDeviceTemplatesData,
   adminCreateDeviceTemplate,
   adminDeleteDeviceTemplate,
   adminGetDeviceTemplate,
   adminListDeviceTemplates,
   adminUpdateDeviceTemplate,
-  lookupDeviceTemplate,
-  type AdminListDeviceTemplatesData,
   type DeviceTemplateCreate,
   type DeviceTemplateDetail,
   type DeviceTemplateList,
   type DeviceTemplateLookup,
   type DeviceTemplateUpdate,
   type LookupDeviceTemplateData,
+  lookupDeviceTemplate,
 } from "@/lib/generated/api"
 
 // ---------------------------------------------------------------------------

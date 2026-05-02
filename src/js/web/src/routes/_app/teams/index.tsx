@@ -1,20 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
+import { Check, Crown, Download, Eye, Home, MoreVertical, Pencil, Plus, Search, Shield, Trash2, Users, X } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import {
-  Check,
-  Crown,
-  Download,
-  Eye,
-  Home,
-  MoreVertical,
-  Pencil,
-  Plus,
-  Search,
-  Shield,
-  Trash2,
-  Users,
-  X,
-} from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,14 +13,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -42,17 +21,17 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { useAuthStore } from "@/lib/auth"
-import { useTeams, useDeleteTeam } from "@/lib/api/hooks/teams"
-import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { useDeleteTeam, useTeams } from "@/lib/api/hooks/teams"
+import { useAuthStore } from "@/lib/auth"
+import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import type { Team } from "@/lib/generated/api"
-import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { useSettingsStore } from "@/lib/settings-store"
 import { cn } from "@/lib/utils"
 
@@ -68,10 +47,7 @@ export const Route = createFileRoute("/_app/teams/")({
     q: typeof search.q === "string" && search.q ? search.q : undefined,
     page: Number(search.page) > 1 ? Number(search.page) : undefined,
     sort: typeof search.sort === "string" && search.sort ? search.sort : undefined,
-    order:
-      typeof search.order === "string" && (search.order === "asc" || search.order === "desc")
-        ? search.order
-        : undefined,
+    order: typeof search.order === "string" && (search.order === "asc" || search.order === "desc") ? search.order : undefined,
   }),
   component: TeamsPage,
 })
@@ -133,12 +109,7 @@ function TeamsPage() {
   useDocumentTitle("Teams")
   const compactMode = useSettingsStore((s) => s.compactMode)
   const cellClass = compactMode ? "py-1 px-2 text-xs" : ""
-  const {
-    q: searchParam,
-    page: pageParam,
-    sort: sortParam,
-    order: orderParam,
-  } = Route.useSearch()
+  const { q: searchParam, page: pageParam, sort: sortParam, order: orderParam } = Route.useSearch()
   const navigate = Route.useNavigate()
   const searchInputRef = useRef<HTMLInputElement>(null)
   const { user, currentTeam, setCurrentTeam, setTeams } = useAuthStore()
@@ -296,11 +267,7 @@ function TeamsPage() {
           setSelectedIds(new Set())
         },
       ),
-      createExportAction<Team>(
-        "teams-selected",
-        csvHeaders,
-        (ids) => sortedItems.filter((t) => ids.includes(t.id)),
-      ),
+      createExportAction<Team>("teams-selected", csvHeaders, (ids) => sortedItems.filter((t) => ids.includes(t.id))),
     ],
     [sortedItems, deleteTeamMutation],
   )
@@ -377,40 +344,40 @@ function TeamsPage() {
 
       {/* Summary stats */}
       <SectionErrorBoundary name="Team Statistics">
-      <div className="flex flex-wrap items-center gap-2">
-        {isLoading ? (
-          <>
-            <Skeleton className="h-7 w-24 rounded-full" />
-            <Skeleton className="h-7 w-24 rounded-full" />
-            <Skeleton className="h-7 w-24 rounded-full" />
-            <Skeleton className="h-7 w-28 rounded-full" />
-          </>
-        ) : (
-          <>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground">
-              Total
-              <span className="ml-0.5 font-semibold text-foreground">{teamStats.total}</span>
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              Active
-              <span className="ml-0.5 font-semibold">{teamStats.active}</span>
-            </span>
-            {teamStats.inactive > 0 && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-zinc-400/30 bg-zinc-400/10 px-3 py-1 text-xs font-medium text-zinc-600 dark:text-zinc-400">
-                <span className="h-1.5 w-1.5 rounded-full bg-zinc-400" />
-                Inactive
-                <span className="ml-0.5 font-semibold">{teamStats.inactive}</span>
+        <div className="flex flex-wrap items-center gap-2">
+          {isLoading ? (
+            <>
+              <Skeleton className="h-7 w-24 rounded-full" />
+              <Skeleton className="h-7 w-24 rounded-full" />
+              <Skeleton className="h-7 w-24 rounded-full" />
+              <Skeleton className="h-7 w-28 rounded-full" />
+            </>
+          ) : (
+            <>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground">
+                Total
+                <span className="ml-0.5 font-semibold text-foreground">{teamStats.total}</span>
               </span>
-            )}
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-700 dark:text-blue-400">
-              <Users className="h-3 w-3" />
-              Members
-              <span className="ml-0.5 font-semibold">{teamStats.totalMembers}</span>
-            </span>
-          </>
-        )}
-      </div>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                Active
+                <span className="ml-0.5 font-semibold">{teamStats.active}</span>
+              </span>
+              {teamStats.inactive > 0 && (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-zinc-400/30 bg-zinc-400/10 px-3 py-1 text-xs font-medium text-zinc-600 dark:text-zinc-400">
+                  <span className="h-1.5 w-1.5 rounded-full bg-zinc-400" />
+                  Inactive
+                  <span className="ml-0.5 font-semibold">{teamStats.inactive}</span>
+                </span>
+              )}
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-700 dark:text-blue-400">
+                <Users className="h-3 w-3" />
+                Members
+                <span className="ml-0.5 font-semibold">{teamStats.totalMembers}</span>
+              </span>
+            </>
+          )}
+        </div>
       </SectionErrorBoundary>
 
       {/* Search */}
@@ -418,13 +385,7 @@ function TeamsPage() {
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative max-w-sm flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              ref={searchInputRef}
-              placeholder="Search teams by name..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              className="pl-9 pr-8"
-            />
+            <Input ref={searchInputRef} placeholder="Search teams by name..." value={searchInput} onChange={(e) => setSearchInput(e.target.value)} className="pl-9 pr-8" />
             {searchInput ? (
               <button
                 type="button"
@@ -435,7 +396,9 @@ function TeamsPage() {
                 <span className="sr-only">Clear search</span>
               </button>
             ) : (
-              <kbd className="pointer-events-none absolute right-8 top-1/2 -translate-y-1/2 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">/</kbd>
+              <kbd className="pointer-events-none absolute right-8 top-1/2 -translate-y-1/2 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">
+                /
+              </kbd>
             )}
           </div>
         </div>
@@ -444,206 +407,188 @@ function TeamsPage() {
       {/* Content */}
       <PageSection delay={0.1}>
         <SectionErrorBoundary name="Teams List">
-        {isLoading ? (
-          <SkeletonTable rows={4} />
-        ) : isError ? (
-          <EmptyState
-            icon={Users}
-            title="Unable to load teams"
-            description="Something went wrong while fetching your teams. Please try again."
-            action={
-              <Button variant="outline" size="sm" onClick={() => refetch()}>
-                Try again
-              </Button>
-            }
-          />
-        ) : !hasAnyTeams && !search ? (
-          <EmptyState
-            icon={Users}
-            title="Create your first team"
-            description="Teams help you organize members and control access across the app. Get started by creating your first team."
-            action={
-              <Button size="sm" asChild>
-                <Link to="/teams/new">
-                  <Plus className="mr-2 h-4 w-4" /> Create team
-                </Link>
-              </Button>
-            }
-          />
-        ) : !hasData ? (
-          <EmptyState
-            icon={Search}
-            variant="no-results"
-            title="No matching teams"
-            description={`No teams match "${search}". Try a different search term.`}
-            action={
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setSearchInput("")
-                  navigate({
-                    search: {
-                      q: undefined,
-                      sort: undefined,
-                      order: undefined,
-                      page: undefined,
-                    },
-                  })
-                }}
-              >
-                Clear search
-              </Button>
-            }
-          />
-        ) : (
-          <div className="space-y-3">
-            {/* Result count & pagination info */}
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">
-                {total} team{total === 1 ? "" : "s"}
-                {search && " (filtered)"}
-              </p>
-              {totalPages > 1 && (
-                <p className="text-xs text-muted-foreground">
-                  Page {page} of {totalPages}
+          {isLoading ? (
+            <SkeletonTable rows={4} />
+          ) : isError ? (
+            <EmptyState
+              icon={Users}
+              title="Unable to load teams"
+              description="Something went wrong while fetching your teams. Please try again."
+              action={
+                <Button variant="outline" size="sm" onClick={() => refetch()}>
+                  Try again
+                </Button>
+              }
+            />
+          ) : !hasAnyTeams && !search ? (
+            <EmptyState
+              icon={Users}
+              title="Create your first team"
+              description="Teams help you organize members and control access across the app. Get started by creating your first team."
+              action={
+                <Button size="sm" asChild>
+                  <Link to="/teams/new">
+                    <Plus className="mr-2 h-4 w-4" /> Create team
+                  </Link>
+                </Button>
+              }
+            />
+          ) : !hasData ? (
+            <EmptyState
+              icon={Search}
+              variant="no-results"
+              title="No matching teams"
+              description={`No teams match "${search}". Try a different search term.`}
+              action={
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSearchInput("")
+                    navigate({
+                      search: {
+                        q: undefined,
+                        sort: undefined,
+                        order: undefined,
+                        page: undefined,
+                      },
+                    })
+                  }}
+                >
+                  Clear search
+                </Button>
+              }
+            />
+          ) : (
+            <div className="space-y-3">
+              {/* Result count & pagination info */}
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">
+                  {total} team{total === 1 ? "" : "s"}
+                  {search && " (filtered)"}
                 </p>
-              )}
-            </div>
-
-            {/* Table */}
-            <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
-              <Table aria-label="Teams" aria-busy={isLoading}>
-                <TableHeader className="sticky top-0 z-10 bg-background">
-                  <TableRow>
-                    <TableHead className="w-10">
-                      <Checkbox
-                        checked={allSelected}
-                        indeterminate={someSelected && !allSelected}
-                        onChange={toggleAll}
-                        aria-label="Select all teams"
-                      />
-                    </TableHead>
-                    <SortableHeader
-                      label="Team"
-                      sortKey="name"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                    />
-                    <SortableHeader
-                      label="Members"
-                      sortKey="member_count"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                    />
-                    <TableHead className="hidden md:table-cell">Your Role</TableHead>
-                    <TableHead className="hidden md:table-cell">Tags</TableHead>
-                    <TableHead className="hidden md:table-cell">Status</TableHead>
-                    <TableHead className="w-16 text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {sortedItems.map((team) => (
-                    <TeamRow
-                      key={team.id}
-                      team={team}
-                      selected={selectedIds.has(team.id)}
-                      onToggle={() => toggleOne(team.id)}
-                      isActiveTeam={currentTeam?.id === team.id}
-                      onSwitchTeam={() => setCurrentTeam(team)}
-                      currentUserId={user?.id}
-                      cellClass={cellClass}
-                    />
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-            <div className="sr-only" aria-live="polite" aria-atomic="true">
-              {!isLoading && `Showing ${sortedItems.length} of ${total} results, page ${page}`}
-            </div>
-
-            {/* Pagination */}
-            <div className="flex items-center justify-end gap-4">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Rows per page</span>
-                <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
-                  <SelectTrigger className="h-8 w-[70px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PAGE_SIZES.map((size) => (
-                      <SelectItem key={size} value={String(size)}>
-                        {size}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {totalPages > 1 && (
+                  <p className="text-xs text-muted-foreground">
+                    Page {page} of {totalPages}
+                  </p>
+                )}
               </div>
-              {totalPages > 1 && (
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      navigate({
-                        search: (prev) => ({
-                          ...prev,
-                          page: page - 1 > 1 ? page - 1 : undefined,
-                        }),
-                      })
-                    }
-                    disabled={page <= 1}
-                  >
-                    Previous
-                    <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&larr;</kbd>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      navigate({
-                        search: (prev) => ({ ...prev, page: page + 1 }),
-                      })
-                    }
-                    disabled={page >= totalPages}
-                  >
-                    Next
-                    <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&rarr;</kbd>
-                  </Button>
-                </div>
-              )}
-            </div>
 
-            {/* Keyboard shortcut hints */}
-            <div className="hidden items-center justify-center gap-4 pt-1 text-[11px] text-muted-foreground/60 lg:flex">
-              <span className="inline-flex items-center gap-1.5">
-                <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded border border-border/50 bg-muted/50 px-1 font-mono text-[10px] font-medium">/</kbd>
-                Search
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded border border-border/50 bg-muted/50 px-1 font-mono text-[10px] font-medium">N</kbd>
-                New team
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded border border-border/50 bg-muted/50 px-1 font-mono text-[10px] font-medium">&larr;</kbd>
-                <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded border border-border/50 bg-muted/50 px-1 font-mono text-[10px] font-medium">&rarr;</kbd>
-                Navigate pages
-              </span>
+              {/* Table */}
+              <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
+                <Table aria-label="Teams" aria-busy={isLoading}>
+                  <TableHeader className="sticky top-0 z-10 bg-background">
+                    <TableRow>
+                      <TableHead className="w-10">
+                        <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all teams" />
+                      </TableHead>
+                      <SortableHeader label="Team" sortKey="name" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                      <SortableHeader label="Members" sortKey="member_count" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                      <TableHead className="hidden md:table-cell">Your Role</TableHead>
+                      <TableHead className="hidden md:table-cell">Tags</TableHead>
+                      <TableHead className="hidden md:table-cell">Status</TableHead>
+                      <TableHead className="w-16 text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {sortedItems.map((team) => (
+                      <TeamRow
+                        key={team.id}
+                        team={team}
+                        selected={selectedIds.has(team.id)}
+                        onToggle={() => toggleOne(team.id)}
+                        isActiveTeam={currentTeam?.id === team.id}
+                        onSwitchTeam={() => setCurrentTeam(team)}
+                        currentUserId={user?.id}
+                        cellClass={cellClass}
+                      />
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              <div className="sr-only" aria-live="polite" aria-atomic="true">
+                {!isLoading && `Showing ${sortedItems.length} of ${total} results, page ${page}`}
+              </div>
+
+              {/* Pagination */}
+              <div className="flex items-center justify-end gap-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">Rows per page</span>
+                  <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
+                    <SelectTrigger className="h-8 w-[70px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PAGE_SIZES.map((size) => (
+                        <SelectItem key={size} value={String(size)}>
+                          {size}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {totalPages > 1 && (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        navigate({
+                          search: (prev) => ({
+                            ...prev,
+                            page: page - 1 > 1 ? page - 1 : undefined,
+                          }),
+                        })
+                      }
+                      disabled={page <= 1}
+                    >
+                      Previous
+                      <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&larr;</kbd>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        navigate({
+                          search: (prev) => ({ ...prev, page: page + 1 }),
+                        })
+                      }
+                      disabled={page >= totalPages}
+                    >
+                      Next
+                      <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&rarr;</kbd>
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              {/* Keyboard shortcut hints */}
+              <div className="hidden items-center justify-center gap-4 pt-1 text-[11px] text-muted-foreground/60 lg:flex">
+                <span className="inline-flex items-center gap-1.5">
+                  <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded border border-border/50 bg-muted/50 px-1 font-mono text-[10px] font-medium">/</kbd>
+                  Search
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded border border-border/50 bg-muted/50 px-1 font-mono text-[10px] font-medium">N</kbd>
+                  New team
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded border border-border/50 bg-muted/50 px-1 font-mono text-[10px] font-medium">
+                    &larr;
+                  </kbd>
+                  <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded border border-border/50 bg-muted/50 px-1 font-mono text-[10px] font-medium">
+                    &rarr;
+                  </kbd>
+                  Navigate pages
+                </span>
+              </div>
             </div>
-          </div>
-        )}
+          )}
         </SectionErrorBoundary>
       </PageSection>
 
       {/* Bulk action bar */}
-      <BulkActionBar
-        selectedCount={selectedIds.size}
-        selectedIds={Array.from(selectedIds)}
-        onClearSelection={() => setSelectedIds(new Set())}
-        actions={bulkActions}
-      />
+      <BulkActionBar selectedCount={selectedIds.size} selectedIds={Array.from(selectedIds)} onClearSelection={() => setSelectedIds(new Set())} actions={bulkActions} />
     </PageContainer>
   )
 }
@@ -703,16 +648,9 @@ function TeamRow({
         </TableCell>
         <TableCell className={cellClass}>
           <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={onSwitchTeam}
-              className="group/avatar relative shrink-0"
-              title={isActiveTeam ? "Current team" : "Click to switch to this team"}
-            >
+            <button type="button" onClick={onSwitchTeam} className="group/avatar relative shrink-0" title={isActiveTeam ? "Current team" : "Click to switch to this team"}>
               <Avatar className={`h-9 w-9 transition-all ${getTeamColor(team.name)} ${!isActiveTeam && "group-hover/avatar:ring-2 group-hover/avatar:ring-primary/30"}`}>
-                <AvatarFallback className={`text-xs font-semibold ${getTeamColor(team.name)}`}>
-                  {getTeamInitials(team.name)}
-                </AvatarFallback>
+                <AvatarFallback className={`text-xs font-semibold ${getTeamColor(team.name)}`}>{getTeamInitials(team.name)}</AvatarFallback>
               </Avatar>
               {isActiveTeam && (
                 <div className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-primary-foreground ring-2 ring-background">
@@ -720,16 +658,9 @@ function TeamRow({
                 </div>
               )}
             </button>
-            <Link
-              to="/teams/$teamId"
-              params={{ teamId: team.id }}
-              className="group flex flex-col gap-0.5"
-              onClick={(e) => e.stopPropagation()}
-            >
+            <Link to="/teams/$teamId" params={{ teamId: team.id }} className="group flex flex-col gap-0.5" onClick={(e) => e.stopPropagation()}>
               <span className="font-medium group-hover:underline">{team.name}</span>
-              {team.description && (
-                <span className="text-xs text-muted-foreground line-clamp-1">{team.description}</span>
-              )}
+              {team.description && <span className="text-xs text-muted-foreground line-clamp-1">{team.description}</span>}
             </Link>
           </div>
         </TableCell>
@@ -778,7 +709,9 @@ function TeamRow({
         </TableCell>
         <TableCell className={cn("hidden md:table-cell", cellClass)}>
           {team.isActive === false ? (
-            <Badge variant="destructive" className="text-[10px]">Inactive</Badge>
+            <Badge variant="destructive" className="text-[10px]">
+              Inactive
+            </Badge>
           ) : (
             <span className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400">
               <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
@@ -789,13 +722,7 @@ function TeamRow({
         <TableCell className={cn("text-right", cellClass)}>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0"
-                data-slot="dropdown"
-                onClick={(e) => e.stopPropagation()}
-              >
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" data-slot="dropdown" onClick={(e) => e.stopPropagation()}>
                 <MoreVertical className="h-4 w-4" />
                 <span className="sr-only">Actions for {team.name}</span>
               </Button>
@@ -814,10 +741,7 @@ function TeamRow({
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="text-destructive focus:text-destructive"
-                onClick={() => setShowDeleteConfirm(true)}
-              >
+              <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setShowDeleteConfirm(true)}>
                 <Trash2 className="mr-2 h-4 w-4" />
                 Delete
               </DropdownMenuItem>
@@ -836,10 +760,7 @@ function TeamRow({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={() => deleteTeamMutation.mutate(team.id)}
-            >
+            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => deleteTeamMutation.mutate(team.id)}>
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

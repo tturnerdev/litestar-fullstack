@@ -28,18 +28,10 @@ import {
 } from "lucide-react"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
-import {
-  CommandDialog,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-} from "@/components/ui/command"
+import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from "@/components/ui/command"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { type SearchResultItem, useGlobalSearch } from "@/lib/api/hooks/search"
 import { useAuthStore } from "@/lib/auth"
-import { useGlobalSearch, type SearchResultItem } from "@/lib/api/hooks/search"
 
 // ---------------------------------------------------------------------------
 // Type icon, label, and color mappings
@@ -178,9 +170,7 @@ function labelFromPath(pathname: string): string {
   // Fallback: build a human-readable label from the path.
   const segments = pathname.split("/").filter(Boolean)
   if (segments.length === 0) return "Home"
-  return segments
-    .map((s) => s.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()))
-    .join(" / ")
+  return segments.map((s) => s.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())).join(" / ")
 }
 
 function getRecentPages(): RecentPage[] {
@@ -337,12 +327,7 @@ export function GlobalSearch() {
     <>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-8 text-muted-foreground"
-            onClick={() => setOpen(true)}
-          >
+          <Button variant="ghost" size="icon" className="size-8 text-muted-foreground" onClick={() => setOpen(true)}>
             <Search className="size-5" />
             <span className="sr-only">Search</span>
           </Button>
@@ -357,17 +342,9 @@ export function GlobalSearch() {
 
       <CommandDialog open={open} onOpenChange={setOpen} title="Global Search">
         <div className="relative">
-          <CommandInput
-            placeholder="Search or jump to a page..."
-            value={inputValue}
-            onValueChange={handleInputChange}
-          />
+          <CommandInput placeholder="Search or jump to a page..." value={inputValue} onValueChange={handleInputChange} />
           {inputValue.length > 0 && (
-            <button
-              type="button"
-              onClick={handleClear}
-              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
-            >
+            <button type="button" onClick={handleClear} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground">
               <X className="size-4" />
               <span className="sr-only">Clear search</span>
             </button>
@@ -380,9 +357,7 @@ export function GlobalSearch() {
             </div>
           )}
 
-          {!showLoading && debouncedQuery.length >= 2 && !hasResults && !hasNavMatches && (
-            <CommandEmpty>No results found.</CommandEmpty>
-          )}
+          {!showLoading && debouncedQuery.length >= 2 && !hasResults && !hasNavMatches && <CommandEmpty>No results found.</CommandEmpty>}
 
           {/* Idle state: recent pages + recent searches + navigation + quick actions */}
           {showIdleState && (
@@ -390,12 +365,7 @@ export function GlobalSearch() {
               {recentPages.length > 0 && (
                 <CommandGroup heading="Recent Pages">
                   {recentPages.map((page) => (
-                    <CommandItem
-                      key={`recent-page-${page.url}`}
-                      value={`recent-page-${page.label}`}
-                      onSelect={() => handleNavSelect(page.url)}
-                      className="cursor-pointer"
-                    >
+                    <CommandItem key={`recent-page-${page.url}`} value={`recent-page-${page.label}`} onSelect={() => handleNavSelect(page.url)} className="cursor-pointer">
                       <History className="size-4 shrink-0 text-muted-foreground" />
                       <span className="truncate text-sm">{page.label}</span>
                       <span className="ml-auto truncate text-xs text-muted-foreground">{page.url}</span>
@@ -406,12 +376,7 @@ export function GlobalSearch() {
               {recentSearches.length > 0 && (
                 <CommandGroup heading="Recent Searches">
                   {recentSearches.map((query) => (
-                    <CommandItem
-                      key={query}
-                      value={`recent-${query}`}
-                      onSelect={() => handleRecentSelect(query)}
-                      className="cursor-pointer"
-                    >
+                    <CommandItem key={query} value={`recent-${query}`} onSelect={() => handleRecentSelect(query)} className="cursor-pointer">
                       <Clock className="size-4 shrink-0 text-muted-foreground" />
                       <span className="truncate text-sm">{query}</span>
                     </CommandItem>
@@ -426,12 +391,7 @@ export function GlobalSearch() {
                     {visibleItems.map((item) => {
                       const NavIcon = item.icon
                       return (
-                        <CommandItem
-                          key={item.url}
-                          value={`nav-${category}-${item.label}`}
-                          onSelect={() => handleNavSelect(item.url)}
-                          className="cursor-pointer"
-                        >
+                        <CommandItem key={item.url} value={`nav-${category}-${item.label}`} onSelect={() => handleNavSelect(item.url)} className="cursor-pointer">
                           <NavIcon className={`size-4 shrink-0 ${item.color}`} />
                           <span className="text-sm">{item.label}</span>
                         </CommandItem>
@@ -444,12 +404,7 @@ export function GlobalSearch() {
                 {QUICK_ACTIONS.map((action) => {
                   const ActionIcon = action.icon
                   return (
-                    <CommandItem
-                      key={action.url}
-                      value={`action-${action.label}`}
-                      onSelect={() => handleQuickAction(action.url)}
-                      className="cursor-pointer"
-                    >
+                    <CommandItem key={action.url} value={`action-${action.label}`} onSelect={() => handleQuickAction(action.url)} className="cursor-pointer">
                       <div className="flex size-5 items-center justify-center rounded bg-muted">
                         <Plus className="size-3 text-muted-foreground" />
                       </div>
@@ -470,12 +425,7 @@ export function GlobalSearch() {
                   {items.map((item) => {
                     const NavIcon = item.icon
                     return (
-                      <CommandItem
-                        key={item.url}
-                        value={`nav-${category}-${item.label}`}
-                        onSelect={() => handleNavSelect(item.url)}
-                        className="cursor-pointer"
-                      >
+                      <CommandItem key={item.url} value={`nav-${category}-${item.label}`} onSelect={() => handleNavSelect(item.url)} className="cursor-pointer">
                         <NavIcon className={`size-4 shrink-0 ${item.color}`} />
                         <span className="text-sm">{item.label}</span>
                       </CommandItem>
@@ -494,12 +444,7 @@ export function GlobalSearch() {
                   {items.map((item) => {
                     const NavIcon = item.icon
                     return (
-                      <CommandItem
-                        key={item.url}
-                        value={`nav-${category}-${item.label}`}
-                        onSelect={() => handleNavSelect(item.url)}
-                        className="cursor-pointer"
-                      >
+                      <CommandItem key={item.url} value={`nav-${category}-${item.label}`} onSelect={() => handleNavSelect(item.url)} className="cursor-pointer">
                         <NavIcon className={`size-4 shrink-0 ${item.color}`} />
                         <div className="flex min-w-0 flex-1 flex-col">
                           <span className="truncate text-sm font-medium">
@@ -529,12 +474,7 @@ export function GlobalSearch() {
               return (
                 <CommandGroup key={type} heading={meta.label}>
                   {items.map((item) => (
-                    <CommandItem
-                      key={`${item.type}-${item.id}`}
-                      value={`${item.type}-${item.id}-${item.label}`}
-                      onSelect={() => handleSelect(item)}
-                      className="cursor-pointer"
-                    >
+                    <CommandItem key={`${item.type}-${item.id}`} value={`${item.type}-${item.id}-${item.label}`} onSelect={() => handleSelect(item)} className="cursor-pointer">
                       <Icon className={`size-4 shrink-0 ${meta.color}`} />
                       <div className="flex min-w-0 flex-1 flex-col">
                         <span className="truncate text-sm font-medium">
@@ -556,9 +496,15 @@ export function GlobalSearch() {
         {/* Keyboard navigation hints */}
         <CommandSeparator />
         <div className="flex items-center justify-center gap-4 border-t px-3 py-2 text-xs text-muted-foreground">
-          <span><kbd className="rounded border bg-muted px-1 py-0.5 font-mono text-[0.65rem]">↑↓</kbd> Navigate</span>
-          <span><kbd className="rounded border bg-muted px-1 py-0.5 font-mono text-[0.65rem]">Enter</kbd> Select</span>
-          <span><kbd className="rounded border bg-muted px-1 py-0.5 font-mono text-[0.65rem]">Esc</kbd> Close</span>
+          <span>
+            <kbd className="rounded border bg-muted px-1 py-0.5 font-mono text-[0.65rem]">↑↓</kbd> Navigate
+          </span>
+          <span>
+            <kbd className="rounded border bg-muted px-1 py-0.5 font-mono text-[0.65rem]">Enter</kbd> Select
+          </span>
+          <span>
+            <kbd className="rounded border bg-muted px-1 py-0.5 font-mono text-[0.65rem]">Esc</kbd> Close
+          </span>
         </div>
       </CommandDialog>
     </>
@@ -569,10 +515,7 @@ export function GlobalSearch() {
 // Hook: filter navigation shortcuts by query
 // ---------------------------------------------------------------------------
 
-function useFilteredNavShortcuts(
-  query: string,
-  isSuperuser: boolean,
-): [string, NavShortcut[]][] {
+function useFilteredNavShortcuts(query: string, isSuperuser: boolean): [string, NavShortcut[]][] {
   const q = query.trim().toLowerCase()
   if (q.length === 0) return []
 

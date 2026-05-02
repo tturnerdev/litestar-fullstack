@@ -10,8 +10,7 @@
 export function formatPhoneNumber(phone: string | null | undefined): string {
   if (!phone) return "—"
   const digits = phone.replace(/\D/g, "")
-  const national =
-    digits.length === 11 && digits.startsWith("1") ? digits.slice(1) : digits
+  const national = digits.length === 11 && digits.startsWith("1") ? digits.slice(1) : digits
   if (national.length === 10) {
     return `(${national.slice(0, 3)}) ${national.slice(3, 6)}-${national.slice(6)}`
   }
@@ -81,7 +80,10 @@ export function formatUptime(seconds: number, detailed = false): string {
  * Strips non-hex characters, uppercases, and inserts colons every 2 chars.
  */
 export function formatMacAddress(raw: string): string {
-  const hex = raw.replace(/[^0-9A-Fa-f]/g, "").toUpperCase().slice(0, 12)
+  const hex = raw
+    .replace(/[^0-9A-Fa-f]/g, "")
+    .toUpperCase()
+    .slice(0, 12)
   const parts: string[] = []
   for (let i = 0; i < hex.length; i += 2) {
     parts.push(hex.slice(i, i + 2))

@@ -3,15 +3,7 @@ import { useState } from "react"
 import { toast } from "sonner"
 
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useDisableMfa, useInitiateDisableMfaOAuth } from "@/lib/api/hooks/auth"
@@ -89,7 +81,8 @@ export function MfaDisableDialog({ disabled }: MfaDisableDialogProps) {
         <Alert variant="warning">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
-            Disabling MFA will reduce your account security. Your account will be protected by password only. If your password is compromised, an attacker could access your account.
+            Disabling MFA will reduce your account security. Your account will be protected by password only. If your password is compromised, an attacker could access your
+            account.
           </AlertDescription>
         </Alert>
 

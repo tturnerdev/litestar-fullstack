@@ -47,9 +47,7 @@ const features: FeatureHighlight[] = [
 
 const ROTATION_INTERVAL = 5000
 
-export function AuthHeroPanel({
-  title = "Litestar Fullstack",
-}: AuthHeroPanelProps) {
+export function AuthHeroPanel({ title = "Litestar Fullstack" }: AuthHeroPanelProps) {
   const [activeFeature, setActiveFeature] = useState(0)
 
   const advanceFeature = useCallback(() => {
@@ -65,11 +63,7 @@ export function AuthHeroPanel({
     <div className="relative hidden min-h-screen w-1/2 max-w-2xl flex-col bg-brand-navy p-10 text-white lg:flex">
       <RetroGrid />
 
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
-      >
+      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}>
         <Link to="/" className="relative z-20">
           <div className="flex items-center font-medium text-lg">
             <Icons.logo className="mr-2 h-6 w-6" />
@@ -79,12 +73,7 @@ export function AuthHeroPanel({
       </motion.div>
 
       <div className="relative z-20 my-auto flex flex-col items-start justify-center">
-        <motion.div
-          className="w-full max-w-md"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-        >
+        <motion.div className="w-full max-w-md" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6, delay: 0.2 }}>
           <div className="space-y-3">
             {features.map((feature, index) => {
               const Icon = feature.icon
@@ -110,13 +99,13 @@ export function AuthHeroPanel({
                   }}
                   onClick={() => setActiveFeature(index)}
                 >
-                  <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors duration-300 ${isActive ? "bg-brand-gold/20 text-brand-gold" : "bg-white/10 text-white/60"}`}>
+                  <div
+                    className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors duration-300 ${isActive ? "bg-brand-gold/20 text-brand-gold" : "bg-white/10 text-white/60"}`}
+                  >
                     <Icon className="h-4 w-4" />
                   </div>
                   <div className="min-w-0">
-                    <p className={`font-medium text-sm transition-colors duration-300 ${isActive ? "text-white" : "text-white/70"}`}>
-                      {feature.title}
-                    </p>
+                    <p className={`font-medium text-sm transition-colors duration-300 ${isActive ? "text-white" : "text-white/70"}`}>{feature.title}</p>
                     <AnimatePresence mode="wait">
                       {isActive && (
                         <motion.p
@@ -137,12 +126,7 @@ export function AuthHeroPanel({
             })}
           </div>
 
-          <motion.div
-            className="mt-6 flex gap-1.5"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.4, delay: 0.8 }}
-          >
+          <motion.div className="mt-6 flex gap-1.5" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4, delay: 0.8 }}>
             {features.map((_, index) => (
               <button
                 key={`dot-${features[index].title}`}
@@ -154,11 +138,7 @@ export function AuthHeroPanel({
               >
                 <div className="absolute inset-0 rounded-full bg-white/20" />
                 {index === activeFeature && (
-                  <motion.div
-                    className="absolute inset-0 rounded-full bg-brand-gold"
-                    layoutId="activeFeatureDot"
-                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                  />
+                  <motion.div className="absolute inset-0 rounded-full bg-brand-gold" layoutId="activeFeatureDot" transition={{ type: "spring", stiffness: 400, damping: 30 }} />
                 )}
               </button>
             ))}
@@ -166,12 +146,7 @@ export function AuthHeroPanel({
         </motion.div>
       </div>
 
-      <motion.div
-        className="relative z-20"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.6 }}
-      >
+      <motion.div className="relative z-20" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.6 }}>
         <div className="space-y-4">
           <div className="flex items-center gap-4">
             <div className="flex -space-x-1">

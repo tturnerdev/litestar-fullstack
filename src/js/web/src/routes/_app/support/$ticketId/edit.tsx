@@ -24,10 +24,10 @@ import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useAdminUsers } from "@/lib/api/hooks/admin"
 import { useTicket, useUpdateTicket } from "@/lib/api/hooks/support"
 import { useAuthStore } from "@/lib/auth"
-import { useDocumentTitle } from "@/hooks/use-document-title"
 import { cn } from "@/lib/utils"
 
 // ── Field limits ──────────────────────────────────────────────────────
@@ -186,208 +186,214 @@ function EditTicketForm({ ticketId }: { ticketId: string }) {
 
   return (
     <>
-    <PageContainer className="flex-1 space-y-8">
-      <PageHeader
-        eyebrow="Helpdesk"
-        title="Edit Ticket"
-        description={`${ticket.ticketNumber} · ${ticket.subject}`}
-        breadcrumbs={
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link to="/home">Home</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link to="/support">Support</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link to="/support/$ticketId" params={{ ticketId }}>
-                    {ticket.subject}
-                  </Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Edit</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        }
-      />
+      <PageContainer className="flex-1 space-y-8">
+        <PageHeader
+          eyebrow="Helpdesk"
+          title="Edit Ticket"
+          description={`${ticket.ticketNumber} · ${ticket.subject}`}
+          breadcrumbs={
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link to="/home">Home</Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link to="/support">Support</Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link to="/support/$ticketId" params={{ ticketId }}>
+                      {ticket.subject}
+                    </Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Edit</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          }
+        />
 
-      <SectionErrorBoundary name="Edit Ticket Form">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Ticket Details</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="subject"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Subject</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Brief summary of the issue" maxLength={SUBJECT_MAX} {...field} />
-                    </FormControl>
-                    <div className="flex items-center justify-between">
-                      <FormMessage />
-                      <p className={cn("shrink-0 text-xs", field.value.length >= SUBJECT_MAX ? "text-destructive" : field.value.length >= SUBJECT_MAX * 0.8 ? "text-amber-500" : "text-muted-foreground")}>
-                        {field.value.length}/{SUBJECT_MAX}
-                      </p>
-                    </div>
-                  </FormItem>
-                )}
-              />
-
-              <div className="grid gap-6 sm:grid-cols-2">
-                <FormField
-                  control={form.control}
-                  name="status"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Status</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select status" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="open">Open</SelectItem>
-                          <SelectItem value="in_progress">In Progress</SelectItem>
-                          <SelectItem value="waiting_on_customer">Waiting on Customer</SelectItem>
-                          <SelectItem value="waiting_on_support">Waiting on Support</SelectItem>
-                          <SelectItem value="resolved">Resolved</SelectItem>
-                          <SelectItem value="closed">Closed</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="priority"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Priority</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select priority" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="low">Low</SelectItem>
-                          <SelectItem value="medium">Medium</SelectItem>
-                          <SelectItem value="high">High</SelectItem>
-                          <SelectItem value="urgent">Urgent</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              {isSuperuser && (
-                <div className="grid gap-6 sm:grid-cols-2">
+        <SectionErrorBoundary name="Edit Ticket Form">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Ticket Details</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                   <FormField
                     control={form.control}
-                    name="assignedToId"
+                    name="subject"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Assigned To</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select assignee" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value={UNASSIGNED_VALUE}>Unassigned</SelectItem>
-                            {usersData?.items
-                              ?.filter((u) => u.isSuperuser || u.isActive)
-                              .map((u) => (
-                                <SelectItem key={u.id} value={u.id}>
-                                  {u.name ?? u.email}{u.name ? ` (${u.email})` : ""}
-                                </SelectItem>
-                              ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
+                        <FormLabel>Subject</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Brief summary of the issue" maxLength={SUBJECT_MAX} {...field} />
+                        </FormControl>
+                        <div className="flex items-center justify-between">
+                          <FormMessage />
+                          <p
+                            className={cn(
+                              "shrink-0 text-xs",
+                              field.value.length >= SUBJECT_MAX ? "text-destructive" : field.value.length >= SUBJECT_MAX * 0.8 ? "text-amber-500" : "text-muted-foreground",
+                            )}
+                          >
+                            {field.value.length}/{SUBJECT_MAX}
+                          </p>
+                        </div>
                       </FormItem>
                     )}
                   />
-                </div>
-              )}
 
-              <div className="grid gap-6 sm:grid-cols-2">
-                <FormField
-                  control={form.control}
-                  name="category"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Category</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select category" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="general">General</SelectItem>
-                          <SelectItem value="billing">Billing</SelectItem>
-                          <SelectItem value="technical">Technical</SelectItem>
-                          <SelectItem value="account">Account</SelectItem>
-                          <SelectItem value="device">Device</SelectItem>
-                          <SelectItem value="voice">Voice</SelectItem>
-                          <SelectItem value="fax">Fax</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
+                  <div className="grid gap-6 sm:grid-cols-2">
+                    <FormField
+                      control={form.control}
+                      name="status"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Status</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select status" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="open">Open</SelectItem>
+                              <SelectItem value="in_progress">In Progress</SelectItem>
+                              <SelectItem value="waiting_on_customer">Waiting on Customer</SelectItem>
+                              <SelectItem value="waiting_on_support">Waiting on Support</SelectItem>
+                              <SelectItem value="resolved">Resolved</SelectItem>
+                              <SelectItem value="closed">Closed</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="priority"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Priority</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select priority" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="low">Low</SelectItem>
+                              <SelectItem value="medium">Medium</SelectItem>
+                              <SelectItem value="high">High</SelectItem>
+                              <SelectItem value="urgent">Urgent</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {isSuperuser && (
+                    <div className="grid gap-6 sm:grid-cols-2">
+                      <FormField
+                        control={form.control}
+                        name="assignedToId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Assigned To</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select assignee" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value={UNASSIGNED_VALUE}>Unassigned</SelectItem>
+                                {usersData?.items
+                                  ?.filter((u) => u.isSuperuser || u.isActive)
+                                  .map((u) => (
+                                    <SelectItem key={u.id} value={u.id}>
+                                      {u.name ?? u.email}
+                                      {u.name ? ` (${u.email})` : ""}
+                                    </SelectItem>
+                                  ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
                   )}
-                />
-              </div>
 
-              {form.formState.errors.root && (
-                <Alert variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>{form.formState.errors.root.message}</AlertDescription>
-                </Alert>
-              )}
+                  <div className="grid gap-6 sm:grid-cols-2">
+                    <FormField
+                      control={form.control}
+                      name="category"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Category</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select category" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="general">General</SelectItem>
+                              <SelectItem value="billing">Billing</SelectItem>
+                              <SelectItem value="technical">Technical</SelectItem>
+                              <SelectItem value="account">Account</SelectItem>
+                              <SelectItem value="device">Device</SelectItem>
+                              <SelectItem value="voice">Voice</SelectItem>
+                              <SelectItem value="fax">Fax</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
-              <Separator />
+                  {form.formState.errors.root && (
+                    <Alert variant="destructive">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>{form.formState.errors.root.message}</AlertDescription>
+                    </Alert>
+                  )}
 
-              <div className="flex items-center justify-between">
-                <Button type="button" variant="ghost" asChild>
-                  <Link to="/support/$ticketId" params={{ ticketId }}>
-                    Cancel
-                  </Link>
-                </Button>
-                <Button type="submit" disabled={form.formState.isSubmitting}>
-                  {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {form.formState.isSubmitting ? "Saving..." : "Save Changes"}
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-      </SectionErrorBoundary>
-    </PageContainer>
+                  <Separator />
+
+                  <div className="flex items-center justify-between">
+                    <Button type="button" variant="ghost" asChild>
+                      <Link to="/support/$ticketId" params={{ ticketId }}>
+                        Cancel
+                      </Link>
+                    </Button>
+                    <Button type="submit" disabled={form.formState.isSubmitting}>
+                      {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      {form.formState.isSubmitting ? "Saving..." : "Save Changes"}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
+        </SectionErrorBoundary>
+      </PageContainer>
 
       {/* Unsaved changes dialog */}
       <AlertDialog open={blocker.status === "blocked"} onOpenChange={(open) => !open && blocker.reset?.()}>
@@ -397,9 +403,7 @@ function EditTicketForm({ ticketId }: { ticketId: string }) {
               <AlertTriangle className="h-5 w-5 text-amber-500" />
               Unsaved Changes
             </AlertDialogTitle>
-            <AlertDialogDescription>
-              You have unsaved changes on this form. If you leave now, your progress will be lost.
-            </AlertDialogDescription>
+            <AlertDialogDescription>You have unsaved changes on this form. If you leave now, your progress will be lost.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => blocker.reset?.()}>Stay on Page</AlertDialogCancel>

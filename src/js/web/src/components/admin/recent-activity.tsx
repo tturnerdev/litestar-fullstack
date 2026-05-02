@@ -1,17 +1,5 @@
 import { Link } from "@tanstack/react-router"
-import {
-  AlertCircle,
-  ArrowRight,
-  KeyRound,
-  LogIn,
-  Pencil,
-  Plus,
-  Settings,
-  Shield,
-  Trash2,
-  UserCheck,
-  UserPlus,
-} from "lucide-react"
+import { AlertCircle, ArrowRight, KeyRound, LogIn, Pencil, Plus, Settings, Shield, Trash2, UserCheck, UserPlus } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -107,9 +95,7 @@ function getActionStyle(action: string) {
 
 /** Format an action string for display (e.g. "user_login" becomes "User Login"). */
 function formatAction(action: string): string {
-  return action
-    .replace(/[._-]/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase())
+  return action.replace(/[._-]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
 function TimelineSkeleton() {
@@ -151,7 +137,11 @@ export function RecentActivity() {
         icon={AlertCircle}
         title="Unable to load recent activity"
         description="Something went wrong. Please try again."
-        action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+        action={
+          <Button variant="outline" size="sm" onClick={() => refetch()}>
+            Try again
+          </Button>
+        }
       />
     )
   }
@@ -184,14 +174,9 @@ export function RecentActivity() {
                 const actorDisplay = activity.actorName || activity.actorEmail || "System"
 
                 return (
-                  <div
-                    key={activity.id}
-                    className="group/item flex items-start gap-3 rounded-lg px-2 py-2.5 transition-colors hover:bg-muted/50"
-                  >
+                  <div key={activity.id} className="group/item flex items-start gap-3 rounded-lg px-2 py-2.5 transition-colors hover:bg-muted/50">
                     {/* Icon */}
-                    <div
-                      className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${style.bgColor} ${style.iconColor} transition-colors`}
-                    >
+                    <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${style.bgColor} ${style.iconColor} transition-colors`}>
                       <Icon className="h-3.5 w-3.5" />
                     </div>
 
@@ -209,9 +194,7 @@ export function RecentActivity() {
                       {activity.targetLabel && (
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <p className="mt-0.5 text-xs text-muted-foreground truncate">
-                              {activity.targetLabel}
-                            </p>
+                            <p className="mt-0.5 text-xs text-muted-foreground truncate">{activity.targetLabel}</p>
                           </TooltipTrigger>
                           <TooltipContent>{activity.targetLabel}</TooltipContent>
                         </Tooltip>
@@ -221,9 +204,7 @@ export function RecentActivity() {
                     {/* Timestamp */}
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <span className="mt-0.5 shrink-0 text-[11px] tabular-nums text-muted-foreground">
-                          {formatRelativeTimeShort(activity.createdAt)}
-                        </span>
+                        <span className="mt-0.5 shrink-0 text-[11px] tabular-nums text-muted-foreground">{formatRelativeTimeShort(activity.createdAt)}</span>
                       </TooltipTrigger>
                       <TooltipContent side="left" className="text-xs">
                         {formatDateTime(activity.createdAt)}
@@ -237,10 +218,7 @@ export function RecentActivity() {
         )}
       </CardContent>
       <CardFooter className="border-t pt-4">
-        <Link
-          to="/admin/audit"
-          className="group inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-        >
+        <Link to="/admin/audit" className="group inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
           View all activity
           <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
         </Link>

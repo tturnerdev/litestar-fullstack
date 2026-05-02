@@ -176,14 +176,7 @@ export function VoicemailPlayer({ audioUrl, durationSeconds, onPlay }: Voicemail
   const VolumeIcon = muted || volume === 0 ? VolumeX : volume < 0.5 ? Volume1 : Volume2
 
   return (
-    <div
-      ref={containerRef}
-      className="flex items-center gap-3 rounded-lg bg-muted/30 px-3 py-2"
-      onKeyDown={handleKeyDown}
-      tabIndex={0}
-      role="group"
-      aria-label="Audio player"
-    >
+    <div ref={containerRef} className="flex items-center gap-3 rounded-lg bg-muted/30 px-3 py-2" onKeyDown={handleKeyDown} tabIndex={0} role="group" aria-label="Audio player">
       <Button variant="ghost" size="sm" className="h-8 w-8 shrink-0 p-0" onClick={togglePlay}>
         {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
       </Button>
@@ -202,10 +195,7 @@ export function VoicemailPlayer({ audioUrl, durationSeconds, onPlay }: Voicemail
           aria-valuemax={Math.round(duration)}
           tabIndex={-1}
         >
-          <div
-            className="absolute inset-y-0 left-0 rounded-full bg-primary transition-all"
-            style={{ width: `${progress}%` }}
-          />
+          <div className="absolute inset-y-0 left-0 rounded-full bg-primary transition-all" style={{ width: `${progress}%` }} />
           {/* Draggable dot */}
           <div
             className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary shadow-sm transition-transform group-hover:scale-100"
@@ -233,11 +223,7 @@ export function VoicemailPlayer({ audioUrl, durationSeconds, onPlay }: Voicemail
       </Button>
 
       {/* Volume control */}
-      <div
-        className="relative flex shrink-0 items-center"
-        onMouseEnter={() => setShowVolumeSlider(true)}
-        onMouseLeave={() => setShowVolumeSlider(false)}
-      >
+      <div className="relative flex shrink-0 items-center" onMouseEnter={() => setShowVolumeSlider(true)} onMouseLeave={() => setShowVolumeSlider(false)}>
         <button
           type="button"
           className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-foreground"

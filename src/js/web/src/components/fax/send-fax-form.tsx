@@ -1,17 +1,5 @@
 import { Link } from "@tanstack/react-router"
-import {
-  AlertCircle,
-  CheckCircle2,
-  Clock,
-  FileText,
-  FileUp,
-  Info,
-  Loader2,
-  Phone,
-  Send,
-  Upload,
-  X,
-} from "lucide-react"
+import { AlertCircle, CheckCircle2, Clock, FileText, FileUp, Info, Loader2, Phone, Send, Upload, X } from "lucide-react"
 import { useCallback, useMemo, useRef, useState } from "react"
 import {
   AlertDialog,
@@ -28,13 +16,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -65,17 +47,15 @@ function formatPhoneDisplay(value: string): string {
   // US numbers: +1 (XXX) XXX-XXXX
   if (digits.length <= 1) return `+${digits}`
   if (digits.length <= 4) return `+${digits[0]} (${digits.slice(1)}`
-  if (digits.length <= 7)
-    return `+${digits[0]} (${digits.slice(1, 4)}) ${digits.slice(4)}`
-  if (digits.length <= 11)
-    return `+${digits[0]} (${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7, 11)}`
+  if (digits.length <= 7) return `+${digits[0]} (${digits.slice(1, 4)}) ${digits.slice(4)}`
+  if (digits.length <= 11) return `+${digits[0]} (${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7, 11)}`
   // International — just group
   return `+${digits}`
 }
 
 /** Strip formatting to get raw number for API */
 function stripPhone(value: string): string {
-  const stripped = value.replace(/[\s()\-]/g, "")
+  const stripped = value.replace(/[\s()-]/g, "")
   return stripped.startsWith("+") ? stripped : `+${stripped}`
 }
 
@@ -118,8 +98,7 @@ export function SendFaxForm() {
   const activeNumbers = faxNumbers?.items.filter((n) => n.isActive) ?? []
   const selectedNumber = activeNumbers.find((n) => n.id === faxNumberId)
   const hasContent = contentMode === "file" ? !!file : textBody.trim().length > 0
-  const canSubmit =
-    !!faxNumberId && !!remoteNumber.trim() && hasContent && !sendFax.isPending
+  const canSubmit = !!faxNumberId && !!remoteNumber.trim() && hasContent && !sendFax.isPending
   const fileSizePercent = file ? Math.min((file.size / MAX_FILE_SIZE) * 100, 100) : 0
   const textLengthPercent = (textBody.length / MAX_TEXT_LENGTH) * 100
   const isTextOverLimit = textBody.length > MAX_TEXT_LENGTH
@@ -189,10 +168,7 @@ export function SendFaxForm() {
     e.preventDefault()
     e.stopPropagation()
     // Only leave if we actually left the drop zone
-    if (
-      dropZoneRef.current &&
-      !dropZoneRef.current.contains(e.relatedTarget as Node)
-    ) {
+    if (dropZoneRef.current && !dropZoneRef.current.contains(e.relatedTarget as Node)) {
       setIsDragging(false)
     }
   }, [])
@@ -210,7 +186,7 @@ export function SendFaxForm() {
     if (droppedFile) {
       validateAndSetFile(droppedFile)
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // ---- Phone formatting ----
@@ -230,9 +206,7 @@ export function SendFaxForm() {
       return false
     }
     if (!PHONE_REGEX.test(cleaned)) {
-      setNumberError(
-        "Enter a valid fax number (e.g. +12125551234)",
-      )
+      setNumberError("Enter a valid fax number (e.g. +12125551234)")
       return false
     }
     setNumberError(null)
@@ -253,11 +227,7 @@ export function SendFaxForm() {
     const numberOk = validateNumber()
     let contentOk = hasContent
     if (!contentOk) {
-      setFileError(
-        contentMode === "file"
-          ? "Upload a document to send"
-          : "Enter text content to send",
-      )
+      setFileError(contentMode === "file" ? "Upload a document to send" : "Enter text content to send")
     }
     if (contentMode === "text" && textBody.length > MAX_TEXT_LENGTH) {
       setFileError(`Text content exceeds maximum length of ${MAX_TEXT_LENGTH.toLocaleString()} characters`)
@@ -331,9 +301,7 @@ export function SendFaxForm() {
           </div>
           <div className="space-y-1">
             <h3 className="text-lg font-semibold">Fax Queued Successfully</h3>
-            <p className="text-sm text-muted-foreground">
-              Your fax to {remoteNumber} has been queued for sending.
-            </p>
+            <p className="text-sm text-muted-foreground">Your fax to {remoteNumber} has been queued for sending.</p>
           </div>
           <Separator className="my-2" />
           <div className="flex flex-wrap gap-3">
@@ -366,9 +334,7 @@ export function SendFaxForm() {
           <Card>
             <CardHeader>
               <CardTitle>Compose Fax</CardTitle>
-              <CardDescription>
-                Fill in the sender, recipient, and attach a document to send.
-              </CardDescription>
+              <CardDescription>Fill in the sender, recipient, and attach a document to send.</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handlePreSubmit} className="space-y-8">
@@ -389,10 +355,7 @@ export function SendFaxForm() {
                         if (senderError) setSenderError(null)
                       }}
                     >
-                      <SelectTrigger
-                        id="source-number"
-                        aria-invalid={!!senderError}
-                      >
+                      <SelectTrigger id="source-number" aria-invalid={!!senderError}>
                         <SelectValue placeholder="Select a fax number" />
                       </SelectTrigger>
                       <SelectContent>
@@ -413,10 +376,7 @@ export function SendFaxForm() {
                     {activeNumbers.length === 0 && (
                       <p className="text-xs text-muted-foreground">
                         No active fax numbers available.{" "}
-                        <Link
-                          to="/fax/numbers"
-                          className="underline underline-offset-2 hover:text-foreground"
-                        >
+                        <Link to="/fax/numbers" className="underline underline-offset-2 hover:text-foreground">
                           Add one
                         </Link>
                       </p>
@@ -451,9 +411,7 @@ export function SendFaxForm() {
                         {numberError}
                       </p>
                     ) : (
-                      <p className="text-xs text-muted-foreground">
-                        Enter the recipient's fax number in E.164 format
-                      </p>
+                      <p className="text-xs text-muted-foreground">Enter the recipient's fax number in E.164 format</p>
                     )}
                   </div>
 
@@ -502,10 +460,7 @@ export function SendFaxForm() {
                     </Tooltip>
                   </legend>
 
-                  <Tabs
-                    value={contentMode}
-                    onValueChange={(v) => setContentMode(v as "file" | "text")}
-                  >
+                  <Tabs value={contentMode} onValueChange={(v) => setContentMode(v as "file" | "text")}>
                     <TabsList>
                       <TabsTrigger value="file">Upload Document</TabsTrigger>
                       <TabsTrigger value="text">Text Content</TabsTrigger>
@@ -522,9 +477,7 @@ export function SendFaxForm() {
                             <div className="flex-1 min-w-0">
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <p className="text-sm font-medium truncate">
-                                    {file.name}
-                                  </p>
+                                  <p className="text-sm font-medium truncate">{file.name}</p>
                                 </TooltipTrigger>
                                 <TooltipContent side="top" className="max-w-sm">
                                   <p>{file.name}</p>
@@ -537,24 +490,14 @@ export function SendFaxForm() {
                                 </Badge>
                               </div>
                             </div>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={handleClearFile}
-                              aria-label="Remove file"
-                            >
+                            <Button type="button" variant="ghost" size="sm" onClick={handleClearFile} aria-label="Remove file">
                               <X className="h-4 w-4" />
                             </Button>
                           </div>
                           <div className="space-y-1">
                             <div className="h-1 w-full overflow-hidden rounded-full bg-muted">
                               <div
-                                className={`h-full rounded-full transition-all ${
-                                  fileSizePercent > 90
-                                    ? "bg-amber-500"
-                                    : "bg-primary"
-                                }`}
+                                className={`h-full rounded-full transition-all ${fileSizePercent > 90 ? "bg-amber-500" : "bg-primary"}`}
                                 style={{ width: `${fileSizePercent}%` }}
                               />
                             </div>
@@ -582,36 +525,18 @@ export function SendFaxForm() {
                           className={`
                             flex cursor-pointer flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed p-8
                             transition-colors duration-150
-                            ${
-                              isDragging
-                                ? "border-primary bg-primary/5 text-primary"
-                                : "border-border/60 text-muted-foreground hover:border-primary/40 hover:bg-muted/30"
-                            }
+                            ${isDragging ? "border-primary bg-primary/5 text-primary" : "border-border/60 text-muted-foreground hover:border-primary/40 hover:bg-muted/30"}
                             ${fileError ? "border-destructive/60" : ""}
                           `}
                         >
-                          <Upload
-                            className={`h-8 w-8 ${isDragging ? "text-primary" : "text-muted-foreground/40"}`}
-                          />
+                          <Upload className={`h-8 w-8 ${isDragging ? "text-primary" : "text-muted-foreground/40"}`} />
                           <div className="text-center">
-                            <p className="text-sm font-medium">
-                              {isDragging
-                                ? "Drop file here"
-                                : "Drag and drop a file, or click to browse"}
-                            </p>
-                            <p className="mt-1 text-xs text-muted-foreground">
-                              PDF or TIFF, max 20 MB
-                            </p>
+                            <p className="text-sm font-medium">{isDragging ? "Drop file here" : "Drag and drop a file, or click to browse"}</p>
+                            <p className="mt-1 text-xs text-muted-foreground">PDF or TIFF, max 20 MB</p>
                           </div>
                         </div>
                       )}
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept={ACCEPTED_EXTENSIONS}
-                        className="hidden"
-                        onChange={handleFileChange}
-                      />
+                      <input ref={fileInputRef} type="file" accept={ACCEPTED_EXTENSIONS} className="hidden" onChange={handleFileChange} />
                       {fileError && (
                         <p className="flex items-center gap-1 text-xs text-destructive">
                           <AlertCircle className="h-3 w-3" />
@@ -624,9 +549,7 @@ export function SendFaxForm() {
                     <TabsContent value="text" className="mt-4 space-y-3">
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                          <Label htmlFor="text-body">
-                            Fax Text Content
-                          </Label>
+                          <Label htmlFor="text-body">Fax Text Content</Label>
                           <span
                             className={`text-xs tabular-nums ${
                               isTextOverLimit
@@ -653,19 +576,11 @@ export function SendFaxForm() {
                         <div className="space-y-1.5">
                           <div className="h-1 w-full overflow-hidden rounded-full bg-muted">
                             <div
-                              className={`h-full rounded-full transition-all ${
-                                isTextOverLimit
-                                  ? "bg-destructive"
-                                  : textLengthPercent > 90
-                                    ? "bg-amber-500"
-                                    : "bg-primary"
-                              }`}
+                              className={`h-full rounded-full transition-all ${isTextOverLimit ? "bg-destructive" : textLengthPercent > 90 ? "bg-amber-500" : "bg-primary"}`}
                               style={{ width: `${Math.min(textLengthPercent, 100)}%` }}
                             />
                           </div>
-                          <p className="text-xs text-muted-foreground">
-                            Text will be rendered as a fax document on the server.
-                          </p>
+                          <p className="text-xs text-muted-foreground">Text will be rendered as a fax document on the server.</p>
                         </div>
                       </div>
                     </TabsContent>
@@ -697,9 +612,7 @@ export function SendFaxForm() {
                   {sendFax.isError && (
                     <p className="flex items-center gap-1.5 text-sm text-destructive">
                       <AlertCircle className="h-4 w-4 shrink-0" />
-                      {sendFax.error instanceof Error
-                        ? sendFax.error.message
-                        : "Failed to send fax. Please try again."}
+                      {sendFax.error instanceof Error ? sendFax.error.message : "Failed to send fax. Please try again."}
                     </p>
                   )}
                 </div>
@@ -717,11 +630,7 @@ export function SendFaxForm() {
             <CardContent>
               {previewUrl ? (
                 <div className="overflow-hidden rounded-lg border border-border/60">
-                  <iframe
-                    src={previewUrl}
-                    title="PDF preview"
-                    className="h-[500px] w-full border-none"
-                  />
+                  <iframe src={previewUrl} title="PDF preview" className="h-[500px] w-full border-none" />
                 </div>
               ) : file && file.type !== "application/pdf" ? (
                 <div className="flex h-[300px] flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border/60 text-muted-foreground">
@@ -731,21 +640,13 @@ export function SendFaxForm() {
                 </div>
               ) : contentMode === "text" && textBody.trim() ? (
                 <div className="rounded-lg border border-border/60 p-4">
-                  <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wide">
-                    Text Preview
-                  </p>
-                  <div className="whitespace-pre-wrap text-sm leading-relaxed max-h-[460px] overflow-y-auto">
-                    {textBody}
-                  </div>
+                  <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wide">Text Preview</p>
+                  <div className="whitespace-pre-wrap text-sm leading-relaxed max-h-[460px] overflow-y-auto">{textBody}</div>
                 </div>
               ) : (
                 <div className="flex h-[300px] flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border/60 text-muted-foreground">
                   <FileUp className="h-10 w-10 text-muted-foreground/30" />
-                  <p className="text-sm">
-                    {contentMode === "file"
-                      ? "Upload a PDF to see a preview"
-                      : "Start typing to see a preview"}
-                  </p>
+                  <p className="text-sm">{contentMode === "file" ? "Upload a PDF to see a preview" : "Start typing to see a preview"}</p>
                 </div>
               )}
             </CardContent>
@@ -758,9 +659,7 @@ export function SendFaxForm() {
         <AlertDialogContent className="sm:max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle>Confirm Fax</AlertDialogTitle>
-            <AlertDialogDescription>
-              Review the details below before sending.
-            </AlertDialogDescription>
+            <AlertDialogDescription>Review the details below before sending.</AlertDialogDescription>
           </AlertDialogHeader>
           <div className="space-y-3 py-2">
             <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
@@ -788,15 +687,8 @@ export function SendFaxForm() {
             </div>
           </div>
           <AlertDialogFooter>
-            <AlertDialogCancel
-              onClick={() => setShowConfirmDialog(false)}
-            >
-              Go Back
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleConfirmSend}
-              disabled={sendFax.isPending}
-            >
+            <AlertDialogCancel onClick={() => setShowConfirmDialog(false)}>Go Back</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmSend} disabled={sendFax.isPending}>
               {sendFax.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

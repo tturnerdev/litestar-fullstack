@@ -1,13 +1,13 @@
-import { useState } from "react"
 import { AlertCircle, Info, ShieldAlert, ShieldCheck } from "lucide-react"
+import { useState } from "react"
 import { toast } from "sonner"
 import { BackupCodesDisplay } from "@/components/mfa/backup-codes-display"
 import { MfaDisableDialog } from "@/components/mfa/mfa-disable-dialog"
 import { MfaSetupDialog } from "@/components/mfa/mfa-setup-dialog"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { EmptyState } from "@/components/ui/empty-state"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
@@ -49,10 +49,7 @@ function BackupCodesProgress({ remaining }: { remaining: number }) {
         </span>
       </div>
       <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-        <div
-          className={`h-full rounded-full transition-all ${color}`}
-          style={{ width: `${percent}%` }}
-        />
+        <div className={`h-full rounded-full transition-all ${color}`} style={{ width: `${percent}%` }} />
       </div>
     </div>
   )
@@ -75,7 +72,11 @@ export function MfaSection() {
         icon={AlertCircle}
         title="Unable to load MFA status"
         description="Something went wrong. Please try again."
-        action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+        action={
+          <Button variant="outline" size="sm" onClick={() => refetch()}>
+            Try again
+          </Button>
+        }
       />
     )
   }
@@ -115,9 +116,7 @@ export function MfaSection() {
               <p className="text-sm font-medium text-green-800 dark:text-green-300">Protected</p>
               <p className="text-xs text-green-600 dark:text-green-400">
                 Your account is secured with multi-factor authentication.
-                {data.confirmedAt && (
-                  <span> Enabled on {formatDateLong(data.confirmedAt)}.</span>
-                )}
+                {data.confirmedAt && <span> Enabled on {formatDateLong(data.confirmedAt)}.</span>}
               </p>
             </div>
           </div>
@@ -128,17 +127,13 @@ export function MfaSection() {
             </div>
             <div className="min-w-0">
               <p className="text-sm font-medium text-amber-800 dark:text-amber-300">Not Protected</p>
-              <p className="text-xs text-amber-600 dark:text-amber-400">
-                Your account does not have multi-factor authentication enabled. We strongly recommend enabling it.
-              </p>
+              <p className="text-xs text-amber-600 dark:text-amber-400">Your account does not have multi-factor authentication enabled. We strongly recommend enabling it.</p>
             </div>
           </div>
         )}
 
         {/* Backup codes progress (only when MFA is enabled) */}
-        {data.enabled && data.backupCodesRemaining != null && (
-          <BackupCodesProgress remaining={data.backupCodesRemaining} />
-        )}
+        {data.enabled && data.backupCodesRemaining != null && <BackupCodesProgress remaining={data.backupCodesRemaining} />}
 
         {/* Actions */}
         {data.enabled ? (

@@ -77,9 +77,7 @@ export function OrganizationQuickLinks() {
   const isSuperuser = user?.isSuperuser ?? false
   const { pathname } = useLocation()
 
-  const visibleLinks = quickLinks.filter(
-    (link) => !link.requiresSuperuser || isSuperuser,
-  )
+  const visibleLinks = quickLinks.filter((link) => !link.requiresSuperuser || isSuperuser)
 
   if (visibleLinks.length === 0) {
     return null

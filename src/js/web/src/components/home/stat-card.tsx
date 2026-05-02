@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router"
 import { motion } from "framer-motion"
-import { Minus, TrendingDown, TrendingUp, type LucideIcon } from "lucide-react"
+import { type LucideIcon, Minus, TrendingDown, TrendingUp } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
@@ -86,22 +86,14 @@ export function StatCard({ label, value, icon: Icon, iconClassName, isLoading, t
 
   const card = href ? (
     <Link to={href}>
-      <Card className="relative overflow-hidden transition-all duration-200 hover:scale-[1.02] hover:shadow-md cursor-pointer">
-        {cardContent}
-      </Card>
+      <Card className="relative overflow-hidden transition-all duration-200 hover:scale-[1.02] hover:shadow-md cursor-pointer">{cardContent}</Card>
     </Link>
   ) : (
-    <Card className="relative overflow-hidden transition-all duration-200 hover:scale-[1.02] hover:shadow-md">
-      {cardContent}
-    </Card>
+    <Card className="relative overflow-hidden transition-all duration-200 hover:scale-[1.02] hover:shadow-md">{cardContent}</Card>
   )
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: index * 0.06, ease: "easeOut" }}
-    >
+    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: index * 0.06, ease: "easeOut" }}>
       {card}
     </motion.div>
   )

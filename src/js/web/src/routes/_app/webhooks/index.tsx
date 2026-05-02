@@ -1,6 +1,4 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { toast } from "sonner"
 import {
   Activity,
   AlertCircle,
@@ -22,27 +20,15 @@ import {
   X,
   XCircle,
 } from "lucide-react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -56,35 +42,22 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
-import { Switch } from "@/components/ui/switch"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
+import { Switch } from "@/components/ui/switch"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Textarea } from "@/components/ui/textarea"
-import {
-  useWebhooks,
-  useCreateWebhook,
-  useUpdateWebhook,
-  useDeleteWebhook,
-  useTestWebhook,
-  useWebhookDeliveries,
-} from "@/lib/api/hooks/webhooks"
-import type { WebhookDelivery } from "@/lib/api/hooks/webhooks"
-import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
-import { formatDateTime } from "@/lib/date-utils"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
-import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
+import type { WebhookDelivery } from "@/lib/api/hooks/webhooks"
+import { useCreateWebhook, useDeleteWebhook, useTestWebhook, useUpdateWebhook, useWebhookDeliveries, useWebhooks } from "@/lib/api/hooks/webhooks"
+import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
+import { formatDateTime } from "@/lib/date-utils"
+import type { WebhookCreate, WebhookList, WebhookUpdate } from "@/lib/generated/api"
 import { useSettingsStore } from "@/lib/settings-store"
 import { cn } from "@/lib/utils"
-import type { WebhookCreate, WebhookList, WebhookUpdate } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/webhooks/")({
   validateSearch: (
@@ -98,10 +71,7 @@ export const Route = createFileRoute("/_app/webhooks/")({
     q: typeof search.q === "string" && search.q ? search.q : undefined,
     page: Number(search.page) > 1 ? Number(search.page) : undefined,
     sort: typeof search.sort === "string" && search.sort ? search.sort : undefined,
-    order:
-      typeof search.order === "string" && (search.order === "asc" || search.order === "desc")
-        ? search.order
-        : undefined,
+    order: typeof search.order === "string" && (search.order === "asc" || search.order === "desc") ? search.order : undefined,
   }),
   component: WebhooksPage,
 })
@@ -128,7 +98,7 @@ function getStoredPageSize(): number {
 const csvHeaders: CsvHeader<WebhookList>[] = [
   { label: "Name", accessor: (w) => w.name },
   { label: "URL", accessor: (w) => w.url },
-  { label: "Active", accessor: (w) => w.isActive ? "Yes" : "No" },
+  { label: "Active", accessor: (w) => (w.isActive ? "Yes" : "No") },
   { label: "Events", accessor: (w) => w.events.join(", ") },
   { label: "Failure Count", accessor: (w) => String(w.failureCount ?? 0) },
   { label: "Last Triggered", accessor: (w) => w.lastTriggeredAt ?? "" },
@@ -190,24 +160,12 @@ function statusCodeBadge(code: number | null): React.ReactNode {
     )
   }
   if (code >= 200 && code < 300) {
-    return (
-      <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400">
-        {code}
-      </Badge>
-    )
+    return <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400">{code}</Badge>
   }
   if (code >= 300 && code < 400) {
-    return (
-      <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400">
-        {code}
-      </Badge>
-    )
+    return <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400">{code}</Badge>
   }
-  return (
-    <Badge className="bg-red-100 text-red-700 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400">
-      {code}
-    </Badge>
-  )
+  return <Badge className="bg-red-100 text-red-700 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400">{code}</Badge>
 }
 
 // -- Delivery History Panel ---------------------------------------------------
@@ -263,7 +221,11 @@ function DeliveryHistoryPanel({ webhookId }: { webhookId: string }) {
         icon={AlertCircle}
         title="Failed to load delivery history"
         description="Something went wrong. Please try again."
-        action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+        action={
+          <Button variant="outline" size="sm" onClick={() => refetch()}>
+            Try again
+          </Button>
+        }
       />
     )
   }
@@ -310,11 +272,7 @@ function DeliveryHistoryPanel({ webhookId }: { webhookId: string }) {
                     Success
                   </Badge>
                 ) : (
-                  <Badge
-                    variant="destructive"
-                    className="gap-1"
-                    title={delivery.error ?? undefined}
-                  >
+                  <Badge variant="destructive" className="gap-1" title={delivery.error ?? undefined}>
                     <XCircle className="h-3 w-3" />
                     Failed
                   </Badge>
@@ -330,15 +288,7 @@ function DeliveryHistoryPanel({ webhookId }: { webhookId: string }) {
 
 // -- Create/Edit Webhook Dialog -----------------------------------------------
 
-function WebhookFormDialog({
-  open,
-  onOpenChange,
-  editWebhook,
-}: {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  editWebhook?: WebhookList | null
-}) {
+function WebhookFormDialog({ open, onOpenChange, editWebhook }: { open: boolean; onOpenChange: (open: boolean) => void; editWebhook?: WebhookList | null }) {
   const createWebhook = useCreateWebhook()
   const updateWebhook = useUpdateWebhook(editWebhook?.id ?? "")
 
@@ -466,45 +416,22 @@ function WebhookFormDialog({
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{isEditing ? "Edit Webhook" : "New Webhook"}</DialogTitle>
-          <DialogDescription>
-            {isEditing
-              ? "Update your webhook configuration."
-              : "Create a webhook to receive event notifications via HTTP POST."}
-          </DialogDescription>
+          <DialogDescription>{isEditing ? "Update your webhook configuration." : "Create a webhook to receive event notifications via HTTP POST."}</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="webhook-name">Name</Label>
-            <Input
-              id="webhook-name"
-              placeholder="e.g., Slack Notifications"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              maxLength={100}
-              required
-            />
+            <Input id="webhook-name" placeholder="e.g., Slack Notifications" value={name} onChange={(e) => setName(e.target.value)} maxLength={100} required />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="webhook-url">URL</Label>
-            <Input
-              id="webhook-url"
-              type="url"
-              placeholder="https://example.com/webhook"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              maxLength={500}
-              required
-            />
-            <p className="text-xs text-muted-foreground mt-1">
-              Must be an HTTPS URL that accepts POST requests with a JSON body.
-            </p>
+            <Input id="webhook-url" type="url" placeholder="https://example.com/webhook" value={url} onChange={(e) => setUrl(e.target.value)} maxLength={500} required />
+            <p className="text-xs text-muted-foreground mt-1">Must be an HTTPS URL that accepts POST requests with a JSON body.</p>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="webhook-secret">
-              Secret {isEditing && <span className="text-muted-foreground">(leave blank to keep current)</span>}
-            </Label>
+            <Label htmlFor="webhook-secret">Secret {isEditing && <span className="text-muted-foreground">(leave blank to keep current)</span>}</Label>
             <Input
               id="webhook-secret"
               type="password"
@@ -513,28 +440,16 @@ function WebhookFormDialog({
               onChange={(e) => setSecret(e.target.value)}
               maxLength={200}
             />
-            <p className="text-xs text-muted-foreground mt-1">
-              Used to sign payloads so you can verify they came from us. Keep this value secret.
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">Used to sign payloads so you can verify they came from us. Keep this value secret.</p>
           </div>
 
           <div className="space-y-2">
             <Label>Events</Label>
-            <p className="text-xs text-muted-foreground">
-              Select which events should trigger this webhook. If none are selected, all events will be sent.
-            </p>
+            <p className="text-xs text-muted-foreground">Select which events should trigger this webhook. If none are selected, all events will be sent.</p>
             <div className="grid grid-cols-2 gap-2 rounded-md border p-3 max-h-48 overflow-y-auto">
               {AVAILABLE_EVENTS.map((event) => (
-                <label
-                  key={event}
-                  className="flex items-center gap-2 cursor-pointer text-sm hover:bg-muted/50 rounded px-1 py-0.5"
-                >
-                  <input
-                    type="checkbox"
-                    checked={events.includes(event)}
-                    onChange={() => toggleEvent(event)}
-                    className="rounded border-input"
-                  />
+                <label key={event} className="flex items-center gap-2 cursor-pointer text-sm hover:bg-muted/50 rounded px-1 py-0.5">
+                  <input type="checkbox" checked={events.includes(event)} onChange={() => toggleEvent(event)} className="rounded border-input" />
                   <span className="text-xs font-mono">{event}</span>
                 </label>
               ))}
@@ -570,9 +485,7 @@ function WebhookFormDialog({
               rows={3}
               className="font-mono text-xs"
             />
-            <p className="text-xs text-muted-foreground mt-1">
-              Additional HTTP headers sent with each delivery. One header per line.
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">Additional HTTP headers sent with each delivery. One header per line.</p>
           </div>
 
           <div className="flex items-center gap-3">
@@ -597,15 +510,7 @@ function WebhookFormDialog({
 
 // -- Delete Confirmation Dialog ------------------------------------------------
 
-function DeleteWebhookDialog({
-  open,
-  onOpenChange,
-  webhook,
-}: {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  webhook: WebhookList | null
-}) {
+function DeleteWebhookDialog({ open, onOpenChange, webhook }: { open: boolean; onOpenChange: (open: boolean) => void; webhook: WebhookList | null }) {
   const deleteWebhook = useDeleteWebhook()
 
   const handleDelete = () => {
@@ -659,21 +564,13 @@ function WebhooksPage() {
   useDocumentTitle("Webhooks")
   const compactMode = useSettingsStore((s) => s.compactMode)
   const cellClass = compactMode ? "py-1 px-2 text-xs" : ""
-  const {
-    q: searchParam,
-    page: pageParam,
-    sort: sortParam,
-    order: orderParam,
-  } = Route.useSearch()
+  const { q: searchParam, page: pageParam, sort: sortParam, order: orderParam } = Route.useSearch()
   const navigate = Route.useNavigate()
   const searchInputRef = useRef<HTMLInputElement>(null)
 
   // Column visibility
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(loadColumnVisibility)
-  const isColumnVisible = useCallback(
-    (col: string) => columnVisibility[col] !== false,
-    [columnVisibility],
-  )
+  const isColumnVisible = useCallback((col: string) => columnVisibility[col] !== false, [columnVisibility])
   const toggleColumn = useCallback((col: string) => {
     setColumnVisibility((prev) => {
       const updated = { ...prev, [col]: prev[col] !== false ? false : true }
@@ -848,11 +745,7 @@ function WebhooksPage() {
         () => refetch(),
         { label: "Delete Selected" },
       ),
-      createExportAction<WebhookList>(
-        "webhooks",
-        csvHeaders,
-        (ids) => webhooks.filter((w) => ids.includes(w.id)),
-      ),
+      createExportAction<WebhookList>("webhooks", csvHeaders, (ids) => webhooks.filter((w) => ids.includes(w.id))),
     ],
     [deleteWebhook, refetch, webhooks],
   )
@@ -895,11 +788,7 @@ function WebhooksPage() {
                 <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {TOGGLEABLE_COLUMNS.map((col) => (
-                  <DropdownMenuCheckboxItem
-                    key={col.key}
-                    checked={isColumnVisible(col.key)}
-                    onCheckedChange={() => toggleColumn(col.key)}
-                  >
+                  <DropdownMenuCheckboxItem key={col.key} checked={isColumnVisible(col.key)} onCheckedChange={() => toggleColumn(col.key)}>
                     {col.label}
                   </DropdownMenuCheckboxItem>
                 ))}
@@ -920,32 +809,32 @@ function WebhooksPage() {
 
       {/* Summary pills */}
       <SectionErrorBoundary name="Webhook Statistics">
-      <div className="flex flex-wrap items-center gap-2">
-        {isLoading ? (
-          <>
-            <Skeleton className="h-7 w-24 rounded-full" />
-            <Skeleton className="h-7 w-24 rounded-full" />
-            <Skeleton className="h-7 w-24 rounded-full" />
-          </>
-        ) : (
-          <>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground">
-              Total
-              <span className="ml-0.5 font-semibold text-foreground">{webhookStats.total}</span>
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              Active
-              <span className="ml-0.5 font-semibold">{webhookStats.active}</span>
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-zinc-400/30 bg-zinc-400/10 px-3 py-1 text-xs font-medium text-zinc-600 dark:text-zinc-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-zinc-400" />
-              Inactive
-              <span className="ml-0.5 font-semibold">{webhookStats.inactive}</span>
-            </span>
-          </>
-        )}
-      </div>
+        <div className="flex flex-wrap items-center gap-2">
+          {isLoading ? (
+            <>
+              <Skeleton className="h-7 w-24 rounded-full" />
+              <Skeleton className="h-7 w-24 rounded-full" />
+              <Skeleton className="h-7 w-24 rounded-full" />
+            </>
+          ) : (
+            <>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground">
+                Total
+                <span className="ml-0.5 font-semibold text-foreground">{webhookStats.total}</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                Active
+                <span className="ml-0.5 font-semibold">{webhookStats.active}</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-zinc-400/30 bg-zinc-400/10 px-3 py-1 text-xs font-medium text-zinc-600 dark:text-zinc-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-zinc-400" />
+                Inactive
+                <span className="ml-0.5 font-semibold">{webhookStats.inactive}</span>
+              </span>
+            </>
+          )}
+        </div>
       </SectionErrorBoundary>
 
       {/* Search */}
@@ -953,13 +842,7 @@ function WebhooksPage() {
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative max-w-sm flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              ref={searchInputRef}
-              placeholder="Search webhooks..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              className="pl-9 pr-8"
-            />
+            <Input ref={searchInputRef} placeholder="Search webhooks..." value={searchInput} onChange={(e) => setSearchInput(e.target.value)} className="pl-9 pr-8" />
             {searchInput ? (
               <button
                 type="button"
@@ -970,7 +853,9 @@ function WebhooksPage() {
                 <span className="sr-only">Clear search</span>
               </button>
             ) : (
-              <kbd className="pointer-events-none absolute right-8 top-1/2 -translate-y-1/2 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">/</kbd>
+              <kbd className="pointer-events-none absolute right-8 top-1/2 -translate-y-1/2 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">
+                /
+              </kbd>
             )}
           </div>
         </div>
@@ -979,192 +864,164 @@ function WebhooksPage() {
       {/* Content */}
       <PageSection delay={0.1}>
         <SectionErrorBoundary name="Webhooks Table">
-        {isLoading ? (
-          <SkeletonTable rows={6} />
-        ) : isError ? (
-          <EmptyState
-            icon={AlertCircle}
-            title="Unable to load webhooks"
-            description="Something went wrong while fetching your webhooks. Please try again."
-            action={
-              <Button variant="outline" size="sm" onClick={() => refetch()}>
-                Try again
-              </Button>
-            }
-          />
-        ) : webhooks.length === 0 && !hasActiveFilters ? (
-          <EmptyState
-            icon={Webhook}
-            title="No webhooks yet"
-            description="Create your first webhook to receive event notifications via HTTP POST."
-            action={
-              <Button size="sm" asChild>
-                <Link to="/webhooks/new">
-                  <Plus className="mr-2 h-4 w-4" /> New webhook
-                </Link>
-              </Button>
-            }
-          />
-        ) : webhooks.length === 0 ? (
-          <EmptyState
-            icon={Webhook}
-            variant="no-results"
-            title="No results found"
-            description="No webhooks match your current search. Try adjusting your search terms."
-            action={
-              <Button variant="outline" size="sm" onClick={() => {
-                setSearchInput("")
-                navigate({
-                  search: {
-                    q: undefined,
-                    sort: undefined,
-                    order: undefined,
-                    page: undefined,
-                  },
-                })
-              }}>
-                Clear search
-              </Button>
-            }
-          />
-        ) : (
-          <div className="space-y-3">
-            {/* Result count */}
-            <div className="flex items-center justify-between">
-              <p className="text-xs text-muted-foreground">
-                {total} webhook{total === 1 ? "" : "s"}
-                {hasActiveFilters && " (filtered)"}
-              </p>
-              {totalPages > 1 && (
+          {isLoading ? (
+            <SkeletonTable rows={6} />
+          ) : isError ? (
+            <EmptyState
+              icon={AlertCircle}
+              title="Unable to load webhooks"
+              description="Something went wrong while fetching your webhooks. Please try again."
+              action={
+                <Button variant="outline" size="sm" onClick={() => refetch()}>
+                  Try again
+                </Button>
+              }
+            />
+          ) : webhooks.length === 0 && !hasActiveFilters ? (
+            <EmptyState
+              icon={Webhook}
+              title="No webhooks yet"
+              description="Create your first webhook to receive event notifications via HTTP POST."
+              action={
+                <Button size="sm" asChild>
+                  <Link to="/webhooks/new">
+                    <Plus className="mr-2 h-4 w-4" /> New webhook
+                  </Link>
+                </Button>
+              }
+            />
+          ) : webhooks.length === 0 ? (
+            <EmptyState
+              icon={Webhook}
+              variant="no-results"
+              title="No results found"
+              description="No webhooks match your current search. Try adjusting your search terms."
+              action={
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSearchInput("")
+                    navigate({
+                      search: {
+                        q: undefined,
+                        sort: undefined,
+                        order: undefined,
+                        page: undefined,
+                      },
+                    })
+                  }}
+                >
+                  Clear search
+                </Button>
+              }
+            />
+          ) : (
+            <div className="space-y-3">
+              {/* Result count */}
+              <div className="flex items-center justify-between">
                 <p className="text-xs text-muted-foreground">
-                  Page {page} of {totalPages}
+                  {total} webhook{total === 1 ? "" : "s"}
+                  {hasActiveFilters && " (filtered)"}
                 </p>
-              )}
-            </div>
-
-            {/* Table */}
-            <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
-              <Table aria-label="Webhooks" aria-busy={isLoading}>
-                <TableHeader className="sticky top-0 z-10 bg-background">
-                  <TableRow>
-                    <TableHead className="w-[40px]">
-                      <Checkbox
-                        checked={allSelected}
-                        indeterminate={someSelected}
-                        onChange={toggleAll}
-                        aria-label="Select all webhooks"
-                      />
-                    </TableHead>
-                    <SortableHeader
-                      label="Name"
-                      sortKey="name"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                    />
-                    {isColumnVisible("url") && (
-                      <SortableHeader
-                        label="URL"
-                        sortKey="url"
-                        currentSort={sortKey}
-                        currentDirection={sortDir}
-                        onSort={handleSort}
-                        className="hidden sm:table-cell"
-                      />
-                    )}
-                    {isColumnVisible("events") && (
-                      <TableHead className="hidden md:table-cell">Events</TableHead>
-                    )}
-                    {isColumnVisible("status") && (
-                      <SortableHeader
-                        label="Status"
-                        sortKey="status"
-                        currentSort={sortKey}
-                        currentDirection={sortDir}
-                        onSort={handleSort}
-                      />
-                    )}
-                    {isColumnVisible("lastTriggered") && (
-                      <TableHead className="hidden lg:table-cell">Last Triggered</TableHead>
-                    )}
-                    {isColumnVisible("failures") && (
-                      <TableHead className="hidden md:table-cell">Failures</TableHead>
-                    )}
-                    <TableHead className="w-24 text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {webhooks.map((webhook, index) => (
-                    <WebhookRow
-                      key={webhook.id}
-                      webhook={webhook}
-                      index={index}
-                      selected={selected.has(webhook.id)}
-                      onToggle={() => toggleOne(webhook.id)}
-                      onEdit={() => setEditWebhook(webhook)}
-                      onDelete={() => setDeleteTarget(webhook)}
-                      cellClass={cellClass}
-                      isColumnVisible={isColumnVisible}
-                    />
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-            <div className="sr-only" aria-live="polite" aria-atomic="true">
-              {!isLoading && `Showing ${webhooks.length} of ${total} results, page ${page}`}
-            </div>
-
-            {/* Pagination */}
-            <div className="flex items-center justify-end gap-4">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Rows per page</span>
-                <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
-                  <SelectTrigger className="h-8 w-[70px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PAGE_SIZES.map((size) => (
-                      <SelectItem key={size} value={String(size)}>
-                        {size}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {totalPages > 1 && (
+                  <p className="text-xs text-muted-foreground">
+                    Page {page} of {totalPages}
+                  </p>
+                )}
               </div>
-              {totalPages > 1 && (
+
+              {/* Table */}
+              <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
+                <Table aria-label="Webhooks" aria-busy={isLoading}>
+                  <TableHeader className="sticky top-0 z-10 bg-background">
+                    <TableRow>
+                      <TableHead className="w-[40px]">
+                        <Checkbox checked={allSelected} indeterminate={someSelected} onChange={toggleAll} aria-label="Select all webhooks" />
+                      </TableHead>
+                      <SortableHeader label="Name" sortKey="name" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                      {isColumnVisible("url") && (
+                        <SortableHeader label="URL" sortKey="url" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden sm:table-cell" />
+                      )}
+                      {isColumnVisible("events") && <TableHead className="hidden md:table-cell">Events</TableHead>}
+                      {isColumnVisible("status") && <SortableHeader label="Status" sortKey="status" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />}
+                      {isColumnVisible("lastTriggered") && <TableHead className="hidden lg:table-cell">Last Triggered</TableHead>}
+                      {isColumnVisible("failures") && <TableHead className="hidden md:table-cell">Failures</TableHead>}
+                      <TableHead className="w-24 text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {webhooks.map((webhook, index) => (
+                      <WebhookRow
+                        key={webhook.id}
+                        webhook={webhook}
+                        index={index}
+                        selected={selected.has(webhook.id)}
+                        onToggle={() => toggleOne(webhook.id)}
+                        onEdit={() => setEditWebhook(webhook)}
+                        onDelete={() => setDeleteTarget(webhook)}
+                        cellClass={cellClass}
+                        isColumnVisible={isColumnVisible}
+                      />
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              <div className="sr-only" aria-live="polite" aria-atomic="true">
+                {!isLoading && `Showing ${webhooks.length} of ${total} results, page ${page}`}
+              </div>
+
+              {/* Pagination */}
+              <div className="flex items-center justify-end gap-4">
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      navigate({
-                        search: (prev) => ({
-                          ...prev,
-                          page: page - 1 > 1 ? page - 1 : undefined,
-                        }),
-                      })
-                    }
-                    disabled={page <= 1}
-                  >
-                    Previous
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      navigate({
-                        search: (prev) => ({ ...prev, page: page + 1 }),
-                      })
-                    }
-                    disabled={page >= totalPages}
-                  >
-                    Next
-                  </Button>
+                  <span className="text-sm text-muted-foreground">Rows per page</span>
+                  <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
+                    <SelectTrigger className="h-8 w-[70px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PAGE_SIZES.map((size) => (
+                        <SelectItem key={size} value={String(size)}>
+                          {size}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-              )}
+                {totalPages > 1 && (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        navigate({
+                          search: (prev) => ({
+                            ...prev,
+                            page: page - 1 > 1 ? page - 1 : undefined,
+                          }),
+                        })
+                      }
+                      disabled={page <= 1}
+                    >
+                      Previous
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        navigate({
+                          search: (prev) => ({ ...prev, page: page + 1 }),
+                        })
+                      }
+                      disabled={page >= totalPages}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
         </SectionErrorBoundary>
       </PageSection>
 
@@ -1186,12 +1043,7 @@ function WebhooksPage() {
         webhook={deleteTarget}
       />
 
-      <BulkActionBar
-        selectedCount={selected.size}
-        selectedIds={Array.from(selected)}
-        onClearSelection={() => setSelected(new Set())}
-        actions={bulkActions}
-      />
+      <BulkActionBar selectedCount={selected.size} selectedIds={Array.from(selected)} onClearSelection={() => setSelected(new Set())} actions={bulkActions} />
     </PageContainer>
   )
 }
@@ -1249,12 +1101,7 @@ function WebhookRow({
             <div className="flex items-center gap-2">
               <Webhook className="h-4 w-4 text-muted-foreground shrink-0" />
               <div className="min-w-0">
-                <Link
-                  to="/webhooks/$webhookId"
-                  params={{ webhookId: webhook.id }}
-                  className="font-medium hover:underline"
-                  onClick={(e) => e.stopPropagation()}
-                >
+                <Link to="/webhooks/$webhookId" params={{ webhookId: webhook.id }} className="font-medium hover:underline" onClick={(e) => e.stopPropagation()}>
                   {webhook.name}
                 </Link>
                 <span className="block sm:hidden text-xs text-muted-foreground font-mono truncate" title={webhook.url}>
@@ -1294,9 +1141,7 @@ function WebhookRow({
           )}
           {isColumnVisible("lastTriggered") && (
             <TableCell className={cn("hidden lg:table-cell", cellClass)}>
-              <span className="text-sm text-muted-foreground">
-                {formatDateTime(webhook.lastTriggeredAt as string | null | undefined, "Never")}
-              </span>
+              <span className="text-sm text-muted-foreground">{formatDateTime(webhook.lastTriggeredAt as string | null | undefined, "Never")}</span>
             </TableCell>
           )}
           {isColumnVisible("failures") && (
@@ -1313,15 +1158,8 @@ function WebhookRow({
           <TableCell className={cn("text-right", cellClass)}>
             <div className="flex items-center justify-end gap-1">
               <CollapsibleTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8"
-                  title="Delivery history"
-                >
-                  <ChevronDown
-                    className={`h-4 w-4 transition-transform ${deliveriesOpen ? "rotate-180" : ""}`}
-                  />
+                <Button variant="ghost" size="icon" className="h-8 w-8" title="Delivery history">
+                  <ChevronDown className={`h-4 w-4 transition-transform ${deliveriesOpen ? "rotate-180" : ""}`} />
                   <span className="sr-only">Toggle deliveries</span>
                 </Button>
               </CollapsibleTrigger>
@@ -1358,11 +1196,7 @@ function WebhookRow({
                     }
                     disabled={testWebhookMutation.isPending}
                   >
-                    {testWebhookMutation.isPending ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <Play className="mr-2 h-4 w-4" />
-                    )}
+                    {testWebhookMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Play className="mr-2 h-4 w-4" />}
                     Test
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setDeliveriesOpen((prev) => !prev)}>
@@ -1385,9 +1219,7 @@ function WebhookRow({
               <div className="border-t border-border/40 bg-muted/30">
                 <div className="flex items-center gap-2 px-6 pt-3 pb-1">
                   <Activity className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-xs font-medium text-muted-foreground">
-                    Recent Deliveries
-                  </span>
+                  <span className="text-xs font-medium text-muted-foreground">Recent Deliveries</span>
                 </div>
                 <DeliveryHistoryPanel webhookId={webhook.id} />
               </div>

@@ -1,12 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
-import {
-  deleteTeam,
-  getTeam,
-  listTeams,
-  updateTeam,
-  type Team,
-} from "@/lib/generated/api"
+import { deleteTeam, getTeam, listTeams, type Team, updateTeam } from "@/lib/generated/api"
 
 // ── Team Detail ──────────────────────────────────────────────────────
 

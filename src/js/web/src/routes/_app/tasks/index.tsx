@@ -1,54 +1,27 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
+import { AlertCircle, Download, Eye, Home, ListTodo, MoreVertical, XCircle } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
-import {
-  AlertCircle,
-  Download,
-  Eye,
-  Home,
-  ListTodo,
-  MoreVertical,
-  XCircle,
-} from "lucide-react"
 import { toast } from "sonner"
 import { TaskStatusBadge } from "@/components/tasks/task-status-badge"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import { BulkActionBar, createExportAction, type BulkAction } from "@/components/ui/bulk-action-bar"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
+import { type BulkAction, BulkActionBar, createExportAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { DataFreshness } from "@/components/ui/data-freshness"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { useTasks, useCancelTask, type UseTasksOptions } from "@/lib/api/hooks/tasks"
-import type { BackgroundTaskList } from "@/lib/generated/api/types.gen"
-import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
-import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { useDocumentTitle } from "@/hooks/use-document-title"
-import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
+import { type UseTasksOptions, useCancelTask, useTasks } from "@/lib/api/hooks/tasks"
+import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
+import type { BackgroundTaskList } from "@/lib/generated/api/types.gen"
 
 export const Route = createFileRoute("/_app/tasks/")({
   validateSearch: (
@@ -61,19 +34,10 @@ export const Route = createFileRoute("/_app/tasks/")({
     order?: string
   } => ({
     page: Number(search.page) > 1 ? Number(search.page) : undefined,
-    status:
-      typeof search.status === "string" && search.status && search.status !== "all"
-        ? search.status
-        : undefined,
-    type:
-      typeof search.type === "string" && search.type && search.type !== "all"
-        ? search.type
-        : undefined,
+    status: typeof search.status === "string" && search.status && search.status !== "all" ? search.status : undefined,
+    type: typeof search.type === "string" && search.type && search.type !== "all" ? search.type : undefined,
     sort: typeof search.sort === "string" && search.sort ? search.sort : undefined,
-    order:
-      typeof search.order === "string" && (search.order === "asc" || search.order === "desc")
-        ? search.order
-        : undefined,
+    order: typeof search.order === "string" && (search.order === "asc" || search.order === "desc") ? search.order : undefined,
   }),
   component: TasksPage,
 })
@@ -133,30 +97,18 @@ const csvHeaders: CsvHeader<BackgroundTaskList>[] = [
 // -- Helpers ------------------------------------------------------------------
 
 function formatTaskType(taskType: string): string {
-  return taskType
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase())
+  return taskType.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
 function formatEntityType(entityType: string | null | undefined): string {
   if (!entityType) return "--"
-  return entityType
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase())
+  return entityType.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
-function formatDuration(
-  startedAt: string | null | undefined,
-  completedAt: string | null | undefined,
-  status: string,
-): string {
+function formatDuration(startedAt: string | null | undefined, completedAt: string | null | undefined, status: string): string {
   if (!startedAt) return "--"
   const start = new Date(startedAt).getTime()
-  const end = completedAt
-    ? new Date(completedAt).getTime()
-    : status === "running"
-      ? Date.now()
-      : start
+  const end = completedAt ? new Date(completedAt).getTime() : status === "running" ? Date.now() : start
   const ms = end - start
   if (ms < 1000) return "<1s"
   const seconds = Math.floor(ms / 1000) % 60
@@ -169,19 +121,7 @@ function formatDuration(
 
 // -- Task Row -----------------------------------------------------------------
 
-function TaskRow({
-  task,
-  index,
-  selected,
-  onToggle,
-  onRowClick,
-}: {
-  task: BackgroundTaskList
-  index: number
-  selected: boolean
-  onToggle: () => void
-  onRowClick: () => void
-}) {
+function TaskRow({ task, index, selected, onToggle, onRowClick }: { task: BackgroundTaskList; index: number; selected: boolean; onToggle: () => void; onRowClick: () => void }) {
   const cancelMutation = useCancelTask()
   const isActive = task.status === "pending" || task.status === "running"
 
@@ -208,18 +148,9 @@ function TaskRow({
         />
       </TableCell>
       <TableCell>
-        <Link
-          to="/tasks/$taskId"
-          params={{ taskId: task.id }}
-          className="group flex flex-col gap-0.5"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <span className="font-medium group-hover:underline text-sm">
-            {formatTaskType(task.taskType)}
-          </span>
-          {task.initiatedByName && (
-            <span className="text-xs text-muted-foreground">by {task.initiatedByName}</span>
-          )}
+        <Link to="/tasks/$taskId" params={{ taskId: task.id }} className="group flex flex-col gap-0.5" onClick={(e) => e.stopPropagation()}>
+          <span className="font-medium group-hover:underline text-sm">{formatTaskType(task.taskType)}</span>
+          {task.initiatedByName && <span className="text-xs text-muted-foreground">by {task.initiatedByName}</span>}
         </Link>
       </TableCell>
       <TableCell>
@@ -231,18 +162,12 @@ function TaskRow({
             <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
               <div
                 className={`h-full rounded-full transition-all duration-300 ${
-                  task.status === "failed"
-                    ? "bg-red-500"
-                    : task.status === "completed"
-                      ? "bg-green-500"
-                      : "bg-blue-500"
+                  task.status === "failed" ? "bg-red-500" : task.status === "completed" ? "bg-green-500" : "bg-blue-500"
                 }`}
                 style={{ width: `${Math.min(task.progress, 100)}%` }}
               />
             </div>
-            <span className="text-xs font-medium text-muted-foreground w-8 text-right">
-              {Math.round(task.progress)}%
-            </span>
+            <span className="text-xs font-medium text-muted-foreground w-8 text-right">{Math.round(task.progress)}%</span>
           </div>
         ) : (
           <span className="text-xs text-muted-foreground">--</span>
@@ -255,9 +180,7 @@ function TaskRow({
         {task.startedAt ? (
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className="cursor-default text-xs text-muted-foreground">
-                {formatRelativeTimeShort(task.startedAt)}
-              </span>
+              <span className="cursor-default text-xs text-muted-foreground">{formatRelativeTimeShort(task.startedAt)}</span>
             </TooltipTrigger>
             <TooltipContent>{formatDateTime(task.startedAt)}</TooltipContent>
           </Tooltip>
@@ -266,17 +189,13 @@ function TaskRow({
         )}
       </TableCell>
       <TableCell className="hidden md:table-cell">
-        <span className="text-xs text-muted-foreground tabular-nums">
-          {formatDuration(task.startedAt, task.completedAt, task.status)}
-        </span>
+        <span className="text-xs text-muted-foreground tabular-nums">{formatDuration(task.startedAt, task.completedAt, task.status)}</span>
       </TableCell>
       <TableCell className="hidden md:table-cell">
         {task.completedAt ? (
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className="cursor-default text-xs text-muted-foreground">
-                {formatRelativeTimeShort(task.completedAt)}
-              </span>
+              <span className="cursor-default text-xs text-muted-foreground">{formatRelativeTimeShort(task.completedAt)}</span>
             </TooltipTrigger>
             <TooltipContent>{formatDateTime(task.completedAt)}</TooltipContent>
           </Tooltip>
@@ -287,13 +206,7 @@ function TaskRow({
       <TableCell className="text-right">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0"
-              data-slot="dropdown"
-              onClick={(e) => e.stopPropagation()}
-            >
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" data-slot="dropdown" onClick={(e) => e.stopPropagation()}>
               <MoreVertical className="h-4 w-4" />
               <span className="sr-only">Actions for task {task.id}</span>
             </Button>
@@ -308,11 +221,7 @@ function TaskRow({
             {isActive && (
               <>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  variant="destructive"
-                  disabled={cancelMutation.isPending}
-                  onClick={() => cancelMutation.mutate(task.id)}
-                >
+                <DropdownMenuItem variant="destructive" disabled={cancelMutation.isPending} onClick={() => cancelMutation.mutate(task.id)}>
                   <XCircle className="mr-2 h-4 w-4" />
                   Cancel task
                 </DropdownMenuItem>
@@ -330,13 +239,7 @@ function TaskRow({
 function TasksPage() {
   useDocumentTitle("Background Tasks")
 
-  const {
-    page: pageParam,
-    status: statusParam,
-    type: typeParam,
-    sort: sortParam,
-    order: orderParam,
-  } = Route.useSearch()
+  const { page: pageParam, status: statusParam, type: typeParam, sort: sortParam, order: orderParam } = Route.useSearch()
   const navigate = Route.useNavigate()
 
   // Derive filter state from URL search params
@@ -482,44 +385,41 @@ function TasksPage() {
   }, [])
 
   // Bulk actions
-  const bulkActions = useMemo((): BulkAction[] => [
-    createExportAction<BackgroundTaskList>(
-      "background-tasks",
-      csvHeaders,
-      (ids) => items.filter((t) => ids.includes(t.id)),
-    ),
-    {
-      key: "cancel",
-      label: "Cancel Selected",
-      icon: <XCircle className="h-4 w-4" />,
-      variant: "destructive" as const,
-      confirm: {
-        title: "Cancel selected tasks?",
-        description: "Only pending and running tasks will be cancelled. This action cannot be undone.",
-      },
-      onExecute: async (ids: string[]) => {
-        const activeTasks = items.filter(
-          (t) => ids.includes(t.id) && (t.status === "pending" || t.status === "running"),
-        )
-        if (activeTasks.length === 0) {
-          toast.info("No active tasks to cancel among the selection")
-          return
-        }
-        const errors: string[] = []
-        for (const t of activeTasks) {
-          try {
-            await cancelMutation.mutateAsync(t.id)
-          } catch {
-            errors.push(t.id)
+  const bulkActions = useMemo(
+    (): BulkAction[] => [
+      createExportAction<BackgroundTaskList>("background-tasks", csvHeaders, (ids) => items.filter((t) => ids.includes(t.id))),
+      {
+        key: "cancel",
+        label: "Cancel Selected",
+        icon: <XCircle className="h-4 w-4" />,
+        variant: "destructive" as const,
+        confirm: {
+          title: "Cancel selected tasks?",
+          description: "Only pending and running tasks will be cancelled. This action cannot be undone.",
+        },
+        onExecute: async (ids: string[]) => {
+          const activeTasks = items.filter((t) => ids.includes(t.id) && (t.status === "pending" || t.status === "running"))
+          if (activeTasks.length === 0) {
+            toast.info("No active tasks to cancel among the selection")
+            return
           }
-        }
-        if (errors.length > 0) {
-          toast.error(`Failed to cancel ${errors.length} of ${activeTasks.length} tasks`)
-        }
-        setSelectedIds(new Set())
+          const errors: string[] = []
+          for (const t of activeTasks) {
+            try {
+              await cancelMutation.mutateAsync(t.id)
+            } catch {
+              errors.push(t.id)
+            }
+          }
+          if (errors.length > 0) {
+            toast.error(`Failed to cancel ${errors.length} of ${activeTasks.length} tasks`)
+          }
+          setSelectedIds(new Set())
+        },
       },
-    },
-  ], [items, cancelMutation])
+    ],
+    [items, cancelMutation],
+  )
 
   const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / pageSize))
   const hasData = items.length > 0
@@ -576,19 +476,9 @@ function TasksPage() {
         breadcrumbs={breadcrumbs}
         actions={
           <div className="flex items-center gap-2">
-            <DataFreshness
-              dataUpdatedAt={dataUpdatedAt}
-              onRefresh={() => refetch()}
-              isRefreshing={isRefetching}
-            />
-            <Button
-              variant={autoRefresh ? "default" : "outline"}
-              size="sm"
-              onClick={toggleAutoRefresh}
-            >
-              {autoRefresh && (
-                <span className="mr-2 h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
-              )}
+            <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
+            <Button variant={autoRefresh ? "default" : "outline"} size="sm" onClick={toggleAutoRefresh}>
+              {autoRefresh && <span className="mr-2 h-2 w-2 animate-pulse rounded-full bg-emerald-500" />}
               Live
             </Button>
             <Button variant="outline" size="sm" onClick={handleExportAll} disabled={!hasData}>
@@ -601,52 +491,52 @@ function TasksPage() {
 
       {/* Summary stats */}
       <SectionErrorBoundary name="Task Summary Stats">
-      <div className="flex flex-wrap items-center gap-2">
-        {isLoading ? (
-          <>
-            <Skeleton className="h-7 w-20 rounded-full" />
-            <Skeleton className="h-7 w-28 rounded-full" />
-            <Skeleton className="h-7 w-28 rounded-full" />
-            <Skeleton className="h-7 w-24 rounded-full" />
-            <Skeleton className="h-7 w-24 rounded-full" />
-          </>
-        ) : (
-          <>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground">
-              Total
-              <span className="ml-0.5 font-semibold text-foreground">{taskStats.total}</span>
-            </span>
-            {taskStats.running > 0 && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-700 dark:text-blue-400">
-                <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
-                Running
-                <span className="ml-0.5 font-semibold">{taskStats.running}</span>
+        <div className="flex flex-wrap items-center gap-2">
+          {isLoading ? (
+            <>
+              <Skeleton className="h-7 w-20 rounded-full" />
+              <Skeleton className="h-7 w-28 rounded-full" />
+              <Skeleton className="h-7 w-28 rounded-full" />
+              <Skeleton className="h-7 w-24 rounded-full" />
+              <Skeleton className="h-7 w-24 rounded-full" />
+            </>
+          ) : (
+            <>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground">
+                Total
+                <span className="ml-0.5 font-semibold text-foreground">{taskStats.total}</span>
               </span>
-            )}
-            {taskStats.completed > 0 && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                Completed
-                <span className="ml-0.5 font-semibold">{taskStats.completed}</span>
-              </span>
-            )}
-            {taskStats.failed > 0 && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-xs font-medium text-red-700 dark:text-red-400">
-                <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
-                Failed
-                <span className="ml-0.5 font-semibold">{taskStats.failed}</span>
-              </span>
-            )}
-            {taskStats.pending > 0 && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-zinc-400/30 bg-zinc-400/10 px-3 py-1 text-xs font-medium text-zinc-600 dark:text-zinc-400">
-                <span className="h-1.5 w-1.5 rounded-full bg-zinc-400" />
-                Pending
-                <span className="ml-0.5 font-semibold">{taskStats.pending}</span>
-              </span>
-            )}
-          </>
-        )}
-      </div>
+              {taskStats.running > 0 && (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-700 dark:text-blue-400">
+                  <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+                  Running
+                  <span className="ml-0.5 font-semibold">{taskStats.running}</span>
+                </span>
+              )}
+              {taskStats.completed > 0 && (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  Completed
+                  <span className="ml-0.5 font-semibold">{taskStats.completed}</span>
+                </span>
+              )}
+              {taskStats.failed > 0 && (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-xs font-medium text-red-700 dark:text-red-400">
+                  <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+                  Failed
+                  <span className="ml-0.5 font-semibold">{taskStats.failed}</span>
+                </span>
+              )}
+              {taskStats.pending > 0 && (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-zinc-400/30 bg-zinc-400/10 px-3 py-1 text-xs font-medium text-zinc-600 dark:text-zinc-400">
+                  <span className="h-1.5 w-1.5 rounded-full bg-zinc-400" />
+                  Pending
+                  <span className="ml-0.5 font-semibold">{taskStats.pending}</span>
+                </span>
+              )}
+            </>
+          )}
+        </div>
       </SectionErrorBoundary>
 
       {/* Filters */}
@@ -699,12 +589,7 @@ function TasksPage() {
             </SelectContent>
           </Select>
           {hasAnyFilters && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-xs text-muted-foreground"
-              onClick={clearAllFilters}
-            >
+            <Button variant="ghost" size="sm" className="text-xs text-muted-foreground" onClick={clearAllFilters}>
               Clear all filters
             </Button>
           )}
@@ -714,154 +599,151 @@ function TasksPage() {
       {/* Content */}
       <PageSection delay={0.1}>
         <SectionErrorBoundary name="Tasks Table">
-        {isLoading ? (
-          <SkeletonTable rows={6} />
-        ) : isError ? (
-          <EmptyState
-            icon={AlertCircle}
-            title="Unable to load tasks"
-            description="Something went wrong while fetching background tasks. Please try again."
-            action={
-              <Button variant="outline" size="sm" onClick={() => refetch()}>
-                Try again
-              </Button>
-            }
-          />
-        ) : !hasData && !hasAnyFilters ? (
-          <EmptyState
-            icon={ListTodo}
-            title="No background tasks"
-            description="Background tasks will appear here when bulk operations, imports, exports, or syncs are initiated."
-          />
-        ) : !hasData ? (
-          <EmptyState
-            icon={ListTodo}
-            variant="no-results"
-            title="No results found"
-            description="No tasks match your current filters. Try adjusting your filters."
-            action={
-              <Button variant="outline" size="sm" onClick={clearAllFilters}>
-                Clear all filters
-              </Button>
-            }
-          />
-        ) : (
-          <div className="space-y-3">
-            {/* Result count & pagination info */}
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">
-                {data?.total ?? items.length} task{(data?.total ?? items.length) === 1 ? "" : "s"}
-                {hasAnyFilters && " (filtered)"}
-              </p>
-              {totalPages > 1 && (
-                <p className="text-xs text-muted-foreground">
-                  Page {page} of {totalPages}
+          {isLoading ? (
+            <SkeletonTable rows={6} />
+          ) : isError ? (
+            <EmptyState
+              icon={AlertCircle}
+              title="Unable to load tasks"
+              description="Something went wrong while fetching background tasks. Please try again."
+              action={
+                <Button variant="outline" size="sm" onClick={() => refetch()}>
+                  Try again
+                </Button>
+              }
+            />
+          ) : !hasData && !hasAnyFilters ? (
+            <EmptyState
+              icon={ListTodo}
+              title="No background tasks"
+              description="Background tasks will appear here when bulk operations, imports, exports, or syncs are initiated."
+            />
+          ) : !hasData ? (
+            <EmptyState
+              icon={ListTodo}
+              variant="no-results"
+              title="No results found"
+              description="No tasks match your current filters. Try adjusting your filters."
+              action={
+                <Button variant="outline" size="sm" onClick={clearAllFilters}>
+                  Clear all filters
+                </Button>
+              }
+            />
+          ) : (
+            <div className="space-y-3">
+              {/* Result count & pagination info */}
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">
+                  {data?.total ?? items.length} task{(data?.total ?? items.length) === 1 ? "" : "s"}
+                  {hasAnyFilters && " (filtered)"}
                 </p>
-              )}
-            </div>
-
-            <div className="sr-only" aria-live="polite" aria-atomic="true">
-              {!isLoading && `Showing ${items.length} of ${data?.total ?? 0} tasks, page ${page}`}
-            </div>
-
-            {/* Table */}
-            <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
-              <Table aria-label="Background tasks" aria-busy={isLoading || isRefetching}>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-10">
-                      <Checkbox
-                        checked={allSelected}
-                        indeterminate={someSelected && !allSelected}
-                        onChange={toggleAll}
-                        aria-label="Select all tasks"
-                      />
-                    </TableHead>
-                    <SortableHeader label="Task Type" sortKey="task_type" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
-                    <SortableHeader label="Status" sortKey="status" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
-                    <TableHead>Progress</TableHead>
-                    <TableHead className="hidden md:table-cell">Entity</TableHead>
-                    <SortableHeader label="Started" sortKey="started_at" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
-                    <TableHead className="hidden md:table-cell">Duration</TableHead>
-                    <SortableHeader label="Completed" sortKey="completed_at" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
-                    <TableHead className="w-16 text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {items.map((task, index) => (
-                    <TaskRow
-                      key={task.id}
-                      task={task}
-                      index={index}
-                      selected={selectedIds.has(task.id)}
-                      onToggle={() => toggleOne(task.id)}
-                      onRowClick={() => handleRowClick(task.id)}
-                    />
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-
-            {/* Pagination */}
-            <div className="flex items-center justify-end gap-4 pt-2">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Rows per page</span>
-                <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
-                  <SelectTrigger className="h-8 w-[70px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PAGE_SIZES.map((size) => (
-                      <SelectItem key={size} value={String(size)}>
-                        {size}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {totalPages > 1 && (
+                  <p className="text-xs text-muted-foreground">
+                    Page {page} of {totalPages}
+                  </p>
+                )}
               </div>
-              {totalPages > 1 && (
+
+              <div className="sr-only" aria-live="polite" aria-atomic="true">
+                {!isLoading && `Showing ${items.length} of ${data?.total ?? 0} tasks, page ${page}`}
+              </div>
+
+              {/* Table */}
+              <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
+                <Table aria-label="Background tasks" aria-busy={isLoading || isRefetching}>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-10">
+                        <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all tasks" />
+                      </TableHead>
+                      <SortableHeader label="Task Type" sortKey="task_type" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                      <SortableHeader label="Status" sortKey="status" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                      <TableHead>Progress</TableHead>
+                      <TableHead className="hidden md:table-cell">Entity</TableHead>
+                      <SortableHeader label="Started" sortKey="started_at" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
+                      <TableHead className="hidden md:table-cell">Duration</TableHead>
+                      <SortableHeader
+                        label="Completed"
+                        sortKey="completed_at"
+                        currentSort={sortKey}
+                        currentDirection={sortDir}
+                        onSort={handleSort}
+                        className="hidden md:table-cell"
+                      />
+                      <TableHead className="w-16 text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {items.map((task, index) => (
+                      <TaskRow
+                        key={task.id}
+                        task={task}
+                        index={index}
+                        selected={selectedIds.has(task.id)}
+                        onToggle={() => toggleOne(task.id)}
+                        onRowClick={() => handleRowClick(task.id)}
+                      />
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Pagination */}
+              <div className="flex items-center justify-end gap-4 pt-2">
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      navigate({
-                        search: (prev) => ({
-                          ...prev,
-                          page: page - 1 > 1 ? page - 1 : undefined,
-                        }),
-                      })
-                    }
-                    disabled={page <= 1}
-                  >
-                    Previous
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      navigate({
-                        search: (prev) => ({ ...prev, page: page + 1 }),
-                      })
-                    }
-                    disabled={page >= totalPages}
-                  >
-                    Next
-                  </Button>
+                  <span className="text-sm text-muted-foreground">Rows per page</span>
+                  <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
+                    <SelectTrigger className="h-8 w-[70px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PAGE_SIZES.map((size) => (
+                        <SelectItem key={size} value={String(size)}>
+                          {size}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-              )}
+                {totalPages > 1 && (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        navigate({
+                          search: (prev) => ({
+                            ...prev,
+                            page: page - 1 > 1 ? page - 1 : undefined,
+                          }),
+                        })
+                      }
+                      disabled={page <= 1}
+                    >
+                      Previous
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        navigate({
+                          search: (prev) => ({ ...prev, page: page + 1 }),
+                        })
+                      }
+                      disabled={page >= totalPages}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
         </SectionErrorBoundary>
       </PageSection>
 
-      <BulkActionBar
-        selectedCount={selectedIds.size}
-        selectedIds={Array.from(selectedIds)}
-        onClearSelection={() => setSelectedIds(new Set())}
-        actions={bulkActions}
-      />
+      <BulkActionBar selectedCount={selectedIds.size} selectedIds={Array.from(selectedIds)} onClearSelection={() => setSelectedIds(new Set())} actions={bulkActions} />
     </PageContainer>
   )
 }

@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { useTargetAuditLogs } from "@/lib/api/hooks/admin"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import type { AuditLogEntry } from "@/lib/generated/api"
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -97,9 +97,7 @@ function TimelineEntry({ entry }: { entry: AuditLogEntry }) {
     <div className="relative flex gap-3 pb-6 last:pb-0">
       {/* Timeline line */}
       <div className="flex flex-col items-center">
-        <div
-          className={`mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-white ${getTimelineDotClass(entry.action)}`}
-        >
+        <div className={`mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-white ${getTimelineDotClass(entry.action)}`}>
           <ActionIcon action={entry.action} />
         </div>
         <div className="w-px flex-1 bg-border" />
@@ -113,9 +111,7 @@ function TimelineEntry({ entry }: { entry: AuditLogEntry }) {
           </Badge>
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className="cursor-default text-xs text-muted-foreground">
-                {formatRelativeTimeShort(entry.createdAt)}
-              </span>
+              <span className="cursor-default text-xs text-muted-foreground">{formatRelativeTimeShort(entry.createdAt)}</span>
             </TooltipTrigger>
             <TooltipContent>{formatDateTime(entry.createdAt)}</TooltipContent>
           </Tooltip>
@@ -125,9 +121,7 @@ function TimelineEntry({ entry }: { entry: AuditLogEntry }) {
           {entry.actorName ? (
             <>
               <span className="font-medium text-foreground">{entry.actorName}</span>
-              {entry.actorEmail && (
-                <span className="text-xs"> ({entry.actorEmail})</span>
-              )}
+              {entry.actorEmail && <span className="text-xs"> ({entry.actorEmail})</span>}
             </>
           ) : entry.actorEmail ? (
             <span className="font-medium text-foreground">{entry.actorEmail}</span>
@@ -140,11 +134,7 @@ function TimelineEntry({ entry }: { entry: AuditLogEntry }) {
           <div className="flex flex-wrap gap-1 pt-0.5">
             <span className="text-xs text-muted-foreground">Changed:</span>
             {fields.map((field) => (
-              <Badge
-                key={field}
-                variant="outline"
-                className="px-1.5 py-0 text-[10px] font-normal text-muted-foreground"
-              >
+              <Badge key={field} variant="outline" className="px-1.5 py-0 text-[10px] font-normal text-muted-foreground">
                 {field.replace(/_/g, " ")}
               </Badge>
             ))}
@@ -184,11 +174,7 @@ interface EntityActivityPanelProps {
   enabled?: boolean
 }
 
-export function EntityActivityPanel({
-  targetType,
-  targetId,
-  enabled = true,
-}: EntityActivityPanelProps) {
+export function EntityActivityPanel({ targetType, targetId, enabled = true }: EntityActivityPanelProps) {
   const { data, isLoading, isError, refetch } = useTargetAuditLogs(targetType, targetId, {
     enabled,
   })
@@ -203,7 +189,11 @@ export function EntityActivityPanel({
         icon={AlertCircle}
         title="Unable to load activity"
         description="Something went wrong while fetching the audit trail."
-        action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+        action={
+          <Button variant="outline" size="sm" onClick={() => refetch()}>
+            Try again
+          </Button>
+        }
       />
     )
   }
@@ -215,9 +205,7 @@ export function EntityActivityPanel({
       <div className="flex flex-col items-center justify-center py-8 text-center">
         <History className="mb-2 h-8 w-8 text-muted-foreground/40" />
         <p className="text-sm font-medium text-muted-foreground">No activity recorded</p>
-        <p className="text-xs text-muted-foreground/60">
-          Changes to this resource will appear here.
-        </p>
+        <p className="text-xs text-muted-foreground/60">Changes to this resource will appear here.</p>
       </div>
     )
   }

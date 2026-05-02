@@ -1,37 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
+import { AlertCircle, Download, Eye, Filter, Home, Monitor, MoreVertical, Pencil, Plus, Power, RefreshCw, RotateCcw, Search, SlidersHorizontal, Trash2, X } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import {
-  AlertCircle,
-  Download,
-  Eye,
-  Filter,
-  Home,
-  Monitor,
-  MoreVertical,
-  Pencil,
-  Plus,
-  Power,
-  RefreshCw,
-  RotateCcw,
-  Search,
-  SlidersHorizontal,
-  Trash2,
-  X,
-} from "lucide-react"
-import { DataFreshness } from "@/components/ui/data-freshness"
 import { DeviceStatusBadge } from "@/components/devices/device-status-badge"
 import { Badge } from "@/components/ui/badge"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { DateRangeFilter, getPresetDates, isDateInRange } from "@/components/ui/date-range-filter"
 import {
   DropdownMenu,
@@ -46,24 +22,18 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { FilterDropdown, type FilterOption } from "@/components/ui/filter-dropdown"
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Skeleton, SkeletonCard } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import {
-  useDevices,
-  useDeleteDevice,
-  useRebootDevice,
-  useReprovisionDevice,
-  useUpdateDevice,
-} from "@/lib/api/hooks/devices"
-import { deleteDevice, type Device } from "@/lib/generated/api"
-import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
-import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
-import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
+import { useDeleteDevice, useDevices, useRebootDevice, useReprovisionDevice, useUpdateDevice } from "@/lib/api/hooks/devices"
+import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
+import { type Device, deleteDevice } from "@/lib/generated/api"
 import { useSettingsStore } from "@/lib/settings-store"
 import { cn } from "@/lib/utils"
 
@@ -83,10 +53,7 @@ export const Route = createFileRoute("/_app/devices/")({
     status: typeof search.status === "string" && search.status ? search.status : undefined,
     type: typeof search.type === "string" && search.type ? search.type : undefined,
     sort: typeof search.sort === "string" && search.sort ? search.sort : undefined,
-    order:
-      typeof search.order === "string" && (search.order === "asc" || search.order === "desc")
-        ? search.order
-        : undefined,
+    order: typeof search.order === "string" && (search.order === "asc" || search.order === "desc") ? search.order : undefined,
   }),
   component: DevicesPage,
 })
@@ -197,14 +164,7 @@ function DevicesPage() {
   useDocumentTitle("Devices")
   const compactMode = useSettingsStore((s) => s.compactMode)
   const cellClass = compactMode ? "py-1 px-2 text-xs" : ""
-  const {
-    q: searchParam,
-    page: pageParam,
-    status: statusParam,
-    type: typeParam,
-    sort: sortParam,
-    order: orderParam,
-  } = Route.useSearch()
+  const { q: searchParam, page: pageParam, status: statusParam, type: typeParam, sort: sortParam, order: orderParam } = Route.useSearch()
   const navigate = Route.useNavigate()
   const searchInputRef = useRef<HTMLInputElement>(null)
 
@@ -231,10 +191,7 @@ function DevicesPage() {
 
   // Column visibility
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(loadColumnVisibility)
-  const isColumnVisible = useCallback(
-    (col: string) => columnVisibility[col] !== false,
-    [columnVisibility],
-  )
+  const isColumnVisible = useCallback((col: string) => columnVisibility[col] !== false, [columnVisibility])
   const toggleColumn = useCallback((col: string) => {
     setColumnVisibility((prev) => {
       const updated = { ...prev, [col]: prev[col] !== false ? false : true }
@@ -246,14 +203,8 @@ function DevicesPage() {
   // Derive filter state from URL search params
   const search = searchParam ?? ""
   const page = pageParam ?? 1
-  const statusFilter = useMemo(
-    () => (statusParam ? statusParam.split(",").filter(Boolean) : []),
-    [statusParam],
-  )
-  const typeFilter = useMemo(
-    () => (typeParam ? typeParam.split(",").filter(Boolean) : []),
-    [typeParam],
-  )
+  const statusFilter = useMemo(() => (statusParam ? statusParam.split(",").filter(Boolean) : []), [statusParam])
+  const typeFilter = useMemo(() => (typeParam ? typeParam.split(",").filter(Boolean) : []), [typeParam])
   const sortKey = sortParam ?? null
   const sortDir: SortDirection = (orderParam as SortDirection) ?? null
 
@@ -318,8 +269,7 @@ function DevicesPage() {
     return data.items.filter((device) => {
       if (typeFilter.length > 0 && !typeFilter.includes(device.deviceType)) return false
       if (statusFilter.length > 0 && !statusFilter.includes(device.status)) return false
-      if ((startDate || endDate) && !isDateInRange(device.lastSeenAt, startDate, endDate))
-        return false
+      if ((startDate || endDate) && !isDateInRange(device.lastSeenAt, startDate, endDate)) return false
       return true
     })
   }, [data?.items, typeFilter, statusFilter, startDate, endDate])
@@ -404,11 +354,7 @@ function DevicesPage() {
           deleteMutation.reset()
         },
       ),
-      createExportAction<Device>(
-        "devices-selected",
-        csvHeaders,
-        (ids) => filteredItems.filter((d) => ids.includes(d.id)),
-      ),
+      createExportAction<Device>("devices-selected", csvHeaders, (ids) => filteredItems.filter((d) => ids.includes(d.id))),
     ],
     [filteredItems, deleteMutation],
   )
@@ -509,19 +455,9 @@ function DevicesPage() {
         breadcrumbs={breadcrumbs}
         actions={
           <div className="flex items-center gap-2">
-            <DataFreshness
-              dataUpdatedAt={dataUpdatedAt}
-              onRefresh={() => refetch()}
-              isRefreshing={isRefetching}
-            />
-            <Button
-              variant={autoRefresh ? "default" : "outline"}
-              size="sm"
-              onClick={toggleAutoRefresh}
-            >
-              {autoRefresh && (
-                <span className="mr-2 h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
-              )}
+            <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
+            <Button variant={autoRefresh ? "default" : "outline"} size="sm" onClick={toggleAutoRefresh}>
+              {autoRefresh && <span className="mr-2 h-2 w-2 animate-pulse rounded-full bg-emerald-500" />}
               Live
             </Button>
             <DropdownMenu>
@@ -535,11 +471,7 @@ function DevicesPage() {
                 <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {TOGGLEABLE_COLUMNS.map((col) => (
-                  <DropdownMenuCheckboxItem
-                    key={col.key}
-                    checked={isColumnVisible(col.key)}
-                    onCheckedChange={() => toggleColumn(col.key)}
-                  >
+                  <DropdownMenuCheckboxItem key={col.key} checked={isColumnVisible(col.key)} onCheckedChange={() => toggleColumn(col.key)}>
                     {col.label}
                   </DropdownMenuCheckboxItem>
                 ))}
@@ -560,46 +492,46 @@ function DevicesPage() {
 
       {/* Status summary pills */}
       <SectionErrorBoundary name="Device Status Summary">
-      <div className="flex flex-wrap items-center gap-2">
-        {isLoading ? (
-          <>
-            <Skeleton className="h-7 w-24 rounded-full" />
-            <Skeleton className="h-7 w-24 rounded-full" />
-            <Skeleton className="h-7 w-24 rounded-full" />
-          </>
-        ) : (
-          <>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground">
-              Total
-              <span className="ml-0.5 font-semibold text-foreground">{deviceStats.total}</span>
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              Online
-              <span className="ml-0.5 font-semibold">{deviceStats.online}</span>
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-xs font-medium text-red-700 dark:text-red-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
-              Offline
-              <span className="ml-0.5 font-semibold">{deviceStats.offline}</span>
-            </span>
-            {deviceStats.provisioning > 0 && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-700 dark:text-amber-400">
-                <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-                Provisioning
-                <span className="ml-0.5 font-semibold">{deviceStats.provisioning}</span>
+        <div className="flex flex-wrap items-center gap-2">
+          {isLoading ? (
+            <>
+              <Skeleton className="h-7 w-24 rounded-full" />
+              <Skeleton className="h-7 w-24 rounded-full" />
+              <Skeleton className="h-7 w-24 rounded-full" />
+            </>
+          ) : (
+            <>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground">
+                Total
+                <span className="ml-0.5 font-semibold text-foreground">{deviceStats.total}</span>
               </span>
-            )}
-            {deviceStats.error > 0 && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-rose-500/30 bg-rose-500/10 px-3 py-1 text-xs font-medium text-rose-700 dark:text-rose-400">
-                <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
-                Error
-                <span className="ml-0.5 font-semibold">{deviceStats.error}</span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                Online
+                <span className="ml-0.5 font-semibold">{deviceStats.online}</span>
               </span>
-            )}
-          </>
-        )}
-      </div>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-xs font-medium text-red-700 dark:text-red-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+                Offline
+                <span className="ml-0.5 font-semibold">{deviceStats.offline}</span>
+              </span>
+              {deviceStats.provisioning > 0 && (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-700 dark:text-amber-400">
+                  <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                  Provisioning
+                  <span className="ml-0.5 font-semibold">{deviceStats.provisioning}</span>
+                </span>
+              )}
+              {deviceStats.error > 0 && (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-rose-500/30 bg-rose-500/10 px-3 py-1 text-xs font-medium text-rose-700 dark:text-rose-400">
+                  <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
+                  Error
+                  <span className="ml-0.5 font-semibold">{deviceStats.error}</span>
+                </span>
+              )}
+            </>
+          )}
+        </div>
       </SectionErrorBoundary>
 
       {/* Quick filter chips */}
@@ -608,13 +540,7 @@ function DevicesPage() {
         {QUICK_FILTERS.map((filter) => {
           const active = isQuickFilterActive(filter, statusFilter)
           return (
-            <Button
-              key={filter.id}
-              variant={active ? "default" : "outline"}
-              size="sm"
-              className="h-7 rounded-full text-xs"
-              onClick={() => handleQuickFilter(filter)}
-            >
+            <Button key={filter.id} variant={active ? "default" : "outline"} size="sm" className="h-7 rounded-full text-xs" onClick={() => handleQuickFilter(filter)}>
               {filter.label}
               {active && <X className="ml-1.5 h-3 w-3" />}
             </Button>
@@ -644,7 +570,9 @@ function DevicesPage() {
                 <span className="sr-only">Clear search</span>
               </button>
             ) : (
-              <kbd className="pointer-events-none absolute right-8 top-1/2 -translate-y-1/2 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">/</kbd>
+              <kbd className="pointer-events-none absolute right-8 top-1/2 -translate-y-1/2 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">
+                /
+              </kbd>
             )}
           </div>
           <FilterDropdown
@@ -716,243 +644,214 @@ function DevicesPage() {
       {/* Content */}
       <PageSection delay={0.1}>
         <SectionErrorBoundary name="Devices Table">
-        {isLoading ? (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <SkeletonCard key={i} />
-            ))}
-          </div>
-        ) : isError ? (
-          <EmptyState
-            icon={AlertCircle}
-            title="Unable to load devices"
-            description="Something went wrong while fetching your devices. Please try again."
-            action={
-              <Button variant="outline" size="sm" onClick={() => refetch()}>
-                Try again
-              </Button>
-            }
-          />
-        ) : !hasAnyDevices && !search && activeFilterCount === 0 ? (
-          <EmptyState
-            icon={Monitor}
-            title="No devices yet"
-            description="Add your first device to start managing phones, ATAs, and other SIP endpoints."
-            action={
-              <Button size="sm" asChild>
-                <Link to="/devices/new">
-                  <Plus className="mr-2 h-4 w-4" /> Add device
-                </Link>
-              </Button>
-            }
-          />
-        ) : !hasData ? (
-          <EmptyState
-            icon={Monitor}
-            variant="no-results"
-            title="No results found"
-            description="No devices match your current filters. Try adjusting your search or filters."
-            action={
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setSearchInput("")
-                  setStartDate("")
-                  setEndDate("")
-                  navigate({
-                    search: {
-                      q: undefined,
-                      type: undefined,
-                      status: undefined,
-                      sort: undefined,
-                      order: undefined,
-                      page: undefined,
-                    },
-                  })
-                }}
-              >
-                Clear all filters
-              </Button>
-            }
-          />
-        ) : (
-          <div className="space-y-3">
-            {/* Result count & pagination info */}
-            <div className="flex items-center justify-between">
-              <p className="text-xs text-muted-foreground">
-                {data?.total ?? filteredItems.length} device{(data?.total ?? filteredItems.length) === 1 ? "" : "s"}
-                {activeFilterCount > 0 && " (filtered)"}
-              </p>
-              {totalPages > 1 && (
+          {isLoading ? (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <SkeletonCard key={i} />
+              ))}
+            </div>
+          ) : isError ? (
+            <EmptyState
+              icon={AlertCircle}
+              title="Unable to load devices"
+              description="Something went wrong while fetching your devices. Please try again."
+              action={
+                <Button variant="outline" size="sm" onClick={() => refetch()}>
+                  Try again
+                </Button>
+              }
+            />
+          ) : !hasAnyDevices && !search && activeFilterCount === 0 ? (
+            <EmptyState
+              icon={Monitor}
+              title="No devices yet"
+              description="Add your first device to start managing phones, ATAs, and other SIP endpoints."
+              action={
+                <Button size="sm" asChild>
+                  <Link to="/devices/new">
+                    <Plus className="mr-2 h-4 w-4" /> Add device
+                  </Link>
+                </Button>
+              }
+            />
+          ) : !hasData ? (
+            <EmptyState
+              icon={Monitor}
+              variant="no-results"
+              title="No results found"
+              description="No devices match your current filters. Try adjusting your search or filters."
+              action={
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSearchInput("")
+                    setStartDate("")
+                    setEndDate("")
+                    navigate({
+                      search: {
+                        q: undefined,
+                        type: undefined,
+                        status: undefined,
+                        sort: undefined,
+                        order: undefined,
+                        page: undefined,
+                      },
+                    })
+                  }}
+                >
+                  Clear all filters
+                </Button>
+              }
+            />
+          ) : (
+            <div className="space-y-3">
+              {/* Result count & pagination info */}
+              <div className="flex items-center justify-between">
                 <p className="text-xs text-muted-foreground">
-                  Page {page} of {totalPages}
+                  {data?.total ?? filteredItems.length} device{(data?.total ?? filteredItems.length) === 1 ? "" : "s"}
+                  {activeFilterCount > 0 && " (filtered)"}
                 </p>
-              )}
-            </div>
-
-            {/* Table */}
-            <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
-              <Table aria-label="Devices" aria-busy={isLoading || isRefetching}>
-                <TableHeader className="sticky top-0 z-10 bg-background">
-                  <TableRow>
-                    <TableHead className="w-10">
-                      <Checkbox
-                        checked={allSelected}
-                        indeterminate={someSelected && !allSelected}
-                        onChange={toggleAll}
-                        aria-label="Select all devices"
-                      />
-                    </TableHead>
-                    <SortableHeader
-                      label="Name"
-                      sortKey="name"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                    />
-                    {isColumnVisible("type") && (
-                      <SortableHeader
-                        label="Type"
-                        sortKey="device_type"
-                        currentSort={sortKey}
-                        currentDirection={sortDir}
-                        onSort={handleSort}
-                        className="hidden md:table-cell"
-                      />
-                    )}
-                    {isColumnVisible("status") && (
-                      <SortableHeader
-                        label="Status"
-                        sortKey="status"
-                        currentSort={sortKey}
-                        currentDirection={sortDir}
-                        onSort={handleSort}
-                      />
-                    )}
-                    {isColumnVisible("mac") && (
-                      <TableHead className="hidden md:table-cell">MAC Address</TableHead>
-                    )}
-                    {isColumnVisible("ip") && (
-                      <SortableHeader
-                        label="IP Address"
-                        sortKey="ip_address"
-                        currentSort={sortKey}
-                        currentDirection={sortDir}
-                        onSort={handleSort}
-                        className="hidden md:table-cell"
-                      />
-                    )}
-                    {isColumnVisible("lastSeen") && (
-                      <SortableHeader
-                        label="Last Seen"
-                        sortKey="last_seen_at"
-                        currentSort={sortKey}
-                        currentDirection={sortDir}
-                        onSort={handleSort}
-                        className="hidden md:table-cell"
-                      />
-                    )}
-                    <TableHead className="w-16 text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredItems.map((device, index) => (
-                    <DeviceRow
-                      key={device.id}
-                      device={device}
-                      index={index}
-                      selected={selectedIds.has(device.id)}
-                      onToggle={() => toggleOne(device.id)}
-                      onRowClick={() => handleRowClick(device.id)}
-                      onDelete={() => deleteMutation.mutate(device.id)}
-                      cellClass={cellClass}
-                      isColumnVisible={isColumnVisible}
-                    />
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-            <div className="sr-only" aria-live="polite" aria-atomic="true">
-              {!isLoading && `Showing ${filteredItems.length} of ${data?.total ?? 0} results, page ${page}`}
-            </div>
-
-            {/* Pagination */}
-            <div className="flex items-center justify-end gap-4">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Rows per page</span>
-                <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
-                  <SelectTrigger className="h-8 w-[70px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PAGE_SIZES.map((size) => (
-                      <SelectItem key={size} value={String(size)}>
-                        {size}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {totalPages > 1 && (
+                  <p className="text-xs text-muted-foreground">
+                    Page {page} of {totalPages}
+                  </p>
+                )}
               </div>
-              {totalPages > 1 && (
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      navigate({
-                        search: (prev) => ({
-                          ...prev,
-                          page: page - 1 > 1 ? page - 1 : undefined,
-                        }),
-                      })
-                    }
-                    disabled={page <= 1}
-                  >
-                    Previous
-                    <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&larr;</kbd>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      navigate({
-                        search: (prev) => ({ ...prev, page: page + 1 }),
-                      })
-                    }
-                    disabled={page >= totalPages}
-                  >
-                    Next
-                    <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&rarr;</kbd>
-                  </Button>
-                </div>
-              )}
-            </div>
 
-            {/* Keyboard shortcut hints */}
-            <div className="hidden items-center justify-center gap-4 pt-1 text-[11px] text-muted-foreground/60 lg:flex">
-              <span className="inline-flex items-center gap-1.5">
-                <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded border border-border/50 bg-muted/50 px-1 font-mono text-[10px] font-medium">/</kbd>
-                Search
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded border border-border/50 bg-muted/50 px-1 font-mono text-[10px] font-medium">&larr;</kbd>
-                <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded border border-border/50 bg-muted/50 px-1 font-mono text-[10px] font-medium">&rarr;</kbd>
-                Navigate pages
-              </span>
+              {/* Table */}
+              <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
+                <Table aria-label="Devices" aria-busy={isLoading || isRefetching}>
+                  <TableHeader className="sticky top-0 z-10 bg-background">
+                    <TableRow>
+                      <TableHead className="w-10">
+                        <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all devices" />
+                      </TableHead>
+                      <SortableHeader label="Name" sortKey="name" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                      {isColumnVisible("type") && (
+                        <SortableHeader label="Type" sortKey="device_type" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
+                      )}
+                      {isColumnVisible("status") && <SortableHeader label="Status" sortKey="status" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />}
+                      {isColumnVisible("mac") && <TableHead className="hidden md:table-cell">MAC Address</TableHead>}
+                      {isColumnVisible("ip") && (
+                        <SortableHeader
+                          label="IP Address"
+                          sortKey="ip_address"
+                          currentSort={sortKey}
+                          currentDirection={sortDir}
+                          onSort={handleSort}
+                          className="hidden md:table-cell"
+                        />
+                      )}
+                      {isColumnVisible("lastSeen") && (
+                        <SortableHeader
+                          label="Last Seen"
+                          sortKey="last_seen_at"
+                          currentSort={sortKey}
+                          currentDirection={sortDir}
+                          onSort={handleSort}
+                          className="hidden md:table-cell"
+                        />
+                      )}
+                      <TableHead className="w-16 text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredItems.map((device, index) => (
+                      <DeviceRow
+                        key={device.id}
+                        device={device}
+                        index={index}
+                        selected={selectedIds.has(device.id)}
+                        onToggle={() => toggleOne(device.id)}
+                        onRowClick={() => handleRowClick(device.id)}
+                        onDelete={() => deleteMutation.mutate(device.id)}
+                        cellClass={cellClass}
+                        isColumnVisible={isColumnVisible}
+                      />
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              <div className="sr-only" aria-live="polite" aria-atomic="true">
+                {!isLoading && `Showing ${filteredItems.length} of ${data?.total ?? 0} results, page ${page}`}
+              </div>
+
+              {/* Pagination */}
+              <div className="flex items-center justify-end gap-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">Rows per page</span>
+                  <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
+                    <SelectTrigger className="h-8 w-[70px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PAGE_SIZES.map((size) => (
+                        <SelectItem key={size} value={String(size)}>
+                          {size}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {totalPages > 1 && (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        navigate({
+                          search: (prev) => ({
+                            ...prev,
+                            page: page - 1 > 1 ? page - 1 : undefined,
+                          }),
+                        })
+                      }
+                      disabled={page <= 1}
+                    >
+                      Previous
+                      <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&larr;</kbd>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        navigate({
+                          search: (prev) => ({ ...prev, page: page + 1 }),
+                        })
+                      }
+                      disabled={page >= totalPages}
+                    >
+                      Next
+                      <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&rarr;</kbd>
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              {/* Keyboard shortcut hints */}
+              <div className="hidden items-center justify-center gap-4 pt-1 text-[11px] text-muted-foreground/60 lg:flex">
+                <span className="inline-flex items-center gap-1.5">
+                  <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded border border-border/50 bg-muted/50 px-1 font-mono text-[10px] font-medium">/</kbd>
+                  Search
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded border border-border/50 bg-muted/50 px-1 font-mono text-[10px] font-medium">
+                    &larr;
+                  </kbd>
+                  <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded border border-border/50 bg-muted/50 px-1 font-mono text-[10px] font-medium">
+                    &rarr;
+                  </kbd>
+                  Navigate pages
+                </span>
+              </div>
             </div>
-          </div>
-        )}
+          )}
         </SectionErrorBoundary>
       </PageSection>
 
       {/* Bulk action bar */}
-      <BulkActionBar
-        selectedCount={selectedIds.size}
-        selectedIds={Array.from(selectedIds)}
-        onClearSelection={() => setSelectedIds(new Set())}
-        actions={bulkActions}
-      />
+      <BulkActionBar selectedCount={selectedIds.size} selectedIds={Array.from(selectedIds)} onClearSelection={() => setSelectedIds(new Set())} actions={bulkActions} />
     </PageContainer>
   )
 }
@@ -1005,12 +904,7 @@ function DeviceRow({
         />
       </TableCell>
       <TableCell className={cellClass}>
-        <Link
-          to="/devices/$deviceId"
-          params={{ deviceId: device.id }}
-          className="group flex flex-col gap-0.5"
-          onClick={(e) => e.stopPropagation()}
-        >
+        <Link to="/devices/$deviceId" params={{ deviceId: device.id }} className="group flex flex-col gap-0.5" onClick={(e) => e.stopPropagation()}>
           <span className="font-medium group-hover:underline">{device.name}</span>
           {device.deviceModel && (
             <span className="text-xs text-muted-foreground">
@@ -1027,9 +921,7 @@ function DeviceRow({
       </TableCell>
       {isColumnVisible("type") && (
         <TableCell className={cn("hidden md:table-cell", cellClass)}>
-          <Badge variant="outline">
-            {deviceTypeLabels[device.deviceType] ?? device.deviceType}
-          </Badge>
+          <Badge variant="outline">{deviceTypeLabels[device.deviceType] ?? device.deviceType}</Badge>
         </TableCell>
       )}
       {isColumnVisible("status") && (
@@ -1039,29 +931,19 @@ function DeviceRow({
       )}
       {isColumnVisible("mac") && (
         <TableCell className={cn("hidden md:table-cell", cellClass)}>
-          {device.macAddress ? (
-            <span className="font-mono text-xs text-muted-foreground">{device.macAddress}</span>
-          ) : (
-            <span className="text-xs text-muted-foreground">--</span>
-          )}
+          {device.macAddress ? <span className="font-mono text-xs text-muted-foreground">{device.macAddress}</span> : <span className="text-xs text-muted-foreground">--</span>}
         </TableCell>
       )}
       {isColumnVisible("ip") && (
         <TableCell className={cn("hidden md:table-cell", cellClass)}>
-          {device.ipAddress ? (
-            <span className="font-mono text-xs text-muted-foreground">{device.ipAddress}</span>
-          ) : (
-            <span className="text-xs text-muted-foreground">--</span>
-          )}
+          {device.ipAddress ? <span className="font-mono text-xs text-muted-foreground">{device.ipAddress}</span> : <span className="text-xs text-muted-foreground">--</span>}
         </TableCell>
       )}
       {isColumnVisible("lastSeen") && (
         <TableCell className={cn("hidden md:table-cell", cellClass)}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className="text-xs text-muted-foreground">
-                {formatRelativeTimeShort(device.lastSeenAt)}
-              </span>
+              <span className="text-xs text-muted-foreground">{formatRelativeTimeShort(device.lastSeenAt)}</span>
             </TooltipTrigger>
             <TooltipContent>{formatDateTime(device.lastSeenAt)}</TooltipContent>
           </Tooltip>
@@ -1070,13 +952,7 @@ function DeviceRow({
       <TableCell className={cn("text-right", cellClass)}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0"
-              data-slot="dropdown"
-              onClick={(e) => e.stopPropagation()}
-            >
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" data-slot="dropdown" onClick={(e) => e.stopPropagation()}>
               <MoreVertical className="h-4 w-4" />
               <span className="sr-only">Actions for {device.name}</span>
             </Button>
@@ -1095,32 +971,20 @@ function DeviceRow({
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={() => rebootMutation.mutate()}
-              disabled={rebootMutation.isPending}
-            >
+            <DropdownMenuItem onClick={() => rebootMutation.mutate()} disabled={rebootMutation.isPending}>
               <RefreshCw className="mr-2 h-4 w-4" />
               Reboot
             </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => reprovisionMutation.mutate()}
-              disabled={reprovisionMutation.isPending}
-            >
+            <DropdownMenuItem onClick={() => reprovisionMutation.mutate()} disabled={reprovisionMutation.isPending}>
               <RotateCcw className="mr-2 h-4 w-4" />
               Reprovision
             </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => updateMutation.mutate({ isActive: !device.isActive })}
-              disabled={updateMutation.isPending}
-            >
+            <DropdownMenuItem onClick={() => updateMutation.mutate({ isActive: !device.isActive })} disabled={updateMutation.isPending}>
               <Power className="mr-2 h-4 w-4" />
               {device.isActive ? "Disable" : "Enable"}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem
-              className="text-destructive focus:text-destructive"
-              onClick={onDelete}
-            >
+            <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={onDelete}>
               <Trash2 className="mr-2 h-4 w-4" />
               Delete
             </DropdownMenuItem>

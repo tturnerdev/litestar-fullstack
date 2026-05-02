@@ -1,6 +1,4 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
-import { useEffect, useState, useCallback } from "react"
-import { z } from "zod"
 import {
   AlertCircle,
   AlertTriangle,
@@ -26,42 +24,35 @@ import {
   Users,
   Voicemail,
 } from "lucide-react"
+import { useCallback, useEffect, useState } from "react"
+import { toast } from "sonner"
+import { z } from "zod"
 import { ExternalDataTab } from "@/components/gateway/external-data-tab"
+import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { CopyButton } from "@/components/ui/copy-button"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { CopyButton } from "@/components/ui/copy-button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { DeleteExtensionDialog } from "@/components/voice/delete-extension-dialog"
 import { DndQuickToggle } from "@/components/voice/dnd-quick-toggle"
 import { EditExtensionDialog } from "@/components/voice/edit-extension-dialog"
 import { useDocumentTitle } from "@/hooks/use-document-title"
-import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
+import { useCallQueues, useRingGroups } from "@/lib/api/hooks/call-routing"
+import { useDevicesByExtension } from "@/lib/api/hooks/devices"
+import { useGatewayLookupExtension } from "@/lib/api/hooks/gateway"
+import { useTeams } from "@/lib/api/hooks/teams"
 import {
   type Extension as ExtensionType,
   useDndSettings,
@@ -72,12 +63,8 @@ import {
   useVoicemailMessages,
   useVoicemailSettings,
 } from "@/lib/api/hooks/voice"
-import { useCallQueues, useRingGroups } from "@/lib/api/hooks/call-routing"
-import { useDevicesByExtension } from "@/lib/api/hooks/devices"
-import { useGatewayLookupExtension } from "@/lib/api/hooks/gateway"
-import { useTeams } from "@/lib/api/hooks/teams"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { formatDuration } from "@/lib/format-utils"
-import { toast } from "sonner"
 
 const searchSchema = z.object({
   tab: z.string().optional(),
@@ -89,16 +76,9 @@ export const Route = createFileRoute("/_app/voice/extensions/$extensionId/")({
   validateSearch: searchSchema,
 })
 
-
 // -- Timestamp with tooltip ---------------------------------------------------
 
-function TimestampField({
-  label,
-  value,
-}: {
-  label: string
-  value: string | null | undefined
-}) {
+function TimestampField({ label, value }: { label: string; value: string | null | undefined }) {
   if (!value) {
     return (
       <div>
@@ -242,7 +222,11 @@ function ExtensionDetailPage() {
             icon={AlertCircle}
             title="Unable to load extension"
             description="Something went wrong. Please try again."
-            action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+            action={
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
+                Try again
+              </Button>
+            }
           />
         </PageSection>
       </PageContainer>
@@ -282,10 +266,7 @@ function ExtensionDetailPage() {
           <div className="flex items-center gap-3">
             <DndQuickToggle extensionId={extensionId} showLabel />
             {!data.isActive && (
-              <Badge
-                variant="outline"
-                className="border-muted-foreground/30 text-muted-foreground"
-              >
+              <Badge variant="outline" className="border-muted-foreground/30 text-muted-foreground">
                 Disabled
               </Badge>
             )}
@@ -309,10 +290,7 @@ function ExtensionDetailPage() {
                   Copy Extension Number
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="text-destructive focus:text-destructive"
-                  onClick={() => setShowDeleteDialog(true)}
-                >
+                <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setShowDeleteDialog(true)}>
                   <Trash2 className="mr-2 h-4 w-4" />
                   Delete Extension
                 </DropdownMenuItem>
@@ -334,151 +312,141 @@ function ExtensionDetailPage() {
           <TabsContent value="details" className="mt-6 space-y-6">
             {/* Extension Info */}
             <SectionErrorBoundary name="Extension Info">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Phone className="h-5 w-5 text-muted-foreground" />
-                  <CardTitle>Extension Info</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-4">
-                  <div>
-                    <p className="text-muted-foreground">Extension Number</p>
-                    <p className="font-mono font-medium">{data.extensionNumber}</p>
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Phone className="h-5 w-5 text-muted-foreground" />
+                    <CardTitle>Extension Info</CardTitle>
                   </div>
-                  <div>
-                    <p className="text-muted-foreground">Display Name</p>
-                    <p className="font-medium">{data.displayName}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Phone Number</p>
-                    {data.phoneNumberId ? (
-                      <Link
-                        to="/voice/phone-numbers/$phoneNumberId"
-                        params={{ phoneNumberId: data.phoneNumberId }}
-                        className="inline-flex items-center gap-1 font-mono text-sm text-primary hover:underline"
-                      >
-                        {phoneNumberQuery.data?.number ?? "Assigned"}
-                        {phoneNumberQuery.data?.label && (
-                          <span className="text-muted-foreground">
-                            ({phoneNumberQuery.data.label})
-                          </span>
-                        )}
-                      </Link>
-                    ) : (
-                      <p className="text-muted-foreground">Not assigned</p>
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Active</p>
-                    <div className="mt-0.5 flex items-center gap-2">
-                      <p>{data.isActive ? "Yes" : "No"}</p>
-                      <Switch
-                        checked={data.isActive}
-                        onCheckedChange={(checked) =>
-                          updateExtension.mutate({ isActive: checked })
-                        }
-                        disabled={updateExtension.isPending}
-                      />
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-4">
+                    <div>
+                      <p className="text-muted-foreground">Extension Number</p>
+                      <p className="font-mono font-medium">{data.extensionNumber}</p>
                     </div>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">E911 Status</p>
-                    <div className="mt-0.5">
-                      {!data.phoneNumberId ? (
-                        <span className="text-muted-foreground">No phone number assigned</span>
-                      ) : phoneNumberQuery.isLoading ? (
-                        <Skeleton className="h-5 w-28" />
-                      ) : phoneNumberQuery.data?.e911Registered ? (
+                    <div>
+                      <p className="text-muted-foreground">Display Name</p>
+                      <p className="font-medium">{data.displayName}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Phone Number</p>
+                      {data.phoneNumberId ? (
                         <Link
-                          to="/e911/$registrationId"
-                          params={{ registrationId: phoneNumberQuery.data.e911RegistrationId ?? "" }}
-                          className="inline-flex items-center gap-1.5 text-emerald-600 hover:underline"
+                          to="/voice/phone-numbers/$phoneNumberId"
+                          params={{ phoneNumberId: data.phoneNumberId }}
+                          className="inline-flex items-center gap-1 font-mono text-sm text-primary hover:underline"
                         >
-                          <Shield className="h-3.5 w-3.5" />
-                          Registered
+                          {phoneNumberQuery.data?.number ?? "Assigned"}
+                          {phoneNumberQuery.data?.label && <span className="text-muted-foreground">({phoneNumberQuery.data.label})</span>}
                         </Link>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 text-amber-600">
-                          <ShieldOff className="h-3.5 w-3.5" />
-                          Not Registered
-                        </span>
+                        <p className="text-muted-foreground">Not assigned</p>
                       )}
                     </div>
+                    <div>
+                      <p className="text-muted-foreground">Active</p>
+                      <div className="mt-0.5 flex items-center gap-2">
+                        <p>{data.isActive ? "Yes" : "No"}</p>
+                        <Switch checked={data.isActive} onCheckedChange={(checked) => updateExtension.mutate({ isActive: checked })} disabled={updateExtension.isPending} />
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">E911 Status</p>
+                      <div className="mt-0.5">
+                        {!data.phoneNumberId ? (
+                          <span className="text-muted-foreground">No phone number assigned</span>
+                        ) : phoneNumberQuery.isLoading ? (
+                          <Skeleton className="h-5 w-28" />
+                        ) : phoneNumberQuery.data?.e911Registered ? (
+                          <Link
+                            to="/e911/$registrationId"
+                            params={{ registrationId: phoneNumberQuery.data.e911RegistrationId ?? "" }}
+                            className="inline-flex items-center gap-1.5 text-emerald-600 hover:underline"
+                          >
+                            <Shield className="h-3.5 w-3.5" />
+                            Registered
+                          </Link>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 text-amber-600">
+                            <ShieldOff className="h-3.5 w-3.5" />
+                            Not Registered
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
 
             {/* Call Settings */}
             <SectionErrorBoundary name="Call Settings">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Settings className="h-5 w-5 text-muted-foreground" />
-                  <CardTitle>Call Settings</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <CallSettingsSummary extensionId={extensionId} />
-              </CardContent>
-            </Card>
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Settings className="h-5 w-5 text-muted-foreground" />
+                    <CardTitle>Call Settings</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <CallSettingsSummary extensionId={extensionId} />
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
 
             {/* Call Forwarding */}
             <SectionErrorBoundary name="Call Forwarding">
-            <CallForwardingCard extensionId={extensionId} extension={data} />
+              <CallForwardingCard extensionId={extensionId} extension={data} />
             </SectionErrorBoundary>
 
             {/* Assigned Devices */}
             <SectionErrorBoundary name="Assigned Devices">
-            <AssignedDevicesCard extensionId={extensionId} />
+              <AssignedDevicesCard extensionId={extensionId} />
             </SectionErrorBoundary>
 
             {/* Sub-page links (voicemail, forwarding, dnd) */}
             <SectionErrorBoundary name="Sub-Page Links">
-            <SubPageLinks extensionId={extensionId} />
+              <SubPageLinks extensionId={extensionId} />
             </SectionErrorBoundary>
 
             {/* Metadata */}
             <SectionErrorBoundary name="Metadata">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Fingerprint className="h-5 w-5 text-muted-foreground" />
-                  <CardTitle>Metadata</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Extension ID</p>
-                    <div className="flex items-center gap-1">
-                      <p className="font-mono text-xs">{extensionId}</p>
-                      <CopyButton value={extensionId} label="extension ID" />
-                    </div>
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Fingerprint className="h-5 w-5 text-muted-foreground" />
+                    <CardTitle>Metadata</CardTitle>
                   </div>
-                  <TimestampField label="Created" value={data.createdAt} />
-                  <TimestampField label="Last Updated" value={data.updatedAt} />
-                  {data.phoneNumberId && (
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-4">
                     <div>
-                      <p className="text-sm text-muted-foreground">Phone Number ID</p>
+                      <p className="text-sm text-muted-foreground">Extension ID</p>
                       <div className="flex items-center gap-1">
-                        <p className="font-mono text-xs">{data.phoneNumberId}</p>
-                        <CopyButton value={data.phoneNumberId} label="phone number ID" />
+                        <p className="font-mono text-xs">{extensionId}</p>
+                        <CopyButton value={extensionId} label="extension ID" />
                       </div>
                     </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+                    <TimestampField label="Created" value={data.createdAt} />
+                    <TimestampField label="Last Updated" value={data.updatedAt} />
+                    {data.phoneNumberId && (
+                      <div>
+                        <p className="text-sm text-muted-foreground">Phone Number ID</p>
+                        <div className="flex items-center gap-1">
+                          <p className="font-mono text-xs">{data.phoneNumberId}</p>
+                          <CopyButton value={data.phoneNumberId} label="phone number ID" />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
 
             {/* Related Resources */}
             <SectionErrorBoundary name="Related Resources">
-            <RelatedResourcesSection extensionId={extensionId} extension={data} />
+              <RelatedResourcesSection extensionId={extensionId} extension={data} />
             </SectionErrorBoundary>
           </TabsContent>
 
@@ -500,18 +468,14 @@ function ExtensionDetailPage() {
 
           <TabsContent value="activity" className="mt-6">
             <SectionErrorBoundary name="Activity Log">
-            <Card>
-              <CardHeader>
-                <CardTitle>Activity Log</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <EntityActivityPanel
-                  targetType="extension"
-                  targetId={extensionId}
-                  enabled={tab === "activity"}
-                />
-              </CardContent>
-            </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Activity Log</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <EntityActivityPanel targetType="extension" targetId={extensionId} enabled={tab === "activity"} />
+                </CardContent>
+              </Card>
             </SectionErrorBoundary>
           </TabsContent>
         </Tabs>
@@ -520,41 +484,32 @@ function ExtensionDetailPage() {
       {/* Danger Zone */}
       <PageSection delay={0.25}>
         <SectionErrorBoundary name="Danger Zone">
-        <Card className="border-destructive/30">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-destructive">
-              <AlertTriangle className="h-4 w-4" />
-              Danger Zone
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium text-sm">Delete this extension</p>
-                <p className="text-sm text-muted-foreground">
-                  This action cannot be undone. All forwarding rules, voicemail settings, and DND
-                  configuration will be permanently removed.
-                </p>
+          <Card className="border-destructive/30">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-destructive">
+                <AlertTriangle className="h-4 w-4" />
+                Danger Zone
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-sm">Delete this extension</p>
+                  <p className="text-sm text-muted-foreground">
+                    This action cannot be undone. All forwarding rules, voicemail settings, and DND configuration will be permanently removed.
+                  </p>
+                </div>
+                <Button variant="destructive" size="sm" onClick={() => setShowDeleteDialog(true)}>
+                  <Trash2 className="mr-2 h-4 w-4" /> Delete
+                </Button>
               </div>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => setShowDeleteDialog(true)}
-              >
-                <Trash2 className="mr-2 h-4 w-4" /> Delete
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
         </SectionErrorBoundary>
       </PageSection>
 
       {/* Edit extension dialog */}
-      <EditExtensionDialog
-        extension={data}
-        open={showEditDialog}
-        onOpenChange={setShowEditDialog}
-      />
+      <EditExtensionDialog extension={data} open={showEditDialog} onOpenChange={setShowEditDialog} />
 
       {/* Delete confirmation dialog */}
       <DeleteExtensionDialog
@@ -616,36 +571,20 @@ function hasChanges(current: ForwardingState, original: ForwardingState): boolea
 
 function buildPatch(current: ForwardingState, original: ForwardingState): Record<string, unknown> {
   const patch: Record<string, unknown> = {}
-  if (current.dndEnabled !== original.dndEnabled)
-    patch.dndEnabled = current.dndEnabled
-  if (current.forwardAlwaysEnabled !== original.forwardAlwaysEnabled)
-    patch.forwardAlwaysEnabled = current.forwardAlwaysEnabled
-  if (current.forwardAlwaysDestination !== original.forwardAlwaysDestination)
-    patch.forwardAlwaysDestination = current.forwardAlwaysDestination || null
-  if (current.forwardBusyEnabled !== original.forwardBusyEnabled)
-    patch.forwardBusyEnabled = current.forwardBusyEnabled
-  if (current.forwardBusyDestination !== original.forwardBusyDestination)
-    patch.forwardBusyDestination = current.forwardBusyDestination || null
-  if (current.forwardNoAnswerEnabled !== original.forwardNoAnswerEnabled)
-    patch.forwardNoAnswerEnabled = current.forwardNoAnswerEnabled
-  if (current.forwardNoAnswerDestination !== original.forwardNoAnswerDestination)
-    patch.forwardNoAnswerDestination = current.forwardNoAnswerDestination || null
-  if (current.forwardNoAnswerRingCount !== original.forwardNoAnswerRingCount)
-    patch.forwardNoAnswerRingCount = current.forwardNoAnswerRingCount
-  if (current.forwardUnreachableEnabled !== original.forwardUnreachableEnabled)
-    patch.forwardUnreachableEnabled = current.forwardUnreachableEnabled
-  if (current.forwardUnreachableDestination !== original.forwardUnreachableDestination)
-    patch.forwardUnreachableDestination = current.forwardUnreachableDestination || null
+  if (current.dndEnabled !== original.dndEnabled) patch.dndEnabled = current.dndEnabled
+  if (current.forwardAlwaysEnabled !== original.forwardAlwaysEnabled) patch.forwardAlwaysEnabled = current.forwardAlwaysEnabled
+  if (current.forwardAlwaysDestination !== original.forwardAlwaysDestination) patch.forwardAlwaysDestination = current.forwardAlwaysDestination || null
+  if (current.forwardBusyEnabled !== original.forwardBusyEnabled) patch.forwardBusyEnabled = current.forwardBusyEnabled
+  if (current.forwardBusyDestination !== original.forwardBusyDestination) patch.forwardBusyDestination = current.forwardBusyDestination || null
+  if (current.forwardNoAnswerEnabled !== original.forwardNoAnswerEnabled) patch.forwardNoAnswerEnabled = current.forwardNoAnswerEnabled
+  if (current.forwardNoAnswerDestination !== original.forwardNoAnswerDestination) patch.forwardNoAnswerDestination = current.forwardNoAnswerDestination || null
+  if (current.forwardNoAnswerRingCount !== original.forwardNoAnswerRingCount) patch.forwardNoAnswerRingCount = current.forwardNoAnswerRingCount
+  if (current.forwardUnreachableEnabled !== original.forwardUnreachableEnabled) patch.forwardUnreachableEnabled = current.forwardUnreachableEnabled
+  if (current.forwardUnreachableDestination !== original.forwardUnreachableDestination) patch.forwardUnreachableDestination = current.forwardUnreachableDestination || null
   return patch
 }
 
-function CallForwardingCard({
-  extensionId,
-  extension,
-}: {
-  extensionId: string
-  extension: ExtensionType
-}) {
+function CallForwardingCard({ extensionId, extension }: { extensionId: string; extension: ExtensionType }) {
   const updateExtension = useUpdateExtension(extensionId)
   const [isEditing, setIsEditing] = useState(false)
   const [state, setState] = useState<ForwardingState>(() => stateFromExtension(extension))
@@ -658,12 +597,9 @@ function CallForwardingCard({
     }
   }, [extension, isEditing])
 
-  const update = useCallback(
-    <K extends keyof ForwardingState>(key: K, value: ForwardingState[K]) => {
-      setState((prev) => ({ ...prev, [key]: value }))
-    },
-    [],
-  )
+  const update = useCallback(<K extends keyof ForwardingState>(key: K, value: ForwardingState[K]) => {
+    setState((prev) => ({ ...prev, [key]: value }))
+  }, [])
 
   function handleSave() {
     const patch = buildPatch(state, original)
@@ -685,11 +621,7 @@ function CallForwardingCard({
   }
 
   const dirty = hasChanges(state, original)
-  const anyForwardingEnabled =
-    extension.forwardAlwaysEnabled ||
-    extension.forwardBusyEnabled ||
-    extension.forwardNoAnswerEnabled ||
-    extension.forwardUnreachableEnabled
+  const anyForwardingEnabled = extension.forwardAlwaysEnabled || extension.forwardBusyEnabled || extension.forwardNoAnswerEnabled || extension.forwardUnreachableEnabled
 
   return (
     <Card>
@@ -704,7 +636,9 @@ function CallForwardingCard({
               </Badge>
             )}
             {!isEditing && anyForwardingEnabled && (
-              <Badge variant="secondary" className="ml-1 text-xs">Active</Badge>
+              <Badge variant="secondary" className="ml-1 text-xs">
+                Active
+              </Badge>
             )}
           </div>
           {!isEditing ? (
@@ -713,24 +647,11 @@ function CallForwardingCard({
             </Button>
           ) : (
             <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleCancel}
-                disabled={updateExtension.isPending}
-              >
+              <Button variant="outline" size="sm" onClick={handleCancel} disabled={updateExtension.isPending}>
                 Cancel
               </Button>
-              <Button
-                size="sm"
-                onClick={handleSave}
-                disabled={!dirty || updateExtension.isPending}
-              >
-                {updateExtension.isPending ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Check className="mr-2 h-4 w-4" />
-                )}
+              <Button size="sm" onClick={handleSave} disabled={!dirty || updateExtension.isPending}>
+                {updateExtension.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
                 Save
               </Button>
             </div>
@@ -741,12 +662,12 @@ function CallForwardingCard({
         {/* DND Toggle */}
         <div className="flex items-center justify-between rounded-lg border border-border/60 bg-muted/30 p-4">
           <div className="flex items-center gap-3">
-            <BellOff className={`h-5 w-5 ${isEditing ? (state.dndEnabled ? "text-destructive" : "text-muted-foreground") : (extension.dndEnabled ? "text-destructive" : "text-muted-foreground")}`} />
+            <BellOff
+              className={`h-5 w-5 ${isEditing ? (state.dndEnabled ? "text-destructive" : "text-muted-foreground") : extension.dndEnabled ? "text-destructive" : "text-muted-foreground"}`}
+            />
             <div>
               <p className="text-sm font-medium">Do Not Disturb</p>
-              <p className="text-xs text-muted-foreground">
-                Silence all incoming calls to this extension
-              </p>
+              <p className="text-xs text-muted-foreground">Silence all incoming calls to this extension</p>
             </div>
           </div>
           <Switch
@@ -853,9 +774,13 @@ function ForwardingRuleRow({
             <div className="flex items-center gap-2">
               <p className="text-sm font-medium">{label}</p>
               {enabled ? (
-                <Badge variant="default" className="text-xs">On</Badge>
+                <Badge variant="default" className="text-xs">
+                  On
+                </Badge>
               ) : (
-                <Badge variant="outline" className="text-xs">Off</Badge>
+                <Badge variant="outline" className="text-xs">
+                  Off
+                </Badge>
               )}
             </div>
             <p className="text-xs text-muted-foreground">{description}</p>
@@ -879,23 +804,13 @@ function ForwardingRuleRow({
           <p className="text-sm font-medium">{label}</p>
           <p className="text-xs text-muted-foreground">{description}</p>
         </div>
-        <Switch
-          checked={enabled}
-          onCheckedChange={onEnabledChange}
-          disabled={disabled}
-        />
+        <Switch checked={enabled} onCheckedChange={onEnabledChange} disabled={disabled} />
       </div>
       {enabled && (
         <div className="grid gap-3 pt-1 md:grid-cols-2">
           <div className="space-y-1.5">
             <Label className="text-xs">Destination</Label>
-            <Input
-              value={destination}
-              onChange={(e) => onDestinationChange(e.target.value)}
-              placeholder="Phone number or extension"
-              disabled={disabled}
-              className="h-9 text-sm"
-            />
+            <Input value={destination} onChange={(e) => onDestinationChange(e.target.value)} placeholder="Phone number or extension" disabled={disabled} className="h-9 text-sm" />
           </div>
           {showRingCount && onRingCountChange && (
             <div className="space-y-1.5">
@@ -943,9 +858,7 @@ function CallSettingsSummary({ extensionId }: { extensionId: string }) {
               <Badge variant="destructive" className="gap-1 text-xs">
                 <BellOff className="h-3 w-3" />
                 Active
-                {dndSettings?.mode && dndSettings.mode !== "always"
-                  ? ` (${dndSettings.mode})`
-                  : ""}
+                {dndSettings?.mode && dndSettings.mode !== "always" ? ` (${dndSettings.mode})` : ""}
               </Badge>
             ) : (
               <span>Off</span>
@@ -957,11 +870,7 @@ function CallSettingsSummary({ extensionId }: { extensionId: string }) {
         <PhoneForwarded className="mt-0.5 h-4 w-4 text-muted-foreground" />
         <div>
           <p className="text-muted-foreground">Forwarding Rules</p>
-          <p className="mt-0.5">
-            {ruleCount > 0
-              ? `${activeRules} of ${ruleCount} rules active`
-              : "No rules configured"}
-          </p>
+          <p className="mt-0.5">{ruleCount > 0 ? `${activeRules} of ${ruleCount} rules active` : "No rules configured"}</p>
         </div>
       </div>
       <div className="flex items-start gap-3">
@@ -993,37 +902,27 @@ function SubPageLinks({ extensionId }: { extensionId: string }) {
   const subPages = [
     {
       label: "Voicemail",
-      description: vmEnabled
-        ? unreadCount > 0
-          ? `${unreadCount} unread of ${totalMessages} messages`
-          : `${totalMessages} messages`
-        : "Voicemail disabled",
+      description: vmEnabled ? (unreadCount > 0 ? `${unreadCount} unread of ${totalMessages} messages` : `${totalMessages} messages`) : "Voicemail disabled",
       to: "/voice/extensions/$extensionId/voicemail" as const,
       icon: Voicemail,
-      badge: unreadCount > 0 ? (
-        <Badge variant="secondary" className="gap-1">
-          <Mail className="h-3 w-3" />
-          {unreadCount}
-        </Badge>
-      ) : null,
+      badge:
+        unreadCount > 0 ? (
+          <Badge variant="secondary" className="gap-1">
+            <Mail className="h-3 w-3" />
+            {unreadCount}
+          </Badge>
+        ) : null,
     },
     {
       label: "Call Forwarding",
-      description:
-        ruleCount > 0
-          ? `${activeRules} of ${ruleCount} rules active`
-          : "No forwarding rules configured",
+      description: ruleCount > 0 ? `${activeRules} of ${ruleCount} rules active` : "No forwarding rules configured",
       to: "/voice/extensions/$extensionId/forwarding" as const,
       icon: PhoneForwarded,
-      badge: ruleCount > 0 ? (
-        <Badge variant="secondary">{ruleCount} rules</Badge>
-      ) : null,
+      badge: ruleCount > 0 ? <Badge variant="secondary">{ruleCount} rules</Badge> : null,
     },
     {
       label: "Do Not Disturb",
-      description: dndEnabled
-        ? `DND is active (${dndSettings?.mode ?? "always"})`
-        : "DND is off",
+      description: dndEnabled ? `DND is active (${dndSettings?.mode ?? "always"})` : "DND is off",
       to: "/voice/extensions/$extensionId/dnd" as const,
       icon: BellOff,
       badge: dndEnabled ? (
@@ -1077,9 +976,7 @@ function AssignedDevicesCard({ extensionId }: { extensionId: string }) {
             </Badge>
           )}
         </div>
-        <CardDescription>
-          Devices that have this extension assigned to one of their lines
-        </CardDescription>
+        <CardDescription>Devices that have this extension assigned to one of their lines</CardDescription>
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -1096,9 +993,7 @@ function AssignedDevicesCard({ extensionId }: { extensionId: string }) {
         ) : !deviceLines || deviceLines.length === 0 ? (
           <div className="flex flex-col items-center gap-2 py-6 text-center">
             <Monitor className="h-8 w-8 text-muted-foreground/50" />
-            <p className="text-sm text-muted-foreground">
-              No devices have this extension assigned to their lines.
-            </p>
+            <p className="text-sm text-muted-foreground">No devices have this extension assigned to their lines.</p>
           </div>
         ) : (
           <Table aria-label="Devices using this extension">
@@ -1114,22 +1009,14 @@ function AssignedDevicesCard({ extensionId }: { extensionId: string }) {
               {deviceLines.map((assignment) => (
                 <TableRow key={`${assignment.deviceId}-${assignment.lineId}`}>
                   <TableCell>
-                    <Link
-                      to="/devices/$deviceId"
-                      params={{ deviceId: assignment.deviceId }}
-                      className="font-medium text-primary hover:underline"
-                    >
+                    <Link to="/devices/$deviceId" params={{ deviceId: assignment.deviceId }} className="font-medium text-primary hover:underline">
                       {assignment.deviceName}
                     </Link>
-                    {assignment.deviceModel && (
-                      <p className="text-xs text-muted-foreground">{assignment.deviceModel}</p>
-                    )}
+                    {assignment.deviceModel && <p className="text-xs text-muted-foreground">{assignment.deviceModel}</p>}
                   </TableCell>
                   <TableCell>
                     <span className="font-mono text-xs">Line {assignment.lineNumber}</span>
-                    {assignment.lineLabel && (
-                      <span className="ml-1 text-xs text-muted-foreground">({assignment.lineLabel})</span>
-                    )}
+                    {assignment.lineLabel && <span className="ml-1 text-xs text-muted-foreground">({assignment.lineLabel})</span>}
                   </TableCell>
                   <TableCell>
                     <span className="text-xs capitalize">{assignment.deviceType}</span>
@@ -1137,11 +1024,7 @@ function AssignedDevicesCard({ extensionId }: { extensionId: string }) {
                   <TableCell>
                     <Badge
                       variant={assignment.status === "online" ? "default" : "outline"}
-                      className={
-                        assignment.status === "online"
-                          ? "bg-emerald-600 text-white text-xs"
-                          : "text-xs"
-                      }
+                      className={assignment.status === "online" ? "bg-emerald-600 text-white text-xs" : "text-xs"}
                     >
                       {assignment.status}
                     </Badge>
@@ -1158,32 +1041,20 @@ function AssignedDevicesCard({ extensionId }: { extensionId: string }) {
 
 // -- Related Resources --------------------------------------------------------
 
-function RelatedResourcesSection({
-  extensionId,
-  extension,
-}: {
-  extensionId: string
-  extension: ExtensionType
-}) {
+function RelatedResourcesSection({ extensionId, extension }: { extensionId: string; extension: ExtensionType }) {
   const phoneNumberQuery = usePhoneNumber(extension.phoneNumberId ?? "")
   const ringGroupsQuery = useRingGroups({ pageSize: 100 })
   const callQueuesQuery = useCallQueues({ pageSize: 100 })
   const teamsQuery = useTeams({ pageSize: 100 })
 
   // Find ring groups where this extension is a member
-  const memberRingGroups = (ringGroupsQuery.data?.items ?? []).filter((rg) =>
-    rg.members.some((m) => m.extensionId === extensionId),
-  )
+  const memberRingGroups = (ringGroupsQuery.data?.items ?? []).filter((rg) => rg.members.some((m) => m.extensionId === extensionId))
 
   // Find call queues where this extension is a member
-  const memberCallQueues = (callQueuesQuery.data?.items ?? []).filter((cq) =>
-    cq.members.some((m) => m.extensionId === extensionId),
-  )
+  const memberCallQueues = (callQueuesQuery.data?.items ?? []).filter((cq) => cq.members.some((m) => m.extensionId === extensionId))
 
   // Find teams that this extension's user belongs to
-  const userTeams = (teamsQuery.data?.items ?? []).filter((team) =>
-    (team.members ?? []).some((m) => m.userId === extension.userId),
-  )
+  const userTeams = (teamsQuery.data?.items ?? []).filter((team) => (team.members ?? []).some((m) => m.userId === extension.userId))
 
   const hasPhoneNumber = !!extension.phoneNumberId
   const hasRingGroups = memberRingGroups.length > 0
@@ -1191,8 +1062,7 @@ function RelatedResourcesSection({
   const hasTeams = userTeams.length > 0
   const hasAnyRelated = hasPhoneNumber || hasRingGroups || hasCallQueues || hasTeams
 
-  const isLoading =
-    ringGroupsQuery.isLoading || callQueuesQuery.isLoading || teamsQuery.isLoading
+  const isLoading = ringGroupsQuery.isLoading || callQueuesQuery.isLoading || teamsQuery.isLoading
 
   if (isLoading) {
     return (
@@ -1229,10 +1099,7 @@ function RelatedResourcesSection({
         <CardContent>
           <div className="flex flex-col items-center gap-2 py-6 text-center">
             <Link2 className="h-8 w-8 text-muted-foreground/50" />
-            <p className="text-sm text-muted-foreground">
-              No related items. This extension is not linked to any phone numbers,
-              ring groups, call queues, or teams.
-            </p>
+            <p className="text-sm text-muted-foreground">No related items. This extension is not linked to any phone numbers, ring groups, call queues, or teams.</p>
           </div>
         </CardContent>
       </Card>
@@ -1246,17 +1113,13 @@ function RelatedResourcesSection({
           <Link2 className="h-5 w-5 text-muted-foreground" />
           <CardTitle>Related Resources</CardTitle>
         </div>
-        <CardDescription>
-          Entities linked to this extension across the system
-        </CardDescription>
+        <CardDescription>Entities linked to this extension across the system</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Associated Phone Number */}
         {hasPhoneNumber && (
           <div className="space-y-2">
-            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              Phone Number
-            </p>
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Phone Number</p>
             <Link
               to="/voice/phone-numbers/$phoneNumberId"
               params={{ phoneNumberId: extension.phoneNumberId! }}
@@ -1265,19 +1128,15 @@ function RelatedResourcesSection({
               <div className="flex items-center gap-3">
                 <Phone className="h-4 w-4 text-primary" />
                 <div>
-                  <p className="text-sm font-medium group-hover:text-primary">
-                    {phoneNumberQuery.data?.number ?? "Loading..."}
-                  </p>
-                  {phoneNumberQuery.data?.label && (
-                    <p className="text-xs text-muted-foreground">
-                      {phoneNumberQuery.data.label}
-                    </p>
-                  )}
+                  <p className="text-sm font-medium group-hover:text-primary">{phoneNumberQuery.data?.number ?? "Loading..."}</p>
+                  {phoneNumberQuery.data?.label && <p className="text-xs text-muted-foreground">{phoneNumberQuery.data.label}</p>}
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 {phoneNumberQuery.data?.isActive === false && (
-                  <Badge variant="outline" className="text-xs">Inactive</Badge>
+                  <Badge variant="outline" className="text-xs">
+                    Inactive
+                  </Badge>
                 )}
                 <ArrowRight className="h-4 w-4 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" />
               </div>
@@ -1288,9 +1147,7 @@ function RelatedResourcesSection({
         {/* Ring Groups */}
         {hasRingGroups && (
           <div className="space-y-2">
-            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              Ring Groups
-            </p>
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Ring Groups</p>
             <div className="space-y-2">
               {memberRingGroups.map((rg) => (
                 <Link
@@ -1318,9 +1175,7 @@ function RelatedResourcesSection({
         {/* Call Queues */}
         {hasCallQueues && (
           <div className="space-y-2">
-            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              Call Queues
-            </p>
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Call Queues</p>
             <div className="space-y-2">
               {memberCallQueues.map((cq) => (
                 <Link
@@ -1348,9 +1203,7 @@ function RelatedResourcesSection({
         {/* Teams */}
         {hasTeams && (
           <div className="space-y-2">
-            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              Team
-            </p>
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Team</p>
             <div className="space-y-2">
               {userTeams.map((team) => (
                 <Link
@@ -1430,15 +1283,10 @@ function ExtensionVoicemailTab({ extensionId }: { extensionId: string }) {
             <Voicemail className="h-10 w-10 text-muted-foreground/50" />
             <div>
               <p className="font-medium">No voicemail box configured</p>
-              <p className="text-sm text-muted-foreground">
-                Set up voicemail for this extension to allow callers to leave messages.
-              </p>
+              <p className="text-sm text-muted-foreground">Set up voicemail for this extension to allow callers to leave messages.</p>
             </div>
             <Button variant="outline" size="sm" asChild>
-              <Link
-                to="/voice/extensions/$extensionId/voicemail"
-                params={{ extensionId }}
-              >
+              <Link to="/voice/extensions/$extensionId/voicemail" params={{ extensionId }}>
                 Set Up Voicemail
               </Link>
             </Button>
@@ -1458,14 +1306,9 @@ function ExtensionVoicemailTab({ extensionId }: { extensionId: string }) {
             <CardTitle>Voicemail Settings</CardTitle>
           </div>
           <div className="flex items-center gap-2">
-            <Badge variant={vmEnabled ? "default" : "outline"}>
-              {vmEnabled ? "Enabled" : "Disabled"}
-            </Badge>
+            <Badge variant={vmEnabled ? "default" : "outline"}>{vmEnabled ? "Enabled" : "Disabled"}</Badge>
             <Button variant="ghost" size="sm" asChild>
-              <Link
-                to="/voice/extensions/$extensionId/voicemail"
-                params={{ extensionId }}
-              >
+              <Link to="/voice/extensions/$extensionId/voicemail" params={{ extensionId }}>
                 <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
                 Full settings
               </Link>
@@ -1508,10 +1351,7 @@ function ExtensionVoicemailTab({ extensionId }: { extensionId: string }) {
           </div>
           {totalCount > 0 && (
             <Button variant="ghost" size="sm" asChild>
-              <Link
-                to="/voice/extensions/$extensionId/voicemail"
-                params={{ extensionId }}
-              >
+              <Link to="/voice/extensions/$extensionId/voicemail" params={{ extensionId }}>
                 View all ({totalCount})
                 <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
               </Link>
@@ -1534,9 +1374,7 @@ function ExtensionVoicemailTab({ extensionId }: { extensionId: string }) {
                   className="group flex items-center gap-3 rounded-lg border border-border/40 p-3 transition-all hover:bg-muted/30 hover:shadow-sm"
                 >
                   <div className="flex items-center gap-2">
-                    {!msg.isRead && (
-                      <div className="h-2 w-2 rounded-full bg-primary" />
-                    )}
+                    {!msg.isRead && <div className="h-2 w-2 rounded-full bg-primary" />}
                     {msg.isUrgent && (
                       <Badge variant="destructive" className="text-[10px] px-1 py-0">
                         Urgent
@@ -1544,15 +1382,10 @@ function ExtensionVoicemailTab({ extensionId }: { extensionId: string }) {
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className={`text-sm ${!msg.isRead ? "font-semibold" : ""}`}>
-                      {msg.callerName ?? msg.callerNumber}
-                    </p>
+                    <p className={`text-sm ${!msg.isRead ? "font-semibold" : ""}`}>{msg.callerName ?? msg.callerNumber}</p>
                     <p className="text-xs text-muted-foreground truncate">
-                      {formatDuration(msg.durationSeconds)} &middot;{" "}
-                      {formatDateTime(msg.receivedAt)}
-                      {msg.transcription
-                        ? ` — ${msg.transcription.slice(0, 50)}${msg.transcription.length > 50 ? "..." : ""}`
-                        : ""}
+                      {formatDuration(msg.durationSeconds)} &middot; {formatDateTime(msg.receivedAt)}
+                      {msg.transcription ? ` — ${msg.transcription.slice(0, 50)}${msg.transcription.length > 50 ? "..." : ""}` : ""}
                     </p>
                   </div>
                   <ArrowRight className="h-4 w-4 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" />

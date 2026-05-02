@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { useConnections, type ConnectionList } from "@/lib/api/hooks/connections"
+import { type ConnectionList, useConnections } from "@/lib/api/hooks/connections"
 import { formatRelativeTimeShort } from "@/lib/date-utils"
 
 const MAX_VISIBLE = 5
@@ -44,11 +44,7 @@ function ConnectionRow({ connection, index }: { connection: ConnectionList; inde
   const isPulsing = getStatusPulse(connection.status)
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: -8 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.25, delay: index * 0.05, ease: "easeOut" }}
-    >
+    <motion.div initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.25, delay: index * 0.05, ease: "easeOut" }}>
       <Link
         to="/connections/$connectionId"
         params={{ connectionId: connection.id }}
@@ -57,9 +53,7 @@ function ConnectionRow({ connection, index }: { connection: ConnectionList; inde
         <Tooltip>
           <TooltipTrigger asChild>
             <span className="relative flex h-2.5 w-2.5 shrink-0">
-              {isPulsing && (
-                <span className={`absolute inline-flex h-full w-full animate-ping rounded-full ${getStatusColor(connection.status)} opacity-75`} />
-              )}
+              {isPulsing && <span className={`absolute inline-flex h-full w-full animate-ping rounded-full ${getStatusColor(connection.status)} opacity-75`} />}
               <span className={`relative inline-flex h-2.5 w-2.5 rounded-full ${getStatusColor(connection.status)}`} />
             </span>
           </TooltipTrigger>
@@ -78,9 +72,7 @@ function ConnectionRow({ connection, index }: { connection: ConnectionList; inde
           {connection.lastHealthCheck && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="text-[10px] text-muted-foreground/70">
-                  {formatRelativeTimeShort(connection.lastHealthCheck)}
-                </span>
+                <span className="text-[10px] text-muted-foreground/70">{formatRelativeTimeShort(connection.lastHealthCheck)}</span>
               </TooltipTrigger>
               <TooltipContent>Last checked {formatRelativeTimeShort(connection.lastHealthCheck)}</TooltipContent>
             </Tooltip>
@@ -96,9 +88,7 @@ export function ConnectionsStatusCard() {
 
   const connections = data?.items ?? []
   const total = data?.total ?? 0
-  const healthyCount = connections.filter(
-    (c) => ["connected", "healthy", "active"].includes(c.status.toLowerCase()),
-  ).length
+  const healthyCount = connections.filter((c) => ["connected", "healthy", "active"].includes(c.status.toLowerCase())).length
 
   if (isLoading) {
     return (
@@ -131,11 +121,7 @@ export function ConnectionsStatusCard() {
           <Cable className="h-4 w-4 text-muted-foreground" />
           <CardTitle className="text-lg">Connections</CardTitle>
         </div>
-        <CardDescription>
-          {total > 0
-            ? `${healthyCount} of ${total} connected`
-            : "External integration status"}
-        </CardDescription>
+        <CardDescription>{total > 0 ? `${healthyCount} of ${total} connected` : "External integration status"}</CardDescription>
       </CardHeader>
       <CardContent>
         {connections.length === 0 ? (
@@ -144,9 +130,7 @@ export function ConnectionsStatusCard() {
               <Cable className="h-6 w-6 text-muted-foreground" />
             </div>
             <p className="text-sm font-medium text-muted-foreground">No connections configured</p>
-            <p className="mt-1 text-xs text-muted-foreground/70">
-              Add an integration to connect external services.
-            </p>
+            <p className="mt-1 text-xs text-muted-foreground/70">Add an integration to connect external services.</p>
             <Button asChild size="sm" variant="outline" className="mt-4">
               <Link to="/connections">
                 <Plus className="mr-1.5 h-3.5 w-3.5" />
@@ -163,10 +147,7 @@ export function ConnectionsStatusCard() {
             </div>
             {total > MAX_VISIBLE && (
               <div className="mt-4 border-t pt-3">
-                <Link
-                  to="/connections"
-                  className="flex items-center justify-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-                >
+                <Link to="/connections" className="flex items-center justify-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
                   View all {total} connections
                   <ArrowRight className="h-3.5 w-3.5" />
                 </Link>

@@ -1,5 +1,4 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   AlertCircle,
   AlertTriangle,
@@ -18,47 +17,37 @@ import {
   Trash2,
   X,
 } from "lucide-react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Badge } from "@/components/ui/badge"
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { FilterDropdown, type FilterOption } from "@/components/ui/filter-dropdown"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { E911StatusBadge } from "@/components/voice/e911-status-badge"
-import {
-  type PhoneNumber,
-  useDeletePhoneNumber,
-  usePhoneNumbers,
-  useUpdatePhoneNumber,
-} from "@/lib/api/hooks/voice"
-import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
-import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
-import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
+import { useDocumentTitle } from "@/hooks/use-document-title"
+import { type PhoneNumber, useDeletePhoneNumber, usePhoneNumbers, useUpdatePhoneNumber } from "@/lib/api/hooks/voice"
+import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { useSettingsStore } from "@/lib/settings-store"
 import { cn } from "@/lib/utils"
 
@@ -78,10 +67,7 @@ export const Route = createFileRoute("/_app/voice/phone-numbers/")({
     type: typeof search.type === "string" && search.type ? search.type : undefined,
     status: typeof search.status === "string" && search.status ? search.status : undefined,
     sort: typeof search.sort === "string" && search.sort ? search.sort : undefined,
-    order:
-      typeof search.order === "string" && (search.order === "asc" || search.order === "desc")
-        ? search.order
-        : undefined,
+    order: typeof search.order === "string" && (search.order === "asc" || search.order === "desc") ? search.order : undefined,
   }),
   component: PhoneNumbersPage,
 })
@@ -177,15 +163,7 @@ function StatusIndicator({ isActive }: { isActive: boolean }) {
 
 // -- Edit dialog --------------------------------------------------------------
 
-function EditPhoneNumberDialog({
-  phoneNumber,
-  open,
-  onOpenChange,
-}: {
-  phoneNumber: PhoneNumber | null
-  open: boolean
-  onOpenChange: (open: boolean) => void
-}) {
+function EditPhoneNumberDialog({ phoneNumber, open, onOpenChange }: { phoneNumber: PhoneNumber | null; open: boolean; onOpenChange: (open: boolean) => void }) {
   const [label, setLabel] = useState("")
   const [callerIdName, setCallerIdName] = useState("")
   const updateMutation = useUpdatePhoneNumber(phoneNumber?.id ?? "")
@@ -204,10 +182,7 @@ function EditPhoneNumberDialog({
 
   function handleSave() {
     if (!phoneNumber) return
-    updateMutation.mutate(
-      { label: label || null, callerIdName: callerIdName || null },
-      { onSuccess: () => onOpenChange(false) },
-    )
+    updateMutation.mutate({ label: label || null, callerIdName: callerIdName || null }, { onSuccess: () => onOpenChange(false) })
   }
 
   return (
@@ -216,28 +191,17 @@ function EditPhoneNumberDialog({
         <DialogHeader>
           <DialogTitle>Edit Phone Number</DialogTitle>
           <DialogDescription>
-            Update the label and caller ID for{" "}
-            <span className="font-mono font-medium">{phoneNumber?.number}</span>
+            Update the label and caller ID for <span className="font-mono font-medium">{phoneNumber?.number}</span>
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-2">
           <div className="grid gap-2">
             <Label htmlFor="edit-label">Label</Label>
-            <Input
-              id="edit-label"
-              value={label}
-              onChange={(e) => setLabel(e.target.value)}
-              placeholder="e.g. Main Office"
-            />
+            <Input id="edit-label" value={label} onChange={(e) => setLabel(e.target.value)} placeholder="e.g. Main Office" />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="edit-caller-id">Caller ID Name</Label>
-            <Input
-              id="edit-caller-id"
-              value={callerIdName}
-              onChange={(e) => setCallerIdName(e.target.value)}
-              placeholder="e.g. Acme Corp"
-            />
+            <Input id="edit-caller-id" value={callerIdName} onChange={(e) => setCallerIdName(e.target.value)} placeholder="e.g. Acme Corp" />
           </div>
         </div>
         <DialogFooter>
@@ -303,9 +267,7 @@ function PhoneNumberRow({
       </TableCell>
       {isColumnVisible("type") && (
         <TableCell className={cn("hidden md:table-cell", cellClass)}>
-          <Badge variant={typeBadgeVariant[pn.numberType] ?? "outline"}>
-            {typeLabels[pn.numberType] ?? pn.numberType}
-          </Badge>
+          <Badge variant={typeBadgeVariant[pn.numberType] ?? "outline"}>{typeLabels[pn.numberType] ?? pn.numberType}</Badge>
         </TableCell>
       )}
       {isColumnVisible("callerId") && (
@@ -346,10 +308,7 @@ function PhoneNumberRow({
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="text-destructive focus:text-destructive"
-                onClick={() => onEdit()}
-              >
+              <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => onEdit()}>
                 <Trash2 className="mr-2 h-4 w-4" />
                 Delete
               </DropdownMenuItem>
@@ -367,28 +326,15 @@ function PhoneNumbersPage() {
   useDocumentTitle("Phone Numbers")
   const compactMode = useSettingsStore((s) => s.compactMode)
   const cellClass = compactMode ? "py-1 px-2 text-xs" : ""
-  const {
-    q: searchParam,
-    page: pageParam,
-    type: typeParam,
-    status: statusParam,
-    sort: sortParam,
-    order: orderParam,
-  } = Route.useSearch()
+  const { q: searchParam, page: pageParam, type: typeParam, status: statusParam, sort: sortParam, order: orderParam } = Route.useSearch()
   const navigate = Route.useNavigate()
   const searchInputRef = useRef<HTMLInputElement>(null)
 
   // Derive filter state from URL search params
   const search = searchParam ?? ""
   const page = pageParam ?? 1
-  const typeFilter = useMemo(
-    () => (typeParam ? typeParam.split(",").filter(Boolean) : []),
-    [typeParam],
-  )
-  const statusFilter = useMemo(
-    () => (statusParam ? statusParam.split(",").filter(Boolean) : []),
-    [statusParam],
-  )
+  const typeFilter = useMemo(() => (typeParam ? typeParam.split(",").filter(Boolean) : []), [typeParam])
+  const statusFilter = useMemo(() => (statusParam ? statusParam.split(",").filter(Boolean) : []), [statusParam])
   const sortKey = sortParam ?? null
   const sortDir: SortDirection = (orderParam as SortDirection) ?? null
 
@@ -415,10 +361,7 @@ function PhoneNumbersPage() {
 
   // Column visibility
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(loadColumnVisibility)
-  const isColumnVisible = useCallback(
-    (col: string) => columnVisibility[col] !== false,
-    [columnVisibility],
-  )
+  const isColumnVisible = useCallback((col: string) => columnVisibility[col] !== false, [columnVisibility])
   const toggleColumn = useCallback((col: string) => {
     setColumnVisibility((prev) => {
       const updated = { ...prev, [col]: prev[col] !== false ? false : true }
@@ -585,11 +528,7 @@ function PhoneNumbersPage() {
           setSelectedIds(new Set())
         },
       ),
-      createExportAction<PhoneNumber>(
-        "phone-numbers-selected",
-        csvHeaders,
-        (ids) => filteredItems.filter((pn) => ids.includes(pn.id)),
-      ),
+      createExportAction<PhoneNumber>("phone-numbers-selected", csvHeaders, (ids) => filteredItems.filter((pn) => ids.includes(pn.id))),
     ],
     [deletePhoneNumber, filteredItems],
   )
@@ -679,11 +618,7 @@ function PhoneNumbersPage() {
                 <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {TOGGLEABLE_COLUMNS.map((col) => (
-                  <DropdownMenuCheckboxItem
-                    key={col.key}
-                    checked={isColumnVisible(col.key)}
-                    onCheckedChange={() => toggleColumn(col.key)}
-                  >
+                  <DropdownMenuCheckboxItem key={col.key} checked={isColumnVisible(col.key)} onCheckedChange={() => toggleColumn(col.key)}>
                     {col.label}
                   </DropdownMenuCheckboxItem>
                 ))}
@@ -712,9 +647,7 @@ function PhoneNumbersPage() {
               <span className="font-medium">
                 {unregisteredCount} phone number{unregisteredCount === 1 ? " is" : "s are"} not registered for E911.
               </span>{" "}
-              <span className="text-muted-foreground">
-                Emergency services may not be able to locate callers using unregistered numbers.
-              </span>
+              <span className="text-muted-foreground">Emergency services may not be able to locate callers using unregistered numbers.</span>
             </p>
             <Button variant="outline" size="sm" asChild>
               <Link to="/e911">Register now</Link>
@@ -725,32 +658,32 @@ function PhoneNumbersPage() {
 
       {/* Summary stats */}
       <SectionErrorBoundary name="Phone Numbers Summary">
-      <div className="flex flex-wrap items-center gap-2">
-        {isLoading ? (
-          <>
-            <Skeleton className="h-7 w-24 rounded-full" />
-            <Skeleton className="h-7 w-24 rounded-full" />
-            <Skeleton className="h-7 w-24 rounded-full" />
-          </>
-        ) : (
-          <>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground">
-              Total
-              <span className="ml-0.5 font-semibold text-foreground">{phoneNumberStats.total}</span>
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              Active
-              <span className="ml-0.5 font-semibold">{phoneNumberStats.active}</span>
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-zinc-400/30 bg-zinc-400/10 px-3 py-1 text-xs font-medium text-zinc-600 dark:text-zinc-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-zinc-400" />
-              Inactive
-              <span className="ml-0.5 font-semibold">{phoneNumberStats.inactive}</span>
-            </span>
-          </>
-        )}
-      </div>
+        <div className="flex flex-wrap items-center gap-2">
+          {isLoading ? (
+            <>
+              <Skeleton className="h-7 w-24 rounded-full" />
+              <Skeleton className="h-7 w-24 rounded-full" />
+              <Skeleton className="h-7 w-24 rounded-full" />
+            </>
+          ) : (
+            <>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground">
+                Total
+                <span className="ml-0.5 font-semibold text-foreground">{phoneNumberStats.total}</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                Active
+                <span className="ml-0.5 font-semibold">{phoneNumberStats.active}</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-zinc-400/30 bg-zinc-400/10 px-3 py-1 text-xs font-medium text-zinc-600 dark:text-zinc-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-zinc-400" />
+                Inactive
+                <span className="ml-0.5 font-semibold">{phoneNumberStats.inactive}</span>
+              </span>
+            </>
+          )}
+        </div>
       </SectionErrorBoundary>
 
       {/* Search & filters */}
@@ -775,7 +708,9 @@ function PhoneNumbersPage() {
                 <span className="sr-only">Clear search</span>
               </button>
             ) : (
-              <kbd className="pointer-events-none absolute right-8 top-1/2 -translate-y-1/2 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">/</kbd>
+              <kbd className="pointer-events-none absolute right-8 top-1/2 -translate-y-1/2 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">
+                /
+              </kbd>
             )}
           </div>
           <FilterDropdown
@@ -831,230 +766,186 @@ function PhoneNumbersPage() {
       {/* Content */}
       <PageSection delay={0.1}>
         <SectionErrorBoundary name="Phone Numbers Table">
-        {isLoading ? (
-          <SkeletonTable rows={6} />
-        ) : isError ? (
-          <EmptyState
-            icon={AlertCircle}
-            title="Unable to load phone numbers"
-            description="Something went wrong while fetching your phone numbers. Please try again."
-            action={
-              <Button variant="outline" size="sm" onClick={() => refetch()}>
-                Try again
-              </Button>
-            }
-          />
-        ) : !hasAnyNumbers && !search ? (
-          <EmptyState
-            icon={Phone}
-            title="No phone numbers yet"
-            description="Add your first phone number to start routing calls to your extensions."
-            action={
-              <Button size="sm" asChild>
-                <Link to="/voice/phone-numbers/new">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Phone Number
-                </Link>
-              </Button>
-            }
-          />
-        ) : !hasData ? (
-          <EmptyState
-            icon={Phone}
-            variant="no-results"
-            title="No results found"
-            description="No phone numbers match your current filters. Try adjusting your search or filters."
-            action={
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setSearchInput("")
-                  navigate({
-                    search: {
-                      q: undefined,
-                      type: undefined,
-                      status: undefined,
-                      sort: undefined,
-                      order: undefined,
-                      page: undefined,
-                    },
-                  })
-                }}
-              >
-                Clear all filters
-              </Button>
-            }
-          />
-        ) : (
-          <div className="space-y-3">
-            {/* Result count & pagination info */}
-            <div className="flex items-center justify-between">
-              <p className="text-xs text-muted-foreground">
-                {data?.total ?? filteredItems.length} phone number{(data?.total ?? filteredItems.length) === 1 ? "" : "s"}
-                {activeFilterCount > 0 && " (filtered)"}
-              </p>
-              {totalPages > 1 && (
+          {isLoading ? (
+            <SkeletonTable rows={6} />
+          ) : isError ? (
+            <EmptyState
+              icon={AlertCircle}
+              title="Unable to load phone numbers"
+              description="Something went wrong while fetching your phone numbers. Please try again."
+              action={
+                <Button variant="outline" size="sm" onClick={() => refetch()}>
+                  Try again
+                </Button>
+              }
+            />
+          ) : !hasAnyNumbers && !search ? (
+            <EmptyState
+              icon={Phone}
+              title="No phone numbers yet"
+              description="Add your first phone number to start routing calls to your extensions."
+              action={
+                <Button size="sm" asChild>
+                  <Link to="/voice/phone-numbers/new">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Phone Number
+                  </Link>
+                </Button>
+              }
+            />
+          ) : !hasData ? (
+            <EmptyState
+              icon={Phone}
+              variant="no-results"
+              title="No results found"
+              description="No phone numbers match your current filters. Try adjusting your search or filters."
+              action={
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSearchInput("")
+                    navigate({
+                      search: {
+                        q: undefined,
+                        type: undefined,
+                        status: undefined,
+                        sort: undefined,
+                        order: undefined,
+                        page: undefined,
+                      },
+                    })
+                  }}
+                >
+                  Clear all filters
+                </Button>
+              }
+            />
+          ) : (
+            <div className="space-y-3">
+              {/* Result count & pagination info */}
+              <div className="flex items-center justify-between">
                 <p className="text-xs text-muted-foreground">
-                  Page {page} of {totalPages}
+                  {data?.total ?? filteredItems.length} phone number{(data?.total ?? filteredItems.length) === 1 ? "" : "s"}
+                  {activeFilterCount > 0 && " (filtered)"}
                 </p>
-              )}
-            </div>
-
-            <div className="sr-only" aria-live="polite" aria-atomic="true">
-              {!isLoading && `Showing ${filteredItems.length} of ${data?.total ?? 0} phone numbers, page ${page}`}
-            </div>
-
-            {/* Table */}
-            <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
-              <Table aria-label="Phone numbers" aria-busy={isLoading || isRefetching}>
-                <TableHeader className="sticky top-0 z-10 bg-background">
-                  <TableRow>
-                    <TableHead className="w-10">
-                      <Checkbox
-                        checked={allSelected}
-                        indeterminate={someSelected && !allSelected}
-                        onChange={toggleAll}
-                        aria-label="Select all phone numbers"
-                      />
-                    </TableHead>
-                    <SortableHeader
-                      label="Number"
-                      sortKey="number"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                    />
-                    <SortableHeader
-                      label="Label"
-                      sortKey="label"
-                      currentSort={sortKey}
-                      currentDirection={sortDir}
-                      onSort={handleSort}
-                      className="hidden md:table-cell"
-                    />
-                    {isColumnVisible("type") && (
-                      <SortableHeader
-                        label="Type"
-                        sortKey="number_type"
-                        currentSort={sortKey}
-                        currentDirection={sortDir}
-                        onSort={handleSort}
-                        className="hidden md:table-cell"
-                      />
-                    )}
-                    {isColumnVisible("callerId") && (
-                      <SortableHeader
-                        label="Caller ID"
-                        sortKey="caller_id_name"
-                        currentSort={sortKey}
-                        currentDirection={sortDir}
-                        onSort={handleSort}
-                        className="hidden md:table-cell"
-                      />
-                    )}
-                    {isColumnVisible("status") && (
-                      <SortableHeader
-                        label="Status"
-                        sortKey="is_active"
-                        currentSort={sortKey}
-                        currentDirection={sortDir}
-                        onSort={handleSort}
-                      />
-                    )}
-                    {isColumnVisible("e911") && (
-                      <TableHead className="hidden md:table-cell">E911</TableHead>
-                    )}
-                    <TableHead className="w-20 text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredItems.map((pn) => (
-                    <PhoneNumberRow
-                      key={pn.id}
-                      pn={pn}
-                      selected={selectedIds.has(pn.id)}
-                      onToggle={() => toggleOne(pn.id)}
-                      onEdit={() => handleEdit(pn)}
-                      onRowClick={() => navigate({ to: "/voice/phone-numbers/$phoneNumberId", params: { phoneNumberId: pn.id } })}
-                      cellClass={cellClass}
-                      isColumnVisible={isColumnVisible}
-                    />
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-
-            {/* Pagination */}
-            <div className="flex items-center justify-end gap-4">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Rows per page</span>
-                <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
-                  <SelectTrigger className="h-8 w-[70px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PAGE_SIZES.map((size) => (
-                      <SelectItem key={size} value={String(size)}>
-                        {size}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {totalPages > 1 && (
+                  <p className="text-xs text-muted-foreground">
+                    Page {page} of {totalPages}
+                  </p>
+                )}
               </div>
-              {totalPages > 1 && (
+
+              <div className="sr-only" aria-live="polite" aria-atomic="true">
+                {!isLoading && `Showing ${filteredItems.length} of ${data?.total ?? 0} phone numbers, page ${page}`}
+              </div>
+
+              {/* Table */}
+              <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
+                <Table aria-label="Phone numbers" aria-busy={isLoading || isRefetching}>
+                  <TableHeader className="sticky top-0 z-10 bg-background">
+                    <TableRow>
+                      <TableHead className="w-10">
+                        <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all phone numbers" />
+                      </TableHead>
+                      <SortableHeader label="Number" sortKey="number" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                      <SortableHeader label="Label" sortKey="label" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
+                      {isColumnVisible("type") && (
+                        <SortableHeader label="Type" sortKey="number_type" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
+                      )}
+                      {isColumnVisible("callerId") && (
+                        <SortableHeader
+                          label="Caller ID"
+                          sortKey="caller_id_name"
+                          currentSort={sortKey}
+                          currentDirection={sortDir}
+                          onSort={handleSort}
+                          className="hidden md:table-cell"
+                        />
+                      )}
+                      {isColumnVisible("status") && <SortableHeader label="Status" sortKey="is_active" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />}
+                      {isColumnVisible("e911") && <TableHead className="hidden md:table-cell">E911</TableHead>}
+                      <TableHead className="w-20 text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredItems.map((pn) => (
+                      <PhoneNumberRow
+                        key={pn.id}
+                        pn={pn}
+                        selected={selectedIds.has(pn.id)}
+                        onToggle={() => toggleOne(pn.id)}
+                        onEdit={() => handleEdit(pn)}
+                        onRowClick={() => navigate({ to: "/voice/phone-numbers/$phoneNumberId", params: { phoneNumberId: pn.id } })}
+                        cellClass={cellClass}
+                        isColumnVisible={isColumnVisible}
+                      />
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Pagination */}
+              <div className="flex items-center justify-end gap-4">
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      navigate({
-                        search: (prev) => ({
-                          ...prev,
-                          page: page - 1 > 1 ? page - 1 : undefined,
-                        }),
-                      })
-                    }
-                    disabled={page <= 1}
-                  >
-                    Previous
-                    <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&larr;</kbd>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      navigate({
-                        search: (prev) => ({ ...prev, page: page + 1 }),
-                      })
-                    }
-                    disabled={page >= totalPages}
-                  >
-                    Next
-                    <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&rarr;</kbd>
-                  </Button>
+                  <span className="text-sm text-muted-foreground">Rows per page</span>
+                  <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
+                    <SelectTrigger className="h-8 w-[70px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PAGE_SIZES.map((size) => (
+                        <SelectItem key={size} value={String(size)}>
+                          {size}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-              )}
+                {totalPages > 1 && (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        navigate({
+                          search: (prev) => ({
+                            ...prev,
+                            page: page - 1 > 1 ? page - 1 : undefined,
+                          }),
+                        })
+                      }
+                      disabled={page <= 1}
+                    >
+                      Previous
+                      <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&larr;</kbd>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        navigate({
+                          search: (prev) => ({ ...prev, page: page + 1 }),
+                        })
+                      }
+                      disabled={page >= totalPages}
+                    >
+                      Next
+                      <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&rarr;</kbd>
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
         </SectionErrorBoundary>
       </PageSection>
 
       {/* Bulk action bar */}
-      <BulkActionBar
-        selectedCount={selectedIds.size}
-        selectedIds={Array.from(selectedIds)}
-        onClearSelection={() => setSelectedIds(new Set())}
-        actions={bulkActions}
-      />
+      <BulkActionBar selectedCount={selectedIds.size} selectedIds={Array.from(selectedIds)} onClearSelection={() => setSelectedIds(new Set())} actions={bulkActions} />
 
       {/* Edit dialog */}
-      <EditPhoneNumberDialog
-        phoneNumber={editingPhoneNumber}
-        open={editDialogOpen}
-        onOpenChange={setEditDialogOpen}
-      />
+      <EditPhoneNumberDialog phoneNumber={editingPhoneNumber} open={editDialogOpen} onOpenChange={setEditDialogOpen} />
     </PageContainer>
   )
 }

@@ -1,11 +1,11 @@
 import { AlertCircle } from "lucide-react"
 import { useMemo, useState } from "react"
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { EmptyState } from "@/components/ui/empty-state"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { useAdminTrends } from "@/lib/api/hooks/admin"
-import { Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 
 type Period = "7d" | "30d" | "90d"
 
@@ -19,9 +19,7 @@ function PeriodToggle({ value, onChange }: { value: Period; onChange: (p: Period
           key={p}
           onClick={() => onChange(p)}
           className={`rounded px-2 py-0.5 text-[11px] font-medium transition-colors ${
-            value === p
-              ? "bg-background text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
+            value === p ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
           }`}
         >
           {p}
@@ -60,15 +58,9 @@ export function AdminCharts() {
     return data.points.slice(-PERIOD_DAYS[growthPeriod])
   }, [data, growthPeriod])
 
-  const totalEvents = useMemo(
-    () => activityPoints.reduce((sum, p) => sum + p.events, 0),
-    [activityPoints],
-  )
+  const totalEvents = useMemo(() => activityPoints.reduce((sum, p) => sum + p.events, 0), [activityPoints])
 
-  const totalNewUsers = useMemo(
-    () => growthPoints.reduce((sum, p) => sum + p.newUsers, 0),
-    [growthPoints],
-  )
+  const totalNewUsers = useMemo(() => growthPoints.reduce((sum, p) => sum + p.newUsers, 0), [growthPoints])
 
   if (isLoading) {
     return (
@@ -85,7 +77,11 @@ export function AdminCharts() {
         icon={AlertCircle}
         title="Unable to load trend data"
         description="Something went wrong. Please try again."
-        action={<Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button>}
+        action={
+          <Button variant="outline" size="sm" onClick={() => refetch()}>
+            Try again
+          </Button>
+        }
       />
     )
   }
@@ -101,9 +97,7 @@ export function AdminCharts() {
             </div>
             <div className="flex flex-col items-end gap-1">
               <PeriodToggle value={activityPeriod} onChange={setActivityPeriod} />
-              <span className="text-xs font-medium text-muted-foreground">
-                {totalEvents.toLocaleString()} total events
-              </span>
+              <span className="text-xs font-medium text-muted-foreground">{totalEvents.toLocaleString()} total events</span>
             </div>
           </div>
         </CardHeader>
@@ -135,9 +129,7 @@ export function AdminCharts() {
             </div>
             <div className="flex flex-col items-end gap-1">
               <PeriodToggle value={growthPeriod} onChange={setGrowthPeriod} />
-              <span className="text-xs font-medium text-muted-foreground">
-                {totalNewUsers.toLocaleString()} total new users
-              </span>
+              <span className="text-xs font-medium text-muted-foreground">{totalNewUsers.toLocaleString()} total new users</span>
             </div>
           </div>
         </CardHeader>

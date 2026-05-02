@@ -1,17 +1,11 @@
-import { Button } from "@/components/ui/button"
+import { CheckCircle2, Loader2, Shield, ShieldOff, Trash2, Users, UsersRound } from "lucide-react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { Badge } from "@/components/ui/badge"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { SkeletonCard } from "@/components/ui/skeleton"
-import { CheckCircle2, Loader2, Shield, ShieldOff, Trash2, Users, UsersRound } from "lucide-react"
-import { useCallback, useEffect, useRef, useState } from "react"
 import { useAdminUser, useAssignRole, useRevokeRole, useRoles, useUpdateTeamMember } from "@/lib/api/hooks/admin"
 import type { TeamRoles } from "@/lib/generated/api"
 
@@ -139,18 +133,14 @@ export function ManageRolesDialog({ userId, userEmail, open, onOpenChange }: Man
                           onClick={() => handleRevokeClick(role.roleSlug)}
                           disabled={revokeRoleMutation.isPending}
                           className={`ml-1 rounded-full p-0.5 transition-colors ${
-                            isConfirming
-                              ? "bg-destructive/15 text-destructive hover:bg-destructive/25"
-                              : "hover:bg-violet-200 dark:hover:bg-violet-800/50"
+                            isConfirming ? "bg-destructive/15 text-destructive hover:bg-destructive/25" : "hover:bg-violet-200 dark:hover:bg-violet-800/50"
                           }`}
                           aria-label={isConfirming ? `Confirm remove ${role.roleName}` : `Remove ${role.roleName} role`}
                           title={isConfirming ? "Click again to confirm" : `Remove ${role.roleName}`}
                         >
                           <Trash2 className="h-3 w-3" />
                         </button>
-                        {isConfirming && (
-                          <span className="ml-0.5 text-xs text-destructive">Remove?</span>
-                        )}
+                        {isConfirming && <span className="ml-0.5 text-xs text-destructive">Remove?</span>}
                       </Badge>
                     )
                   })}
@@ -202,10 +192,7 @@ export function ManageRolesDialog({ userId, userEmail, open, onOpenChange }: Man
               ) : (
                 <div className="space-y-2">
                   {teams.map((team) => (
-                    <div
-                      key={team.teamId}
-                      className="flex items-center justify-between rounded-md border px-3 py-2 transition-colors hover:bg-muted/30"
-                    >
+                    <div key={team.teamId} className="flex items-center justify-between rounded-md border px-3 py-2 transition-colors hover:bg-muted/30">
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium">{team.teamName}</span>
                         {team.isOwner && (
@@ -213,9 +200,7 @@ export function ManageRolesDialog({ userId, userEmail, open, onOpenChange }: Man
                             Owner
                           </Badge>
                         )}
-                        {changedTeamId === team.teamId && (
-                          <CheckCircle2 className="h-4 w-4 text-green-500 animate-in fade-in zoom-in duration-200" />
-                        )}
+                        {changedTeamId === team.teamId && <CheckCircle2 className="h-4 w-4 text-green-500 animate-in fade-in zoom-in duration-200" />}
                       </div>
                       <Select
                         value={team.role ?? "MEMBER"}

@@ -44,15 +44,12 @@ export function TicketReplyForm({ ticketId }: { ticketId: string }) {
     return () => clearTimeout(timer)
   }, [showSuccess])
 
-  const insertImageMarkdown = useCallback(
-    (markdown: string) => {
-      setBody((prev) => {
-        const suffix = prev.endsWith("\n") || prev === "" ? "" : "\n"
-        return prev + suffix + markdown + "\n"
-      })
-    },
-    [],
-  )
+  const insertImageMarkdown = useCallback((markdown: string) => {
+    setBody((prev) => {
+      const suffix = prev.endsWith("\n") || prev === "" ? "" : "\n"
+      return prev + suffix + markdown + "\n"
+    })
+  }, [])
 
   const { handlePaste, handleDrop } = useImagePasteHandler({
     onUpload: (blob) => pasteImage.mutateAsync(blob),
@@ -114,35 +111,21 @@ export function TicketReplyForm({ ticketId }: { ticketId: string }) {
 
   return (
     <>
-      <Card
-        className={cn(
-          "border-l-2 transition-colors",
-          isInternalNote
-            ? "border-amber-500/30 border-l-amber-500 bg-amber-500/5"
-            : "border-border/60 border-l-primary/30",
-        )}
-      >
+      <Card className={cn("border-l-2 transition-colors", isInternalNote ? "border-amber-500/30 border-l-amber-500 bg-amber-500/5" : "border-border/60 border-l-primary/30")}>
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div
                 className={cn(
                   "flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium",
-                  isInternalNote
-                    ? "bg-amber-500/15 text-amber-700 dark:text-amber-400"
-                    : "bg-primary/10 text-primary",
+                  isInternalNote ? "bg-amber-500/15 text-amber-700 dark:text-amber-400" : "bg-primary/10 text-primary",
                 )}
               >
                 {userInitial}
               </div>
-              <CardTitle className="text-sm font-medium">
-                {isInternalNote ? "Internal Note" : "Reply"}
-              </CardTitle>
+              <CardTitle className="text-sm font-medium">{isInternalNote ? "Internal Note" : "Reply"}</CardTitle>
               {isInternalNote && (
-                <Badge
-                  variant="outline"
-                  className="border-amber-500/30 bg-amber-500/10 text-[10px] text-amber-700 dark:text-amber-400"
-                >
+                <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-[10px] text-amber-700 dark:text-amber-400">
                   <Eye className="mr-0.5 h-2.5 w-2.5" />
                   Staff only
                 </Badge>
@@ -160,27 +143,15 @@ export function TicketReplyForm({ ticketId }: { ticketId: string }) {
                   <div className="flex items-center gap-2">
                     <label
                       htmlFor="internal-note-toggle"
-                      className={cn(
-                        "cursor-pointer text-xs font-medium transition-colors",
-                        isInternalNote
-                          ? "text-amber-700 dark:text-amber-400"
-                          : "text-muted-foreground",
-                      )}
+                      className={cn("cursor-pointer text-xs font-medium transition-colors", isInternalNote ? "text-amber-700 dark:text-amber-400" : "text-muted-foreground")}
                     >
                       <StickyNote className="mr-1 inline h-3 w-3" />
                       Internal Note
                     </label>
-                    <Switch
-                      id="internal-note-toggle"
-                      checked={isInternalNote}
-                      onCheckedChange={setIsInternalNote}
-                      className="data-[state=checked]:bg-amber-500"
-                    />
+                    <Switch id="internal-note-toggle" checked={isInternalNote} onCheckedChange={setIsInternalNote} className="data-[state=checked]:bg-amber-500" />
                   </div>
                 </TooltipTrigger>
-                <TooltipContent>
-                  Internal notes are only visible to superusers
-                </TooltipContent>
+                <TooltipContent>Internal notes are only visible to superusers</TooltipContent>
               </Tooltip>
             )}
           </div>
@@ -190,11 +161,7 @@ export function TicketReplyForm({ ticketId }: { ticketId: string }) {
             <MarkdownEditor
               value={body}
               onChange={setBody}
-              placeholder={
-                isInternalNote
-                  ? "Write an internal note... (only visible to superusers)"
-                  : "Write your reply... (Markdown supported, paste images with Ctrl+V)"
-              }
+              placeholder={isInternalNote ? "Write an internal note... (only visible to superusers)" : "Write your reply... (Markdown supported, paste images with Ctrl+V)"}
               minHeight="120px"
               onPaste={handlePaste}
               onDrop={handleDrop}
@@ -210,22 +177,10 @@ export function TicketReplyForm({ ticketId }: { ticketId: string }) {
               </div>
             )}
             <div className="flex items-start justify-between gap-4">
-              <AttachmentUpload
-                files={files}
-                onFilesChange={setFiles}
-                uploading={uploadAttachment.isPending}
-                disabled={isSending}
-                compact
-              />
+              <AttachmentUpload files={files} onFilesChange={setFiles} uploading={uploadAttachment.isPending} disabled={isSending} compact />
               <div className="flex items-center gap-2">
                 {hasContent && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className="shrink-0 text-destructive hover:text-destructive"
-                    onClick={handleDiscard}
-                    disabled={isSending}
-                  >
+                  <Button type="button" variant="ghost" className="shrink-0 text-destructive hover:text-destructive" onClick={handleDiscard} disabled={isSending}>
                     <X className="mr-2 h-4 w-4" />
                     Discard
                   </Button>
@@ -234,24 +189,10 @@ export function TicketReplyForm({ ticketId }: { ticketId: string }) {
                   <Button
                     type="submit"
                     disabled={isSending || !body.trim()}
-                    className={cn(
-                      "shrink-0",
-                      isInternalNote &&
-                        "bg-amber-600 text-white hover:bg-amber-700 dark:bg-amber-600 dark:hover:bg-amber-700",
-                    )}
+                    className={cn("shrink-0", isInternalNote && "bg-amber-600 text-white hover:bg-amber-700 dark:bg-amber-600 dark:hover:bg-amber-700")}
                   >
-                    {isSending ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : isInternalNote ? (
-                      <StickyNote className="mr-2 h-4 w-4" />
-                    ) : (
-                      <Send className="mr-2 h-4 w-4" />
-                    )}
-                    {isSending
-                      ? "Sending..."
-                      : isInternalNote
-                        ? "Add Internal Note"
-                        : "Send Reply"}
+                    {isSending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : isInternalNote ? <StickyNote className="mr-2 h-4 w-4" /> : <Send className="mr-2 h-4 w-4" />}
+                    {isSending ? "Sending..." : isInternalNote ? "Add Internal Note" : "Send Reply"}
                   </Button>
                   <span className="hidden items-center gap-1 text-xs text-muted-foreground sm:flex">
                     <Keyboard className="h-3 w-3" />
@@ -268,17 +209,11 @@ export function TicketReplyForm({ ticketId }: { ticketId: string }) {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Discard reply?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Your reply has unsaved content. Are you sure you want to discard it?
-            </AlertDialogDescription>
+            <AlertDialogDescription>Your reply has unsaved content. Are you sure you want to discard it?</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setShowDiscardConfirm(false)}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDiscard}>
-              Discard
-            </AlertDialogAction>
+            <AlertDialogCancel onClick={() => setShowDiscardConfirm(false)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDiscard}>Discard</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
