@@ -7,6 +7,8 @@ import {
   Calendar,
   CheckCircle2,
   Clock,
+  Grid3x3,
+  List,
   Loader2,
   Pencil,
   Plus,
@@ -44,6 +46,8 @@ import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { formatDateTime, formatRelativeTime } from "@/lib/date-utils"
 import {
   useSchedule,
@@ -387,6 +391,172 @@ function DeleteScheduleDialog({
   )
 }
 
+// -- Weekly View Grid ---------------------------------------------------------
+
+const GRID_START_HOUR = 6
+const GRID_END_HOUR = 22
+const GRID_TOTAL_HOURS = GRID_END_HOUR - GRID_START_HOUR // 16
+
+const DAY_ABBREVIATIONS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+
+/** Parse "HH:MM" into fractional hours (e.g. "09:30" => 9.5). */
+function parseTime(time: string): number {
+  const [h, m] = time.split(":").map(Number)
+  return h + m / 60
+}
+
+/** Format fractional hour to a readable label, e.g. 9 => "9 AM", 13.5 => "1:30 PM". */
+function formatHourLabel(hour: number): string {
+  const h = Math.floor(hour)
+  const m = Math.round((hour - h) * 60)
+  const suffix = h >= 12 ? "PM" : "AM"
+  const display = h === 0 ? 12 : h > 12 ? h - 12 : h
+  return m > 0 ? `${display}:${String(m).padStart(2, "0")} ${suffix}` : `${display} ${suffix}`
+}
+
+function WeeklyViewGrid({
+  weeklyEntries,
+}: {
+  weeklyEntries: Map<number, ScheduleEntry[]>
+}) {
+  const hasAnyEntries = Array.from(weeklyEntries.values()).some((entries) => entries.length > 0)
+
+  if (!hasAnyEntries) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <Calendar className="mb-3 h-10 w-10 text-muted-foreground/40" />
+        <p className="text-sm font-medium text-muted-foreground">No schedule entries</p>
+        <p className="text-xs text-muted-foreground/70">
+          Add hours using the list view to see them displayed here.
+        </p>
+      </div>
+    )
+  }
+
+  const hourLabels: number[] = []
+  for (let h = GRID_START_HOUR; h <= GRID_END_HOUR; h++) {
+    hourLabels.push(h)
+  }
+
+  return (
+    <TooltipProvider delayDuration={200}>
+      <div className="overflow-x-auto">
+        <div className="min-w-[600px]">
+          {/* Header row: day names */}
+          <div className="grid grid-cols-[60px_repeat(7,1fr)] border-b border-border/60">
+            <div /> {/* empty corner cell */}
+            {DAY_ABBREVIATIONS.map((day) => (
+              <div
+                key={day}
+                className="px-1 py-2 text-center text-xs font-semibold text-muted-foreground"
+              >
+                {day}
+              </div>
+            ))}
+          </div>
+
+          {/* Grid body */}
+          <div className="grid grid-cols-[60px_repeat(7,1fr)]">
+            {/* Hour labels column */}
+            <div className="relative">
+              {hourLabels.map((hour) => (
+                <div
+                  key={hour}
+                  className="flex h-7 items-start justify-end pr-2 text-[10px] text-muted-foreground/70"
+                  style={{ marginTop: hour === GRID_START_HOUR ? 0 : undefined }}
+                >
+                  {formatHourLabel(hour)}
+                </div>
+              ))}
+            </div>
+
+            {/* Day columns */}
+            {DAY_ABBREVIATIONS.map((_, dayIndex) => {
+              const entries = weeklyEntries.get(dayIndex) ?? []
+              return (
+                <div
+                  key={dayIndex}
+                  className="relative border-l border-border/40"
+                  style={{ height: `${GRID_TOTAL_HOURS * 28}px` }}
+                >
+                  {/* Hour grid lines */}
+                  {hourLabels.slice(0, -1).map((hour) => (
+                    <div
+                      key={hour}
+                      className="absolute left-0 right-0 border-b border-border/20"
+                      style={{ top: `${(hour - GRID_START_HOUR) * 28}px`, height: "28px" }}
+                    />
+                  ))}
+
+                  {/* Entry blocks */}
+                  {entries.map((entry) => {
+                    if (entry.isClosed) {
+                      return (
+                        <Tooltip key={entry.id}>
+                          <TooltipTrigger asChild>
+                            <div
+                              className="absolute inset-x-0.5 rounded-sm border border-red-200 bg-red-50 dark:border-red-900/40 dark:bg-red-950/20"
+                              style={{
+                                top: 0,
+                                height: `${GRID_TOTAL_HOURS * 28}px`,
+                              }}
+                            >
+                              <span className="block px-1 pt-0.5 text-[9px] font-medium text-red-500 dark:text-red-400">
+                                Closed
+                              </span>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent side="top">
+                            <p>{DAY_NAMES[dayIndex]} - Closed all day</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      )
+                    }
+
+                    const start = parseTime(entry.startTime)
+                    const end = parseTime(entry.endTime)
+
+                    // Clamp to visible grid range
+                    const clampedStart = Math.max(start, GRID_START_HOUR)
+                    const clampedEnd = Math.min(end, GRID_END_HOUR)
+
+                    if (clampedEnd <= clampedStart) return null
+
+                    const topPx = (clampedStart - GRID_START_HOUR) * 28
+                    const heightPx = (clampedEnd - clampedStart) * 28
+
+                    return (
+                      <Tooltip key={entry.id}>
+                        <TooltipTrigger asChild>
+                          <div
+                            className="absolute inset-x-0.5 rounded-sm border border-emerald-200 bg-emerald-100 transition-colors hover:bg-emerald-200 dark:border-emerald-800/50 dark:bg-emerald-900/30 dark:hover:bg-emerald-900/50"
+                            style={{ top: `${topPx}px`, height: `${heightPx}px` }}
+                          >
+                            {heightPx >= 20 && (
+                              <span className="block px-1 pt-0.5 text-[9px] font-medium text-emerald-700 dark:text-emerald-300">
+                                {entry.startTime} - {entry.endTime}
+                              </span>
+                            )}
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="top">
+                          <p>
+                            {DAY_NAMES[dayIndex]}: {entry.startTime} - {entry.endTime}
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    )
+                  })}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      </div>
+    </TooltipProvider>
+  )
+}
+
 // -- Main page ----------------------------------------------------------------
 
 function ScheduleDetailPage() {
@@ -667,41 +837,60 @@ function ScheduleDetailPage() {
                   <CardDescription>Define operating hours for each day of the week.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="overflow-x-auto">
-                  <Table aria-label="Weekly schedule entries">
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-32">Day</TableHead>
-                        <TableHead>Hours</TableHead>
-                        <TableHead className="w-32 text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {DAY_NAMES.map((day, index) => {
-                        const entries = weeklyEntries.get(index) ?? []
-                        return (
-                          <TableRow key={index}>
-                            <TableCell className="font-medium">{day}</TableCell>
-                            <TableCell>
-                              {entries.length === 0 ? (
-                                <span className="text-sm text-muted-foreground">No hours set</span>
-                              ) : (
-                                <div className="flex flex-col gap-1">
-                                  {entries.map((entry) => (
-                                    <EntryDisplay key={entry.id} entry={entry} scheduleId={scheduleId} />
-                                  ))}
-                                </div>
-                              )}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <AddWeeklyEntryRow scheduleId={scheduleId} dayOfWeek={index} />
-                            </TableCell>
+                  <Tabs defaultValue="list">
+                    <TabsList className="mb-4">
+                      <TabsTrigger value="list" className="gap-1.5">
+                        <List className="h-3.5 w-3.5" />
+                        List
+                      </TabsTrigger>
+                      <TabsTrigger value="weekly" className="gap-1.5">
+                        <Grid3x3 className="h-3.5 w-3.5" />
+                        Weekly View
+                      </TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="list">
+                      <div className="overflow-x-auto">
+                      <Table aria-label="Weekly schedule entries">
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-32">Day</TableHead>
+                            <TableHead>Hours</TableHead>
+                            <TableHead className="w-32 text-right">Actions</TableHead>
                           </TableRow>
-                        )
-                      })}
-                    </TableBody>
-                  </Table>
-                  </div>
+                        </TableHeader>
+                        <TableBody>
+                          {DAY_NAMES.map((day, index) => {
+                            const entries = weeklyEntries.get(index) ?? []
+                            return (
+                              <TableRow key={index}>
+                                <TableCell className="font-medium">{day}</TableCell>
+                                <TableCell>
+                                  {entries.length === 0 ? (
+                                    <span className="text-sm text-muted-foreground">No hours set</span>
+                                  ) : (
+                                    <div className="flex flex-col gap-1">
+                                      {entries.map((entry) => (
+                                        <EntryDisplay key={entry.id} entry={entry} scheduleId={scheduleId} />
+                                      ))}
+                                    </div>
+                                  )}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <AddWeeklyEntryRow scheduleId={scheduleId} dayOfWeek={index} />
+                                </TableCell>
+                              </TableRow>
+                            )
+                          })}
+                        </TableBody>
+                      </Table>
+                      </div>
+                    </TabsContent>
+
+                    <TabsContent value="weekly">
+                      <WeeklyViewGrid weeklyEntries={weeklyEntries} />
+                    </TabsContent>
+                  </Tabs>
                 </CardContent>
               </Card>
             )}

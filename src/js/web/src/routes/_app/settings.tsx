@@ -4,19 +4,25 @@ import {
   Bell,
   Calendar,
   Check,
+  Globe,
   Hash,
   Keyboard,
+  Laptop,
   Layout,
+  LogOut,
   Monitor,
   Moon,
   PanelLeftClose,
   Palette,
   RotateCcw,
+  Shield,
+  Smartphone,
   Sun,
 } from "lucide-react"
-import { useCallback, useRef, useState } from "react"
+import { useCallback, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 import { NotificationPreferences } from "@/components/settings/notification-preferences"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
@@ -39,6 +45,7 @@ const NAV_ITEMS = [
   { id: "appearance", label: "Appearance", icon: Palette },
   { id: "notifications", label: "Notifications", icon: Bell },
   { id: "display", label: "Display", icon: Layout },
+  { id: "sessions", label: "Sessions", icon: Shield },
   { id: "shortcuts", label: "Shortcuts", icon: Keyboard },
 ] as const
 
@@ -132,6 +139,12 @@ function SettingsPage() {
           </PageSection>
 
           <PageSection delay={0.25}>
+            <div ref={(el) => { sectionRefs.current.sessions = el }} className="scroll-mt-24">
+              <ActiveSessionsSection />
+            </div>
+          </PageSection>
+
+          <PageSection delay={0.3}>
             <div ref={(el) => { sectionRefs.current.shortcuts = el }} className="scroll-mt-24">
               <KeyboardShortcutsSection />
             </div>
@@ -375,6 +388,174 @@ function DisplaySection() {
             <p className="text-sm text-muted-foreground">Start with the sidebar in its collapsed state.</p>
           </div>
           <Switch id="sidebar-collapsed" checked={sidebarCollapsed} onCheckedChange={handleSidebarChange} />
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+/* -----------------------------------------------------------------------
+ * Active sessions section
+ * ----------------------------------------------------------------------- */
+
+interface SessionInfo {
+  id: string
+  device: string
+  icon: React.ComponentType<{ className?: string }>
+  browser: string
+  ip: string
+  location: string
+  lastActive: string
+  isCurrent: boolean
+}
+
+function parseUserAgent(ua: string): { device: string; browser: string; icon: React.ComponentType<{ className?: string }> } {
+  let browser = "Unknown browser"
+  if (ua.includes("Firefox")) browser = "Firefox"
+  else if (ua.includes("Edg/")) browser = "Microsoft Edge"
+  else if (ua.includes("Chrome") && !ua.includes("Edg/")) browser = "Google Chrome"
+  else if (ua.includes("Safari") && !ua.includes("Chrome")) browser = "Safari"
+
+  let device = "Unknown device"
+  let icon: React.ComponentType<{ className?: string }> = Monitor
+  if (/Android|iPhone|iPad|iPod|Mobile/i.test(ua)) {
+    icon = Smartphone
+    if (ua.includes("iPhone")) device = "iPhone"
+    else if (ua.includes("iPad")) device = "iPad"
+    else if (ua.includes("Android")) device = "Android device"
+    else device = "Mobile device"
+  } else {
+    icon = Laptop
+    if (ua.includes("Windows")) device = "Windows PC"
+    else if (ua.includes("Macintosh")) device = "macOS"
+    else if (ua.includes("Linux")) device = "Linux"
+    else device = "Desktop"
+  }
+
+  return { device, browser, icon }
+}
+
+function ActiveSessionsSection() {
+  const currentSession = useMemo<SessionInfo>(() => {
+    const ua = typeof navigator !== "undefined" ? navigator.userAgent : ""
+    const { device, browser, icon } = parseUserAgent(ua)
+    return {
+      id: "current",
+      device,
+      icon,
+      browser,
+      ip: "Current network",
+      location: "This device",
+      lastActive: "Active now",
+      isCurrent: true,
+    }
+  }, [])
+
+  const handleSignOut = useCallback((_sessionId: string) => {
+    toast.info("Coming soon", {
+      description: "Remote session management will be available in a future update.",
+    })
+  }, [])
+
+  const handleSignOutAll = useCallback(() => {
+    toast.info("Coming soon", {
+      description: "The ability to sign out all other sessions will be available in a future update.",
+    })
+  }, [])
+
+  const sessions: SessionInfo[] = [currentSession]
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10">
+            <Shield className="h-4 w-4 text-emerald-500" />
+          </div>
+          Active Sessions
+        </CardTitle>
+        <CardDescription>
+          Devices and browsers where you are currently signed in.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          {sessions.map((session) => {
+            const Icon = session.icon
+            return (
+              <div
+                key={session.id}
+                className={cn(
+                  "flex items-center justify-between rounded-lg border p-4",
+                  session.isCurrent
+                    ? "border-emerald-500/30 bg-emerald-500/5"
+                    : "border-border/60",
+                )}
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className={cn(
+                      "flex h-10 w-10 items-center justify-center rounded-lg",
+                      session.isCurrent ? "bg-emerald-500/10" : "bg-muted",
+                    )}
+                  >
+                    <Icon
+                      className={cn(
+                        "h-5 w-5",
+                        session.isCurrent ? "text-emerald-500" : "text-muted-foreground",
+                      )}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium">{session.browser}</span>
+                      <span className="text-sm text-muted-foreground">on {session.device}</span>
+                      {session.isCurrent && (
+                        <Badge variant="default" className="bg-emerald-600 text-[0.625rem] px-1.5 py-0">
+                          Current
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Globe className="h-3 w-3" />
+                        {session.ip}
+                      </span>
+                      <span>{session.lastActive}</span>
+                    </div>
+                  </div>
+                </div>
+                {!session.isCurrent && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleSignOut(session.id)}
+                    className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                  >
+                    <LogOut className="mr-1.5 h-3.5 w-3.5" />
+                    Sign out
+                  </Button>
+                )}
+              </div>
+            )
+          })}
+        </div>
+
+        <Separator />
+
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-muted-foreground">
+            Session management is limited to the current session. Full session history and remote sign-out coming soon.
+          </p>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleSignOutAll}
+            className="shrink-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
+          >
+            <LogOut className="mr-1.5 h-3.5 w-3.5" />
+            Sign out all other sessions
+          </Button>
         </div>
       </CardContent>
     </Card>

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { createFileRoute, Link } from "@tanstack/react-router"
+import { useQuery } from "@tanstack/react-query"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import {
   Activity,
@@ -14,6 +15,7 @@ import {
   HardDrive,
   Layers,
   Loader2,
+  Radio,
   RefreshCw,
   Server,
   XCircle,
@@ -32,6 +34,8 @@ import { Switch } from "@/components/ui/switch"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAdminSystemStatus } from "@/lib/api/hooks/admin"
 import { useConnections, useTestAnyConnection } from "@/lib/api/hooks/connections"
+import { sseStatus } from "@/lib/api/hooks/events"
+import { systemHealth, type SystemHealth } from "@/lib/generated/api"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { formatUptime } from "@/lib/format-utils"
 
@@ -98,6 +102,215 @@ function OverallHealthBanner({ healthy }: { healthy: boolean }) {
         </p>
       </div>
     </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// System Health Indicators
+// ---------------------------------------------------------------------------
+
+const HEALTH_CHECK_INTERVAL = 30_000
+
+type HealthStatus = "healthy" | "degraded" | "unhealthy" | "unknown"
+
+interface HealthIndicator {
+  name: string
+  icon: typeof Server
+  status: HealthStatus
+  detail: string
+}
+
+function useSystemHealthCheck() {
+  return useQuery({
+    queryKey: ["system", "health-check"],
+    queryFn: async () => {
+      const response = await systemHealth()
+      return response.data as SystemHealth
+    },
+    refetchInterval: HEALTH_CHECK_INTERVAL,
+    retry: 1,
+  })
+}
+
+function healthStatusColor(status: HealthStatus) {
+  switch (status) {
+    case "healthy":
+      return {
+        dot: "bg-emerald-500",
+        ping: "bg-emerald-400",
+        icon: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+        badge: "text-emerald-600 dark:text-emerald-400",
+        badgeVariant: "outline" as const,
+        label: "Healthy",
+      }
+    case "degraded":
+      return {
+        dot: "bg-amber-500",
+        ping: "bg-amber-400",
+        icon: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+        badge: "text-amber-600 dark:text-amber-400",
+        badgeVariant: "outline" as const,
+        label: "Degraded",
+      }
+    case "unhealthy":
+      return {
+        dot: "bg-destructive",
+        ping: "",
+        icon: "bg-destructive/10 text-destructive",
+        badge: "",
+        badgeVariant: "destructive" as const,
+        label: "Unhealthy",
+      }
+    case "unknown":
+      return {
+        dot: "bg-muted-foreground",
+        ping: "",
+        icon: "bg-muted text-muted-foreground",
+        badge: "",
+        badgeVariant: "secondary" as const,
+        label: "Unknown",
+      }
+  }
+}
+
+function HealthIndicatorCard({ indicator }: { indicator: HealthIndicator }) {
+  const Icon = indicator.icon
+  const colors = healthStatusColor(indicator.status)
+  const showPing = indicator.status === "healthy" || indicator.status === "degraded"
+
+  return (
+    <Card>
+      <CardContent className="flex items-center gap-3 p-4">
+        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${colors.icon}`}>
+          <Icon className="h-5 w-5" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium">{indicator.name}</p>
+            <div className="flex items-center gap-2">
+              <Badge variant={colors.badgeVariant} className={`text-[10px] ${colors.badge}`}>
+                {colors.label}
+              </Badge>
+              <span className="relative flex h-2.5 w-2.5">
+                {showPing && (
+                  <span className={`absolute inline-flex h-full w-full animate-ping rounded-full ${colors.ping} opacity-40`} />
+                )}
+                <span className={`relative inline-flex h-2.5 w-2.5 rounded-full ${colors.dot}`} />
+              </span>
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground">{indicator.detail}</p>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+function SystemHealthIndicators() {
+  const { data: healthData, isError: healthError, dataUpdatedAt, refetch, isFetching } = useSystemHealthCheck()
+
+  // Live "last checked X ago" ticker
+  const [, setTick] = useState(0)
+  useEffect(() => {
+    const id = setInterval(() => setTick((t) => t + 1), 5_000)
+    return () => clearInterval(id)
+  }, [])
+
+  // Read SSE status reactively by polling the module-level object
+  const [sseConnected, setSseConnected] = useState(sseStatus.connected)
+  useEffect(() => {
+    const id = setInterval(() => setSseConnected(sseStatus.connected), 2_000)
+    return () => clearInterval(id)
+  }, [])
+
+  // Determine individual statuses
+  const apiStatus: HealthStatus = healthError ? "unhealthy" : healthData ? "healthy" : "unknown"
+  const dbStatus: HealthStatus = healthError
+    ? "unknown"
+    : healthData?.databaseStatus === "online"
+      ? "healthy"
+      : healthData?.databaseStatus === "offline"
+        ? "unhealthy"
+        : "unknown"
+  const redisStatus: HealthStatus = healthError ? "unknown" : healthData ? "healthy" : "unknown"
+  const sseIndicatorStatus: HealthStatus = sseConnected ? "healthy" : "degraded"
+
+  const indicators: HealthIndicator[] = [
+    {
+      name: "API Server",
+      icon: Server,
+      status: apiStatus,
+      detail: apiStatus === "healthy"
+        ? `v${healthData?.version ?? "?"} -- ${healthData?.app ?? "Litestar"}`
+        : apiStatus === "unhealthy"
+          ? "Endpoint unreachable"
+          : "Checking...",
+    },
+    {
+      name: "Database",
+      icon: Database,
+      status: dbStatus,
+      detail: dbStatus === "healthy"
+        ? "PostgreSQL connected"
+        : dbStatus === "unhealthy"
+          ? "Connection failed"
+          : "Status unavailable",
+    },
+    {
+      name: "Redis / Queue",
+      icon: Zap,
+      status: redisStatus,
+      detail: redisStatus === "healthy" ? "Broker reachable" : "Status unavailable",
+    },
+    {
+      name: "SSE Connection",
+      icon: Radio,
+      status: sseIndicatorStatus,
+      detail: sseConnected
+        ? "Real-time events active"
+        : sseStatus.disconnectedSince
+          ? `Disconnected ${formatTimeSince(new Date(sseStatus.disconnectedSince))}`
+          : "Reconnecting...",
+    },
+  ]
+
+  const lastCheckedLabel =
+    dataUpdatedAt > 0 ? `Last checked: ${formatTimeSince(new Date(dataUpdatedAt))}` : "Checking..."
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Activity className="h-4 w-4 text-muted-foreground" />
+              System Health
+            </CardTitle>
+            <CardDescription>Real-time health indicators for core subsystems.</CardDescription>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-[11px] text-muted-foreground">{lastCheckedLabel}</span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => refetch()}
+              disabled={isFetching}
+              aria-label="Refresh health checks"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${isFetching ? "animate-spin" : ""}`} />
+              Refresh
+            </Button>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {indicators.map((indicator) => (
+            <HealthIndicatorCard key={indicator.name} indicator={indicator} />
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 
@@ -600,6 +813,9 @@ function AdminSystemPage() {
                   </p>
                 )}
               </div>
+
+              {/* System health indicators */}
+              <SystemHealthIndicators />
 
               {/* Service status grid */}
               <ServiceStatusGrid databaseStatus={data.databaseStatus} workerQueues={data.workerQueues} />

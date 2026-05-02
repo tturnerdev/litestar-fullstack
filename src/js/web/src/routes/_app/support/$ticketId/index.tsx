@@ -1,10 +1,11 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
-import { useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   AlertCircle,
   AlertTriangle,
   ArrowLeft,
   Calendar,
+  Check,
   ChevronDown,
   ChevronRight,
   Clock,
@@ -15,12 +16,24 @@ import {
   Mail,
   MessageSquare,
   Pencil,
+  Plus,
   Tag,
   Trash2,
   Unlock,
   User,
   Users,
+  X,
 } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { TicketConversation } from "@/components/support/ticket-conversation"
 import { TicketPriorityBadge } from "@/components/support/ticket-priority-badge"
@@ -71,6 +84,7 @@ import {
   useTicket,
   useUpdateTicket,
 } from "@/lib/api/hooks/support"
+import { useTags, type Tag as TagType } from "@/lib/api/hooks/tags"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 
@@ -134,6 +148,173 @@ function TimestampField({
           <p className="mt-0.5 text-sm text-muted-foreground/70">--</p>
         )}
       </div>
+    </div>
+  )
+}
+
+// ── Tag Manager ────────────────────────────────────────────────────────
+
+interface TicketTag {
+  id: string
+  name: string
+  slug: string
+}
+
+function TicketTagManager({
+  ticketId,
+  initialTags,
+}: {
+  ticketId: string
+  initialTags: TicketTag[]
+}) {
+  const [tagPopoverOpen, setTagPopoverOpen] = useState(false)
+  const [tagSearch, setTagSearch] = useState("")
+  const [assignedTags, setAssignedTags] = useState<TicketTag[]>(initialTags)
+  const updateTicket = useUpdateTicket(ticketId)
+
+  // Sync local state when the ticket data refreshes from the server
+  useEffect(() => {
+    setAssignedTags(initialTags)
+  }, [initialTags])
+
+  const { data: tagsData } = useTags({ page: 1, pageSize: 100, search: tagSearch })
+  const availableTags: TagType[] = tagsData?.items ?? []
+
+  const assignedIds = useMemo(
+    () => new Set(assignedTags.map((t) => t.id)),
+    [assignedTags],
+  )
+
+  const handleToggleTag = useCallback(
+    (tag: TagType) => {
+      const isAssigned = assignedIds.has(tag.id)
+      let nextTags: TicketTag[]
+
+      if (isAssigned) {
+        nextTags = assignedTags.filter((t) => t.id !== tag.id)
+      } else {
+        nextTags = [...assignedTags, { id: tag.id, name: tag.name, slug: tag.slug }]
+      }
+
+      // Optimistic update
+      setAssignedTags(nextTags)
+
+      updateTicket.mutate(
+        { tagIds: nextTags.map((t) => t.id) },
+        {
+          onError: () => {
+            // Revert on failure
+            setAssignedTags(assignedTags)
+          },
+        },
+      )
+    },
+    [assignedIds, assignedTags, updateTicket],
+  )
+
+  const handleRemoveTag = useCallback(
+    (tagId: string) => {
+      const nextTags = assignedTags.filter((t) => t.id !== tagId)
+
+      // Optimistic update
+      setAssignedTags(nextTags)
+
+      updateTicket.mutate(
+        { tagIds: nextTags.map((t) => t.id) },
+        {
+          onError: () => {
+            // Revert on failure
+            setAssignedTags(assignedTags)
+          },
+        },
+      )
+    },
+    [assignedTags, updateTicket],
+  )
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="flex h-5 w-5 shrink-0 items-center justify-center">
+            <Tag className="h-3.5 w-3.5 text-muted-foreground" />
+          </div>
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Tags
+          </p>
+        </div>
+        <Popover open={tagPopoverOpen} onOpenChange={setTagPopoverOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 w-6 p-0"
+              aria-label="Add tag"
+            >
+              <Plus className="h-3.5 w-3.5" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-64 p-0" align="end">
+            <Command shouldFilter={false}>
+              <CommandInput
+                placeholder="Search tags..."
+                value={tagSearch}
+                onValueChange={setTagSearch}
+              />
+              <CommandList>
+                <CommandEmpty>No tags found.</CommandEmpty>
+                <CommandGroup>
+                  {availableTags.map((tag) => {
+                    const isSelected = assignedIds.has(tag.id)
+                    return (
+                      <CommandItem
+                        key={tag.id}
+                        value={tag.id}
+                        onSelect={() => handleToggleTag(tag)}
+                      >
+                        <div
+                          className={`mr-2 flex h-4 w-4 shrink-0 items-center justify-center rounded-sm border ${
+                            isSelected
+                              ? "border-primary bg-primary text-primary-foreground"
+                              : "border-muted-foreground/30"
+                          }`}
+                        >
+                          {isSelected && <Check className="h-3 w-3" />}
+                        </div>
+                        <span className="truncate text-sm">{tag.name}</span>
+                      </CommandItem>
+                    )
+                  })}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
+      </div>
+
+      {assignedTags.length > 0 ? (
+        <div className="flex flex-wrap gap-1.5 pl-7">
+          {assignedTags.map((tag) => (
+            <Badge
+              key={tag.id}
+              variant="secondary"
+              className="gap-1 px-2 py-0.5 text-[10px]"
+            >
+              {tag.name}
+              <button
+                type="button"
+                className="ml-0.5 rounded-full p-0 hover:bg-muted-foreground/20"
+                onClick={() => handleRemoveTag(tag.id)}
+                aria-label={`Remove tag ${tag.name}`}
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </Badge>
+          ))}
+        </div>
+      ) : (
+        <p className="pl-7 text-sm text-muted-foreground/70">No tags</p>
+      )}
     </div>
   )
 }
@@ -572,6 +753,14 @@ function TicketDetailPage() {
                     </p>
                   </div>
                 </div>
+
+                <Separator />
+
+                {/* Tags */}
+                <TicketTagManager
+                  ticketId={ticketId}
+                  initialTags={[]}
+                />
               </CardContent>
             </Card>
           </PageSection>
