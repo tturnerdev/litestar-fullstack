@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.241.0 (2026-05-03)
+
+### Added
+- **Audit logging for tags** — create, update, delete operations logged with before/after snapshots
+- **Audit logging for phone numbers** — create, update, delete operations logged with before/after snapshots
+- **Audit logging for notifications** — delete, bulk delete read, mark all read operations logged; notification preference updates logged with before/after diffs
+
 ## v0.240.0 (2026-05-03)
 
 ### Added
