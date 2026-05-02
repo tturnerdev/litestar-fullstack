@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.210.0 (2026-05-02)
+
+### Added
+- **Action dropdown menus** on admin teams and admin users detail pages with Copy ID, Copy Email, and Delete actions
+- **Copy Schedule ID** action in schedules list row dropdown
+
+### Fixed
+- **Locations list** — removed duplicate export logic from index page (already handled by LocationList component) and fixed React hooks ordering violation in LocationList
+
 ## v0.209.0 (2026-05-02)
 
 ### Added

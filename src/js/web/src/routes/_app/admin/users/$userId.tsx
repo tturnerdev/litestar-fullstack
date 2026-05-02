@@ -5,11 +5,13 @@ import {
   BadgeCheck,
   Calendar,
   Clock,
+  Copy,
   KeyRound,
   Link2,
   Lock,
   LogIn,
   Mail,
+  MoreHorizontal,
   Pencil,
   Phone,
   Shield,
@@ -21,6 +23,7 @@ import {
   Users,
 } from "lucide-react"
 import { useState } from "react"
+import { toast } from "sonner"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { DeleteUserDialog } from "@/components/admin/delete-user-dialog"
 import { EditUserDialog } from "@/components/admin/edit-user-dialog"
@@ -47,6 +50,13 @@ import { SkeletonCard } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { CopyButton } from "@/components/ui/copy-button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAdminUpdateUser, useAdminUser } from "@/lib/api/hooks/admin"
 import { useDocumentTitle } from "@/hooks/use-document-title"
@@ -261,6 +271,44 @@ function AdminUserDetailPage() {
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back
               </Link>
             </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <MoreHorizontal className="h-4 w-4" />
+                  <span className="sr-only">Actions</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={() => {
+                    navigator.clipboard.writeText(userId)
+                    toast.success("User ID copied to clipboard")
+                  }}
+                >
+                  <Copy className="mr-2 h-4 w-4" />
+                  Copy User ID
+                </DropdownMenuItem>
+                {data.email && (
+                  <DropdownMenuItem
+                    onClick={() => {
+                      navigator.clipboard.writeText(data.email)
+                      toast.success("Email copied to clipboard")
+                    }}
+                  >
+                    <Mail className="mr-2 h-4 w-4" />
+                    Copy Email
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-destructive focus:text-destructive"
+                  onClick={() => setDeleteOpen(true)}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete User
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         }
       />

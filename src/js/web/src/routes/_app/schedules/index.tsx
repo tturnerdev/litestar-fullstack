@@ -5,6 +5,7 @@ import {
   Calendar,
   CheckCircle2,
   Clock,
+  Copy,
   Download,
   Eye,
   Globe,
@@ -66,6 +67,7 @@ import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { formatDateTime } from "@/lib/date-utils"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { toast } from "sonner"
 
 export const Route = createFileRoute("/_app/schedules/")({
   component: SchedulesPage,
@@ -622,6 +624,15 @@ function ScheduleRow({
                 <Pencil className="mr-2 h-4 w-4" />
                 Edit
               </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => {
+                navigator.clipboard.writeText(schedule.id)
+                toast.success("Schedule ID copied to clipboard")
+              }}
+            >
+              <Copy className="mr-2 h-4 w-4" />
+              Copy Schedule ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem

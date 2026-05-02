@@ -175,6 +175,28 @@ export function LocationList() {
     [navigate],
   )
 
+  const hasActiveFilters = search !== "" || typeFilter !== "all"
+
+  // Keyboard shortcuts: ArrowLeft/ArrowRight for pagination
+  // NOTE: This useEffect must be above all conditional returns to satisfy
+  // the rules of hooks (consistent hook call order on every render).
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return
+      if (e.key === "ArrowLeft" && page > 1) {
+        e.preventDefault()
+        setPage((p) => Math.max(1, p - 1))
+      }
+      if (e.key === "ArrowRight" && page < totalPages) {
+        e.preventDefault()
+        setPage((p) => Math.min(totalPages, p + 1))
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [page, totalPages])
+
   if (!currentTeam) {
     return (
       <EmptyState
@@ -218,26 +240,6 @@ export function LocationList() {
       />
     )
   }
-
-  const hasActiveFilters = search !== "" || typeFilter !== "all"
-
-  // Keyboard shortcuts: ArrowLeft/ArrowRight for pagination
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement
-      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return
-      if (e.key === "ArrowLeft" && page > 1) {
-        e.preventDefault()
-        setPage((p) => Math.max(1, p - 1))
-      }
-      if (e.key === "ArrowRight" && page < totalPages) {
-        e.preventDefault()
-        setPage((p) => Math.min(totalPages, p + 1))
-      }
-    }
-    document.addEventListener("keydown", handleKeyDown)
-    return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [page, totalPages])
 
   return (
     <>
