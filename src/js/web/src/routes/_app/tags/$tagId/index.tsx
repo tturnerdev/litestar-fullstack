@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 import {
   AlertCircle,
+  AlertTriangle,
   ArrowLeft,
   Clock,
   Copy,
@@ -383,6 +384,28 @@ function TagDetailPage() {
               </div>
               <div className="border-t pt-4">
                 <EntityActivityPanel targetType="tag" targetId={tagId} />
+              </div>
+            </CardContent>
+          </Card>
+        </PageSection>
+        {/* Danger Zone */}
+        <PageSection delay={0.3}>
+          <Card className="max-w-xl border-destructive/30">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-destructive">
+                <AlertTriangle className="h-4 w-4" />
+                Danger Zone
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-sm">Delete this tag</p>
+                  <p className="text-sm text-muted-foreground">This action cannot be undone. Any resources currently using this tag will have it removed.</p>
+                </div>
+                <Button variant="destructive" size="sm" onClick={() => setShowDeleteDialog(true)}>
+                  <Trash2 className="mr-2 h-4 w-4" /> Delete
+                </Button>
               </div>
             </CardContent>
           </Card>

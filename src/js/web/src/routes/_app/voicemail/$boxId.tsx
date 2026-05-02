@@ -265,6 +265,37 @@ function VoicemailBoxDetailPage() {
         />
       </PageSection>
 
+      {/* Danger Zone */}
+      <PageSection delay={0.3}>
+        <Card className="border-destructive/30 bg-card/80 shadow-md">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="h-4 w-4" />
+              Danger Zone
+            </CardTitle>
+            <CardDescription>Irreversible and destructive actions for this voicemail box.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between rounded-lg border border-destructive/20 bg-destructive/5 p-4">
+              <div>
+                <p className="font-medium text-sm">Delete this voicemail box</p>
+                <p className="text-xs text-muted-foreground">
+                  Once deleted, this voicemail box and all messages cannot be recovered.
+                </p>
+              </div>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => setShowDeleteConfirm(true)}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </PageSection>
+
       {/* Delete box confirmation */}
       <AlertDialog
         open={showDeleteConfirm}

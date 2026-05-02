@@ -45,7 +45,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { Button, buttonVariants } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -717,6 +717,37 @@ function TeamDetail() {
                 description="Extensions belonging to team members will appear here."
               />
             )}
+          </CardContent>
+        </Card>
+      </PageSection>
+
+      {/* Danger Zone */}
+      <PageSection delay={0.4}>
+        <Card className="border-destructive/30 bg-card/80 shadow-md">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="h-4 w-4" />
+              Danger Zone
+            </CardTitle>
+            <CardDescription>Irreversible and destructive actions for this team.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between rounded-lg border border-destructive/20 bg-destructive/5 p-4">
+              <div>
+                <p className="font-medium text-sm">Delete this team</p>
+                <p className="text-xs text-muted-foreground">
+                  Once deleted, this team and all member associations cannot be recovered.
+                </p>
+              </div>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => setShowDeleteDialog(true)}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </PageSection>

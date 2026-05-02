@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.216.0 (2026-05-02)
+
+### Added
+- **Danger zone sections** on phone number, tag, voicemail box, and team detail pages with destructive-styled delete cards and confirmation dialogs
+
 ## v0.215.0 (2026-05-02)
 
 ### Added
