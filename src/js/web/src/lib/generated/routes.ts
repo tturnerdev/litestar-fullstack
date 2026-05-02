@@ -175,6 +175,7 @@ export type RouteName =
   | 'list_devices'
   | 'list_devices_api_devices'
   | 'list_entries'
+  | 'list_extension_devices'
   | 'list_extensions'
   | 'list_extensions_api_voice_extensions'
   | 'list_fax_email_routes'
@@ -691,6 +692,9 @@ export interface RoutePathParams {
   'list_devices_api_devices': Record<string, never>;
   'list_entries': {
     schedule_id: UUID;
+  };
+  'list_extension_devices': {
+    ext_id: UUID;
   };
   'list_extensions': Record<string, never>;
   'list_extensions_api_voice_extensions': Record<string, never>;
@@ -1349,6 +1353,7 @@ export interface RouteQueryParams {
     updatedBefore?: DateTime;
   };
   'list_entries': Record<string, never>;
+  'list_extension_devices': Record<string, never>;
   'list_extensions': Record<string, never>;
   'list_extensions_api_voice_extensions': {
     createdAfter?: DateTime;
@@ -3027,6 +3032,13 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: ['schedule_id'] as const,
+    queryParams: [] as const,
+  },
+  'list_extension_devices': {
+    path: '/api/voice/extensions/{ext_id}/devices',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['ext_id'] as const,
     queryParams: [] as const,
   },
   'list_extensions': {

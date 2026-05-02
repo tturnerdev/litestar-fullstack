@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from app.db.models._background_task import BackgroundTask
     from saq.types import Context
 
-__all__ = ("device_provision_job", "device_reboot_job", "device_reprovision_job")
+__all__ = ("device_provision_job", "device_reboot_job", "device_reprovision_job", "device_status_sync_job")
 
 logger = get_logger()
 
@@ -138,3 +138,33 @@ async def device_reprovision_job(ctx: Context, *, task_id: str) -> dict:
         await broadcast_device_status(task, status="online", previous_status="provisioning")
         await broadcast_entity_event(task)
     return {"status": "completed"}
+
+
+async def device_status_sync_job(_: Context) -> dict[str, int]:
+    """SAQ cron job that syncs device statuses.
+
+    In a production deployment, this would poll device management APIs
+    or check SIP registrations. For now, it serves as the integration
+    point for status change detection and SSE broadcasting.
+
+    Args:
+        _: SAQ job context (unused).
+
+    Returns:
+        Dictionary with checked and updated counts.
+    """
+    from app.db import models as m
+    from app.domain.devices import deps as device_deps
+    from app.lib.deps import provide_services
+
+    updated_count = 0
+    async with provide_services(device_deps.provide_devices_service) as (device_service,):
+        devices = await device_service.list(m.Device.is_active.is_(True))
+        for device in devices:
+            # In production: check actual device status via API/SIP registration
+            # and call broadcast_device_status when changes are detected.
+            pass
+
+    result = {"checked": len(devices), "updated": updated_count}
+    await logger.ainfo("Device status sync complete", **result)
+    return result

@@ -1,10 +1,13 @@
+import { useQuery } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
 import {
   Cable,
+  Calendar,
   ChevronRight,
   FileText,
   Headset,
   type LucideIcon,
+  MapPin,
   Monitor,
   Phone,
   Tag,
@@ -14,8 +17,10 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useConnections } from "@/lib/api/hooks/connections"
 import { useDevices } from "@/lib/api/hooks/devices"
 import { useFaxNumbers } from "@/lib/api/hooks/fax"
+import { useSchedules } from "@/lib/api/hooks/schedules"
 import { useTickets } from "@/lib/api/hooks/support"
 import { usePhoneNumbers } from "@/lib/api/hooks/voice"
+import { listTags } from "@/lib/generated/api"
 
 interface FeatureArea {
   key: string
@@ -30,17 +35,6 @@ interface FeatureArea {
 }
 
 const featureAreas: FeatureArea[] = [
-  {
-    key: "connections",
-    label: "Connections",
-    description: "External service integrations",
-    icon: Cable,
-    to: "/connections",
-    iconBg: "bg-cyan-500/10",
-    iconBgHover: "group-hover:bg-cyan-500/20",
-    iconText: "text-cyan-600 dark:text-cyan-400",
-    accentBorder: "group-hover:border-b-cyan-500",
-  },
   {
     key: "devices",
     label: "Devices",
@@ -86,11 +80,44 @@ const featureAreas: FeatureArea[] = [
     accentBorder: "group-hover:border-b-violet-500",
   },
   {
+    key: "connections",
+    label: "Connections",
+    description: "External service integrations",
+    icon: Cable,
+    to: "/connections",
+    iconBg: "bg-cyan-500/10",
+    iconBgHover: "group-hover:bg-cyan-500/20",
+    iconText: "text-cyan-600 dark:text-cyan-400",
+    accentBorder: "group-hover:border-b-cyan-500",
+  },
+  {
+    key: "schedules",
+    label: "Schedules",
+    description: "Business hours & time rules",
+    icon: Calendar,
+    to: "/schedules",
+    iconBg: "bg-teal-500/10",
+    iconBgHover: "group-hover:bg-teal-500/20",
+    iconText: "text-teal-600 dark:text-teal-400",
+    accentBorder: "group-hover:border-b-teal-500",
+  },
+  {
+    key: "locations",
+    label: "Locations",
+    description: "Office sites & addresses",
+    icon: MapPin,
+    to: "/locations",
+    iconBg: "bg-pink-500/10",
+    iconBgHover: "group-hover:bg-pink-500/20",
+    iconText: "text-pink-600 dark:text-pink-400",
+    accentBorder: "group-hover:border-b-pink-500",
+  },
+  {
     key: "tags",
     label: "Tags",
     description: "Organize & categorize resources",
     icon: Tag,
-    to: "/admin",
+    to: "/tags",
     iconBg: "bg-emerald-500/10",
     iconBgHover: "group-hover:bg-emerald-500/20",
     iconText: "text-emerald-600 dark:text-emerald-400",
@@ -104,6 +131,14 @@ function useFeatureAreaCounts() {
   const phoneNumbers = usePhoneNumbers(1, 1)
   const faxNumbers = useFaxNumbers(1, 1)
   const tickets = useTickets(1, 1)
+  const schedules = useSchedules({ page: 1, pageSize: 1 })
+  const tags = useQuery({
+    queryKey: ["home", "feature-tags-count"],
+    queryFn: async () => {
+      const response = await listTags({ query: { currentPage: 1, pageSize: 1 } })
+      return response.data as { total?: number } | undefined
+    },
+  })
 
   return {
     connections: { total: connections.data?.total, isLoading: connections.isLoading },
@@ -111,7 +146,9 @@ function useFeatureAreaCounts() {
     voice: { total: phoneNumbers.data?.total, isLoading: phoneNumbers.isLoading },
     fax: { total: faxNumbers.data?.total, isLoading: faxNumbers.isLoading },
     support: { total: tickets.data?.total, isLoading: tickets.isLoading },
-    tags: { total: undefined, isLoading: false },
+    schedules: { total: schedules.data?.total, isLoading: schedules.isLoading },
+    locations: { total: undefined, isLoading: false },
+    tags: { total: tags.data?.total, isLoading: tags.isLoading },
   } as Record<string, { total: number | undefined; isLoading: boolean }>
 }
 
@@ -119,7 +156,7 @@ export function FeatureAreasGrid() {
   const counts = useFeatureAreaCounts()
 
   return (
-    <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
       {featureAreas.map((area, index) => {
         const count = counts[area.key]
         return (

@@ -7,8 +7,10 @@ import {
   type DeviceCreate,
   type DeviceLineAssignment,
   type DeviceUpdate,
+  type ExtensionDeviceSummary,
   getDevice,
   listDevices,
+  listExtensionDevices,
   type ListDevicesData,
   updateDevice,
 } from "@/lib/generated/api"
@@ -272,31 +274,15 @@ export function useDeviceAction(deviceId: string) {
 }
 
 // ---------------------------------------------------------------------------
-// Devices by Extension (client-side filter)
+// Devices by Extension (server-side)
 // ---------------------------------------------------------------------------
-
-export interface DeviceWithLine {
-  device: Device
-  line: DeviceLineAssignment
-}
 
 export function useDevicesByExtension(extensionId: string | undefined) {
   return useQuery({
     queryKey: ["devices", "by-extension", extensionId],
     queryFn: async () => {
-      // Fetch all devices (with their line assignments embedded)
-      const query: ListDevicesData["query"] = { pageSize: 200 }
-      const response = await listDevices({ query })
-      const data = response.data as { items: Device[]; total: number }
-      const matches: DeviceWithLine[] = []
-      for (const device of data.items ?? []) {
-        for (const line of device.lines ?? []) {
-          if (line.extensionId === extensionId) {
-            matches.push({ device, line })
-          }
-        }
-      }
-      return matches
+      const response = await listExtensionDevices({ path: { ext_id: extensionId! } })
+      return response.data as ExtensionDeviceSummary[]
     },
     enabled: !!extensionId,
   })

@@ -4560,6 +4560,55 @@ export const ExtensionCreateSchema = {
   type: "object",
 } as const;
 
+export const ExtensionDeviceSummarySchema = {
+  properties: {
+    deviceId: {
+      format: "uuid",
+      type: "string",
+    },
+    deviceModel: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    deviceName: {
+      type: "string",
+    },
+    deviceType: {
+      type: "string",
+    },
+    lineId: {
+      format: "uuid",
+      type: "string",
+    },
+    lineLabel: {
+      type: "string",
+    },
+    lineNumber: {
+      type: "integer",
+    },
+    status: {
+      type: "string",
+    },
+  },
+  required: [
+    "deviceId",
+    "deviceName",
+    "deviceType",
+    "lineId",
+    "lineLabel",
+    "lineNumber",
+    "status",
+  ],
+  title: "ExtensionDeviceSummary",
+  type: "object",
+} as const;
+
 export const ExtensionGatewayResponseSchema = {
   properties: {
     extensionNumber: {

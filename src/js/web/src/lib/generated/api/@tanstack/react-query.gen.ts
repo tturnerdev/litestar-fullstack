@@ -192,6 +192,7 @@ import {
   listDeviceLines,
   listDevices,
   listE911Registrations,
+  listExtensionDevices,
   listExtensions,
   listFaxEmailRoutes,
   listFaxMessages,
@@ -825,6 +826,9 @@ import type {
   ListE911RegistrationsData,
   ListE911RegistrationsError,
   ListE911RegistrationsResponse,
+  ListExtensionDevicesData,
+  ListExtensionDevicesError,
+  ListExtensionDevicesResponse,
   ListExtensionsData,
   ListExtensionsError,
   ListExtensionsResponse,
@@ -7852,6 +7856,34 @@ export const updateExtensionMutation = (
   };
   return mutationOptions;
 };
+
+export const listExtensionDevicesQueryKey = (
+  options: Options<ListExtensionDevicesData>,
+) => createQueryKey("listExtensionDevices", options);
+
+/**
+ * ListExtensionDevices
+ */
+export const listExtensionDevicesOptions = (
+  options: Options<ListExtensionDevicesData>,
+) =>
+  queryOptions<
+    ListExtensionDevicesResponse,
+    ListExtensionDevicesError,
+    ListExtensionDevicesResponse,
+    ReturnType<typeof listExtensionDevicesQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listExtensionDevices({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listExtensionDevicesQueryKey(options),
+  });
 
 export const getDndSettingsQueryKey = (options: Options<GetDndSettingsData>) =>
   createQueryKey("getDndSettings", options);

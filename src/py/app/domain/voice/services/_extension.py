@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 from typing import Any
+from uuid import UUID
 
 from advanced_alchemy.extensions.litestar import repository, service
+from sqlalchemy import select
 
 from app.db import models as m
 from app.domain.voice.schemas import Extension as ExtensionSchema
+from app.domain.voice.schemas import ExtensionDeviceSummary
 
 
 class ExtensionService(service.SQLAlchemyAsyncRepositoryService[m.Extension]):
@@ -61,6 +64,45 @@ class ExtensionService(service.SQLAlchemyAsyncRepositoryService[m.Extension]):
         for k, v in extra.items():
             object.__setattr__(schema, k, v)
         return schema
+
+    async def get_assigned_devices(self, extension_id: UUID) -> list[ExtensionDeviceSummary]:
+        """Return devices that have this extension assigned to a line.
+
+        Args:
+            extension_id: The extension UUID to look up assignments for.
+
+        Returns:
+            A list of ``ExtensionDeviceSummary`` schemas.
+        """
+        stmt = (
+            select(
+                m.Device.id,
+                m.Device.name,
+                m.Device.device_model,
+                m.Device.device_type,
+                m.Device.status,
+                m.DeviceLineAssignment.line_number,
+                m.DeviceLineAssignment.label,
+                m.DeviceLineAssignment.id.label("line_id"),
+            )
+            .join(m.DeviceLineAssignment, m.DeviceLineAssignment.device_id == m.Device.id)
+            .where(m.DeviceLineAssignment.extension_id == extension_id)
+            .order_by(m.Device.name, m.DeviceLineAssignment.line_number)
+        )
+        result = await self.repository.session.execute(stmt)
+        return [
+            ExtensionDeviceSummary(
+                device_id=row.id,
+                device_name=row.name,
+                device_model=row.device_model,
+                device_type=row.device_type,
+                status=row.status,
+                line_number=row.line_number,
+                line_label=row.label,
+                line_id=row.line_id,
+            )
+            for row in result.all()
+        ]
 
     async def get_by_extension_number(self, extension_number: str) -> m.Extension | None:
         """Look up an extension by its extension number.

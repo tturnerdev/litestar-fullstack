@@ -1058,39 +1058,39 @@ function AssignedDevicesCard({ extensionId }: { extensionId: string }) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {deviceLines.map(({ device, line }) => (
-                <TableRow key={`${device.id}-${line.id}`}>
+              {deviceLines.map((assignment) => (
+                <TableRow key={`${assignment.deviceId}-${assignment.lineId}`}>
                   <TableCell>
                     <Link
                       to="/devices/$deviceId"
-                      params={{ deviceId: device.id }}
+                      params={{ deviceId: assignment.deviceId }}
                       className="font-medium text-primary hover:underline"
                     >
-                      {device.name}
+                      {assignment.deviceName}
                     </Link>
-                    {device.deviceModel && (
-                      <p className="text-xs text-muted-foreground">{device.deviceModel}</p>
+                    {assignment.deviceModel && (
+                      <p className="text-xs text-muted-foreground">{assignment.deviceModel}</p>
                     )}
                   </TableCell>
                   <TableCell>
-                    <span className="font-mono text-xs">Line {line.lineNumber}</span>
-                    {line.label && (
-                      <span className="ml-1 text-xs text-muted-foreground">({line.label})</span>
+                    <span className="font-mono text-xs">Line {assignment.lineNumber}</span>
+                    {assignment.lineLabel && (
+                      <span className="ml-1 text-xs text-muted-foreground">({assignment.lineLabel})</span>
                     )}
                   </TableCell>
                   <TableCell>
-                    <span className="text-xs capitalize">{device.deviceType}</span>
+                    <span className="text-xs capitalize">{assignment.deviceType}</span>
                   </TableCell>
                   <TableCell>
                     <Badge
-                      variant={device.status === "online" ? "default" : "outline"}
+                      variant={assignment.status === "online" ? "default" : "outline"}
                       className={
-                        device.status === "online"
+                        assignment.status === "online"
                           ? "bg-emerald-600 text-white text-xs"
                           : "text-xs"
                       }
                     >
-                      {device.status}
+                      {assignment.status}
                     </Badge>
                   </TableCell>
                 </TableRow>

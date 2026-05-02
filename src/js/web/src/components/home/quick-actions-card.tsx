@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router"
-import { ChevronRight, type LucideIcon, Plus, Settings, ShieldCheck, Tag, Users } from "lucide-react"
+import { Bell, ChevronRight, Headset, type LucideIcon, Monitor, Plus, Settings, ShieldCheck, Tag, Users } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
@@ -26,7 +26,33 @@ const defaultActions: QuickAction[] = [
     iconBgClassName: "bg-primary/10 group-hover:bg-primary",
     iconTextClassName: "text-primary group-hover:text-primary-foreground",
     shortcut: "T",
-    isNew: true,
+  },
+  {
+    key: "manage-devices",
+    label: "Manage devices",
+    description: "Phones, computers & hardware",
+    to: "/devices",
+    icon: Monitor,
+    iconBgClassName: "bg-blue-500/10 group-hover:bg-blue-500",
+    iconTextClassName: "text-blue-600 dark:text-blue-400 group-hover:text-white dark:group-hover:text-white",
+  },
+  {
+    key: "submit-ticket",
+    label: "Submit a support ticket",
+    description: "Get help from the team",
+    to: "/support/new",
+    icon: Headset,
+    iconBgClassName: "bg-amber-500/10 group-hover:bg-amber-500",
+    iconTextClassName: "text-amber-600 dark:text-amber-400 group-hover:text-white dark:group-hover:text-white",
+  },
+  {
+    key: "view-notifications",
+    label: "View notifications",
+    description: "Check unread alerts",
+    to: "/notifications",
+    icon: Bell,
+    iconBgClassName: "bg-rose-500/10 group-hover:bg-rose-500",
+    iconTextClassName: "text-rose-600 dark:text-rose-400 group-hover:text-white dark:group-hover:text-white",
   },
   {
     key: "browse-teams",
@@ -34,8 +60,8 @@ const defaultActions: QuickAction[] = [
     description: "View your workspaces",
     to: "/teams",
     icon: Users,
-    iconBgClassName: "bg-blue-500/10 group-hover:bg-blue-500",
-    iconTextClassName: "text-blue-600 dark:text-blue-400 group-hover:text-white dark:group-hover:text-white",
+    iconBgClassName: "bg-cyan-500/10 group-hover:bg-cyan-500",
+    iconTextClassName: "text-cyan-600 dark:text-cyan-400 group-hover:text-white dark:group-hover:text-white",
     shortcut: "D",
   },
   {

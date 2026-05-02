@@ -21,7 +21,7 @@ from app.domain.tasks.deps import provide_background_tasks_service
 from app.domain.teams.guards import requires_feature_permission
 from app.domain.voice.guards import requires_extension_ownership
 from app.domain.voice.jobs import extension_create_job, extension_delete_job, extension_update_job
-from app.domain.voice.schemas import Extension, ExtensionCreate, ExtensionSyncResult, ExtensionUpdate
+from app.domain.voice.schemas import Extension, ExtensionCreate, ExtensionDeviceSummary, ExtensionSyncResult, ExtensionUpdate
 from app.domain.voice.services import ExtensionService
 from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
@@ -168,6 +168,22 @@ class ExtensionController(Controller):
         """Get extension details."""
         db_obj = await extensions_service.get_one(id=ext_id, user_id=current_user.id)
         return extensions_service.to_schema_enriched(db_obj)
+
+    @get(
+        operation_id="ListExtensionDevices",
+        path="/{ext_id:uuid}/devices",
+        guards=[requires_feature_permission("voice", "view"), requires_extension_ownership],
+    )
+    async def list_extension_devices(
+        self,
+        extensions_service: ExtensionService,
+        current_user: m.User,
+        ext_id: Annotated[UUID, Parameter(title="Extension ID", description="The extension to list devices for.")],
+    ) -> list[ExtensionDeviceSummary]:
+        """List devices that have this extension assigned to a line."""
+        # Verify the extension exists and belongs to the user
+        await extensions_service.get_one(id=ext_id, user_id=current_user.id)
+        return await extensions_service.get_assigned_devices(ext_id)
 
     @patch(
         operation_id="UpdateExtension",

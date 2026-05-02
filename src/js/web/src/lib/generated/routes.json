@@ -1912,6 +1912,19 @@
       ],
       "uri": "/api/schedules/{schedule_id}/entries"
     },
+    "list_extension_devices": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "ext_id": "UUID"
+      },
+      "parameters": [
+        "ext_id"
+      ],
+      "uri": "/api/voice/extensions/{ext_id}/devices"
+    },
     "list_extensions": {
       "method": "get",
       "methods": [

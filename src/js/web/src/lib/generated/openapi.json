@@ -4674,6 +4674,54 @@
         "title": "ExtensionCreate",
         "type": "object"
       },
+      "ExtensionDeviceSummary": {
+        "properties": {
+          "deviceId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "deviceModel": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "deviceName": {
+            "type": "string"
+          },
+          "deviceType": {
+            "type": "string"
+          },
+          "lineId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "lineLabel": {
+            "type": "string"
+          },
+          "lineNumber": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "deviceId",
+          "deviceName",
+          "deviceType",
+          "lineId",
+          "lineLabel",
+          "lineNumber",
+          "status"
+        ],
+        "title": "ExtensionDeviceSummary",
+        "type": "object"
+      },
       "ExtensionGatewayResponse": {
         "properties": {
           "extensionNumber": {
@@ -11542,7 +11590,28 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actorIdIn",
+            "name": "targetTypeIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "targetIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -11584,28 +11653,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
-            "name": "targetIdIn",
+            "name": "actorIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -11931,7 +11979,28 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actorIdIn",
+            "name": "targetTypeIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "targetIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -11973,28 +12042,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
-            "name": "targetIdIn",
+            "name": "actorIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -12318,7 +12366,28 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actorIdIn",
+            "name": "targetTypeIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "targetIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -12360,28 +12429,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
-            "name": "targetIdIn",
+            "name": "actorIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -12699,7 +12747,28 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actorIdIn",
+            "name": "targetTypeIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "targetIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -12741,28 +12810,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
-            "name": "targetIdIn",
+            "name": "actorIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -36752,6 +36800,85 @@
           }
         },
         "summary": "UpdateExtension",
+        "tags": [
+          "Voice - Extensions"
+        ]
+      }
+    },
+    "/api/voice/extensions/{ext_id}/devices": {
+      "get": {
+        "deprecated": false,
+        "operationId": "ListExtensionDevices",
+        "parameters": [
+          {
+            "deprecated": false,
+            "description": "The extension to list devices for.",
+            "in": "path",
+            "name": "ext_id",
+            "required": true,
+            "schema": {
+              "description": "The extension to list devices for.",
+              "format": "uuid",
+              "title": "Extension ID",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ExtensionDeviceSummary"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Request fulfilled, document follows",
+            "headers": {}
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "detail": "Bad Request",
+                      "extra": {},
+                      "status_code": 400
+                    }
+                  ],
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    },
+                    "status_code": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Bad request syntax or unsupported method"
+          }
+        },
+        "summary": "ListExtensionDevices",
         "tags": [
           "Voice - Extensions"
         ]

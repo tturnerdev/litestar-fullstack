@@ -60,6 +60,19 @@ class ExtensionUpdate(CamelizedBaseStruct, omit_defaults=True):
     dnd_enabled: bool | msgspec.UnsetType = msgspec.UNSET
 
 
+class ExtensionDeviceSummary(CamelizedBaseStruct):
+    """Summary of a device assigned to an extension via a line assignment."""
+
+    device_id: UUID
+    device_name: str
+    device_type: str
+    status: str
+    line_number: int
+    line_label: str
+    line_id: UUID
+    device_model: str | None = None
+
+
 class ExtensionSyncResult(CamelizedBaseStruct):
     """Result of a PBX extension sync operation."""
 

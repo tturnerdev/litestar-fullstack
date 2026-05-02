@@ -539,6 +539,9 @@ import type {
   ListE911RegistrationsData,
   ListE911RegistrationsErrors,
   ListE911RegistrationsResponses,
+  ListExtensionDevicesData,
+  ListExtensionDevicesErrors,
+  ListExtensionDevicesResponses,
   ListExtensionsData,
   ListExtensionsErrors,
   ListExtensionsResponses,
@@ -5193,6 +5196,22 @@ export const updateExtension = <ThrowOnError extends boolean = false>(
       "Content-Type": "application/json",
       ...options.headers,
     },
+  });
+
+/**
+ * ListExtensionDevices
+ */
+export const listExtensionDevices = <ThrowOnError extends boolean = false>(
+  options: Options<ListExtensionDevicesData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    ListExtensionDevicesResponses,
+    ListExtensionDevicesErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/voice/extensions/{ext_id}/devices",
+    ...options,
   });
 
 /**

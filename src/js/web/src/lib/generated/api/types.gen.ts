@@ -1111,6 +1111,20 @@ export type ExtensionCreate = {
 };
 
 /**
+ * ExtensionDeviceSummary
+ */
+export type ExtensionDeviceSummary = {
+  deviceId: string;
+  deviceModel?: string | null;
+  deviceName: string;
+  deviceType: string;
+  lineId: string;
+  lineLabel: string;
+  lineNumber: number;
+  status: string;
+};
+
+/**
  * ExtensionGatewayResponse
  */
 export type ExtensionGatewayResponse = {
@@ -3119,10 +3133,10 @@ export type AdminListAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    actorIdIn?: Array<string> | null;
-    actionIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3198,10 +3212,10 @@ export type AdminExportAuditLogData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    actorIdIn?: Array<string> | null;
-    actionIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3266,10 +3280,10 @@ export type AdminGetTargetAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    actorIdIn?: Array<string> | null;
-    actionIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -3346,10 +3360,10 @@ export type AdminGetUserAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    actorIdIn?: Array<string> | null;
-    actionIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -13520,6 +13534,49 @@ export type UpdateExtensionResponses = {
 
 export type UpdateExtensionResponse =
   UpdateExtensionResponses[keyof UpdateExtensionResponses];
+
+export type ListExtensionDevicesData = {
+  body?: never;
+  path: {
+    /**
+     * Extension ID
+     *
+     * The extension to list devices for.
+     */
+    ext_id: string;
+  };
+  query?: never;
+  url: "/api/voice/extensions/{ext_id}/devices";
+};
+
+export type ListExtensionDevicesErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type ListExtensionDevicesError =
+  ListExtensionDevicesErrors[keyof ListExtensionDevicesErrors];
+
+export type ListExtensionDevicesResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: Array<ExtensionDeviceSummary>;
+};
+
+export type ListExtensionDevicesResponse =
+  ListExtensionDevicesResponses[keyof ListExtensionDevicesResponses];
 
 export type GetDndSettingsData = {
   body?: never;

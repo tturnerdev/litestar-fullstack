@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { AlertCircle, Plus, ShieldCheck, Tag, Users } from "lucide-react"
+import { AlertCircle, Bell, ListTodo, Monitor, Plus, ShieldCheck, Tag, TicketCheck, Users } from "lucide-react"
 import { ConnectionsStatusCard } from "@/components/home/connections-status-card"
 import { FeatureAreasGrid } from "@/components/home/feature-areas-grid"
 import { GettingStarted } from "@/components/home/getting-started"
@@ -12,6 +12,10 @@ import { TeamsCard } from "@/components/home/teams-card"
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/ui/empty-state"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { useDevices } from "@/lib/api/hooks/devices"
+import { useUnreadCount } from "@/lib/api/hooks/notifications"
+import { useTickets } from "@/lib/api/hooks/support"
+import { useActiveTasks } from "@/lib/api/hooks/tasks"
 import { useAuthStore } from "@/lib/auth"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import {
@@ -78,6 +82,12 @@ function HomePage() {
     enabled: isSuperuser,
   })
 
+  // Operational stats
+  const { data: devicesData, isLoading: devicesLoading } = useDevices({ page: 1, pageSize: 1 })
+  const { data: openTicketsData, isLoading: ticketsLoading } = useTickets(1, 1, { status: "open" })
+  const { data: unreadData, isLoading: unreadLoading } = useUnreadCount()
+  const { data: activeTasksData, isLoading: activeTasksLoading } = useActiveTasks()
+
   const teams = teamsRaw?.items ?? []
 
   const hasError = teamsError || tagsError || rolesError || adminStatsError || activityError
@@ -119,14 +129,56 @@ function HomePage() {
         }
       />
 
-      {/* Stats Cards Row */}
+      {/* Operational Stats Row */}
       <PageSection delay={0.05}>
+        <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+          <StatCard
+            label="Devices"
+            value={devicesData?.total}
+            icon={Monitor}
+            iconClassName="bg-blue-500/10 text-blue-600 dark:text-blue-400"
+            isLoading={devicesLoading}
+            href="/devices"
+            index={0}
+          />
+          <StatCard
+            label="Open Tickets"
+            value={openTicketsData?.total}
+            icon={TicketCheck}
+            iconClassName="bg-amber-500/10 text-amber-600 dark:text-amber-400"
+            isLoading={ticketsLoading}
+            href="/support"
+            index={1}
+          />
+          <StatCard
+            label="Notifications"
+            value={unreadData?.count}
+            icon={Bell}
+            iconClassName="bg-rose-500/10 text-rose-600 dark:text-rose-400"
+            isLoading={unreadLoading}
+            href="/notifications"
+            index={2}
+          />
+          <StatCard
+            label="Active Tasks"
+            value={activeTasksData?.length}
+            icon={ListTodo}
+            iconClassName="bg-indigo-500/10 text-indigo-600 dark:text-indigo-400"
+            isLoading={activeTasksLoading}
+            href="/tasks"
+            index={3}
+          />
+        </div>
+      </PageSection>
+
+      {/* Organization Stats Row */}
+      <PageSection delay={0.07}>
         <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
           <StatCard
             label="Teams"
             value={teamsRaw?.total ?? teams.length}
             icon={Users}
-            iconClassName="bg-blue-500/10 text-blue-600 dark:text-blue-400"
+            iconClassName="bg-cyan-500/10 text-cyan-600 dark:text-cyan-400"
             isLoading={teamsLoading}
             href="/teams"
             index={0}
