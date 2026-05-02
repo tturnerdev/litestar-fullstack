@@ -23,6 +23,7 @@ import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { EmptyState } from "@/components/ui/empty-state"
 import { useAdminDevices, useAdminDeviceStats } from "@/lib/api/hooks/admin"
 import type { AdminDeviceSummary } from "@/lib/generated/api/types.gen"
@@ -121,7 +122,7 @@ function AdminDevicesPage() {
   }, [debouncedSearch])
 
   const { data: stats, isLoading: statsLoading, isError: statsError, refetch: refetchStats } = useAdminDeviceStats()
-  const { data, isLoading, isError, refetch } = useAdminDevices(page, PAGE_SIZE, debouncedSearch || undefined)
+  const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useAdminDevices(page, PAGE_SIZE, debouncedSearch || undefined)
 
   const devices = data?.items ?? []
   const total = data?.total ?? 0
@@ -141,10 +142,17 @@ function AdminDevicesPage() {
         description="Manage all devices across the organization."
         breadcrumbs={<AdminBreadcrumbs />}
         actions={
-          <Button variant="outline" size="sm" onClick={handleExport} disabled={!devices.length}>
-            <Download className="mr-2 h-4 w-4" />
-            Export
-          </Button>
+          <div className="flex items-center gap-2">
+            <DataFreshness
+              dataUpdatedAt={dataUpdatedAt}
+              onRefresh={() => refetch()}
+              isRefreshing={isRefetching}
+            />
+            <Button variant="outline" size="sm" onClick={handleExport} disabled={!devices.length}>
+              <Download className="mr-2 h-4 w-4" />
+              Export
+            </Button>
+          </div>
         }
       />
       <AdminNav />

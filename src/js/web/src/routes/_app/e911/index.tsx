@@ -1,6 +1,6 @@
 import { toast } from "sonner"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import {
   AlertCircle,
@@ -550,9 +550,24 @@ function E911Page() {
     setSortDir(next.direction)
   }, [sortKey, sortDir])
 
+  const searchInputRef = useRef<HTMLInputElement>(null)
+
   useEffect(() => {
     setPage(1)
   }, [debouncedSearch])
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "/" && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        const target = e.target as HTMLElement
+        if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return
+        e.preventDefault()
+        searchInputRef.current?.focus()
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [])
 
   const { data, isLoading, isError, refetch } = useE911Registrations({
     page,
@@ -685,6 +700,7 @@ function E911Page() {
           <div className="relative max-w-sm flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
+              ref={searchInputRef}
               placeholder="Search by address..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}

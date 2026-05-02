@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.199.0 (2026-05-02)
+
+### Added
+- **Create Schedule page** — New form at `/schedules/new` with name, type, timezone, and default toggle fields, dirty state warning, and redirect to detail on success
+- **E911 search focus shortcut** — Press "/" to focus the search input on the E911 list page
+- **DataFreshness on admin pages** — Added refresh indicators to admin devices, device templates, and gateway settings pages
+
 ## v0.198.0 (2026-05-02)
 
 ### Added

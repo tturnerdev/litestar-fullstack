@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Separator } from "@/components/ui/separator"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { EmptyState } from "@/components/ui/empty-state"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { useAdminGatewaySettings, useUpdateAdminGatewaySettings } from "@/lib/api/hooks/gateway"
@@ -55,7 +56,7 @@ function validateCacheTtl(value: string): string | undefined {
 
 function AdminGatewayPage() {
   useDocumentTitle("Gateway Settings")
-  const { data, isLoading, isError, refetch } = useAdminGatewaySettings()
+  const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useAdminGatewaySettings()
   const updateSettings = useUpdateAdminGatewaySettings()
 
   const [timeout, setTimeout] = useState("")
@@ -142,6 +143,13 @@ function AdminGatewayPage() {
         title="Gateway"
         description="Configure default settings for the data gateway service."
         breadcrumbs={<AdminBreadcrumbs />}
+        actions={
+          <DataFreshness
+            dataUpdatedAt={dataUpdatedAt}
+            onRefresh={() => refetch()}
+            isRefreshing={isRefetching}
+          />
+        }
       />
       <AdminNav />
 

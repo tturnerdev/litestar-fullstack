@@ -63,6 +63,7 @@ import { Route as AppVoicePhoneNumbersRouteImport } from './routes/_app/voice/ph
 import { Route as AppTeamsNewRouteImport } from './routes/_app/teams/new'
 import { Route as AppTagsNewRouteImport } from './routes/_app/tags/new'
 import { Route as AppSupportNewRouteImport } from './routes/_app/support/new'
+import { Route as AppSchedulesNewRouteImport } from './routes/_app/schedules/new'
 import { Route as AppSchedulesScheduleIdRouteImport } from './routes/_app/schedules/$scheduleId'
 import { Route as AppLocationsNewRouteImport } from './routes/_app/locations/new'
 import { Route as AppLocationsLocationIdRouteImport } from './routes/_app/locations/$locationId'
@@ -388,6 +389,11 @@ const AppSupportNewRoute = AppSupportNewRouteImport.update({
   id: '/new',
   path: '/new',
   getParentRoute: () => AppSupportRoute,
+} as any)
+const AppSchedulesNewRoute = AppSchedulesNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AppSchedulesRoute,
 } as any)
 const AppSchedulesScheduleIdRoute = AppSchedulesScheduleIdRouteImport.update({
   id: '/$scheduleId',
@@ -744,6 +750,7 @@ export interface FileRoutesByFullPath {
   '/locations/$locationId': typeof AppLocationsLocationIdRouteWithChildren
   '/locations/new': typeof AppLocationsNewRoute
   '/schedules/$scheduleId': typeof AppSchedulesScheduleIdRouteWithChildren
+  '/schedules/new': typeof AppSchedulesNewRoute
   '/support/new': typeof AppSupportNewRoute
   '/tags/new': typeof AppTagsNewRoute
   '/teams/new': typeof AppTeamsNewRoute
@@ -840,6 +847,7 @@ export interface FileRoutesByTo {
   '/fax/email-routes': typeof AppFaxEmailRoutesRoute
   '/fax/send': typeof AppFaxSendRoute
   '/locations/new': typeof AppLocationsNewRoute
+  '/schedules/new': typeof AppSchedulesNewRoute
   '/support/new': typeof AppSupportNewRoute
   '/tags/new': typeof AppTagsNewRoute
   '/teams/new': typeof AppTeamsNewRoute
@@ -953,6 +961,7 @@ export interface FileRoutesById {
   '/_app/locations/$locationId': typeof AppLocationsLocationIdRouteWithChildren
   '/_app/locations/new': typeof AppLocationsNewRoute
   '/_app/schedules/$scheduleId': typeof AppSchedulesScheduleIdRouteWithChildren
+  '/_app/schedules/new': typeof AppSchedulesNewRoute
   '/_app/support/new': typeof AppSupportNewRoute
   '/_app/tags/new': typeof AppTagsNewRoute
   '/_app/teams/new': typeof AppTeamsNewRoute
@@ -1066,6 +1075,7 @@ export interface FileRouteTypes {
     | '/locations/$locationId'
     | '/locations/new'
     | '/schedules/$scheduleId'
+    | '/schedules/new'
     | '/support/new'
     | '/tags/new'
     | '/teams/new'
@@ -1162,6 +1172,7 @@ export interface FileRouteTypes {
     | '/fax/email-routes'
     | '/fax/send'
     | '/locations/new'
+    | '/schedules/new'
     | '/support/new'
     | '/tags/new'
     | '/teams/new'
@@ -1274,6 +1285,7 @@ export interface FileRouteTypes {
     | '/_app/locations/$locationId'
     | '/_app/locations/new'
     | '/_app/schedules/$scheduleId'
+    | '/_app/schedules/new'
     | '/_app/support/new'
     | '/_app/tags/new'
     | '/_app/teams/new'
@@ -1724,6 +1736,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/support/new'
       preLoaderRoute: typeof AppSupportNewRouteImport
       parentRoute: typeof AppSupportRoute
+    }
+    '/_app/schedules/new': {
+      id: '/_app/schedules/new'
+      path: '/new'
+      fullPath: '/schedules/new'
+      preLoaderRoute: typeof AppSchedulesNewRouteImport
+      parentRoute: typeof AppSchedulesRoute
     }
     '/_app/schedules/$scheduleId': {
       id: '/_app/schedules/$scheduleId'
@@ -2327,11 +2346,13 @@ const AppSchedulesScheduleIdRouteWithChildren =
 
 interface AppSchedulesRouteChildren {
   AppSchedulesScheduleIdRoute: typeof AppSchedulesScheduleIdRouteWithChildren
+  AppSchedulesNewRoute: typeof AppSchedulesNewRoute
   AppSchedulesIndexRoute: typeof AppSchedulesIndexRoute
 }
 
 const AppSchedulesRouteChildren: AppSchedulesRouteChildren = {
   AppSchedulesScheduleIdRoute: AppSchedulesScheduleIdRouteWithChildren,
+  AppSchedulesNewRoute: AppSchedulesNewRoute,
   AppSchedulesIndexRoute: AppSchedulesIndexRoute,
 }
 

@@ -53,6 +53,7 @@ import { Switch } from "@/components/ui/switch"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Textarea } from "@/components/ui/textarea"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { EmptyState } from "@/components/ui/empty-state"
 import {
   useAdminDeviceTemplates,
@@ -438,7 +439,7 @@ function AdminDeviceTemplatesPage() {
     setPage(1)
   }, [debouncedSearch])
 
-  const { data, isLoading, isError, refetch } = useAdminDeviceTemplates(page, pageSize, debouncedSearch || undefined)
+  const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useAdminDeviceTemplates(page, pageSize, debouncedSearch || undefined)
   const deleteMutation = useDeleteDeviceTemplate()
 
   const rawTemplates = data?.items ?? []
@@ -488,10 +489,17 @@ function AdminDeviceTemplatesPage() {
         description="Manage wireframe layouts and provisioning templates for device models."
         breadcrumbs={<AdminBreadcrumbs />}
         actions={
-          <Button variant="outline" size="sm" onClick={handleExport} disabled={!templates.length}>
-            <Download className="mr-2 h-4 w-4" />
-            Export
-          </Button>
+          <div className="flex items-center gap-2">
+            <DataFreshness
+              dataUpdatedAt={dataUpdatedAt}
+              onRefresh={() => refetch()}
+              isRefreshing={isRefetching}
+            />
+            <Button variant="outline" size="sm" onClick={handleExport} disabled={!templates.length}>
+              <Download className="mr-2 h-4 w-4" />
+              Export
+            </Button>
+          </div>
         }
       />
       <AdminNav />
