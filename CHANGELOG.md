@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.240.0 (2026-05-03)
+
+### Added
+- **AuditMixin** for services — declarative audit logging mixin at `app.lib.audit` with `capture_audit_snapshot()`, `compute_audit_diff()`, and `log_audit()` methods for services inheriting `SQLAlchemyAsyncRepositoryService`
+- **Inline audit helpers** for devices and teams controllers — cleaner `_capture_snapshot()` and `_log_audit()` with simplified actor parameter, replacing shared utility imports
+
 ## v0.239.0 (2026-05-03)
 
 ### Added
