@@ -413,17 +413,17 @@ No new hook files. Existing hooks return the enriched schemas automatically afte
 
 ### Phase 1: Device ↔ Location
 
-- [ ] Add `location_id` FK column to `Device` model (`_device.py`)
-- [ ] Add `Location` relationship to `Device` model
+- [x] Add `location_id` FK column to `Device` model (`_device.py`)
+- [x] Add `Location` relationship to `Device` model
 - [ ] Add reverse `devices` relationship to `Location` model (`_location.py`)
-- [ ] Create Alembic migration (add column, FK constraint, index)
-- [ ] Update `Device` schema: add `location_id`, `location_name`
-- [ ] Update `DeviceCreate` schema: add `location_id`
-- [ ] Update `DeviceUpdate` schema: add `location_id`
+- [x] Create Alembic migration (add column, FK constraint, index)
+- [x] Update `Device` schema: add `location_id`, `location_name`
+- [x] Update `DeviceCreate` schema: add `location_id`
+- [x] Update `DeviceUpdate` schema: add `location_id`
 - [ ] Update `Location` schema: add `device_count`
-- [ ] Update `DeviceService` to eager-load location relationship
+- [x] Update `DeviceService` to eager-load location relationship
 - [ ] Update `LocationService` to compute `device_count`
-- [ ] Regenerate TypeScript types (`make types`)
+- [x] Regenerate TypeScript types (`make types`)
 - [ ] Add Location field to device detail page overview section
 - [ ] Add Location dropdown to device create/edit form
 - [ ] Add "Devices at this location" section to location detail page
@@ -431,13 +431,13 @@ No new hook files. Existing hooks return the enriched schemas automatically afte
 
 ### Phase 2: DeviceLineAssignment ↔ Extension (FK formalization)
 
-- [ ] Add FK constraint on `device_line_assignment.extension_id` → `extension.id`
-- [ ] Add `Extension` relationship to `DeviceLineAssignment` model
-- [ ] Add reverse `device_line_assignments` relationship to `Extension` model
-- [ ] Create Alembic migration (add FK constraint and index on existing column)
-- [ ] Update `DeviceLineAssignment` schema: add `extension_number`, `extension_display_name`
+- [x] Add FK constraint on `device_line_assignment.extension_id` → `extension.id`
+- [x] Add `Extension` relationship to `DeviceLineAssignment` model
+- [x] Add reverse `device_line_assignments` relationship to `Extension` model
+- [x] Create Alembic migration (add FK constraint and index on existing column)
+- [x] Update `DeviceLineAssignment` schema: add `extension_number`, `extension_display_name`
 - [ ] Create `DeviceLineAssignmentSummary` schema for extension detail response
-- [ ] Update `DeviceService` line loading to eager-load extension
+- [x] Update `DeviceService` line loading to eager-load extension
 - [ ] Update `ExtensionService` to support loading assigned devices
 - [ ] Regenerate TypeScript types (`make types`)
 - [ ] Show extension number/name in device line configuration UI
@@ -445,12 +445,12 @@ No new hook files. Existing hooks return the enriched schemas automatically afte
 
 ### Phase 3: Extension ↔ E911 and Phone Number ↔ E911 (surfacing)
 
-- [ ] Add reverse `e911_registration` relationship to `PhoneNumber` model
+- [x] Add reverse `e911_registration` relationship to `PhoneNumber` model
 - [ ] Update Extension detail schema: add `e911_status`, `e911_registration_id`, `e911_address_summary`
-- [ ] Update PhoneNumber list schema: add `e911_registered`
-- [ ] Update PhoneNumber detail schema: add `e911_registered`, `e911_registration_id`
+- [x] Update PhoneNumber list schema: add `e911_registered`
+- [x] Update PhoneNumber detail schema: add `e911_registered`, `e911_registration_id`
 - [ ] Update `ExtensionService.get()` to join `phone_number → e911_registration`
-- [ ] Update `PhoneNumberService` to check E911 status on detail/list queries
+- [x] Update `PhoneNumberService` to check E911 status on detail/list queries
 - [ ] Add `get_unregistered_numbers(team_id)` method to `PhoneNumberService`
 - [ ] Add `GET /api/voice/phone-numbers/unregistered-e911` endpoint
 - [ ] Regenerate TypeScript types (`make types`)
@@ -462,17 +462,17 @@ No new hook files. Existing hooks return the enriched schemas automatically afte
 
 ### Phase 4: Device ↔ Connection
 
-- [ ] Add `connection_id` FK column to `Device` model (`_device.py`)
-- [ ] Add `Connection` relationship to `Device` model
+- [x] Add `connection_id` FK column to `Device` model (`_device.py`)
+- [x] Add `Connection` relationship to `Device` model
 - [ ] Add reverse `devices` relationship to `Connection` model (`_connection.py`)
-- [ ] Create Alembic migration (add column, FK constraint, index)
-- [ ] Update `Device` schema: add `connection_id`, `connection_name`
-- [ ] Update `DeviceCreate` schema: add `connection_id`
-- [ ] Update `DeviceUpdate` schema: add `connection_id`
+- [x] Create Alembic migration (add column, FK constraint, index)
+- [x] Update `Device` schema: add `connection_id`, `connection_name`
+- [x] Update `DeviceCreate` schema: add `connection_id`
+- [x] Update `DeviceUpdate` schema: add `connection_id`
 - [ ] Update `Connection` schema: add `managed_device_count`
-- [ ] Update `DeviceService` to eager-load connection relationship
+- [x] Update `DeviceService` to eager-load connection relationship
 - [ ] Update `ConnectionService` to compute `managed_device_count`
-- [ ] Regenerate TypeScript types (`make types`)
+- [x] Regenerate TypeScript types (`make types`)
 - [ ] Add Connection field to device detail page overview section
 - [ ] Add Connection dropdown to device create/edit form (filtered to type=`pbx`)
 - [ ] Add "Managed Devices" section to connection detail page

@@ -6,7 +6,9 @@ import {
   Headset,
   Loader2,
   type LucideIcon,
+  MapPin,
   MoreHorizontal,
+  Network,
   Phone,
   Users,
 } from "lucide-react"
@@ -29,7 +31,9 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
+import { useConnections } from "@/lib/api/hooks/connections"
 import { useCreateDevice } from "@/lib/api/hooks/devices"
+import { useLocations } from "@/lib/api/hooks/locations"
 import { formatMacAddress } from "@/lib/format-utils"
 import { cn } from "@/lib/utils"
 
@@ -72,6 +76,8 @@ const createDeviceSchema = z.object({
   deviceModel: z.string().optional(),
   manufacturer: z.string().optional(),
   teamId: z.string().optional(),
+  locationId: z.string().optional(),
+  connectionId: z.string().optional(),
 })
 
 type CreateDeviceFormData = z.infer<typeof createDeviceSchema>
@@ -108,8 +114,14 @@ export function CreateDeviceForm() {
       deviceModel: "",
       manufacturer: "",
       teamId: "",
+      locationId: "",
+      connectionId: "",
     },
   })
+
+  const teamId = form.watch("teamId") ?? ""
+  const locationsQuery = useLocations({ teamId, pageSize: 100 })
+  const connectionsQuery = useConnections({ pageSize: 100 })
 
   const { isDirty, isSubmitting } = form.formState
   const nameLength = (form.watch("name") ?? "").length
@@ -142,6 +154,8 @@ export function CreateDeviceForm() {
         deviceModel: data.deviceModel || undefined,
         manufacturer: data.manufacturer || undefined,
         teamId: data.teamId || undefined,
+        locationId: data.locationId || undefined,
+        connectionId: data.connectionId || undefined,
       })
       router.invalidate()
       router.navigate({ to: "/devices/$deviceId", params: { deviceId: device.id } })
@@ -309,6 +323,78 @@ export function CreateDeviceForm() {
               </FormItem>
             )}
           />
+
+          <div className="grid gap-6 sm:grid-cols-2">
+            <FormField
+              control={form.control}
+              name="locationId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-1.5">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    Location
+                  </FormLabel>
+                  <Select
+                    onValueChange={(v) => field.onChange(v === "__none__" ? "" : v)}
+                    defaultValue={field.value || "__none__"}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a location" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="__none__">None</SelectItem>
+                      {(locationsQuery.data?.items ?? []).map((loc) => (
+                        <SelectItem key={loc.id} value={loc.id}>
+                          {loc.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    Physical location where this device is installed.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="connectionId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-1.5">
+                    <Network className="h-4 w-4 text-muted-foreground" />
+                    Connection
+                  </FormLabel>
+                  <Select
+                    onValueChange={(v) => field.onChange(v === "__none__" ? "" : v)}
+                    defaultValue={field.value || "__none__"}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a connection" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="__none__">None</SelectItem>
+                      {(connectionsQuery.data?.items ?? []).map((conn) => (
+                        <SelectItem key={conn.id} value={conn.id}>
+                          {conn.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    SIP trunk or provider connection for this device.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
           {/* ── Root error ──────────────────────────────────────────── */}
 

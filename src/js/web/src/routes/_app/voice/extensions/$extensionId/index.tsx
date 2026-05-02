@@ -13,10 +13,13 @@ import {
   Inbox,
   Loader2,
   Mail,
+  Monitor,
   Pencil,
   Phone,
   PhoneForwarded,
   Settings,
+  Shield,
+  ShieldOff,
   Trash2,
   Voicemail,
 } from "lucide-react"
@@ -40,6 +43,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { CopyButton } from "@/components/ui/copy-button"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { DeleteExtensionDialog } from "@/components/voice/delete-extension-dialog"
@@ -52,10 +56,12 @@ import {
   useDndSettings,
   useExtension,
   useForwardingRules,
+  usePhoneNumber,
   useUpdateExtension,
   useVoicemailMessages,
   useVoicemailSettings,
 } from "@/lib/api/hooks/voice"
+import { useDevicesByExtension } from "@/lib/api/hooks/devices"
 import { useGatewayLookupExtension } from "@/lib/api/hooks/gateway"
 import { formatDuration } from "@/lib/format-utils"
 
@@ -112,6 +118,7 @@ function ExtensionDetailPage() {
   useDocumentTitle(data ? `${data.displayName} (Ext. ${data.extensionNumber})` : "Extension")
   const updateExtension = useUpdateExtension(extensionId)
   const gatewayQuery = useGatewayLookupExtension(data?.extensionNumber ?? "", tab === "external")
+  const phoneNumberQuery = usePhoneNumber(data?.phoneNumberId ?? "")
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
@@ -320,7 +327,18 @@ function ExtensionDetailPage() {
                   </div>
                   <div>
                     <p className="text-muted-foreground">Phone Number</p>
-                    <p>{data.phoneNumberId ? "Assigned" : "Not assigned"}</p>
+                    {data.phoneNumberId ? (
+                      <p className="font-mono text-sm">
+                        {phoneNumberQuery.data?.number ?? "Assigned"}
+                        {phoneNumberQuery.data?.label && (
+                          <span className="ml-1 text-muted-foreground">
+                            ({phoneNumberQuery.data.label})
+                          </span>
+                        )}
+                      </p>
+                    ) : (
+                      <p className="text-muted-foreground">Not assigned</p>
+                    )}
                   </div>
                   <div>
                     <p className="text-muted-foreground">Active</p>
@@ -333,6 +351,30 @@ function ExtensionDetailPage() {
                         }
                         disabled={updateExtension.isPending}
                       />
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">E911 Status</p>
+                    <div className="mt-0.5">
+                      {!data.phoneNumberId ? (
+                        <span className="text-muted-foreground">No phone number assigned</span>
+                      ) : phoneNumberQuery.isLoading ? (
+                        <Skeleton className="h-5 w-28" />
+                      ) : phoneNumberQuery.data?.e911Registered ? (
+                        <Link
+                          to="/e911/$registrationId"
+                          params={{ registrationId: phoneNumberQuery.data.e911RegistrationId ?? "" }}
+                          className="inline-flex items-center gap-1.5 text-emerald-600 hover:underline"
+                        >
+                          <Shield className="h-3.5 w-3.5" />
+                          Registered
+                        </Link>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 text-amber-600">
+                          <ShieldOff className="h-3.5 w-3.5" />
+                          Not Registered
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -354,6 +396,9 @@ function ExtensionDetailPage() {
 
             {/* Call Forwarding */}
             <CallForwardingCard extensionId={extensionId} extension={data} />
+
+            {/* Assigned Devices */}
+            <AssignedDevicesCard extensionId={extensionId} />
 
             {/* Sub-page links (voicemail, forwarding, dnd) */}
             <SubPageLinks extensionId={extensionId} />
@@ -959,6 +1004,102 @@ function SubPageLinks({ extensionId }: { extensionId: string }) {
         </Card>
       ))}
     </div>
+  )
+}
+
+// -- Assigned Devices card ----------------------------------------------------
+
+function AssignedDevicesCard({ extensionId }: { extensionId: string }) {
+  const { data: deviceLines, isLoading } = useDevicesByExtension(extensionId)
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center gap-2">
+          <Monitor className="h-5 w-5 text-muted-foreground" />
+          <CardTitle>Assigned Devices</CardTitle>
+          {!isLoading && deviceLines && deviceLines.length > 0 && (
+            <Badge variant="secondary" className="ml-1 text-xs">
+              {deviceLines.length}
+            </Badge>
+          )}
+        </div>
+        <CardDescription>
+          Devices that have this extension assigned to one of their lines
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="space-y-2">
+            {Array.from({ length: 2 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <Skeleton className="h-4 w-4 rounded" />
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-4 w-16" />
+                <Skeleton className="h-4 w-20" />
+              </div>
+            ))}
+          </div>
+        ) : !deviceLines || deviceLines.length === 0 ? (
+          <div className="flex flex-col items-center gap-2 py-6 text-center">
+            <Monitor className="h-8 w-8 text-muted-foreground/50" />
+            <p className="text-sm text-muted-foreground">
+              No devices have this extension assigned to their lines.
+            </p>
+          </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Device</TableHead>
+                <TableHead>Line</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {deviceLines.map(({ device, line }) => (
+                <TableRow key={`${device.id}-${line.id}`}>
+                  <TableCell>
+                    <Link
+                      to="/devices/$deviceId"
+                      params={{ deviceId: device.id }}
+                      className="font-medium text-primary hover:underline"
+                    >
+                      {device.name}
+                    </Link>
+                    {device.deviceModel && (
+                      <p className="text-xs text-muted-foreground">{device.deviceModel}</p>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <span className="font-mono text-xs">Line {line.lineNumber}</span>
+                    {line.label && (
+                      <span className="ml-1 text-xs text-muted-foreground">({line.label})</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-xs capitalize">{device.deviceType}</span>
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={device.status === "online" ? "default" : "outline"}
+                      className={
+                        device.status === "online"
+                          ? "bg-emerald-600 text-white text-xs"
+                          : "text-xs"
+                      }
+                    >
+                      {device.status}
+                    </Badge>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </CardContent>
+    </Card>
   )
 }
 

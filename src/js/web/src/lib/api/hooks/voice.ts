@@ -16,6 +16,8 @@ export interface PhoneNumber {
   isActive: boolean
   teamId: string | null
   extensionId: string | null
+  e911Registered?: boolean
+  e911RegistrationId?: string | null
   createdAt: string | null
   updatedAt: string | null
 }

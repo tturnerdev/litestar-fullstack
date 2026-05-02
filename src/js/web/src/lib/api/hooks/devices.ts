@@ -272,6 +272,37 @@ export function useDeviceAction(deviceId: string) {
 }
 
 // ---------------------------------------------------------------------------
+// Devices by Extension (client-side filter)
+// ---------------------------------------------------------------------------
+
+export interface DeviceWithLine {
+  device: Device
+  line: DeviceLineAssignment
+}
+
+export function useDevicesByExtension(extensionId: string | undefined) {
+  return useQuery({
+    queryKey: ["devices", "by-extension", extensionId],
+    queryFn: async () => {
+      // Fetch all devices (with their line assignments embedded)
+      const query: ListDevicesData["query"] = { pageSize: 200 }
+      const response = await listDevices({ query })
+      const data = response.data as { items: Device[]; total: number }
+      const matches: DeviceWithLine[] = []
+      for (const device of data.items ?? []) {
+        for (const line of device.lines ?? []) {
+          if (line.extensionId === extensionId) {
+            matches.push({ device, line })
+          }
+        }
+      }
+      return matches
+    },
+    enabled: !!extensionId,
+  })
+}
+
+// ---------------------------------------------------------------------------
 // Device Screenshot (LCD live view)
 // ---------------------------------------------------------------------------
 

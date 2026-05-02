@@ -1,8 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
-import { AlertCircle, ArrowLeft, Fingerprint, Home, Pencil, Phone, Trash2 } from "lucide-react"
+import { AlertCircle, ArrowLeft, Fingerprint, Home, Pencil, Phone, Shield, Trash2 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { ExternalDataTab } from "@/components/gateway/external-data-tab"
+import { E911StatusBadge } from "@/components/voice/e911-status-badge"
 import { PhoneNumberDeleteDialog } from "@/components/voice/phone-number-delete-dialog"
 import { PhoneNumberEditSheet } from "@/components/voice/phone-number-edit-sheet"
 import { Badge } from "@/components/ui/badge"
@@ -228,6 +229,22 @@ function PhoneNumberDetailPage() {
                   <div>
                     <p className="text-muted-foreground">Team</p>
                     <p>{data.teamId ?? "Not assigned"}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">E911 Status</p>
+                    <div className="flex items-center gap-2 pt-0.5">
+                      <E911StatusBadge registered={data.e911Registered ?? false} registrationId={data.e911RegistrationId} />
+                      {data.e911Registered && data.e911RegistrationId && (
+                        <Link
+                          to="/e911/$registrationId"
+                          params={{ registrationId: data.e911RegistrationId }}
+                          className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                        >
+                          <Shield className="h-3 w-3" />
+                          View Registration
+                        </Link>
+                      )}
+                    </div>
                   </div>
                 </div>
               </CardContent>

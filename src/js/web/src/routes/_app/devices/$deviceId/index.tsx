@@ -10,6 +10,7 @@ import {
   EyeOff,
   Fingerprint,
   Loader2,
+  MapPin,
   Network,
   Pencil,
   Phone,
@@ -35,6 +36,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -51,7 +59,9 @@ import {
   useReprovisionDevice,
   useUpdateDevice,
 } from "@/lib/api/hooks/devices"
+import { useConnections } from "@/lib/api/hooks/connections"
 import { useGatewayLookupDevice } from "@/lib/api/hooks/gateway"
+import { useLocations } from "@/lib/api/hooks/locations"
 import { ExternalDataTab } from "@/components/gateway/external-data-tab"
 import { DeviceDiagnosticTab } from "@/components/devices/device-diagnostic-tab"
 import type { Device } from "@/lib/generated/api"
@@ -120,6 +130,8 @@ function DeviceDetailPage() {
   const reprovisionDevice = useReprovisionDevice(deviceId)
   const linesQuery = useDeviceLines(deviceId)
   const gatewayQuery = useGatewayLookupDevice(data?.macAddress ?? "", tab === "external")
+  const locationsQuery = useLocations({ teamId: data?.teamId ?? "", pageSize: 100 })
+  const connectionsQuery = useConnections({ pageSize: 100 })
 
   const [editing, setEditing] = useState(false)
   const [editName, setEditName] = useState("")
@@ -127,6 +139,8 @@ function DeviceDetailPage() {
   const [editModel, setEditModel] = useState("")
   const [editMacAddress, setEditMacAddress] = useState("")
   const [editIpAddress, setEditIpAddress] = useState("")
+  const [editLocationId, setEditLocationId] = useState<string | null>(null)
+  const [editConnectionId, setEditConnectionId] = useState<string | null>(null)
 
   useEffect(() => {
     if (editParam && data && !editing) {
@@ -141,6 +155,8 @@ function DeviceDetailPage() {
     setEditModel(device.deviceModel ?? "")
     setEditMacAddress(device.macAddress ?? "")
     setEditIpAddress(device.ipAddress ?? "")
+    setEditLocationId(device.locationId ?? null)
+    setEditConnectionId(device.connectionId ?? null)
     setEditing(true)
   }
 
@@ -151,6 +167,8 @@ function DeviceDetailPage() {
     if (editModel !== (data?.deviceModel ?? "")) payload.deviceModel = editModel || null
     if (editMacAddress !== (data?.macAddress ?? "")) payload.macAddress = editMacAddress || null
     if (editIpAddress !== (data?.ipAddress ?? "")) payload.ipAddress = editIpAddress || null
+    if (editLocationId !== (data?.locationId ?? null)) payload.locationId = editLocationId || null
+    if (editConnectionId !== (data?.connectionId ?? null)) payload.connectionId = editConnectionId || null
     updateDevice.mutate(payload, {
       onSuccess: () => setEditing(false),
     })
@@ -389,6 +407,44 @@ function DeviceDetailPage() {
                         <Label>IP Address</Label>
                         <Input value={editIpAddress} onChange={(e) => setEditIpAddress(e.target.value)} placeholder="192.168.1.100" />
                       </div>
+                      <div className="space-y-2">
+                        <Label>Location</Label>
+                        <Select
+                          value={editLocationId ?? "__none__"}
+                          onValueChange={(v) => setEditLocationId(v === "__none__" ? null : v)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a location" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="__none__">None</SelectItem>
+                            {(locationsQuery.data?.items ?? []).map((loc) => (
+                              <SelectItem key={loc.id} value={loc.id}>
+                                {loc.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Connection</Label>
+                        <Select
+                          value={editConnectionId ?? "__none__"}
+                          onValueChange={(v) => setEditConnectionId(v === "__none__" ? null : v)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a connection" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="__none__">None</SelectItem>
+                            {(connectionsQuery.data?.items ?? []).map((conn) => (
+                              <SelectItem key={conn.id} value={conn.id}>
+                                {conn.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                   </div>
                 ) : (
@@ -426,6 +482,40 @@ function DeviceDetailPage() {
                           size="sm"
                         />
                       </div>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground flex items-center gap-1">
+                        <MapPin className="h-3.5 w-3.5" />
+                        Location
+                      </p>
+                      {data.locationId && data.locationName ? (
+                        <Link
+                          to="/locations/$locationId"
+                          params={{ locationId: data.locationId }}
+                          className="font-medium text-primary hover:underline"
+                        >
+                          {data.locationName}
+                        </Link>
+                      ) : (
+                        <p className="text-muted-foreground">None</p>
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground flex items-center gap-1">
+                        <Network className="h-3.5 w-3.5" />
+                        Connection
+                      </p>
+                      {data.connectionId && data.connectionName ? (
+                        <Link
+                          to="/connections/$connectionId"
+                          params={{ connectionId: data.connectionId }}
+                          className="font-medium text-primary hover:underline"
+                        >
+                          {data.connectionName}
+                        </Link>
+                      ) : (
+                        <p className="text-muted-foreground">None</p>
+                      )}
                     </div>
                   </div>
                 )}

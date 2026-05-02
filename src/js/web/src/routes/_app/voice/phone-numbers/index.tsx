@@ -46,6 +46,7 @@ import { SkeletonTable } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { CreatePhoneNumberDialog } from "@/components/voice/create-phone-number-dialog"
+import { E911StatusBadge } from "@/components/voice/e911-status-badge"
 import {
   type PhoneNumber,
   useDeletePhoneNumber,
@@ -244,6 +245,9 @@ function PhoneNumberRow({
       </TableCell>
       <TableCell>
         <StatusIndicator isActive={pn.isActive} />
+      </TableCell>
+      <TableCell className="hidden md:table-cell">
+        <E911StatusBadge registered={pn.e911Registered ?? false} registrationId={pn.e911RegistrationId} />
       </TableCell>
       <TableCell className="text-right">
         <div onClick={(e) => e.stopPropagation()}>
@@ -673,6 +677,7 @@ function PhoneNumbersPage() {
                       currentDirection={sortDir}
                       onSort={handleSort}
                     />
+                    <TableHead className="hidden md:table-cell">E911</TableHead>
                     <TableHead className="w-20 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
