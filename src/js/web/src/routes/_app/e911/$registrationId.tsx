@@ -5,12 +5,15 @@ import {
   AlertTriangle,
   ArrowLeft,
   CheckCircle2,
+  Copy,
   Fingerprint,
   Loader2,
   MapPin,
+  MoreHorizontal,
   Pencil,
   Phone,
   ShieldAlert,
+  Trash2,
   XCircle,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
@@ -22,18 +25,26 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { Button } from "@/components/ui/button"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { EmptyState } from "@/components/ui/empty-state"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
@@ -41,6 +52,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { CopyButton } from "@/components/ui/copy-button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
+import { toast } from "sonner"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import {
@@ -90,44 +102,56 @@ function DeleteConfirmDialog({
   address,
   onDelete,
   isPending,
+  open: controlledOpen,
+  onOpenChange,
+  showTrigger = true,
 }: {
   address: string
   onDelete: () => void
   isPending: boolean
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+  showTrigger?: boolean
 }) {
-  const [open, setOpen] = useState(false)
+  const [internalOpen, setInternalOpen] = useState(false)
+  const open = controlledOpen ?? internalOpen
+  const setOpen = onOpenChange ?? setInternalOpen
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="destructive" size="sm">
+    <>
+      {showTrigger && (
+        <Button variant="destructive" size="sm" onClick={() => setOpen(true)}>
+          <Trash2 className="mr-2 h-4 w-4" />
           Delete Registration
         </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Delete E911 Registration</DialogTitle>
-          <DialogDescription>
-            Are you sure you want to delete the E911 registration for "{address}"? This action cannot be undone and may impact emergency services for the associated phone number.
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>
-            Cancel
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={() => {
-              onDelete()
-              setOpen(false)
-            }}
-            disabled={isPending}
-          >
-            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Delete
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      )}
+      <AlertDialog open={open} onOpenChange={setOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Delete E911 registration?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete the E911 registration for "{address}"? This action cannot be undone and may impact emergency services for the associated phone number.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setOpen(false)} disabled={isPending}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className={buttonVariants({ variant: "destructive" })}
+              onClick={onDelete}
+              disabled={isPending}
+            >
+              {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isPending ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }
 
@@ -143,6 +167,7 @@ function E911DetailPage() {
   const deleteMutation = useDeleteE911Registration()
   const validateMutation = useValidateE911Registration(registrationId)
 
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [editing, setEditing] = useState(false)
   const [editAddr1, setEditAddr1] = useState("")
   const [editAddr2, setEditAddr2] = useState("")
@@ -295,8 +320,40 @@ function E911DetailPage() {
                 <Pencil className="mr-2 h-4 w-4" /> Edit
               </Button>
             )}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <MoreHorizontal className="h-4 w-4" />
+                  <span className="sr-only">Actions</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => { navigator.clipboard.writeText(registrationId); toast.success("Copied registration ID") }}>
+                  <Copy className="mr-2 h-4 w-4" />
+                  Copy Registration ID
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  variant="destructive"
+                  onClick={() => setShowDeleteDialog(true)}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete Registration
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         }
+      />
+
+      {/* Delete dialog triggered from dropdown */}
+      <DeleteConfirmDialog
+        address={`${data.addressLine1}, ${data.city}`}
+        onDelete={handleDelete}
+        isPending={deleteMutation.isPending}
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        showTrigger={false}
       />
 
       {/* Address Details */}

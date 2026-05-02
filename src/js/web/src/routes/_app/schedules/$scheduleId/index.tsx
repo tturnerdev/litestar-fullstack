@@ -7,9 +7,11 @@ import {
   Calendar,
   CheckCircle2,
   Clock,
+  Copy,
   Grid3x3,
   List,
   Loader2,
+  MoreHorizontal,
   Pencil,
   Plus,
   Trash2,
@@ -25,6 +27,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
 import {
   Breadcrumb,
@@ -60,6 +69,7 @@ import {
   type ScheduleEntry,
   type ScheduleEntryCreate,
 } from "@/lib/api/hooks/schedules"
+import { toast } from "sonner"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 
@@ -384,19 +394,28 @@ function DeleteScheduleDialog({
   scheduleName,
   onDelete,
   isPending,
+  open: controlledOpen,
+  onOpenChange,
 }: {
   scheduleName: string
   onDelete: () => void
   isPending: boolean
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }) {
-  const [open, setOpen] = useState(false)
+  const [internalOpen, setInternalOpen] = useState(false)
+  const isControlled = controlledOpen !== undefined
+  const open = isControlled ? controlledOpen : internalOpen
+  const setOpen = isControlled ? (onOpenChange ?? (() => {})) : setInternalOpen
 
   return (
     <>
-      <Button variant="destructive" size="sm" onClick={() => setOpen(true)}>
-        <Trash2 className="mr-2 h-4 w-4" />
-        Delete
-      </Button>
+      {!isControlled && (
+        <Button variant="destructive" size="sm" onClick={() => setOpen(true)}>
+          <Trash2 className="mr-2 h-4 w-4" />
+          Delete
+        </Button>
+      )}
       <AlertDialog open={open} onOpenChange={setOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -610,6 +629,7 @@ function ScheduleDetailPage() {
   const [editTimezone, setEditTimezone] = useState("")
   const [editType, setEditType] = useState<Schedule["scheduleType"]>("business_hours")
   const [editDefault, setEditDefault] = useState(false)
+  const [showDeleteFromMenu, setShowDeleteFromMenu] = useState(false)
 
   useDocumentTitle(data?.name ? `${data.name} - Schedule` : "Schedule")
 
@@ -793,8 +813,36 @@ function ScheduleDetailPage() {
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back
               </Link>
             </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <MoreHorizontal className="h-4 w-4" />
+                  <span className="sr-only">Actions</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => { navigator.clipboard.writeText(scheduleId); toast.success("Copied schedule ID") }}>
+                  <Copy className="mr-2 h-4 w-4" />
+                  Copy Schedule ID
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem variant="destructive" onClick={() => setShowDeleteFromMenu(true)}>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete Schedule
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         }
+      />
+
+      {/* Delete dialog triggered from dropdown menu */}
+      <DeleteScheduleDialog
+        scheduleName={data.name}
+        onDelete={handleDelete}
+        isPending={deleteSchedule.isPending}
+        open={showDeleteFromMenu}
+        onOpenChange={setShowDeleteFromMenu}
       />
 
       <PageSection>

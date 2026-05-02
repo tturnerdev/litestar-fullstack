@@ -9,12 +9,14 @@ import {
   ChevronDown,
   ChevronRight,
   Clock,
+  Copy,
   Hash,
   History,
   Loader2,
   Lock,
   Mail,
   MessageSquare,
+  MoreHorizontal,
   Pencil,
   Plus,
   Tag,
@@ -86,6 +88,7 @@ import {
 } from "@/lib/api/hooks/support"
 import { useTags, type Tag as TagType } from "@/lib/api/hooks/tags"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { toast } from "sonner"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 
 export const Route = createFileRoute("/_app/support/$ticketId/")({
@@ -469,48 +472,64 @@ function TicketDetailPage() {
                 <Pencil className="mr-2 h-4 w-4" /> Edit
               </Link>
             </Button>
-            {isClosed ? (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => reopenTicket.mutate()}
-                disabled={reopenTicket.isPending}
-              >
-                {reopenTicket.isPending ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Unlock className="mr-2 h-4 w-4" />
-                )}
-                Reopen
-              </Button>
-            ) : (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => closeTicket.mutate()}
-                disabled={closeTicket.isPending}
-              >
-                {closeTicket.isPending ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Lock className="mr-2 h-4 w-4" />
-                )}
-                Close
-              </Button>
-            )}
-            <Button
-              size="sm"
-              variant="outline"
-              className="text-destructive hover:bg-destructive/10"
-              onClick={() => setShowDeleteDialog(true)}
-            >
-              <Trash2 className="mr-2 h-4 w-4" /> Delete
-            </Button>
             <Button variant="outline" size="sm" asChild>
               <Link to="/support">
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back
               </Link>
             </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon" className="h-9 w-9">
+                  <MoreHorizontal className="h-4 w-4" />
+                  <span className="sr-only">More actions</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={() => {
+                    navigator.clipboard.writeText(ticket.ticketNumber)
+                    toast.success("Copied ticket number")
+                  }}
+                >
+                  <Copy className="mr-2 h-4 w-4" />
+                  Copy Ticket ID
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                {isClosed ? (
+                  <DropdownMenuItem
+                    onClick={() => reopenTicket.mutate()}
+                    disabled={reopenTicket.isPending}
+                  >
+                    {reopenTicket.isPending ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Unlock className="mr-2 h-4 w-4" />
+                    )}
+                    Reopen Ticket
+                  </DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem
+                    onClick={() => closeTicket.mutate()}
+                    disabled={closeTicket.isPending}
+                  >
+                    {closeTicket.isPending ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Lock className="mr-2 h-4 w-4" />
+                    )}
+                    Close Ticket
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-destructive focus:text-destructive"
+                  onClick={() => setShowDeleteDialog(true)}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete Ticket
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         }
       />
