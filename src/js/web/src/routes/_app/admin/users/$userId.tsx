@@ -70,6 +70,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAdminUpdateUser, useAdminUser } from "@/lib/api/hooks/admin"
 import { useDocumentTitle } from "@/hooks/use-document-title"
@@ -397,6 +398,7 @@ function AdminUserDetailPage() {
 
       {/* Hero section */}
       <PageSection>
+        <SectionErrorBoundary name="User Profile">
         <Card className="overflow-hidden">
           <div className="h-24 bg-gradient-to-r from-primary/20 via-primary/10 to-transparent" />
           <CardContent className="relative -mt-12 pb-6">
@@ -503,12 +505,14 @@ function AdminUserDetailPage() {
             </div>
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Account Info + Activity side-by-side */}
       <PageSection delay={0.1}>
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Account Info */}
+          <SectionErrorBoundary name="Account Info">
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
@@ -600,8 +604,10 @@ function AdminUserDetailPage() {
               </div>
             </CardContent>
           </Card>
+          </SectionErrorBoundary>
 
           {/* Activity */}
+          <SectionErrorBoundary name="Activity">
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
@@ -628,6 +634,7 @@ function AdminUserDetailPage() {
               </div>
             </CardContent>
           </Card>
+          </SectionErrorBoundary>
         </div>
       </PageSection>
 
@@ -640,6 +647,7 @@ function AdminUserDetailPage() {
           title="Admin Actions"
           description="Toggle account properties and manage permissions."
         />
+        <SectionErrorBoundary name="Admin Actions">
         <Card>
           <CardContent className="divide-y pt-6">
             {/* Active toggle */}
@@ -724,6 +732,7 @@ function AdminUserDetailPage() {
             </div>
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       <Separator />
@@ -740,6 +749,7 @@ function AdminUserDetailPage() {
             </Button>
           }
         />
+        <SectionErrorBoundary name="Roles">
         <Card>
           <CardContent className="pt-6">
             {(data.roles ?? []).length === 0 ? (
@@ -766,6 +776,7 @@ function AdminUserDetailPage() {
             )}
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       <Separator />
@@ -777,6 +788,7 @@ function AdminUserDetailPage() {
           title="Teams"
           description={`Member of ${(data.teams ?? []).length} team${(data.teams ?? []).length !== 1 ? "s" : ""}.`}
         />
+        <SectionErrorBoundary name="Teams">
         <Card>
           <CardContent className="pt-6">
             {(data.teams ?? []).length === 0 ? (
@@ -825,6 +837,7 @@ function AdminUserDetailPage() {
             )}
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* OAuth Accounts */}
@@ -837,6 +850,7 @@ function AdminUserDetailPage() {
               title="Linked OAuth Accounts"
               description="External identity providers linked to this user."
             />
+            <SectionErrorBoundary name="OAuth Accounts">
             <Card>
               <CardContent className="pt-6">
                 <div className="overflow-x-auto">
@@ -868,6 +882,7 @@ function AdminUserDetailPage() {
                 </div>
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
           </PageSection>
         </>
       )}
@@ -876,13 +891,16 @@ function AdminUserDetailPage() {
 
       {/* Recent Activity Timeline */}
       <PageSection delay={0.35}>
+        <SectionErrorBoundary name="Recent Activity">
         <UserActivityTimeline userId={userId} />
+        </SectionErrorBoundary>
       </PageSection>
 
       <Separator />
 
       {/* Activity History (Audit Trail) */}
       <PageSection delay={0.4}>
+        <SectionErrorBoundary name="Activity History">
         <Card>
           <CardHeader>
             <CardTitle>Activity History</CardTitle>
@@ -892,12 +910,14 @@ function AdminUserDetailPage() {
             <EntityActivityPanel targetType="user" targetId={userId} />
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       <Separator />
 
       {/* Danger Zone */}
       <PageSection delay={0.45}>
+        <SectionErrorBoundary name="Danger Zone">
         <Card className="border-destructive/30">
           <CardHeader>
             <CardTitle className="text-destructive">Danger Zone</CardTitle>
@@ -917,6 +937,7 @@ function AdminUserDetailPage() {
             </div>
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Dialogs */}

@@ -62,6 +62,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { useAdminTeam, useAdminUpdateTeam } from "@/lib/api/hooks/admin"
@@ -365,6 +366,7 @@ function AdminTeamDetailPage() {
 
       {/* Hero section */}
       <PageSection>
+        <SectionErrorBoundary name="Team Profile">
         <Card className="overflow-hidden">
           <div className="h-24 bg-gradient-to-r from-primary/20 via-primary/10 to-transparent" />
           <CardContent className="relative -mt-12 pb-6">
@@ -474,12 +476,14 @@ function AdminTeamDetailPage() {
             </div>
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Team Info + Statistics side-by-side */}
       <PageSection delay={0.1}>
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Team Info */}
+          <SectionErrorBoundary name="Team Info">
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
@@ -557,8 +561,10 @@ function AdminTeamDetailPage() {
               </div>
             </CardContent>
           </Card>
+          </SectionErrorBoundary>
 
           {/* Statistics */}
+          <SectionErrorBoundary name="Statistics">
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
@@ -584,6 +590,7 @@ function AdminTeamDetailPage() {
               </div>
             </CardContent>
           </Card>
+          </SectionErrorBoundary>
         </div>
       </PageSection>
 
@@ -596,7 +603,9 @@ function AdminTeamDetailPage() {
           title="Members"
           description={`${memberCount} member${memberCount !== 1 ? "s" : ""} in this team.`}
         />
+        <SectionErrorBoundary name="Members">
         <MembersCard members={members} />
+        </SectionErrorBoundary>
       </PageSection>
 
       <Separator />
@@ -608,7 +617,9 @@ function AdminTeamDetailPage() {
           title="Invitations"
           description="Pending and accepted team invitations."
         />
+        <SectionErrorBoundary name="Invitations">
         <InvitationsCard teamId={teamId} />
+        </SectionErrorBoundary>
       </PageSection>
 
       <Separator />
@@ -620,6 +631,7 @@ function AdminTeamDetailPage() {
           title="Admin Actions"
           description="Toggle team properties and manage access."
         />
+        <SectionErrorBoundary name="Admin Actions">
         <Card>
           <CardContent className="divide-y pt-6">
             {/* Active toggle */}
@@ -652,12 +664,14 @@ function AdminTeamDetailPage() {
             </div>
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       <Separator />
 
       {/* Activity History (Audit Trail) */}
       <PageSection delay={0.3}>
+        <SectionErrorBoundary name="Activity History">
         <Card>
           <CardHeader>
             <CardTitle>Activity History</CardTitle>
@@ -666,12 +680,14 @@ function AdminTeamDetailPage() {
             <EntityActivityPanel targetType="team" targetId={teamId} />
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       <Separator />
 
       {/* Danger Zone */}
       <PageSection delay={0.35}>
+        <SectionErrorBoundary name="Danger Zone">
         <Card className="border-destructive/30">
           <CardHeader>
             <CardTitle className="text-destructive">Danger Zone</CardTitle>
@@ -691,6 +707,7 @@ function AdminTeamDetailPage() {
             </div>
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Dialogs */}

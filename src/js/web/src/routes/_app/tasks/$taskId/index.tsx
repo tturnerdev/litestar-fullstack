@@ -54,6 +54,7 @@ import {
 } from "@/components/ui/collapsible"
 import { CopyButton } from "@/components/ui/copy-button"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useTask, useCancelTask, useRetryTask } from "@/lib/api/hooks/tasks"
@@ -363,6 +364,7 @@ function TaskDetailPage() {
           {/* Progress section */}
           {task.progress != null && task.progress > 0 && (
             <PageSection delay={0.05}>
+              <SectionErrorBoundary name="Task Progress">
               <Card className="border-border/60 bg-card/80">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-base">Progress</CardTitle>
@@ -394,29 +396,36 @@ function TaskDetailPage() {
                   </div>
                 </CardContent>
               </Card>
+              </SectionErrorBoundary>
             </PageSection>
           )}
 
           {/* Error section */}
           {task.status === "failed" && task.errorMessage && (
             <PageSection delay={0.1}>
+              <SectionErrorBoundary name="Task Error">
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
                 <AlertTitle>Task Failed</AlertTitle>
                 <AlertDescription>{task.errorMessage}</AlertDescription>
               </Alert>
+              </SectionErrorBoundary>
             </PageSection>
           )}
 
           {/* Payload section */}
           <PageSection delay={0.15}>
+            <SectionErrorBoundary name="Task Payload">
             <JsonSection title="Payload" data={task.payload} defaultOpen={!task.result} />
+            </SectionErrorBoundary>
           </PageSection>
 
           {/* Result section */}
           {task.result && (
             <PageSection delay={0.2}>
+              <SectionErrorBoundary name="Task Result">
               <JsonSection title="Result" data={task.result} defaultOpen />
+              </SectionErrorBoundary>
             </PageSection>
           )}
         </div>
@@ -424,6 +433,7 @@ function TaskDetailPage() {
         {/* Sidebar */}
         <div className="space-y-4">
           <PageSection delay={0.1}>
+            <SectionErrorBoundary name="Task Details">
             <Card className="border-border/60 bg-card/80">
               <CardHeader className="pb-2">
                 <CardTitle className="text-base">Details</CardTitle>
@@ -524,6 +534,7 @@ function TaskDetailPage() {
                 </div>
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
           </PageSection>
         </div>
       </div>

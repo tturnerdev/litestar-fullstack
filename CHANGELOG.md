@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.231.0 (2026-05-03)
+
+### Added
+- **SectionErrorBoundary** on admin users, admin teams, voicemail, and tasks detail pages — completing error boundary coverage across every detail page in the portal
+
 ## v0.230.0 (2026-05-03)
 
 ### Added

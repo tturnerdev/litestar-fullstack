@@ -66,6 +66,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { VoicemailPlayer } from "@/components/voice/voicemail-player"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { formatDateTime, formatFullDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { formatDuration, formatDurationHuman } from "@/lib/format-utils"
@@ -249,24 +250,31 @@ function VoicemailBoxDetailPage() {
 
       {/* Box Settings */}
       <PageSection>
+        <SectionErrorBoundary name="Box Settings">
         <BoxSettingsForm boxId={boxId} />
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Messages */}
       <PageSection delay={0.1}>
+        <SectionErrorBoundary name="Voicemail Messages">
         <BoxMessageList boxId={boxId} />
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Activity */}
       <PageSection delay={0.2}>
+        <SectionErrorBoundary name="Activity">
         <EntityActivityPanel
           targetType="voicemail_box"
           targetId={boxId}
         />
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Danger Zone */}
       <PageSection delay={0.3}>
+        <SectionErrorBoundary name="Danger Zone">
         <Card className="border-destructive/30 bg-card/80 shadow-md">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-destructive">
@@ -294,6 +302,7 @@ function VoicemailBoxDetailPage() {
             </div>
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Delete box confirmation */}
