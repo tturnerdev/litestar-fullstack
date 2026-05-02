@@ -584,6 +584,20 @@ function WebhooksPage() {
   const [deleteTarget, setDeleteTarget] = useState<WebhookList | null>(null)
   const [selected, setSelected] = useState<Set<string>>(new Set())
 
+  // Keyboard shortcut: "N" opens the create dialog
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "n" && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        const target = e.target as HTMLElement
+        if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return
+        e.preventDefault()
+        setCreateOpen(true)
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [])
+
   // Reset page when debounced search changes
   useEffect(() => {
     setPage(1)
@@ -670,6 +684,7 @@ function WebhooksPage() {
             </Button>
             <Button size="sm" onClick={() => setCreateOpen(true)}>
               <Plus className="mr-2 h-4 w-4" /> New webhook
+              <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">N</kbd>
             </Button>
           </div>
         }

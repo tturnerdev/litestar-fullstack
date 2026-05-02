@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router"
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   Check,
@@ -77,7 +77,22 @@ const csvHeaders: CsvHeader<Team>[] = [
 
 function TeamsPage() {
   useDocumentTitle("Teams")
+  const navigate = useNavigate()
   const { user, currentTeam, setCurrentTeam, setTeams } = useAuthStore()
+
+  // Keyboard shortcut: "N" opens the create page
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "n" && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        const target = e.target as HTMLElement
+        if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return
+        e.preventDefault()
+        navigate({ to: "/teams/new" })
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [navigate])
 
   // Search state
   const [search, setSearch] = useState("")
@@ -218,6 +233,7 @@ function TeamsPage() {
             <Button size="sm" asChild>
               <Link to="/teams/new">
                 <Plus className="mr-2 h-4 w-4" /> New team
+                <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">N</kbd>
               </Link>
             </Button>
           </div>

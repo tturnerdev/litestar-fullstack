@@ -177,6 +177,20 @@ function ConnectionsPage() {
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(getStoredPageSize)
 
+  // Keyboard shortcut: "N" opens the create page
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "n" && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        const target = e.target as HTMLElement
+        if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return
+        e.preventDefault()
+        navigate({ to: "/connections/new" })
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [navigate])
+
   // Reset page when debounced search changes
   useEffect(() => {
     setPage(1)
@@ -338,6 +352,7 @@ function ConnectionsPage() {
             <Button size="sm" asChild>
               <Link to="/connections/new">
                 <Plus className="mr-2 h-4 w-4" /> Add connection
+                <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">N</kbd>
               </Link>
             </Button>
           </div>

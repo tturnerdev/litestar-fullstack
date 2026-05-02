@@ -66,6 +66,20 @@ function TagsPage() {
   const [sortDir, setSortDir] = useState<SortDir>("asc")
   const [page, setPage] = useState(1)
 
+  // Keyboard shortcut: "N" opens the create page
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "n" && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        const target = e.target as HTMLElement
+        if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return
+        e.preventDefault()
+        navigate({ to: "/tags/new" })
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [navigate])
+
   // Reset page when debounced search changes
   useEffect(() => {
     setPage(1)
@@ -210,6 +224,7 @@ function TagsPage() {
             <Button size="sm" asChild>
               <Link to="/tags/new">
                 <Plus className="mr-2 h-4 w-4" /> New Tag
+                <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">N</kbd>
               </Link>
             </Button>
           </div>

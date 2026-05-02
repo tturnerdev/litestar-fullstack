@@ -16,9 +16,12 @@ import {
   ShieldCheck,
   Tag,
   TicketCheck,
+  TrendingUp,
   Users,
   type LucideIcon,
 } from "lucide-react"
+import { useMemo } from "react"
+import { Area, AreaChart, ResponsiveContainer, Tooltip as RechartsTooltip, XAxis, YAxis } from "recharts"
 import { ConnectionsStatusCard } from "@/components/home/connections-status-card"
 import { FeatureAreasGrid } from "@/components/home/feature-areas-grid"
 import { GettingStarted } from "@/components/home/getting-started"
@@ -240,6 +243,35 @@ function HomePage() {
     enabled: isSuperuser,
   })
 
+  const { data: chartActivityData } = useQuery({
+    queryKey: ["admin", "activity-chart"],
+    queryFn: async () => {
+      const response = await getRecentActivity({ query: { limit: 200, hours: 168 } })
+      return response.data as RecentActivity
+    },
+    enabled: isSuperuser,
+  })
+
+  const chartData = useMemo(() => {
+    const days: { date: string; label: string; count: number }[] = []
+    const now = new Date()
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now)
+      d.setDate(d.getDate() - i)
+      const dateKey = d.toISOString().slice(0, 10)
+      const label = d.toLocaleDateString("en-US", { weekday: "short" })
+      days.push({ date: dateKey, label, count: 0 })
+    }
+    if (chartActivityData?.activities) {
+      for (const activity of chartActivityData.activities) {
+        const dateKey = activity.createdAt.slice(0, 10)
+        const day = days.find((d) => d.date === dateKey)
+        if (day) day.count++
+      }
+    }
+    return days
+  }, [chartActivityData])
+
   // Operational stats
   const { data: devicesData, isLoading: devicesLoading } = useDevices({ page: 1, pageSize: 1 })
   const { data: openTicketsData, isLoading: ticketsLoading } = useTickets(1, 1, { status: "open" })
@@ -410,13 +442,67 @@ function HomePage() {
       {/* Admin Section: Connections + Recent Activity */}
       {isSuperuser && (
         <PageSection delay={0.18}>
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             <ConnectionsStatusCard />
             <RecentActivityCard
               activities={activityData?.activities ?? []}
               isLoading={activityLoading}
               isAdmin={isSuperuser}
             />
+            <Card>
+              <CardHeader className="space-y-1 pb-2">
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-lg">7-Day Activity</CardTitle>
+                </div>
+                <CardDescription>Events across the platform this week</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[200px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={chartData} margin={{ top: 8, right: 8, bottom: 0, left: -20 }}>
+                      <defs>
+                        <linearGradient id="activityGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.02} />
+                        </linearGradient>
+                      </defs>
+                      <XAxis
+                        dataKey="label"
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
+                        dy={4}
+                      />
+                      <YAxis
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
+                        allowDecimals={false}
+                      />
+                      <RechartsTooltip
+                        contentStyle={{
+                          backgroundColor: "hsl(var(--popover))",
+                          border: "1px solid hsl(var(--border))",
+                          borderRadius: "var(--radius)",
+                          fontSize: 13,
+                          color: "hsl(var(--popover-foreground))",
+                        }}
+                        formatter={(value) => [String(value), "Events"]}
+                        labelFormatter={(label) => String(label)}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="count"
+                        stroke="hsl(var(--primary))"
+                        strokeWidth={2}
+                        fill="url(#activityGradient)"
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </PageSection>
       )}

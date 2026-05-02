@@ -1,8 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { useQueryClient } from "@tanstack/react-query"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   AlertCircle,
+  Bookmark,
   CheckCircle,
   Download,
   Eye,
@@ -11,6 +12,7 @@ import {
   MoreVertical,
   Pencil,
   Plus,
+  Save,
   Search,
   Trash2,
   X,
@@ -38,6 +40,7 @@ import { FilterDropdown, type FilterOption } from "@/components/ui/filter-dropdo
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Separator } from "@/components/ui/separator"
 import { SkeletonTable } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -109,6 +112,72 @@ const csvHeaders: CsvHeader<Ticket>[] = [
   { label: "Updated", accessor: (t) => (t.updatedAt ? formatDateTime(t.updatedAt) : "") },
 ]
 
+// ── Filter Presets ──────────────────────────────────────────────────────
+
+interface FilterPresetFilters {
+  status?: string[]
+  priority?: string[]
+  category?: string[]
+  search?: string
+}
+
+interface FilterPreset {
+  id: string
+  name: string
+  filters: FilterPresetFilters
+  isBuiltin?: boolean
+}
+
+const PRESET_STORAGE_KEY = "support-filter-presets"
+
+const BUILTIN_PRESETS: FilterPreset[] = [
+  {
+    id: "all",
+    name: "All Tickets",
+    filters: {},
+    isBuiltin: true,
+  },
+  {
+    id: "open",
+    name: "Open Tickets",
+    filters: { status: ["open"] },
+    isBuiltin: true,
+  },
+  {
+    id: "high-priority",
+    name: "High Priority",
+    filters: { priority: ["high", "urgent"] },
+    isBuiltin: true,
+  },
+  {
+    id: "unresolved",
+    name: "Unresolved",
+    filters: { status: ["open", "in_progress", "waiting_on_customer", "waiting_on_support"] },
+    isBuiltin: true,
+  },
+]
+
+function loadCustomPresets(): FilterPreset[] {
+  try {
+    const stored = localStorage.getItem(PRESET_STORAGE_KEY)
+    if (stored) {
+      const parsed = JSON.parse(stored) as FilterPreset[]
+      if (Array.isArray(parsed)) return parsed
+    }
+  } catch {
+    // localStorage unavailable or corrupt
+  }
+  return []
+}
+
+function saveCustomPresets(presets: FilterPreset[]): void {
+  try {
+    localStorage.setItem(PRESET_STORAGE_KEY, JSON.stringify(presets))
+  } catch {
+    // localStorage unavailable
+  }
+}
+
 // ── Helpers ──────────────────────────────────────────────────────────────
 
 const priorityRowAccent: Record<string, string> = {
@@ -144,6 +213,74 @@ function SupportPage() {
   const [endDate, setEndDate] = useState("")
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(getStoredPageSize)
+
+  // Filter presets
+  const [customPresets, setCustomPresets] = useState<FilterPreset[]>(loadCustomPresets)
+  const [activePresetId, setActivePresetId] = useState<string | null>(null)
+  const [isNamingPreset, setIsNamingPreset] = useState(false)
+  const [presetName, setPresetName] = useState("")
+
+  // Track manual filter changes to clear active preset
+  const manualFilterChangeRef = useRef(false)
+
+  useEffect(() => {
+    if (manualFilterChangeRef.current) {
+      setActivePresetId(null)
+      manualFilterChangeRef.current = false
+    }
+  }, [statusFilter, priorityFilter, categoryFilter, search])
+
+  const applyPreset = useCallback(
+    (preset: FilterPreset) => {
+      // Apply filters without triggering the manual-change detector
+      setSearch(preset.filters.search ?? "")
+      setStatusFilter(preset.filters.status ?? [])
+      setPriorityFilter(preset.filters.priority ?? [])
+      setCategoryFilter(preset.filters.category ?? [])
+      setStartDate("")
+      setEndDate("")
+      setPage(1)
+      setActivePresetId(preset.id)
+    },
+    [],
+  )
+
+  const handleSavePreset = useCallback(() => {
+    const trimmed = presetName.trim()
+    if (!trimmed) return
+
+    const newPreset: FilterPreset = {
+      id: `custom-${Date.now()}`,
+      name: trimmed,
+      filters: {
+        ...(statusFilter.length > 0 ? { status: statusFilter } : {}),
+        ...(priorityFilter.length > 0 ? { priority: priorityFilter } : {}),
+        ...(categoryFilter.length > 0 ? { category: categoryFilter } : {}),
+        ...(search ? { search } : {}),
+      },
+    }
+
+    const updated = [...customPresets, newPreset]
+    setCustomPresets(updated)
+    saveCustomPresets(updated)
+    setActivePresetId(newPreset.id)
+    setIsNamingPreset(false)
+    setPresetName("")
+    toast.success(`Filter preset "${trimmed}" saved`)
+  }, [presetName, statusFilter, priorityFilter, categoryFilter, search, customPresets])
+
+  const handleDeletePreset = useCallback(
+    (presetId: string) => {
+      const updated = customPresets.filter((p) => p.id !== presetId)
+      setCustomPresets(updated)
+      saveCustomPresets(updated)
+      if (activePresetId === presetId) {
+        setActivePresetId(null)
+      }
+      toast.success("Filter preset removed")
+    },
+    [customPresets, activePresetId],
+  )
 
   // Reset page when debounced search changes
   useEffect(() => {
@@ -265,6 +402,7 @@ function SupportPage() {
 
   const handleSearchChange = useCallback(
     (value: string) => {
+      manualFilterChangeRef.current = true
       setSearch(value)
     },
     [],
@@ -428,6 +566,102 @@ function SupportPage() {
         }
       />
 
+      {/* Filter presets */}
+      <PageSection>
+        <div className="flex flex-wrap items-center gap-2">
+          <Bookmark className="h-4 w-4 text-muted-foreground shrink-0" />
+          {BUILTIN_PRESETS.map((preset) => (
+            <Button
+              key={preset.id}
+              variant={activePresetId === preset.id ? "default" : "outline"}
+              size="sm"
+              className="h-7 text-xs"
+              onClick={() => applyPreset(preset)}
+            >
+              {preset.name}
+            </Button>
+          ))}
+
+          {customPresets.length > 0 && (
+            <Separator orientation="vertical" className="mx-1 h-5" />
+          )}
+
+          {customPresets.map((preset) => (
+            <div key={preset.id} className="flex items-center gap-0">
+              <Button
+                variant={activePresetId === preset.id ? "default" : "outline"}
+                size="sm"
+                className="h-7 rounded-r-none text-xs"
+                onClick={() => applyPreset(preset)}
+              >
+                {preset.name}
+              </Button>
+              <Button
+                variant={activePresetId === preset.id ? "default" : "outline"}
+                size="sm"
+                className="h-7 rounded-l-none border-l-0 px-1.5"
+                onClick={() => handleDeletePreset(preset.id)}
+                aria-label={`Remove preset ${preset.name}`}
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </div>
+          ))}
+
+          <Separator orientation="vertical" className="mx-1 h-5" />
+
+          {isNamingPreset ? (
+            <div className="flex items-center gap-1.5">
+              <Input
+                autoFocus
+                placeholder="Preset name..."
+                value={presetName}
+                onChange={(e) => setPresetName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleSavePreset()
+                  if (e.key === "Escape") {
+                    setIsNamingPreset(false)
+                    setPresetName("")
+                  }
+                }}
+                className="h-7 w-40 text-xs"
+              />
+              <Button
+                variant="default"
+                size="sm"
+                className="h-7 text-xs"
+                onClick={handleSavePreset}
+                disabled={!presetName.trim()}
+              >
+                Save
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 px-1.5"
+                onClick={() => {
+                  setIsNamingPreset(false)
+                  setPresetName("")
+                }}
+                aria-label="Cancel saving preset"
+              >
+                <X className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          ) : (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 text-xs text-muted-foreground"
+              onClick={() => setIsNamingPreset(true)}
+            >
+              <Save className="mr-1.5 h-3.5 w-3.5" />
+              Save filters
+            </Button>
+          )}
+        </div>
+      </PageSection>
+
       {/* Search & filters */}
       <PageSection>
         <div className="flex flex-wrap items-center gap-3">
@@ -455,6 +689,7 @@ function SupportPage() {
             options={statusOptions}
             selected={statusFilter}
             onChange={(v) => {
+              manualFilterChangeRef.current = true
               setStatusFilter(v)
               setPage(1)
             }}
@@ -464,6 +699,7 @@ function SupportPage() {
             options={priorityOptions}
             selected={priorityFilter}
             onChange={(v) => {
+              manualFilterChangeRef.current = true
               setPriorityFilter(v)
               setPage(1)
             }}
@@ -473,6 +709,7 @@ function SupportPage() {
             options={categoryOptions}
             selected={categoryFilter}
             onChange={(v) => {
+              manualFilterChangeRef.current = true
               setCategoryFilter(v)
               setPage(1)
             }}
