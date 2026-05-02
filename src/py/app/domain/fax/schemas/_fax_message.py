@@ -38,5 +38,7 @@ class FaxMessageCreate(CamelizedBaseStruct):
 class SendFax(CamelizedBaseStruct):
     fax_number_id: UUID
     destination_number: str
+    team_id: UUID
     subject: str | None = None
     body: str | None = None
+    media_url: str | None = None

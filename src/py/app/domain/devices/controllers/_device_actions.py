@@ -16,12 +16,15 @@ from litestar.params import Parameter
 from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.devices.deps import provide_devices_service
+from app.domain.devices.jobs import device_reboot_job, device_reprovision_job
 from app.domain.devices.schemas import (
     Device,
     DeviceActionResponse,
     DeviceLineAssignment,
     SetDeviceLinesRequest,
 )
+from app.domain.tasks.deps import provide_background_tasks_service
+from app.domain.tasks.schemas import BackgroundTaskDetail
 from app.lib.audit import capture_snapshot, log_audit
 
 if TYPE_CHECKING:
@@ -30,6 +33,7 @@ if TYPE_CHECKING:
 
     from app.domain.admin.services import AuditLogService
     from app.domain.devices.services import DeviceService
+    from app.domain.tasks.services import BackgroundTaskService
 
 logger = logging.getLogger(__name__)
 
@@ -58,6 +62,7 @@ class DeviceActionsController(Controller):
     dependencies = {
         "devices_service": Provide(provide_devices_service),
         "audit_service": Provide(provide_audit_log_service),
+        "task_service": Provide(provide_background_tasks_service),
     }
 
     @post(operation_id="RebootDevice", path="/api/devices/{device_id:uuid}/reboot")
@@ -66,10 +71,24 @@ class DeviceActionsController(Controller):
         request: Request[m.User, Token, Any],
         devices_service: DeviceService,
         audit_service: AuditLogService,
+        task_service: BackgroundTaskService,
         current_user: m.User,
         device_id: Annotated[UUID, Parameter(title="Device ID", description="The device to reboot.")],
-    ) -> DeviceActionResponse:
-        device = await devices_service.reboot_device(device_id)
+    ) -> BackgroundTaskDetail:
+        device = await devices_service.get(device_id)
+        team_id = device.team_id or (current_user.teams[0].team_id if current_user.teams else None)
+        if team_id is None:
+            raise ValidationException(detail="Device must belong to a team to perform background actions.")
+        task = await task_service.enqueue_tracked_task(
+            task_type="device.reboot",
+            job_function=device_reboot_job,
+            team_id=team_id,
+            initiated_by_id=request.user.id,
+            entity_type="device",
+            entity_id=device.id,
+            payload={"device_id": str(device.id)},
+            timeout=120,
+        )
         await log_audit(
             audit_service,
             action="device.reboot",
@@ -81,12 +100,7 @@ class DeviceActionsController(Controller):
             target_label=device.name,
             request=request,
         )
-        return DeviceActionResponse(
-            device_id=device.id,
-            action="reboot",
-            status="initiated",
-            message="Reboot command has been sent to the device.",
-        )
+        return task_service.to_schema(task, schema_type=BackgroundTaskDetail)
 
     @post(operation_id="ReprovisionDevice", path="/api/devices/{device_id:uuid}/reprovision")
     async def reprovision_device(
@@ -94,10 +108,24 @@ class DeviceActionsController(Controller):
         request: Request[m.User, Token, Any],
         devices_service: DeviceService,
         audit_service: AuditLogService,
+        task_service: BackgroundTaskService,
         current_user: m.User,
         device_id: Annotated[UUID, Parameter(title="Device ID", description="The device to reprovision.")],
-    ) -> DeviceActionResponse:
-        device = await devices_service.reprovision_device(device_id)
+    ) -> BackgroundTaskDetail:
+        device = await devices_service.get(device_id)
+        team_id = device.team_id or (current_user.teams[0].team_id if current_user.teams else None)
+        if team_id is None:
+            raise ValidationException(detail="Device must belong to a team to perform background actions.")
+        task = await task_service.enqueue_tracked_task(
+            task_type="device.reprovision",
+            job_function=device_reprovision_job,
+            team_id=team_id,
+            initiated_by_id=request.user.id,
+            entity_type="device",
+            entity_id=device.id,
+            payload={"device_id": str(device.id)},
+            timeout=120,
+        )
         await log_audit(
             audit_service,
             action="device.reprovision",
@@ -109,12 +137,7 @@ class DeviceActionsController(Controller):
             target_label=device.name,
             request=request,
         )
-        return DeviceActionResponse(
-            device_id=device.id,
-            action="reprovision",
-            status="initiated",
-            message="Reprovisioning has been initiated for the device.",
-        )
+        return task_service.to_schema(task, schema_type=BackgroundTaskDetail)
 
     @get(operation_id="ListDeviceLines", path="/api/devices/{device_id:uuid}/lines")
     async def list_device_lines(

@@ -748,16 +748,6 @@ export type Device = {
 };
 
 /**
- * DeviceActionResponse
- */
-export type DeviceActionResponse = {
-  action: string;
-  deviceId: string;
-  message: string;
-  status: string;
-};
-
-/**
  * DeviceCreate
  */
 export type DeviceCreate = {
@@ -2048,7 +2038,9 @@ export type SendFax = {
   body?: string | null;
   destinationNumber: string;
   faxNumberId: string;
+  mediaUrl?: string | null;
   subject?: string | null;
+  teamId: string;
 };
 
 /**
@@ -3076,8 +3068,8 @@ export type AdminListAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    actionIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
     action?: string | null;
@@ -3155,8 +3147,8 @@ export type AdminExportAuditLogData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    actionIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
     action?: string | null;
@@ -3223,8 +3215,8 @@ export type AdminGetTargetAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    actionIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
     action?: string | null;
@@ -3303,8 +3295,8 @@ export type AdminGetUserAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    actionIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
     action?: string | null;
@@ -6571,7 +6563,7 @@ export type RebootDeviceResponses = {
   /**
    * Document created, URL follows
    */
-  201: DeviceActionResponse;
+  201: BackgroundTaskDetail;
 };
 
 export type RebootDeviceResponse =
@@ -6614,7 +6606,7 @@ export type ReprovisionDeviceResponses = {
   /**
    * Document created, URL follows
    */
-  201: DeviceActionResponse;
+  201: BackgroundTaskDetail;
 };
 
 export type ReprovisionDeviceResponse =
@@ -7662,9 +7654,9 @@ export type SendFaxError = SendFaxErrors[keyof SendFaxErrors];
 
 export type SendFaxResponses = {
   /**
-   * Document created, URL follows
+   * Request accepted, processing continues off-line
    */
-  201: FaxMessage;
+  202: BackgroundTaskDetail;
 };
 
 export type SendFaxResponse = SendFaxResponses[keyof SendFaxResponses];

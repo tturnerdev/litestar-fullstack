@@ -913,7 +913,6 @@ export type {
   DeleteWebhookResponse,
   DeleteWebhookResponses,
   Device,
-  DeviceActionResponse,
   DeviceCreate,
   DeviceGatewayResponse,
   DeviceLineAssignment,

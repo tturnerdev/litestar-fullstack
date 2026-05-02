@@ -3123,31 +3123,6 @@
         "title": "Device",
         "type": "object"
       },
-      "DeviceActionResponse": {
-        "properties": {
-          "action": {
-            "type": "string"
-          },
-          "deviceId": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "message": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "action",
-          "deviceId",
-          "message",
-          "status"
-        ],
-        "title": "DeviceActionResponse",
-        "type": "object"
-      },
       "DeviceCreate": {
         "properties": {
           "deviceModel": {
@@ -7881,6 +7856,16 @@
             "format": "uuid",
             "type": "string"
           },
+          "mediaUrl": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "subject": {
             "oneOf": [
               {
@@ -7890,11 +7875,16 @@
                 "type": "null"
               }
             ]
+          },
+          "teamId": {
+            "format": "uuid",
+            "type": "string"
           }
         },
         "required": [
           "destinationNumber",
-          "faxNumberId"
+          "faxNumberId",
+          "teamId"
         ],
         "title": "SendFax",
         "type": "object"
@@ -11243,7 +11233,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
+            "name": "targetIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -11264,7 +11254,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetIdIn",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -11632,7 +11622,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
+            "name": "targetIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -11653,7 +11643,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetIdIn",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -12019,7 +12009,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
+            "name": "targetIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -12040,7 +12030,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetIdIn",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -12400,7 +12390,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
+            "name": "targetIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -12421,7 +12411,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetIdIn",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -20649,7 +20639,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DeviceActionResponse"
+                  "$ref": "#/components/schemas/BackgroundTaskDetail"
                 }
               }
             },
@@ -20725,7 +20715,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DeviceActionResponse"
+                  "$ref": "#/components/schemas/BackgroundTaskDetail"
                 }
               }
             },
@@ -23196,15 +23186,15 @@
           "required": true
         },
         "responses": {
-          "201": {
+          "202": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FaxMessage"
+                  "$ref": "#/components/schemas/BackgroundTaskDetail"
                 }
               }
             },
-            "description": "Document created, URL follows",
+            "description": "Request accepted, processing continues off-line",
             "headers": {}
           },
           "400": {

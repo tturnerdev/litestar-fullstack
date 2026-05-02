@@ -3042,27 +3042,6 @@ export const DeviceSchema = {
   type: "object",
 } as const;
 
-export const DeviceActionResponseSchema = {
-  properties: {
-    action: {
-      type: "string",
-    },
-    deviceId: {
-      format: "uuid",
-      type: "string",
-    },
-    message: {
-      type: "string",
-    },
-    status: {
-      type: "string",
-    },
-  },
-  required: ["action", "deviceId", "message", "status"],
-  title: "DeviceActionResponse",
-  type: "object",
-} as const;
-
 export const DeviceCreateSchema = {
   properties: {
     deviceModel: {
@@ -7644,6 +7623,16 @@ export const SendFaxSchema = {
       format: "uuid",
       type: "string",
     },
+    mediaUrl: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     subject: {
       oneOf: [
         {
@@ -7654,8 +7643,12 @@ export const SendFaxSchema = {
         },
       ],
     },
+    teamId: {
+      format: "uuid",
+      type: "string",
+    },
   },
-  required: ["destinationNumber", "faxNumberId"],
+  required: ["destinationNumber", "faxNumberId", "teamId"],
   title: "SendFax",
   type: "object",
 } as const;

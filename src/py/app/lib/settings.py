@@ -192,6 +192,8 @@ class SaqSettings:
             The SAQ configuration.
         """
         from app.domain.accounts import jobs as account_jobs
+        from app.domain.devices import jobs as device_jobs
+        from app.domain.fax import jobs as fax_jobs
         from app.domain.system import jobs as system_jobs
         from app.domain.tasks import jobs as task_jobs
         from app.lib.worker import after_process, before_process, on_shutdown, on_startup
@@ -208,6 +210,11 @@ class SaqSettings:
                         system_jobs.cleanup_auth_tokens,
                         account_jobs.refresh_oauth_tokens,
                         task_jobs.cleanup_stale_tasks,
+                        device_jobs.device_reboot_job,
+                        device_jobs.device_provision_job,
+                        device_jobs.device_reprovision_job,
+                        fax_jobs.fax_send_job,
+                        fax_jobs.fax_receive_process_job,
                     ],
                     scheduled_tasks=[
                         CronJob(
