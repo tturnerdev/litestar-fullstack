@@ -503,6 +503,7 @@ function AdminUsersPage() {
                       currentSort={sortKey}
                       currentDirection={sortDir}
                       onSort={handleSort}
+                      className="hidden sm:table-cell"
                     />
                     <SortableHeader
                       label="Role"
@@ -510,6 +511,7 @@ function AdminUsersPage() {
                       currentSort={sortKey}
                       currentDirection={sortDir}
                       onSort={handleSort}
+                      className="hidden sm:table-cell"
                     />
                     <SortableHeader
                       label="Status"
@@ -524,6 +526,7 @@ function AdminUsersPage() {
                       currentSort={sortKey}
                       currentDirection={sortDir}
                       onSort={handleSort}
+                      className="hidden md:table-cell"
                     />
                     <SortableHeader
                       label="Created"
@@ -531,6 +534,7 @@ function AdminUsersPage() {
                       currentSort={sortKey}
                       currentDirection={sortDir}
                       onSort={handleSort}
+                      className="hidden md:table-cell"
                     />
                     <TableHead className="w-16 text-right">Actions</TableHead>
                   </TableRow>
@@ -676,10 +680,10 @@ function UserRow({
             </div>
           </Link>
         </TableCell>
-        <TableCell>
+        <TableCell className="hidden sm:table-cell">
           <span className="text-sm text-muted-foreground">{user.email}</span>
         </TableCell>
-        <TableCell>
+        <TableCell className="hidden sm:table-cell">
           {user.isSuperuser ? (
             <Badge variant="outline" className="gap-1 border-amber-300 bg-amber-500/10 text-amber-700 dark:border-amber-700 dark:text-amber-400">
               <Shield className="h-3 w-3" />
@@ -705,12 +709,12 @@ function UserRow({
             )}
           </div>
         </TableCell>
-        <TableCell>
+        <TableCell className="hidden md:table-cell">
           <span className="text-sm tabular-nums text-muted-foreground">
             {user.loginCount ?? 0}
           </span>
         </TableCell>
-        <TableCell>
+        <TableCell className="hidden md:table-cell">
           <Tooltip>
             <TooltipTrigger asChild>
               <span className="cursor-default text-xs text-muted-foreground">

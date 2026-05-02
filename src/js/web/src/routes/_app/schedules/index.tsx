@@ -509,15 +509,16 @@ function SchedulesPage() {
                       currentDirection={sortDir}
                       onSort={handleSort}
                     />
-                    <TableHead>Type</TableHead>
+                    <TableHead className="hidden md:table-cell">Type</TableHead>
                     <SortableHeader
                       label="Timezone"
                       sortKey="timezone"
                       currentSort={sortKey}
                       currentDirection={sortDir}
                       onSort={handleSort}
+                      className="hidden md:table-cell"
                     />
-                    <TableHead>Entries</TableHead>
+                    <TableHead className="hidden lg:table-cell">Entries</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="w-16 text-right">Actions</TableHead>
                   </TableRow>
@@ -641,7 +642,7 @@ function ScheduleRow({
           )}
         </Link>
       </TableCell>
-      <TableCell>
+      <TableCell className="hidden md:table-cell">
         <Badge variant={scheduleTypeVariant[schedule.scheduleType] ?? "outline"} className="gap-1">
           {(() => {
             const TypeIcon = scheduleTypeIcons[schedule.scheduleType] ?? Clock
@@ -650,13 +651,13 @@ function ScheduleRow({
           {scheduleTypeLabels[schedule.scheduleType] ?? schedule.scheduleType}
         </Badge>
       </TableCell>
-      <TableCell>
+      <TableCell className="hidden md:table-cell">
         <Badge variant="outline" className="gap-1 font-normal text-muted-foreground">
           <Globe className="h-3 w-3" />
           {schedule.timezone.replace(/_/g, " ")}
         </Badge>
       </TableCell>
-      <TableCell>
+      <TableCell className="hidden lg:table-cell">
         {schedule.entries && schedule.entries.length > 0 ? (
           <span className="text-sm text-muted-foreground">
             {schedule.entries.length} {schedule.entries.length === 1 ? "entry" : "entries"}

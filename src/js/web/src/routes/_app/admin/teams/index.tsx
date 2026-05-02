@@ -397,6 +397,7 @@ function AdminTeamsPage() {
                       currentSort={sortKey}
                       currentDirection={sortDir}
                       onSort={handleSort}
+                      className="hidden md:table-cell"
                     />
                     <SortableHeader
                       label="Members"
@@ -411,6 +412,7 @@ function AdminTeamsPage() {
                       currentSort={sortKey}
                       currentDirection={sortDir}
                       onSort={handleSort}
+                      className="hidden md:table-cell"
                     />
                     <SortableHeader
                       label="Created"
@@ -418,6 +420,7 @@ function AdminTeamsPage() {
                       currentSort={sortKey}
                       currentDirection={sortDir}
                       onSort={handleSort}
+                      className="hidden lg:table-cell"
                     />
                     <TableHead className="w-16 text-right">Actions</TableHead>
                   </TableRow>
@@ -557,7 +560,7 @@ function TeamRow({
             </Tooltip>
           </Link>
         </TableCell>
-        <TableCell>
+        <TableCell className="hidden md:table-cell">
           <span className="text-sm text-muted-foreground">{team.slug}</span>
         </TableCell>
         <TableCell>
@@ -566,10 +569,10 @@ function TeamRow({
             {formatMemberCount(team.memberCount)}
           </Badge>
         </TableCell>
-        <TableCell>
+        <TableCell className="hidden md:table-cell">
           <ActiveStatusIndicator isActive={team.isActive} />
         </TableCell>
-        <TableCell>
+        <TableCell className="hidden lg:table-cell">
           <Tooltip>
             <TooltipTrigger asChild>
               <span className="cursor-default text-xs text-muted-foreground">

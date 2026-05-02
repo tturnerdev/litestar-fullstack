@@ -767,11 +767,11 @@ function WebhooksPage() {
                       />
                     </TableHead>
                     <TableHead>Name</TableHead>
-                    <TableHead>URL</TableHead>
-                    <TableHead>Events</TableHead>
+                    <TableHead className="hidden sm:table-cell">URL</TableHead>
+                    <TableHead className="hidden md:table-cell">Events</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Last Triggered</TableHead>
-                    <TableHead>Failures</TableHead>
+                    <TableHead className="hidden lg:table-cell">Last Triggered</TableHead>
+                    <TableHead className="hidden md:table-cell">Failures</TableHead>
                     <TableHead className="w-24 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -886,16 +886,21 @@ function WebhookRow({
           </TableCell>
           <TableCell>
             <div className="flex items-center gap-2">
-              <Webhook className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">{webhook.name}</span>
+              <Webhook className="h-4 w-4 text-muted-foreground shrink-0" />
+              <div className="min-w-0">
+                <span className="font-medium">{webhook.name}</span>
+                <span className="block sm:hidden text-xs text-muted-foreground font-mono truncate" title={webhook.url}>
+                  {truncateUrl(webhook.url, 30)}
+                </span>
+              </div>
             </div>
           </TableCell>
-          <TableCell>
+          <TableCell className="hidden sm:table-cell">
             <span className="text-sm text-muted-foreground font-mono" title={webhook.url}>
               {truncateUrl(webhook.url)}
             </span>
           </TableCell>
-          <TableCell>
+          <TableCell className="hidden md:table-cell">
             <Badge variant="secondary" className="gap-1">
               {webhook.events.length} event{webhook.events.length === 1 ? "" : "s"}
             </Badge>
@@ -913,12 +918,12 @@ function WebhookRow({
               </Badge>
             )}
           </TableCell>
-          <TableCell>
+          <TableCell className="hidden lg:table-cell">
             <span className="text-sm text-muted-foreground">
               {formatDateTime(webhook.lastTriggeredAt as string | null | undefined, "Never")}
             </span>
           </TableCell>
-          <TableCell>
+          <TableCell className="hidden md:table-cell">
             {(webhook.failureCount ?? 0) > 0 ? (
               <Badge variant="destructive" className="gap-1">
                 {webhook.failureCount}

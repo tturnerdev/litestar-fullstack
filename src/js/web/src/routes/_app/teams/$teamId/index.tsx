@@ -3,6 +3,8 @@ import { createFileRoute, Link, useParams } from "@tanstack/react-router"
 import {
   Activity,
   ArrowLeft,
+  Calendar,
+  Clock,
   Crown,
   Pencil,
   Settings,
@@ -29,9 +31,11 @@ import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-lay
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { CopyButton } from "@/components/ui/copy-button"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useAuthStore } from "@/lib/auth"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { getTeam, type TeamMember } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/teams/$teamId/")({
@@ -273,6 +277,31 @@ function TeamDetail() {
                   <span className="text-xs text-muted-foreground">ID:</span>
                   <span className="font-mono text-xs text-muted-foreground">{teamId}</span>
                   <CopyButton value={teamId} label="team ID" />
+                </div>
+                {/* Timestamps */}
+                <div className="flex items-center gap-4 pt-1">
+                  {team.createdAt && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="flex items-center gap-1 text-xs text-muted-foreground cursor-default">
+                          <Calendar className="h-3 w-3" />
+                          Created {formatRelativeTimeShort(team.createdAt)}
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent>{formatDateTime(team.createdAt)}</TooltipContent>
+                    </Tooltip>
+                  )}
+                  {team.updatedAt && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="flex items-center gap-1 text-xs text-muted-foreground cursor-default">
+                          <Clock className="h-3 w-3" />
+                          Updated {formatRelativeTimeShort(team.updatedAt)}
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent>{formatDateTime(team.updatedAt)}</TooltipContent>
+                    </Tooltip>
+                  )}
                 </div>
               </div>
 
