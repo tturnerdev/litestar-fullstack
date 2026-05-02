@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.225.0 (2026-05-02)
+
+### Added
+- **Status distribution pills** on tags (total), webhooks (active/inactive), and schedules (active/inactive) list pages for consistent summary indicators across all list views
+
 ## v0.224.0 (2026-05-02)
 
 ### Added

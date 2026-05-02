@@ -677,6 +677,18 @@ function WebhooksPage() {
 
   const rawWebhooks = data?.items ?? []
 
+  // Summary stats computed from all items on the current page
+  const webhookStats = useMemo(() => {
+    const items = data?.items ?? []
+    let active = 0
+    let inactive = 0
+    for (const w of items) {
+      if (w.isActive) active++
+      else inactive++
+    }
+    return { active, inactive, total: data?.total ?? 0 }
+  }, [data?.items, data?.total])
+
   // Client-side sorting
   const webhooks = useMemo(() => {
     if (!sortKey || !sortDir) return rawWebhooks
@@ -794,6 +806,34 @@ function WebhooksPage() {
           </div>
         }
       />
+
+      {/* Summary pills */}
+      <div className="flex flex-wrap items-center gap-2">
+        {isLoading ? (
+          <>
+            <Skeleton className="h-7 w-24 rounded-full" />
+            <Skeleton className="h-7 w-24 rounded-full" />
+            <Skeleton className="h-7 w-24 rounded-full" />
+          </>
+        ) : (
+          <>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground">
+              Total
+              <span className="ml-0.5 font-semibold text-foreground">{webhookStats.total}</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              Active
+              <span className="ml-0.5 font-semibold">{webhookStats.active}</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-zinc-400/30 bg-zinc-400/10 px-3 py-1 text-xs font-medium text-zinc-600 dark:text-zinc-400">
+              <span className="h-1.5 w-1.5 rounded-full bg-zinc-400" />
+              Inactive
+              <span className="ml-0.5 font-semibold">{webhookStats.inactive}</span>
+            </span>
+          </>
+        )}
+      </div>
 
       {/* Search */}
       <PageSection>

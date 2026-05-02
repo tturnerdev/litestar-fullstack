@@ -54,7 +54,7 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { SkeletonTable } from "@/components/ui/skeleton"
+import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
@@ -208,6 +208,18 @@ function SchedulesPage() {
   // filteredItems (no client-side filters currently, but keeps export consistent)
   const filteredItems = useMemo(() => schedules, [schedules])
 
+  // Schedule summary stats (computed from fetched items)
+  const scheduleStats = useMemo(() => {
+    let active = 0
+    let inactive = 0
+    for (const s of schedules) {
+      const hasEntries = s.entries && s.entries.length > 0
+      if (hasEntries) active++
+      else inactive++
+    }
+    return { total, active, inactive }
+  }, [schedules, total])
+
   // Selection helpers
   const allVisibleIds = useMemo(() => filteredItems.map((s) => s.id), [filteredItems])
   const allSelected = filteredItems.length > 0 && filteredItems.every((s) => selectedIds.has(s.id))
@@ -314,6 +326,36 @@ function SchedulesPage() {
           </div>
         }
       />
+
+      {/* Summary stats */}
+      <div className="flex flex-wrap items-center gap-2">
+        {isLoading ? (
+          <>
+            <Skeleton className="h-7 w-24 rounded-full" />
+            <Skeleton className="h-7 w-24 rounded-full" />
+            <Skeleton className="h-7 w-24 rounded-full" />
+          </>
+        ) : (
+          <>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground">
+              Total
+              <span className="ml-0.5 font-semibold text-foreground">{scheduleStats.total}</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              Active
+              <span className="ml-0.5 font-semibold">{scheduleStats.active}</span>
+            </span>
+            {scheduleStats.inactive > 0 && (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-zinc-400/30 bg-zinc-400/10 px-3 py-1 text-xs font-medium text-zinc-600 dark:text-zinc-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-zinc-400" />
+                Inactive
+                <span className="ml-0.5 font-semibold">{scheduleStats.inactive}</span>
+              </span>
+            )}
+          </>
+        )}
+      </div>
 
       {/* Search */}
       <PageSection>
