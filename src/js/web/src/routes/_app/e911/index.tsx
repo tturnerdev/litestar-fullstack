@@ -1,5 +1,5 @@
 import { toast } from "sonner"
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
+import { createFileRoute, Link } from "@tanstack/react-router"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import {
@@ -64,6 +64,22 @@ import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 
 export const Route = createFileRoute("/_app/e911/")({
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): {
+    q?: string
+    page?: number
+    sort?: string
+    order?: string
+  } => ({
+    q: typeof search.q === "string" && search.q ? search.q : undefined,
+    page: Number(search.page) > 1 ? Number(search.page) : undefined,
+    sort: typeof search.sort === "string" && search.sort ? search.sort : undefined,
+    order:
+      typeof search.order === "string" && (search.order === "asc" || search.order === "desc")
+        ? search.order
+        : undefined,
+  }),
   component: E911Page,
 })
 
@@ -264,39 +280,67 @@ function E911Page() {
   useDocumentTitle("E911 Addresses")
 
   const { currentTeam } = useAuthStore()
-  const navigate = useNavigate()
+  const {
+    q: searchParam,
+    page: pageParam,
+    sort: sortParam,
+    order: orderParam,
+  } = Route.useSearch()
+  const navigate = Route.useNavigate()
   const teamId = currentTeam?.id ?? ""
 
-  const [search, setSearch] = useState("")
-  const debouncedSearch = useDebouncedValue(search)
-  const [page, setPage] = useState(1)
+  // Derive filter state from URL search params
+  const search = searchParam ?? ""
+  const page = pageParam ?? 1
+  const sortKey = sortParam ?? null
+  const sortDir: SortDirection = (orderParam as SortDirection) ?? null
+
+  // Local input state for search (so typing is smooth before debounce)
+  const [searchInput, setSearchInput] = useState(search)
+  const debouncedSearch = useDebouncedValue(searchInput)
+
+  // Sync URL when debounced search value settles
+  useEffect(() => {
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        q: debouncedSearch || undefined,
+        page: undefined,
+      }),
+      replace: true,
+    })
+  }, [debouncedSearch, navigate])
+
+  // Keep local input in sync if URL search param changes externally (back/forward)
+  useEffect(() => {
+    setSearchInput(search)
+  }, [search])
+
   const [pageSize, setPageSize] = useState(getStoredPageSize)
 
   const handlePageSizeChange = useCallback((value: string) => {
     const size = Number(value)
     setPageSize(size)
-    setPage(1)
+    navigate({ search: (prev) => ({ ...prev, page: undefined }), replace: true })
     try {
       localStorage.setItem(PAGE_SIZE_STORAGE_KEY, String(size))
     } catch {
       /* localStorage unavailable */
     }
-  }, [])
-
-  const [sortKey, setSortKey] = useState<string | null>(null)
-  const [sortDir, setSortDir] = useState<SortDirection>(null)
+  }, [navigate])
 
   const handleSort = useCallback((key: string) => {
     const next = nextSortDirection(sortKey, sortDir, key)
-    setSortKey(next.sort)
-    setSortDir(next.direction)
-  }, [sortKey, sortDir])
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        sort: next.sort || undefined,
+        order: next.direction || undefined,
+      }),
+    })
+  }, [sortKey, sortDir, navigate])
 
   const searchInputRef = useRef<HTMLInputElement>(null)
-
-  useEffect(() => {
-    setPage(1)
-  }, [debouncedSearch])
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -490,14 +534,14 @@ function E911Page() {
             <Input
               ref={searchInputRef}
               placeholder="Search by address..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               className="pl-9 pr-8"
             />
-            {search && (
+            {searchInput && (
               <button
                 type="button"
-                onClick={() => setSearch("")}
+                onClick={() => setSearchInput("")}
                 className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
               >
                 <X className="h-3.5 w-3.5" />
@@ -576,7 +620,7 @@ function E911Page() {
             title="No results found"
             description="No E911 registrations match your search. Try adjusting your query."
             action={
-              <Button variant="outline" size="sm" onClick={() => setSearch("")}>
+              <Button variant="outline" size="sm" onClick={() => setSearchInput("")}>
                 Clear search
               </Button>
             }
@@ -676,7 +720,14 @@ function E911Page() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    onClick={() =>
+                      navigate({
+                        search: (prev) => ({
+                          ...prev,
+                          page: page - 1 > 1 ? page - 1 : undefined,
+                        }),
+                      })
+                    }
                     disabled={page <= 1}
                   >
                     Previous
@@ -684,7 +735,11 @@ function E911Page() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    onClick={() =>
+                      navigate({
+                        search: (prev) => ({ ...prev, page: page + 1 }),
+                      })
+                    }
                     disabled={page >= totalPages}
                   >
                     Next

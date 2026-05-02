@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.233.0 (2026-05-03)
+
+### Added
+- **URL filter state persistence** on teams, connections, webhooks, tags, E911, and locations list pages — all major list pages now support bookmarkable/shareable filtered views with browser back/forward navigation
+
 ## v0.232.0 (2026-05-03)
 
 ### Added

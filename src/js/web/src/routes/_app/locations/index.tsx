@@ -14,11 +14,32 @@ import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-lay
 import { useDocumentTitle } from "@/hooks/use-document-title"
 
 export const Route = createFileRoute("/_app/locations/")({
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): {
+    q?: string
+    page?: number
+    type?: string
+    sort?: string
+    order?: string
+  } => ({
+    q: typeof search.q === "string" && search.q ? search.q : undefined,
+    page: Number(search.page) > 1 ? Number(search.page) : undefined,
+    type: typeof search.type === "string" && search.type ? search.type : undefined,
+    sort: typeof search.sort === "string" && search.sort ? search.sort : undefined,
+    order:
+      typeof search.order === "string" && (search.order === "asc" || search.order === "desc")
+        ? search.order
+        : undefined,
+  }),
   component: LocationsPage,
 })
 
 function LocationsPage() {
   useDocumentTitle("Locations")
+
+  const searchParams = Route.useSearch()
+  const navigate = Route.useNavigate()
 
   const breadcrumbs = (
     <Breadcrumb>
@@ -56,7 +77,7 @@ function LocationsPage() {
         }
       />
       <PageSection>
-        <LocationList />
+        <LocationList searchParams={searchParams} navigate={navigate} />
       </PageSection>
     </PageContainer>
   )

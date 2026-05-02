@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
+import { createFileRoute, Link } from "@tanstack/react-router"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   Check,
@@ -54,6 +54,22 @@ import { useDocumentTitle } from "@/hooks/use-document-title"
 import type { Team } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/teams/")({
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): {
+    q?: string
+    page?: number
+    sort?: string
+    order?: string
+  } => ({
+    q: typeof search.q === "string" && search.q ? search.q : undefined,
+    page: Number(search.page) > 1 ? Number(search.page) : undefined,
+    sort: typeof search.sort === "string" && search.sort ? search.sort : undefined,
+    order:
+      typeof search.order === "string" && (search.order === "asc" || search.order === "desc")
+        ? search.order
+        : undefined,
+  }),
   component: TeamsPage,
 })
 
@@ -112,7 +128,13 @@ const csvHeaders: CsvHeader<Team>[] = [
 
 function TeamsPage() {
   useDocumentTitle("Teams")
-  const navigate = useNavigate()
+  const {
+    q: searchParam,
+    page: pageParam,
+    sort: sortParam,
+    order: orderParam,
+  } = Route.useSearch()
+  const navigate = Route.useNavigate()
   const { user, currentTeam, setCurrentTeam, setTeams } = useAuthStore()
 
   // Keyboard shortcut: "N" opens the create page
@@ -129,34 +151,50 @@ function TeamsPage() {
     return () => document.removeEventListener("keydown", handleKeyDown)
   }, [navigate])
 
-  // Search state
-  const [search, setSearch] = useState("")
-  const debouncedSearch = useDebouncedValue(search)
+  // Derive filter state from URL search params
+  const search = searchParam ?? ""
+  const page = pageParam ?? 1
+  const sortKey = sortParam ?? null
+  const sortDir: SortDirection = (orderParam as SortDirection) ?? null
+
+  // Local input state for search (so typing is smooth before debounce)
+  const [searchInput, setSearchInput] = useState(search)
+  const debouncedSearch = useDebouncedValue(searchInput)
+
+  // Sync URL when debounced search value settles
+  useEffect(() => {
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        q: debouncedSearch || undefined,
+        page: undefined,
+      }),
+      replace: true,
+    })
+  }, [debouncedSearch, navigate])
+
+  // Keep local input in sync if URL search param changes externally (back/forward)
+  useEffect(() => {
+    setSearchInput(search)
+  }, [search])
 
   // Pagination state
   const [pageSize, setPageSize] = useState(getStoredPageSize)
-  const [page, setPage] = useState(1)
-
-  // Reset page when debounced search changes
-  useEffect(() => {
-    setPage(1)
-  }, [debouncedSearch])
 
   // Persist page size preference
-  const handlePageSizeChange = useCallback((value: string) => {
-    const size = Number(value)
-    setPageSize(size)
-    setPage(1)
-    try {
-      localStorage.setItem(PAGE_SIZE_STORAGE_KEY, value)
-    } catch {
-      // localStorage unavailable
-    }
-  }, [])
-
-  // Sort state
-  const [sortKey, setSortKey] = useState<string | null>(null)
-  const [sortDir, setSortDir] = useState<SortDirection>(null)
+  const handlePageSizeChange = useCallback(
+    (value: string) => {
+      const size = Number(value)
+      setPageSize(size)
+      navigate({ search: (prev) => ({ ...prev, page: undefined }), replace: true })
+      try {
+        localStorage.setItem(PAGE_SIZE_STORAGE_KEY, value)
+      } catch {
+        // localStorage unavailable
+      }
+    },
+    [navigate],
+  )
 
   // Selection state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -246,10 +284,15 @@ function TeamsPage() {
   const handleSort = useCallback(
     (key: string) => {
       const next = nextSortDirection(sortKey, sortDir, key)
-      setSortKey(next.sort)
-      setSortDir(next.direction)
+      navigate({
+        search: (prev) => ({
+          ...prev,
+          sort: next.sort || undefined,
+          order: next.direction || undefined,
+        }),
+      })
     },
-    [sortKey, sortDir],
+    [sortKey, sortDir, navigate],
   )
 
   // Bulk actions
@@ -357,14 +400,14 @@ function TeamsPage() {
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Search teams by name..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               className="pl-9 pr-8"
             />
-            {search && (
+            {searchInput && (
               <button
                 type="button"
-                onClick={() => setSearch("")}
+                onClick={() => setSearchInput("")}
                 className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
               >
                 <X className="h-3.5 w-3.5" />
@@ -413,7 +456,17 @@ function TeamsPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setSearch("")}
+                onClick={() => {
+                  setSearchInput("")
+                  navigate({
+                    search: {
+                      q: undefined,
+                      sort: undefined,
+                      order: undefined,
+                      page: undefined,
+                    },
+                  })
+                }}
               >
                 Clear search
               </Button>
@@ -505,7 +558,14 @@ function TeamsPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    onClick={() =>
+                      navigate({
+                        search: (prev) => ({
+                          ...prev,
+                          page: page - 1 > 1 ? page - 1 : undefined,
+                        }),
+                      })
+                    }
                     disabled={page <= 1}
                   >
                     Previous
@@ -513,7 +573,11 @@ function TeamsPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    onClick={() =>
+                      navigate({
+                        search: (prev) => ({ ...prev, page: page + 1 }),
+                      })
+                    }
                     disabled={page >= totalPages}
                   >
                     Next
@@ -553,7 +617,7 @@ function TeamRow({
   onSwitchTeam: () => void
   currentUserId?: string
 }) {
-  const navigate = useNavigate()
+  const navigate = Route.useNavigate()
   const deleteTeamMutation = useDeleteTeam()
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 

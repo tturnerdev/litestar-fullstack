@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "@tanstack/react-router"
+import { Link } from "@tanstack/react-router"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { AlertCircle, Building2, Download, Eye, MapPin, MoreVertical, Pencil, Search, Trash2, X } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
@@ -59,35 +59,72 @@ const csvHeaders: CsvHeader<Location>[] = [
   { label: "Description", accessor: (l) => l.description ?? "" },
 ]
 
-export function LocationList() {
-  const { currentTeam } = useAuthStore()
-  const navigate = useNavigate()
+interface LocationSearchParams {
+  q?: string
+  page?: number
+  type?: string
+  sort?: string
+  order?: string
+}
 
-  const [search, setSearch] = useState("")
-  const debouncedSearch = useDebouncedValue(search)
-  const [typeFilter, setTypeFilter] = useState<string>("all")
-  const [sortKey, setSortKey] = useState<string | null>(null)
-  const [sortDir, setSortDir] = useState<SortDirection>(null)
+type NavigateFn = (opts: {
+  to?: string
+  params?: Record<string, string>
+  search?: LocationSearchParams | ((prev: LocationSearchParams) => LocationSearchParams)
+  replace?: boolean
+}) => void
+
+export function LocationList({
+  searchParams,
+  navigate,
+}: {
+  searchParams: LocationSearchParams
+  navigate: NavigateFn
+}) {
+  const { currentTeam } = useAuthStore()
+
+  // Derive filter state from URL search params
+  const search = searchParams.q ?? ""
+  const page = searchParams.page ?? 1
+  const typeFilter = searchParams.type ?? "all"
+  const sortKey = searchParams.sort ?? null
+  const sortDir: SortDirection = (searchParams.order as SortDirection) ?? null
+
+  // Local input state for search (so typing is smooth before debounce)
+  const [searchInput, setSearchInput] = useState(search)
+  const debouncedSearch = useDebouncedValue(searchInput)
+
+  // Sync URL when debounced search value settles
+  useEffect(() => {
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        q: debouncedSearch || undefined,
+        page: undefined,
+      }),
+      replace: true,
+    })
+  }, [debouncedSearch, navigate])
+
+  // Keep local input in sync if URL search param changes externally (back/forward)
+  useEffect(() => {
+    setSearchInput(search)
+  }, [search])
+
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
-  const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(getStoredPageSize)
 
   // Persist page size preference
   const handlePageSizeChange = useCallback((value: string) => {
     const size = Number(value)
     setPageSize(size)
-    setPage(1)
+    navigate({ search: (prev) => ({ ...prev, page: undefined }), replace: true })
     try {
       localStorage.setItem(PAGE_SIZE_STORAGE_KEY, value)
     } catch {
       // localStorage unavailable
     }
-  }, [])
-
-  // Reset page when debounced search changes
-  useEffect(() => {
-    setPage(1)
-  }, [debouncedSearch])
+  }, [navigate])
 
   const teamId = currentTeam?.id ?? ""
 
@@ -135,10 +172,15 @@ export function LocationList() {
   const handleSort = useCallback(
     (key: string) => {
       const next = nextSortDirection(sortKey, sortDir, key)
-      setSortKey(next.sort)
-      setSortDir(next.direction)
+      navigate({
+        search: (prev) => ({
+          ...prev,
+          sort: next.sort || undefined,
+          order: next.direction || undefined,
+        }),
+      })
     },
-    [sortKey, sortDir],
+    [sortKey, sortDir, navigate],
   )
 
   // Bulk actions
@@ -186,16 +228,16 @@ export function LocationList() {
       if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return
       if (e.key === "ArrowLeft" && page > 1) {
         e.preventDefault()
-        setPage((p) => Math.max(1, p - 1))
+        navigate({ search: (prev) => ({ ...prev, page: page - 1 > 1 ? page - 1 : undefined }) })
       }
       if (e.key === "ArrowRight" && page < totalPages) {
         e.preventDefault()
-        setPage((p) => Math.min(totalPages, p + 1))
+        navigate({ search: (prev) => ({ ...prev, page: page + 1 }) })
       }
     }
     document.addEventListener("keydown", handleKeyDown)
     return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [page, totalPages])
+  }, [page, totalPages, navigate])
 
   if (!currentTeam) {
     return (
@@ -265,14 +307,14 @@ export function LocationList() {
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Search locations..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               className="pl-10 pr-8"
             />
-            {search && (
+            {searchInput && (
               <button
                 type="button"
-                onClick={() => setSearch("")}
+                onClick={() => setSearchInput("")}
                 className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
               >
                 <X className="h-3.5 w-3.5" />
@@ -280,7 +322,15 @@ export function LocationList() {
               </button>
             )}
           </div>
-          <Select value={typeFilter} onValueChange={(v) => { setTypeFilter(v); setPage(1) }}>
+          <Select value={typeFilter} onValueChange={(v) => {
+            navigate({
+              search: (prev) => ({
+                ...prev,
+                type: v !== "all" ? v : undefined,
+                page: undefined,
+              }),
+            })
+          }}>
             <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder="All types" />
             </SelectTrigger>
@@ -310,9 +360,16 @@ export function LocationList() {
                   size="sm"
                   className="text-xs text-muted-foreground"
                   onClick={() => {
-                    setSearch("")
-                    setTypeFilter("all")
-                    setPage(1)
+                    setSearchInput("")
+                    navigate({
+                      search: {
+                        q: undefined,
+                        type: undefined,
+                        sort: searchParams.sort,
+                        order: searchParams.order,
+                        page: undefined,
+                      },
+                    })
                   }}
                 >
                   Clear filters
@@ -387,8 +444,16 @@ export function LocationList() {
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  setSearch("")
-                  setTypeFilter("all")
+                  setSearchInput("")
+                  navigate({
+                    search: {
+                      q: undefined,
+                      type: undefined,
+                      sort: undefined,
+                      order: undefined,
+                      page: undefined,
+                    },
+                  })
                 }}
               >
                 Clear filters
@@ -419,7 +484,14 @@ export function LocationList() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                onClick={() =>
+                  navigate({
+                    search: (prev) => ({
+                      ...prev,
+                      page: page - 1 > 1 ? page - 1 : undefined,
+                    }),
+                  })
+                }
                 disabled={page <= 1}
               >
                 Previous
@@ -428,7 +500,11 @@ export function LocationList() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                onClick={() =>
+                  navigate({
+                    search: (prev) => ({ ...prev, page: page + 1 }),
+                  })
+                }
                 disabled={page >= totalPages}
               >
                 Next

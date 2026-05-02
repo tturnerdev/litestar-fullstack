@@ -81,6 +81,22 @@ import { useDocumentTitle } from "@/hooks/use-document-title"
 import type { WebhookCreate, WebhookList, WebhookUpdate } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/webhooks/")({
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): {
+    q?: string
+    page?: number
+    sort?: string
+    order?: string
+  } => ({
+    q: typeof search.q === "string" && search.q ? search.q : undefined,
+    page: Number(search.page) > 1 ? Number(search.page) : undefined,
+    sort: typeof search.sort === "string" && search.sort ? search.sort : undefined,
+    order:
+      typeof search.order === "string" && (search.order === "asc" || search.order === "desc")
+        ? search.order
+        : undefined,
+  }),
   component: WebhooksPage,
 })
 
@@ -613,28 +629,60 @@ function DeleteWebhookDialog({
 
 function WebhooksPage() {
   useDocumentTitle("Webhooks")
-  const navigate = useNavigate()
+  const {
+    q: searchParam,
+    page: pageParam,
+    sort: sortParam,
+    order: orderParam,
+  } = Route.useSearch()
+  const navigate = Route.useNavigate()
   const searchInputRef = useRef<HTMLInputElement>(null)
 
-  const [page, setPage] = useState(1)
+  // Derive filter state from URL search params
+  const search = searchParam ?? ""
+  const page = pageParam ?? 1
+  const sortKey = sortParam ?? null
+  const sortDir: SortDirection = (orderParam as SortDirection) ?? null
+
+  // Local input state for search (so typing is smooth before debounce)
+  const [searchInput, setSearchInput] = useState(search)
+  const debouncedSearch = useDebouncedValue(searchInput)
+
+  // Sync URL when debounced search value settles
+  useEffect(() => {
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        q: debouncedSearch || undefined,
+        page: undefined,
+      }),
+      replace: true,
+    })
+  }, [debouncedSearch, navigate])
+
+  // Keep local input in sync if URL search param changes externally (back/forward)
+  useEffect(() => {
+    setSearchInput(search)
+  }, [search])
+
   const [pageSize, setPageSize] = useState(getStoredPageSize)
-  const [search, setSearch] = useState("")
-  const debouncedSearch = useDebouncedValue(search)
   const [editWebhook, setEditWebhook] = useState<WebhookList | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<WebhookList | null>(null)
   const [selected, setSelected] = useState<Set<string>>(new Set())
 
-  // Sort state
-  const [sortKey, setSortKey] = useState<string | null>(null)
-  const [sortDir, setSortDir] = useState<SortDirection>(null)
-
+  // Sort handler
   const handleSort = useCallback(
     (key: string) => {
       const next = nextSortDirection(sortKey, sortDir, key)
-      setSortKey(next.sort)
-      setSortDir(next.direction)
+      navigate({
+        search: (prev) => ({
+          ...prev,
+          sort: next.sort || undefined,
+          order: next.direction || undefined,
+        }),
+      })
     },
-    [sortKey, sortDir],
+    [sortKey, sortDir, navigate],
   )
 
   // Keyboard shortcuts: "/" to focus search, "N" opens the create dialog
@@ -653,24 +701,22 @@ function WebhooksPage() {
     }
     document.addEventListener("keydown", handleKeyDown)
     return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [])
+  }, [navigate])
 
   // Persist page size preference
-  const handlePageSizeChange = useCallback((value: string) => {
-    const size = Number(value)
-    setPageSize(size)
-    setPage(1)
-    try {
-      localStorage.setItem(PAGE_SIZE_STORAGE_KEY, value)
-    } catch {
-      // localStorage unavailable
-    }
-  }, [])
-
-  // Reset page when debounced search changes
-  useEffect(() => {
-    setPage(1)
-  }, [debouncedSearch])
+  const handlePageSizeChange = useCallback(
+    (value: string) => {
+      const size = Number(value)
+      setPageSize(size)
+      navigate({ search: (prev) => ({ ...prev, page: undefined }), replace: true })
+      try {
+        localStorage.setItem(PAGE_SIZE_STORAGE_KEY, value)
+      } catch {
+        // localStorage unavailable
+      }
+    },
+    [navigate],
+  )
 
   const { data, isLoading, isError, refetch } = useWebhooks(page, pageSize, debouncedSearch || undefined)
   const deleteWebhook = useDeleteWebhook()
@@ -729,7 +775,7 @@ function WebhooksPage() {
   const total = data?.total ?? 0
   const totalPages = Math.max(1, Math.ceil(total / pageSize))
 
-  const hasActiveFilters = search !== ""
+  const hasActiveFilters = debouncedSearch !== ""
 
   const allSelected = webhooks.length > 0 && selected.size === webhooks.length
   const someSelected = selected.size > 0 && selected.size < webhooks.length
@@ -843,14 +889,14 @@ function WebhooksPage() {
             <Input
               ref={searchInputRef}
               placeholder="Search webhooks..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               className="pl-9 pr-8"
             />
-            {search ? (
+            {searchInput ? (
               <button
                 type="button"
-                onClick={() => setSearch("")}
+                onClick={() => setSearchInput("")}
                 className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
               >
                 <X className="h-3.5 w-3.5" />
@@ -898,7 +944,17 @@ function WebhooksPage() {
             title="No results found"
             description="No webhooks match your current search. Try adjusting your search terms."
             action={
-              <Button variant="outline" size="sm" onClick={() => setSearch("")}>
+              <Button variant="outline" size="sm" onClick={() => {
+                setSearchInput("")
+                navigate({
+                  search: {
+                    q: undefined,
+                    sort: undefined,
+                    order: undefined,
+                    page: undefined,
+                  },
+                })
+              }}>
                 Clear search
               </Button>
             }
@@ -997,7 +1053,14 @@ function WebhooksPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    onClick={() =>
+                      navigate({
+                        search: (prev) => ({
+                          ...prev,
+                          page: page - 1 > 1 ? page - 1 : undefined,
+                        }),
+                      })
+                    }
                     disabled={page <= 1}
                   >
                     Previous
@@ -1005,7 +1068,11 @@ function WebhooksPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    onClick={() =>
+                      navigate({
+                        search: (prev) => ({ ...prev, page: page + 1 }),
+                      })
+                    }
                     disabled={page >= totalPages}
                   >
                     Next

@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
+import { createFileRoute, Link } from "@tanstack/react-router"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { AlertCircle, Download, Eye, Home, Loader2, MoreVertical, Pencil, Plus, Search, Tags, Trash2, X } from "lucide-react"
 import {
@@ -50,6 +50,22 @@ import { useDocumentTitle } from "@/hooks/use-document-title"
 import type { Tag } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/tags/")({
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): {
+    q?: string
+    page?: number
+    sort?: string
+    order?: string
+  } => ({
+    q: typeof search.q === "string" && search.q ? search.q : undefined,
+    page: Number(search.page) > 1 ? Number(search.page) : undefined,
+    sort: typeof search.sort === "string" && search.sort ? search.sort : undefined,
+    order:
+      typeof search.order === "string" && (search.order === "asc" || search.order === "desc")
+        ? search.order
+        : undefined,
+  }),
   component: TagsPage,
 })
 
@@ -77,15 +93,44 @@ const csvHeaders: CsvHeader<Tag>[] = [
 
 function TagsPage() {
   useDocumentTitle("Tags")
-  const navigate = useNavigate()
+  const {
+    q: searchParam,
+    page: pageParam,
+    sort: sortParam,
+    order: orderParam,
+  } = Route.useSearch()
+  const navigate = Route.useNavigate()
   const searchInputRef = useRef<HTMLInputElement>(null)
-  const [search, setSearch] = useState("")
-  const debouncedSearch = useDebouncedValue(search)
+
+  // Derive filter state from URL search params
+  const search = searchParam ?? ""
+  const page = pageParam ?? 1
+  const sortKey = sortParam ?? null
+  const sortDir: SortDirection = (orderParam as SortDirection) ?? null
+
+  // Local input state for search (so typing is smooth before debounce)
+  const [searchInput, setSearchInput] = useState(search)
+  const debouncedSearch = useDebouncedValue(searchInput)
+
+  // Sync URL when debounced search value settles
+  useEffect(() => {
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        q: debouncedSearch || undefined,
+        page: undefined,
+      }),
+      replace: true,
+    })
+  }, [debouncedSearch, navigate])
+
+  // Keep local input in sync if URL search param changes externally (back/forward)
+  useEffect(() => {
+    setSearchInput(search)
+  }, [search])
+
   const [tagToDelete, setTagToDelete] = useState<Tag | null>(null)
   const [selected, setSelected] = useState<Set<string>>(new Set())
-  const [sortKey, setSortKey] = useState<string | null>(null)
-  const [sortDir, setSortDir] = useState<SortDirection>(null)
-  const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(getStoredPageSize)
 
   // Keyboard shortcuts: "/" to focus search, "N" opens the create page
@@ -106,28 +151,34 @@ function TagsPage() {
     return () => document.removeEventListener("keydown", handleKeyDown)
   }, [navigate])
 
-  // Reset page when debounced search changes
-  useEffect(() => {
-    setPage(1)
-  }, [debouncedSearch])
-
   // Persist page size preference
-  const handlePageSizeChange = useCallback((value: string) => {
-    const size = Number(value)
-    setPageSize(size)
-    setPage(1)
-    try {
-      localStorage.setItem(PAGE_SIZE_STORAGE_KEY, value)
-    } catch {
-      // localStorage unavailable
-    }
-  }, [])
+  const handlePageSizeChange = useCallback(
+    (value: string) => {
+      const size = Number(value)
+      setPageSize(size)
+      navigate({ search: (prev) => ({ ...prev, page: undefined }), replace: true })
+      try {
+        localStorage.setItem(PAGE_SIZE_STORAGE_KEY, value)
+      } catch {
+        // localStorage unavailable
+      }
+    },
+    [navigate],
+  )
 
-  const handleSort = useCallback((key: string) => {
-    const next = nextSortDirection(sortKey, sortDir, key)
-    setSortKey(next.sort)
-    setSortDir(next.direction)
-  }, [sortKey, sortDir])
+  const handleSort = useCallback(
+    (key: string) => {
+      const next = nextSortDirection(sortKey, sortDir, key)
+      navigate({
+        search: (prev) => ({
+          ...prev,
+          sort: next.sort || undefined,
+          order: next.direction || undefined,
+        }),
+      })
+    },
+    [sortKey, sortDir, navigate],
+  )
 
   const { data, isLoading, isError, refetch } = useTags({
     search: debouncedSearch || undefined,
@@ -205,7 +256,7 @@ function TagsPage() {
 
   const handleRowClick = useCallback(
     (tagId: string) => {
-      navigate({ to: "/tags/$tagId", params: { tagId } })
+      void navigate({ to: "/tags/$tagId", params: { tagId } })
     },
     [navigate],
   )
@@ -297,14 +348,14 @@ function TagsPage() {
             <Input
               ref={searchInputRef}
               placeholder="Search tags..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               className="pl-9 pr-8"
             />
-            {search ? (
+            {searchInput ? (
               <button
                 type="button"
-                onClick={() => setSearch("")}
+                onClick={() => setSearchInput("")}
                 className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
               >
                 <X className="h-3.5 w-3.5" />
@@ -356,7 +407,17 @@ function TagsPage() {
             title="No results found"
             description="No tags match your search. Try a different search term."
             action={
-              <Button variant="outline" size="sm" onClick={() => setSearch("")}>
+              <Button variant="outline" size="sm" onClick={() => {
+                setSearchInput("")
+                navigate({
+                  search: {
+                    q: undefined,
+                    sort: undefined,
+                    order: undefined,
+                    page: undefined,
+                  },
+                })
+              }}>
                 Clear search
               </Button>
             }
@@ -431,7 +492,14 @@ function TagsPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    onClick={() =>
+                      navigate({
+                        search: (prev) => ({
+                          ...prev,
+                          page: page - 1 > 1 ? page - 1 : undefined,
+                        }),
+                      })
+                    }
                     disabled={page <= 1}
                   >
                     Previous
@@ -439,7 +507,11 @@ function TagsPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    onClick={() =>
+                      navigate({
+                        search: (prev) => ({ ...prev, page: page + 1 }),
+                      })
+                    }
                     disabled={page >= totalPages}
                   >
                     Next
