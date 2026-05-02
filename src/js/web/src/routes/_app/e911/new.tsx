@@ -25,6 +25,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import {
   Select,
   SelectContent,
@@ -217,6 +218,7 @@ function NewE911RegistrationPage() {
 
         <div className="flex gap-6">
           {/* Main form */}
+          <SectionErrorBoundary name="Create E911 Registration Form">
           <Card className="min-w-0 flex-1">
             <CardHeader>
               <CardTitle className="text-lg">Registration Details</CardTitle>
@@ -390,6 +392,7 @@ function NewE911RegistrationPage() {
               </form>
             </CardContent>
           </Card>
+          </SectionErrorBoundary>
 
           {/* Sidebar tips */}
           <Card className="h-fit w-72 shrink-0 border-border/40 bg-linear-to-br from-muted/30 to-muted/10">

@@ -34,6 +34,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { useDocumentTitle } from "@/hooks/use-document-title"
@@ -272,6 +273,7 @@ function NewWebhookPage() {
 
         <div className="flex gap-6">
           {/* Main form */}
+          <SectionErrorBoundary name="Create Webhook Form">
           <Card className="min-w-0 flex-1">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
@@ -533,6 +535,7 @@ function NewWebhookPage() {
               </form>
             </CardContent>
           </Card>
+          </SectionErrorBoundary>
 
           {/* Sidebar tips */}
           <Card className="hidden h-fit w-72 shrink-0 border-border/40 bg-linear-to-br from-muted/30 to-muted/10 lg:block">

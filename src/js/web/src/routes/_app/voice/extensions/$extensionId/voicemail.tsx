@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { VoicemailMessageList } from "@/components/voice/voicemail-message-list"
@@ -109,6 +110,7 @@ function VoicemailPage() {
       />
 
       <PageSection>
+        <SectionErrorBoundary name="Voicemail">
         <Tabs defaultValue="messages">
           <TabsList>
             <TabsTrigger value="messages" className="gap-2">
@@ -130,6 +132,7 @@ function VoicemailPage() {
             <VoicemailSettingsForm extensionId={extensionId} />
           </TabsContent>
         </Tabs>
+        </SectionErrorBoundary>
       </PageSection>
     </PageContainer>
   )

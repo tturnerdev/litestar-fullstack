@@ -5,6 +5,7 @@ import { CreateTeamForm } from "@/components/teams/create-team-form"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PageContainer, PageHeader } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 
 export const Route = createFileRoute("/_app/teams/new")({
   component: NewTeamPage,
@@ -66,6 +67,7 @@ function NewTeamPage() {
 
       <div className="flex gap-6">
         {/* Main form */}
+        <SectionErrorBoundary name="Create Team Form">
         <Card className="min-w-0 flex-1">
           <CardHeader>
             <CardTitle className="text-lg">Team Details</CardTitle>
@@ -77,6 +79,7 @@ function NewTeamPage() {
             <CreateTeamForm />
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
 
         {/* Sidebar tips */}
         <Card className="h-fit w-72 shrink-0 border-border/40 bg-linear-to-br from-muted/30 to-muted/10">

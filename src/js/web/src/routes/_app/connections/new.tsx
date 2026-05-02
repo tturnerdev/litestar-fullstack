@@ -43,6 +43,7 @@ import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { useAuth } from "@/hooks/use-auth"
 import { useCreateConnection, type ConnectionCreate } from "@/lib/api/hooks/connections"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
@@ -496,6 +497,7 @@ function NewConnectionPage() {
 
       <div className="flex gap-6">
         {/* Main form */}
+        <SectionErrorBoundary name="Create Connection Form">
         <Card className="min-w-0 flex-1">
           <CardHeader>
             <CardTitle className="text-lg">Connection Details</CardTitle>
@@ -790,6 +792,7 @@ function NewConnectionPage() {
             </form>
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
 
         {/* Sidebar */}
         <div className="flex h-fit w-72 shrink-0 flex-col gap-4">

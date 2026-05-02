@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PageContainer, PageHeader } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
 
@@ -92,6 +93,7 @@ function NewTicketPage() {
 
       <div className="flex gap-6">
         {/* Main form */}
+        <SectionErrorBoundary name="Create Ticket Form">
         <Card className="min-w-0 flex-1">
           <CardHeader>
             <CardTitle className="text-lg">Ticket Details</CardTitle>
@@ -103,6 +105,7 @@ function NewTicketPage() {
             <CreateTicketForm />
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
 
         {/* Sidebar */}
         <div className="flex h-fit w-72 shrink-0 flex-col gap-4">

@@ -1,5 +1,5 @@
-import { createFileRoute, useBlocker } from "@tanstack/react-router"
-import { Building2, CheckCircle2, Circle, Copy, Globe, Hash, Link2, Loader2, Mail, MapPin, MonitorSmartphone, MoreHorizontal, Pencil, Save, Sparkles, TicketCheck, Users, UsersRound, X } from "lucide-react"
+import { createFileRoute, Link, useBlocker } from "@tanstack/react-router"
+import { Building2, CheckCircle2, Circle, Copy, Globe, Hash, Home, Link2, Loader2, Mail, MapPin, MonitorSmartphone, MoreHorizontal, Pencil, Save, Sparkles, TicketCheck, Users, UsersRound, X } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   AlertDialog,
@@ -12,6 +12,14 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { DataFreshness } from "@/components/ui/data-freshness"
@@ -384,6 +392,23 @@ function OrganizationSettingsPage() {
             </span>
           }
           description="View and manage your organization profile, contact information, and preferences."
+          breadcrumbs={
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link to="/">
+                      <Home className="h-3.5 w-3.5" />
+                    </Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Organization</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          }
           actions={
           <div className="flex items-center gap-2">
             <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={handleRefreshOrg} isRefreshing={isRefreshingOrg} />

@@ -5,6 +5,7 @@ import { CreateDeviceForm } from "@/components/devices/device-form"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PageContainer, PageHeader } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 
 export const Route = createFileRoute("/_app/devices/new")({
   component: NewDevicePage,
@@ -41,6 +42,7 @@ function NewDevicePage() {
 
       <div className="flex gap-6">
         {/* Main form */}
+        <SectionErrorBoundary name="Create Device Form">
         <Card className="min-w-0 flex-1">
           <CardHeader>
             <CardTitle className="text-lg">Device Details</CardTitle>
@@ -49,6 +51,7 @@ function NewDevicePage() {
             <CreateDeviceForm />
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
 
         {/* Sidebar tips */}
         <Card className="h-fit w-72 shrink-0 border-border/40 bg-linear-to-br from-muted/30 to-muted/10">

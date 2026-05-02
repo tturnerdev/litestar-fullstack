@@ -21,6 +21,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
@@ -108,6 +109,7 @@ function NewExtensionPage() {
         }
       />
 
+      <SectionErrorBoundary name="Create Extension Form">
       <Card className="max-w-2xl">
         <CardHeader>
           <CardTitle className="text-lg">Extension Details</CardTitle>
@@ -207,6 +209,7 @@ function NewExtensionPage() {
           </Form>
         </CardContent>
       </Card>
+      </SectionErrorBoundary>
     </PageContainer>
 
       {/* Unsaved changes dialog */}

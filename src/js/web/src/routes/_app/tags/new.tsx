@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { PageContainer, PageHeader } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { useCreateTag, type TagCreate } from "@/lib/api/hooks/tags"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
@@ -118,6 +119,7 @@ function NewTagPage() {
         }
       />
 
+      <SectionErrorBoundary name="Create Tag Form">
       <Card className="max-w-xl">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
@@ -230,6 +232,7 @@ function NewTagPage() {
           </form>
         </CardContent>
       </Card>
+      </SectionErrorBoundary>
     </PageContainer>
 
     {/* -- Unsaved changes dialog ---------------------------------------- */}

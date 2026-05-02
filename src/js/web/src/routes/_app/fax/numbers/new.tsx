@@ -18,6 +18,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Switch } from "@/components/ui/switch"
 import { useAuth } from "@/hooks/use-auth"
 import { useCreateFaxNumber } from "@/lib/api/hooks/fax"
@@ -120,6 +121,7 @@ function NewFaxNumberPage() {
         }
       />
 
+      <SectionErrorBoundary name="Create Fax Number Form">
       <Card className="max-w-xl">
         <CardHeader>
           <CardTitle className="text-lg">Fax Number Details</CardTitle>
@@ -192,6 +194,7 @@ function NewFaxNumberPage() {
           </form>
         </CardContent>
       </Card>
+      </SectionErrorBoundary>
     </PageContainer>
 
       {/* Unsaved changes dialog */}

@@ -26,6 +26,7 @@ import { FilterDropdown, type FilterOption } from "@/components/ui/filter-dropdo
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { SkeletonTable } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
@@ -551,6 +552,7 @@ function FaxEmailRoutesPage() {
       />
 
       <PageSection>
+        <SectionErrorBoundary name="Email Routes">
         {isLoading ? (
           <SkeletonTable rows={5} />
         ) : isError ? (
@@ -762,6 +764,7 @@ function FaxEmailRoutesPage() {
             }
           />
         )}
+        </SectionErrorBoundary>
       </PageSection>
 
       <CreateEmailRouteDialog open={showCreateDialog} onOpenChange={setShowCreateDialog} />

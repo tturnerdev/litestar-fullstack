@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.244.0 (2026-05-03)
+
+### Added
+- **SectionErrorBoundary on all 11 create pages** — connections, devices, E911, fax numbers, schedules, support, tags, teams, extensions, phone numbers, webhooks create forms wrapped
+- **SectionErrorBoundary on fax email-routes and voicemail pages**
+- **Breadcrumbs on organization page** — Home → Organization navigation
+- **Audit logging for feedback controller** — feedback.submitted action logged with submission metadata
+
 ## v0.243.0 (2026-05-03)
 
 ### Added
