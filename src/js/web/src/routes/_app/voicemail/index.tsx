@@ -215,6 +215,24 @@ function MessagesTab() {
 
   const activeFilterCount = readFilter.length + (startDate || endDate ? 1 : 0) + (debouncedSearch ? 1 : 0)
 
+  // Keyboard shortcuts: ArrowLeft/ArrowRight for pagination
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return
+      if (e.key === "ArrowLeft" && page > 1) {
+        e.preventDefault()
+        setPage((p) => Math.max(1, p - 1))
+      }
+      if (e.key === "ArrowRight" && page < totalPages) {
+        e.preventDefault()
+        setPage((p) => Math.min(totalPages, p + 1))
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [page, totalPages])
+
   // Export all visible
   const handleExportAll = useCallback(() => {
     if (!items.length) return
@@ -620,6 +638,7 @@ function MessagesTab() {
                 disabled={page <= 1}
               >
                 Previous
+                <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&larr;</kbd>
               </Button>
               <Button
                 variant="outline"
@@ -628,6 +647,7 @@ function MessagesTab() {
                 disabled={page >= totalPages}
               >
                 Next
+                <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&rarr;</kbd>
               </Button>
             </div>
           )}
@@ -866,6 +886,24 @@ function BoxesTab() {
   const items = data?.items ?? []
   const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / PAGE_SIZE))
 
+  // Keyboard shortcuts: ArrowLeft/ArrowRight for pagination
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return
+      if (e.key === "ArrowLeft" && page > 1) {
+        e.preventDefault()
+        setPage((p) => Math.max(1, p - 1))
+      }
+      if (e.key === "ArrowRight" && page < totalPages) {
+        e.preventDefault()
+        setPage((p) => Math.min(totalPages, p + 1))
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [page, totalPages])
+
   if (isError) {
     return (
       <EmptyState
@@ -1004,6 +1042,7 @@ function BoxesTab() {
                 disabled={page <= 1}
               >
                 Previous
+                <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&larr;</kbd>
               </Button>
               <Button
                 variant="outline"
@@ -1012,6 +1051,7 @@ function BoxesTab() {
                 disabled={page >= totalPages}
               >
                 Next
+                <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&rarr;</kbd>
               </Button>
             </div>
           )}

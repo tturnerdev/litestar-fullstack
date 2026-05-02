@@ -1,6 +1,16 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, useBlocker } from "@tanstack/react-router"
 import { Building2, Globe, Hash, Loader2, Mail, MapPin, Pencil, Save, Users, X } from "lucide-react"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -124,6 +134,33 @@ function OrganizationSettingsPage() {
     syncFormFromOrg()
   }, [syncFormFromOrg])
 
+  // Track whether the form has been modified relative to original data
+  const formDirty = useMemo(() => {
+    if (!isEditing || !org) return false
+    return (
+      formData.name !== (org.name ?? "") ||
+      formData.description !== (org.description ?? "") ||
+      formData.logoUrl !== (org.logoUrl ?? "") ||
+      formData.website !== (org.website ?? "") ||
+      formData.email !== (org.email ?? "") ||
+      formData.phone !== (org.phone ?? "") ||
+      formData.addressLine1 !== (org.addressLine1 ?? "") ||
+      formData.addressLine2 !== (org.addressLine2 ?? "") ||
+      formData.city !== (org.city ?? "") ||
+      formData.state !== (org.state ?? "") ||
+      formData.postalCode !== (org.postalCode ?? "") ||
+      formData.country !== (org.country ?? "") ||
+      formData.timezone !== (org.timezone ?? "UTC") ||
+      formData.defaultLanguage !== (org.defaultLanguage ?? "en")
+    )
+  }, [isEditing, org, formData])
+
+  // Block navigation when form has unsaved changes
+  const blocker = useBlocker({
+    shouldBlockFn: () => formDirty,
+    withResolver: true,
+  })
+
   const handleSave = async () => {
     const payload: Record<string, unknown> = {}
     if (formData.name !== (org?.name ?? "")) payload.name = formData.name
@@ -181,6 +218,7 @@ function OrganizationSettingsPage() {
   }
 
   return (
+    <>
     <PageContainer className="flex-1 space-y-8">
       <div className="-mx-4 -mt-8 mb-2 rounded-b-xl bg-gradient-to-br from-primary/5 via-primary/3 to-transparent px-4 pb-2 pt-8 md:-mx-6 md:-mt-10 md:px-6 md:pt-10">
         <PageHeader
@@ -505,5 +543,22 @@ function OrganizationSettingsPage() {
         <OrganizationQuickLinks />
       </PageSection>
     </PageContainer>
+
+    {/* -- Unsaved changes dialog ---------------------------------------- */}
+    <AlertDialog open={blocker.status === "blocked"} onOpenChange={() => blocker.reset?.()}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
+          <AlertDialogDescription>
+            You have unsaved changes to organization settings. Are you sure you want to leave? Your changes will be lost.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={() => blocker.reset?.()}>Stay on page</AlertDialogCancel>
+          <AlertDialogAction onClick={() => blocker.proceed?.()}>Discard changes</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   )
 }

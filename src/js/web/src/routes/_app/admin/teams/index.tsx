@@ -256,6 +256,24 @@ function AdminTeamsPage() {
   const hasAnyTeams = (data?.items.length ?? 0) > 0
   const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / pageSize))
 
+  // Keyboard shortcuts: ArrowLeft/ArrowRight for pagination
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return
+      if (e.key === "ArrowLeft" && page > 1) {
+        e.preventDefault()
+        setPage((p) => Math.max(1, p - 1))
+      }
+      if (e.key === "ArrowRight" && page < totalPages) {
+        e.preventDefault()
+        setPage((p) => Math.min(totalPages, p + 1))
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [page, totalPages])
+
   return (
     <PageContainer className="flex-1 space-y-8">
       <PageHeader
@@ -469,6 +487,7 @@ function AdminTeamsPage() {
                     disabled={page <= 1}
                   >
                     Previous
+                    <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&larr;</kbd>
                   </Button>
                   <Button
                     variant="outline"
@@ -480,6 +499,7 @@ function AdminTeamsPage() {
                     disabled={page >= totalPages}
                   >
                     Next
+                    <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&rarr;</kbd>
                   </Button>
                 </div>
               )}

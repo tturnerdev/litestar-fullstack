@@ -6,9 +6,11 @@ import {
   ArrowLeft,
   ArrowUpRight,
   Check,
+  Copy,
   Eye,
   Hash,
   MessageSquare,
+  MoreHorizontal,
   Pencil,
   Phone,
   Send,
@@ -39,6 +41,13 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
@@ -126,6 +135,7 @@ function FaxNumberDetailPage() {
   })
 
   const [editingLabel, setEditingLabel] = useState(false)
+  const [showEditDialog, setShowEditDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [labelValue, setLabelValue] = useState("")
 
@@ -312,28 +322,37 @@ function FaxNumberDetailPage() {
                 <Send className="mr-2 h-4 w-4" /> Send Fax
               </Link>
             </Button>
-            <FaxNumberEditDialog
-              faxNumber={data}
-              trigger={
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm">
-                  <Pencil className="mr-2 h-4 w-4" /> Edit
+                  <MoreHorizontal className="h-4 w-4" />
+                  <span className="sr-only">Actions</span>
                 </Button>
-              }
-            />
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-destructive hover:bg-destructive/10"
-              onClick={() => setShowDeleteDialog(true)}
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
-            </Button>
-            <Button variant="outline" size="sm" asChild>
-              <Link to="/fax/numbers">
-                <ArrowLeft className="mr-2 h-4 w-4" /> Back
-              </Link>
-            </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => navigator.clipboard.writeText(faxNumberId)}>
+                  <Copy className="mr-2 h-4 w-4" />
+                  Copy Fax Number ID
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigator.clipboard.writeText(data.number)}>
+                  <Copy className="mr-2 h-4 w-4" />
+                  Copy Phone Number
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => setShowEditDialog(true)}>
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Edit Fax Number
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-destructive focus:text-destructive"
+                  onClick={() => setShowDeleteDialog(true)}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete Fax Number
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         }
       />
@@ -373,6 +392,13 @@ function FaxNumberDetailPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Edit dialog */}
+      <FaxNumberEditDialog
+        faxNumber={data}
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+      />
 
       {/* Number Info */}
       <PageSection>

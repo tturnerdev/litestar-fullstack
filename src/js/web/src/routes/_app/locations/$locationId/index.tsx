@@ -1,10 +1,17 @@
 import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
-import { AlertCircle, AlertTriangle, ArrowLeft, Clock, Cpu, ExternalLink, Loader2, MapPin, Pencil, RefreshCw, Trash2 } from "lucide-react"
+import { AlertCircle, AlertTriangle, ArrowLeft, Clock, Copy, Cpu, ExternalLink, Loader2, MapPin, MoreHorizontal, Pencil, RefreshCw, Trash2 } from "lucide-react"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import {
   AlertDialog,
@@ -85,6 +92,7 @@ function LocationDetailPage() {
   const { data: locationDevices, isLoading: devicesLoading } = useDevicesByLocation(locationId)
 
   const [editing, setEditing] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [editName, setEditName] = useState("")
   const [editDescription, setEditDescription] = useState("")
   const [editAddress1, setEditAddress1] = useState("")
@@ -285,13 +293,41 @@ function LocationDetailPage() {
                 <Pencil className="mr-2 h-4 w-4" /> Edit
               </Button>
             )}
-            <Button variant="outline" size="sm" asChild>
-              <Link to="/locations">
-                <ArrowLeft className="mr-2 h-4 w-4" /> Back
-              </Link>
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <MoreHorizontal className="h-4 w-4" />
+                  <span className="sr-only">Actions</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => navigator.clipboard.writeText(locationId)}>
+                  <Copy className="mr-2 h-4 w-4" />
+                  Copy Location ID
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-destructive focus:text-destructive"
+                  onClick={() => setShowDeleteDialog(true)}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete Location
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         }
+      />
+
+      {/* Delete dialog triggered from dropdown */}
+      <DeleteLocationDialog
+        locationName={data.name}
+        hasChildren={children.length > 0}
+        onDelete={handleDelete}
+        isPending={deleteLocation.isPending}
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        showTrigger={false}
       />
 
       <PageSection>
@@ -654,20 +690,30 @@ function DeleteLocationDialog({
   hasChildren,
   onDelete,
   isPending,
+  open: controlledOpen,
+  onOpenChange,
+  showTrigger = true,
 }: {
   locationName: string
   hasChildren: boolean
   onDelete: () => void
   isPending: boolean
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+  showTrigger?: boolean
 }) {
-  const [open, setOpen] = useState(false)
+  const [internalOpen, setInternalOpen] = useState(false)
+  const open = controlledOpen ?? internalOpen
+  const setOpen = onOpenChange ?? setInternalOpen
 
   return (
     <>
-      <Button variant="destructive" size="sm" onClick={() => setOpen(true)}>
-        <Trash2 className="mr-2 h-4 w-4" />
-        Delete
-      </Button>
+      {showTrigger && (
+        <Button variant="destructive" size="sm" onClick={() => setOpen(true)}>
+          <Trash2 className="mr-2 h-4 w-4" />
+          Delete
+        </Button>
+      )}
       <AlertDialog open={open} onOpenChange={setOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

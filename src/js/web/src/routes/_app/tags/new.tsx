@@ -1,6 +1,16 @@
 import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
 import { useCallback, useMemo, useRef, useState } from "react"
 import { Hash, Loader2, Tags } from "lucide-react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
@@ -53,7 +63,7 @@ function NewTagPage() {
   const slug = useMemo(() => nameToSlug(name), [name])
   const formDirty = name.trim() !== "" || description.trim() !== "" || selectedColor !== null
 
-  useBlocker({
+  const blocker = useBlocker({
     shouldBlockFn: () => formDirty && !justSubmittedRef.current,
     withResolver: true,
   })
@@ -87,6 +97,7 @@ function NewTagPage() {
   const isValid = name.trim() !== "" && name.length <= NAME_MAX
 
   return (
+    <>
     <PageContainer className="flex-1 space-y-8">
       <PageHeader
         eyebrow="Tags"
@@ -218,5 +229,22 @@ function NewTagPage() {
         </CardContent>
       </Card>
     </PageContainer>
+
+    {/* -- Unsaved changes dialog ---------------------------------------- */}
+    <AlertDialog open={blocker.status === "blocked"} onOpenChange={() => blocker.reset?.()}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
+          <AlertDialogDescription>
+            You have unsaved changes to this tag. Are you sure you want to leave? Your changes will be lost.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={() => blocker.reset?.()}>Stay on page</AlertDialogCancel>
+          <AlertDialogAction onClick={() => blocker.proceed?.()}>Discard changes</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   )
 }

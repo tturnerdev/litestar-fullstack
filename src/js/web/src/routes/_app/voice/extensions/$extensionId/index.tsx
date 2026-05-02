@@ -4,16 +4,17 @@ import { z } from "zod"
 import {
   AlertCircle,
   AlertTriangle,
-  ArrowLeft,
   ArrowRight,
   BellOff,
   Check,
+  Copy,
   ExternalLink,
   Fingerprint,
   Inbox,
   Loader2,
   Mail,
   Monitor,
+  MoreHorizontal,
   Pencil,
   Phone,
   PhoneForwarded,
@@ -37,6 +38,13 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -266,12 +274,6 @@ function ExtensionDetailPage() {
         }
         actions={
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" asChild>
-              <Link to="/voice/extensions">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Extensions
-              </Link>
-            </Button>
             <DndQuickToggle extensionId={extensionId} showLabel />
             {!data.isActive && (
               <Badge
@@ -284,15 +286,32 @@ function ExtensionDetailPage() {
             <Button variant="outline" size="sm" onClick={() => setShowEditDialog(true)}>
               <Pencil className="mr-2 h-4 w-4" /> Edit
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
-              onClick={() => setShowDeleteDialog(true)}
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <MoreHorizontal className="h-4 w-4" />
+                  <span className="sr-only">Actions</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => navigator.clipboard.writeText(extensionId)}>
+                  <Copy className="mr-2 h-4 w-4" />
+                  Copy Extension ID
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigator.clipboard.writeText(data.extensionNumber)}>
+                  <Copy className="mr-2 h-4 w-4" />
+                  Copy Extension Number
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-destructive focus:text-destructive"
+                  onClick={() => setShowDeleteDialog(true)}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete Extension
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         }
       />

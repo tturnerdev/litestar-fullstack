@@ -6,17 +6,20 @@ import {
   AlertTriangle,
   ArrowLeft,
   ClipboardList,
+  Copy,
   Cpu,
   Eye,
   EyeOff,
   Fingerprint,
   Loader2,
   MapPin,
+  MoreHorizontal,
   Network,
   Pencil,
   Phone,
   Settings,
   Shield,
+  Trash2,
   Wrench,
 } from "lucide-react"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
@@ -35,6 +38,13 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -379,12 +389,34 @@ function DeviceDetailPage() {
               isPending={reprovisionDevice.isPending}
               size="sm"
             />
-            <DeleteButton
-              deviceName={data.name}
-              onDelete={handleDelete}
-              isPending={deleteDevice.isPending}
-              size="sm"
-            />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <MoreHorizontal className="h-4 w-4" />
+                  <span className="sr-only">Actions</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => navigator.clipboard.writeText(deviceId)}>
+                  <Copy className="mr-2 h-4 w-4" />
+                  Copy Device ID
+                </DropdownMenuItem>
+                {data.macAddress && (
+                  <DropdownMenuItem onClick={() => navigator.clipboard.writeText(data.macAddress!)}>
+                    <Copy className="mr-2 h-4 w-4" />
+                    Copy MAC Address
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-destructive focus:text-destructive"
+                  onClick={() => handleDelete()}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete Device
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         }
       />

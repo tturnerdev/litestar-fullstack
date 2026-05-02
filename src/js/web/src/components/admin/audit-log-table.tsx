@@ -61,7 +61,7 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAdminAuditLogs, useAdminAuditLogsExport } from "@/lib/api/hooks/admin"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
-import { formatDateTime } from "@/lib/date-utils"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import type { AuditLogEntry } from "@/lib/generated/api"
 
 // ── Constants ──────────────────────────────────────────────────────────────
@@ -218,23 +218,6 @@ const csvHeaders: CsvHeader<AuditLogEntry>[] = [
 ]
 
 // ── Helpers ────────────────────────────────────────────────────────────────
-
-/** Return a human-readable relative time string. */
-function relativeTime(dateStr: string): string {
-  const date = new Date(dateStr)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffSec = Math.floor(diffMs / 1000)
-  if (diffSec < 60) return "just now"
-  const diffMin = Math.floor(diffSec / 60)
-  if (diffMin < 60) return `${diffMin}m ago`
-  const diffHr = Math.floor(diffMin / 60)
-  if (diffHr < 24) return `${diffHr}h ago`
-  const diffDays = Math.floor(diffHr / 24)
-  if (diffDays < 30) return `${diffDays}d ago`
-  const diffMonths = Math.floor(diffDays / 30)
-  return `${diffMonths}mo ago`
-}
 
 /** Derive the verb from an action string (e.g., "user.created" -> "created"). */
 function getActionVerb(action: string): string {
@@ -1329,7 +1312,7 @@ export function AuditLogTable() {
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <span className="cursor-default text-sm text-muted-foreground">
-                                {relativeTime(entry.createdAt)}
+                                {formatRelativeTimeShort(entry.createdAt)}
                               </span>
                             </TooltipTrigger>
                             <TooltipContent>

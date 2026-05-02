@@ -177,20 +177,6 @@ function ConnectionsPage() {
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(getStoredPageSize)
 
-  // Keyboard shortcut: "N" opens the create page
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "n" && !e.ctrlKey && !e.metaKey && !e.altKey) {
-        const target = e.target as HTMLElement
-        if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return
-        e.preventDefault()
-        navigate({ to: "/connections/new" })
-      }
-    }
-    document.addEventListener("keydown", handleKeyDown)
-    return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [navigate])
-
   // Reset page when debounced search changes
   useEffect(() => {
     setPage(1)
@@ -317,6 +303,28 @@ function ConnectionsPage() {
   const hasData = filteredItems.length > 0
   const hasAnyConnections = (data?.items.length ?? 0) > 0
   const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / pageSize))
+
+  // Keyboard shortcuts: "N" opens create page, ArrowLeft/ArrowRight for pagination
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return
+      if (e.key === "n" && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault()
+        navigate({ to: "/connections/new" })
+      }
+      if (e.key === "ArrowLeft" && page > 1) {
+        e.preventDefault()
+        setPage((p) => Math.max(1, p - 1))
+      }
+      if (e.key === "ArrowRight" && page < totalPages) {
+        e.preventDefault()
+        setPage((p) => Math.min(totalPages, p + 1))
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [navigate, page, totalPages])
 
   const breadcrumbs = (
     <Breadcrumb>
@@ -582,6 +590,7 @@ function ConnectionsPage() {
                     disabled={page <= 1}
                   >
                     Previous
+                    <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&larr;</kbd>
                   </Button>
                   <Button
                     variant="outline"
@@ -590,6 +599,7 @@ function ConnectionsPage() {
                     disabled={page >= totalPages}
                   >
                     Next
+                    <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">&rarr;</kbd>
                   </Button>
                 </div>
               )}
