@@ -371,9 +371,6 @@ function MemberRow({
 }) {
   const deleteMember = useDeleteRingGroupMember(groupId)
 
-  const displayValue = member.extensionId
-    ? member.extensionId.slice(0, 8) + "..."
-    : member.externalNumber ?? "---"
   const memberType = member.extensionId ? "Extension" : "External"
 
   return (
@@ -383,7 +380,17 @@ function MemberRow({
         <Badge variant="outline" className="text-xs">{memberType}</Badge>
       </TableCell>
       <TableCell>
-        <span className={member.extensionId ? "font-mono text-xs" : "text-sm"}>{displayValue}</span>
+        {member.extensionId ? (
+          <Link
+            to="/voice/extensions/$extensionId"
+            params={{ extensionId: member.extensionId }}
+            className="text-primary hover:underline font-mono text-sm"
+          >
+            {member.extensionId.slice(0, 8) + "..."}
+          </Link>
+        ) : (
+          <span className="text-sm">{member.externalNumber ?? "---"}</span>
+        )}
       </TableCell>
       <TableCell className="text-right">
         <div className="flex items-center justify-end gap-0.5">
@@ -669,7 +676,13 @@ function RingGroupDetailPage() {
                 <div className="space-y-1">
                   <p className="text-xs font-medium text-muted-foreground">Team ID</p>
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs break-all">{data.teamId}</span>
+                    <Link
+                      to="/teams/$teamId"
+                      params={{ teamId: data.teamId }}
+                      className="text-primary hover:underline font-mono text-xs break-all"
+                    >
+                      {data.teamId}
+                    </Link>
                     <CopyButton value={data.teamId} label="team ID" />
                   </div>
                 </div>

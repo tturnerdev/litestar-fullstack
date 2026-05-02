@@ -6,12 +6,14 @@ import {
   Calendar,
   Clock,
   Crown,
+  HardDrive,
   Pencil,
+  Phone,
   Settings,
   Shield,
   Users,
 } from "lucide-react"
-import { useEffect } from "react"
+import { useEffect, useMemo } from "react"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { TeamMembers } from "@/components/teams/team-members"
 import { TeamSettings } from "@/components/teams/team-settings"
@@ -26,14 +28,18 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/empty-state"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { CopyButton } from "@/components/ui/copy-button"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { useDevicesByTeam } from "@/lib/api/hooks/devices"
+import { useExtensionsByTeam } from "@/lib/api/hooks/voice"
 import { useAuthStore } from "@/lib/auth"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { getTeam, type TeamMember } from "@/lib/generated/api"
@@ -182,6 +188,10 @@ function TeamDetail() {
 
   const userMembership = members.find((m: TeamMember) => m.userId === user?.id)
   const userRole = userMembership?.isOwner ? "Owner" : userMembership?.role === "ADMIN" ? "Admin" : userMembership ? "Member" : null
+
+  const { data: teamDevices, isLoading: devicesLoading } = useDevicesByTeam(teamId)
+  const memberUserIds = useMemo(() => members.map((m) => m.userId), [members])
+  const { data: teamExtensions, isLoading: extensionsLoading } = useExtensionsByTeam(memberUserIds)
 
   return (
     <PageContainer className="flex-1 space-y-8">
@@ -390,6 +400,136 @@ function TeamDetail() {
             />
           </TabsContent>
         </Tabs>
+      </PageSection>
+
+      {/* Team Devices */}
+      <PageSection delay={0.2}>
+        <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2">
+                <HardDrive className="h-5 w-5 text-muted-foreground" />
+                Team Devices
+              </CardTitle>
+              {!devicesLoading && teamDevices && teamDevices.length > 0 && (
+                <Badge variant="secondary" className="ml-1">{teamDevices.length}</Badge>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent>
+            {devicesLoading ? (
+              <div className="space-y-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <Skeleton key={i} className="h-10 w-full" />
+                ))}
+              </div>
+            ) : teamDevices && teamDevices.length > 0 ? (
+              <Table aria-label="Devices assigned to this team">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Model</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Last Seen</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {teamDevices.map((device) => (
+                    <TableRow key={device.id}>
+                      <TableCell>
+                        <Link
+                          to="/devices/$deviceId"
+                          params={{ deviceId: device.id }}
+                          className="font-medium text-primary hover:underline"
+                        >
+                          {device.name}
+                        </Link>
+                      </TableCell>
+                      <TableCell>{device.deviceModel ?? "---"}</TableCell>
+                      <TableCell>
+                        <Badge variant={device.status === "online" ? "default" : "secondary"}>
+                          {device.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {device.lastSeenAt ? formatRelativeTimeShort(device.lastSeenAt) : "---"}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <EmptyState
+                icon={HardDrive}
+                title="No devices assigned to this team"
+                description="Devices assigned to this team will appear here."
+              />
+            )}
+          </CardContent>
+        </Card>
+      </PageSection>
+
+      {/* Team Extensions */}
+      <PageSection delay={0.3}>
+        <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2">
+                <Phone className="h-5 w-5 text-muted-foreground" />
+                Team Extensions
+              </CardTitle>
+              {!extensionsLoading && teamExtensions && teamExtensions.length > 0 && (
+                <Badge variant="secondary" className="ml-1">{teamExtensions.length}</Badge>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent>
+            {extensionsLoading ? (
+              <div className="space-y-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <Skeleton key={i} className="h-10 w-full" />
+                ))}
+              </div>
+            ) : teamExtensions && teamExtensions.length > 0 ? (
+              <Table aria-label="Extensions in this team">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Extension</TableHead>
+                    <TableHead>Display Name</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {teamExtensions.map((ext) => (
+                    <TableRow key={ext.id}>
+                      <TableCell>
+                        <Link
+                          to="/voice/extensions/$extensionId"
+                          params={{ extensionId: ext.id }}
+                          className="font-medium text-primary hover:underline"
+                        >
+                          {ext.extensionNumber}
+                        </Link>
+                      </TableCell>
+                      <TableCell>{ext.displayName}</TableCell>
+                      <TableCell>
+                        <Badge variant={ext.isActive ? "default" : "secondary"}>
+                          {ext.isActive ? "Active" : "Inactive"}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <EmptyState
+                icon={Phone}
+                title="No extensions in this team"
+                description="Extensions belonging to team members will appear here."
+              />
+            )}
+          </CardContent>
+        </Card>
       </PageSection>
     </PageContainer>
   )

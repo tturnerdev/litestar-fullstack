@@ -805,9 +805,15 @@ function DeviceDetailPage() {
                   <TimestampField label="Provisioned" value={data.provisionedAt} />
                   {data.teamId && (
                     <div>
-                      <p className="text-muted-foreground text-sm">Team ID</p>
+                      <p className="text-muted-foreground text-sm">Team</p>
                       <div className="flex items-center gap-1">
-                        <p className="font-mono text-xs">{data.teamId}</p>
+                        <Link
+                          to="/teams/$teamId"
+                          params={{ teamId: data.teamId }}
+                          className="font-mono text-xs text-primary hover:underline"
+                        >
+                          {data.teamId.slice(0, 8)}...
+                        </Link>
                         <CopyButton value={data.teamId} label="team ID" />
                       </div>
                     </div>

@@ -439,7 +439,17 @@ function MemberRow({
   return (
     <TableRow className={isHighlighted ? "animate-highlight-row" : ""}>
       <TableCell>
-        <span className="font-mono text-xs">{member.extensionId ? member.extensionId.slice(0, 8) + "..." : "---"}</span>
+        {member.extensionId ? (
+          <Link
+            to="/voice/extensions/$extensionId"
+            params={{ extensionId: member.extensionId }}
+            className="text-primary hover:underline font-mono text-sm"
+          >
+            {member.extensionId.slice(0, 8) + "..."}
+          </Link>
+        ) : (
+          <span className="font-mono text-xs">---</span>
+        )}
       </TableCell>
       <TableCell><span className="text-sm">{member.priority}</span></TableCell>
       <TableCell><span className="text-sm">{member.penalty}</span></TableCell>
@@ -756,7 +766,13 @@ function CallQueueDetailPage() {
                 <div className="space-y-1">
                   <p className="text-xs font-medium text-muted-foreground">Team ID</p>
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs break-all">{data.teamId}</span>
+                    <Link
+                      to="/teams/$teamId"
+                      params={{ teamId: data.teamId }}
+                      className="text-primary hover:underline font-mono text-xs break-all"
+                    >
+                      {data.teamId}
+                    </Link>
                     <CopyButton value={data.teamId} label="team ID" />
                   </div>
                 </div>

@@ -233,7 +233,13 @@ function PhoneNumberDetailPage() {
                     <p className="text-muted-foreground">Team</p>
                     {data.teamId ? (
                       <div className="flex items-center gap-1">
-                        <p>{data.teamId}</p>
+                        <Link
+                          to="/teams/$teamId"
+                          params={{ teamId: data.teamId }}
+                          className="text-primary hover:underline"
+                        >
+                          {data.teamId.slice(0, 8)}...
+                        </Link>
                         <CopyButton value={data.teamId} label="team ID" />
                       </div>
                     ) : (
@@ -284,7 +290,13 @@ function PhoneNumberDetailPage() {
                     <p className="text-muted-foreground">Team</p>
                     {data.teamId ? (
                       <div className="flex items-center gap-1">
-                        <p className="font-mono text-xs">{data.teamId}</p>
+                        <Link
+                          to="/teams/$teamId"
+                          params={{ teamId: data.teamId }}
+                          className="font-mono text-xs text-primary hover:underline"
+                        >
+                          {data.teamId.slice(0, 8)}...
+                        </Link>
                         <CopyButton value={data.teamId} label="team ID" />
                       </div>
                     ) : (

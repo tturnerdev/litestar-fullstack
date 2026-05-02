@@ -52,6 +52,13 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
@@ -78,7 +85,22 @@ export const Route = createFileRoute("/_app/webhooks/")({
 
 // -- Constants ----------------------------------------------------------------
 
-const PAGE_SIZE = 25
+const PAGE_SIZES = [10, 25, 50, 100] as const
+const DEFAULT_PAGE_SIZE = 25
+const PAGE_SIZE_STORAGE_KEY = "webhooks-page-size"
+
+function getStoredPageSize(): number {
+  try {
+    const stored = localStorage.getItem(PAGE_SIZE_STORAGE_KEY)
+    if (stored) {
+      const parsed = Number(stored)
+      if ((PAGE_SIZES as readonly number[]).includes(parsed)) return parsed
+    }
+  } catch {
+    // localStorage unavailable
+  }
+  return DEFAULT_PAGE_SIZE
+}
 
 const csvHeaders: CsvHeader<WebhookList>[] = [
   { label: "Name", accessor: (w) => w.name },
@@ -593,6 +615,7 @@ function WebhooksPage() {
   const searchInputRef = useRef<HTMLInputElement>(null)
 
   const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(getStoredPageSize)
   const [search, setSearch] = useState("")
   const debouncedSearch = useDebouncedValue(search)
   const [createOpen, setCreateOpen] = useState(false)
@@ -631,12 +654,24 @@ function WebhooksPage() {
     return () => document.removeEventListener("keydown", handleKeyDown)
   }, [])
 
+  // Persist page size preference
+  const handlePageSizeChange = useCallback((value: string) => {
+    const size = Number(value)
+    setPageSize(size)
+    setPage(1)
+    try {
+      localStorage.setItem(PAGE_SIZE_STORAGE_KEY, value)
+    } catch {
+      // localStorage unavailable
+    }
+  }, [])
+
   // Reset page when debounced search changes
   useEffect(() => {
     setPage(1)
   }, [debouncedSearch])
 
-  const { data, isLoading, isError, refetch } = useWebhooks(page, PAGE_SIZE, debouncedSearch || undefined)
+  const { data, isLoading, isError, refetch } = useWebhooks(page, pageSize, debouncedSearch || undefined)
   const deleteWebhook = useDeleteWebhook()
 
   const rawWebhooks = data?.items ?? []
@@ -679,7 +714,7 @@ function WebhooksPage() {
     exportToCsv("webhooks", csvHeaders, webhooks)
   }, [webhooks])
   const total = data?.total ?? 0
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
+  const totalPages = Math.max(1, Math.ceil(total / pageSize))
 
   const hasActiveFilters = search !== ""
 
@@ -896,26 +931,43 @@ function WebhooksPage() {
             </div>
 
             {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-end gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={page <= 1}
-                >
-                  Previous
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={page >= totalPages}
-                >
-                  Next
-                </Button>
+            <div className="flex items-center justify-end gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Rows per page</span>
+                <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
+                  <SelectTrigger className="h-8 w-[70px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PAGE_SIZES.map((size) => (
+                      <SelectItem key={size} value={String(size)}>
+                        {size}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-            )}
+              {totalPages > 1 && (
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page <= 1}
+                  >
+                    Previous
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page >= totalPages}
+                  >
+                    Next
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </PageSection>

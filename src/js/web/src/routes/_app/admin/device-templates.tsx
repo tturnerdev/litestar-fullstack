@@ -71,7 +71,22 @@ export const Route = createFileRoute("/_app/admin/device-templates")({
   component: AdminDeviceTemplatesPage,
 })
 
-const PAGE_SIZE = 25
+const PAGE_SIZES = [10, 25, 50, 100] as const
+const DEFAULT_PAGE_SIZE = 25
+const PAGE_SIZE_STORAGE_KEY = "device-templates-page-size"
+
+function getStoredPageSize(): number {
+  try {
+    const stored = localStorage.getItem(PAGE_SIZE_STORAGE_KEY)
+    if (stored) {
+      const parsed = Number(stored)
+      if ((PAGE_SIZES as readonly number[]).includes(parsed)) return parsed
+    }
+  } catch {
+    // localStorage unavailable
+  }
+  return DEFAULT_PAGE_SIZE
+}
 
 const deviceTypeOptions = [
   { value: "desk_phone", label: "Desk Phone" },
@@ -387,6 +402,7 @@ function TemplateFormDialog({
 function AdminDeviceTemplatesPage() {
   useDocumentTitle("Device Templates - Admin")
   const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(getStoredPageSize)
   const [search, setSearch] = useState("")
   const debouncedSearch = useDebouncedValue(search)
   const [createOpen, setCreateOpen] = useState(false)
@@ -405,17 +421,29 @@ function AdminDeviceTemplatesPage() {
     [sortKey, sortDir],
   )
 
+  // Persist page size preference
+  const handlePageSizeChange = useCallback((value: string) => {
+    const size = Number(value)
+    setPageSize(size)
+    setPage(1)
+    try {
+      localStorage.setItem(PAGE_SIZE_STORAGE_KEY, value)
+    } catch {
+      // localStorage unavailable
+    }
+  }, [])
+
   // Reset page when debounced search changes
   useEffect(() => {
     setPage(1)
   }, [debouncedSearch])
 
-  const { data, isLoading, isError, refetch } = useAdminDeviceTemplates(page, PAGE_SIZE, debouncedSearch || undefined)
+  const { data, isLoading, isError, refetch } = useAdminDeviceTemplates(page, pageSize, debouncedSearch || undefined)
   const deleteMutation = useDeleteDeviceTemplate()
 
   const rawTemplates = data?.items ?? []
   const total = data?.total ?? 0
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
+  const totalPages = Math.max(1, Math.ceil(total / pageSize))
 
   // Client-side sorting
   const templates = useMemo(() => {
@@ -655,31 +683,49 @@ function AdminDeviceTemplatesPage() {
                   </TableBody>
                 </Table>
                 </div>
-                {totalPages > 1 && (
-                  <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between">
                     <p className="text-xs text-muted-foreground">
-                      Page {page} of {totalPages} ({total} total)
+                      {total} template{total !== 1 ? "s" : ""}
+                      {totalPages > 1 && ` · Page ${page} of ${totalPages}`}
                     </p>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setPage((p) => Math.max(1, p - 1))}
-                        disabled={page <= 1}
-                      >
-                        Previous
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                        disabled={page >= totalPages}
-                      >
-                        Next
-                      </Button>
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">Rows per page</span>
+                        <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
+                          <SelectTrigger className="h-8 w-[70px]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {PAGE_SIZES.map((size) => (
+                              <SelectItem key={size} value={String(size)}>
+                                {size}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      {totalPages > 1 && (
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setPage((p) => Math.max(1, p - 1))}
+                            disabled={page <= 1}
+                          >
+                            Previous
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                            disabled={page >= totalPages}
+                          >
+                            Next
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </div>
-                )}
               </>
             )}
           </CardContent>

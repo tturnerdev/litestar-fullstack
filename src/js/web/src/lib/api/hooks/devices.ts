@@ -311,6 +311,23 @@ export function useDevicesByLocation(locationId: string | undefined) {
 }
 
 // ---------------------------------------------------------------------------
+// Devices by Team (client-side filter)
+// ---------------------------------------------------------------------------
+
+export function useDevicesByTeam(teamId: string | undefined) {
+  return useQuery({
+    queryKey: ["devices", "by-team", teamId],
+    queryFn: async () => {
+      const query: ListDevicesData["query"] = { pageSize: 200 }
+      const response = await listDevices({ query })
+      const data = response.data as { items: Device[]; total: number }
+      return (data.items ?? []).filter((d) => d.teamId === teamId)
+    },
+    enabled: !!teamId,
+  })
+}
+
+// ---------------------------------------------------------------------------
 // Device Screenshot (LCD live view)
 // ---------------------------------------------------------------------------
 

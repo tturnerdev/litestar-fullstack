@@ -195,6 +195,16 @@ function VoicemailBoxDetailPage() {
                 {box.unreadCount} unread
               </Badge>
             )}
+            {box.extensionId && (
+              <Button variant="outline" size="sm" asChild>
+                <Link
+                  to="/voice/extensions/$extensionId"
+                  params={{ extensionId: box.extensionId }}
+                >
+                  View Extension
+                </Link>
+              </Button>
+            )}
             <Button variant="outline" size="sm" asChild>
               <Link to="/voicemail">
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back to Voicemail

@@ -228,6 +228,18 @@ export function useExtensionsByPhoneNumber(phoneNumberId: string) {
   })
 }
 
+export function useExtensionsByTeam(memberUserIds: string[]) {
+  return useQuery({
+    queryKey: ["voice", "extensions", "by-team", memberUserIds],
+    queryFn: async () => {
+      const response = await apiFetch<PaginatedResponse<Extension>>("/api/voice/extensions?pageSize=200")
+      const userIdSet = new Set(memberUserIds)
+      return response.items.filter((ext) => userIdSet.has(ext.userId))
+    },
+    enabled: memberUserIds.length > 0,
+  })
+}
+
 export function useExtension(id: string) {
   return useQuery({
     queryKey: ["voice", "extension", id],
