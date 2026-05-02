@@ -5,6 +5,7 @@ import {
   Clock,
   Download,
   Eye,
+  GitFork,
   Home,
   Loader2,
   Menu,
@@ -17,6 +18,7 @@ import {
   Users,
   X,
 } from "lucide-react"
+import { StatCard } from "@/components/home/stat-card"
 import { Badge } from "@/components/ui/badge"
 import {
   Breadcrumb,
@@ -1375,6 +1377,12 @@ function CallRoutingPage() {
   const { tab = "time-conditions" } = Route.useSearch()
   const navigate = Route.useNavigate()
 
+  // Summary stat queries — fetch page 1 with pageSize 1 just to get totals
+  const { data: tcData, isLoading: tcLoading } = useTimeConditions({ page: 1, pageSize: 1 })
+  const { data: ivrData, isLoading: ivrLoading } = useIvrMenus({ page: 1, pageSize: 1 })
+  const { data: cqData, isLoading: cqLoading } = useCallQueues({ page: 1, pageSize: 1 })
+  const { data: rgData, isLoading: rgLoading } = useRingGroups({ page: 1, pageSize: 1 })
+
   const setTab = useCallback(
     (value: string) => {
       navigate({ search: () => ({ tab: value }), replace: true })
@@ -1408,6 +1416,43 @@ function CallRoutingPage() {
         description="Manage time conditions, IVR menus, call queues, and ring groups."
         breadcrumbs={breadcrumbs}
       />
+
+      <PageSection>
+        <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+          <StatCard
+            label="Time Conditions"
+            value={tcData?.total}
+            icon={Clock}
+            iconClassName="bg-sky-500/10 text-sky-600 dark:text-sky-400"
+            isLoading={tcLoading}
+            index={0}
+          />
+          <StatCard
+            label="IVR Menus"
+            value={ivrData?.total}
+            icon={GitFork}
+            iconClassName="bg-violet-500/10 text-violet-600 dark:text-violet-400"
+            isLoading={ivrLoading}
+            index={1}
+          />
+          <StatCard
+            label="Call Queues"
+            value={cqData?.total}
+            icon={Phone}
+            iconClassName="bg-amber-500/10 text-amber-600 dark:text-amber-400"
+            isLoading={cqLoading}
+            index={2}
+          />
+          <StatCard
+            label="Ring Groups"
+            value={rgData?.total}
+            icon={Users}
+            iconClassName="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+            isLoading={rgLoading}
+            index={3}
+          />
+        </div>
+      </PageSection>
 
       <PageSection>
         <Tabs value={tab} onValueChange={setTab}>

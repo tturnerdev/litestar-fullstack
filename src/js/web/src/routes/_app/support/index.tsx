@@ -46,7 +46,7 @@ import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
-import { SkeletonTable } from "@/components/ui/skeleton"
+import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
@@ -343,6 +343,20 @@ function SupportPage() {
       return true
     })
   }, [data?.items, statusFilter, priorityFilter, categoryFilter, startDate, endDate])
+
+  // Ticket summary stats (computed from ALL items on the current page)
+  const ticketStats = useMemo(() => {
+    const items = data?.items ?? []
+    let open = 0
+    let inProgress = 0
+    let resolved = 0
+    for (const ticket of items) {
+      if (ticket.status === "open") open++
+      else if (ticket.status === "in_progress") inProgress++
+      else if (ticket.status === "resolved") resolved++
+    }
+    return { open, inProgress, resolved, total: data?.total ?? 0 }
+  }, [data?.items, data?.total])
 
   // Selection helpers
   const allVisibleIds = useMemo(() => filteredItems.map((t) => t.id), [filteredItems])
@@ -818,6 +832,40 @@ function SupportPage() {
           )}
         </div>
       </PageSection>
+
+      {/* Summary stats */}
+      <div className="flex flex-wrap items-center gap-2">
+        {isLoading ? (
+          <>
+            <Skeleton className="h-7 w-28 rounded-full" />
+            <Skeleton className="h-7 w-32 rounded-full" />
+            <Skeleton className="h-7 w-28 rounded-full" />
+            <Skeleton className="h-7 w-24 rounded-full" />
+          </>
+        ) : (
+          <>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-700 dark:text-blue-400">
+              <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+              Open
+              <span className="ml-0.5 font-semibold">{ticketStats.open}</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-700 dark:text-amber-400">
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+              In Progress
+              <span className="ml-0.5 font-semibold">{ticketStats.inProgress}</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              Resolved
+              <span className="ml-0.5 font-semibold">{ticketStats.resolved}</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground">
+              Total
+              <span className="ml-0.5 font-semibold text-foreground">{ticketStats.total}</span>
+            </span>
+          </>
+        )}
+      </div>
 
       {/* Search & filters */}
       <PageSection>

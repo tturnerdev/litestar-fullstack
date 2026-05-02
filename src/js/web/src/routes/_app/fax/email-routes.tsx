@@ -1,24 +1,7 @@
-import { toast } from "sonner"
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { useDebouncedValue } from "@/hooks/use-debounced-value"
-import { useDocumentTitle } from "@/hooks/use-document-title"
-import { cn } from "@/lib/utils"
-import {
-  AlertCircle,
-  AlertTriangle,
-  Bell,
-  BellOff,
-  Download,
-  Eye,
-  Mail,
-  MailPlus,
-  MoreVertical,
-  Pencil,
-  Search,
-  Trash2,
-  X,
-} from "lucide-react"
+import { AlertCircle, AlertTriangle, Bell, BellOff, Copy, Download, Eye, Mail, MailPlus, MoreVertical, Pencil, Search, Trash2, X } from "lucide-react"
 import { useCallback, useMemo, useState } from "react"
+import { toast } from "sonner"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,68 +13,32 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
 import { Button, buttonVariants } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { CopyButton } from "@/components/ui/copy-button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { DataFreshness } from "@/components/ui/data-freshness"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
+import { FilterDropdown, type FilterOption } from "@/components/ui/filter-dropdown"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { DataFreshness } from "@/components/ui/data-freshness"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { SkeletonTable } from "@/components/ui/skeleton"
+import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Switch } from "@/components/ui/switch"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import {
-  type FaxEmailRouteWithNumber,
-  useAllFaxEmailRoutes,
-  useCreateFaxEmailRoute,
-  useDeleteFaxEmailRoute,
-  useFaxNumbers,
-  useUpdateFaxEmailRoute,
-} from "@/lib/api/hooks/fax"
-import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
+import { useDebouncedValue } from "@/hooks/use-debounced-value"
+import { useDocumentTitle } from "@/hooks/use-document-title"
+import { type FaxEmailRouteWithNumber, useAllFaxEmailRoutes, useCreateFaxEmailRoute, useDeleteFaxEmailRoute, useFaxNumbers, useUpdateFaxEmailRoute } from "@/lib/api/hooks/fax"
+import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { formatDateTime } from "@/lib/date-utils"
 import { client } from "@/lib/generated/api/client.gen"
+import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/fax/email-routes")({
   component: FaxEmailRoutesPage,
@@ -112,17 +59,16 @@ const csvHeaders: CsvHeader<FaxEmailRouteWithNumber>[] = [
   { label: "Created", accessor: (r) => formatDateTime(r.createdAt, "") },
 ]
 
+const statusFilterOptions: FilterOption[] = [
+  { value: "active", label: "Active" },
+  { value: "inactive", label: "Inactive" },
+]
+
 // ---------------------------------------------------------------------------
 // Create Dialog
 // ---------------------------------------------------------------------------
 
-function CreateEmailRouteDialog({
-  open,
-  onOpenChange,
-}: {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-}) {
+function CreateEmailRouteDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   const { data: numbers } = useFaxNumbers(1, 200)
   const [faxNumberId, setFaxNumberId] = useState("")
   const [emailAddress, setEmailAddress] = useState("")
@@ -181,9 +127,7 @@ function CreateEmailRouteDialog({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>New Email Route</DialogTitle>
-          <DialogDescription>
-            Route incoming faxes to an email address.
-          </DialogDescription>
+          <DialogDescription>Route incoming faxes to an email address.</DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-2">
           <div className="space-y-2">
@@ -201,7 +145,8 @@ function CreateEmailRouteDialog({
               <SelectContent>
                 {numbers?.items.map((n) => (
                   <SelectItem key={n.id} value={n.id}>
-                    {n.number}{n.label ? ` (${n.label})` : ""}
+                    {n.number}
+                    {n.label ? ` (${n.label})` : ""}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -234,19 +179,11 @@ function CreateEmailRouteDialog({
           </div>
           <div className="flex items-center justify-between">
             <Label htmlFor="create-active">Active</Label>
-            <Switch
-              id="create-active"
-              checked={isActive}
-              onCheckedChange={setIsActive}
-            />
+            <Switch id="create-active" checked={isActive} onCheckedChange={setIsActive} />
           </div>
           <div className="flex items-center justify-between">
             <Label htmlFor="create-notify">Notify on Failure</Label>
-            <Switch
-              id="create-notify"
-              checked={notifyOnFailure}
-              onCheckedChange={setNotifyOnFailure}
-            />
+            <Switch id="create-notify" checked={notifyOnFailure} onCheckedChange={setNotifyOnFailure} />
           </div>
         </div>
         <DialogFooter>
@@ -260,10 +197,7 @@ function CreateEmailRouteDialog({
           >
             Cancel
           </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={createMutation.isPending || !faxNumberId || !emailAddress.trim()}
-          >
+          <Button onClick={handleSubmit} disabled={createMutation.isPending || !faxNumberId || !emailAddress.trim()}>
             {createMutation.isPending ? "Creating..." : "Create Route"}
           </Button>
         </DialogFooter>
@@ -276,22 +210,13 @@ function CreateEmailRouteDialog({
 // Edit Dialog
 // ---------------------------------------------------------------------------
 
-function EditEmailRouteDialog({
-  route,
-  onOpenChange,
-}: {
-  route: FaxEmailRouteWithNumber | null
-  onOpenChange: (open: boolean) => void
-}) {
+function EditEmailRouteDialog({ route, onOpenChange }: { route: FaxEmailRouteWithNumber | null; onOpenChange: (open: boolean) => void }) {
   const [emailAddress, setEmailAddress] = useState(route?.emailAddress ?? "")
   const [isActive, setIsActive] = useState(route?.isActive ?? true)
   const [notifyOnFailure, setNotifyOnFailure] = useState(route?.notifyOnFailure ?? true)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
-  const updateMutation = useUpdateFaxEmailRoute(
-    route?.faxNumberId ?? "",
-    route?.id ?? "",
-  )
+  const updateMutation = useUpdateFaxEmailRoute(route?.faxNumberId ?? "", route?.id ?? "")
 
   function handleSubmit() {
     const trimmed = emailAddress.trim()
@@ -341,10 +266,7 @@ function EditEmailRouteDialog({
         <DialogHeader>
           <DialogTitle>Edit Email Route</DialogTitle>
           <DialogDescription>
-            Update the routing for{" "}
-            <span className="font-mono text-foreground">
-              {route?.faxNumber}
-            </span>
+            Update the routing for <span className="font-mono text-foreground">{route?.faxNumber}</span>
             {route?.faxNumberLabel ? ` (${route.faxNumberLabel})` : ""}
           </DialogDescription>
         </DialogHeader>
@@ -375,33 +297,18 @@ function EditEmailRouteDialog({
           </div>
           <div className="flex items-center justify-between">
             <Label htmlFor="edit-active">Active</Label>
-            <Switch
-              id="edit-active"
-              checked={isActive}
-              onCheckedChange={setIsActive}
-            />
+            <Switch id="edit-active" checked={isActive} onCheckedChange={setIsActive} />
           </div>
           <div className="flex items-center justify-between">
             <Label htmlFor="edit-notify">Notify on Failure</Label>
-            <Switch
-              id="edit-notify"
-              checked={notifyOnFailure}
-              onCheckedChange={setNotifyOnFailure}
-            />
+            <Switch id="edit-notify" checked={notifyOnFailure} onCheckedChange={setNotifyOnFailure} />
           </div>
         </div>
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={updateMutation.isPending}
-          >
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={updateMutation.isPending}>
             Cancel
           </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={updateMutation.isPending}
-          >
+          <Button onClick={handleSubmit} disabled={updateMutation.isPending}>
             {updateMutation.isPending ? "Saving..." : "Save Changes"}
           </Button>
         </DialogFooter>
@@ -414,13 +321,7 @@ function EditEmailRouteDialog({
 // Delete Dialog
 // ---------------------------------------------------------------------------
 
-function DeleteEmailRouteDialog({
-  route,
-  onOpenChange,
-}: {
-  route: FaxEmailRouteWithNumber | null
-  onOpenChange: (open: boolean) => void
-}) {
+function DeleteEmailRouteDialog({ route, onOpenChange }: { route: FaxEmailRouteWithNumber | null; onOpenChange: (open: boolean) => void }) {
   const deleteMutation = useDeleteFaxEmailRoute(route?.faxNumberId ?? "")
 
   return (
@@ -432,22 +333,12 @@ function DeleteEmailRouteDialog({
             Delete Email Route
           </AlertDialogTitle>
           <AlertDialogDescription>
-            Are you sure you want to remove the route for{" "}
-            <span className="font-medium text-foreground">
-              {route?.emailAddress}
-            </span>{" "}
-            on fax number{" "}
-            <span className="font-mono text-foreground">
-              {route?.faxNumber}
-            </span>
-            ? This action cannot be undone.
+            Are you sure you want to remove the route for <span className="font-medium text-foreground">{route?.emailAddress}</span> on fax number{" "}
+            <span className="font-mono text-foreground">{route?.faxNumber}</span>? This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel
-            onClick={() => onOpenChange(false)}
-            disabled={deleteMutation.isPending}
-          >
+          <AlertDialogCancel onClick={() => onOpenChange(false)} disabled={deleteMutation.isPending}>
             Cancel
           </AlertDialogCancel>
           <AlertDialogAction
@@ -487,27 +378,85 @@ function FaxEmailRoutesPage() {
   const [editRoute, setEditRoute] = useState<FaxEmailRouteWithNumber | null>(null)
   const [deleteRoute, setDeleteRoute] = useState<FaxEmailRouteWithNumber | null>(null)
 
-  // Search state
+  // Search & filter state
   const [search, setSearch] = useState("")
   const debouncedSearch = useDebouncedValue(search)
+  const [statusFilter, setStatusFilter] = useState<string[]>([])
+
+  // Sort state
+  const [sortKey, setSortKey] = useState<string | null>(null)
+  const [sortDir, setSortDir] = useState<SortDirection>(null)
+
+  const handleSort = useCallback(
+    (key: string) => {
+      const next = nextSortDirection(sortKey, sortDir, key)
+      setSortKey(next.sort)
+      setSortDir(next.direction)
+    },
+    [sortKey, sortDir],
+  )
 
   const filteredRoutes = useMemo(() => {
     if (!routes) return []
-    if (!debouncedSearch) return routes
-    const q = debouncedSearch.toLowerCase()
-    return routes.filter(
-      (route) =>
-        route.emailAddress?.toLowerCase().includes(q) ||
-        route.faxNumber?.toLowerCase().includes(q),
-    )
-  }, [routes, debouncedSearch])
+    let result = routes
+
+    // Status filter
+    if (statusFilter.length === 1) {
+      const wantActive = statusFilter[0] === "active"
+      result = result.filter((r) => r.isActive === wantActive)
+    }
+
+    // Text search
+    if (debouncedSearch) {
+      const q = debouncedSearch.toLowerCase()
+      result = result.filter((route) => route.emailAddress?.toLowerCase().includes(q) || route.faxNumber?.toLowerCase().includes(q))
+    }
+
+    return result
+  }, [routes, debouncedSearch, statusFilter])
+
+  // Client-side sorting
+  const sortedRoutes = useMemo(() => {
+    if (!sortKey || !sortDir) return filteredRoutes
+    const sorted = [...filteredRoutes]
+    sorted.sort((a, b) => {
+      let aVal: string | number
+      let bVal: string | number
+      switch (sortKey) {
+        case "email":
+          aVal = a.emailAddress.toLowerCase()
+          bVal = b.emailAddress.toLowerCase()
+          break
+        case "faxNumber":
+          aVal = a.faxNumber.toLowerCase()
+          bVal = b.faxNumber.toLowerCase()
+          break
+        case "status":
+          aVal = a.isActive ? 0 : 1
+          bVal = b.isActive ? 0 : 1
+          break
+        case "created":
+          aVal = a.createdAt ?? ""
+          bVal = b.createdAt ?? ""
+          break
+        default:
+          return 0
+      }
+      if (aVal < bVal) return sortDir === "asc" ? -1 : 1
+      if (aVal > bVal) return sortDir === "asc" ? 1 : -1
+      return 0
+    })
+    return sorted
+  }, [filteredRoutes, sortKey, sortDir])
+
+  const activeFilterCount = statusFilter.length + (debouncedSearch ? 1 : 0)
 
   // Selection state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
-  const allVisibleIds = useMemo(() => filteredRoutes.map((r) => r.id), [filteredRoutes])
-  const allSelected = filteredRoutes.length > 0 && filteredRoutes.every((r) => selectedIds.has(r.id))
-  const someSelected = filteredRoutes.some((r) => selectedIds.has(r.id))
+  const allVisibleIds = useMemo(() => sortedRoutes.map((r) => r.id), [sortedRoutes])
+  const allSelected = sortedRoutes.length > 0 && sortedRoutes.every((r) => selectedIds.has(r.id))
+  const someSelected = sortedRoutes.some((r) => selectedIds.has(r.id))
 
   const toggleAll = useCallback(() => {
     if (allSelected) {
@@ -551,11 +500,7 @@ function FaxEmailRoutesPage() {
           setSelectedIds(new Set())
         },
       ),
-      createExportAction<FaxEmailRouteWithNumber>(
-        "fax-email-routes-selected",
-        csvHeaders,
-        (ids) => (routes ?? []).filter((r) => ids.includes(r.id)),
-      ),
+      createExportAction<FaxEmailRouteWithNumber>("fax-email-routes-selected", csvHeaders, (ids) => (routes ?? []).filter((r) => ids.includes(r.id))),
     ],
     [routes],
   )
@@ -593,11 +538,7 @@ function FaxEmailRoutesPage() {
         breadcrumbs={breadcrumbs}
         actions={
           <div className="flex items-center gap-3">
-            <DataFreshness
-              dataUpdatedAt={dataUpdatedAt}
-              onRefresh={() => refetch()}
-              isRefreshing={isRefetching}
-            />
+            <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
             <Button variant="outline" size="sm" onClick={handleExportAll} disabled={!hasData}>
               <Download className="mr-2 h-4 w-4" />
               Export
@@ -618,27 +559,16 @@ function FaxEmailRoutesPage() {
             title="Unable to load email routes"
             description="Something went wrong while fetching email routes. Please try refreshing the page."
             action={
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => window.location.reload()}
-              >
+              <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
                 Refresh page
               </Button>
             }
           />
         ) : routes && routes.length > 0 ? (
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>All Email Routes</CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  {debouncedSearch
-                    ? `Showing ${filteredRoutes.length} of ${routes.length} routes`
-                    : `${routes.filter((r) => r.isActive).length} of ${routes.length} routes active`}
-                </p>
-              </div>
-              <div className="relative mt-2 max-w-sm">
+          <div className="space-y-4">
+            {/* Filters */}
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="relative max-w-sm flex-1">
                 <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   placeholder="Search by email or fax number..."
@@ -658,169 +588,168 @@ function FaxEmailRoutesPage() {
                   </button>
                 )}
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-              <Table aria-label="Email routes">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-10">
-                      <Checkbox
-                        checked={allSelected}
-                        indeterminate={someSelected && !allSelected}
-                        onChange={toggleAll}
-                        aria-label="Select all email routes"
-                      />
-                    </TableHead>
-                    <TableHead>Email Address</TableHead>
-                    <TableHead>Fax Number</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Failure Alerts</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead className="w-16 text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredRoutes.length === 0 && debouncedSearch ? (
+              <FilterDropdown label="Status" options={statusFilterOptions} selected={statusFilter} onChange={setStatusFilter} />
+              {activeFilterCount > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs text-muted-foreground"
+                  onClick={() => {
+                    setSearch("")
+                    setStatusFilter([])
+                  }}
+                >
+                  Clear filters
+                </Button>
+              )}
+              <p className="ml-auto text-sm text-muted-foreground">
+                {activeFilterCount > 0
+                  ? `Showing ${sortedRoutes.length} of ${routes.length} routes`
+                  : `${routes.filter((r) => r.isActive).length} of ${routes.length} routes active`}
+              </p>
+            </div>
+
+            {sortedRoutes.length === 0 ? (
+              <EmptyState
+                icon={Search}
+                title="No matching routes"
+                description="No email routes match your current filters. Try adjusting your search or filter criteria."
+                action={
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setSearch("")
+                      setStatusFilter([])
+                    }}
+                  >
+                    Clear filters
+                  </Button>
+                }
+              />
+            ) : (
+              <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
+                <Table aria-label="Email routes">
+                  <TableHeader className="sticky top-0 z-10 bg-background">
                     <TableRow>
-                      <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
-                        No routes matching "{debouncedSearch}"
-                      </TableCell>
+                      <TableHead className="w-10">
+                        <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all email routes" />
+                      </TableHead>
+                      <SortableHeader label="Email Address" sortKey="email" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                      <SortableHeader label="Fax Number" sortKey="faxNumber" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                      <SortableHeader label="Status" sortKey="status" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                      <TableHead>Failure Alerts</TableHead>
+                      <SortableHeader label="Created" sortKey="created" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                      <TableHead className="w-16 text-right">Actions</TableHead>
                     </TableRow>
-                  ) : null}
-                  {filteredRoutes.map((route, index) => (
-                    <TableRow
-                      key={route.id}
-                      data-state={selectedIds.has(route.id) ? "selected" : undefined}
-                      className={cn(
-                        "cursor-pointer hover:bg-muted/50 transition-colors",
-                        index % 2 === 1 ? "bg-muted/20" : "",
-                      )}
-                      onClick={(e) => {
-                        const target = e.target as HTMLElement
-                        if (
-                          target.closest("[role=checkbox]") ||
-                          target.closest("[data-slot=dropdown]") ||
-                          target.closest("button") ||
-                          target.closest("a")
-                        ) {
-                          return
-                        }
-                        setEditRoute(route)
-                      }}
-                    >
-                      <TableCell>
-                        <Checkbox
-                          checked={selectedIds.has(route.id)}
-                          onChange={(e) => {
-                            e.stopPropagation()
-                            toggleOne(route.id)
-                          }}
-                          aria-label={`Select route for ${route.emailAddress}`}
-                        />
-                      </TableCell>
-                      <TableCell className="font-mono text-sm">
-                        <span className="inline-flex items-center gap-1">
-                          {route.emailAddress}
-                          <CopyButton value={route.emailAddress} label="email address" />
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <span className="inline-flex items-center gap-1">
-                          <Link
-                            to="/fax/numbers/$faxNumberId"
-                            params={{ faxNumberId: route.faxNumberId }}
-                            className="text-sm text-primary hover:underline"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <span className="font-mono">{route.faxNumber}</span>
-                            {route.faxNumberLabel && (
-                              <span className="ml-1.5 text-muted-foreground">
-                                ({route.faxNumberLabel})
-                              </span>
-                            )}
-                          </Link>
-                          <CopyButton value={route.faxNumber} label="fax number" />
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={route.isActive ? "default" : "secondary"}
-                        >
-                          {route.isActive ? "Active" : "Inactive"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {route.notifyOnFailure ? (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <span className="inline-flex items-center gap-1 text-sm text-emerald-600 dark:text-emerald-400">
-                                <Bell className="h-3.5 w-3.5" /> On
-                              </span>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              Failure notifications enabled
-                            </TooltipContent>
-                          </Tooltip>
-                        ) : (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
-                                <BellOff className="h-3.5 w-3.5" /> Off
-                              </span>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              Failure notifications disabled
-                            </TooltipContent>
-                          </Tooltip>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {formatDateTime(route.createdAt, "--")}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
-                              data-slot="dropdown"
+                  </TableHeader>
+                  <TableBody>
+                    {sortedRoutes.map((route, index) => (
+                      <TableRow
+                        key={route.id}
+                        data-state={selectedIds.has(route.id) ? "selected" : undefined}
+                        className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 ? "bg-muted/20" : "")}
+                        onClick={(e) => {
+                          const target = e.target as HTMLElement
+                          if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) {
+                            return
+                          }
+                          setEditRoute(route)
+                        }}
+                      >
+                        <TableCell>
+                          <Checkbox
+                            checked={selectedIds.has(route.id)}
+                            onChange={(e) => {
+                              e.stopPropagation()
+                              toggleOne(route.id)
+                            }}
+                            aria-label={`Select route for ${route.emailAddress}`}
+                          />
+                        </TableCell>
+                        <TableCell className="font-mono text-sm">
+                          <span className="inline-flex items-center gap-1">
+                            {route.emailAddress}
+                            <CopyButton value={route.emailAddress} label="email address" />
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <span className="inline-flex items-center gap-1">
+                            <Link
+                              to="/fax/numbers/$faxNumberId"
+                              params={{ faxNumberId: route.faxNumberId }}
+                              className="text-sm text-primary hover:underline"
                               onClick={(e) => e.stopPropagation()}
                             >
-                              <MoreVertical className="h-4 w-4" />
-                              <span className="sr-only">Actions for {route.emailAddress}</span>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem asChild>
-                              <Link to="/fax/numbers/$faxNumberId" params={{ faxNumberId: route.faxNumberId }}>
-                                <Eye className="mr-2 h-4 w-4" />
-                                View fax number
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setEditRoute(route)}>
-                              <Pencil className="mr-2 h-4 w-4" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              className="text-destructive focus:text-destructive"
-                              onClick={() => setDeleteRoute(route)}
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                              <span className="font-mono">{route.faxNumber}</span>
+                              {route.faxNumberLabel && <span className="ml-1.5 text-muted-foreground">({route.faxNumberLabel})</span>}
+                            </Link>
+                            <CopyButton value={route.faxNumber} label="fax number" />
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={route.isActive ? "default" : "secondary"}>{route.isActive ? "Active" : "Inactive"}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          {route.notifyOnFailure ? (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className="inline-flex items-center gap-1 text-sm text-emerald-600 dark:text-emerald-400">
+                                  <Bell className="h-3.5 w-3.5" /> On
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent>Failure notifications enabled</TooltipContent>
+                            </Tooltip>
+                          ) : (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
+                                  <BellOff className="h-3.5 w-3.5" /> Off
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent>Failure notifications disabled</TooltipContent>
+                            </Tooltip>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">{formatDateTime(route.createdAt, "--")}</TableCell>
+                        <TableCell className="text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8" data-slot="dropdown" onClick={(e) => e.stopPropagation()}>
+                                <MoreVertical className="h-4 w-4" />
+                                <span className="sr-only">Actions for {route.emailAddress}</span>
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => navigator.clipboard.writeText(route.id)}>
+                                <Copy className="mr-2 h-4 w-4" />
+                                Copy Route ID
+                              </DropdownMenuItem>
+                              <DropdownMenuItem asChild>
+                                <Link to="/fax/numbers/$faxNumberId" params={{ faxNumberId: route.faxNumberId }}>
+                                  <Eye className="mr-2 h-4 w-4" />
+                                  View fax number
+                                </Link>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => setEditRoute(route)}>
+                                <Pencil className="mr-2 h-4 w-4" />
+                                Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setDeleteRoute(route)}>
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </div>
-            </CardContent>
-          </Card>
+            )}
+          </div>
         ) : (
           <EmptyState
             icon={Mail}
@@ -835,10 +764,7 @@ function FaxEmailRoutesPage() {
         )}
       </PageSection>
 
-      <CreateEmailRouteDialog
-        open={showCreateDialog}
-        onOpenChange={setShowCreateDialog}
-      />
+      <CreateEmailRouteDialog open={showCreateDialog} onOpenChange={setShowCreateDialog} />
       <EditEmailRouteDialog
         route={editRoute}
         onOpenChange={(open) => {
@@ -853,12 +779,7 @@ function FaxEmailRoutesPage() {
       />
 
       {/* Bulk action bar */}
-      <BulkActionBar
-        selectedCount={selectedIds.size}
-        selectedIds={Array.from(selectedIds)}
-        onClearSelection={() => setSelectedIds(new Set())}
-        actions={bulkActions}
-      />
+      <BulkActionBar selectedCount={selectedIds.size} selectedIds={Array.from(selectedIds)} onClearSelection={() => setSelectedIds(new Set())} actions={bulkActions} />
     </PageContainer>
   )
 }

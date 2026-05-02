@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.220.0 (2026-05-02)
+
+### Added
+- **Call routing summary stats** — Four stat cards showing time conditions, IVR menus, call queues, and ring groups counts at top of call routing page
+- **Support ticket summary badges** — Compact status distribution pills (open, in progress, resolved, total) above the ticket list
+- **Fax email routes improvements** — Copy Route ID action, column sorting, status filter dropdown, and filtered empty state
+
 ## v0.219.0 (2026-05-02)
 
 ### Added
