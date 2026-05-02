@@ -58,6 +58,7 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -696,6 +697,7 @@ function CallQueueDetailPage() {
         <div className="grid gap-6 md:grid-cols-[1.1fr_0.9fr]">
           <div className="space-y-6">
             {/* Queue Configuration */}
+            <SectionErrorBoundary name="Queue Configuration">
             <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -719,8 +721,10 @@ function CallQueueDetailPage() {
                 </div>
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
 
             {/* Members */}
+            <SectionErrorBoundary name="Queue Members">
             <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -765,8 +769,10 @@ function CallQueueDetailPage() {
                 <AddMemberRow queueId={callQueueId} />
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
 
             {/* Danger Zone */}
+            <SectionErrorBoundary name="Danger Zone">
             <Card className="border-destructive/30 bg-card/80 shadow-md">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-destructive">
@@ -784,10 +790,12 @@ function CallQueueDetailPage() {
                 </div>
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
           </div>
 
           {/* Sidebar */}
           <div className="space-y-4">
+            <SectionErrorBoundary name="Metadata">
             <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Phone className="h-4 w-4" /> Metadata</CardTitle>
@@ -816,7 +824,9 @@ function CallQueueDetailPage() {
                 </div>
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
 
+            <SectionErrorBoundary name="Summary">
             <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Phone className="h-4 w-4" /> Summary</CardTitle>
@@ -843,6 +853,7 @@ function CallQueueDetailPage() {
                 </div>
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
           </div>
         </div>
       </PageSection>

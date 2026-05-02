@@ -48,6 +48,7 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -509,6 +510,7 @@ function IvrMenuDetailPage() {
         <div className="grid gap-6 md:grid-cols-[1.1fr_0.9fr]">
           <div className="space-y-6">
             {/* Menu Configuration */}
+            <SectionErrorBoundary name="Menu Configuration">
             <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
@@ -587,8 +589,10 @@ function IvrMenuDetailPage() {
                 )}
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
 
             {/* Options */}
+            <SectionErrorBoundary name="Menu Options">
             <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -632,8 +636,10 @@ function IvrMenuDetailPage() {
                 <AddOptionRow menuId={ivrMenuId} />
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
 
             {/* Danger Zone */}
+            <SectionErrorBoundary name="Danger Zone">
             <Card className="border-destructive/30 bg-card/80 shadow-md">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-destructive">
@@ -651,10 +657,12 @@ function IvrMenuDetailPage() {
                 </div>
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
           </div>
 
           {/* Sidebar */}
           <div className="space-y-4">
+            <SectionErrorBoundary name="Metadata">
             <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Menu className="h-4 w-4" /> Metadata</CardTitle>
@@ -677,7 +685,9 @@ function IvrMenuDetailPage() {
                 </div>
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
 
+            <SectionErrorBoundary name="Summary">
             <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Menu className="h-4 w-4" /> Summary</CardTitle>
@@ -699,6 +709,7 @@ function IvrMenuDetailPage() {
                 </div>
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
           </div>
         </div>
       </PageSection>

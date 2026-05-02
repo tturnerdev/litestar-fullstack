@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.242.0 (2026-05-03)
+
+### Added
+- **SectionErrorBoundary on call routing pages** — call queues, IVR menus, ring groups, and time conditions detail pages wrapped with error boundaries on all card sections
+- **SectionErrorBoundary on extension pages** — extension settings, DND, and forwarding pages wrapped with error boundaries
+- **SectionErrorBoundary on fax number detail** — all card sections wrapped
+- **Breadcrumbs on notifications list page** — standard Home → Notifications breadcrumb navigation
+
 ## v0.241.0 (2026-05-03)
 
 ### Added

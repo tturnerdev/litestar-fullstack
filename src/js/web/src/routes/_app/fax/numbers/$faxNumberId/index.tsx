@@ -55,6 +55,7 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
@@ -367,16 +368,21 @@ function FaxNumberDetailPage() {
 
       {/* Number Info (inline editing) */}
       <PageSection>
+        <SectionErrorBoundary name="Number Info">
         <FaxNumberSettingsCard faxNumberId={faxNumberId} messageCounts={messageCounts} editing={editing} setEditing={setEditing} />
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Email Routes */}
       <PageSection delay={0.1}>
+        <SectionErrorBoundary name="Email Routes">
         <EmailRouteEditor faxNumberId={faxNumberId} />
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Recent Messages */}
       <PageSection delay={0.15}>
+        <SectionErrorBoundary name="Recent Messages">
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -443,10 +449,12 @@ function FaxNumberDetailPage() {
             )}
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Related Resources */}
       <PageSection delay={0.2}>
+        <SectionErrorBoundary name="Related Resources">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -505,10 +513,12 @@ function FaxNumberDetailPage() {
             </div>
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Activity History */}
       <PageSection delay={0.25}>
+        <SectionErrorBoundary name="Activity History">
         <Card>
           <CardHeader>
             <CardTitle>Activity History</CardTitle>
@@ -520,10 +530,12 @@ function FaxNumberDetailPage() {
             />
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Danger Zone */}
       <PageSection delay={0.3}>
+        <SectionErrorBoundary name="Danger Zone">
         <Card className="border-destructive/30">
           <CardHeader>
             <CardTitle className="text-destructive">Danger Zone</CardTitle>
@@ -547,6 +559,7 @@ function FaxNumberDetailPage() {
             </div>
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
     </PageContainer>
   )

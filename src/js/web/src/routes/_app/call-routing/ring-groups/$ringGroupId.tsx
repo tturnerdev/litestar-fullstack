@@ -56,6 +56,7 @@ import { CopyButton } from "@/components/ui/copy-button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -613,6 +614,7 @@ function RingGroupDetailPage() {
         <div className="grid gap-6 md:grid-cols-[1.1fr_0.9fr]">
           <div className="space-y-6">
             {/* Configuration */}
+            <SectionErrorBoundary name="Group Configuration">
             <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -630,8 +632,10 @@ function RingGroupDetailPage() {
                 </div>
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
 
             {/* Members */}
+            <SectionErrorBoundary name="Group Members">
             <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -675,8 +679,10 @@ function RingGroupDetailPage() {
                 <AddMemberRow groupId={ringGroupId} />
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
 
             {/* Danger Zone */}
+            <SectionErrorBoundary name="Danger Zone">
             <Card className="border-destructive/30 bg-card/80 shadow-md">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-destructive">
@@ -694,10 +700,12 @@ function RingGroupDetailPage() {
                 </div>
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
           </div>
 
           {/* Sidebar */}
           <div className="space-y-4">
+            <SectionErrorBoundary name="Metadata">
             <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Users className="h-4 w-4" /> Metadata</CardTitle>
@@ -726,7 +734,9 @@ function RingGroupDetailPage() {
                 </div>
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
 
+            <SectionErrorBoundary name="Summary">
             <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Users className="h-4 w-4" /> Summary</CardTitle>
@@ -753,6 +763,7 @@ function RingGroupDetailPage() {
                 </div>
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
           </div>
         </div>
       </PageSection>

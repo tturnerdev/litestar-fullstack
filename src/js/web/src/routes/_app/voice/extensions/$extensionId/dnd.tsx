@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { EmptyState } from "@/components/ui/empty-state"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { DndSettingsForm } from "@/components/voice/dnd-settings-form"
 import { useDocumentTitle } from "@/hooks/use-document-title"
@@ -206,6 +207,7 @@ function DndPage() {
 
       {/* DND Status Card -- large visual indicator with toggle */}
       <PageSection>
+        <SectionErrorBoundary name="DND Status">
         <Card
           className={
             isEnabled
@@ -291,10 +293,12 @@ function DndPage() {
             </div>
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Quick Status Summary */}
       <PageSection delay={0.05}>
+        <SectionErrorBoundary name="DND Summary">
         <div className="grid gap-4 md:grid-cols-3">
           {/* Mode */}
           <Card>
@@ -370,11 +374,14 @@ function DndPage() {
             </CardContent>
           </Card>
         </div>
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Settings Form */}
       <PageSection delay={0.1}>
+        <SectionErrorBoundary name="DND Settings">
         <DndSettingsForm extensionId={extensionId} />
+        </SectionErrorBoundary>
       </PageSection>
     </PageContainer>
   )

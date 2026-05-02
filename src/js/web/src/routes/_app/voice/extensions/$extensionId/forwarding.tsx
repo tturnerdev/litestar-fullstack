@@ -42,6 +42,7 @@ import { ErrorState } from "@/components/ui/error-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import {
   Select,
   SelectContent,
@@ -243,6 +244,7 @@ function ForwardingPage() {
       />
 
       <PageSection>
+        <SectionErrorBoundary name="Forwarding Rules">
         {ruleCount === 0 ? (
           <EmptyState
             icon={PhoneForwarded}
@@ -274,6 +276,7 @@ function ForwardingPage() {
             </CardContent>
           </Card>
         )}
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Add rule dialog */}

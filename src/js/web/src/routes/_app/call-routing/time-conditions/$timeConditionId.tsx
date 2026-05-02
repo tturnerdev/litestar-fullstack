@@ -45,6 +45,7 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
@@ -312,6 +313,7 @@ function TimeConditionDetailPage() {
           {/* Main column */}
           <div className="space-y-6">
             {/* Configuration */}
+            <SectionErrorBoundary name="Configuration">
             <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
@@ -358,8 +360,10 @@ function TimeConditionDetailPage() {
                 )}
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
 
             {/* Override Mode */}
+            <SectionErrorBoundary name="Night Mode Override">
             <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -399,8 +403,10 @@ function TimeConditionDetailPage() {
                 </div>
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
 
             {/* Danger Zone */}
+            <SectionErrorBoundary name="Danger Zone">
             <Card className="border-destructive/30 bg-card/80 shadow-md">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-destructive">
@@ -418,10 +424,12 @@ function TimeConditionDetailPage() {
                 </div>
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
           </div>
 
           {/* Sidebar */}
           <div className="space-y-4">
+            <SectionErrorBoundary name="Metadata">
             <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -446,6 +454,7 @@ function TimeConditionDetailPage() {
                 </div>
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
           </div>
         </div>
       </PageSection>

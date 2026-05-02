@@ -49,6 +49,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -332,6 +333,7 @@ function ExtensionDetailPage() {
 
           <TabsContent value="details" className="mt-6 space-y-6">
             {/* Extension Info */}
+            <SectionErrorBoundary name="Extension Info">
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2">
@@ -408,8 +410,10 @@ function ExtensionDetailPage() {
                 </div>
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
 
             {/* Call Settings */}
+            <SectionErrorBoundary name="Call Settings">
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2">
@@ -421,17 +425,25 @@ function ExtensionDetailPage() {
                 <CallSettingsSummary extensionId={extensionId} />
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
 
             {/* Call Forwarding */}
+            <SectionErrorBoundary name="Call Forwarding">
             <CallForwardingCard extensionId={extensionId} extension={data} />
+            </SectionErrorBoundary>
 
             {/* Assigned Devices */}
+            <SectionErrorBoundary name="Assigned Devices">
             <AssignedDevicesCard extensionId={extensionId} />
+            </SectionErrorBoundary>
 
             {/* Sub-page links (voicemail, forwarding, dnd) */}
+            <SectionErrorBoundary name="Sub-Page Links">
             <SubPageLinks extensionId={extensionId} />
+            </SectionErrorBoundary>
 
             {/* Metadata */}
+            <SectionErrorBoundary name="Metadata">
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2">
@@ -462,9 +474,12 @@ function ExtensionDetailPage() {
                 </div>
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
 
             {/* Related Resources */}
+            <SectionErrorBoundary name="Related Resources">
             <RelatedResourcesSection extensionId={extensionId} extension={data} />
+            </SectionErrorBoundary>
           </TabsContent>
 
           <TabsContent value="voicemail" className="mt-6 space-y-6">
@@ -484,6 +499,7 @@ function ExtensionDetailPage() {
           </TabsContent>
 
           <TabsContent value="activity" className="mt-6">
+            <SectionErrorBoundary name="Activity Log">
             <Card>
               <CardHeader>
                 <CardTitle>Activity Log</CardTitle>
@@ -496,12 +512,14 @@ function ExtensionDetailPage() {
                 />
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
           </TabsContent>
         </Tabs>
       </PageSection>
 
       {/* Danger Zone */}
       <PageSection delay={0.25}>
+        <SectionErrorBoundary name="Danger Zone">
         <Card className="border-destructive/30">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-destructive">
@@ -528,6 +546,7 @@ function ExtensionDetailPage() {
             </div>
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Edit extension dialog */}
