@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.224.0 (2026-05-02)
+
+### Added
+- **Status distribution pills** on teams (active/inactive/members), connections (connected/disconnected/disabled), and E911 (validated/pending) list pages
+
 ## v0.223.0 (2026-05-02)
 
 ### Added

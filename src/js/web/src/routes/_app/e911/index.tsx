@@ -48,7 +48,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { SkeletonCard } from "@/components/ui/skeleton"
+import { Skeleton, SkeletonCard } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
   useE911Registrations,
@@ -328,6 +328,18 @@ function E911Page() {
 
   const items = data?.items ?? []
 
+  // Registration summary stats (computed from ALL items on the current page)
+  const registrationStats = useMemo(() => {
+    const all = data?.items ?? []
+    let validated = 0
+    let pending = 0
+    for (const reg of all) {
+      if (reg.validated) validated++
+      else pending++
+    }
+    return { validated, pending, total: data?.total ?? 0 }
+  }, [data?.items, data?.total])
+
   // Selection helpers
   const allVisibleIds = useMemo(() => items.map((r) => r.id), [items])
   const allSelected = items.length > 0 && items.every((r) => selectedIds.has(r.id))
@@ -441,6 +453,34 @@ function E911Page() {
           </div>
         }
       />
+
+      {/* Summary stats */}
+      <div className="flex flex-wrap items-center gap-2">
+        {isLoading ? (
+          <>
+            <Skeleton className="h-7 w-24 rounded-full" />
+            <Skeleton className="h-7 w-24 rounded-full" />
+            <Skeleton className="h-7 w-24 rounded-full" />
+          </>
+        ) : (
+          <>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground">
+              Total
+              <span className="ml-0.5 font-semibold text-foreground">{registrationStats.total}</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              Validated
+              <span className="ml-0.5 font-semibold">{registrationStats.validated}</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-700 dark:text-amber-400">
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+              Pending
+              <span className="ml-0.5 font-semibold">{registrationStats.pending}</span>
+            </span>
+          </>
+        )}
+      </div>
 
       {/* Search */}
       <PageSection>

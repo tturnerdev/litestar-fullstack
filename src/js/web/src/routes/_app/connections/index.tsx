@@ -1,13 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
-  Activity,
   AlertCircle,
   Cable,
   CheckCircle2,
-  ChevronDown,
   Circle,
-  Clock,
   Download,
   Eye,
   Home,
@@ -43,8 +40,6 @@ import {
 } from "@/components/ui/breadcrumb"
 import { BulkActionBar, createBulkDeleteAction, createBulkToggleActions, createExportAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
   DropdownMenu,
@@ -58,7 +53,7 @@ import { FilterDropdown, type FilterOption } from "@/components/ui/filter-dropdo
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { SkeletonCard } from "@/components/ui/skeleton"
+import { Skeleton, SkeletonCard } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
@@ -337,17 +332,18 @@ function ConnectionsPage() {
   const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / pageSize))
 
   // Connection health summary
-  const [healthOpen, setHealthOpen] = useState(true)
   const healthStats = useMemo(() => {
     const items = data?.items ?? []
-    const active = items.filter((c) => c.status === "connected").length
-    const errors = items.filter((c) => c.status === "error" || c.status === "disconnected").length
-    const lastCheck = items.reduce<string | null>((latest, c) => {
-      if (c.lastHealthCheck && (!latest || c.lastHealthCheck > latest)) return c.lastHealthCheck
-      return latest
-    }, null)
-    return { total: items.length, active, errors, lastCheck }
-  }, [data?.items])
+    let connected = 0
+    let disconnected = 0
+    let disabled = 0
+    for (const c of items) {
+      if (!c.isEnabled) disabled++
+      else if (c.status === "connected") connected++
+      else disconnected++
+    }
+    return { total: data?.total ?? items.length, connected, disconnected, disabled }
+  }, [data?.items, data?.total])
 
   // Keyboard shortcuts: "/" to focus search, "N" opens create page, ArrowLeft/ArrowRight for pagination
   useEffect(() => {
@@ -421,71 +417,43 @@ function ConnectionsPage() {
         }
       />
 
-      {/* Connection health summary */}
-      {hasAnyConnections && !isLoading && !isError && (
-        <PageSection>
-          <Collapsible open={healthOpen} onOpenChange={setHealthOpen}>
-            <div className="flex items-center justify-between mb-3">
-              <CollapsibleTrigger asChild>
-                <Button variant="ghost" size="sm" className="gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground -ml-2">
-                  Connection Health
-                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${healthOpen ? "" : "-rotate-90"}`} />
-                </Button>
-              </CollapsibleTrigger>
-            </div>
-            <CollapsibleContent>
-              <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-                <Card>
-                  <CardContent className="flex items-center gap-3 px-4 py-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted">
-                      <Activity className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-2xl font-semibold leading-none">{healthStats.total}</p>
-                      <p className="mt-1 text-xs text-muted-foreground">Total</p>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="flex items-center gap-3 px-4 py-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
-                      <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-2xl font-semibold leading-none text-emerald-600 dark:text-emerald-400">{healthStats.active}</p>
-                      <p className="mt-1 text-xs text-muted-foreground">Connected</p>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="flex items-center gap-3 px-4 py-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/30">
-                      <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-2xl font-semibold leading-none text-red-600 dark:text-red-400">{healthStats.errors}</p>
-                      <p className="mt-1 text-xs text-muted-foreground">Errors</p>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="flex items-center gap-3 px-4 py-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold leading-none">
-                        {healthStats.lastCheck ? formatRelativeTimeShort(healthStats.lastCheck) : "Never"}
-                      </p>
-                      <p className="mt-1 text-xs text-muted-foreground">Last checked</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
-        </PageSection>
-      )}
+      {/* Summary distribution pills */}
+      <div className="flex flex-wrap items-center gap-2">
+        {isLoading ? (
+          <>
+            <Skeleton className="h-7 w-24 rounded-full" />
+            <Skeleton className="h-7 w-28 rounded-full" />
+            <Skeleton className="h-7 w-32 rounded-full" />
+            <Skeleton className="h-7 w-24 rounded-full" />
+          </>
+        ) : (
+          <>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground">
+              Total
+              <span className="ml-0.5 font-semibold text-foreground">{healthStats.total}</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              Connected
+              <span className="ml-0.5 font-semibold">{healthStats.connected}</span>
+            </span>
+            {healthStats.disconnected > 0 && (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-xs font-medium text-red-700 dark:text-red-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+                Disconnected
+                <span className="ml-0.5 font-semibold">{healthStats.disconnected}</span>
+              </span>
+            )}
+            {healthStats.disabled > 0 && (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-zinc-400/30 bg-zinc-400/10 px-3 py-1 text-xs font-medium text-zinc-600 dark:text-zinc-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-zinc-400" />
+                Disabled
+                <span className="ml-0.5 font-semibold">{healthStats.disabled}</span>
+              </span>
+            )}
+          </>
+        )}
+      </div>
 
       {/* Search & filters */}
       <PageSection>

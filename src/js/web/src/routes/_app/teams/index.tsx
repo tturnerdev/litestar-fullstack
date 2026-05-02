@@ -43,7 +43,7 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { SkeletonTable } from "@/components/ui/skeleton"
+import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useAuthStore } from "@/lib/auth"
@@ -190,6 +190,20 @@ function TeamsPage() {
     return items
   }, [items, sortKey, sortDir])
 
+  // Team summary stats (computed from ALL items on the current page)
+  const teamStats = useMemo(() => {
+    const all = data?.items ?? []
+    let active = 0
+    let inactive = 0
+    let totalMembers = 0
+    for (const team of all) {
+      if (team.isActive === false) inactive++
+      else active++
+      totalMembers += team.members?.length ?? 0
+    }
+    return { active, inactive, totalMembers, total: data?.total ?? 0 }
+  }, [data?.items, data?.total])
+
   // Export all visible
   const handleExportAll = useCallback(() => {
     if (!sortedItems.length) return
@@ -299,6 +313,42 @@ function TeamsPage() {
           </div>
         }
       />
+
+      {/* Summary stats */}
+      <div className="flex flex-wrap items-center gap-2">
+        {isLoading ? (
+          <>
+            <Skeleton className="h-7 w-24 rounded-full" />
+            <Skeleton className="h-7 w-24 rounded-full" />
+            <Skeleton className="h-7 w-24 rounded-full" />
+            <Skeleton className="h-7 w-28 rounded-full" />
+          </>
+        ) : (
+          <>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground">
+              Total
+              <span className="ml-0.5 font-semibold text-foreground">{teamStats.total}</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              Active
+              <span className="ml-0.5 font-semibold">{teamStats.active}</span>
+            </span>
+            {teamStats.inactive > 0 && (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-zinc-400/30 bg-zinc-400/10 px-3 py-1 text-xs font-medium text-zinc-600 dark:text-zinc-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-zinc-400" />
+                Inactive
+                <span className="ml-0.5 font-semibold">{teamStats.inactive}</span>
+              </span>
+            )}
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-700 dark:text-blue-400">
+              <Users className="h-3 w-3" />
+              Members
+              <span className="ml-0.5 font-semibold">{teamStats.totalMembers}</span>
+            </span>
+          </>
+        )}
+      </div>
 
       {/* Search */}
       <PageSection>
