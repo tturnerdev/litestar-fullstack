@@ -388,6 +388,9 @@ function WebhookFormDialog({
               maxLength={500}
               required
             />
+            <p className="text-xs text-muted-foreground mt-1">
+              Must be an HTTPS URL that accepts POST requests with a JSON body.
+            </p>
           </div>
 
           <div className="space-y-2">
@@ -402,10 +405,16 @@ function WebhookFormDialog({
               onChange={(e) => setSecret(e.target.value)}
               maxLength={200}
             />
+            <p className="text-xs text-muted-foreground mt-1">
+              Used to sign payloads so you can verify they came from us. Keep this value secret.
+            </p>
           </div>
 
           <div className="space-y-2">
             <Label>Events</Label>
+            <p className="text-xs text-muted-foreground">
+              Select which events should trigger this webhook. If none are selected, all events will be sent.
+            </p>
             <div className="grid grid-cols-2 gap-2 rounded-md border p-3 max-h-48 overflow-y-auto">
               {AVAILABLE_EVENTS.map((event) => (
                 <label
@@ -433,7 +442,7 @@ function WebhookFormDialog({
             <Label htmlFor="webhook-description">Description</Label>
             <Textarea
               id="webhook-description"
-              placeholder="Optional description"
+              placeholder="What is this webhook used for?"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               maxLength={500}
@@ -453,6 +462,9 @@ function WebhookFormDialog({
               rows={3}
               className="font-mono text-xs"
             />
+            <p className="text-xs text-muted-foreground mt-1">
+              Additional HTTP headers sent with each delivery. One header per line.
+            </p>
           </div>
 
           <div className="flex items-center gap-3">

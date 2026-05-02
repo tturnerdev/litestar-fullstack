@@ -110,6 +110,16 @@ const strategyLabels: Record<string, string> = {
   weight_random: "Weighted Random",
 }
 
+const strategyDescriptions: Record<string, string> = {
+  ring_all: "Ring all members simultaneously until one answers.",
+  round_robin: "Distribute calls evenly among members in rotation.",
+  least_recent: "Route to the member who has been idle the longest.",
+  fewest_calls: "Route to the member who has handled the fewest calls.",
+  random: "Route to a random available member.",
+  linear: "Ring members in order until one answers.",
+  weight_random: "Route randomly with weighted probability per member.",
+}
+
 const overrideModeLabels: Record<string, string> = {
   none: "None",
   force_match: "Force Match",
@@ -196,10 +206,12 @@ function NewTimeConditionDialog({ open, onOpenChange }: { open: boolean; onOpenC
           <div className="space-y-2">
             <Label htmlFor="tc-match">Match Destination</Label>
             <Input id="tc-match" placeholder="e.g., ext:100" value={matchDest} onChange={(e) => setMatchDest(e.target.value)} required />
+            <p className="text-xs text-muted-foreground">Where calls are routed when the time condition matches (e.g., during business hours).</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="tc-nomatch">No Match Destination</Label>
             <Input id="tc-nomatch" placeholder="e.g., voicemail:main" value={noMatchDest} onChange={(e) => setNoMatchDest(e.target.value)} required />
+            <p className="text-xs text-muted-foreground">Where calls are routed when the time condition does not match (e.g., after hours).</p>
           </div>
           <DialogFooter>
             <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
@@ -312,6 +324,9 @@ function NewCallQueueDialog({ open, onOpenChange }: { open: boolean; onOpenChang
                 <SelectItem value="linear">Linear</SelectItem>
               </SelectContent>
             </Select>
+            {strategyDescriptions[strategy] && (
+              <p className="text-xs text-muted-foreground">{strategyDescriptions[strategy]}</p>
+            )}
           </div>
           <DialogFooter>
             <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
@@ -377,6 +392,9 @@ function NewRingGroupDialog({ open, onOpenChange }: { open: boolean; onOpenChang
                 <SelectItem value="random">Random</SelectItem>
               </SelectContent>
             </Select>
+            {strategyDescriptions[strategy] && (
+              <p className="text-xs text-muted-foreground">{strategyDescriptions[strategy]}</p>
+            )}
           </div>
           <DialogFooter>
             <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>

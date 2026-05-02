@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { Building2, Globe, Hash, Mail, MapPin, Pencil, Save, Users, X } from "lucide-react"
+import { Building2, Globe, Hash, Loader2, Mail, MapPin, Pencil, Save, Users, X } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -19,6 +19,7 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
+import { toast } from "sonner"
 import { OrganizationQuickLinks } from "@/components/organization/organization-quick-links"
 import { OrganizationStats } from "@/components/organization/organization-stats"
 import { useDocumentTitle } from "@/hooks/use-document-title"
@@ -145,8 +146,15 @@ function OrganizationSettingsPage() {
       return
     }
 
-    await updateOrg.mutateAsync(payload)
-    setIsEditing(false)
+    try {
+      await updateOrg.mutateAsync(payload)
+      toast.success("Organization settings saved")
+      setIsEditing(false)
+    } catch (err) {
+      toast.error("Failed to save organization settings", {
+        description: err instanceof Error ? err.message : undefined,
+      })
+    }
   }
 
   const handleCancel = () => {
@@ -194,7 +202,7 @@ function OrganizationSettingsPage() {
                 <X className="mr-2 h-4 w-4" /> Cancel
               </Button>
               <Button size="sm" onClick={handleSave} disabled={updateOrg.isPending}>
-                <Save className="mr-2 h-4 w-4" /> {updateOrg.isPending ? "Saving..." : "Save changes"}
+                {updateOrg.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />} {updateOrg.isPending ? "Saving..." : "Save changes"}
               </Button>
             </div>
           ) : (
@@ -233,7 +241,7 @@ function OrganizationSettingsPage() {
               <div className="space-y-2">
                 <Label htmlFor="org-name">Organization name</Label>
                 {isEditing ? (
-                  <Input id="org-name" value={formData.name} onChange={(e) => updateField("name", e.target.value)} placeholder="Organization name" />
+                  <Input id="org-name" value={formData.name} onChange={(e) => updateField("name", e.target.value)} placeholder="Organization name" disabled={updateOrg.isPending} />
                 ) : (
                   <p className="text-sm">{org?.name || <span className="text-muted-foreground italic">Not set</span>}</p>
                 )}
@@ -241,7 +249,7 @@ function OrganizationSettingsPage() {
               <div className="space-y-2">
                 <Label htmlFor="org-description">Description</Label>
                 {isEditing ? (
-                  <Textarea id="org-description" value={formData.description} onChange={(e) => updateField("description", e.target.value)} placeholder="A brief description of your organization" rows={3} />
+                  <Textarea id="org-description" value={formData.description} onChange={(e) => updateField("description", e.target.value)} placeholder="A brief description of your organization" rows={3} disabled={updateOrg.isPending} />
                 ) : (
                   <p className="text-sm">{org?.description || <span className="text-muted-foreground italic">Not set</span>}</p>
                 )}
@@ -250,7 +258,7 @@ function OrganizationSettingsPage() {
               <div className="space-y-2">
                 <Label htmlFor="org-logo">Logo URL</Label>
                 {isEditing ? (
-                  <Input id="org-logo" value={formData.logoUrl} onChange={(e) => updateField("logoUrl", e.target.value)} placeholder="https://example.com/logo.png" type="url" />
+                  <Input id="org-logo" value={formData.logoUrl} onChange={(e) => updateField("logoUrl", e.target.value)} placeholder="https://example.com/logo.png" type="url" disabled={updateOrg.isPending} />
                 ) : (
                   <div className="flex items-center gap-3">
                     {org?.logoUrl ? (
@@ -272,7 +280,7 @@ function OrganizationSettingsPage() {
               <div className="space-y-2">
                 <Label htmlFor="org-website">Website</Label>
                 {isEditing ? (
-                  <Input id="org-website" value={formData.website} onChange={(e) => updateField("website", e.target.value)} placeholder="https://example.com" type="url" />
+                  <Input id="org-website" value={formData.website} onChange={(e) => updateField("website", e.target.value)} placeholder="https://example.com" type="url" disabled={updateOrg.isPending} />
                 ) : (
                   <div className="flex items-center gap-1.5">
                     <p className="text-sm">
@@ -306,7 +314,7 @@ function OrganizationSettingsPage() {
               <div className="space-y-2">
                 <Label htmlFor="org-email">Email</Label>
                 {isEditing ? (
-                  <Input id="org-email" value={formData.email} onChange={(e) => updateField("email", e.target.value)} placeholder="contact@example.com" type="email" />
+                  <Input id="org-email" value={formData.email} onChange={(e) => updateField("email", e.target.value)} placeholder="contact@example.com" type="email" disabled={updateOrg.isPending} />
                 ) : (
                   <div className="flex items-center gap-1.5">
                     <p className="text-sm">
@@ -323,7 +331,7 @@ function OrganizationSettingsPage() {
               <div className="space-y-2">
                 <Label htmlFor="org-phone">Phone</Label>
                 {isEditing ? (
-                  <Input id="org-phone" value={formData.phone} onChange={(e) => updateField("phone", e.target.value)} placeholder="+1 (555) 000-0000" type="tel" />
+                  <Input id="org-phone" value={formData.phone} onChange={(e) => updateField("phone", e.target.value)} placeholder="+1 (555) 000-0000" type="tel" disabled={updateOrg.isPending} />
                 ) : (
                   <div className="flex items-center gap-1.5">
                     <p className="text-sm">{org?.phone || <span className="text-muted-foreground italic">Not set</span>}</p>
@@ -339,7 +347,7 @@ function OrganizationSettingsPage() {
               <div className="space-y-2">
                 <Label htmlFor="org-address1">Address line 1</Label>
                 {isEditing ? (
-                  <Input id="org-address1" value={formData.addressLine1} onChange={(e) => updateField("addressLine1", e.target.value)} placeholder="123 Main Street" />
+                  <Input id="org-address1" value={formData.addressLine1} onChange={(e) => updateField("addressLine1", e.target.value)} placeholder="123 Main Street" disabled={updateOrg.isPending} />
                 ) : (
                   <p className="text-sm">{org?.addressLine1 || <span className="text-muted-foreground italic">Not set</span>}</p>
                 )}
@@ -347,7 +355,7 @@ function OrganizationSettingsPage() {
               <div className="space-y-2">
                 <Label htmlFor="org-address2">Address line 2</Label>
                 {isEditing ? (
-                  <Input id="org-address2" value={formData.addressLine2} onChange={(e) => updateField("addressLine2", e.target.value)} placeholder="Suite 100" />
+                  <Input id="org-address2" value={formData.addressLine2} onChange={(e) => updateField("addressLine2", e.target.value)} placeholder="Suite 100" disabled={updateOrg.isPending} />
                 ) : (
                   <p className="text-sm">{org?.addressLine2 || <span className="text-muted-foreground italic">Not set</span>}</p>
                 )}
@@ -356,7 +364,7 @@ function OrganizationSettingsPage() {
                 <div className="space-y-2">
                   <Label htmlFor="org-city">City</Label>
                   {isEditing ? (
-                    <Input id="org-city" value={formData.city} onChange={(e) => updateField("city", e.target.value)} placeholder="City" />
+                    <Input id="org-city" value={formData.city} onChange={(e) => updateField("city", e.target.value)} placeholder="City" disabled={updateOrg.isPending} />
                   ) : (
                     <p className="text-sm">{org?.city || <span className="text-muted-foreground italic">Not set</span>}</p>
                   )}
@@ -364,7 +372,7 @@ function OrganizationSettingsPage() {
                 <div className="space-y-2">
                   <Label htmlFor="org-state">State / Province</Label>
                   {isEditing ? (
-                    <Input id="org-state" value={formData.state} onChange={(e) => updateField("state", e.target.value)} placeholder="State" />
+                    <Input id="org-state" value={formData.state} onChange={(e) => updateField("state", e.target.value)} placeholder="State" disabled={updateOrg.isPending} />
                   ) : (
                     <p className="text-sm">{org?.state || <span className="text-muted-foreground italic">Not set</span>}</p>
                   )}
@@ -374,7 +382,7 @@ function OrganizationSettingsPage() {
                 <div className="space-y-2">
                   <Label htmlFor="org-postal">Postal code</Label>
                   {isEditing ? (
-                    <Input id="org-postal" value={formData.postalCode} onChange={(e) => updateField("postalCode", e.target.value)} placeholder="12345" />
+                    <Input id="org-postal" value={formData.postalCode} onChange={(e) => updateField("postalCode", e.target.value)} placeholder="12345" disabled={updateOrg.isPending} />
                   ) : (
                     <p className="text-sm">{org?.postalCode || <span className="text-muted-foreground italic">Not set</span>}</p>
                   )}
@@ -382,7 +390,7 @@ function OrganizationSettingsPage() {
                 <div className="space-y-2">
                   <Label htmlFor="org-country">Country</Label>
                   {isEditing ? (
-                    <Input id="org-country" value={formData.country} onChange={(e) => updateField("country", e.target.value)} placeholder="Country" />
+                    <Input id="org-country" value={formData.country} onChange={(e) => updateField("country", e.target.value)} placeholder="Country" disabled={updateOrg.isPending} />
                   ) : (
                     <p className="text-sm">{org?.country || <span className="text-muted-foreground italic">Not set</span>}</p>
                   )}
@@ -407,7 +415,7 @@ function OrganizationSettingsPage() {
                 <div className="space-y-2">
                   <Label htmlFor="org-timezone">Timezone</Label>
                   {isEditing ? (
-                    <Select value={formData.timezone} onValueChange={(val) => updateField("timezone", val)}>
+                    <Select value={formData.timezone} onValueChange={(val) => updateField("timezone", val)} disabled={updateOrg.isPending}>
                       <SelectTrigger id="org-timezone">
                         <SelectValue placeholder="Select timezone" />
                       </SelectTrigger>
@@ -426,7 +434,7 @@ function OrganizationSettingsPage() {
                 <div className="space-y-2">
                   <Label htmlFor="org-language">Default language</Label>
                   {isEditing ? (
-                    <Select value={formData.defaultLanguage} onValueChange={(val) => updateField("defaultLanguage", val)}>
+                    <Select value={formData.defaultLanguage} onValueChange={(val) => updateField("defaultLanguage", val)} disabled={updateOrg.isPending}>
                       <SelectTrigger id="org-language">
                         <SelectValue placeholder="Select language" />
                       </SelectTrigger>

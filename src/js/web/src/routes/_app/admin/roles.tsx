@@ -431,13 +431,33 @@ function TeamPermissionCard({
                       <TableHead className="w-[100px] text-center">
                         <div className="text-xs leading-tight">
                           <div className="font-semibold">{role}</div>
-                          <div className="font-normal text-muted-foreground">View</div>
+                          <div className="flex items-center justify-center gap-1 font-normal text-muted-foreground">
+                            View
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Info className="h-3 w-3 shrink-0 cursor-help" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                Allows reading and listing resources in this category
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
                         </div>
                       </TableHead>
                       <TableHead className="w-[100px] text-center">
                         <div className="text-xs leading-tight">
                           <div className="font-semibold">{role}</div>
-                          <div className="font-normal text-muted-foreground">Edit</div>
+                          <div className="flex items-center justify-center gap-1 font-normal text-muted-foreground">
+                            Edit
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Info className="h-3 w-3 shrink-0 cursor-help" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                Allows creating, updating, and deleting. Automatically includes View access
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
                         </div>
                       </TableHead>
                     </Fragment>

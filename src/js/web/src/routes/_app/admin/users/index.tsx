@@ -99,14 +99,14 @@ function getInitials(name: string | null | undefined, email: string): string {
 function ActiveStatusIndicator({ isActive }: { isActive: boolean | undefined }) {
   if (isActive) {
     return (
-      <span className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400">
+      <span className="flex items-center gap-1.5 text-xs text-emerald-700 dark:text-emerald-400">
         <CheckCircle2 className="h-3.5 w-3.5" />
         Active
       </span>
     )
   }
   return (
-    <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+    <span className="flex items-center gap-1.5 text-xs text-red-600 dark:text-red-400">
       <XCircle className="h-3.5 w-3.5" />
       Inactive
     </span>
@@ -635,23 +635,25 @@ function UserRow({
         </TableCell>
         <TableCell>
           {user.isSuperuser ? (
-            <Badge variant="destructive" className="gap-1">
+            <Badge variant="outline" className="gap-1 border-amber-300 bg-amber-500/10 text-amber-700 dark:border-amber-700 dark:text-amber-400">
               <Shield className="h-3 w-3" />
               Superuser
             </Badge>
           ) : (
-            <span className="text-sm text-muted-foreground">Member</span>
+            <Badge variant="secondary" className="gap-1">
+              Member
+            </Badge>
           )}
         </TableCell>
         <TableCell>
           <div className="flex items-center gap-2">
             <ActiveStatusIndicator isActive={user.isActive} />
             {user.isVerified ? (
-              <Badge variant="outline" className="border-emerald-200 text-emerald-700 dark:border-emerald-800 dark:text-emerald-400 text-[10px]">
+              <Badge variant="outline" className="border-emerald-300 bg-emerald-500/10 text-emerald-700 dark:border-emerald-800 dark:text-emerald-400 text-[10px]">
                 Verified
               </Badge>
             ) : (
-              <Badge variant="outline" className="border-muted-foreground/30 text-muted-foreground text-[10px]">
+              <Badge variant="outline" className="bg-muted text-muted-foreground text-[10px]">
                 Unverified
               </Badge>
             )}
