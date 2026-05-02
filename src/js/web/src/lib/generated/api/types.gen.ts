@@ -356,6 +356,51 @@ export type AuditLogEntry = {
 };
 
 /**
+ * BackgroundTaskDetail
+ */
+export type BackgroundTaskDetail = {
+  completedAt?: string | null;
+  createdAt?: string | null;
+  entityId?: string | null;
+  entityType?: string | null;
+  errorMessage?: string | null;
+  id: string;
+  initiatedById?: string | null;
+  initiatedByName?: string | null;
+  payload?: {
+    [key: string]: unknown;
+  } | null;
+  progress?: number;
+  result?: {
+    [key: string]: unknown;
+  } | null;
+  saqJobKey?: string | null;
+  startedAt?: string | null;
+  status: string;
+  taskType: string;
+  teamId: string;
+  updatedAt?: string | null;
+};
+
+/**
+ * BackgroundTaskList
+ */
+export type BackgroundTaskList = {
+  completedAt?: string | null;
+  createdAt?: string | null;
+  entityId?: string | null;
+  entityType?: string | null;
+  id: string;
+  initiatedByName?: string | null;
+  progress?: number;
+  saqJobKey?: string | null;
+  startedAt?: string | null;
+  status: string;
+  taskType: string;
+  updatedAt?: string | null;
+};
+
+/**
  * BulkImportPreview
  */
 export type BulkImportPreview = {
@@ -3032,9 +3077,9 @@ export type AdminListAuditLogsData = {
      */
     sortOrder?: "asc" | "desc" | null;
     actionIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3111,9 +3156,9 @@ export type AdminExportAuditLogData = {
      */
     sortOrder?: "asc" | "desc" | null;
     actionIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3179,9 +3224,9 @@ export type AdminGetTargetAuditLogsData = {
      */
     sortOrder?: "asc" | "desc" | null;
     actionIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -3259,9 +3304,9 @@ export type AdminGetUserAuditLogsData = {
      */
     sortOrder?: "asc" | "desc" | null;
     actionIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -11251,6 +11296,201 @@ export type UpdateTagResponses = {
 };
 
 export type UpdateTagResponse = UpdateTagResponses[keyof UpdateTagResponses];
+
+export type ListTasksData = {
+  body?: never;
+  path?: never;
+  query?: {
+    ids?: Array<string> | null;
+    createdBefore?: string | null;
+    createdAfter?: string | null;
+    updatedBefore?: string | null;
+    updatedAfter?: string | null;
+    /**
+     * Field to search
+     */
+    searchString?: string | null;
+    /**
+     * Search should be case sensitive
+     */
+    searchIgnoreCase?: boolean | null;
+    currentPage?: number;
+    pageSize?: number;
+    /**
+     * Order by field
+     */
+    orderBy?: string | null;
+    /**
+     * Field to search
+     */
+    sortOrder?: "asc" | "desc" | null;
+    /**
+     * Task Type
+     *
+     * Filter by task type.
+     */
+    taskType?: string | null;
+    /**
+     * Status
+     *
+     * Filter by status.
+     */
+    status?: string | null;
+    /**
+     * Entity Type
+     *
+     * Filter by entity type.
+     */
+    entityType?: string | null;
+    /**
+     * Entity ID
+     *
+     * Filter by entity ID.
+     */
+    entityId?: string | null;
+  };
+  url: "/api/tasks";
+};
+
+export type ListTasksErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type ListTasksError = ListTasksErrors[keyof ListTasksErrors];
+
+export type ListTasksResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: {
+    items?: Array<BackgroundTaskList>;
+    /**
+     * Maximal number of items to send.
+     */
+    limit?: number;
+    /**
+     * Offset from the beginning of the query.
+     */
+    offset?: number;
+    /**
+     * Total number of items.
+     */
+    total?: number;
+  };
+};
+
+export type ListTasksResponse = ListTasksResponses[keyof ListTasksResponses];
+
+export type ListActiveTasksData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/api/tasks/active";
+};
+
+export type ListActiveTasksResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: Array<BackgroundTaskList>;
+};
+
+export type ListActiveTasksResponse =
+  ListActiveTasksResponses[keyof ListActiveTasksResponses];
+
+export type GetTaskData = {
+  body?: never;
+  path: {
+    /**
+     * Task ID
+     *
+     * The task to retrieve.
+     */
+    task_id: string;
+  };
+  query?: never;
+  url: "/api/tasks/{task_id}";
+};
+
+export type GetTaskErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type GetTaskError = GetTaskErrors[keyof GetTaskErrors];
+
+export type GetTaskResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: BackgroundTaskDetail;
+};
+
+export type GetTaskResponse = GetTaskResponses[keyof GetTaskResponses];
+
+export type CancelTaskData = {
+  body?: never;
+  path: {
+    /**
+     * Task ID
+     *
+     * The task to cancel.
+     */
+    task_id: string;
+  };
+  query?: never;
+  url: "/api/tasks/{task_id}/cancel";
+};
+
+export type CancelTaskErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type CancelTaskError = CancelTaskErrors[keyof CancelTaskErrors];
+
+export type CancelTaskResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: BackgroundTaskDetail;
+};
+
+export type CancelTaskResponse = CancelTaskResponses[keyof CancelTaskResponses];
 
 export type ListTeamsData = {
   body?: never;

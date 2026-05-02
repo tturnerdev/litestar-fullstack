@@ -63,6 +63,7 @@ import {
   apiEmailVerificationVerifyVerifyEmail,
   assignRole,
   assignUserRole,
+  cancelTask,
   checkSchedule,
   closeTicket,
   confirmMfaSetup,
@@ -163,6 +164,7 @@ import {
   getSchedule,
   getSecurityActivity,
   getTag,
+  getTask,
   getTeam,
   getTicket,
   getTimeCondition,
@@ -177,6 +179,7 @@ import {
   globalSearch,
   initiateDisableMfaOAuth,
   initiateMfaSetup,
+  listActiveTasks,
   listAllVoicemailMessages,
   listCallQueueMembers,
   listCallQueues,
@@ -201,6 +204,7 @@ import {
   listScheduleEntries,
   listSchedules,
   listTags,
+  listTasks,
   listTeamInvitations,
   listTeamPermissions,
   listTeams,
@@ -442,6 +446,9 @@ import type {
   AssignUserRoleData,
   AssignUserRoleError,
   AssignUserRoleResponse,
+  CancelTaskData,
+  CancelTaskError,
+  CancelTaskResponse,
   CheckScheduleData,
   CheckScheduleError,
   CheckScheduleResponse,
@@ -733,6 +740,9 @@ import type {
   GetTagData,
   GetTagError,
   GetTagResponse,
+  GetTaskData,
+  GetTaskError,
+  GetTaskResponse,
   GetTeamData,
   GetTeamError,
   GetTeamResponse,
@@ -773,6 +783,8 @@ import type {
   InitiateDisableMfaOAuthResponse,
   InitiateMfaSetupData,
   InitiateMfaSetupResponse,
+  ListActiveTasksData,
+  ListActiveTasksResponse,
   ListAllVoicemailMessagesData,
   ListAllVoicemailMessagesError,
   ListAllVoicemailMessagesResponse,
@@ -845,6 +857,9 @@ import type {
   ListTagsData,
   ListTagsError,
   ListTagsResponse,
+  ListTasksData,
+  ListTasksError,
+  ListTasksResponse,
   ListTeamInvitationsData,
   ListTeamInvitationsError,
   ListTeamInvitationsResponse,
@@ -6556,6 +6571,111 @@ export const updateTagMutation = (
   > = {
     mutationFn: async (fnOptions) => {
       const { data } = await updateTag({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const listTasksQueryKey = (options?: Options<ListTasksData>) =>
+  createQueryKey("listTasks", options);
+
+/**
+ * ListTasks
+ */
+export const listTasksOptions = (options?: Options<ListTasksData>) =>
+  queryOptions<
+    ListTasksResponse,
+    ListTasksError,
+    ListTasksResponse,
+    ReturnType<typeof listTasksQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listTasks({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listTasksQueryKey(options),
+  });
+
+export const listActiveTasksQueryKey = (
+  options?: Options<ListActiveTasksData>,
+) => createQueryKey("listActiveTasks", options);
+
+/**
+ * ListActiveTasks
+ */
+export const listActiveTasksOptions = (
+  options?: Options<ListActiveTasksData>,
+) =>
+  queryOptions<
+    ListActiveTasksResponse,
+    DefaultError,
+    ListActiveTasksResponse,
+    ReturnType<typeof listActiveTasksQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await listActiveTasks({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: listActiveTasksQueryKey(options),
+  });
+
+export const getTaskQueryKey = (options: Options<GetTaskData>) =>
+  createQueryKey("getTask", options);
+
+/**
+ * GetTask
+ */
+export const getTaskOptions = (options: Options<GetTaskData>) =>
+  queryOptions<
+    GetTaskResponse,
+    GetTaskError,
+    GetTaskResponse,
+    ReturnType<typeof getTaskQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getTask({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getTaskQueryKey(options),
+  });
+
+/**
+ * CancelTask
+ */
+export const cancelTaskMutation = (
+  options?: Partial<Options<CancelTaskData>>,
+): UseMutationOptions<
+  CancelTaskResponse,
+  CancelTaskError,
+  Options<CancelTaskData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    CancelTaskResponse,
+    CancelTaskError,
+    Options<CancelTaskData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await cancelTask({
         ...options,
         ...fnOptions,
         throwOnError: true,

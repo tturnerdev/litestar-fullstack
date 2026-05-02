@@ -165,6 +165,9 @@ import type {
   AssignUserRoleData,
   AssignUserRoleErrors,
   AssignUserRoleResponses,
+  CancelTaskData,
+  CancelTaskErrors,
+  CancelTaskResponses,
   CheckScheduleData,
   CheckScheduleErrors,
   CheckScheduleResponses,
@@ -456,6 +459,9 @@ import type {
   GetTagData,
   GetTagErrors,
   GetTagResponses,
+  GetTaskData,
+  GetTaskErrors,
+  GetTaskResponses,
   GetTeamData,
   GetTeamErrors,
   GetTeamResponses,
@@ -496,6 +502,8 @@ import type {
   InitiateDisableMfaOAuthResponses,
   InitiateMfaSetupData,
   InitiateMfaSetupResponses,
+  ListActiveTasksData,
+  ListActiveTasksResponses,
   ListAllVoicemailMessagesData,
   ListAllVoicemailMessagesErrors,
   ListAllVoicemailMessagesResponses,
@@ -568,6 +576,9 @@ import type {
   ListTagsData,
   ListTagsErrors,
   ListTagsResponses,
+  ListTasksData,
+  ListTasksErrors,
+  ListTasksResponses,
   ListTeamInvitationsData,
   ListTeamInvitationsErrors,
   ListTeamInvitationsResponses,
@@ -4350,6 +4361,68 @@ export const updateTag = <ThrowOnError extends boolean = false>(
       "Content-Type": "application/json",
       ...options.headers,
     },
+  });
+
+/**
+ * ListTasks
+ */
+export const listTasks = <ThrowOnError extends boolean = false>(
+  options?: Options<ListTasksData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    ListTasksResponses,
+    ListTasksErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/tasks",
+    ...options,
+  });
+
+/**
+ * ListActiveTasks
+ */
+export const listActiveTasks = <ThrowOnError extends boolean = false>(
+  options?: Options<ListActiveTasksData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    ListActiveTasksResponses,
+    unknown,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/tasks/active",
+    ...options,
+  });
+
+/**
+ * GetTask
+ */
+export const getTask = <ThrowOnError extends boolean = false>(
+  options: Options<GetTaskData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<GetTaskResponses, GetTaskErrors, ThrowOnError>(
+    {
+      security: [{ scheme: "bearer", type: "http" }],
+      url: "/api/tasks/{task_id}",
+      ...options,
+    },
+  );
+
+/**
+ * CancelTask
+ */
+export const cancelTask = <ThrowOnError extends boolean = false>(
+  options: Options<CancelTaskData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    CancelTaskResponses,
+    CancelTaskErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/tasks/{task_id}/cancel",
+    ...options,
   });
 
 /**

@@ -1294,6 +1294,265 @@ export const AuditLogEntrySchema = {
   type: "object",
 } as const;
 
+export const BackgroundTaskDetailSchema = {
+  properties: {
+    completedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    createdAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    entityId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    entityType: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    errorMessage: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    initiatedById: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    initiatedByName: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    payload: {
+      oneOf: [
+        {
+          type: "object",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    progress: {
+      default: 0,
+      type: "integer",
+    },
+    result: {
+      oneOf: [
+        {
+          type: "object",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    saqJobKey: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    startedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    status: {
+      type: "string",
+    },
+    taskType: {
+      type: "string",
+    },
+    teamId: {
+      format: "uuid",
+      type: "string",
+    },
+    updatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: ["id", "status", "taskType", "teamId"],
+  title: "BackgroundTaskDetail",
+  type: "object",
+} as const;
+
+export const BackgroundTaskListSchema = {
+  properties: {
+    completedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    createdAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    entityId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    entityType: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    id: {
+      format: "uuid",
+      type: "string",
+    },
+    initiatedByName: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    progress: {
+      default: 0,
+      type: "integer",
+    },
+    saqJobKey: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    startedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    status: {
+      type: "string",
+    },
+    taskType: {
+      type: "string",
+    },
+    updatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: ["id", "status", "taskType"],
+  title: "BackgroundTaskList",
+  type: "object",
+} as const;
+
 export const BulkImportPreviewSchema = {
   properties: {
     errorRows: {

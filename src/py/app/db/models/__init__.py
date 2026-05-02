@@ -1,4 +1,6 @@
 from app.db.models._audit_log import AuditLog
+from app.db.models._background_task import BackgroundTask
+from app.db.models._background_task_status import BackgroundTaskStatus
 from app.db.models._call_queue import CallQueue
 from app.db.models._call_queue_member import CallQueueMember
 from app.db.models._call_record import CallRecord
@@ -68,6 +70,8 @@ from app.db.models._webhook_delivery import WebhookDelivery
 
 __all__ = (
     "AuditLog",
+    "BackgroundTask",
+    "BackgroundTaskStatus",
     "CallDirection",
     "CallDisposition",
     "CallQueue",

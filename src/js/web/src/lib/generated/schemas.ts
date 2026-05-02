@@ -126,6 +126,8 @@ import type {
   GetUnreadNotificationCountResponses,
   InitiateMfaSetupData,
   InitiateMfaSetupResponses,
+  ListActiveTasksData,
+  ListActiveTasksResponses,
   MarkAllNotificationsReadData,
   MarkAllNotificationsReadResponses,
   OAuthConfigData,
@@ -215,6 +217,7 @@ export type OperationName =
   | 'get_trends'
   | 'get_unread_count'
   | 'initiate_setup'
+  | 'list_active_tasks'
   | 'list_call_queues'
   | 'list_call_records'
   | 'list_connections'
@@ -307,6 +310,7 @@ export interface OperationDataTypes {
   'get_trends': GetDashboardTrendsData
   'get_unread_count': GetUnreadNotificationCountData
   'initiate_setup': InitiateMfaSetupData
+  'list_active_tasks': ListActiveTasksData
   'list_call_queues': CreateCallQueueData
   'list_call_records': CreateCallRecordData
   'list_connections': CreateConnectionData
@@ -400,6 +404,7 @@ export interface OperationResponseTypes {
   'get_trends': GetDashboardTrendsResponses
   'get_unread_count': GetUnreadNotificationCountResponses
   'initiate_setup': InitiateMfaSetupResponses
+  'list_active_tasks': ListActiveTasksResponses
   'list_call_queues': CreateCallQueueResponses
   'list_call_records': CreateCallRecordResponses
   'list_connections': CreateConnectionResponses
@@ -493,6 +498,7 @@ export interface OperationErrorTypes {
   'get_trends': never
   'get_unread_count': never
   'initiate_setup': never
+  'list_active_tasks': never
   'list_call_queues': CreateCallQueueErrors
   'list_call_records': CreateCallRecordErrors
   'list_connections': CreateConnectionErrors

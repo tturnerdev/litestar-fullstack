@@ -193,6 +193,7 @@ class SaqSettings:
         """
         from app.domain.accounts import jobs as account_jobs
         from app.domain.system import jobs as system_jobs
+        from app.domain.tasks import jobs as task_jobs
         from app.lib.worker import after_process, before_process, on_shutdown, on_startup
 
         return SAQConfig(
@@ -203,7 +204,11 @@ class SaqSettings:
                 QueueConfig(
                     name="background-tasks",
                     dsn=self.REDIS_URL,
-                    tasks=[system_jobs.cleanup_auth_tokens, account_jobs.refresh_oauth_tokens],
+                    tasks=[
+                        system_jobs.cleanup_auth_tokens,
+                        account_jobs.refresh_oauth_tokens,
+                        task_jobs.cleanup_stale_tasks,
+                    ],
                     scheduled_tasks=[
                         CronJob(
                             function=system_jobs.cleanup_auth_tokens,
@@ -215,6 +220,12 @@ class SaqSettings:
                             function=account_jobs.refresh_oauth_tokens,
                             cron="*/15 * * * *",
                             timeout=600,
+                            ttl=1800,
+                        ),
+                        CronJob(
+                            function=task_jobs.cleanup_stale_tasks,
+                            cron="0 3 * * *",
+                            timeout=300,
                             ttl=1800,
                         ),
                     ],

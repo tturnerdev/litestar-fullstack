@@ -52,6 +52,19 @@
       },
       "uri": "/api/users/roles"
     },
+    "cancel_task": {
+      "method": "post",
+      "methods": [
+        "POST"
+      ],
+      "parameterTypes": {
+        "task_id": "UUID"
+      },
+      "parameters": [
+        "task_id"
+      ],
+      "uri": "/api/tasks/{task_id}/cancel"
+    },
     "check_schedule": {
       "method": "get",
       "methods": [
@@ -1375,6 +1388,19 @@
       },
       "uri": "/api/admin/audit/target/{target_type}/{target_id}"
     },
+    "get_task": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "parameterTypes": {
+        "task_id": "UUID"
+      },
+      "parameters": [
+        "task_id"
+      ],
+      "uri": "/api/tasks/{task_id}"
+    },
     "get_team": {
       "method": "get",
       "methods": [
@@ -1664,6 +1690,13 @@
         "sortOrder": "\"asc\" | \"desc\" | undefined"
       },
       "uri": "/api/profile/oauth/accounts"
+    },
+    "list_active_tasks": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "uri": "/api/tasks/active"
     },
     "list_box_messages": {
       "method": "get",
@@ -2279,6 +2312,30 @@
         "updatedBefore": "DateTime | undefined"
       },
       "uri": "/api/tags"
+    },
+    "list_tasks": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "queryParameters": {
+        "createdAfter": "DateTime | undefined",
+        "createdBefore": "DateTime | undefined",
+        "currentPage": "number | undefined",
+        "entityId": "UUID | undefined",
+        "entityType": "string | undefined",
+        "ids": "string[] | undefined",
+        "orderBy": "string | undefined",
+        "pageSize": "number | undefined",
+        "searchIgnoreCase": "boolean | undefined",
+        "searchString": "string | undefined",
+        "sortOrder": "\"asc\" | \"desc\" | undefined",
+        "status": "string | undefined",
+        "taskType": "string | undefined",
+        "updatedAfter": "DateTime | undefined",
+        "updatedBefore": "DateTime | undefined"
+      },
+      "uri": "/api/tasks"
     },
     "list_team_invitations": {
       "method": "get",

@@ -22,6 +22,7 @@ export type RouteName =
   | 'add_member_to_team'
   | 'assign_role'
   | 'assign_role_api_users_roles'
+  | 'cancel_task'
   | 'check_schedule'
   | 'close_ticket'
   | 'confirm_setup'
@@ -136,6 +137,7 @@ export type RouteName =
   | 'get_system_status'
   | 'get_tag'
   | 'get_target_logs'
+  | 'get_task'
   | 'get_team'
   | 'get_team_api_teams_team_id:uuid'
   | 'get_template'
@@ -159,6 +161,7 @@ export type RouteName =
   | 'initiate_disable_mfa_oauth'
   | 'initiate_setup'
   | 'list_accounts'
+  | 'list_active_tasks'
   | 'list_box_messages'
   | 'list_call_queues'
   | 'list_call_records'
@@ -192,6 +195,7 @@ export type RouteName =
   | 'list_roles'
   | 'list_schedules'
   | 'list_tags'
+  | 'list_tasks'
   | 'list_team_invitations'
   | 'list_team_permissions'
   | 'list_teams'
@@ -326,6 +330,9 @@ export interface RoutePathParams {
     role_slug: string;
   };
   'assign_role_api_users_roles': Record<string, never>;
+  'cancel_task': {
+    task_id: UUID;
+  };
   'check_schedule': {
     schedule_id: UUID;
   };
@@ -594,6 +601,9 @@ export interface RoutePathParams {
     target_id: string;
     target_type: string;
   };
+  'get_task': {
+    task_id: UUID;
+  };
   'get_team': {
     team_id: UUID;
   };
@@ -650,6 +660,7 @@ export interface RoutePathParams {
   };
   'initiate_setup': Record<string, never>;
   'list_accounts': Record<string, never>;
+  'list_active_tasks': Record<string, never>;
   'list_box_messages': {
     box_id: UUID;
   };
@@ -705,6 +716,7 @@ export interface RoutePathParams {
   'list_roles': Record<string, never>;
   'list_schedules': Record<string, never>;
   'list_tags': Record<string, never>;
+  'list_tasks': Record<string, never>;
   'list_team_invitations': {
     team_id: UUID;
   };
@@ -995,6 +1007,7 @@ export interface RouteQueryParams {
   'assign_role_api_users_roles': {
     role_slug: string;
   };
+  'cancel_task': Record<string, never>;
   'check_schedule': {
     time?: DateTime;
   };
@@ -1173,6 +1186,7 @@ export interface RouteQueryParams {
     targetIdIn?: string[];
     targetTypeIn?: string[];
   };
+  'get_task': Record<string, never>;
   'get_team': Record<string, never>;
   'get_team_api_teams_team_id:uuid': Record<string, never>;
   'get_template': Record<string, never>;
@@ -1224,6 +1238,7 @@ export interface RouteQueryParams {
     pageSize?: number;
     sortOrder?: "asc" | "desc";
   };
+  'list_active_tasks': Record<string, never>;
   'list_box_messages': {
     createdAfter?: DateTime;
     createdBefore?: DateTime;
@@ -1545,6 +1560,23 @@ export interface RouteQueryParams {
     searchIgnoreCase?: boolean;
     searchString?: string;
     sortOrder?: "asc" | "desc";
+    updatedAfter?: DateTime;
+    updatedBefore?: DateTime;
+  };
+  'list_tasks': {
+    createdAfter?: DateTime;
+    createdBefore?: DateTime;
+    currentPage?: number;
+    entityId?: UUID;
+    entityType?: string;
+    ids?: string[];
+    orderBy?: string;
+    pageSize?: number;
+    searchIgnoreCase?: boolean;
+    searchString?: string;
+    sortOrder?: "asc" | "desc";
+    status?: string;
+    taskType?: string;
     updatedAfter?: DateTime;
     updatedBefore?: DateTime;
   };
@@ -1886,6 +1918,13 @@ export const routeDefinitions = {
     method: 'post',
     pathParams: [] as const,
     queryParams: ['role_slug'] as const,
+  },
+  'cancel_task': {
+    path: '/api/tasks/{task_id}/cancel',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: ['task_id'] as const,
+    queryParams: [] as const,
   },
   'check_schedule': {
     path: '/api/schedules/{schedule_id}/check',
@@ -2685,6 +2724,13 @@ export const routeDefinitions = {
     pathParams: ['target_id', 'target_type'] as const,
     queryParams: ['action', 'actionIn', 'actorIdIn', 'createdAfter', 'createdBefore', 'currentPage', 'end_date', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'targetIdIn', 'targetTypeIn'] as const,
   },
+  'get_task': {
+    path: '/api/tasks/{task_id}',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: ['task_id'] as const,
+    queryParams: [] as const,
+  },
   'get_team': {
     path: '/api/admin/teams/{team_id}',
     methods: ['GET'] as const,
@@ -2845,6 +2891,13 @@ export const routeDefinitions = {
     method: 'get',
     pathParams: [] as const,
     queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'orderBy', 'pageSize', 'sortOrder'] as const,
+  },
+  'list_active_tasks': {
+    path: '/api/tasks/active',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: [] as const,
   },
   'list_box_messages': {
     path: '/api/voicemail/boxes/{box_id}/messages',
@@ -3078,6 +3131,13 @@ export const routeDefinitions = {
     method: 'get',
     pathParams: [] as const,
     queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
+  },
+  'list_tasks': {
+    path: '/api/tasks',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'entityId', 'entityType', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'status', 'taskType', 'updatedAfter', 'updatedBefore'] as const,
   },
   'list_team_invitations': {
     path: '/api/teams/{team_id}/invitations',
