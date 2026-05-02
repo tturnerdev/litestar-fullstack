@@ -129,6 +129,11 @@ All seven domain modules are implemented with full backend (models, services, co
 | Admin | All member domains + view Organization |
 | Superuser | All domains + edit Organization, Connections, Admin |
 
+### Implemented Infrastructure
+
+- **SAQ Task Queue** — Background task tracking with persistent `BackgroundTask` records (Phase 1-5 complete). Core infrastructure, device/extension/fax job wiring, and frontend task list/detail pages are done. Active task indicator and entity linking in Phase 6 are partially complete; admin views (Phase 7) remain.
+- **Real-Time Updates (SSE)** — Server-Sent Events push layer via Redis Pub/Sub (Phase 1-4 complete). Backend SSE infrastructure, task queue event wiring, frontend SSE hook with cache invalidation, and toast notifications are done. Device status events (Phase 5) and notification badge/polling reduction (Phase 6) are partially complete.
+
 ### Upcoming Work
 
 - **API Sync System** — Pull data from external sources (carrier phone numbers, PBX extensions, helpdesk tickets) into portal tables via the Connections domain. Provider-specific adapters behind a common interface, executed as SAQ background jobs.

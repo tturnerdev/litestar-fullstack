@@ -39,6 +39,41 @@ async def provide_task_context(ctx: Context, task_id: str) -> AsyncIterator[tupl
             raise
 
 
+async def broadcast_entity_event(task: BackgroundTask, action: str = "updated") -> None:
+    """Publish an entity.updated SSE event after a job completes.
+
+    Creates a short-lived Redis connection to broadcast the event.
+    Errors are silently caught so broadcast failures never affect
+    job execution.
+
+    Args:
+        task: The background task whose entity should be broadcast.
+        action: The action performed (default ``updated``).
+    """
+    if not task.entity_type or not task.entity_id:
+        return
+    try:
+        from redis.asyncio import Redis
+
+        from app.domain.events.services import EventBroadcaster
+        from app.lib.settings import get_settings
+
+        settings = get_settings()
+        redis = Redis.from_url(settings.saq.REDIS_URL)
+        try:
+            broadcaster = EventBroadcaster(redis)
+            await broadcaster.publish_entity_updated(
+                team_id=task.team_id,
+                entity_type=task.entity_type,
+                entity_id=task.entity_id,
+                action=action,
+            )
+        finally:
+            await redis.aclose()
+    except Exception:  # noqa: BLE001
+        pass  # Never let SSE broadcast failures affect job execution
+
+
 async def cleanup_stale_tasks(ctx: Context) -> dict[str, int]:
     """SAQ cron job that cleans up old completed/failed/cancelled tasks.
 

@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from structlog import get_logger
 
-from app.domain.tasks.jobs import provide_task_context
+from app.domain.tasks.jobs import broadcast_entity_event, provide_task_context
 
 if TYPE_CHECKING:
     from saq.types import Context
@@ -40,7 +40,8 @@ async def extension_create_job(ctx: Context, *, task_id: str) -> dict:
         # TODO: Configure extension settings on PBX
         await task_service.update_progress(task.id, 75)
         # TODO: Verify extension is registered
-        await task_service.complete_task(task.id, result={"extension_id": extension_id, "action": "extension.create"})
+        task = await task_service.complete_task(task.id, result={"extension_id": extension_id, "action": "extension.create"})
+        await broadcast_entity_event(task)
     return {"status": "completed"}
 
 
@@ -68,7 +69,8 @@ async def extension_update_job(ctx: Context, *, task_id: str) -> dict:
         # TODO: Push updated settings to PBX
         await task_service.update_progress(task.id, 75)
         # TODO: Verify settings applied
-        await task_service.complete_task(task.id, result={"extension_id": extension_id, "action": "extension.update"})
+        task = await task_service.complete_task(task.id, result={"extension_id": extension_id, "action": "extension.update"})
+        await broadcast_entity_event(task)
     return {"status": "completed"}
 
 
@@ -96,8 +98,9 @@ async def extension_delete_job(ctx: Context, *, task_id: str) -> dict:
         # TODO: Remove extension from PBX
         await task_service.update_progress(task.id, 66)
         # TODO: Confirm extension no longer registered
-        await task_service.complete_task(
+        task = await task_service.complete_task(
             task.id,
             result={"extension_id": extension_id, "extension_number": extension_number, "action": "extension.delete"},
         )
+        await broadcast_entity_event(task, action="deleted")
     return {"status": "completed"}

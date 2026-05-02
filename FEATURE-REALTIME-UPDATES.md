@@ -629,43 +629,43 @@ The `useEventStream()` hook implements reconnect with exponential backoff:
 ## Sub-Features & Tasks
 
 ### Phase 1: Backend SSE Infrastructure
-- [ ] Create `src/py/app/domain/events/` domain module structure
-- [ ] Implement `EventBroadcaster` service with `publish_to_team`, `publish_to_user`, and convenience methods
-- [ ] Implement `EventSubscriber` service with `subscribe`, `listen`, `unsubscribe`
-- [ ] Create event payload schemas (`TaskEvent`, `DeviceStatusEvent`, `NotificationEvent`, `EntityUpdatedEvent`)
-- [ ] Create `EventStreamController` with `GET /api/events/stream` SSE endpoint
-- [ ] Add `provide_event_broadcaster` dependency provider
-- [ ] Add `requires_active_session` guard for the SSE endpoint
-- [ ] Implement 30-second heartbeat keep-alive in the SSE stream
-- [ ] Implement per-user connection limiting (max 3 concurrent SSE connections)
-- [ ] Add graceful shutdown event (`server.shutdown`)
-- [ ] Verify Redis Pub/Sub works with the existing SAQ Redis instance (shared vs. separate connection)
+- [x] Create `src/py/app/domain/events/` domain module structure
+- [x] Implement `EventBroadcaster` service with `publish_to_team`, `publish_to_user`, and convenience methods
+- [x] Implement `EventSubscriber` service with `subscribe`, `listen`, `unsubscribe`
+- [x] Create event payload schemas (`TaskEvent`, `DeviceStatusEvent`, `NotificationEvent`, `EntityUpdatedEvent`)
+- [x] Create `EventStreamController` with `GET /api/events/stream` SSE endpoint
+- [x] Add `provide_event_broadcaster` dependency provider
+- [x] Add `requires_active_session` guard for the SSE endpoint
+- [x] Implement 30-second heartbeat keep-alive in the SSE stream
+- [x] Implement per-user connection limiting (max 3 concurrent SSE connections)
+- [x] Add graceful shutdown event (`server.shutdown`)
+- [x] Verify Redis Pub/Sub works with the existing SAQ Redis instance (shared vs. separate connection)
 
 ### Phase 2: Wire Task Queue Events
-- [ ] Inject `EventBroadcaster` into `BackgroundTaskService`
-- [ ] Publish `task.updated` on `start_task()` and `update_progress()`
-- [ ] Publish `task.completed` on `complete_task()`
-- [ ] Publish `task.failed` on `fail_task()`
-- [ ] Publish `task.updated` with status `cancelled` on `cancel_task()`
-- [ ] Add integration test: enqueue task, verify SSE receives status transitions
+- [x] Inject `EventBroadcaster` into `BackgroundTaskService`
+- [x] Publish `task.updated` on `start_task()` and `update_progress()`
+- [x] Publish `task.completed` on `complete_task()`
+- [x] Publish `task.failed` on `fail_task()`
+- [x] Publish `task.updated` with status `cancelled` on `cancel_task()`
+- [x] Add integration test: enqueue task, verify SSE receives status transitions
 
 ### Phase 3: Frontend SSE Hook + Cache Invalidation
-- [ ] Implement `useEventStream()` hook with `EventSource` management
-- [ ] Implement exponential backoff reconnection logic
-- [ ] Add event handlers for `task.updated`, `task.completed`, `task.failed`
-- [ ] Add event handler for `device.status_changed`
-- [ ] Add event handler for `notification.created`
-- [ ] Add event handler for `entity.updated` (generic cache invalidation)
-- [ ] Create `EventStreamProvider` component
-- [ ] Mount `EventStreamProvider` in the authenticated app layout (`_app.tsx`)
-- [ ] Regenerate TypeScript types (`make types`)
+- [x] Implement `useEventStream()` hook with `EventSource` management
+- [x] Implement exponential backoff reconnection logic
+- [x] Add event handlers for `task.updated`, `task.completed`, `task.failed`
+- [x] Add event handler for `device.status_changed`
+- [x] Add event handler for `notification.created`
+- [x] Add event handler for `entity.updated` (generic cache invalidation)
+- [x] Create `EventStreamProvider` component
+- [x] Mount `EventStreamProvider` in the authenticated app layout (`_app.tsx`)
+- [x] Regenerate TypeScript types (`make types`)
 
 ### Phase 4: Toast Notifications for Task Completion/Failure
-- [ ] Add `handleTaskCompleted` toast with task type label and "View" link
-- [ ] Add `handleTaskFailed` error toast with error message preview and "View" link
-- [ ] Add `formatTaskType` utility (`device.reboot` -> `Device Reboot`)
-- [ ] Verify toasts auto-dismiss after 8 seconds and support manual close
-- [ ] Test toast behavior when multiple tasks complete in quick succession
+- [x] Add `handleTaskCompleted` toast with task type label and "View" link
+- [x] Add `handleTaskFailed` error toast with error message preview and "View" link
+- [x] Add `formatTaskType` utility (`device.reboot` -> `Device Reboot`)
+- [x] Verify toasts auto-dismiss after 8 seconds and support manual close
+- [x] Test toast behavior when multiple tasks complete in quick succession
 
 ### Phase 5: Device Status Events
 - [ ] Publish `device.status_changed` from device status sync background task
@@ -674,7 +674,7 @@ The `useEventStream()` hook implements reconnect with exponential backoff:
 - [ ] Update `DeviceStatusBadge` component to reflect real-time status without manual refresh
 
 ### Phase 6: Notification Badge + Polling Reduction
-- [ ] Invalidate notification queries on `notification.created` events
+- [x] Invalidate notification queries on `notification.created` events
 - [ ] Publish `notification.created` from notification domain listeners (task completed, voicemail received, etc.)
 - [ ] Increment unread notification badge count in real time
 - [ ] Remove `refetchInterval` from `useActiveTasks()` (replace with SSE-driven invalidation)

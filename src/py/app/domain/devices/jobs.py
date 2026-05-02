@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from structlog import get_logger
 
-from app.domain.tasks.jobs import provide_task_context
+from app.domain.tasks.jobs import broadcast_entity_event, provide_task_context
 
 if TYPE_CHECKING:
     from saq.types import Context
@@ -39,7 +39,8 @@ async def device_reboot_job(ctx: Context, *, task_id: str) -> dict:
         await task_service.update_progress(task.id, 50)
         # TODO: Actual device reboot via SIP NOTIFY or provisioning API
         await task_service.update_progress(task.id, 100)
-        await task_service.complete_task(task.id, result={"device_id": device_id, "action": "reboot"})
+        task = await task_service.complete_task(task.id, result={"device_id": device_id, "action": "reboot"})
+        await broadcast_entity_event(task)
     return {"status": "completed"}
 
 
@@ -65,7 +66,8 @@ async def device_provision_job(ctx: Context, *, task_id: str) -> dict:
         # TODO: Push configuration to device
         await task_service.update_progress(task.id, 75)
         # TODO: Verify device registration
-        await task_service.complete_task(task.id, result={"device_id": device_id, "action": "provision"})
+        task = await task_service.complete_task(task.id, result={"device_id": device_id, "action": "provision"})
+        await broadcast_entity_event(task)
     return {"status": "completed"}
 
 
@@ -87,5 +89,6 @@ async def device_reprovision_job(ctx: Context, *, task_id: str) -> dict:
         await logger.ainfo("Starting device reprovisioning", device_id=device_id)
         await task_service.update_progress(task.id, 50)
         # TODO: Push updated configuration to device
-        await task_service.complete_task(task.id, result={"device_id": device_id, "action": "reprovision"})
+        task = await task_service.complete_task(task.id, result={"device_id": device_id, "action": "reprovision"})
+        await broadcast_entity_event(task)
     return {"status": "completed"}

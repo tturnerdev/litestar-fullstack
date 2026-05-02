@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 import structlog
 
-from app.domain.tasks.jobs import provide_task_context
+from app.domain.tasks.jobs import broadcast_entity_event, provide_task_context
 
 if TYPE_CHECKING:
     from saq.types import Context
@@ -57,12 +57,13 @@ async def fax_send_job(
         # For now, complete immediately as placeholder
         await task_service.update_progress(task.id, 100)
 
-        await task_service.complete_task(task.id, result={
+        task = await task_service.complete_task(task.id, result={
             "to_number": to_number,
             "from_number": from_number,
             "action": "fax.send",
             "provider": "telnyx",
         })
+        await broadcast_entity_event(task)
     return {"status": "completed"}
 
 
@@ -93,8 +94,9 @@ async def fax_receive_process_job(ctx: Context, *, task_id: str, fax_message_id:
         await task_service.update_progress(task.id, 75)
         # TODO: Mark fax message as delivered, record which emails received it
 
-        await task_service.complete_task(task.id, result={
+        task = await task_service.complete_task(task.id, result={
             "fax_message_id": fax_message_id,
             "action": "fax.receive_process",
         })
+        await broadcast_entity_event(task)
     return {"status": "completed"}

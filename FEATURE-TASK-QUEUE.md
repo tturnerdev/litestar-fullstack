@@ -577,54 +577,54 @@ When `entity_type` and `entity_id` are set on a task, the frontend can render a 
 ## Sub-Features & Tasks
 
 ### Phase 1: Core Infrastructure
-- [ ] Create `BackgroundTaskStatus` enum model in `src/py/app/db/models/_background_task_status.py`
-- [ ] Create `BackgroundTask` database model in `src/py/app/db/models/_background_task.py`
-- [ ] Export both from `src/py/app/db/models/__init__.py`
-- [ ] Create Alembic migration
-- [ ] Create `BackgroundTaskService` with core methods (`create_task`, `start_task`, `update_progress`, `complete_task`, `fail_task`, `cancel_task`)
-- [ ] Implement `enqueue_tracked_task` convenience method
-- [ ] Create `provide_task_context` context manager in `jobs.py`
-- [ ] Create schemas (`BackgroundTaskList`, `BackgroundTaskDetail`, `BackgroundTaskCreate`, `BackgroundTaskUpdate`)
-- [ ] Create `BackgroundTaskController` with REST endpoints
-- [ ] Add dependency providers in `deps.py`
-- [ ] Add `requires_task_access` guard
-- [ ] Add `cleanup_stale_tasks` cron job and register in SAQ config
-- [ ] Regenerate TypeScript types (`make types`)
+- [x] Create `BackgroundTaskStatus` enum model in `src/py/app/db/models/_background_task_status.py`
+- [x] Create `BackgroundTask` database model in `src/py/app/db/models/_background_task.py`
+- [x] Export both from `src/py/app/db/models/__init__.py`
+- [x] Create Alembic migration
+- [x] Create `BackgroundTaskService` with core methods (`create_task`, `start_task`, `update_progress`, `complete_task`, `fail_task`, `cancel_task`)
+- [x] Implement `enqueue_tracked_task` convenience method
+- [x] Create `provide_task_context` context manager in `jobs.py`
+- [x] Create schemas (`BackgroundTaskList`, `BackgroundTaskDetail`, `BackgroundTaskCreate`, `BackgroundTaskUpdate`)
+- [x] Create `BackgroundTaskController` with REST endpoints
+- [x] Add dependency providers in `deps.py`
+- [x] Add `requires_task_access` guard
+- [x] Add `cleanup_stale_tasks` cron job and register in SAQ config
+- [x] Regenerate TypeScript types (`make types`)
 
 ### Phase 2: Device Task Jobs
-- [ ] Create `src/py/app/domain/devices/jobs.py` with `device_reboot_job`
-- [ ] Create `device_provision_job` and `device_reprovision_job`
-- [ ] Update device controller reboot/reprovision endpoints to use `enqueue_tracked_task`
-- [ ] Register device job functions in SAQ queue config `tasks` list
-- [ ] Update device controller responses to return `BackgroundTaskDetail` (HTTP 202)
+- [x] Create `src/py/app/domain/devices/jobs.py` with `device_reboot_job`
+- [x] Create `device_provision_job` and `device_reprovision_job`
+- [x] Update device controller reboot/reprovision endpoints to use `enqueue_tracked_task`
+- [x] Register device job functions in SAQ queue config `tasks` list
+- [x] Update device controller responses to return `BackgroundTaskDetail` (HTTP 202)
 
 ### Phase 3: Extension Task Jobs
-- [ ] Create `src/py/app/domain/voice/jobs.py` with `extension_create_job`
-- [ ] Create `extension_update_job` and `extension_delete_job`
-- [ ] Update extension controller to use tracked tasks for PBX-sync operations
-- [ ] Register extension job functions in SAQ queue config `tasks` list
+- [x] Create `src/py/app/domain/voice/jobs.py` with `extension_create_job`
+- [x] Create `extension_update_job` and `extension_delete_job`
+- [x] Update extension controller to use tracked tasks for PBX-sync operations
+- [x] Register extension job functions in SAQ queue config `tasks` list
 
 ### Phase 4: Fax Task Jobs
-- [ ] Create `src/py/app/domain/fax/jobs.py` with `fax_send_job`
-- [ ] Create `fax_receive_process_job`
-- [ ] Update fax send endpoint to use `enqueue_tracked_task`
-- [ ] Register fax job functions in SAQ queue config `tasks` list
+- [x] Create `src/py/app/domain/fax/jobs.py` with `fax_send_job`
+- [x] Create `fax_receive_process_job`
+- [x] Update fax send endpoint to use `enqueue_tracked_task`
+- [x] Register fax job functions in SAQ queue config `tasks` list
 
 ### Phase 5: Frontend -- Task List & Detail
-- [ ] Create `useTasks`, `useTask`, `useActiveTasks`, `useCancelTask` React Query hooks
-- [ ] Build `TaskStatusBadge` component (color-coded by status)
-- [ ] Build `TaskProgressBar` component
-- [ ] Build `TaskPayloadViewer` component (collapsible JSON viewer)
-- [ ] Build task list page at `/tasks` with filtering, sorting, pagination
-- [ ] Build task detail page at `/tasks/:taskId` with auto-refresh
-- [ ] Add cancel button with confirmation dialog
+- [x] Create `useTasks`, `useTask`, `useActiveTasks`, `useCancelTask` React Query hooks
+- [x] Build `TaskStatusBadge` component (color-coded by status)
+- [x] Build `TaskProgressBar` component
+- [x] Build `TaskPayloadViewer` component (collapsible JSON viewer)
+- [x] Build task list page at `/tasks` with filtering, sorting, pagination
+- [x] Build task detail page at `/tasks/:taskId` with auto-refresh
+- [x] Add cancel button with confirmation dialog
 
 ### Phase 6: Frontend -- Active Indicator & Notifications
-- [ ] Build `ActiveTaskIndicator` header component with polling
+- [x] Build `ActiveTaskIndicator` header component with polling
 - [ ] Implement toast notifications on task completion/failure transitions
 - [ ] Add `background_task_completed` event listener to create `Notification` records
 - [ ] Add `background_task_failed` event listener to create `Notification` records
-- [ ] Add entity-type link rendering in task detail and task list
+- [x] Add entity-type link rendering in task detail and task list
 - [ ] Add task count to relevant entity detail pages (e.g., device detail shows recent tasks)
 
 ### Phase 7: Admin Views & Monitoring
