@@ -82,6 +82,7 @@ import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-lay
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { CopyButton } from "@/components/ui/copy-button"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Input } from "@/components/ui/input"
 import {
   Select,
@@ -1061,6 +1062,7 @@ function TicketDetailPage() {
         {/* Main column — Conversation */}
         <div className="min-w-0 space-y-6">
           <PageSection delay={0.05}>
+            <SectionErrorBoundary name="Conversation">
             <Card className="border-border/60 bg-card/80">
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-base">
@@ -1103,6 +1105,7 @@ function TicketDetailPage() {
                 </div>
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
           </PageSection>
         </div>
 
@@ -1110,6 +1113,7 @@ function TicketDetailPage() {
         <div className="space-y-4">
           {/* Status & Priority */}
           <PageSection delay={0.1}>
+            <SectionErrorBoundary name="Ticket Details">
             <Card className="border-border/60 bg-card/80">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -1334,15 +1338,19 @@ function TicketDetailPage() {
                 />
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
           </PageSection>
 
           {/* SLA Metrics */}
           <PageSection delay={0.12}>
+            <SectionErrorBoundary name="SLA Metrics">
             <SlaIndicators ticket={ticket} messages={messagesData ?? []} />
+            </SectionErrorBoundary>
           </PageSection>
 
           {/* Timestamps & ID */}
           <PageSection delay={0.15}>
+            <SectionErrorBoundary name="Ticket Timeline">
             <Card className="border-border/60 bg-card/80">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -1415,10 +1423,12 @@ function TicketDetailPage() {
                 </div>
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
           </PageSection>
 
           {/* Lifecycle Timeline */}
           <PageSection delay={0.18}>
+            <SectionErrorBoundary name="Lifecycle">
             <Card className="border-border/60 bg-card/80">
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
@@ -1433,10 +1443,12 @@ function TicketDetailPage() {
                 />
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
           </PageSection>
 
           {/* Activity Log — collapsed by default, lazy-loads when expanded */}
           <PageSection delay={0.22}>
+            <SectionErrorBoundary name="Activity Log">
             <Collapsible open={activityOpen} onOpenChange={setActivityOpen}>
               <Card className="border-border/60 bg-card/80">
                 <CollapsibleTrigger asChild>
@@ -1461,10 +1473,12 @@ function TicketDetailPage() {
                 </CollapsibleContent>
               </Card>
             </Collapsible>
+            </SectionErrorBoundary>
           </PageSection>
 
           {/* Danger zone */}
           <PageSection delay={0.27}>
+            <SectionErrorBoundary name="Danger Zone">
             <Card className="border-destructive/30">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium text-destructive">
@@ -1488,6 +1502,7 @@ function TicketDetailPage() {
                 </div>
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
           </PageSection>
         </div>
       </div>

@@ -53,6 +53,7 @@ import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Skeleton } from "@/components/ui/skeleton"
 import { CopyButton } from "@/components/ui/copy-button"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { toast } from "sonner"
@@ -363,6 +364,7 @@ function E911DetailPage() {
 
       {/* Address Details */}
       <PageSection>
+        <SectionErrorBoundary name="Address">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="flex items-center gap-2">
@@ -441,10 +443,12 @@ function E911DetailPage() {
             )}
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Linked Phone Number */}
       <PageSection delay={0.1}>
+        <SectionErrorBoundary name="Linked Phone Number">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -472,10 +476,12 @@ function E911DetailPage() {
             </div>
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Linked Location */}
       <PageSection delay={0.15}>
+        <SectionErrorBoundary name="Linked Location">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -499,10 +505,12 @@ function E911DetailPage() {
             </div>
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Related Resources */}
       <PageSection delay={0.2}>
+        <SectionErrorBoundary name="Related Resources">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -604,10 +612,12 @@ function E911DetailPage() {
             </div>
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Validation Status */}
       <PageSection delay={0.25}>
+        <SectionErrorBoundary name="Validation Status">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -644,10 +654,12 @@ function E911DetailPage() {
             </div>
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Metadata */}
       <PageSection delay={0.3}>
+        <SectionErrorBoundary name="Metadata">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -676,10 +688,12 @@ function E911DetailPage() {
             </div>
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Danger Zone */}
       <PageSection delay={0.35}>
+        <SectionErrorBoundary name="Danger Zone">
         <Card className="border-destructive/30">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-destructive">
@@ -703,13 +717,16 @@ function E911DetailPage() {
             </div>
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       <PageSection delay={0.4}>
+        <SectionErrorBoundary name="Activity">
         <EntityActivityPanel
           targetType="e911_registration"
           targetId={registrationId}
         />
+        </SectionErrorBoundary>
       </PageSection>
     </PageContainer>
   )

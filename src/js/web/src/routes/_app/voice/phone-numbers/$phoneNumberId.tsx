@@ -38,6 +38,7 @@ import { useDocumentTitle } from "@/hooks/use-document-title"
 import { usePhoneNumber, useUpdatePhoneNumber, useExtensionsByPhoneNumber } from "@/lib/api/hooks/voice"
 import { useGatewayLookupNumber } from "@/lib/api/hooks/gateway"
 import { useTeam } from "@/lib/api/hooks/teams"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { formatPhoneNumber } from "@/lib/format-utils"
 
 type PhoneNumberDetailSearch = {
@@ -285,6 +286,7 @@ function PhoneNumberDetailPage() {
           </TabsList>
 
           <TabsContent value="details" className="mt-6 space-y-6">
+            <SectionErrorBoundary name="Number Info">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
@@ -443,7 +445,9 @@ function PhoneNumberDetailPage() {
                 )}
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
 
+            <SectionErrorBoundary name="Metadata">
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2">
@@ -493,7 +497,9 @@ function PhoneNumberDetailPage() {
                 </div>
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
 
+            <SectionErrorBoundary name="Related Extensions">
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2">
@@ -551,7 +557,9 @@ function PhoneNumberDetailPage() {
                 )}
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
 
+            <SectionErrorBoundary name="Related Resources">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -653,6 +661,7 @@ function PhoneNumberDetailPage() {
                 </div>
               </CardContent>
             </Card>
+            </SectionErrorBoundary>
           </TabsContent>
 
           <TabsContent value="external" className="mt-6">
@@ -679,6 +688,7 @@ function PhoneNumberDetailPage() {
 
       {/* Danger Zone */}
       <PageSection delay={0.3}>
+        <SectionErrorBoundary name="Danger Zone">
         <Card className="border-destructive/30">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-destructive">
@@ -698,6 +708,7 @@ function PhoneNumberDetailPage() {
             </div>
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       <PhoneNumberEditSheet phoneNumber={data} open={editOpen} onOpenChange={setEditOpen} />

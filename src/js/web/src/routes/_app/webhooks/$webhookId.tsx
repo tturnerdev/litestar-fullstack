@@ -65,7 +65,9 @@ import {
 } from "@/components/ui/table"
 import { Textarea } from "@/components/ui/textarea"
 import { CopyButton } from "@/components/ui/copy-button"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import {
@@ -489,6 +491,7 @@ function WebhookDetailPage() {
 
       {/* Webhook Info */}
       <PageSection>
+        <SectionErrorBoundary name="Webhook Info">
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
@@ -723,10 +726,12 @@ function WebhookDetailPage() {
             )}
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Metadata */}
       <PageSection delay={0.1}>
+        <SectionErrorBoundary name="Metadata">
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
@@ -765,10 +770,12 @@ function WebhookDetailPage() {
             </div>
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Delivery Log */}
       <PageSection delay={0.15}>
+        <SectionErrorBoundary name="Delivery Log">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div className="flex items-center gap-2">
@@ -875,10 +882,29 @@ function WebhookDetailPage() {
             )}
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
+      </PageSection>
+
+      {/* Activity */}
+      <PageSection delay={0.2}>
+        <SectionErrorBoundary name="Activity">
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Clock className="h-5 w-5 text-muted-foreground" />
+              <CardTitle>Activity</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <EntityActivityPanel targetType="webhook" targetId={webhookId} />
+          </CardContent>
+        </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Danger Zone */}
       <PageSection delay={0.25}>
+        <SectionErrorBoundary name="Danger Zone">
         <Card className="border-destructive/30">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-destructive">
@@ -905,6 +931,7 @@ function WebhookDetailPage() {
             </div>
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Delete confirmation dialog */}

@@ -58,6 +58,7 @@ import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { CopyButton } from "@/components/ui/copy-button"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { DirectionBadge, FaxStatusBadge } from "@/components/fax/fax-status-badge"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
@@ -510,6 +511,7 @@ function FaxMessageDetailPage() {
 
       {/* Message Info */}
       <PageSection>
+        <SectionErrorBoundary name="Message Info">
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
@@ -569,10 +571,12 @@ function FaxMessageDetailPage() {
             </div>
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Transmission Details */}
       <PageSection delay={0.1}>
+        <SectionErrorBoundary name="Transmission Details">
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
@@ -609,10 +613,12 @@ function FaxMessageDetailPage() {
             )}
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Message History */}
       <PageSection delay={0.12}>
+        <SectionErrorBoundary name="Message History">
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
@@ -637,10 +643,12 @@ function FaxMessageDetailPage() {
             </div>
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Content / Document Preview */}
       <PageSection delay={0.18}>
+        <SectionErrorBoundary name="Document Preview">
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -679,10 +687,12 @@ function FaxMessageDetailPage() {
             )}
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Metadata */}
       <PageSection delay={0.22}>
+        <SectionErrorBoundary name="Metadata">
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
@@ -739,10 +749,12 @@ function FaxMessageDetailPage() {
             </div>
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Danger Zone */}
       <PageSection delay={0.28}>
+        <SectionErrorBoundary name="Danger Zone">
         <Card className="border-destructive/30">
           <CardHeader>
             <CardTitle className="text-destructive">Danger Zone</CardTitle>
@@ -767,6 +779,7 @@ function FaxMessageDetailPage() {
             </div>
           </CardContent>
         </Card>
+        </SectionErrorBoundary>
       </PageSection>
 
       {/* Delete confirmation dialog */}

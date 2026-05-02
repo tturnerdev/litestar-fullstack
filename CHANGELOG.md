@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.230.0 (2026-05-03)
+
+### Added
+- **EntityActivityPanel** on webhooks detail page for audit trail visibility
+- **SectionErrorBoundary** on voice phone numbers, webhooks, E911, fax messages, and support ticket detail pages — completing error boundary coverage across all detail pages
+
 ## v0.229.0 (2026-05-03)
 
 ### Added
