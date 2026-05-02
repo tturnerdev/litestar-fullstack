@@ -17,10 +17,12 @@ import {
   accountProfileUpdate,
   accountRegister,
   addMemberToTeam,
+  adminCancelTask,
   adminCreateDeviceTemplate,
   adminCreateMusicOnHold,
   adminDeleteDeviceTemplate,
   adminDeleteMusicOnHold,
+  adminDeleteTask,
   adminDeleteTeam,
   adminDeleteUser,
   adminExportAuditLog,
@@ -45,6 +47,7 @@ import {
   adminListFaxNumbers,
   adminListMusicOnHold,
   adminListPhoneNumbers,
+  adminListTasks,
   adminListTeams,
   adminListTickets,
   adminListUsers,
@@ -317,6 +320,9 @@ import type {
   AddMemberToTeamData,
   AddMemberToTeamError,
   AddMemberToTeamResponse,
+  AdminCancelTaskData,
+  AdminCancelTaskError,
+  AdminCancelTaskResponse,
   AdminCreateDeviceTemplateData,
   AdminCreateDeviceTemplateError,
   AdminCreateDeviceTemplateResponse,
@@ -329,6 +335,9 @@ import type {
   AdminDeleteMusicOnHoldData,
   AdminDeleteMusicOnHoldError,
   AdminDeleteMusicOnHoldResponse,
+  AdminDeleteTaskData,
+  AdminDeleteTaskError,
+  AdminDeleteTaskResponse,
   AdminDeleteTeamData,
   AdminDeleteTeamError,
   AdminDeleteTeamResponse,
@@ -395,6 +404,9 @@ import type {
   AdminListPhoneNumbersData,
   AdminListPhoneNumbersError,
   AdminListPhoneNumbersResponse,
+  AdminListTasksData,
+  AdminListTasksError,
+  AdminListTasksResponse,
   AdminListTeamsData,
   AdminListTeamsError,
   AdminListTeamsResponse,
@@ -2311,6 +2323,85 @@ export const getAdminSystemStatusOptions = (
     },
     queryKey: getAdminSystemStatusQueryKey(options),
   });
+
+export const adminListTasksQueryKey = (options?: Options<AdminListTasksData>) =>
+  createQueryKey("adminListTasks", options);
+
+/**
+ * ListTasks
+ */
+export const adminListTasksOptions = (options?: Options<AdminListTasksData>) =>
+  queryOptions<
+    AdminListTasksResponse,
+    AdminListTasksError,
+    AdminListTasksResponse,
+    ReturnType<typeof adminListTasksQueryKey>
+  >({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await adminListTasks({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: adminListTasksQueryKey(options),
+  });
+
+/**
+ * DeleteTask
+ */
+export const adminDeleteTaskMutation = (
+  options?: Partial<Options<AdminDeleteTaskData>>,
+): UseMutationOptions<
+  AdminDeleteTaskResponse,
+  AdminDeleteTaskError,
+  Options<AdminDeleteTaskData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    AdminDeleteTaskResponse,
+    AdminDeleteTaskError,
+    Options<AdminDeleteTaskData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await adminDeleteTask({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+/**
+ * CancelTask
+ */
+export const adminCancelTaskMutation = (
+  options?: Partial<Options<AdminCancelTaskData>>,
+): UseMutationOptions<
+  AdminCancelTaskResponse,
+  AdminCancelTaskError,
+  Options<AdminCancelTaskData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    AdminCancelTaskResponse,
+    AdminCancelTaskError,
+    Options<AdminCancelTaskData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await adminCancelTask({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
 
 export const adminListTeamsQueryKey = (options?: Options<AdminListTeamsData>) =>
   createQueryKey("adminListTeams", options);

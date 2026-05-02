@@ -72,6 +72,7 @@ import { Route as AppDevicesNewRouteImport } from './routes/_app/devices/new'
 import { Route as AppConnectionsNewRouteImport } from './routes/_app/connections/new'
 import { Route as AppConnectionsConnectionIdRouteImport } from './routes/_app/connections/$connectionId'
 import { Route as AppAdminVoiceRouteImport } from './routes/_app/admin/voice'
+import { Route as AppAdminTasksRouteImport } from './routes/_app/admin/tasks'
 import { Route as AppAdminSystemRouteImport } from './routes/_app/admin/system'
 import { Route as AppAdminSupportRouteImport } from './routes/_app/admin/support'
 import { Route as AppAdminRolesRouteImport } from './routes/_app/admin/roles'
@@ -433,6 +434,11 @@ const AppAdminVoiceRoute = AppAdminVoiceRouteImport.update({
   path: '/voice',
   getParentRoute: () => AppAdminRoute,
 } as any)
+const AppAdminTasksRoute = AppAdminTasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => AppAdminRoute,
+} as any)
 const AppAdminSystemRoute = AppAdminSystemRouteImport.update({
   id: '/system',
   path: '/system',
@@ -721,6 +727,7 @@ export interface FileRoutesByFullPath {
   '/admin/roles': typeof AppAdminRolesRoute
   '/admin/support': typeof AppAdminSupportRoute
   '/admin/system': typeof AppAdminSystemRoute
+  '/admin/tasks': typeof AppAdminTasksRoute
   '/admin/voice': typeof AppAdminVoiceRoute
   '/connections/$connectionId': typeof AppConnectionsConnectionIdRouteWithChildren
   '/connections/new': typeof AppConnectionsNewRoute
@@ -818,6 +825,7 @@ export interface FileRoutesByTo {
   '/admin/roles': typeof AppAdminRolesRoute
   '/admin/support': typeof AppAdminSupportRoute
   '/admin/system': typeof AppAdminSystemRoute
+  '/admin/tasks': typeof AppAdminTasksRoute
   '/admin/voice': typeof AppAdminVoiceRoute
   '/connections/new': typeof AppConnectionsNewRoute
   '/devices/new': typeof AppDevicesNewRoute
@@ -926,6 +934,7 @@ export interface FileRoutesById {
   '/_app/admin/roles': typeof AppAdminRolesRoute
   '/_app/admin/support': typeof AppAdminSupportRoute
   '/_app/admin/system': typeof AppAdminSystemRoute
+  '/_app/admin/tasks': typeof AppAdminTasksRoute
   '/_app/admin/voice': typeof AppAdminVoiceRoute
   '/_app/connections/$connectionId': typeof AppConnectionsConnectionIdRouteWithChildren
   '/_app/connections/new': typeof AppConnectionsNewRoute
@@ -1037,6 +1046,7 @@ export interface FileRouteTypes {
     | '/admin/roles'
     | '/admin/support'
     | '/admin/system'
+    | '/admin/tasks'
     | '/admin/voice'
     | '/connections/$connectionId'
     | '/connections/new'
@@ -1134,6 +1144,7 @@ export interface FileRouteTypes {
     | '/admin/roles'
     | '/admin/support'
     | '/admin/system'
+    | '/admin/tasks'
     | '/admin/voice'
     | '/connections/new'
     | '/devices/new'
@@ -1241,6 +1252,7 @@ export interface FileRouteTypes {
     | '/_app/admin/roles'
     | '/_app/admin/support'
     | '/_app/admin/system'
+    | '/_app/admin/tasks'
     | '/_app/admin/voice'
     | '/_app/connections/$connectionId'
     | '/_app/connections/new'
@@ -1764,6 +1776,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminVoiceRouteImport
       parentRoute: typeof AppAdminRoute
     }
+    '/_app/admin/tasks': {
+      id: '/_app/admin/tasks'
+      path: '/tasks'
+      fullPath: '/admin/tasks'
+      preLoaderRoute: typeof AppAdminTasksRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
     '/_app/admin/system': {
       id: '/_app/admin/system'
       path: '/system'
@@ -2100,6 +2119,7 @@ interface AppAdminRouteChildren {
   AppAdminRolesRoute: typeof AppAdminRolesRoute
   AppAdminSupportRoute: typeof AppAdminSupportRoute
   AppAdminSystemRoute: typeof AppAdminSystemRoute
+  AppAdminTasksRoute: typeof AppAdminTasksRoute
   AppAdminVoiceRoute: typeof AppAdminVoiceRoute
   AppAdminIndexRoute: typeof AppAdminIndexRoute
   AppAdminTeamsTeamIdRoute: typeof AppAdminTeamsTeamIdRoute
@@ -2119,6 +2139,7 @@ const AppAdminRouteChildren: AppAdminRouteChildren = {
   AppAdminRolesRoute: AppAdminRolesRoute,
   AppAdminSupportRoute: AppAdminSupportRoute,
   AppAdminSystemRoute: AppAdminSystemRoute,
+  AppAdminTasksRoute: AppAdminTasksRoute,
   AppAdminVoiceRoute: AppAdminVoiceRoute,
   AppAdminIndexRoute: AppAdminIndexRoute,
   AppAdminTeamsTeamIdRoute: AppAdminTeamsTeamIdRoute,

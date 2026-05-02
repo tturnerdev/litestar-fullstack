@@ -33,6 +33,9 @@ import type {
   AddMemberToTeamData,
   AddMemberToTeamErrors,
   AddMemberToTeamResponses,
+  AdminCancelTaskData,
+  AdminCancelTaskErrors,
+  AdminCancelTaskResponses,
   AdminCreateDeviceTemplateData,
   AdminCreateDeviceTemplateErrors,
   AdminCreateDeviceTemplateResponses,
@@ -45,6 +48,9 @@ import type {
   AdminDeleteMusicOnHoldData,
   AdminDeleteMusicOnHoldErrors,
   AdminDeleteMusicOnHoldResponses,
+  AdminDeleteTaskData,
+  AdminDeleteTaskErrors,
+  AdminDeleteTaskResponses,
   AdminDeleteTeamData,
   AdminDeleteTeamErrors,
   AdminDeleteTeamResponses,
@@ -111,6 +117,9 @@ import type {
   AdminListPhoneNumbersData,
   AdminListPhoneNumbersErrors,
   AdminListPhoneNumbersResponses,
+  AdminListTasksData,
+  AdminListTasksErrors,
+  AdminListTasksResponses,
   AdminListTeamsData,
   AdminListTeamsErrors,
   AdminListTeamsResponses,
@@ -1580,6 +1589,54 @@ export const getAdminSystemStatus = <ThrowOnError extends boolean = false>(
   >({
     security: [{ scheme: "bearer", type: "http" }],
     url: "/api/admin/system/status",
+    ...options,
+  });
+
+/**
+ * ListTasks
+ */
+export const adminListTasks = <ThrowOnError extends boolean = false>(
+  options?: Options<AdminListTasksData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    AdminListTasksResponses,
+    AdminListTasksErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/admin/tasks",
+    ...options,
+  });
+
+/**
+ * DeleteTask
+ */
+export const adminDeleteTask = <ThrowOnError extends boolean = false>(
+  options: Options<AdminDeleteTaskData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    AdminDeleteTaskResponses,
+    AdminDeleteTaskErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/admin/tasks/{task_id}",
+    ...options,
+  });
+
+/**
+ * CancelTask
+ */
+export const adminCancelTask = <ThrowOnError extends boolean = false>(
+  options: Options<AdminCancelTaskData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    AdminCancelTaskResponses,
+    AdminCancelTaskErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/admin/tasks/{task_id}/cancel",
     ...options,
   });
 

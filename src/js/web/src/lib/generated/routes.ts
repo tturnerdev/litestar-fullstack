@@ -23,6 +23,7 @@ export type RouteName =
   | 'assign_role'
   | 'assign_role_api_users_roles'
   | 'cancel_task'
+  | 'cancel_task_api_tasks_task_id:uuid_cancel'
   | 'check_schedule'
   | 'close_ticket'
   | 'confirm_setup'
@@ -81,6 +82,7 @@ export type RouteName =
   | 'delete_role'
   | 'delete_schedule'
   | 'delete_tag'
+  | 'delete_task'
   | 'delete_team'
   | 'delete_team_api_teams_team_id:uuid'
   | 'delete_team_invitation'
@@ -197,6 +199,7 @@ export type RouteName =
   | 'list_schedules'
   | 'list_tags'
   | 'list_tasks'
+  | 'list_tasks_api_tasks'
   | 'list_team_invitations'
   | 'list_team_permissions'
   | 'list_teams'
@@ -335,6 +338,9 @@ export interface RoutePathParams {
   'cancel_task': {
     task_id: UUID;
   };
+  'cancel_task_api_tasks_task_id:uuid_cancel': {
+    task_id: UUID;
+  };
   'check_schedule': {
     schedule_id: UUID;
   };
@@ -470,6 +476,9 @@ export interface RoutePathParams {
   };
   'delete_tag': {
     tag_id: UUID;
+  };
+  'delete_task': {
+    task_id: UUID;
   };
   'delete_team': {
     team_id: UUID;
@@ -720,6 +729,7 @@ export interface RoutePathParams {
   'list_schedules': Record<string, never>;
   'list_tags': Record<string, never>;
   'list_tasks': Record<string, never>;
+  'list_tasks_api_tasks': Record<string, never>;
   'list_team_invitations': {
     team_id: UUID;
   };
@@ -1012,6 +1022,7 @@ export interface RouteQueryParams {
     role_slug: string;
   };
   'cancel_task': Record<string, never>;
+  'cancel_task_api_tasks_task_id:uuid_cancel': Record<string, never>;
   'check_schedule': {
     time?: DateTime;
   };
@@ -1072,6 +1083,7 @@ export interface RouteQueryParams {
   'delete_role': Record<string, never>;
   'delete_schedule': Record<string, never>;
   'delete_tag': Record<string, never>;
+  'delete_task': Record<string, never>;
   'delete_team': Record<string, never>;
   'delete_team_api_teams_team_id:uuid': Record<string, never>;
   'delete_team_invitation': Record<string, never>;
@@ -1572,6 +1584,22 @@ export interface RouteQueryParams {
     createdAfter?: DateTime;
     createdBefore?: DateTime;
     currentPage?: number;
+    entityType?: string;
+    ids?: string[];
+    orderBy?: string;
+    pageSize?: number;
+    searchIgnoreCase?: boolean;
+    searchString?: string;
+    sortOrder?: "asc" | "desc";
+    status?: string;
+    taskType?: string;
+    updatedAfter?: DateTime;
+    updatedBefore?: DateTime;
+  };
+  'list_tasks_api_tasks': {
+    createdAfter?: DateTime;
+    createdBefore?: DateTime;
+    currentPage?: number;
     entityId?: UUID;
     entityType?: string;
     ids?: string[];
@@ -1928,6 +1956,13 @@ export const routeDefinitions = {
     queryParams: ['role_slug'] as const,
   },
   'cancel_task': {
+    path: '/api/admin/tasks/{task_id}/cancel',
+    methods: ['POST'] as const,
+    method: 'post',
+    pathParams: ['task_id'] as const,
+    queryParams: [] as const,
+  },
+  'cancel_task_api_tasks_task_id:uuid_cancel': {
     path: '/api/tasks/{task_id}/cancel',
     methods: ['POST'] as const,
     method: 'post',
@@ -2338,6 +2373,13 @@ export const routeDefinitions = {
     methods: ['DELETE'] as const,
     method: 'delete',
     pathParams: ['tag_id'] as const,
+    queryParams: [] as const,
+  },
+  'delete_task': {
+    path: '/api/admin/tasks/{task_id}',
+    methods: ['DELETE'] as const,
+    method: 'delete',
+    pathParams: ['task_id'] as const,
     queryParams: [] as const,
   },
   'delete_team': {
@@ -3148,6 +3190,13 @@ export const routeDefinitions = {
     queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
   },
   'list_tasks': {
+    path: '/api/admin/tasks',
+    methods: ['GET'] as const,
+    method: 'get',
+    pathParams: [] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'entityType', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'status', 'taskType', 'updatedAfter', 'updatedBefore'] as const,
+  },
+  'list_tasks_api_tasks': {
     path: '/api/tasks',
     methods: ['GET'] as const,
     method: 'get',

@@ -16,6 +16,7 @@ const sectionLabels: Record<string, string> = {
   voice: "Voice",
   fax: "Fax",
   support: "Support",
+  tasks: "Tasks",
   audit: "Audit Log",
   system: "System",
 }

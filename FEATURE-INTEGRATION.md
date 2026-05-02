@@ -415,14 +415,14 @@ No new hook files. Existing hooks return the enriched schemas automatically afte
 
 - [x] Add `location_id` FK column to `Device` model (`_device.py`)
 - [x] Add `Location` relationship to `Device` model
-- [ ] Add reverse `devices` relationship to `Location` model (`_location.py`)
+- [x] Add reverse `devices` relationship to `Location` model (`_location.py`) — done in v0.160.0
 - [x] Create Alembic migration (add column, FK constraint, index)
 - [x] Update `Device` schema: add `location_id`, `location_name`
 - [x] Update `DeviceCreate` schema: add `location_id`
 - [x] Update `DeviceUpdate` schema: add `location_id`
-- [ ] Update `Location` schema: add `device_count`
+- [x] Update `Location` schema: add `device_count` — done in v0.160.0
 - [x] Update `DeviceService` to eager-load location relationship
-- [ ] Update `LocationService` to compute `device_count`
+- [x] Update `LocationService` to compute `device_count` — done in v0.160.0, uses batch GROUP BY query
 - [x] Regenerate TypeScript types (`make types`)
 - [x] Add Location field to device detail page overview section — shows as clickable link
 - [x] Add Location dropdown to device create/edit form — Select dropdown with location options
@@ -464,14 +464,14 @@ No new hook files. Existing hooks return the enriched schemas automatically afte
 
 - [x] Add `connection_id` FK column to `Device` model (`_device.py`)
 - [x] Add `Connection` relationship to `Device` model
-- [ ] Add reverse `devices` relationship to `Connection` model (`_connection.py`)
+- [x] Add reverse `devices` relationship to `Connection` model (`_connection.py`) — done in v0.160.0
 - [x] Create Alembic migration (add column, FK constraint, index)
 - [x] Update `Device` schema: add `connection_id`, `connection_name`
 - [x] Update `DeviceCreate` schema: add `connection_id`
 - [x] Update `DeviceUpdate` schema: add `connection_id`
-- [ ] Update `Connection` schema: add `managed_device_count`
+- [x] Update `Connection` schema: add `managed_device_count` — done in v0.160.0
 - [x] Update `DeviceService` to eager-load connection relationship
-- [ ] Update `ConnectionService` to compute `managed_device_count`
+- [x] Update `ConnectionService` to compute `managed_device_count` — done in v0.160.0
 - [x] Regenerate TypeScript types (`make types`)
 - [x] Add Connection field to device detail page — shows as clickable link
 - [x] Add Connection dropdown to device create/edit form — Select dropdown

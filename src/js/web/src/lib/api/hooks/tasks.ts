@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { client } from "@/lib/generated/api/client.gen"
 import type { BackgroundTaskDetail, BackgroundTaskList } from "@/lib/generated/api/types.gen"
+import { sseStatus } from "./events"
 
 // ---------------------------------------------------------------------------
 // Helpers (for endpoints not yet in generated SDK)
@@ -51,6 +52,33 @@ export interface UseTasksOptions {
 }
 
 // ---------------------------------------------------------------------------
+// Polling constants
+// ---------------------------------------------------------------------------
+
+/** Normal polling interval when SSE is delivering real-time updates. */
+const POLL_INTERVAL_NORMAL = 30_000
+
+/** Faster polling interval after SSE has been disconnected long enough. */
+const POLL_INTERVAL_FAST = 5_000
+
+/** How long SSE must be down before we switch to fast polling (ms). */
+const SSE_DISCONNECT_THRESHOLD = 60_000
+
+/**
+ * Returns the appropriate polling interval based on current SSE health.
+ * When the event stream is connected, 30 s is sufficient (updates arrive via
+ * SSE).  If SSE has been down for more than 60 s, we switch to 5 s polling
+ * so the UI stays reasonably fresh.
+ */
+function getPollingInterval(): number {
+  if (sseStatus.connected) return POLL_INTERVAL_NORMAL
+  if (sseStatus.disconnectedSince != null && Date.now() - sseStatus.disconnectedSince > SSE_DISCONNECT_THRESHOLD) {
+    return POLL_INTERVAL_FAST
+  }
+  return POLL_INTERVAL_NORMAL
+}
+
+// ---------------------------------------------------------------------------
 // Query key factory
 // ---------------------------------------------------------------------------
 
@@ -96,12 +124,12 @@ export function useTask(taskId: string) {
     queryKey: taskKeys.detail(taskId),
     queryFn: () => apiFetch<BackgroundTaskDetail>(`/api/tasks/${taskId}`),
     enabled: !!taskId,
-    // Fallback polling when SSE is disconnected — primary updates come from
-    // task.updated / task.completed / task.failed SSE events (see events.ts).
+    // Poll only while the task is in-flight.  The interval adapts based on
+    // SSE health — 30 s when connected, 5 s after a prolonged disconnect.
     refetchInterval: (query) => {
       const data = query.state.data
       if (data && (data.status === "pending" || data.status === "running")) {
-        return 30_000
+        return getPollingInterval()
       }
       return false
     },
@@ -116,9 +144,9 @@ export function useActiveTasks() {
   return useQuery({
     queryKey: taskKeys.active(),
     queryFn: () => apiFetch<BackgroundTaskList[]>("/api/tasks/active"),
-    // Fallback polling when SSE is disconnected — primary updates come from
-    // task lifecycle SSE events (see events.ts).
-    refetchInterval: 30_000,
+    // Polling adapts to SSE health — 30 s when connected, 5 s after a
+    // prolonged SSE disconnect (see getPollingInterval).
+    refetchInterval: () => getPollingInterval(),
   })
 }
 

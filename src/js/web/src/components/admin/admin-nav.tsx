@@ -13,6 +13,7 @@ const navItems = [
   { label: "Support", to: "/admin/support" },
   { label: "Gateway", to: "/admin/gateway" },
   { label: "Bulk Import", to: "/admin/bulk-import" },
+  { label: "Tasks", to: "/admin/tasks" },
   { label: "Roles & Permissions", to: "/admin/roles" },
   { label: "Audit log", to: "/admin/audit" },
   { label: "System", to: "/admin/system" },

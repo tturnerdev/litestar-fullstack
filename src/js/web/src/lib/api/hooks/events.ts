@@ -113,6 +113,25 @@ async function readSSEStream(
 }
 
 // ---------------------------------------------------------------------------
+// SSE connection status — importable by other hooks (e.g. tasks.ts) to adjust
+// polling frequency when the real-time event stream is unavailable.
+// ---------------------------------------------------------------------------
+
+/**
+ * Module-level indicator of SSE connectivity.
+ *
+ * - `connected` — `true` once the stream is actively reading events; `false`
+ *   when the connection drops or is being re-established.
+ * - `disconnectedSince` — timestamp (ms) of the most recent disconnect, or
+ *   `null` while connected.  Consumers can compare against `Date.now()` to
+ *   decide whether to ramp up polling (e.g. only after 60 s of downtime).
+ */
+export const sseStatus = {
+  connected: false,
+  disconnectedSince: null as number | null,
+}
+
+// ---------------------------------------------------------------------------
 // Hook
 // ---------------------------------------------------------------------------
 
@@ -250,8 +269,12 @@ export function useEventStream() {
         }
         // Connection established -- reset the backoff counter
         reconnectAttemptRef.current = 0
+        sseStatus.connected = true
+        sseStatus.disconnectedSince = null
         await readSSEStream(response, handleEvent, controller.signal)
         // Stream ended normally (server closed) -- reconnect
+        sseStatus.connected = false
+        sseStatus.disconnectedSince ??= Date.now()
         if (mountedRef.current) {
           scheduleReconnect()
         }
@@ -259,6 +282,8 @@ export function useEventStream() {
       .catch((err) => {
         // AbortError means we intentionally cancelled -- do not reconnect
         if (err instanceof DOMException && err.name === "AbortError") return
+        sseStatus.connected = false
+        sseStatus.disconnectedSince ??= Date.now()
         if (mountedRef.current) {
           scheduleReconnect()
         }
@@ -280,6 +305,8 @@ export function useEventStream() {
     return () => {
       mountedRef.current = false
       abortRef.current?.abort()
+      sseStatus.connected = false
+      sseStatus.disconnectedSince ??= Date.now()
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current)
       }

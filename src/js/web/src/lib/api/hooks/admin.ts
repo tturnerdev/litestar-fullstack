@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
+import { client } from "@/lib/generated/api/client.gen"
 import {
   type AdminDeviceStats,
   type AdminDeviceSummary,
@@ -460,6 +461,138 @@ export function useRevokeRole() {
     },
   })
 }
+
+// ---------------------------------------------------------------------------
+// Admin Tasks
+// ---------------------------------------------------------------------------
+
+export interface AdminTasksParams {
+  page?: number
+  pageSize?: number
+  taskType?: string
+  status?: string
+  entityType?: string
+  orderBy?: string
+  sortOrder?: "asc" | "desc"
+}
+
+export interface AdminTaskSummary {
+  id: string
+  taskType: string
+  status: string
+  progress: number
+  entityType: string | null
+  entityId: string | null
+  initiatedByName: string | null
+  teamName: string | null
+  teamId: string | null
+  saqJobKey: string | null
+  startedAt: string | null
+  completedAt: string | null
+  createdAt: string | null
+  updatedAt: string | null
+}
+
+export function useAdminTasks(params?: AdminTasksParams) {
+  const { page = 1, pageSize = 25, taskType, status, entityType, orderBy, sortOrder } = params ?? {}
+  return useQuery({
+    queryKey: ["admin", "tasks", page, pageSize, taskType, status, entityType, orderBy, sortOrder],
+    queryFn: async () => {
+      const query = new URLSearchParams()
+      query.set("currentPage", String(page))
+      query.set("pageSize", String(pageSize))
+      if (taskType) query.set("taskType", taskType)
+      if (status) query.set("status", status)
+      if (entityType) query.set("entityType", entityType)
+      if (orderBy) query.set("orderBy", orderBy)
+      if (sortOrder) query.set("sortOrder", sortOrder)
+      const config = client.getConfig()
+      const baseUrl = config.baseUrl ?? ""
+      const token = typeof window !== "undefined" ? window.localStorage.getItem("access_token") : null
+      const response = await fetch(`${baseUrl}/api/admin/tasks?${query.toString()}`, {
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      })
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}))
+        throw new Error(body.detail ?? `Request failed (${response.status})`)
+      }
+      return response.json() as Promise<{ items: AdminTaskSummary[]; total: number }>
+    },
+  })
+}
+
+export function useAdminCancelTask() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (taskId: string) => {
+      const config = client.getConfig()
+      const baseUrl = config.baseUrl ?? ""
+      const token = typeof window !== "undefined" ? window.localStorage.getItem("access_token") : null
+      const response = await fetch(`${baseUrl}/api/admin/tasks/${taskId}/cancel`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      })
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}))
+        throw new Error(body.detail ?? `Request failed (${response.status})`)
+      }
+      return response.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "tasks"] })
+      toast.success("Task cancelled")
+    },
+    onError: (error) => {
+      toast.error("Unable to cancel task", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
+    },
+  })
+}
+
+export function useAdminDeleteTask() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (taskId: string) => {
+      const config = client.getConfig()
+      const baseUrl = config.baseUrl ?? ""
+      const token = typeof window !== "undefined" ? window.localStorage.getItem("access_token") : null
+      const response = await fetch(`${baseUrl}/api/admin/tasks/${taskId}`, {
+        method: "DELETE",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      })
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}))
+        throw new Error(body.detail ?? `Request failed (${response.status})`)
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "tasks"] })
+      toast.success("Task deleted")
+    },
+    onError: (error) => {
+      toast.error("Unable to delete task", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
+    },
+  })
+}
+
+// ---------------------------------------------------------------------------
+// Admin Devices
+// ---------------------------------------------------------------------------
 
 export function useAdminDevices(page = 1, pageSize = 25, search?: string) {
   return useQuery({

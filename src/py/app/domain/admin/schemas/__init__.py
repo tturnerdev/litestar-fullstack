@@ -23,6 +23,7 @@ from app.domain.admin.schemas._admin_music_on_hold import (
 )
 from app.domain.admin.schemas._admin_support import AdminSupportStats, AdminTicketSummary
 from app.domain.admin.schemas._admin_system import AdminSystemStatus, WorkerQueueInfo
+from app.domain.admin.schemas._admin_tasks import AdminTaskSummary
 from app.domain.admin.schemas._admin_voice import AdminExtensionSummary, AdminPhoneNumberSummary, AdminVoiceStats
 from app.domain.admin.schemas._audit import AuditLogEntry
 from app.domain.admin.schemas._dashboard import ActivityLogEntry, AdminTrends, DashboardStats, RecentActivity, TrendPoint
@@ -44,6 +45,7 @@ __all__ = (
     "AdminGatewaySettingsUpdate",
     "AdminPhoneNumberSummary",
     "AdminSupportStats",
+    "AdminTaskSummary",
     "AdminTeamDetail",
     "AdminTeamSummary",
     "AdminTeamUpdate",

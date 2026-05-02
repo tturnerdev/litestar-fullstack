@@ -621,11 +621,11 @@ When `entity_type` and `entity_id` are set on a task, the frontend can render a 
 
 ### Phase 6: Frontend -- Active Indicator & Notifications
 - [x] Build `ActiveTaskIndicator` header component with polling
-- [ ] Implement toast notifications on task completion/failure transitions
+- [x] Implement toast notifications on task completion/failure transitions — already implemented in events.ts SSE hook
 - [x] Add `background_task_completed` event listener to create `Notification` records
 - [x] Add `background_task_failed` event listener to create `Notification` records
 - [x] Add entity-type link rendering in task detail and task list
-- [ ] Add task count to relevant entity detail pages (e.g., device detail shows recent tasks)
+- [x] Add task count to relevant entity detail pages (e.g., device detail shows recent tasks) — done in v0.160.0, device detail has Recent Tasks card
 
 ### Phase 7: Admin Views & Monitoring
 - [ ] Add `/admin/tasks` management page (all tasks across all teams)

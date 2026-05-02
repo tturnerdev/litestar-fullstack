@@ -200,6 +200,26 @@ export type AdminSystemStatus = {
 };
 
 /**
+ * AdminTaskSummary
+ */
+export type AdminTaskSummary = {
+  completedAt?: string | null;
+  createdAt?: string | null;
+  entityId?: string | null;
+  entityType?: string | null;
+  id: string;
+  initiatedByName?: string | null;
+  progress?: number;
+  saqJobKey?: string | null;
+  startedAt?: string | null;
+  status: string;
+  taskType: string;
+  teamId?: string | null;
+  teamName?: string | null;
+  updatedAt?: string | null;
+};
+
+/**
  * AdminTeamDetail
  */
 export type AdminTeamDetail = {
@@ -3083,10 +3103,10 @@ export type AdminListAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    actionIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3162,10 +3182,10 @@ export type AdminExportAuditLogData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    actionIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3230,10 +3250,10 @@ export type AdminGetTargetAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    actionIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -3310,10 +3330,10 @@ export type AdminGetUserAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    actionIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -4461,6 +4481,184 @@ export type GetAdminSystemStatusResponses = {
 
 export type GetAdminSystemStatusResponse =
   GetAdminSystemStatusResponses[keyof GetAdminSystemStatusResponses];
+
+export type AdminListTasksData = {
+  body?: never;
+  path?: never;
+  query?: {
+    ids?: Array<string> | null;
+    createdBefore?: string | null;
+    createdAfter?: string | null;
+    updatedBefore?: string | null;
+    updatedAfter?: string | null;
+    /**
+     * Field to search
+     */
+    searchString?: string | null;
+    /**
+     * Search should be case sensitive
+     */
+    searchIgnoreCase?: boolean | null;
+    currentPage?: number;
+    pageSize?: number;
+    /**
+     * Order by field
+     */
+    orderBy?: string | null;
+    /**
+     * Field to search
+     */
+    sortOrder?: "asc" | "desc" | null;
+    /**
+     * Task Type
+     *
+     * Filter by task type.
+     */
+    taskType?: string | null;
+    /**
+     * Status
+     *
+     * Filter by status.
+     */
+    status?: string | null;
+    /**
+     * Entity Type
+     *
+     * Filter by entity type.
+     */
+    entityType?: string | null;
+  };
+  url: "/api/admin/tasks";
+};
+
+export type AdminListTasksErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type AdminListTasksError =
+  AdminListTasksErrors[keyof AdminListTasksErrors];
+
+export type AdminListTasksResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: {
+    items?: Array<AdminTaskSummary>;
+    /**
+     * Maximal number of items to send.
+     */
+    limit?: number;
+    /**
+     * Offset from the beginning of the query.
+     */
+    offset?: number;
+    /**
+     * Total number of items.
+     */
+    total?: number;
+  };
+};
+
+export type AdminListTasksResponse =
+  AdminListTasksResponses[keyof AdminListTasksResponses];
+
+export type AdminDeleteTaskData = {
+  body?: never;
+  path: {
+    /**
+     * Task ID
+     *
+     * The task to delete.
+     */
+    task_id: string;
+  };
+  query?: never;
+  url: "/api/admin/tasks/{task_id}";
+};
+
+export type AdminDeleteTaskErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type AdminDeleteTaskError =
+  AdminDeleteTaskErrors[keyof AdminDeleteTaskErrors];
+
+export type AdminDeleteTaskResponses = {
+  /**
+   * Request fulfilled, nothing follows
+   */
+  204: void;
+};
+
+export type AdminDeleteTaskResponse =
+  AdminDeleteTaskResponses[keyof AdminDeleteTaskResponses];
+
+export type AdminCancelTaskData = {
+  body?: never;
+  path: {
+    /**
+     * Task ID
+     *
+     * The task to cancel.
+     */
+    task_id: string;
+  };
+  query?: never;
+  url: "/api/admin/tasks/{task_id}/cancel";
+};
+
+export type AdminCancelTaskErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type AdminCancelTaskError =
+  AdminCancelTaskErrors[keyof AdminCancelTaskErrors];
+
+export type AdminCancelTaskResponses = {
+  /**
+   * Document created, URL follows
+   */
+  201: BackgroundTaskDetail;
+};
+
+export type AdminCancelTaskResponse =
+  AdminCancelTaskResponses[keyof AdminCancelTaskResponses];
 
 export type AdminListTeamsData = {
   body?: never;
