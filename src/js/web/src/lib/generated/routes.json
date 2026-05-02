@@ -867,6 +867,13 @@
       ],
       "uri": "/api/mfa/disable"
     },
+    "events:stream": {
+      "method": "get",
+      "methods": [
+        "GET"
+      ],
+      "uri": "/api/events/stream"
+    },
     "export_call_records": {
       "method": "get",
       "methods": [

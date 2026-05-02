@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import type { KeyboardShortcut, SequenceShortcut } from "@/hooks/use-keyboard-shortcuts"
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts"
+import { useEventStream } from "@/lib/api/hooks/events"
 import { useAuthStore } from "@/lib/auth"
 
 const NEW_ITEM_ROUTES: Record<string, string> = {
@@ -41,6 +42,9 @@ export function AppLayout() {
     select: (state) => state.location.pathname,
   })
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
+
+  // Establish SSE connection for real-time cache invalidation and notifications
+  useEventStream()
 
   const goTo = useCallback((path: string) => navigate({ to: path }), [navigate])
 

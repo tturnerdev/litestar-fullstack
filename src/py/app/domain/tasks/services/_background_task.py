@@ -25,6 +25,42 @@ class BackgroundTaskService(CompositeServiceMixin, service.SQLAlchemyAsyncReposi
 
     repository_type = Repo
 
+    async def _broadcast_task_event(self, task: m.BackgroundTask) -> None:
+        """Publish a task status event to Redis for SSE streaming.
+
+        Creates a short-lived Redis connection to broadcast the event.
+        Errors are silently caught so broadcast failures never affect
+        task operations.
+
+        Args:
+            task: The task whose status should be broadcast.
+        """
+        try:
+            from redis.asyncio import Redis
+
+            from app.domain.events.services import EventBroadcaster
+            from app.lib.settings import get_settings
+
+            settings = get_settings()
+            redis = Redis.from_url(settings.saq.REDIS_URL)
+            try:
+                broadcaster = EventBroadcaster(redis)
+                await broadcaster.publish_task_update(
+                    team_id=task.team_id,
+                    task_id=task.id,
+                    task_type=task.task_type,
+                    status=task.status,
+                    progress=task.progress,
+                    entity_type=task.entity_type,
+                    entity_id=task.entity_id,
+                    result=task.result,
+                    error_message=task.error_message,
+                )
+            finally:
+                await redis.aclose()
+        except Exception:  # noqa: BLE001
+            pass  # Never let SSE broadcast failures affect task operations
+
     async def create_task(
         self,
         task_type: str,
@@ -70,10 +106,12 @@ class BackgroundTaskService(CompositeServiceMixin, service.SQLAlchemyAsyncReposi
             The updated BackgroundTask.
         """
         now = datetime.now(UTC)
-        return await self.update(
+        updated = await self.update(
             {"status": m.BackgroundTaskStatus.RUNNING, "started_at": now},
             item_id=task_id,
         )
+        await self._broadcast_task_event(updated)
+        return updated
 
     async def update_progress(self, task_id: Any, progress: int) -> m.BackgroundTask:
         """Update task progress percentage.
@@ -85,10 +123,12 @@ class BackgroundTaskService(CompositeServiceMixin, service.SQLAlchemyAsyncReposi
         Returns:
             The updated BackgroundTask.
         """
-        return await self.update(
+        updated = await self.update(
             {"progress": min(max(progress, 0), 100)},
             item_id=task_id,
         )
+        await self._broadcast_task_event(updated)
+        return updated
 
     async def complete_task(self, task_id: Any, result: dict[str, Any] | None = None) -> m.BackgroundTask:
         """Mark a task as completed.
@@ -101,7 +141,7 @@ class BackgroundTaskService(CompositeServiceMixin, service.SQLAlchemyAsyncReposi
             The updated BackgroundTask.
         """
         now = datetime.now(UTC)
-        return await self.update(
+        updated = await self.update(
             {
                 "status": m.BackgroundTaskStatus.COMPLETED,
                 "progress": 100,
@@ -110,6 +150,8 @@ class BackgroundTaskService(CompositeServiceMixin, service.SQLAlchemyAsyncReposi
             },
             item_id=task_id,
         )
+        await self._broadcast_task_event(updated)
+        return updated
 
     async def fail_task(self, task_id: Any, error_message: str) -> m.BackgroundTask:
         """Mark a task as failed.
@@ -122,7 +164,7 @@ class BackgroundTaskService(CompositeServiceMixin, service.SQLAlchemyAsyncReposi
             The updated BackgroundTask.
         """
         now = datetime.now(UTC)
-        return await self.update(
+        updated = await self.update(
             {
                 "status": m.BackgroundTaskStatus.FAILED,
                 "completed_at": now,
@@ -130,6 +172,8 @@ class BackgroundTaskService(CompositeServiceMixin, service.SQLAlchemyAsyncReposi
             },
             item_id=task_id,
         )
+        await self._broadcast_task_event(updated)
+        return updated
 
     async def cancel_task(self, task_id: Any) -> m.BackgroundTask:
         """Cancel a pending or running task.
@@ -160,6 +204,7 @@ class BackgroundTaskService(CompositeServiceMixin, service.SQLAlchemyAsyncReposi
                 await queue.abort(db_obj.saq_job_key)
             except Exception:
                 pass
+        await self._broadcast_task_event(updated)
         return updated
 
     async def list_active_for_user(self, user_id: Any) -> list[m.BackgroundTask]:

@@ -94,6 +94,7 @@ export type RouteName =
   | 'delete_voicemail_message_api_voicemail_messages_message_id:uuid'
   | 'delete_webhook'
   | 'disable_mfa'
+  | 'events:stream'
   | 'export_call_records'
   | 'export_logs'
   | 'forgot_password'
@@ -508,6 +509,7 @@ export interface RoutePathParams {
     webhook_id: UUID;
   };
   'disable_mfa': Record<string, never>;
+  'events:stream': Record<string, never>;
   'export_call_records': Record<string, never>;
   'export_logs': Record<string, never>;
   'forgot_password': Record<string, never>;
@@ -1081,6 +1083,7 @@ export interface RouteQueryParams {
   'delete_voicemail_message_api_voicemail_messages_message_id:uuid': Record<string, never>;
   'delete_webhook': Record<string, never>;
   'disable_mfa': Record<string, never>;
+  'events:stream': Record<string, never>;
   'export_call_records': {
     direction?: string;
     disposition?: string;
@@ -2420,6 +2423,13 @@ export const routeDefinitions = {
     path: '/api/mfa/disable',
     methods: ['DELETE'] as const,
     method: 'delete',
+    pathParams: [] as const,
+    queryParams: [] as const,
+  },
+  'events:stream': {
+    path: '/api/events/stream',
+    methods: ['GET'] as const,
+    method: 'get',
     pathParams: [] as const,
     queryParams: [] as const,
   },
