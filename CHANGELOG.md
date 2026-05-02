@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.226.0 (2026-05-02)
+
+### Added
+- **Status distribution pills** on fax numbers (active/inactive), voice phone numbers (active/inactive), tasks (running/completed/failed/pending), and locations (total) — completing consistency across all list pages
+
 ## v0.225.0 (2026-05-02)
 
 ### Added

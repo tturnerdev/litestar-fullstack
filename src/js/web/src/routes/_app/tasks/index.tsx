@@ -39,7 +39,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { SkeletonTable } from "@/components/ui/skeleton"
+import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
@@ -370,6 +370,31 @@ function TasksPage() {
 
   const items = data?.items ?? []
 
+  // Task summary stats
+  const taskStats = useMemo(() => {
+    let running = 0
+    let completed = 0
+    let failed = 0
+    let pending = 0
+    for (const t of items) {
+      switch (t.status) {
+        case "running":
+          running++
+          break
+        case "completed":
+          completed++
+          break
+        case "failed":
+          failed++
+          break
+        case "pending":
+          pending++
+          break
+      }
+    }
+    return { total: data?.total ?? 0, running, completed, failed, pending }
+  }, [items, data?.total])
+
   // Selection helpers
   const allVisibleIds = useMemo(() => items.map((t) => t.id), [items])
   const allSelected = items.length > 0 && items.every((t) => selectedIds.has(t.id))
@@ -497,6 +522,54 @@ function TasksPage() {
           </div>
         }
       />
+
+      {/* Summary stats */}
+      <div className="flex flex-wrap items-center gap-2">
+        {isLoading ? (
+          <>
+            <Skeleton className="h-7 w-20 rounded-full" />
+            <Skeleton className="h-7 w-28 rounded-full" />
+            <Skeleton className="h-7 w-28 rounded-full" />
+            <Skeleton className="h-7 w-24 rounded-full" />
+            <Skeleton className="h-7 w-24 rounded-full" />
+          </>
+        ) : (
+          <>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground">
+              Total
+              <span className="ml-0.5 font-semibold text-foreground">{taskStats.total}</span>
+            </span>
+            {taskStats.running > 0 && (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-700 dark:text-blue-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+                Running
+                <span className="ml-0.5 font-semibold">{taskStats.running}</span>
+              </span>
+            )}
+            {taskStats.completed > 0 && (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                Completed
+                <span className="ml-0.5 font-semibold">{taskStats.completed}</span>
+              </span>
+            )}
+            {taskStats.failed > 0 && (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-xs font-medium text-red-700 dark:text-red-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+                Failed
+                <span className="ml-0.5 font-semibold">{taskStats.failed}</span>
+              </span>
+            )}
+            {taskStats.pending > 0 && (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-zinc-400/30 bg-zinc-400/10 px-3 py-1 text-xs font-medium text-zinc-600 dark:text-zinc-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-zinc-400" />
+                Pending
+                <span className="ml-0.5 font-semibold">{taskStats.pending}</span>
+              </span>
+            )}
+          </>
+        )}
+      </div>
 
       {/* Filters */}
       <PageSection>

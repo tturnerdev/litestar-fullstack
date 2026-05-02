@@ -9,7 +9,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { SkeletonTable } from "@/components/ui/skeleton"
+import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
@@ -208,7 +208,14 @@ export function LocationList() {
   }
 
   if (isLoading) {
-    return <SkeletonTable rows={6} />
+    return (
+      <div className="space-y-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <Skeleton className="h-7 w-28 rounded-full" />
+        </div>
+        <SkeletonTable rows={6} />
+      </div>
+    )
   }
 
   if (isError) {
@@ -244,6 +251,14 @@ export function LocationList() {
   return (
     <>
       <div className="space-y-4">
+        {/* Summary stats */}
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground">
+            Total
+            <span className="ml-0.5 font-semibold text-foreground">{total}</span>
+          </span>
+        </div>
+
         {/* Search & filter bar */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative max-w-md flex-1">
