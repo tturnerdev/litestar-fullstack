@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.200.0 (2026-05-02)
+
+### Added
+- **Schedule creation via dedicated page** — "New Schedule" button now navigates to `/schedules/new` instead of inline dialog; "N" shortcut enabled on schedules page
+- **DataFreshness on remaining pages** — Added refresh indicators to fax email routes, admin music-on-hold, admin voice, admin fax, and admin support pages
+
+### Changed
+- Removed inline schedule creation dialog from schedules list in favor of the dedicated form page
+
 ## v0.199.0 (2026-05-02)
 
 ### Added

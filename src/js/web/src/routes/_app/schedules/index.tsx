@@ -49,17 +49,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { SkeletonTable } from "@/components/ui/skeleton"
@@ -67,11 +58,9 @@ import { nextSortDirection, SortableHeader, type SortDirection } from "@/compone
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
   useSchedules,
-  useCreateSchedule,
   useDeleteSchedule,
   useCheckSchedule,
   type Schedule,
-  type ScheduleCreate,
 } from "@/lib/api/hooks/schedules"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { formatDateTime } from "@/lib/date-utils"
@@ -118,27 +107,6 @@ const scheduleTypeIcons: Record<string, typeof Clock> = {
   holiday: Calendar,
   custom: SlidersHorizontal,
 }
-
-const COMMON_TIMEZONES = [
-  "America/New_York",
-  "America/Chicago",
-  "America/Denver",
-  "America/Los_Angeles",
-  "America/Phoenix",
-  "America/Anchorage",
-  "Pacific/Honolulu",
-  "America/Toronto",
-  "America/Vancouver",
-  "Europe/London",
-  "Europe/Paris",
-  "Europe/Berlin",
-  "Asia/Tokyo",
-  "Asia/Shanghai",
-  "Asia/Kolkata",
-  "Australia/Sydney",
-  "Pacific/Auckland",
-  "UTC",
-]
 
 const csvHeaders: CsvHeader<Schedule>[] = [
   { label: "Name", accessor: (s) => s.name },
@@ -188,101 +156,6 @@ function ScheduleStatusBadge({ scheduleId }: { scheduleId: string }) {
   )
 }
 
-// -- New Schedule Dialog ------------------------------------------------------
-
-function NewScheduleDialog({
-  open,
-  onOpenChange,
-}: {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-}) {
-  const navigate = useNavigate()
-  const createSchedule = useCreateSchedule()
-
-  const [name, setName] = useState("")
-  const [scheduleType, setScheduleType] = useState<ScheduleCreate["scheduleType"]>("business_hours")
-  const [timezone, setTimezone] = useState("America/New_York")
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!name.trim()) return
-
-    createSchedule.mutate(
-      { name: name.trim(), scheduleType, timezone },
-      {
-        onSuccess: (data) => {
-          onOpenChange(false)
-          setName("")
-          setScheduleType("business_hours")
-          setTimezone("America/New_York")
-          navigate({ to: "/schedules/$scheduleId", params: { scheduleId: data.id } })
-        },
-      },
-    )
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>New Schedule</DialogTitle>
-          <DialogDescription>Create a new schedule to define operating hours or holidays.</DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="schedule-name">Name</Label>
-            <Input
-              id="schedule-name"
-              placeholder="e.g., Main Office Hours"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="schedule-type">Type</Label>
-            <Select value={scheduleType} onValueChange={(v) => setScheduleType(v as ScheduleCreate["scheduleType"])}>
-              <SelectTrigger id="schedule-type">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="business_hours">Business Hours</SelectItem>
-                <SelectItem value="holiday">Holiday</SelectItem>
-                <SelectItem value="custom">Custom</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="schedule-timezone">Timezone</Label>
-            <Select value={timezone} onValueChange={setTimezone}>
-              <SelectTrigger id="schedule-timezone">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {COMMON_TIMEZONES.map((tz) => (
-                  <SelectItem key={tz} value={tz}>
-                    {tz.replace(/_/g, " ")}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <DialogFooter>
-            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={!name.trim() || createSchedule.isPending}>
-              {createSchedule.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create Schedule
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
-  )
-}
-
 // -- Main page ----------------------------------------------------------------
 
 function SchedulesPage() {
@@ -295,7 +168,6 @@ function SchedulesPage() {
   const [page, setPage] = useState(1)
   const [sortKey, setSortKey] = useState<string | null>(null)
   const [sortDir, setSortDir] = useState<SortDirection>(null)
-  const [dialogOpen, setDialogOpen] = useState(false)
 
   // Reset page when debounced search changes
   useEffect(() => {
@@ -432,8 +304,10 @@ function SchedulesPage() {
               <Download className="mr-2 h-4 w-4" />
               Export
             </Button>
-            <Button size="sm" onClick={() => setDialogOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" /> New schedule
+            <Button size="sm" asChild>
+              <Link to="/schedules/new">
+                <Plus className="mr-2 h-4 w-4" /> New schedule
+              </Link>
             </Button>
           </div>
         }
@@ -485,8 +359,10 @@ function SchedulesPage() {
             title="No schedules yet"
             description="Create your first schedule to define business hours, holidays, or custom operating windows."
             action={
-              <Button size="sm" onClick={() => setDialogOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" /> New schedule
+              <Button size="sm" asChild>
+                <Link to="/schedules/new">
+                  <Plus className="mr-2 h-4 w-4" /> New schedule
+                </Link>
               </Button>
             }
           />
@@ -607,9 +483,6 @@ function SchedulesPage() {
           </div>
         )}
       </PageSection>
-
-      {/* New schedule dialog */}
-      <NewScheduleDialog open={dialogOpen} onOpenChange={setDialogOpen} />
 
       {/* Bulk action bar */}
       <BulkActionBar

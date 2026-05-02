@@ -15,6 +15,7 @@ import {
 } from "lucide-react"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { EmptyState } from "@/components/ui/empty-state"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
@@ -147,7 +148,12 @@ function AdminSupportPage() {
   }, [debouncedSearch])
 
   const { data: stats, isLoading: statsLoading, isError: statsError, refetch: refetchStats } = useAdminSupportStats()
-  const { data, isLoading, isError, refetch: refetchTickets } = useAdminTickets(page, PAGE_SIZE, debouncedSearch || undefined)
+  const { data, isLoading, isError, refetch: refetchTickets, dataUpdatedAt, isRefetching } = useAdminTickets(page, PAGE_SIZE, debouncedSearch || undefined)
+
+  const handleRefreshAll = useCallback(() => {
+    refetchStats()
+    refetchTickets()
+  }, [refetchStats, refetchTickets])
 
   const tickets = data?.items ?? []
   const total = data?.total ?? 0
@@ -168,10 +174,17 @@ function AdminSupportPage() {
         description="Monitor support tickets and response metrics across the organization."
         breadcrumbs={<AdminBreadcrumbs />}
         actions={
-          <Button variant="outline" size="sm" onClick={handleExport} disabled={!tickets.length}>
-            <Download className="mr-2 h-4 w-4" />
-            Export
-          </Button>
+          <div className="flex items-center gap-2">
+            <DataFreshness
+              dataUpdatedAt={dataUpdatedAt}
+              onRefresh={handleRefreshAll}
+              isRefreshing={isRefetching}
+            />
+            <Button variant="outline" size="sm" onClick={handleExport} disabled={!tickets.length}>
+              <Download className="mr-2 h-4 w-4" />
+              Export
+            </Button>
+          </div>
         }
       />
       <AdminNav />

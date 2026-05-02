@@ -13,6 +13,7 @@ import {
   X,
 } from "lucide-react"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { EmptyState } from "@/components/ui/empty-state"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
@@ -117,8 +118,14 @@ function AdminVoicePage() {
   const [phoneSearch, setPhoneSearch] = useState("")
 
   const { data: stats, isLoading: statsLoading, isError: statsError, refetch: refetchStats } = useAdminVoiceStats()
-  const { data: phoneData, isLoading: phonesLoading, isError: phonesError, refetch: refetchPhones } = useAdminPhoneNumbers(phoneNumberPage, PAGE_SIZE, phoneSearch || undefined)
+  const { data: phoneData, isLoading: phonesLoading, isError: phonesError, refetch: refetchPhones, dataUpdatedAt, isRefetching } = useAdminPhoneNumbers(phoneNumberPage, PAGE_SIZE, phoneSearch || undefined)
   const { data: extensions, isLoading: extensionsLoading, isError: extensionsError, refetch: refetchExtensions } = useAdminExtensions()
+
+  const handleRefreshAll = useCallback(() => {
+    refetchStats()
+    refetchPhones()
+    refetchExtensions()
+  }, [refetchStats, refetchPhones, refetchExtensions])
 
   const phoneNumbers = phoneData?.items ?? []
   const phoneTotal = phoneData?.total ?? 0
@@ -139,7 +146,19 @@ function AdminVoicePage() {
 
   return (
     <PageContainer className="flex-1 space-y-8">
-      <PageHeader eyebrow="Administration" title="Voice" description="Manage phone numbers and extensions across the organization." breadcrumbs={<AdminBreadcrumbs />} />
+      <PageHeader
+        eyebrow="Administration"
+        title="Voice"
+        description="Manage phone numbers and extensions across the organization."
+        breadcrumbs={<AdminBreadcrumbs />}
+        actions={
+          <DataFreshness
+            dataUpdatedAt={dataUpdatedAt}
+            onRefresh={handleRefreshAll}
+            isRefreshing={isRefetching}
+          />
+        }
+      />
       <AdminNav />
 
       {/* Stat cards */}

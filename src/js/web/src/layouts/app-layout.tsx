@@ -23,6 +23,7 @@ const NEW_ITEM_ROUTES: Record<string, string> = {
   "/support": "/support/new",
   "/tags": "/tags/new",
   "/teams": "/teams/new",
+  "/schedules": "/schedules/new",
   "/voice/extensions": "/voice/extensions/new",
 }
 

@@ -14,6 +14,7 @@ import {
   XCircle,
 } from "lucide-react"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { Badge } from "@/components/ui/badge"
@@ -118,8 +119,14 @@ function AdminFaxPage() {
   const [numberSearch, setNumberSearch] = useState("")
 
   const { data: stats, isLoading: statsLoading, isError: statsError, refetch: refetchStats } = useAdminFaxStats()
-  const { data: numberData, isLoading: numbersLoading, isError: numbersError, refetch: refetchNumbers } = useAdminFaxNumbers(numberPage, PAGE_SIZE, numberSearch || undefined)
+  const { data: numberData, isLoading: numbersLoading, isError: numbersError, refetch: refetchNumbers, dataUpdatedAt, isRefetching } = useAdminFaxNumbers(numberPage, PAGE_SIZE, numberSearch || undefined)
   const { data: messages, isLoading: messagesLoading, isError: messagesError, refetch: refetchMessages } = useAdminFaxMessages()
+
+  const handleRefreshAll = useCallback(() => {
+    refetchStats()
+    refetchNumbers()
+    refetchMessages()
+  }, [refetchStats, refetchNumbers, refetchMessages])
 
   const faxNumbers = numberData?.items ?? []
   const numberTotal = numberData?.total ?? 0
@@ -141,10 +148,17 @@ function AdminFaxPage() {
         description="Monitor fax numbers, messages, and delivery across the organization."
         breadcrumbs={<AdminBreadcrumbs />}
         actions={
-          <Button variant="outline" size="sm" onClick={handleExport} disabled={!faxNumbers.length}>
-            <Download className="mr-2 h-4 w-4" />
-            Export
-          </Button>
+          <div className="flex items-center gap-2">
+            <DataFreshness
+              dataUpdatedAt={dataUpdatedAt}
+              onRefresh={handleRefreshAll}
+              isRefreshing={isRefetching}
+            />
+            <Button variant="outline" size="sm" onClick={handleExport} disabled={!faxNumbers.length}>
+              <Download className="mr-2 h-4 w-4" />
+              Export
+            </Button>
+          </div>
         }
       />
       <AdminNav />

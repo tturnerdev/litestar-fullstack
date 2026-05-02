@@ -61,6 +61,7 @@ import {
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import {
   Select,
@@ -481,7 +482,7 @@ function DeleteEmailRouteDialog({
 
 function FaxEmailRoutesPage() {
   useDocumentTitle("Fax Email Routes")
-  const { data: routes, isLoading, isError } = useAllFaxEmailRoutes()
+  const { data: routes, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useAllFaxEmailRoutes()
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [editRoute, setEditRoute] = useState<FaxEmailRouteWithNumber | null>(null)
   const [deleteRoute, setDeleteRoute] = useState<FaxEmailRouteWithNumber | null>(null)
@@ -591,7 +592,12 @@ function FaxEmailRoutesPage() {
         description="Configure where incoming faxes are delivered via email across all fax numbers."
         breadcrumbs={breadcrumbs}
         actions={
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            <DataFreshness
+              dataUpdatedAt={dataUpdatedAt}
+              onRefresh={() => refetch()}
+              isRefreshing={isRefetching}
+            />
             <Button variant="outline" size="sm" onClick={handleExportAll} disabled={!hasData}>
               <Download className="mr-2 h-4 w-4" />
               Export

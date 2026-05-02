@@ -62,6 +62,7 @@ import {
 } from "@/lib/api/hooks/music-on-hold"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { formatDateTime } from "@/lib/date-utils"
 import type { MusicOnHoldList } from "@/lib/generated/api"
@@ -338,7 +339,7 @@ function AdminMusicOnHoldPage() {
     setPage(1)
   }, [debouncedSearch])
 
-  const { data, isLoading, isError, refetch } = useAdminMusicOnHold(page, PAGE_SIZE, debouncedSearch || undefined)
+  const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useAdminMusicOnHold(page, PAGE_SIZE, debouncedSearch || undefined)
   const deleteMutation = useDeleteMusicOnHold()
 
   const items = data?.items ?? []
@@ -356,6 +357,13 @@ function AdminMusicOnHoldPage() {
         title="Music on Hold"
         description="Manage Music on Hold classes, audio files, and playback settings."
         breadcrumbs={<AdminBreadcrumbs />}
+        actions={
+          <DataFreshness
+            dataUpdatedAt={dataUpdatedAt}
+            onRefresh={() => refetch()}
+            isRefreshing={isRefetching}
+          />
+        }
       />
       <AdminNav />
 
