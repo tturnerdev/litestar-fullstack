@@ -4,6 +4,7 @@ import {
   AlertCircle,
   Download,
   Eye,
+  Filter,
   Home,
   Monitor,
   MoreVertical,
@@ -117,8 +118,24 @@ const csvHeaders: CsvHeader<Device>[] = [
   { label: "Active", accessor: (d) => (d.isActive === false ? "No" : "Yes") },
 ]
 
-// -- Helpers ------------------------------------------------------------------
+// -- Quick filter chips -------------------------------------------------------
 
+interface QuickFilter {
+  id: string
+  label: string
+  statuses: string[]
+}
+
+const QUICK_FILTERS: QuickFilter[] = [
+  { id: "online", label: "Online Only", statuses: ["online", "ringing", "in_use"] },
+  { id: "offline", label: "Offline", statuses: ["offline"] },
+  { id: "attention", label: "Needs Attention", statuses: ["error", "provisioning"] },
+]
+
+function isQuickFilterActive(filter: QuickFilter, statusFilter: string[]): boolean {
+  if (statusFilter.length !== filter.statuses.length) return false
+  return filter.statuses.every((s) => statusFilter.includes(s))
+}
 
 // -- Main page ----------------------------------------------------------------
 
@@ -306,6 +323,19 @@ function DevicesPage() {
     [],
   )
 
+  // Quick filter chip toggle
+  const handleQuickFilter = useCallback(
+    (filter: QuickFilter) => {
+      if (isQuickFilterActive(filter, statusFilter)) {
+        setStatusFilter([])
+      } else {
+        setStatusFilter(filter.statuses)
+      }
+      setPage(1)
+    },
+    [statusFilter],
+  )
+
   // Row click handler
   const handleRowClick = useCallback(
     (deviceId: string) => {
@@ -438,6 +468,26 @@ function DevicesPage() {
             )}
           </>
         )}
+      </div>
+
+      {/* Quick filter chips */}
+      <div className="flex flex-wrap items-center gap-2">
+        <Filter className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+        {QUICK_FILTERS.map((filter) => {
+          const active = isQuickFilterActive(filter, statusFilter)
+          return (
+            <Button
+              key={filter.id}
+              variant={active ? "default" : "outline"}
+              size="sm"
+              className="h-7 rounded-full text-xs"
+              onClick={() => handleQuickFilter(filter)}
+            >
+              {filter.label}
+              {active && <X className="ml-1.5 h-3 w-3" />}
+            </Button>
+          )
+        })}
       </div>
 
       {/* Search & filters */}

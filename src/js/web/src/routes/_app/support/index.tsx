@@ -19,6 +19,8 @@ import {
   Save,
   Search,
   Trash2,
+  User,
+  UserX,
   X,
 } from "lucide-react"
 import { toast } from "sonner"
@@ -50,6 +52,7 @@ import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { useAuthStore } from "@/lib/auth"
 import { type Ticket, useTickets } from "@/lib/api/hooks/support"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { client } from "@/lib/generated/api/client.gen"
@@ -220,11 +223,17 @@ function SupportPage() {
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(getStoredPageSize)
 
+  // Current user (for "My Tickets" quick filter)
+  const currentUser = useAuthStore((state) => state.user)
+
   // Filter presets
   const [customPresets, setCustomPresets] = useState<FilterPreset[]>(loadCustomPresets)
   const [activePresetId, setActivePresetId] = useState<string | null>(null)
   const [isNamingPreset, setIsNamingPreset] = useState(false)
   const [presetName, setPresetName] = useState("")
+
+  // Assignee quick filter: "my-tickets" | "unassigned" | null
+  const [assigneeQuickFilter, setAssigneeQuickFilter] = useState<"my-tickets" | "unassigned" | null>(null)
 
   // Track manual filter changes to clear active preset
   const manualFilterChangeRef = useRef(false)
@@ -245,6 +254,7 @@ function SupportPage() {
       setCategoryFilter(preset.filters.category ?? [])
       setStartDate("")
       setEndDate("")
+      setAssigneeQuickFilter(null)
       setPage(1)
       setActivePresetId(preset.id)
     },
@@ -340,9 +350,16 @@ function SupportPage() {
         return false
       if ((startDate || endDate) && !isDateInRange(ticket.createdAt, startDate, endDate))
         return false
+      // Assignee quick filters
+      if (assigneeQuickFilter === "my-tickets" && currentUser) {
+        if (ticket.assignedTo?.id !== currentUser.id) return false
+      }
+      if (assigneeQuickFilter === "unassigned") {
+        if (ticket.assignedTo != null) return false
+      }
       return true
     })
-  }, [data?.items, statusFilter, priorityFilter, categoryFilter, startDate, endDate])
+  }, [data?.items, statusFilter, priorityFilter, categoryFilter, startDate, endDate, assigneeQuickFilter, currentUser])
 
   // Ticket summary stats (computed from ALL items on the current page)
   const ticketStats = useMemo(() => {
@@ -407,8 +424,17 @@ function SupportPage() {
 
   // Filter helpers
   const activeFilterCount =
-    statusFilter.length + priorityFilter.length + categoryFilter.length + (startDate || endDate ? 1 : 0)
+    statusFilter.length + priorityFilter.length + categoryFilter.length + (startDate || endDate ? 1 : 0) + (assigneeQuickFilter ? 1 : 0)
   const hasAnyFilters = activeFilterCount > 0 || !!search
+
+  const toggleAssigneeQuickFilter = useCallback(
+    (filter: "my-tickets" | "unassigned") => {
+      setAssigneeQuickFilter((prev) => (prev === filter ? null : filter))
+      setActivePresetId(null)
+      setPage(1)
+    },
+    [],
+  )
 
   const clearAllFilters = useCallback(() => {
     setSearch("")
@@ -417,6 +443,7 @@ function SupportPage() {
     setCategoryFilter([])
     setStartDate("")
     setEndDate("")
+    setAssigneeQuickFilter(null)
     setPage(1)
   }, [])
 
@@ -752,6 +779,27 @@ function SupportPage() {
               {preset.name}
             </Button>
           ))}
+
+          <Separator orientation="vertical" className="mx-1 h-5" />
+
+          <Button
+            variant={assigneeQuickFilter === "my-tickets" ? "default" : "outline"}
+            size="sm"
+            className="h-7 text-xs"
+            onClick={() => toggleAssigneeQuickFilter("my-tickets")}
+          >
+            <User className="mr-1.5 h-3.5 w-3.5" />
+            My Tickets
+          </Button>
+          <Button
+            variant={assigneeQuickFilter === "unassigned" ? "default" : "outline"}
+            size="sm"
+            className="h-7 text-xs"
+            onClick={() => toggleAssigneeQuickFilter("unassigned")}
+          >
+            <UserX className="mr-1.5 h-3.5 w-3.5" />
+            Unassigned
+          </Button>
 
           {customPresets.length > 0 && (
             <Separator orientation="vertical" className="mx-1 h-5" />

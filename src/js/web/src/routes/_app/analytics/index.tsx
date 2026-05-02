@@ -44,7 +44,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { DateRangeFilter, getPresetDates } from "@/components/ui/date-range-filter"
+import { DateRangeFilter, getPresetDates, getPresetLabel } from "@/components/ui/date-range-filter"
 import {
   Dialog,
   DialogContent,
@@ -222,6 +222,46 @@ function StatCard({
         {subtitle && <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>}
       </CardContent>
     </Card>
+  )
+}
+
+// -- Date range preset buttons ------------------------------------------------
+
+const QUICK_PRESETS = [
+  { label: "Today", days: 0 },
+  { label: "7 Days", days: 7 },
+  { label: "30 Days", days: 30 },
+  { label: "90 Days", days: 90 },
+] as const
+
+function DateRangePresets({
+  startDate,
+  endDate,
+  onPreset,
+}: {
+  startDate: string
+  endDate: string
+  onPreset: (days: number) => void
+}) {
+  const activeLabel = getPresetLabel(startDate, endDate)
+
+  return (
+    <div className="flex items-center gap-1">
+      {QUICK_PRESETS.map((preset) => {
+        const isActive = activeLabel === (preset.days === 0 ? "Today" : `Last ${preset.days} days`)
+        return (
+          <Button
+            key={preset.days}
+            variant={isActive ? "secondary" : "ghost"}
+            size="sm"
+            className={`h-7 text-xs ${isActive ? "font-medium" : ""}`}
+            onClick={() => onPreset(preset.days)}
+          >
+            {preset.label}
+          </Button>
+        )
+      })}
+    </div>
   )
 }
 
@@ -598,6 +638,8 @@ function DashboardTab() {
     <div className="space-y-6">
       {/* Date filter */}
       <div className="flex items-center gap-3">
+        <DateRangePresets startDate={startDate} endDate={endDate} onPreset={handleDatePreset} />
+        <div className="h-5 w-px bg-border" />
         <DateRangeFilter
           startDate={startDate}
           endDate={endDate}
@@ -1214,6 +1256,8 @@ function CallRecordsTab() {
             </button>
           )}
         </div>
+        <DateRangePresets startDate={startDate} endDate={endDate} onPreset={handleDatePreset} />
+        <div className="h-5 w-px bg-border" />
         <DateRangeFilter
           startDate={startDate}
           endDate={endDate}

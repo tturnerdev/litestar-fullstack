@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.227.0 (2026-05-02)
+
+### Added
+- **Support ticket quick filters** — "My Tickets" and "Unassigned" assignee filter chips on support list page with toggle behavior
+- **Device quick filter chips** — "Online Only", "Offline", and "Needs Attention" one-click status filters on devices list page
+- **Analytics date range presets** — Quick "Today", "7 Days", "30 Days", "90 Days" buttons on both Dashboard and Call Records tabs
+
 ## v0.226.0 (2026-05-02)
 
 ### Added
