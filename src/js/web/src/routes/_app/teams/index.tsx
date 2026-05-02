@@ -42,6 +42,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { SkeletonTable } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -55,6 +56,25 @@ import type { Team } from "@/lib/generated/api"
 export const Route = createFileRoute("/_app/teams/")({
   component: TeamsPage,
 })
+
+// ── Pagination constants ─────────────────────────────────────────────────
+
+const PAGE_SIZES = [10, 25, 50, 100] as const
+const DEFAULT_PAGE_SIZE = 25
+const PAGE_SIZE_STORAGE_KEY = "teams-page-size"
+
+function getStoredPageSize(): number {
+  try {
+    const stored = localStorage.getItem(PAGE_SIZE_STORAGE_KEY)
+    if (stored) {
+      const parsed = Number(stored)
+      if ((PAGE_SIZES as readonly number[]).includes(parsed)) return parsed
+    }
+  } catch {
+    // localStorage unavailable
+  }
+  return DEFAULT_PAGE_SIZE
+}
 
 // ── Helpers ──────────────────────────────────────────────────────────────
 
@@ -113,6 +133,27 @@ function TeamsPage() {
   const [search, setSearch] = useState("")
   const debouncedSearch = useDebouncedValue(search)
 
+  // Pagination state
+  const [pageSize, setPageSize] = useState(getStoredPageSize)
+  const [page, setPage] = useState(1)
+
+  // Reset page when debounced search changes
+  useEffect(() => {
+    setPage(1)
+  }, [debouncedSearch])
+
+  // Persist page size preference
+  const handlePageSizeChange = useCallback((value: string) => {
+    const size = Number(value)
+    setPageSize(size)
+    setPage(1)
+    try {
+      localStorage.setItem(PAGE_SIZE_STORAGE_KEY, value)
+    } catch {
+      // localStorage unavailable
+    }
+  }, [])
+
   // Sort state
   const [sortKey, setSortKey] = useState<string | null>(null)
   const [sortDir, setSortDir] = useState<SortDirection>(null)
@@ -122,6 +163,8 @@ function TeamsPage() {
 
   // Query
   const { data, isLoading, isError, refetch } = useTeams({
+    page,
+    pageSize,
     search: debouncedSearch || undefined,
     orderBy: sortKey ?? undefined,
     sortOrder: sortDir ?? undefined,
@@ -130,6 +173,8 @@ function TeamsPage() {
   const deleteTeamMutation = useDeleteTeam()
 
   const items = data?.items ?? []
+  const total = data?.total ?? 0
+  const totalPages = Math.max(1, Math.ceil(total / pageSize))
 
   // Client-side sort for member count (not available server-side)
   const sortedItems = useMemo(() => {
@@ -326,19 +371,23 @@ function TeamsPage() {
           />
         ) : (
           <div className="space-y-3">
-            {/* Result count */}
+            {/* Result count & pagination info */}
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">
-                {sortedItems.length} team{sortedItems.length === 1 ? "" : "s"}
-                {data?.total != null && data.total !== sortedItems.length && ` of ${data.total} total`}
+                {total} team{total === 1 ? "" : "s"}
                 {search && " (filtered)"}
               </p>
+              {totalPages > 1 && (
+                <p className="text-xs text-muted-foreground">
+                  Page {page} of {totalPages}
+                </p>
+              )}
             </div>
 
             {/* Table */}
             <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
               <Table aria-label="Teams">
-                <TableHeader>
+                <TableHeader className="sticky top-0 z-10 bg-background">
                   <TableRow>
                     <TableHead className="w-10">
                       <Checkbox
@@ -382,6 +431,45 @@ function TeamsPage() {
                   ))}
                 </TableBody>
               </Table>
+            </div>
+
+            {/* Pagination */}
+            <div className="flex items-center justify-end gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Rows per page</span>
+                <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
+                  <SelectTrigger className="h-8 w-[70px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PAGE_SIZES.map((size) => (
+                      <SelectItem key={size} value={String(size)}>
+                        {size}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {totalPages > 1 && (
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page <= 1}
+                  >
+                    Previous
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page >= totalPages}
+                  >
+                    Next
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         )}

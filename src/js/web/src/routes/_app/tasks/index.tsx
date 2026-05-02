@@ -19,6 +19,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { BulkActionBar, createExportAction, type BulkAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -39,6 +40,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { SkeletonTable } from "@/components/ui/skeleton"
+import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useTasks, useCancelTask, type UseTasksOptions } from "@/lib/api/hooks/tasks"
@@ -308,6 +310,19 @@ function TasksPage() {
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(getStoredPageSize)
 
+  // Sort state
+  const [sortKey, setSortKey] = useState<string | null>(null)
+  const [sortDir, setSortDir] = useState<SortDirection>(null)
+
+  const handleSort = useCallback((key: string) => {
+    const next = nextSortDirection(sortKey, sortDir, key)
+    setSortKey(next.sort)
+    setSortDir(next.direction)
+  }, [sortKey, sortDir])
+
+  // Page-level cancel mutation for bulk actions
+  const cancelMutation = useCancelTask()
+
   // Reset page when filters change
   useEffect(() => {
     setPage(1)
@@ -334,11 +349,11 @@ function TasksPage() {
       pageSize,
       status: statusFilter !== "all" ? statusFilter : undefined,
       taskType: taskTypeFilter !== "all" ? taskTypeFilter : undefined,
-      orderBy: "created_at",
-      sortOrder: "desc" as const,
+      orderBy: sortKey ?? "created_at",
+      sortOrder: sortDir ?? "desc",
       refetchInterval: hasActiveTasks ? 15000 : false,
     }),
-    [page, pageSize, statusFilter, taskTypeFilter, hasActiveTasks],
+    [page, pageSize, statusFilter, taskTypeFilter, sortKey, sortDir, hasActiveTasks],
   )
 
   const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useTasks(queryOptions)
@@ -379,6 +394,46 @@ function TasksPage() {
       return next
     })
   }, [])
+
+  // Bulk actions
+  const bulkActions = useMemo((): BulkAction[] => [
+    createExportAction<BackgroundTaskList>(
+      "background-tasks",
+      csvHeaders,
+      (ids) => items.filter((t) => ids.includes(t.id)),
+    ),
+    {
+      key: "cancel",
+      label: "Cancel Selected",
+      icon: <XCircle className="h-4 w-4" />,
+      variant: "destructive" as const,
+      confirm: {
+        title: "Cancel selected tasks?",
+        description: "Only pending and running tasks will be cancelled. This action cannot be undone.",
+      },
+      onExecute: async (ids: string[]) => {
+        const activeTasks = items.filter(
+          (t) => ids.includes(t.id) && (t.status === "pending" || t.status === "running"),
+        )
+        if (activeTasks.length === 0) {
+          toast.info("No active tasks to cancel among the selection")
+          return
+        }
+        const errors: string[] = []
+        for (const t of activeTasks) {
+          try {
+            await cancelMutation.mutateAsync(t.id)
+          } catch {
+            errors.push(t.id)
+          }
+        }
+        if (errors.length > 0) {
+          toast.error(`Failed to cancel ${errors.length} of ${activeTasks.length} tasks`)
+        }
+        setSelectedIds(new Set())
+      },
+    },
+  ], [items, cancelMutation])
 
   const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / pageSize))
   const hasData = items.length > 0
@@ -544,13 +599,13 @@ function TasksPage() {
                         aria-label="Select all tasks"
                       />
                     </TableHead>
-                    <TableHead>Task Type</TableHead>
-                    <TableHead>Status</TableHead>
+                    <SortableHeader label="Task Type" sortKey="task_type" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                    <SortableHeader label="Status" sortKey="status" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
                     <TableHead>Progress</TableHead>
                     <TableHead className="hidden md:table-cell">Entity</TableHead>
-                    <TableHead className="hidden md:table-cell">Started</TableHead>
+                    <SortableHeader label="Started" sortKey="started_at" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
                     <TableHead className="hidden md:table-cell">Duration</TableHead>
-                    <TableHead className="hidden md:table-cell">Completed</TableHead>
+                    <SortableHeader label="Completed" sortKey="completed_at" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
                     <TableHead className="w-16 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -610,6 +665,13 @@ function TasksPage() {
           </div>
         )}
       </PageSection>
+
+      <BulkActionBar
+        selectedCount={selectedIds.size}
+        selectedIds={Array.from(selectedIds)}
+        onClearSelection={() => setSelectedIds(new Set())}
+        actions={bulkActions}
+      />
     </PageContainer>
   )
 }

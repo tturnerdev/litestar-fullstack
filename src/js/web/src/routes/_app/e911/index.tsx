@@ -81,7 +81,22 @@ export const Route = createFileRoute("/_app/e911/")({
 
 // -- Constants ----------------------------------------------------------------
 
-const PAGE_SIZE = 20
+const PAGE_SIZES = [10, 25, 50, 100] as const
+const DEFAULT_PAGE_SIZE = 25
+const PAGE_SIZE_STORAGE_KEY = "e911-page-size"
+
+function getStoredPageSize(): number {
+  try {
+    const stored = localStorage.getItem(PAGE_SIZE_STORAGE_KEY)
+    if (stored) {
+      const parsed = Number(stored)
+      if ((PAGE_SIZES as readonly number[]).includes(parsed)) return parsed
+    }
+  } catch {
+    /* localStorage unavailable */
+  }
+  return DEFAULT_PAGE_SIZE
+}
 
 const csvHeaders: CsvHeader<E911Registration>[] = [
   { label: "Phone Number", accessor: (r) => r.phoneNumberDisplay ?? "" },
@@ -512,6 +527,18 @@ function E911Page() {
   const [search, setSearch] = useState("")
   const debouncedSearch = useDebouncedValue(search)
   const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(getStoredPageSize)
+
+  const handlePageSizeChange = useCallback((value: string) => {
+    const size = Number(value)
+    setPageSize(size)
+    setPage(1)
+    try {
+      localStorage.setItem(PAGE_SIZE_STORAGE_KEY, String(size))
+    } catch {
+      /* localStorage unavailable */
+    }
+  }, [])
 
   useEffect(() => {
     setPage(1)
@@ -519,7 +546,7 @@ function E911Page() {
 
   const { data, isLoading, isError, refetch } = useE911Registrations({
     page,
-    pageSize: PAGE_SIZE,
+    pageSize,
     search: debouncedSearch || undefined,
     teamId: teamId || undefined,
   })
@@ -578,7 +605,7 @@ function E911Page() {
     [items, deleteMutation],
   )
 
-  const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / PAGE_SIZE))
+  const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / pageSize))
   const hasData = items.length > 0
   const unregisteredCount = unregistered?.length ?? 0
 
@@ -747,7 +774,7 @@ function E911Page() {
 
             <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
               <Table aria-label="E911 Registrations">
-                <TableHeader>
+                <TableHeader className="sticky top-0 z-10 bg-background">
                   <TableRow>
                     <TableHead className="w-10">
                       <Checkbox
@@ -781,26 +808,43 @@ function E911Page() {
             </div>
 
             {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-end gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={page <= 1}
-                >
-                  Previous
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={page >= totalPages}
-                >
-                  Next
-                </Button>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">Rows per page</span>
+                <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
+                  <SelectTrigger className="h-8 w-[70px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PAGE_SIZES.map((size) => (
+                      <SelectItem key={size} value={String(size)}>
+                        {size}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-            )}
+              {totalPages > 1 && (
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page <= 1}
+                  >
+                    Previous
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page >= totalPages}
+                  >
+                    Next
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </PageSection>
