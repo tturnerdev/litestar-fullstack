@@ -8,7 +8,7 @@ from app.lib.deps import create_service_provider
 
 provide_devices_service = create_service_provider(
     DeviceService,
-    load=[m.Device.lines],
+    load=[m.Device.lines, m.Device.location, m.Device.connection],
     error_messages={"duplicate_key": "This device already exists.", "integrity": "Device operation failed."},
 )
 

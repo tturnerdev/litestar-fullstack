@@ -10,6 +10,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.models._voice_enums import PhoneNumberType
 
 if TYPE_CHECKING:
+    from app.db.models._e911_registration import E911Registration
     from app.db.models._extension import Extension
     from app.db.models._team import Team
     from app.db.models._user import User
@@ -50,4 +51,10 @@ class PhoneNumber(UUIDv7AuditBase):
         back_populates="phone_number",
         lazy="noload",
         uselist=True,
+    )
+    e911_registration: Mapped[E911Registration | None] = relationship(
+        foreign_keys="E911Registration.phone_number_id",
+        uselist=False,
+        lazy="noload",
+        viewonly=True,
     )

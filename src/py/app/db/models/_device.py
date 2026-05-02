@@ -13,7 +13,9 @@ from app.db.models._device_status import DeviceStatus
 from app.db.models._device_type import DeviceType
 
 if TYPE_CHECKING:
+    from app.db.models._connection import Connection
     from app.db.models._device_line_assignment import DeviceLineAssignment
+    from app.db.models._location import Location
     from app.db.models._team import Team
     from app.db.models._user import User
 
@@ -35,6 +37,20 @@ class Device(UUIDv7AuditBase):
         default=None,
         index=True,
     )
+    location_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("location.id", ondelete="set null"),
+        nullable=True,
+        default=None,
+        index=True,
+    )
+    """ID of the physical location where this device is installed."""
+    connection_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("connection.id", ondelete="set null"),
+        nullable=True,
+        default=None,
+        index=True,
+    )
+    """ID of the PBX/provisioning connection managing this device."""
     name: Mapped[str] = mapped_column(String(length=255), nullable=False, index=True)
     device_type: Mapped[DeviceType] = mapped_column(
         String(length=50),
@@ -71,6 +87,16 @@ class Device(UUIDv7AuditBase):
         foreign_keys="Device.team_id",
         uselist=False,
         lazy="joined",
+    )
+    location: Mapped[Location | None] = relationship(
+        foreign_keys="Device.location_id",
+        uselist=False,
+        lazy="noload",
+    )
+    connection: Mapped[Connection | None] = relationship(
+        foreign_keys="Device.connection_id",
+        uselist=False,
+        lazy="noload",
     )
     lines: Mapped[list[DeviceLineAssignment]] = relationship(
         back_populates="device",

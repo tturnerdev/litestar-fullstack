@@ -146,10 +146,12 @@ class DeviceActionsController(Controller):
         device_id: Annotated[UUID, Parameter(title="Device ID", description="The device to list lines for.")],
     ) -> list[DeviceLineAssignment]:
         device = await devices_service.get(device_id)
-        return [
-            devices_service.to_schema(line, schema_type=DeviceLineAssignment)
-            for line in device.lines
-        ]
+        schemas = []
+        for line in device.lines:
+            schema = devices_service.to_schema(line, schema_type=DeviceLineAssignment)
+            devices_service._enrich_line_schema(line, schema)
+            schemas.append(schema)
+        return schemas
 
     @put(operation_id="SetDeviceLines", path="/api/devices/{device_id:uuid}/lines")
     async def set_device_lines(
@@ -179,7 +181,7 @@ class DeviceActionsController(Controller):
             after=after,
             request=request,
         )
-        return devices_service.to_schema(device, schema_type=Device)
+        return devices_service.to_schema_enriched(device)
 
     @get(
         operation_id="GetDeviceScreenshot",

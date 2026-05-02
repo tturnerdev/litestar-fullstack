@@ -8,6 +8,7 @@ from sqlalchemy import ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 if TYPE_CHECKING:
+    from app.db.models._device_line_assignment import DeviceLineAssignment
     from app.db.models._do_not_disturb import DoNotDisturb
     from app.db.models._forwarding_rule import ForwardingRule
     from app.db.models._phone_number import PhoneNumber
@@ -70,4 +71,10 @@ class Extension(UUIDv7AuditBase):
         uselist=False,
         lazy="noload",
         cascade="all, delete",
+    )
+    device_line_assignments: Mapped[list[DeviceLineAssignment]] = relationship(
+        foreign_keys="DeviceLineAssignment.extension_id",
+        uselist=True,
+        lazy="noload",
+        viewonly=True,
     )

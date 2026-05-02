@@ -2912,6 +2912,27 @@ export const DashboardStatsSchema = {
 
 export const DeviceSchema = {
   properties: {
+    connectionId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    connectionName: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     deviceModel: {
       oneOf: [
         {
@@ -2969,6 +2990,27 @@ export const DeviceSchema = {
         $ref: "#/components/schemas/DeviceLineAssignment",
       },
       type: "array",
+    },
+    locationId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    locationName: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
     },
     macAddress: {
       oneOf: [
@@ -3044,6 +3086,17 @@ export const DeviceSchema = {
 
 export const DeviceCreateSchema = {
   properties: {
+    connectionId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     deviceModel: {
       oneOf: [
         {
@@ -3056,6 +3109,17 @@ export const DeviceCreateSchema = {
     },
     deviceType: {
       type: "string",
+    },
+    locationId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
     },
     macAddress: {
       oneOf: [
@@ -3137,10 +3201,30 @@ export const DeviceGatewayResponseSchema = {
 
 export const DeviceLineAssignmentSchema = {
   properties: {
+    extensionDisplayName: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     extensionId: {
       oneOf: [
         {
           format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    extensionNumber: {
+      oneOf: [
+        {
           type: "string",
         },
         {
@@ -3563,6 +3647,17 @@ export const DeviceUpdateSchema = {
         },
       ],
     },
+    connectionId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     deviceModel: {
       oneOf: [
         {
@@ -3597,6 +3692,17 @@ export const DeviceUpdateSchema = {
       oneOf: [
         {
           type: "boolean",
+        },
+      ],
+    },
+    locationId: {
+      oneOf: [
+        {
+          format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
         },
       ],
     },
@@ -6607,6 +6713,21 @@ export const PhoneNumberSchema = {
     callerIdName: {
       oneOf: [
         {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    e911Registered: {
+      default: false,
+      type: "boolean",
+    },
+    e911RegistrationId: {
+      oneOf: [
+        {
+          format: "uuid",
           type: "string",
         },
         {

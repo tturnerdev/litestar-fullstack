@@ -8,6 +8,7 @@ from uuid import UUID
 from litestar import Controller, delete, get, patch, post
 from litestar.di import Provide
 from litestar.params import Dependency, Parameter
+from sqlalchemy.orm import joinedload
 
 from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
@@ -35,6 +36,7 @@ class PhoneNumberController(Controller):
     dependencies = create_service_dependencies(
         PhoneNumberService,
         key="phone_numbers_service",
+        load=[joinedload(m.PhoneNumber.e911_registration)],
         filters={
             "id_filter": UUID,
             "pagination_type": "limit_offset",
@@ -63,7 +65,7 @@ class PhoneNumberController(Controller):
             *filters,
             m.PhoneNumber.user_id == current_user.id,
         )
-        return phone_numbers_service.to_schema(results, total, filters, schema_type=PhoneNumber)
+        return phone_numbers_service.to_schema_enriched(results, total, filters)
 
     @post(
         operation_id="CreatePhoneNumber",
@@ -95,7 +97,7 @@ class PhoneNumberController(Controller):
             after=after,
             request=request,
         )
-        return phone_numbers_service.to_schema(db_obj, schema_type=PhoneNumber)
+        return phone_numbers_service.to_schema_enriched(db_obj)
 
     @get(operation_id="GetPhoneNumber", path="/{phone_number_id:uuid}", guards=[requires_feature_permission("voice", "view"), requires_phone_number_access])
     async def get_phone_number(
@@ -106,7 +108,7 @@ class PhoneNumberController(Controller):
     ) -> PhoneNumber:
         """Get phone number details."""
         db_obj = await phone_numbers_service.get_one(id=phone_number_id, user_id=current_user.id)
-        return phone_numbers_service.to_schema(db_obj, schema_type=PhoneNumber)
+        return phone_numbers_service.to_schema_enriched(db_obj)
 
     @patch(operation_id="UpdatePhoneNumber", path="/{phone_number_id:uuid}", guards=[requires_feature_permission("voice", "edit"), requires_phone_number_access])
     async def update_phone_number(
@@ -136,7 +138,7 @@ class PhoneNumberController(Controller):
             after=after,
             request=request,
         )
-        return phone_numbers_service.to_schema(db_obj, schema_type=PhoneNumber)
+        return phone_numbers_service.to_schema_enriched(db_obj)
 
     @delete(
         operation_id="DeletePhoneNumber",

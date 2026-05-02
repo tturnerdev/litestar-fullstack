@@ -19,6 +19,8 @@ class PhoneNumber(CamelizedBaseStruct):
     caller_id_name: str | None = None
     is_active: bool = True
     team_id: UUID | None = None
+    e911_registered: bool = False
+    e911_registration_id: UUID | None = None
 
 
 class PhoneNumberCreate(CamelizedBaseStruct):

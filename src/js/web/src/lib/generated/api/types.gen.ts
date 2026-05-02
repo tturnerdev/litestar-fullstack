@@ -728,6 +728,8 @@ export type DashboardStats = {
  * Device
  */
 export type Device = {
+  connectionId?: string | null;
+  connectionName?: string | null;
   deviceModel?: string | null;
   deviceType: string;
   firmwareVersion?: string | null;
@@ -736,6 +738,8 @@ export type Device = {
   isActive?: boolean;
   lastSeenAt?: string | null;
   lines?: Array<DeviceLineAssignment>;
+  locationId?: string | null;
+  locationName?: string | null;
   macAddress?: string | null;
   manufacturer?: string | null;
   name: string;
@@ -751,8 +755,10 @@ export type Device = {
  * DeviceCreate
  */
 export type DeviceCreate = {
+  connectionId?: string | null;
   deviceModel?: string | null;
   deviceType: string;
+  locationId?: string | null;
   macAddress?: string | null;
   manufacturer?: string | null;
   name: string;
@@ -777,7 +783,9 @@ export type DeviceGatewayResponse = {
  * DeviceLineAssignment
  */
 export type DeviceLineAssignment = {
+  extensionDisplayName?: string | null;
   extensionId?: string | null;
+  extensionNumber?: string | null;
   id: string;
   isActive?: boolean;
   label: string;
@@ -897,10 +905,12 @@ export type DeviceUpdate = {
   configJson?: {
     [key: string]: unknown;
   } | null;
+  connectionId?: string | null;
   deviceModel?: string | null;
   firmwareVersion?: string | null;
   ipAddress?: string | null;
   isActive?: boolean;
+  locationId?: string | null;
   macAddress?: string | null;
   manufacturer?: string | null;
   name?: string;
@@ -1731,6 +1741,8 @@ export type PasswordUpdate = {
  */
 export type PhoneNumber = {
   callerIdName?: string | null;
+  e911Registered?: boolean;
+  e911RegistrationId?: string | null;
   id: string;
   isActive?: boolean;
   label?: string | null;

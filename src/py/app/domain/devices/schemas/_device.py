@@ -16,6 +16,8 @@ class DeviceLineAssignment(CamelizedBaseStruct):
     label: str
     line_type: str
     extension_id: UUID | None = None
+    extension_number: str | None = None
+    extension_display_name: str | None = None
     is_active: bool = True
 
 
@@ -30,6 +32,10 @@ class Device(CamelizedBaseStruct):
     sip_server: str
     status: str
     team_id: UUID | None = None
+    location_id: UUID | None = None
+    location_name: str | None = None
+    connection_id: UUID | None = None
+    connection_name: str | None = None
     mac_address: str | None = None
     device_model: str | None = None
     manufacturer: str | None = None
@@ -51,6 +57,8 @@ class DeviceCreate(CamelizedBaseStruct):
     manufacturer: str | None = None
     sip_username: str | None = None
     team_id: UUID | None = None
+    location_id: UUID | None = None
+    connection_id: UUID | None = None
 
 
 class DeviceUpdate(CamelizedBaseStruct, omit_defaults=True):
@@ -64,6 +72,8 @@ class DeviceUpdate(CamelizedBaseStruct, omit_defaults=True):
     firmware_version: str | msgspec.UnsetType | None = msgspec.UNSET
     ip_address: str | msgspec.UnsetType | None = msgspec.UNSET
     config_json: dict | msgspec.UnsetType | None = msgspec.UNSET
+    location_id: UUID | msgspec.UnsetType | None = msgspec.UNSET
+    connection_id: UUID | msgspec.UnsetType | None = msgspec.UNSET
 
 
 class DeviceActionResponse(CamelizedBaseStruct):

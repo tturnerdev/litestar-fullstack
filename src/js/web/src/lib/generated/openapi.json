@@ -2994,6 +2994,27 @@
       },
       "Device": {
         "properties": {
+          "connectionId": {
+            "oneOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "connectionName": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "deviceModel": {
             "oneOf": [
               {
@@ -3051,6 +3072,27 @@
               "$ref": "#/components/schemas/DeviceLineAssignment"
             },
             "type": "array"
+          },
+          "locationId": {
+            "oneOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "locationName": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "macAddress": {
             "oneOf": [
@@ -3125,6 +3167,17 @@
       },
       "DeviceCreate": {
         "properties": {
+          "connectionId": {
+            "oneOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "deviceModel": {
             "oneOf": [
               {
@@ -3137,6 +3190,17 @@
           },
           "deviceType": {
             "type": "string"
+          },
+          "locationId": {
+            "oneOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "macAddress": {
             "oneOf": [
@@ -3221,10 +3285,30 @@
       },
       "DeviceLineAssignment": {
         "properties": {
+          "extensionDisplayName": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "extensionId": {
             "oneOf": [
               {
                 "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "extensionNumber": {
+            "oneOf": [
+              {
                 "type": "string"
               },
               {
@@ -3648,6 +3732,17 @@
               }
             ]
           },
+          "connectionId": {
+            "oneOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "deviceModel": {
             "oneOf": [
               {
@@ -3682,6 +3777,17 @@
             "oneOf": [
               {
                 "type": "boolean"
+              }
+            ]
+          },
+          "locationId": {
+            "oneOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
               }
             ]
           },
@@ -6781,6 +6887,21 @@
           "callerIdName": {
             "oneOf": [
               {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "e911Registered": {
+            "default": false,
+            "type": "boolean"
+          },
+          "e911RegistrationId": {
+            "oneOf": [
+              {
+                "format": "uuid",
                 "type": "string"
               },
               {

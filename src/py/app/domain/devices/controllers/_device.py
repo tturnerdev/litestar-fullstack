@@ -8,7 +8,7 @@ from uuid import UUID
 from litestar import Controller, delete, get, patch, post
 from litestar.di import Provide
 from litestar.params import Dependency, Parameter
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import joinedload, selectinload
 
 from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
@@ -37,7 +37,11 @@ class DeviceController(Controller):
     dependencies = create_service_dependencies(
         DeviceService,
         key="devices_service",
-        load=[selectinload(m.Device.lines)],
+        load=[
+            selectinload(m.Device.lines).joinedload(m.DeviceLineAssignment.extension),
+            joinedload(m.Device.location),
+            joinedload(m.Device.connection),
+        ],
         filters={
             "id_filter": UUID,
             "search": "name",
@@ -81,7 +85,7 @@ class DeviceController(Controller):
                 *filters,
                 m.Device.user_id == current_user.id,
             )
-        return devices_service.to_schema(results, total, filters, schema_type=Device)
+        return devices_service.to_schema_enriched(results, total, filters)
 
     @post(
         operation_id="CreateDevice",
@@ -136,7 +140,7 @@ class DeviceController(Controller):
             )
         except Exception:
             pass
-        return devices_service.to_schema(db_obj, schema_type=Device)
+        return devices_service.to_schema_enriched(db_obj)
 
     @get(
         operation_id="GetDevice",
@@ -158,7 +162,7 @@ class DeviceController(Controller):
             Device
         """
         db_obj = await devices_service.get(device_id)
-        return devices_service.to_schema(db_obj, schema_type=Device)
+        return devices_service.to_schema_enriched(db_obj)
 
     @patch(
         operation_id="UpdateDevice",
@@ -207,7 +211,7 @@ class DeviceController(Controller):
             after=after,
             request=request,
         )
-        return devices_service.to_schema(fresh_obj, schema_type=Device)
+        return devices_service.to_schema_enriched(fresh_obj)
 
     @delete(
         operation_id="DeleteDevice",

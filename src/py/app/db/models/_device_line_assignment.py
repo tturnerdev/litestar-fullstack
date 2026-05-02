@@ -11,6 +11,7 @@ from app.db.models._device_line_type import DeviceLineType
 
 if TYPE_CHECKING:
     from app.db.models._device import Device
+    from app.db.models._extension import Extension
 
 
 class DeviceLineAssignment(UUIDv7AuditBase):
@@ -28,7 +29,11 @@ class DeviceLineAssignment(UUIDv7AuditBase):
         index=True,
     )
     line_number: Mapped[int] = mapped_column(nullable=False)
-    extension_id: Mapped[UUID | None] = mapped_column(nullable=True, default=None)
+    extension_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("extension.id", ondelete="SET NULL"),
+        nullable=True,
+        default=None,
+    )
     label: Mapped[str] = mapped_column(String(length=50), nullable=False)
     line_type: Mapped[DeviceLineType] = mapped_column(
         String(length=50),
@@ -43,4 +48,9 @@ class DeviceLineAssignment(UUIDv7AuditBase):
         foreign_keys="DeviceLineAssignment.device_id",
         innerjoin=True,
         uselist=False,
+    )
+    extension: Mapped[Extension | None] = relationship(
+        foreign_keys="DeviceLineAssignment.extension_id",
+        uselist=False,
+        lazy="joined",
     )
