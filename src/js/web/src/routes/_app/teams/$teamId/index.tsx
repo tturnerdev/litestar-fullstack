@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { createFileRoute, Link, useParams } from "@tanstack/react-router"
+import { createFileRoute, Link, useBlocker, useParams } from "@tanstack/react-router"
 import {
   Activity,
   AlertTriangle,
@@ -9,15 +9,18 @@ import {
   Copy,
   Crown,
   HardDrive,
+  Loader2,
   MoreHorizontal,
   Pencil,
   Phone,
+  Save,
   Settings,
   Shield,
   Trash2,
   Users,
+  X,
 } from "lucide-react"
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { TeamMembers } from "@/components/teams/team-members"
 import { TeamSettings } from "@/components/teams/team-settings"
@@ -51,16 +54,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Textarea } from "@/components/ui/textarea"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { CopyButton } from "@/components/ui/copy-button"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useDevicesByTeam } from "@/lib/api/hooks/devices"
-import { useDeleteTeam } from "@/lib/api/hooks/teams"
+import { useDeleteTeam, useUpdateTeam } from "@/lib/api/hooks/teams"
 import { useExtensionsByTeam } from "@/lib/api/hooks/voice"
 import { useAuthStore } from "@/lib/auth"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
@@ -108,6 +114,10 @@ function TeamDetail() {
   const navigate = Route.useNavigate()
 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [editing, setEditing] = useState(false)
+  const [editName, setEditName] = useState("")
+  const [editDescription, setEditDescription] = useState("")
+  const [editTags, setEditTags] = useState("")
 
   const {
     data: team,
@@ -122,6 +132,7 @@ function TeamDetail() {
   })
 
   const deleteTeamMutation = useDeleteTeam()
+  const updateTeamMutation = useUpdateTeam(teamId)
 
   useDocumentTitle(team?.name ?? "Team Details")
 
@@ -130,6 +141,79 @@ function TeamDetail() {
       setCurrentTeam(team)
     }
   }, [currentTeam?.id, setCurrentTeam, team])
+
+  // Sync edit fields from current data
+  const syncEditFields = useCallback(() => {
+    if (team) {
+      setEditName(team.name)
+      setEditDescription(team.description ?? "")
+      const tagNames = (team.tags ?? []).map((t: { name: string }) => t.name).join(", ")
+      setEditTags(tagNames)
+    }
+  }, [team])
+
+  useEffect(() => {
+    syncEditFields()
+  }, [syncEditFields])
+
+  // Dirty check
+  const formDirty = useMemo(() => {
+    if (!editing || !team) return false
+    const originalTags = (team.tags ?? []).map((t: { name: string }) => t.name).join(", ")
+    return (
+      editName !== team.name ||
+      editDescription !== (team.description ?? "") ||
+      editTags !== originalTags
+    )
+  }, [editing, team, editName, editDescription, editTags])
+
+  // Block navigation when dirty
+  const blocker = useBlocker({
+    shouldBlockFn: () => formDirty,
+    withResolver: true,
+  })
+
+  function handleStartEditing() {
+    syncEditFields()
+    setEditing(true)
+  }
+
+  function handleCancelEditing() {
+    syncEditFields()
+    setEditing(false)
+  }
+
+  function handleSaveEditing() {
+    if (!team) return
+    const trimmedName = editName.trim()
+    if (!trimmedName) return
+
+    const payload: { name?: string | null; description?: string | null; tags?: string[] | null } = {}
+
+    if (trimmedName !== team.name) payload.name = trimmedName
+    if (editDescription !== (team.description ?? "")) {
+      payload.description = editDescription || null
+    }
+    const originalTags = (team.tags ?? []).map((t: { name: string }) => t.name).join(", ")
+    if (editTags !== originalTags) {
+      const parsed = editTags
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean)
+      payload.tags = parsed.length > 0 ? parsed : null
+    }
+
+    if (Object.keys(payload).length === 0) {
+      setEditing(false)
+      return
+    }
+
+    updateTeamMutation.mutate(payload, {
+      onSuccess: () => {
+        setEditing(false)
+      },
+    })
+  }
 
   if (isTeamLoading) {
     return (
@@ -273,11 +357,21 @@ function TeamDetail() {
                 {userRole}
               </Badge>
             )}
-            <Button variant="outline" size="sm" asChild>
-              <Link to="/teams/$teamId/edit" params={{ teamId }}>
+            {editing ? (
+              <>
+                <Button variant="outline" size="sm" onClick={handleCancelEditing} disabled={updateTeamMutation.isPending}>
+                  <X className="mr-2 h-4 w-4" /> Cancel
+                </Button>
+                <Button size="sm" onClick={handleSaveEditing} disabled={updateTeamMutation.isPending || !editName.trim()}>
+                  {updateTeamMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                  {updateTeamMutation.isPending ? "Saving..." : "Save"}
+                </Button>
+              </>
+            ) : (
+              <Button variant="outline" size="sm" onClick={handleStartEditing}>
                 <Pencil className="mr-2 h-4 w-4" /> Edit
-              </Link>
-            </Button>
+              </Button>
+            )}
             <Button variant="outline" size="sm" asChild>
               <Link to="/teams">
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back
@@ -313,26 +407,73 @@ function TeamDetail() {
       <PageSection>
         <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
           <CardContent className="p-6">
-            <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
-              <Avatar className={`h-16 w-16 ${getTeamColor(team.name)}`}>
-                <AvatarFallback className={`text-xl font-bold ${getTeamColor(team.name)}`}>
-                  {getTeamInitials(team.name)}
+            {editing && formDirty && (
+              <div className="mb-4 flex items-center gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-400">
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-500" />
+                You have unsaved changes
+              </div>
+            )}
+            <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
+              <Avatar className={`h-16 w-16 ${getTeamColor(editing ? editName || team.name : team.name)}`}>
+                <AvatarFallback className={`text-xl font-bold ${getTeamColor(editing ? editName || team.name : team.name)}`}>
+                  {getTeamInitials(editing ? editName || team.name : team.name)}
                 </AvatarFallback>
               </Avatar>
 
-              <div className="flex-1 space-y-2">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h2 className="text-xl font-semibold">{team.name}</h2>
-                </div>
-                {team.description && <p className="text-sm text-muted-foreground">{team.description}</p>}
-                {tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5">
-                    {tags.map((tag) => (
-                      <Badge key={tag.id} variant="secondary" className="text-[10px] px-2 py-0.5">
-                        {tag.name}
-                      </Badge>
-                    ))}
-                  </div>
+              <div className="flex-1 space-y-3">
+                {editing ? (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-team-name">Name</Label>
+                      <Input
+                        id="edit-team-name"
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        placeholder="Team name"
+                        disabled={updateTeamMutation.isPending}
+                        maxLength={100}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-team-description">Description</Label>
+                      <Textarea
+                        id="edit-team-description"
+                        value={editDescription}
+                        onChange={(e) => setEditDescription(e.target.value)}
+                        placeholder="Optional description"
+                        disabled={updateTeamMutation.isPending}
+                        maxLength={500}
+                        rows={3}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-team-tags">Tags</Label>
+                      <Input
+                        id="edit-team-tags"
+                        value={editTags}
+                        onChange={(e) => setEditTags(e.target.value)}
+                        placeholder="e.g., engineering, backend, platform"
+                        disabled={updateTeamMutation.isPending}
+                      />
+                      <p className="text-xs text-muted-foreground">Comma-separated list of tags.</p>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h2 className="text-xl font-semibold">{team.name}</h2>
+                    </div>
+                    {team.description && <p className="text-sm text-muted-foreground">{team.description}</p>}
+                    {tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {tags.map((tag) => (
+                          <Badge key={tag.id} variant="secondary" className="text-[10px] px-2 py-0.5">
+                            {tag.name}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                  </>
                 )}
                 {/* Team ID with copy */}
                 <div className="flex items-center gap-1 pt-1">
@@ -611,6 +752,22 @@ function TeamDetail() {
             >
               {deleteTeamMutation.isPending ? "Deleting..." : "Delete team"}
             </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Unsaved changes dialog */}
+      <AlertDialog open={blocker.status === "blocked"} onOpenChange={() => blocker.reset?.()}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
+            <AlertDialogDescription>
+              You have unsaved changes to team details. Are you sure you want to leave? Your changes will be lost.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => blocker.reset?.()}>Stay on page</AlertDialogCancel>
+            <AlertDialogAction onClick={() => blocker.proceed?.()}>Discard changes</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

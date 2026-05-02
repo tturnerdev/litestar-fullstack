@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.204.0 (2026-05-02)
+
+### Added
+- **Teams detail inline editing** — Edit team name, description, and tags directly on the detail page with view/edit toggle, dirty state warning, and unsaved changes dialog
+- **Phone number create page** — New dedicated form at `/voice/phone-numbers/new` with E.164 validation, label, type, caller ID, active toggle, and live preview sidebar
+
+### Changed
+- Teams detail "Edit" button now toggles inline editing instead of navigating to the edit page
+- Phone numbers list "New" button now navigates to `/voice/phone-numbers/new` instead of inline dialog
+- Added `/voice/phone-numbers` to keyboard shortcut "N" new-item routes
+
 ## v0.203.0 (2026-05-02)
 
 ### Added

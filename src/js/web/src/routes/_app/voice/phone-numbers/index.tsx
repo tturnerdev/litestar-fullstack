@@ -47,7 +47,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { SkeletonTable } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { CreatePhoneNumberDialog } from "@/components/voice/create-phone-number-dialog"
 import { E911StatusBadge } from "@/components/voice/e911-status-badge"
 import {
   type PhoneNumber,
@@ -544,14 +543,12 @@ function PhoneNumbersPage() {
               <Download className="mr-2 h-4 w-4" />
               Export
             </Button>
-            <CreatePhoneNumberDialog
-              trigger={
-                <Button size="sm">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Phone Number
-                </Button>
-              }
-            />
+            <Button size="sm" asChild>
+              <Link to="/voice/phone-numbers/new">
+                <Plus className="mr-2 h-4 w-4" />
+                Add Phone Number
+              </Link>
+            </Button>
           </div>
         }
       />
@@ -663,14 +660,12 @@ function PhoneNumbersPage() {
             title="No phone numbers yet"
             description="Add your first phone number to start routing calls to your extensions."
             action={
-              <CreatePhoneNumberDialog
-                trigger={
-                  <Button size="sm">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Phone Number
-                  </Button>
-                }
-              />
+              <Button size="sm" asChild>
+                <Link to="/voice/phone-numbers/new">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Phone Number
+                </Link>
+              </Button>
             }
           />
         ) : !hasData ? (

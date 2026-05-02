@@ -103,6 +103,7 @@ import { Route as AppAdminUsersIndexRouteImport } from './routes/_app/admin/user
 import { Route as AppAdminTeamsIndexRouteImport } from './routes/_app/admin/teams/index'
 import { Route as PublicAuthGoogleCallbackRouteImport } from './routes/_public/auth/google/callback'
 import { Route as PublicAuthGithubCallbackRouteImport } from './routes/_public/auth/github/callback'
+import { Route as AppVoicePhoneNumbersNewRouteImport } from './routes/_app/voice/phone-numbers/new'
 import { Route as AppVoicePhoneNumbersPhoneNumberIdRouteImport } from './routes/_app/voice/phone-numbers/$phoneNumberId'
 import { Route as AppVoiceExtensionsNewRouteImport } from './routes/_app/voice/extensions/new'
 import { Route as AppTeamsTeamIdEditRouteImport } from './routes/_app/teams/$teamId/edit'
@@ -600,6 +601,11 @@ const PublicAuthGithubCallbackRoute =
     path: '/auth/github/callback',
     getParentRoute: () => PublicRoute,
   } as any)
+const AppVoicePhoneNumbersNewRoute = AppVoicePhoneNumbersNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AppVoicePhoneNumbersRoute,
+} as any)
 const AppVoicePhoneNumbersPhoneNumberIdRoute =
   AppVoicePhoneNumbersPhoneNumberIdRouteImport.update({
     id: '/$phoneNumberId',
@@ -811,6 +817,7 @@ export interface FileRoutesByFullPath {
   '/teams/$teamId/edit': typeof AppTeamsTeamIdEditRoute
   '/voice/extensions/new': typeof AppVoiceExtensionsNewRoute
   '/voice/phone-numbers/$phoneNumberId': typeof AppVoicePhoneNumbersPhoneNumberIdRoute
+  '/voice/phone-numbers/new': typeof AppVoicePhoneNumbersNewRoute
   '/auth/github/callback': typeof PublicAuthGithubCallbackRoute
   '/auth/google/callback': typeof PublicAuthGoogleCallbackRoute
   '/admin/teams/': typeof AppAdminTeamsIndexRoute
@@ -910,6 +917,7 @@ export interface FileRoutesByTo {
   '/teams/$teamId/edit': typeof AppTeamsTeamIdEditRoute
   '/voice/extensions/new': typeof AppVoiceExtensionsNewRoute
   '/voice/phone-numbers/$phoneNumberId': typeof AppVoicePhoneNumbersPhoneNumberIdRoute
+  '/voice/phone-numbers/new': typeof AppVoicePhoneNumbersNewRoute
   '/auth/github/callback': typeof PublicAuthGithubCallbackRoute
   '/auth/google/callback': typeof PublicAuthGoogleCallbackRoute
   '/admin/teams': typeof AppAdminTeamsIndexRoute
@@ -1028,6 +1036,7 @@ export interface FileRoutesById {
   '/_app/teams/$teamId/edit': typeof AppTeamsTeamIdEditRoute
   '/_app/voice/extensions/new': typeof AppVoiceExtensionsNewRoute
   '/_app/voice/phone-numbers/$phoneNumberId': typeof AppVoicePhoneNumbersPhoneNumberIdRoute
+  '/_app/voice/phone-numbers/new': typeof AppVoicePhoneNumbersNewRoute
   '/_public/auth/github/callback': typeof PublicAuthGithubCallbackRoute
   '/_public/auth/google/callback': typeof PublicAuthGoogleCallbackRoute
   '/_app/admin/teams/': typeof AppAdminTeamsIndexRoute
@@ -1145,6 +1154,7 @@ export interface FileRouteTypes {
     | '/teams/$teamId/edit'
     | '/voice/extensions/new'
     | '/voice/phone-numbers/$phoneNumberId'
+    | '/voice/phone-numbers/new'
     | '/auth/github/callback'
     | '/auth/google/callback'
     | '/admin/teams/'
@@ -1244,6 +1254,7 @@ export interface FileRouteTypes {
     | '/teams/$teamId/edit'
     | '/voice/extensions/new'
     | '/voice/phone-numbers/$phoneNumberId'
+    | '/voice/phone-numbers/new'
     | '/auth/github/callback'
     | '/auth/google/callback'
     | '/admin/teams'
@@ -1361,6 +1372,7 @@ export interface FileRouteTypes {
     | '/_app/teams/$teamId/edit'
     | '/_app/voice/extensions/new'
     | '/_app/voice/phone-numbers/$phoneNumberId'
+    | '/_app/voice/phone-numbers/new'
     | '/_public/auth/github/callback'
     | '/_public/auth/google/callback'
     | '/_app/admin/teams/'
@@ -2053,6 +2065,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicAuthGithubCallbackRouteImport
       parentRoute: typeof PublicRoute
     }
+    '/_app/voice/phone-numbers/new': {
+      id: '/_app/voice/phone-numbers/new'
+      path: '/new'
+      fullPath: '/voice/phone-numbers/new'
+      preLoaderRoute: typeof AppVoicePhoneNumbersNewRouteImport
+      parentRoute: typeof AppVoicePhoneNumbersRoute
+    }
     '/_app/voice/phone-numbers/$phoneNumberId': {
       id: '/_app/voice/phone-numbers/$phoneNumberId'
       path: '/$phoneNumberId'
@@ -2474,12 +2493,14 @@ const AppVoicemailRouteWithChildren = AppVoicemailRoute._addFileChildren(
 
 interface AppVoicePhoneNumbersRouteChildren {
   AppVoicePhoneNumbersPhoneNumberIdRoute: typeof AppVoicePhoneNumbersPhoneNumberIdRoute
+  AppVoicePhoneNumbersNewRoute: typeof AppVoicePhoneNumbersNewRoute
   AppVoicePhoneNumbersIndexRoute: typeof AppVoicePhoneNumbersIndexRoute
 }
 
 const AppVoicePhoneNumbersRouteChildren: AppVoicePhoneNumbersRouteChildren = {
   AppVoicePhoneNumbersPhoneNumberIdRoute:
     AppVoicePhoneNumbersPhoneNumberIdRoute,
+  AppVoicePhoneNumbersNewRoute: AppVoicePhoneNumbersNewRoute,
   AppVoicePhoneNumbersIndexRoute: AppVoicePhoneNumbersIndexRoute,
 }
 

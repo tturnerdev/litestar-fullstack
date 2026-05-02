@@ -27,6 +27,7 @@ const NEW_ITEM_ROUTES: Record<string, string> = {
   "/webhooks": "/webhooks/new",
   "/schedules": "/schedules/new",
   "/voice/extensions": "/voice/extensions/new",
+  "/voice/phone-numbers": "/voice/phone-numbers/new",
 }
 
 function getNewItemRoute(pathname: string): string | null {
