@@ -7,7 +7,10 @@ import {
   Inbox,
   Mail,
   Send,
+  TrendingUp,
 } from "lucide-react"
+import { useMemo } from "react"
+import { Area, AreaChart, ResponsiveContainer, Tooltip as RechartsTooltip, XAxis, YAxis } from "recharts"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { SkeletonCard } from "@/components/ui/skeleton"
@@ -33,6 +36,34 @@ function FaxOverviewPage() {
   const failedCount = messages?.items.filter((m) => m.status === "failed").length ?? 0
   const inboundCount = messages?.items.filter((m) => m.direction === "inbound").length ?? 0
   const outboundCount = messages?.items.filter((m) => m.direction === "outbound").length ?? 0
+
+  const volumeChartData = useMemo(() => {
+    const days: { date: string; label: string; inbound: number; outbound: number }[] = []
+    const now = new Date()
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now)
+      d.setDate(d.getDate() - i)
+      const dateKey = d.toISOString().slice(0, 10)
+      const label = d.toLocaleDateString("en-US", { weekday: "short" })
+      days.push({ date: dateKey, label, inbound: 0, outbound: 0 })
+    }
+    if (messages?.items) {
+      for (const msg of messages.items) {
+        const timestamp = msg.receivedAt ?? msg.createdAt
+        if (!timestamp) continue
+        const dateKey = timestamp.slice(0, 10)
+        const day = days.find((d) => d.date === dateKey)
+        if (day) {
+          if (msg.direction === "inbound") {
+            day.inbound++
+          } else {
+            day.outbound++
+          }
+        }
+      }
+    }
+    return days
+  }, [messages])
 
   return (
     <PageContainer className="flex-1 space-y-8">
@@ -102,7 +133,78 @@ function FaxOverviewPage() {
         )}
       </PageSection>
 
-      <PageSection delay={0.2}>
+      <PageSection delay={0.15}>
+        <Card>
+          <CardHeader className="space-y-1 pb-2">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-lg">Message Volume</CardTitle>
+            </div>
+            <CardDescription>Inbound and outbound fax messages over the last 7 days</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[200px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={volumeChartData} margin={{ top: 8, right: 8, bottom: 0, left: -20 }}>
+                  <defs>
+                    <linearGradient id="faxInboundGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.02} />
+                    </linearGradient>
+                    <linearGradient id="faxOutboundGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="hsl(var(--chart-2, 220 70% 50%))" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="hsl(var(--chart-2, 220 70% 50%))" stopOpacity={0.02} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis
+                    dataKey="label"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
+                    dy={4}
+                  />
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
+                    allowDecimals={false}
+                  />
+                  <RechartsTooltip
+                    contentStyle={{
+                      backgroundColor: "hsl(var(--popover))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "var(--radius)",
+                      fontSize: 13,
+                      color: "hsl(var(--popover-foreground))",
+                    }}
+                    labelFormatter={(label) => String(label)}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="inbound"
+                    name="Inbound"
+                    stroke="hsl(var(--primary))"
+                    strokeWidth={2}
+                    fill="url(#faxInboundGradient)"
+                    stackId="fax"
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="outbound"
+                    name="Outbound"
+                    stroke="hsl(var(--chart-2, 220 70% 50%))"
+                    strokeWidth={2}
+                    fill="url(#faxOutboundGradient)"
+                    stackId="fax"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </PageSection>
+
+      <PageSection delay={0.25}>
         <Card className="border-border/40 bg-linear-to-br from-muted/30 to-muted/10">
           <CardHeader className="space-y-1 pb-3">
             <CardTitle className="text-lg">Quick Actions</CardTitle>
@@ -174,7 +276,7 @@ function FaxOverviewPage() {
       </PageSection>
 
       {!isLoading && messages && messages.items.length > 0 && (
-        <PageSection delay={0.3}>
+        <PageSection delay={0.35}>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-lg">Recent Messages</CardTitle>

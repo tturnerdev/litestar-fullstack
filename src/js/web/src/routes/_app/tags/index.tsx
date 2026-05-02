@@ -316,7 +316,7 @@ function TagsPage() {
 
             <div className="overflow-x-auto rounded-lg border">
             <Table aria-label="Tags">
-              <TableHeader>
+              <TableHeader className="sticky top-0 z-10 bg-background">
                 <TableRow>
                   <TableHead className="w-[40px]">
                     <Checkbox

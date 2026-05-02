@@ -423,7 +423,7 @@ function TeamPermissionCard({
         ) : (
           <div className="overflow-x-auto rounded-md border">
             <Table aria-label="Role permissions matrix">
-              <TableHeader>
+              <TableHeader className="sticky top-0 z-10 bg-background">
                 <TableRow>
                   <TableHead>Feature Area</TableHead>
                   {ROLES.map((role) => (

@@ -2,9 +2,32 @@
 
 import { Link } from "@tanstack/react-router"
 import { ChevronRight, type LucideIcon } from "lucide-react"
+import { useCallback, useState } from "react"
 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuBadge, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem } from "@/components/ui/sidebar"
+
+const NAV_STORAGE_KEY = "nav-sections-expanded"
+
+function readExpandedState(): Record<string, boolean> {
+  try {
+    const stored = localStorage.getItem(NAV_STORAGE_KEY)
+    if (stored) {
+      return JSON.parse(stored) as Record<string, boolean>
+    }
+  } catch {
+    // Ignore malformed or inaccessible localStorage
+  }
+  return {}
+}
+
+function writeExpandedState(state: Record<string, boolean>): void {
+  try {
+    localStorage.setItem(NAV_STORAGE_KEY, JSON.stringify(state))
+  } catch {
+    // Ignore quota or access errors
+  }
+}
 
 export interface NavMainItem {
   title: string
@@ -27,6 +50,25 @@ function formatBadge(value: number | string | null | undefined): string | null {
 }
 
 export function NavMain({ items, label = "Platform" }: { items: NavMainItem[]; label?: string }) {
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>(() => {
+    const stored = readExpandedState()
+    const initial: Record<string, boolean> = {}
+    for (const item of items) {
+      if (item.items && item.items.length > 0) {
+        initial[item.title] = stored[item.title] ?? true
+      }
+    }
+    return initial
+  })
+
+  const handleToggle = useCallback((title: string, open: boolean) => {
+    setExpandedSections((prev) => {
+      const next = { ...prev, [title]: open }
+      writeExpandedState(next)
+      return next
+    })
+  }, [])
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel>{label}</SidebarGroupLabel>
@@ -58,7 +100,13 @@ export function NavMain({ items, label = "Platform" }: { items: NavMainItem[]; l
           }
 
           return (
-            <Collapsible key={item.title} asChild defaultOpen={item.isActive} className="group/collapsible">
+            <Collapsible
+              key={item.title}
+              asChild
+              open={expandedSections[item.title] ?? true}
+              onOpenChange={(open) => handleToggle(item.title, open)}
+              className="group/collapsible"
+            >
               <SidebarMenuItem>
                 <CollapsibleTrigger asChild>
                   <SidebarMenuButton asChild tooltip={item.title}>

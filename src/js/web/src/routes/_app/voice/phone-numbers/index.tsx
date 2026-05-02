@@ -685,7 +685,7 @@ function PhoneNumbersPage() {
             {/* Table */}
             <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
               <Table aria-label="Phone numbers">
-                <TableHeader>
+                <TableHeader className="sticky top-0 z-10 bg-background">
                   <TableRow>
                     <TableHead className="w-10">
                       <Checkbox

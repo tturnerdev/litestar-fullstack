@@ -15,8 +15,10 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
+import { BulkActionBar, type BulkAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
@@ -75,6 +77,7 @@ export function TeamMembers({ team, teamId, canManageMembers, isOwner }: TeamMem
   const [removeMember, setRemoveMember] = useState<TeamMember | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("ALL")
+  const [selected, setSelected] = useState<Set<string>>(new Set())
   const members = team.members ?? []
 
   const { data: invitationsData } = useQuery({
@@ -130,6 +133,126 @@ export function TeamMembers({ team, teamId, canManageMembers, isOwner }: TeamMem
 
     return result
   }, [members, roleFilter, searchQuery])
+
+  // ── Bulk selection helpers ──────────────────────────────────────────────
+  const selectableMembers = useMemo(
+    () => filteredMembers.filter((m) => !m.isOwner),
+    [filteredMembers],
+  )
+
+  const allSelected = selectableMembers.length > 0 && selectableMembers.every((m) => selected.has(m.userId))
+  const someSelected = selectableMembers.some((m) => selected.has(m.userId)) && !allSelected
+
+  const toggleAll = () => {
+    if (allSelected) {
+      setSelected(new Set())
+    } else {
+      setSelected(new Set(selectableMembers.map((m) => m.userId)))
+    }
+  }
+
+  const toggleOne = (userId: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev)
+      if (next.has(userId)) next.delete(userId)
+      else next.add(userId)
+      return next
+    })
+  }
+
+  // ── Bulk actions ──────────────────────────────────────────────────────
+  const bulkActions = useMemo((): BulkAction[] => {
+    const invalidate = () => {
+      queryClient.invalidateQueries({ queryKey: ["team", teamId] })
+    }
+
+    return [
+      {
+        key: "remove",
+        label: "Remove Members",
+        icon: <UserMinus className="h-4 w-4" />,
+        variant: "destructive",
+        confirm: {
+          title: "Remove selected members?",
+          description: "The selected members will lose access to all team resources. This cannot be undone.",
+        },
+        onExecute: async (ids) => {
+          const errors: string[] = []
+          for (const userId of ids) {
+            const member = members.find((m) => m.userId === userId)
+            if (!member) continue
+            try {
+              const response = await removeMemberFromTeam({
+                path: { team_id: teamId },
+                body: { userName: member.email },
+              })
+              if (response.error) throw new Error(response.error.detail || "Failed")
+            } catch {
+              errors.push(userId)
+            }
+          }
+          invalidate()
+          if (errors.length > 0) {
+            toast.error(`Failed to remove ${errors.length} of ${ids.length} member${ids.length === 1 ? "" : "s"}`)
+          } else {
+            toast.success(`Removed ${ids.length} member${ids.length === 1 ? "" : "s"}`)
+          }
+        },
+      },
+      {
+        key: "role-admin",
+        label: "Set Admin",
+        icon: <Shield className="h-4 w-4" />,
+        variant: "outline",
+        onExecute: async (ids) => {
+          const errors: string[] = []
+          for (const userId of ids) {
+            try {
+              const response = await updateTeamMember({
+                path: { team_id: teamId, user_id: userId },
+                body: { role: "ADMIN" },
+              })
+              if (response.error) throw new Error(response.error.detail || "Failed")
+            } catch {
+              errors.push(userId)
+            }
+          }
+          invalidate()
+          if (errors.length > 0) {
+            toast.error(`Failed to update ${errors.length} of ${ids.length} member${ids.length === 1 ? "" : "s"}`)
+          } else {
+            toast.success(`Updated ${ids.length} member${ids.length === 1 ? "" : "s"} to Admin`)
+          }
+        },
+      },
+      {
+        key: "role-member",
+        label: "Set Member",
+        icon: <User className="h-4 w-4" />,
+        variant: "outline",
+        onExecute: async (ids) => {
+          const errors: string[] = []
+          for (const userId of ids) {
+            try {
+              const response = await updateTeamMember({
+                path: { team_id: teamId, user_id: userId },
+                body: { role: "MEMBER" },
+              })
+              if (response.error) throw new Error(response.error.detail || "Failed")
+            } catch {
+              errors.push(userId)
+            }
+          }
+          invalidate()
+          if (errors.length > 0) {
+            toast.error(`Failed to update ${errors.length} of ${ids.length} member${ids.length === 1 ? "" : "s"}`)
+          } else {
+            toast.success(`Updated ${ids.length} member${ids.length === 1 ? "" : "s"} to Member`)
+          }
+        },
+      },
+    ]
+  }, [members, queryClient, teamId])
 
   const removeMemberMutation = useMutation({
     mutationFn: async (memberEmail: string) => {
@@ -258,19 +381,32 @@ export function TeamMembers({ team, teamId, canManageMembers, isOwner }: TeamMem
           {canManageMembers && <InviteMemberDialog teamId={teamId} />}
         </CardHeader>
         <CardContent className="space-y-3">
-          {/* Role filter buttons */}
-          <div className="flex items-center gap-1.5">
-            {roleFilterButtons.map((btn) => (
-              <Button
-                key={btn.value}
-                variant={roleFilter === btn.value ? "secondary" : "ghost"}
-                size="sm"
-                className="h-7 px-2.5 text-xs"
-                onClick={() => setRoleFilter(btn.value)}
-              >
-                {btn.label}
-              </Button>
-            ))}
+          {/* Role filter buttons and select-all */}
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-1.5">
+              {roleFilterButtons.map((btn) => (
+                <Button
+                  key={btn.value}
+                  variant={roleFilter === btn.value ? "secondary" : "ghost"}
+                  size="sm"
+                  className="h-7 px-2.5 text-xs"
+                  onClick={() => setRoleFilter(btn.value)}
+                >
+                  {btn.label}
+                </Button>
+              ))}
+            </div>
+            {canManageMembers && selectableMembers.length > 0 && (
+              <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer select-none">
+                <Checkbox
+                  checked={allSelected}
+                  indeterminate={someSelected}
+                  onChange={toggleAll}
+                  aria-label="Select all members"
+                />
+                Select all
+              </label>
+            )}
           </div>
 
           {/* Search input - only show when 5+ members */}
@@ -291,13 +427,22 @@ export function TeamMembers({ team, teamId, canManageMembers, isOwner }: TeamMem
             {filteredMembers.map((member: TeamMember) => {
               const isSelf = member.userId === user?.id
               const colorClass = getMemberColor(member.email)
+              const isSelected = selected.has(member.userId)
+              const canSelect = canManageMembers && !member.isOwner
 
               return (
                 <div
                   key={member.id}
-                  className={`flex items-center justify-between rounded-xl border p-3 transition-colors ${isSelf ? "border-primary/30 bg-primary/5" : "border-border/60 bg-background/60 hover:bg-muted/30"}`}
+                  className={`flex items-center justify-between rounded-xl border p-3 transition-colors ${isSelected ? "border-primary/40 bg-primary/5" : isSelf ? "border-primary/30 bg-primary/5" : "border-border/60 bg-background/60 hover:bg-muted/30"}`}
                 >
                   <div className="flex items-center gap-3">
+                    {canSelect && (
+                      <Checkbox
+                        checked={isSelected}
+                        onChange={() => toggleOne(member.userId)}
+                        aria-label={`Select ${member.name ?? member.email}`}
+                      />
+                    )}
                     <Avatar className={`h-9 w-9 ${colorClass}`}>
                       <AvatarFallback className={`text-xs font-semibold ${colorClass}`}>
                         {getMemberInitials(member.name, member.email)}
@@ -465,6 +610,15 @@ export function TeamMembers({ team, teamId, canManageMembers, isOwner }: TeamMem
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {canManageMembers && (
+        <BulkActionBar
+          selectedCount={selected.size}
+          selectedIds={Array.from(selected)}
+          onClearSelection={() => setSelected(new Set())}
+          actions={bulkActions}
+        />
+      )}
     </div>
   )
 }
