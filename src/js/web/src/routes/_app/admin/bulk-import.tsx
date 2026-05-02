@@ -402,11 +402,11 @@ function CsvPreviewTable({ parsed }: CsvPreviewTableProps) {
             </TableHeader>
             <TableBody>
               {parsed.rows.map((row, rowIdx) => (
-                <TableRow key={rowIdx}>
+                <TableRow key={row.join("|")}>
                   <TableCell className="font-mono text-xs text-muted-foreground">{rowIdx + 1}</TableCell>
-                  {parsed.headers.map((_, colIdx) => (
-                    <TableCell key={colIdx} className="text-sm">
-                      {row[colIdx] || <span className="text-muted-foreground/40">--</span>}
+                  {parsed.headers.map((header) => (
+                    <TableCell key={header} className="text-sm">
+                      {row[parsed.headers.indexOf(header)] || <span className="text-muted-foreground/40">--</span>}
                     </TableCell>
                   ))}
                 </TableRow>

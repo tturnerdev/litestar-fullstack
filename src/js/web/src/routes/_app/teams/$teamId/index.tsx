@@ -242,6 +242,7 @@ function TeamDetail() {
           <Skeleton className="h-10 w-64 rounded-lg" />
           <div className="mt-6 space-y-3">
             {Array.from({ length: 4 }).map((_, i) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton placeholders
               <div key={i} className="flex items-center gap-4 rounded-lg border border-border/60 p-4">
                 <Skeleton className="h-10 w-10 rounded-full" />
                 <div className="flex-1 space-y-1.5">
@@ -584,6 +585,7 @@ function TeamDetail() {
               {devicesLoading ? (
                 <div className="space-y-3">
                   {Array.from({ length: 3 }).map((_, i) => (
+                    // biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton placeholders
                     <Skeleton key={i} className="h-10 w-full" />
                   ))}
                 </div>
@@ -643,6 +645,7 @@ function TeamDetail() {
               {extensionsLoading ? (
                 <div className="space-y-3">
                   {Array.from({ length: 3 }).map((_, i) => (
+                    // biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton placeholders
                     <Skeleton key={i} className="h-10 w-full" />
                   ))}
                 </div>

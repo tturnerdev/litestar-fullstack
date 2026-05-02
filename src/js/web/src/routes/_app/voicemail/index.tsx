@@ -351,6 +351,7 @@ function MessagesTab() {
     return (
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 3 }).map((_, i) => (
+          // biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton placeholders
           <SkeletonCard key={i} />
         ))}
       </div>

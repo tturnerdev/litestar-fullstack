@@ -646,8 +646,8 @@ function DevicesPage() {
         <SectionErrorBoundary name="Devices Table">
           {isLoading ? (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <SkeletonCard key={i} />
+              {["sk-card-0", "sk-card-1", "sk-card-2"].map((key) => (
+                <SkeletonCard key={key} />
               ))}
             </div>
           ) : isError ? (

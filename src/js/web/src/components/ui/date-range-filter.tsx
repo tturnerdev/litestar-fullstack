@@ -106,12 +106,16 @@ export function DateRangeFilter({ startDate, endDate, onStartDateChange, onEndDa
         <div className="-mx-3 h-px bg-border" />
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <label className="w-12 text-xs text-muted-foreground">From</label>
-            <Input type="date" className="h-8 text-xs" value={startDate} onChange={(e) => onStartDateChange(e.target.value)} aria-label="From date" />
+            <label htmlFor="date-range-from" className="w-12 text-xs text-muted-foreground">
+              From
+            </label>
+            <Input id="date-range-from" type="date" className="h-8 text-xs" value={startDate} onChange={(e) => onStartDateChange(e.target.value)} aria-label="From date" />
           </div>
           <div className="flex items-center gap-2">
-            <label className="w-12 text-xs text-muted-foreground">To</label>
-            <Input type="date" className="h-8 text-xs" value={endDate} onChange={(e) => onEndDateChange(e.target.value)} aria-label="To date" />
+            <label htmlFor="date-range-to" className="w-12 text-xs text-muted-foreground">
+              To
+            </label>
+            <Input id="date-range-to" type="date" className="h-8 text-xs" value={endDate} onChange={(e) => onEndDateChange(e.target.value)} aria-label="To date" />
           </div>
         </div>
         {hasDateFilter && (

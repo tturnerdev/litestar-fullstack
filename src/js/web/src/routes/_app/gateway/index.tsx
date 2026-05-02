@@ -128,10 +128,14 @@ function DataValue({ value }: { value: unknown }) {
   }
   if (Array.isArray(value)) {
     if (value.length === 0) return <span className="text-muted-foreground italic">Empty</span>
+    const keyed = value.map((item, idx) => ({
+      key: `${typeof item === "object" ? JSON.stringify(item) : String(item)}-${idx}`,
+      item,
+    }))
     return (
       <div className="flex flex-wrap gap-1">
-        {value.map((item, i) => (
-          <Badge key={i} variant="outline" className="text-xs font-normal">
+        {keyed.map(({ key, item }) => (
+          <Badge key={key} variant="outline" className="text-xs font-normal">
             {typeof item === "object" ? JSON.stringify(item) : String(item)}
           </Badge>
         ))}
@@ -216,8 +220,8 @@ function LookupResults({
   if (isLoading) {
     return (
       <div className="space-y-4">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <SkeletonCard key={i} />
+        {["sk-card-0", "sk-card-1", "sk-card-2"].map((key) => (
+          <SkeletonCard key={key} />
         ))}
       </div>
     )

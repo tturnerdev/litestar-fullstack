@@ -372,8 +372,8 @@ function IvrMenuDetailPage() {
               <div className="rounded-xl border border-border/60 bg-card/80 p-6 space-y-4">
                 <Skeleton className="h-6 w-40" />
                 <div className="grid gap-4 md:grid-cols-2">
-                  {Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i} className="space-y-1.5">
+                  {["name", "description", "timeout", "retries", "direct-dial", "invalid-destination"].map((id) => (
+                    <div key={id} className="space-y-1.5">
                       <Skeleton className="h-3.5 w-20" />
                       <Skeleton className="h-5 w-36" />
                     </div>
@@ -382,15 +382,15 @@ function IvrMenuDetailPage() {
               </div>
               <div className="rounded-xl border border-border/60 bg-card/80 p-6 space-y-4">
                 <Skeleton className="h-6 w-24" />
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <Skeleton key={i} className="h-10 w-full" />
+                {["entry-a", "entry-b", "entry-c"].map((id) => (
+                  <Skeleton key={id} className="h-10 w-full" />
                 ))}
               </div>
             </div>
             <div className="rounded-xl border border-border/60 bg-card/80 p-6 space-y-4">
               <Skeleton className="h-5 w-24" />
-              {Array.from({ length: 2 }).map((_, i) => (
-                <div key={i} className="space-y-1">
+              {["created", "updated"].map((id) => (
+                <div key={id} className="space-y-1">
                   <Skeleton className="h-3 w-20" />
                   <Skeleton className="h-5 w-40" />
                 </div>

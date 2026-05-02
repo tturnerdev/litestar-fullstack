@@ -167,8 +167,8 @@ function TimeConditionDetailPage() {
               <div className="rounded-xl border border-border/60 bg-card/80 p-6 space-y-4">
                 <Skeleton className="h-6 w-40" />
                 <div className="grid gap-4 md:grid-cols-2">
-                  {Array.from({ length: 4 }).map((_, i) => (
-                    <div key={i} className="space-y-1.5">
+                  {["name", "timezone", "match-dest", "nomatch-dest"].map((id) => (
+                    <div key={id} className="space-y-1.5">
                       <Skeleton className="h-3.5 w-20" />
                       <Skeleton className="h-5 w-36" />
                     </div>
@@ -179,8 +179,8 @@ function TimeConditionDetailPage() {
             <div className="space-y-4">
               <div className="rounded-xl border border-border/60 bg-card/80 p-6 space-y-4">
                 <Skeleton className="h-5 w-24" />
-                {Array.from({ length: 2 }).map((_, i) => (
-                  <div key={i} className="space-y-1">
+                {["created", "updated"].map((id) => (
+                  <div key={id} className="space-y-1">
                     <Skeleton className="h-3 w-20" />
                     <Skeleton className="h-5 w-40" />
                   </div>

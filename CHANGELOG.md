@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.250.0 (2026-05-03)
+
+### Fixed
+- **Eliminated all 69 `noArrayIndexKey` lint errors** — replaced array index keys with stable identifiers (semantic strings, item IDs, or biome-ignore for skeleton placeholders) across 27 route files
+- **Fixed `noLabelWithoutControl` a11y issues** — converted label-without-input patterns to proper `<button>` elements or `<label>` wrapping `<input>` in date-range-filter, filter-dropdown, and team-members components
+- **Fixed a11y issues** in voicemail-player (toolbar role, keyboard handlers), attachment-upload (converted to button), and global-search (removed useless fragments)
+- **Removed unused variable** in bulk-action-bar catch clause
+- **Biome lint count reduced** from 183 to 100 total diagnostics (errors 142→65, warnings 20→16, infos 21→19)
+
 ## v0.249.0 (2026-05-03)
 
 ### Fixed

@@ -147,6 +147,7 @@ function PhoneNumberDetailPage() {
           <div className="rounded-xl border border-border/60 bg-card/80 p-6 space-y-4">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {Array.from({ length: 6 }).map((_, i) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton placeholders
                 <div key={i} className="space-y-1.5">
                   <Skeleton className="h-3.5 w-24" />
                   <Skeleton className="h-5 w-36" />

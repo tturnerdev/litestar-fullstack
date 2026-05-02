@@ -155,8 +155,8 @@ function FaxNumberDetailPage() {
               <Skeleton className="h-6 w-28" />
             </div>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="space-y-1.5">
+              {["sk-info-0", "sk-info-1", "sk-info-2", "sk-info-3"].map((key) => (
+                <div key={key} className="space-y-1.5">
                   <Skeleton className="h-3.5 w-24" />
                   <Skeleton className="h-5 w-36" />
                 </div>
@@ -175,8 +175,8 @@ function FaxNumberDetailPage() {
               <Skeleton className="h-9 w-28 rounded-md" />
             </div>
             <div className="space-y-2">
-              {Array.from({ length: 2 }).map((_, i) => (
-                <Skeleton key={i} className="h-14 w-full rounded-md" />
+              {["sk-route-0", "sk-route-1"].map((key) => (
+                <Skeleton key={key} className="h-14 w-full rounded-md" />
               ))}
             </div>
           </div>
@@ -192,8 +192,8 @@ function FaxNumberDetailPage() {
               <Skeleton className="h-8 w-20 rounded-md" />
             </div>
             <div className="space-y-2">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton key={i} className="h-12 w-full rounded-md" />
+              {["sk-msg-0", "sk-msg-1", "sk-msg-2"].map((key) => (
+                <Skeleton key={key} className="h-12 w-full rounded-md" />
               ))}
             </div>
           </div>
@@ -574,8 +574,8 @@ function FaxNumberSettingsCard({
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="space-y-1.5">
+            {["sk-set-0", "sk-set-1", "sk-set-2", "sk-set-3"].map((key) => (
+              <div key={key} className="space-y-1.5">
                 <Skeleton className="h-3.5 w-24" />
                 <Skeleton className="h-5 w-36" />
               </div>

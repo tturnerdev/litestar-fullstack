@@ -381,6 +381,7 @@ function NewWebhookPage() {
                     {headers.length > 0 && (
                       <div className="space-y-2">
                         {headers.map((header, index) => (
+                          // biome-ignore lint/suspicious/noArrayIndexKey: Header pairs have no stable ID
                           <div key={index} className="flex items-center gap-2">
                             <Input placeholder="Header name" value={header.key} onChange={(e) => updateHeader(index, "key", e.target.value)} className="flex-1 font-mono text-xs" />
                             <Input placeholder="Value" value={header.value} onChange={(e) => updateHeader(index, "value", e.target.value)} className="flex-1 font-mono text-xs" />

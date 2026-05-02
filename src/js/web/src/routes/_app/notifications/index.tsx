@@ -841,7 +841,8 @@ function NotificationsPage() {
                 {isLoading ? (
                   <div className="space-y-3">
                     {Array.from({ length: 5 }).map((_, i) => (
-                      <Skeleton key={i} className="h-16 w-full rounded-lg" />
+                      // biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton placeholders
+                      <Skeleton key={`notif-skel-${i}`} className="h-16 w-full rounded-lg" />
                     ))}
                   </div>
                 ) : isEmptyFiltered ? (

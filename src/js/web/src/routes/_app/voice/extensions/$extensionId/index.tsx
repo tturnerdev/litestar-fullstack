@@ -142,6 +142,7 @@ function ExtensionDetailPage() {
             </div>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               {Array.from({ length: 4 }).map((_, i) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton placeholders
                 <div key={i} className="space-y-1.5">
                   <Skeleton className="h-3.5 w-24" />
                   <Skeleton className="h-5 w-28" />
@@ -159,6 +160,7 @@ function ExtensionDetailPage() {
             </div>
             <div className="grid gap-4 md:grid-cols-3">
               {Array.from({ length: 3 }).map((_, i) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton placeholders
                 <div key={i} className="flex items-start gap-3">
                   <Skeleton className="mt-0.5 h-4 w-4 rounded" />
                   <div className="space-y-1.5">
@@ -174,6 +176,7 @@ function ExtensionDetailPage() {
         <PageSection delay={0.15}>
           <div className="grid gap-3 md:grid-cols-3">
             {Array.from({ length: 3 }).map((_, i) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton placeholders
               <div key={i} className="rounded-xl border border-border/60 bg-card/80 p-6 space-y-3">
                 <div className="flex items-center gap-3">
                   <Skeleton className="h-5 w-5 rounded" />
@@ -193,6 +196,7 @@ function ExtensionDetailPage() {
             </div>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               {Array.from({ length: 4 }).map((_, i) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton placeholders
                 <div key={i} className="space-y-1.5">
                   <Skeleton className="h-3.5 w-24" />
                   <Skeleton className="h-5 w-36" />
@@ -982,6 +986,7 @@ function AssignedDevicesCard({ extensionId }: { extensionId: string }) {
         {isLoading ? (
           <div className="space-y-2">
             {Array.from({ length: 2 }).map((_, i) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton placeholders
               <div key={i} className="flex items-center gap-3">
                 <Skeleton className="h-4 w-4 rounded" />
                 <Skeleton className="h-4 w-32" />
@@ -1076,6 +1081,7 @@ function RelatedResourcesSection({ extensionId, extension }: { extensionId: stri
         <CardContent>
           <div className="grid gap-3 md:grid-cols-2">
             {Array.from({ length: 2 }).map((_, i) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton placeholders
               <div key={i} className="rounded-lg border border-border/40 p-4 space-y-2">
                 <Skeleton className="h-4 w-24" />
                 <Skeleton className="h-4 w-36" />
@@ -1257,6 +1263,7 @@ function ExtensionVoicemailTab({ extensionId }: { extensionId: string }) {
           <CardContent>
             <div className="grid gap-4 md:grid-cols-3">
               {Array.from({ length: 3 }).map((_, i) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton placeholders
                 <div key={i} className="space-y-1.5">
                   <div className="h-3.5 w-24 animate-pulse rounded bg-muted" />
                   <div className="h-5 w-16 animate-pulse rounded bg-muted" />

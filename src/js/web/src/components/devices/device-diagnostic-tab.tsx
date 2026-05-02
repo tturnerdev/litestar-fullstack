@@ -304,6 +304,7 @@ function WireframeRenderer({ data }: { data: WireframeData }) {
             return (
               <Tooltip key={region.id}>
                 <TooltipTrigger asChild>
+                  {/* biome-ignore lint/a11y/noStaticElementInteractions: SVG tooltip trigger for hover feedback */}
                   <g onMouseEnter={() => setHoveredId(region.id)} onMouseLeave={() => setHoveredId(null)} className="cursor-default">
                     <rect
                       x={region.x}
@@ -338,6 +339,7 @@ function WireframeRenderer({ data }: { data: WireframeData }) {
             return (
               <Tooltip key={region.id}>
                 <TooltipTrigger asChild>
+                  {/* biome-ignore lint/a11y/noStaticElementInteractions: SVG tooltip trigger for hover feedback */}
                   <g onMouseEnter={() => setHoveredId(region.id)} onMouseLeave={() => setHoveredId(null)} className="cursor-default">
                     {/* Simplified handset shape */}
                     <rect
@@ -376,6 +378,7 @@ function WireframeRenderer({ data }: { data: WireframeData }) {
             return (
               <Tooltip key={region.id}>
                 <TooltipTrigger asChild>
+                  {/* biome-ignore lint/a11y/noStaticElementInteractions: SVG tooltip trigger for hover feedback */}
                   <g onMouseEnter={() => setHoveredId(region.id)} onMouseLeave={() => setHoveredId(null)} className="cursor-pointer">
                     <circle
                       cx={region.cx}
@@ -397,6 +400,7 @@ function WireframeRenderer({ data }: { data: WireframeData }) {
           return (
             <Tooltip key={region.id}>
               <TooltipTrigger asChild>
+                {/* biome-ignore lint/a11y/noStaticElementInteractions: SVG tooltip trigger for hover feedback */}
                 <g onMouseEnter={() => setHoveredId(region.id)} onMouseLeave={() => setHoveredId(null)} className="cursor-pointer">
                   <rect
                     x={region.x}
@@ -452,6 +456,7 @@ function DialpadRenderer({ dialpad, hoveredId, setHoveredId }: { dialpad: Wirefr
         return (
           <Tooltip key={id}>
             <TooltipTrigger asChild>
+              {/* biome-ignore lint/a11y/noStaticElementInteractions: SVG tooltip trigger for hover feedback */}
               <g onMouseEnter={() => setHoveredId(id)} onMouseLeave={() => setHoveredId(null)} className="cursor-pointer">
                 <rect
                   x={x}
@@ -566,6 +571,7 @@ function WireframeRendererV1({ data, screenshotUrl, onAction }: { data: V1Wirefr
         return (
           <Tooltip key={ind.id}>
             <TooltipTrigger asChild>
+              {/* biome-ignore lint/a11y/noStaticElementInteractions: SVG element with tooltip hover feedback */}
               <rect
                 x={ind.bounds.x}
                 y={ind.bounds.y}
@@ -632,6 +638,7 @@ function WireframeRendererV1({ data, screenshotUrl, onAction }: { data: V1Wirefr
         return (
           <Tooltip key={lk.id}>
             <TooltipTrigger asChild>
+              {/* biome-ignore lint/a11y/noStaticElementInteractions: SVG element with tooltip hover and optional click action */}
               <rect
                 x={lk.bounds.x}
                 y={lk.bounds.y}
@@ -663,6 +670,7 @@ function WireframeRendererV1({ data, screenshotUrl, onAction }: { data: V1Wirefr
         return (
           <Tooltip key={sk.id}>
             <TooltipTrigger asChild>
+              {/* biome-ignore lint/a11y/noStaticElementInteractions: SVG element with tooltip hover and optional click action */}
               <rect
                 x={sk.bounds.x}
                 y={sk.bounds.y}
@@ -708,6 +716,7 @@ function V1HandsetRenderer({ handset, hoveredId, setHoveredId }: { handset: V1Ha
   return (
     <Tooltip>
       <TooltipTrigger asChild>
+        {/* biome-ignore lint/a11y/noStaticElementInteractions: SVG tooltip trigger for hover feedback */}
         <g onMouseEnter={() => setHoveredId(handset.id)} onMouseLeave={() => setHoveredId(null)} className="cursor-default">
           {/* Handset body */}
           <rect
@@ -854,6 +863,7 @@ function V1DisplayRenderer({ display, hoveredId, setHoveredId }: { display: V1Di
   return (
     <Tooltip>
       <TooltipTrigger asChild>
+        {/* biome-ignore lint/a11y/noStaticElementInteractions: SVG tooltip trigger for hover feedback */}
         <g onMouseEnter={() => setHoveredId(display.id)} onMouseLeave={() => setHoveredId(null)} className="cursor-default">
           {/* LCD background */}
           <rect
@@ -979,7 +989,15 @@ function V1DialPadRenderer({
         return (
           <Tooltip key={key.id}>
             <TooltipTrigger asChild>
-              <g onMouseEnter={() => setHoveredId(key.id)} onMouseLeave={() => setHoveredId(null)} onClick={onAction ? () => onAction(ak) : undefined} className="cursor-pointer">
+              {/* biome-ignore lint/a11y/useSemanticElements: SVG g element cannot be replaced with semantic HTML */}
+              <g
+                onMouseEnter={() => setHoveredId(key.id)}
+                onMouseLeave={() => setHoveredId(null)}
+                onClick={onAction ? () => onAction(ak) : undefined}
+                className="cursor-pointer"
+                role="button"
+                aria-label={`Key ${key.digit}`}
+              >
                 <rect
                   x={kx}
                   y={ky}
@@ -1107,11 +1125,14 @@ function V1FunctionKeysRenderer({
         return (
           <Tooltip key={key.id}>
             <TooltipTrigger asChild>
+              {/* biome-ignore lint/a11y/useSemanticElements: SVG g element cannot be replaced with semantic HTML */}
               <g
                 onMouseEnter={() => setHoveredId(key.id)}
                 onMouseLeave={() => setHoveredId(null)}
                 onClick={ak && onAction ? () => onAction(ak) : undefined}
                 className={ak && onAction ? "cursor-pointer" : "cursor-default"}
+                role="button"
+                aria-label={key.function}
               >
                 <rect
                   x={kx}
@@ -1157,6 +1178,7 @@ function V1VolumeRockerRenderer({
   const upCtrl = rocker.controls.find((c) => c.side === "right" || c.side === "plus")
 
   return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: SVG group with hover feedback for child tooltip triggers
     <g onMouseEnter={() => setHoveredId(rocker.id)} onMouseLeave={() => setHoveredId(null)}>
       <rect
         x={b.x}
@@ -1173,9 +1195,12 @@ function V1VolumeRockerRenderer({
       {/* Volume down (left half) */}
       <Tooltip>
         <TooltipTrigger asChild>
+          {/* biome-ignore lint/a11y/useSemanticElements: SVG g element cannot be replaced with semantic HTML */}
           <g
-            onClick={downCtrl?.actionKey && onAction ? () => onAction(downCtrl.actionKey!) : undefined}
+            onClick={downCtrl?.actionKey && onAction ? () => onAction(downCtrl.actionKey as string) : undefined}
             className={downCtrl?.actionKey && onAction ? "cursor-pointer" : "cursor-default"}
+            role="button"
+            aria-label="Volume Down"
           >
             <rect x={b.x} y={b.y} width={halfW} height={b.height} fill="transparent" />
             <text x={b.x + 10} y={b.y + b.height / 2} textAnchor="middle" dominantBaseline="middle" fill={V1_COLORS.textSecondary} fontSize={11} fontWeight={400}>
@@ -1188,9 +1213,12 @@ function V1VolumeRockerRenderer({
       {/* Volume up (right half) */}
       <Tooltip>
         <TooltipTrigger asChild>
+          {/* biome-ignore lint/a11y/useSemanticElements: SVG g element cannot be replaced with semantic HTML */}
           <g
-            onClick={upCtrl?.actionKey && onAction ? () => onAction(upCtrl.actionKey!) : undefined}
+            onClick={upCtrl?.actionKey && onAction ? () => onAction(upCtrl.actionKey as string) : undefined}
             className={upCtrl?.actionKey && onAction ? "cursor-pointer" : "cursor-default"}
+            role="button"
+            aria-label="Volume Up"
           >
             <rect x={b.x + halfW} y={b.y} width={halfW} height={b.height} fill="transparent" />
             <text x={b.x + b.width - 10} y={b.y + b.height / 2} textAnchor="middle" dominantBaseline="middle" fill={V1_COLORS.textSecondary} fontSize={11} fontWeight={400}>

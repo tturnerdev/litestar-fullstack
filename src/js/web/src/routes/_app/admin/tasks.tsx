@@ -179,8 +179,8 @@ function TaskStatsSummary() {
   if (isLoading) {
     return (
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <Card key={i}>
+        {["queued", "active", "complete", "failed"].map((id) => (
+          <Card key={id}>
             <CardHeader className="pb-2">
               <div className="h-4 w-20 animate-pulse rounded bg-muted" />
             </CardHeader>

@@ -188,6 +188,7 @@ function DeliveryHistoryPanel({ webhookId }: { webhookId: string }) {
           </TableHeader>
           <TableBody>
             {Array.from({ length: 5 }).map((_, i) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton placeholders
               <TableRow key={i}>
                 <TableCell>
                   <div className="flex items-center gap-1.5">

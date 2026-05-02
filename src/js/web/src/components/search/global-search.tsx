@@ -418,46 +418,43 @@ export function GlobalSearch() {
           )}
 
           {/* Matching navigation shortcuts while typing (before server search kicks in at 2 chars) */}
-          {isNavFiltering && hasNavMatches && (
-            <>
-              {filteredNavGroups.map(([category, items]) => (
-                <CommandGroup key={`nav-filter-${category}`} heading={category}>
-                  {items.map((item) => {
-                    const NavIcon = item.icon
-                    return (
-                      <CommandItem key={item.url} value={`nav-${category}-${item.label}`} onSelect={() => handleNavSelect(item.url)} className="cursor-pointer">
-                        <NavIcon className={`size-4 shrink-0 ${item.color}`} />
-                        <span className="text-sm">{item.label}</span>
-                      </CommandItem>
-                    )
-                  })}
-                </CommandGroup>
-              ))}
-            </>
-          )}
+          {isNavFiltering &&
+            hasNavMatches &&
+            filteredNavGroups.map(([category, items]) => (
+              <CommandGroup key={`nav-filter-${category}`} heading={category}>
+                {items.map((item) => {
+                  const NavIcon = item.icon
+                  return (
+                    <CommandItem key={item.url} value={`nav-${category}-${item.label}`} onSelect={() => handleNavSelect(item.url)} className="cursor-pointer">
+                      <NavIcon className={`size-4 shrink-0 ${item.color}`} />
+                      <span className="text-sm">{item.label}</span>
+                    </CommandItem>
+                  )
+                })}
+              </CommandGroup>
+            ))}
 
           {/* Matching navigation shortcuts alongside server results */}
-          {!showLoading && debouncedQuery.length >= 2 && hasNavMatches && (
-            <>
-              {filteredNavGroups.map(([category, items]) => (
-                <CommandGroup key={`nav-result-${category}`} heading={`Go to - ${category}`}>
-                  {items.map((item) => {
-                    const NavIcon = item.icon
-                    return (
-                      <CommandItem key={item.url} value={`nav-${category}-${item.label}`} onSelect={() => handleNavSelect(item.url)} className="cursor-pointer">
-                        <NavIcon className={`size-4 shrink-0 ${item.color}`} />
-                        <div className="flex min-w-0 flex-1 flex-col">
-                          <span className="truncate text-sm font-medium">
-                            <HighlightMatch text={item.label} query={inputValue} />
-                          </span>
-                        </div>
-                      </CommandItem>
-                    )
-                  })}
-                </CommandGroup>
-              ))}
-            </>
-          )}
+          {!showLoading &&
+            debouncedQuery.length >= 2 &&
+            hasNavMatches &&
+            filteredNavGroups.map(([category, items]) => (
+              <CommandGroup key={`nav-result-${category}`} heading={`Go to - ${category}`}>
+                {items.map((item) => {
+                  const NavIcon = item.icon
+                  return (
+                    <CommandItem key={item.url} value={`nav-${category}-${item.label}`} onSelect={() => handleNavSelect(item.url)} className="cursor-pointer">
+                      <NavIcon className={`size-4 shrink-0 ${item.color}`} />
+                      <div className="flex min-w-0 flex-1 flex-col">
+                        <span className="truncate text-sm font-medium">
+                          <HighlightMatch text={item.label} query={inputValue} />
+                        </span>
+                      </div>
+                    </CommandItem>
+                  )
+                })}
+              </CommandGroup>
+            ))}
 
           {/* Result count */}
           {!showLoading && hasResults && (

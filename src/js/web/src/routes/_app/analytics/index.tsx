@@ -578,8 +578,8 @@ function DashboardTab() {
       <SectionErrorBoundary name="Analytics Summary Stats">
         {summaryLoading ? (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <SkeletonCard key={i} />
+            {["total", "answered", "missed", "avg-duration"].map((id) => (
+              <SkeletonCard key={id} />
             ))}
           </div>
         ) : summary ? (
@@ -690,8 +690,8 @@ function CostAnalysisSection({ startDate, endDate }: { startDate: string; endDat
           Cost Analysis
         </h3>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <SkeletonCard key={i} />
+          {["total-cost", "avg-cost", "calls-with-cost", "cost-per-min"].map((id) => (
+            <SkeletonCard key={id} />
           ))}
         </div>
       </div>
@@ -1150,8 +1150,8 @@ function CallRecordsTab() {
       <SectionErrorBoundary name="Call Records Table">
         {isLoading ? (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <SkeletonCard key={i} />
+            {["records-a", "records-b", "records-c"].map((id) => (
+              <SkeletonCard key={id} />
             ))}
           </div>
         ) : isError ? (

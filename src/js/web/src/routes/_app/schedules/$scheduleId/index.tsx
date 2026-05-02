@@ -462,10 +462,10 @@ function WeeklyViewGrid({ weeklyEntries }: { weeklyEntries: Map<number, Schedule
             </div>
 
             {/* Day columns */}
-            {DAY_ABBREVIATIONS.map((_, dayIndex) => {
+            {DAY_ABBREVIATIONS.map((dayAbbr, dayIndex) => {
               const entries = weeklyEntries.get(dayIndex) ?? []
               return (
-                <div key={dayIndex} className="relative border-l border-border/40" style={{ height: `${GRID_TOTAL_HOURS * 28}px` }}>
+                <div key={dayAbbr} className="relative border-l border-border/40" style={{ height: `${GRID_TOTAL_HOURS * 28}px` }}>
                   {/* Hour grid lines */}
                   {hourLabels.slice(0, -1).map((hour) => (
                     <div key={hour} className="absolute left-0 right-0 border-b border-border/20" style={{ top: `${(hour - GRID_START_HOUR) * 28}px`, height: "28px" }} />
@@ -628,7 +628,8 @@ function ScheduleDetailPage() {
                 <Skeleton className="h-6 w-40" />
                 <div className="grid gap-4 md:grid-cols-2">
                   {Array.from({ length: 4 }).map((_, i) => (
-                    <div key={i} className="space-y-1.5">
+                    // biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton placeholders
+                    <div key={`sched-info-skel-${i}`} className="space-y-1.5">
                       <Skeleton className="h-3.5 w-20" />
                       <Skeleton className="h-5 w-36" />
                     </div>
@@ -638,6 +639,7 @@ function ScheduleDetailPage() {
               <div className="rounded-xl border border-border/60 bg-card/80 p-6 space-y-4">
                 <Skeleton className="h-6 w-32" />
                 {Array.from({ length: 7 }).map((_, i) => (
+                  // biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton placeholders
                   <div key={i} className="flex items-center gap-4">
                     <Skeleton className="h-5 w-24" />
                     <Skeleton className="h-5 w-40" />
@@ -649,6 +651,7 @@ function ScheduleDetailPage() {
               <div className="rounded-xl border border-border/60 bg-card/80 p-6 space-y-4">
                 <Skeleton className="h-5 w-24" />
                 {Array.from({ length: 3 }).map((_, i) => (
+                  // biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton placeholders
                   <div key={i} className="space-y-1">
                     <Skeleton className="h-3 w-20" />
                     <Skeleton className="h-5 w-40" />
@@ -882,7 +885,7 @@ function ScheduleDetailPage() {
                               {DAY_NAMES.map((day, index) => {
                                 const entries = weeklyEntries.get(index) ?? []
                                 return (
-                                  <TableRow key={index}>
+                                  <TableRow key={day}>
                                     <TableCell className="font-medium">{day}</TableCell>
                                     <TableCell>
                                       {entries.length === 0 ? (
@@ -1099,6 +1102,7 @@ function RelatedResourcesSection({ scheduleId }: { scheduleId: string }) {
         <CardContent>
           <div className="space-y-3">
             {Array.from({ length: 2 }).map((_, i) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton placeholders
               <div key={i} className="rounded-lg border border-border/40 p-4 space-y-2">
                 <Skeleton className="h-4 w-24" />
                 <Skeleton className="h-4 w-36" />

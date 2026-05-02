@@ -220,13 +220,14 @@ export function AttachmentUpload({ files, onFilesChange, uploading = false, disa
         }}
         disabled={disabled}
       />
-      <div
+      <button
+        type="button"
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={() => fileInputRef.current?.click()}
         className={cn(
-          "flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-4 py-6 transition-all",
+          "flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-4 py-6 transition-all",
           isDragging ? "border-primary/50 bg-primary/5 [animation:border-dash_8s_linear_infinite]" : "border-border/60 bg-muted/20 hover:border-border hover:bg-muted/40",
           disabled && "pointer-events-none opacity-50",
         )}
@@ -244,7 +245,7 @@ export function AttachmentUpload({ files, onFilesChange, uploading = false, disa
           <p className="text-sm font-medium">{isDragging ? "Drop files here" : "Drag & drop files here"}</p>
           <p className="text-xs text-muted-foreground">or click to browse (max 10 MB per file)</p>
         </div>
-      </div>
+      </button>
 
       {files.length > 0 && (
         <div className="space-y-1.5">

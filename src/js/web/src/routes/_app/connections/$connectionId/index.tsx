@@ -349,8 +349,8 @@ function ConnectionDetailPage() {
               <Skeleton className="h-6 w-32" />
             </div>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="space-y-1.5">
+              {["sk-info-0", "sk-info-1", "sk-info-2", "sk-info-3", "sk-info-4", "sk-info-5"].map((key) => (
+                <div key={key} className="space-y-1.5">
                   <Skeleton className="h-3.5 w-20" />
                   <Skeleton className="h-5 w-32" />
                 </div>
@@ -366,8 +366,8 @@ function ConnectionDetailPage() {
               <Skeleton className="h-6 w-40" />
             </div>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="space-y-1.5">
+              {["sk-srv-0", "sk-srv-1", "sk-srv-2"].map((key) => (
+                <div key={key} className="space-y-1.5">
                   <Skeleton className="h-3.5 w-16" />
                   <Skeleton className="h-5 w-28" />
                 </div>
@@ -919,8 +919,8 @@ function ConnectionDetailPage() {
                 <CardContent>
                   {devicesQuery.isLoading ? (
                     <div className="space-y-2">
-                      {Array.from({ length: 3 }).map((_, i) => (
-                        <Skeleton key={i} className="h-8 w-full" />
+                      {["sk-dev-0", "sk-dev-1", "sk-dev-2"].map((key) => (
+                        <Skeleton key={key} className="h-8 w-full" />
                       ))}
                     </div>
                   ) : managedDevices.length === 0 ? (

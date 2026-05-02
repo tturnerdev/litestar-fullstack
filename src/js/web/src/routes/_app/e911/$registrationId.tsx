@@ -199,8 +199,8 @@ function E911DetailPage() {
               <Skeleton className="h-6 w-28" />
             </div>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="space-y-1.5">
+              {["sk-addr-0", "sk-addr-1", "sk-addr-2", "sk-addr-3", "sk-addr-4", "sk-addr-5"].map((key) => (
+                <div key={key} className="space-y-1.5">
                   <Skeleton className="h-3.5 w-20" />
                   <Skeleton className="h-5 w-32" />
                 </div>

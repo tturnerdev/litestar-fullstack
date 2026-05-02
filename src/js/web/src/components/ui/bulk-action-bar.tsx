@@ -179,7 +179,7 @@ export function createBulkDeleteAction(deleteFn: (id: string) => Promise<void>, 
       for (let i = 0; i < ids.length; i++) {
         try {
           await deleteFn(ids[i])
-        } catch (e) {
+        } catch {
           errors.push(ids[i])
         }
       }

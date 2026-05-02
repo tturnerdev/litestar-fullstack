@@ -258,6 +258,7 @@ function WebhookDetailPage() {
               </div>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {Array.from({ length: 6 }).map((_, i) => (
+                  // biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton placeholders
                   <div key={i} className="space-y-1.5">
                     <Skeleton className="h-3.5 w-20" />
                     <Skeleton className="h-5 w-32" />
@@ -272,6 +273,7 @@ function WebhookDetailPage() {
               </div>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 {Array.from({ length: 4 }).map((_, i) => (
+                  // biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton placeholders
                   <div key={i} className="space-y-1.5">
                     <Skeleton className="h-3.5 w-20" />
                     <Skeleton className="h-5 w-40" />
@@ -286,6 +288,7 @@ function WebhookDetailPage() {
               </div>
               <div className="space-y-2">
                 {Array.from({ length: 5 }).map((_, i) => (
+                  // biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton placeholders
                   <Skeleton key={i} className="h-10 w-full rounded-md" />
                 ))}
               </div>
@@ -697,6 +700,7 @@ function WebhookDetailPage() {
               {deliveriesQuery.isLoading ? (
                 <div className="space-y-2">
                   {Array.from({ length: 5 }).map((_, i) => (
+                    // biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton placeholders
                     <Skeleton key={i} className="h-10 w-full rounded-md" />
                   ))}
                 </div>

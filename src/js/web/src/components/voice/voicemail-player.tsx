@@ -176,7 +176,8 @@ export function VoicemailPlayer({ audioUrl, durationSeconds, onPlay }: Voicemail
   const VolumeIcon = muted || volume === 0 ? VolumeX : volume < 0.5 ? Volume1 : Volume2
 
   return (
-    <div ref={containerRef} className="flex items-center gap-3 rounded-lg bg-muted/30 px-3 py-2" onKeyDown={handleKeyDown} tabIndex={0} role="group" aria-label="Audio player">
+    // biome-ignore lint/a11y/noNoninteractiveTabindex: toolbar role requires tabIndex for keyboard navigation
+    <div ref={containerRef} className="flex items-center gap-3 rounded-lg bg-muted/30 px-3 py-2" onKeyDown={handleKeyDown} tabIndex={0} role="toolbar" aria-label="Audio player">
       <Button variant="ghost" size="sm" className="h-8 w-8 shrink-0 p-0" onClick={togglePlay}>
         {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
       </Button>
@@ -188,6 +189,7 @@ export function VoicemailPlayer({ audioUrl, durationSeconds, onPlay }: Voicemail
           className="group relative h-1.5 flex-1 cursor-pointer rounded-full bg-muted transition-[height] hover:h-2.5"
           onMouseDown={handleProgressMouseDown}
           onClick={handleSeek}
+          onKeyDown={handleKeyDown}
           role="slider"
           aria-label="Seek"
           aria-valuenow={Math.round(currentTime)}
@@ -223,6 +225,7 @@ export function VoicemailPlayer({ audioUrl, durationSeconds, onPlay }: Voicemail
       </Button>
 
       {/* Volume control */}
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: hover-reveal for volume slider is a progressive enhancement over the mute button */}
       <div className="relative flex shrink-0 items-center" onMouseEnter={() => setShowVolumeSlider(true)} onMouseLeave={() => setShowVolumeSlider(false)}>
         <button
           type="button"

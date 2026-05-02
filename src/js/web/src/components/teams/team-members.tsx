@@ -126,7 +126,7 @@ export function TeamMembers({ team, teamId, canManageMembers, isOwner }: TeamMem
 
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase()
-      result = result.filter((m) => (m.name && m.name.toLowerCase().includes(query)) || m.email.toLowerCase().includes(query))
+      result = result.filter((m) => m.name?.toLowerCase().includes(query) || m.email.toLowerCase().includes(query))
     }
 
     return result
@@ -392,10 +392,10 @@ export function TeamMembers({ team, teamId, canManageMembers, isOwner }: TeamMem
               ))}
             </div>
             {canManageMembers && selectableMembers.length > 0 && (
-              <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer select-none">
+              <button type="button" className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer select-none" onClick={toggleAll}>
                 <Checkbox checked={allSelected} indeterminate={someSelected} onChange={toggleAll} aria-label="Select all members" />
                 Select all
-              </label>
+              </button>
             )}
           </div>
 

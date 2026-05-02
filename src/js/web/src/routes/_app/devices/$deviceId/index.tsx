@@ -275,8 +275,8 @@ function DeviceDetailPage() {
                 <Skeleton className="h-6 w-28" />
               </div>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="space-y-1.5">
+                {["sk-info-0", "sk-info-1", "sk-info-2", "sk-info-3", "sk-info-4", "sk-info-5"].map((key) => (
+                  <div key={key} className="space-y-1.5">
                     <Skeleton className="h-3.5 w-20" />
                     <Skeleton className="h-5 w-32" />
                   </div>
@@ -290,8 +290,8 @@ function DeviceDetailPage() {
                 <Skeleton className="h-6 w-24" />
               </div>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="space-y-1.5">
+                {["sk-net-0", "sk-net-1", "sk-net-2", "sk-net-3", "sk-net-4"].map((key) => (
+                  <div key={key} className="space-y-1.5">
                     <Skeleton className="h-3.5 w-24" />
                     <Skeleton className="h-5 w-36" />
                   </div>
@@ -305,8 +305,8 @@ function DeviceDetailPage() {
                 <Skeleton className="h-6 w-36" />
               </div>
               <div className="space-y-2">
-                {Array.from({ length: 2 }).map((_, i) => (
-                  <Skeleton key={i} className="h-12 w-full rounded-md" />
+                {["sk-line-0", "sk-line-1"].map((key) => (
+                  <Skeleton key={key} className="h-12 w-full rounded-md" />
                 ))}
               </div>
             </div>
@@ -317,8 +317,8 @@ function DeviceDetailPage() {
                 <Skeleton className="h-6 w-24" />
               </div>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="space-y-1.5">
+                {["sk-meta-0", "sk-meta-1", "sk-meta-2", "sk-meta-3"].map((key) => (
+                  <div key={key} className="space-y-1.5">
                     <Skeleton className="h-3.5 w-20" />
                     <Skeleton className="h-5 w-40" />
                   </div>
@@ -885,8 +885,8 @@ function DeviceDetailPage() {
                 <CardContent>
                   {tasksQuery.isLoading ? (
                     <div className="space-y-2">
-                      {Array.from({ length: 3 }).map((_, i) => (
-                        <Skeleton key={i} className="h-10 w-full rounded-md" />
+                      {["sk-task-0", "sk-task-1", "sk-task-2"].map((key) => (
+                        <Skeleton key={key} className="h-10 w-full rounded-md" />
                       ))}
                     </div>
                   ) : !tasksQuery.data?.items?.length ? (

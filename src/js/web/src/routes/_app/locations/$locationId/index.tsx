@@ -165,8 +165,8 @@ function LocationDetailPage() {
                 <div className="space-y-4">
                   <Skeleton className="h-3 w-16" />
                   <div className="grid gap-4 md:grid-cols-2">
-                    {Array.from({ length: 4 }).map((_, i) => (
-                      <div key={i} className="space-y-1.5">
+                    {["sk-gen-0", "sk-gen-1", "sk-gen-2", "sk-gen-3"].map((key) => (
+                      <div key={key} className="space-y-1.5">
                         <Skeleton className="h-3.5 w-20" />
                         <Skeleton className="h-5 w-36" />
                       </div>
@@ -175,8 +175,8 @@ function LocationDetailPage() {
                   <Separator />
                   <Skeleton className="h-3 w-16" />
                   <div className="grid gap-4 md:grid-cols-2">
-                    {Array.from({ length: 6 }).map((_, i) => (
-                      <div key={i} className="space-y-1.5">
+                    {["sk-addr-0", "sk-addr-1", "sk-addr-2", "sk-addr-3", "sk-addr-4", "sk-addr-5"].map((key) => (
+                      <div key={key} className="space-y-1.5">
                         <Skeleton className="h-3.5 w-24" />
                         <Skeleton className="h-5 w-32" />
                       </div>
@@ -198,8 +198,8 @@ function LocationDetailPage() {
                   <Skeleton className="h-4 w-4 rounded" />
                   <Skeleton className="h-5 w-24" />
                 </div>
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="space-y-1">
+                {["sk-meta-0", "sk-meta-1", "sk-meta-2"].map((key) => (
+                  <div key={key} className="space-y-1">
                     <Skeleton className="h-3 w-20" />
                     <Skeleton className="h-5 w-40" />
                   </div>
@@ -211,8 +211,8 @@ function LocationDetailPage() {
                   <Skeleton className="h-4 w-4 rounded" />
                   <Skeleton className="h-5 w-28" />
                 </div>
-                {Array.from({ length: 2 }).map((_, i) => (
-                  <Skeleton key={i} className="h-14 w-full rounded-xl" />
+                {["sk-subloc-0", "sk-subloc-1"].map((key) => (
+                  <Skeleton key={key} className="h-14 w-full rounded-xl" />
                 ))}
               </div>
             </div>
@@ -485,8 +485,8 @@ function LocationDetailPage() {
                 <CardContent>
                   {devicesLoading ? (
                     <div className="space-y-3">
-                      {Array.from({ length: 3 }).map((_, i) => (
-                        <Skeleton key={i} className="h-10 w-full" />
+                      {["sk-dev-0", "sk-dev-1", "sk-dev-2"].map((key) => (
+                        <Skeleton key={key} className="h-10 w-full" />
                       ))}
                     </div>
                   ) : locationDevices && locationDevices.length > 0 ? (
@@ -552,8 +552,8 @@ function LocationDetailPage() {
                 <CardContent>
                   {e911Loading ? (
                     <div className="space-y-3">
-                      {Array.from({ length: 2 }).map((_, i) => (
-                        <Skeleton key={i} className="h-16 w-full rounded-xl" />
+                      {["sk-e911-0", "sk-e911-1"].map((key) => (
+                        <Skeleton key={key} className="h-16 w-full rounded-xl" />
                       ))}
                     </div>
                   ) : e911Registrations.length > 0 ? (
