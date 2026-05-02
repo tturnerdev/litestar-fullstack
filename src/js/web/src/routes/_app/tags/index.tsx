@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { AlertCircle, ArrowUpDown, Download, Eye, Home, Loader2, MoreVertical, Pencil, Plus, Search, Tags, Trash2, X } from "lucide-react"
+import { AlertCircle, Download, Eye, Home, Loader2, MoreVertical, Pencil, Plus, Search, Tags, Trash2, X } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,6 +33,7 @@ import {
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import {
   Select,
   SelectContent,
@@ -51,9 +52,6 @@ import type { Tag } from "@/lib/generated/api"
 export const Route = createFileRoute("/_app/tags/")({
   component: TagsPage,
 })
-
-type SortField = "name" | "slug"
-type SortDir = "asc" | "desc"
 
 const PAGE_SIZES = [10, 25, 50, 100] as const
 const DEFAULT_PAGE_SIZE = 25
@@ -85,8 +83,8 @@ function TagsPage() {
   const debouncedSearch = useDebouncedValue(search)
   const [tagToDelete, setTagToDelete] = useState<Tag | null>(null)
   const [selected, setSelected] = useState<Set<string>>(new Set())
-  const [sortField, setSortField] = useState<SortField>("name")
-  const [sortDir, setSortDir] = useState<SortDir>("asc")
+  const [sortKey, setSortKey] = useState<string | null>(null)
+  const [sortDir, setSortDir] = useState<SortDirection>(null)
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(getStoredPageSize)
 
@@ -125,12 +123,18 @@ function TagsPage() {
     }
   }, [])
 
+  const handleSort = useCallback((key: string) => {
+    const next = nextSortDirection(sortKey, sortDir, key)
+    setSortKey(next.sort)
+    setSortDir(next.direction)
+  }, [sortKey, sortDir])
+
   const { data, isLoading, isError, refetch } = useTags({
     search: debouncedSearch || undefined,
     page,
     pageSize,
-    orderBy: sortField,
-    sortOrder: sortDir,
+    orderBy: sortKey ?? undefined,
+    sortOrder: sortDir ?? undefined,
   })
   const deleteTag = useDeleteTag()
 
@@ -140,16 +144,17 @@ function TagsPage() {
 
   // Sort locally as a fallback (server may not support all sort options)
   const sortedItems = useMemo(() => {
+    if (!sortKey || !sortDir) return items
     const copy = [...items]
     copy.sort((a, b) => {
-      const aVal = sortField === "name" ? a.name.toLowerCase() : a.slug.toLowerCase()
-      const bVal = sortField === "name" ? b.name.toLowerCase() : b.slug.toLowerCase()
+      const aVal = sortKey === "name" ? a.name.toLowerCase() : a.slug.toLowerCase()
+      const bVal = sortKey === "name" ? b.name.toLowerCase() : b.slug.toLowerCase()
       if (aVal < bVal) return sortDir === "asc" ? -1 : 1
       if (aVal > bVal) return sortDir === "asc" ? 1 : -1
       return 0
     })
     return copy
-  }, [items, sortField, sortDir])
+  }, [items, sortKey, sortDir])
 
   // Export all visible
   const handleExportAll = useCallback(() => {
@@ -159,15 +164,6 @@ function TagsPage() {
 
   const allSelected = sortedItems.length > 0 && selected.size === sortedItems.length
   const someSelected = selected.size > 0 && selected.size < sortedItems.length
-
-  const toggleSort = (field: SortField) => {
-    if (sortField === field) {
-      setSortDir((d) => (d === "asc" ? "desc" : "asc"))
-    } else {
-      setSortField(field)
-      setSortDir("asc")
-    }
-  }
 
   const toggleAll = () => {
     if (allSelected) {
@@ -376,26 +372,8 @@ function TagsPage() {
                       aria-label="Select all tags"
                     />
                   </TableHead>
-                  <TableHead>
-                    <button
-                      type="button"
-                      className="inline-flex items-center gap-1 font-medium hover:text-foreground transition-colors"
-                      onClick={() => toggleSort("name")}
-                    >
-                      Name
-                      <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />
-                    </button>
-                  </TableHead>
-                  <TableHead className="hidden md:table-cell">
-                    <button
-                      type="button"
-                      className="inline-flex items-center gap-1 font-medium hover:text-foreground transition-colors"
-                      onClick={() => toggleSort("slug")}
-                    >
-                      Slug
-                      <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />
-                    </button>
-                  </TableHead>
+                  <SortableHeader label="Name" sortKey="name" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                  <SortableHeader label="Slug" sortKey="slug" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} className="hidden md:table-cell" />
                   <TableHead className="w-16 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>

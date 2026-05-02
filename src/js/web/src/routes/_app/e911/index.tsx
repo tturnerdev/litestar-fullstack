@@ -1,6 +1,7 @@
 import { toast } from "sonner"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { useCallback, useEffect, useMemo, useState } from "react"
+import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import {
   AlertCircle,
   AlertTriangle,
@@ -540,6 +541,15 @@ function E911Page() {
     }
   }, [])
 
+  const [sortKey, setSortKey] = useState<string | null>(null)
+  const [sortDir, setSortDir] = useState<SortDirection>(null)
+
+  const handleSort = useCallback((key: string) => {
+    const next = nextSortDirection(sortKey, sortDir, key)
+    setSortKey(next.sort)
+    setSortDir(next.direction)
+  }, [sortKey, sortDir])
+
   useEffect(() => {
     setPage(1)
   }, [debouncedSearch])
@@ -549,6 +559,8 @@ function E911Page() {
     pageSize,
     search: debouncedSearch || undefined,
     teamId: teamId || undefined,
+    orderBy: sortKey ?? undefined,
+    sortOrder: sortDir ?? undefined,
   })
 
   const deleteMutation = useDeleteE911Registration()
@@ -784,10 +796,35 @@ function E911Page() {
                         aria-label="Select all registrations"
                       />
                     </TableHead>
-                    <TableHead>Phone Number</TableHead>
-                    <TableHead>Address</TableHead>
-                    <TableHead className="hidden md:table-cell">City / State</TableHead>
-                    <TableHead>Validated</TableHead>
+                    <SortableHeader
+                      label="Phone Number"
+                      sortKey="phone_number_display"
+                      currentSort={sortKey}
+                      currentDirection={sortDir}
+                      onSort={handleSort}
+                    />
+                    <SortableHeader
+                      label="Address"
+                      sortKey="address_line1"
+                      currentSort={sortKey}
+                      currentDirection={sortDir}
+                      onSort={handleSort}
+                    />
+                    <SortableHeader
+                      label="City / State"
+                      sortKey="city"
+                      currentSort={sortKey}
+                      currentDirection={sortDir}
+                      onSort={handleSort}
+                      className="hidden md:table-cell"
+                    />
+                    <SortableHeader
+                      label="Validated"
+                      sortKey="validated"
+                      currentSort={sortKey}
+                      currentDirection={sortDir}
+                      onSort={handleSort}
+                    />
                     <TableHead className="hidden md:table-cell">Carrier Reg ID</TableHead>
                     <TableHead className="w-16 text-right">Actions</TableHead>
                   </TableRow>
