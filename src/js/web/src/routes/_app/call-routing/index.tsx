@@ -524,9 +524,9 @@ function TimeConditionsTab() {
                     />
                   </TableHead>
                   <TableHead>Name</TableHead>
-                  <TableHead>Match Destination</TableHead>
-                  <TableHead>No Match Destination</TableHead>
-                  <TableHead>Override</TableHead>
+                  <TableHead className="hidden md:table-cell">Match Destination</TableHead>
+                  <TableHead className="hidden md:table-cell">No Match Destination</TableHead>
+                  <TableHead className="hidden lg:table-cell">Override</TableHead>
                   <TableHead className="w-16 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -546,9 +546,9 @@ function TimeConditionsTab() {
                         <span className="font-medium group-hover:underline">{tc.name}</span>
                       </Link>
                     </TableCell>
-                    <TableCell><span className="text-sm text-muted-foreground">{tc.matchDestination || "---"}</span></TableCell>
-                    <TableCell><span className="text-sm text-muted-foreground">{tc.noMatchDestination || "---"}</span></TableCell>
-                    <TableCell>
+                    <TableCell className="hidden md:table-cell"><span className="text-sm text-muted-foreground">{tc.matchDestination || "---"}</span></TableCell>
+                    <TableCell className="hidden md:table-cell"><span className="text-sm text-muted-foreground">{tc.noMatchDestination || "---"}</span></TableCell>
+                    <TableCell className="hidden lg:table-cell">
                       <Badge variant={tc.overrideMode === "none" ? "outline" : "default"}>
                         {overrideModeLabels[tc.overrideMode] ?? tc.overrideMode}
                       </Badge>
@@ -737,9 +737,9 @@ function IvrMenusTab() {
                     />
                   </TableHead>
                   <TableHead>Name</TableHead>
-                  <TableHead>Greeting</TableHead>
-                  <TableHead>Options</TableHead>
-                  <TableHead>Timeout</TableHead>
+                  <TableHead className="hidden md:table-cell">Greeting</TableHead>
+                  <TableHead className="hidden md:table-cell">Options</TableHead>
+                  <TableHead className="hidden lg:table-cell">Timeout</TableHead>
                   <TableHead className="w-16 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -759,9 +759,9 @@ function IvrMenusTab() {
                         <span className="font-medium group-hover:underline">{ivr.name}</span>
                       </Link>
                     </TableCell>
-                    <TableCell><Badge variant="outline">{ivr.greetingType}</Badge></TableCell>
-                    <TableCell><span className="text-sm text-muted-foreground">{ivr.options?.length ?? 0} option{(ivr.options?.length ?? 0) === 1 ? "" : "s"}</span></TableCell>
-                    <TableCell><span className="text-sm text-muted-foreground">{ivr.timeoutSeconds}s</span></TableCell>
+                    <TableCell className="hidden md:table-cell"><Badge variant="outline">{ivr.greetingType}</Badge></TableCell>
+                    <TableCell className="hidden md:table-cell"><span className="text-sm text-muted-foreground">{ivr.options?.length ?? 0} option{(ivr.options?.length ?? 0) === 1 ? "" : "s"}</span></TableCell>
+                    <TableCell className="hidden lg:table-cell"><span className="text-sm text-muted-foreground">{ivr.timeoutSeconds}s</span></TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -946,10 +946,10 @@ function CallQueuesTab() {
                     />
                   </TableHead>
                   <TableHead>Name</TableHead>
-                  <TableHead>Number</TableHead>
+                  <TableHead className="hidden md:table-cell">Number</TableHead>
                   <TableHead>Strategy</TableHead>
-                  <TableHead>Members</TableHead>
-                  <TableHead>Ring Time</TableHead>
+                  <TableHead className="hidden md:table-cell">Members</TableHead>
+                  <TableHead className="hidden lg:table-cell">Ring Time</TableHead>
                   <TableHead className="w-16 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -969,10 +969,10 @@ function CallQueuesTab() {
                         <span className="font-medium group-hover:underline">{q.name}</span>
                       </Link>
                     </TableCell>
-                    <TableCell><span className="font-mono text-sm text-muted-foreground">{q.number}</span></TableCell>
+                    <TableCell className="hidden md:table-cell"><span className="font-mono text-sm text-muted-foreground">{q.number}</span></TableCell>
                     <TableCell><Badge variant="outline">{strategyLabels[q.strategy] ?? q.strategy}</Badge></TableCell>
-                    <TableCell><span className="text-sm text-muted-foreground">{q.members?.length ?? 0}</span></TableCell>
-                    <TableCell><span className="text-sm text-muted-foreground">{q.ringTime}s</span></TableCell>
+                    <TableCell className="hidden md:table-cell"><span className="text-sm text-muted-foreground">{q.members?.length ?? 0}</span></TableCell>
+                    <TableCell className="hidden lg:table-cell"><span className="text-sm text-muted-foreground">{q.ringTime}s</span></TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -1157,10 +1157,10 @@ function RingGroupsTab() {
                     />
                   </TableHead>
                   <TableHead>Name</TableHead>
-                  <TableHead>Number</TableHead>
+                  <TableHead className="hidden md:table-cell">Number</TableHead>
                   <TableHead>Strategy</TableHead>
-                  <TableHead>Members</TableHead>
-                  <TableHead>Ring Time</TableHead>
+                  <TableHead className="hidden md:table-cell">Members</TableHead>
+                  <TableHead className="hidden lg:table-cell">Ring Time</TableHead>
                   <TableHead className="w-16 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -1180,10 +1180,10 @@ function RingGroupsTab() {
                         <span className="font-medium group-hover:underline">{rg.name}</span>
                       </Link>
                     </TableCell>
-                    <TableCell><span className="font-mono text-sm text-muted-foreground">{rg.number}</span></TableCell>
+                    <TableCell className="hidden md:table-cell"><span className="font-mono text-sm text-muted-foreground">{rg.number}</span></TableCell>
                     <TableCell><Badge variant="outline">{strategyLabels[rg.strategy] ?? rg.strategy}</Badge></TableCell>
-                    <TableCell><span className="text-sm text-muted-foreground">{rg.members?.length ?? 0}</span></TableCell>
-                    <TableCell><span className="text-sm text-muted-foreground">{rg.ringTime}s</span></TableCell>
+                    <TableCell className="hidden md:table-cell"><span className="text-sm text-muted-foreground">{rg.members?.length ?? 0}</span></TableCell>
+                    <TableCell className="hidden lg:table-cell"><span className="text-sm text-muted-foreground">{rg.ringTime}s</span></TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>

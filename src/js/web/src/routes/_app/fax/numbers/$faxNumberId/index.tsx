@@ -113,7 +113,7 @@ function FaxNumberDetailPage() {
   const { faxNumberId } = Route.useParams()
   const navigate = useNavigate()
   const { data, isLoading, isError, refetch } = useFaxNumber(faxNumberId)
-  useDocumentTitle(data?.number ?? "Fax Number")
+  useDocumentTitle(data?.number ? `${data.number} - Fax Number` : "Fax Number")
   const updateFaxNumber = useUpdateFaxNumber(faxNumberId)
   const deleteFaxNumber = useDeleteFaxNumber()
 

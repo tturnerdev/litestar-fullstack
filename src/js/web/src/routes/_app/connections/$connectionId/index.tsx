@@ -171,7 +171,7 @@ function ConnectionDetailPage() {
   const navigate = Route.useNavigate()
   const router = useRouter()
   const { data, isLoading, isError, refetch } = useConnection(connectionId)
-  useDocumentTitle(data ? `Connections - ${data.name}` : "Connection Details")
+  useDocumentTitle(data?.name ? `${data.name} - Connection` : "Connection")
   const deleteConnection = useDeleteConnection()
   const testConnection = useTestConnection(connectionId)
   const updateConnection = useUpdateConnection(connectionId)

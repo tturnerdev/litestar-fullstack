@@ -573,7 +573,7 @@ function ScheduleDetailPage() {
   const [editType, setEditType] = useState<Schedule["scheduleType"]>("business_hours")
   const [editDefault, setEditDefault] = useState(false)
 
-  useDocumentTitle(data ? `${data.name} - Schedules` : "Schedule Detail")
+  useDocumentTitle(data?.name ? `${data.name} - Schedule` : "Schedule")
 
   function startEditing(schedule: Schedule) {
     setEditName(schedule.name)
