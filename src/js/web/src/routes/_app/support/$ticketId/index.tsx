@@ -359,7 +359,7 @@ function SlaIndicators({ ticket, messages }: { ticket: TicketType; messages: Tic
     const nonSystemMessages = messages.filter((m) => !m.isSystemMessage && m.createdAt)
     if (nonSystemMessages.length > 1) {
       // The first message is the ticket body itself; the second is the first response
-      const firstReply = nonSystemMessages.slice(1).sort((a, b) => new Date(a.createdAt!).getTime() - new Date(b.createdAt!).getTime())[0]
+      const firstReply = nonSystemMessages.slice(1).sort((a, b) => new Date(a.createdAt as string).getTime() - new Date(b.createdAt as string).getTime())[0]
       if (firstReply?.createdAt) {
         const replyMs = new Date(firstReply.createdAt).getTime() - createdMs
         if (replyMs > 0) {

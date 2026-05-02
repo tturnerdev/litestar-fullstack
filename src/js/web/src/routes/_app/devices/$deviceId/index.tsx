@@ -220,7 +220,7 @@ function DeviceDetailPage() {
   const [editLocationId, setEditLocationId] = useState<string | null>(null)
   const [editConnectionId, setEditConnectionId] = useState<string | null>(null)
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional trigger dependency
+  // biome-ignore lint/correctness/useExhaustiveDependencies: startEditing is a stable form-populating function defined below
   useEffect(() => {
     if (editParam && data && !editing) {
       startEditing(data)
@@ -423,7 +423,7 @@ function DeviceDetailPage() {
                   Copy Device ID
                 </DropdownMenuItem>
                 {data.macAddress && (
-                  <DropdownMenuItem onClick={() => navigator.clipboard.writeText(data.macAddress!)}>
+                  <DropdownMenuItem onClick={() => navigator.clipboard.writeText(data.macAddress as string)}>
                     <Copy className="mr-2 h-4 w-4" />
                     Copy MAC Address
                   </DropdownMenuItem>
@@ -847,7 +847,7 @@ function DeviceDetailPage() {
                             <Link
                               key={line.id}
                               to="/voice/extensions/$extensionId"
-                              params={{ extensionId: line.extensionId! }}
+                              params={{ extensionId: line.extensionId as string }}
                               className="group flex items-center gap-3 rounded-md px-3 py-2 transition-colors hover:bg-muted/50"
                             >
                               <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400">

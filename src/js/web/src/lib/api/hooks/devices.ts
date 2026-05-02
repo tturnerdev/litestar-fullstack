@@ -282,7 +282,7 @@ export function useDevicesByExtension(extensionId: string | undefined) {
   return useQuery({
     queryKey: ["devices", "by-extension", extensionId],
     queryFn: async () => {
-      const response = await listExtensionDevices({ path: { ext_id: extensionId! } })
+      const response = await listExtensionDevices({ path: { ext_id: extensionId as string } })
       return response.data as ExtensionDeviceSummary[]
     },
     enabled: !!extensionId,

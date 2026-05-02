@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.252.0 (2026-05-03)
+
+### Added
+- **E911 validation status filter** — FilterDropdown on E911 list page to filter by validated/pending status, with URL-persisted state
+- **Admin Users URL-persisted sort** — sort key and direction now stored in URL params for link-sharing and back-navigation consistency
+
+### Fixed
+- **Zero biome warnings** — replaced all 10 `noNonNullAssertion` (`!`) operators with `as Type` casts guarded by truthiness checks
+- **About page broken links** — converted dead `href="#"` Terms/Privacy links to non-link `<span>` elements
+- **Biome status: 0 errors, 0 warnings, 0 infos** across 332 frontend files
+
 ## v0.251.0 (2026-05-03)
 
 ### Fixed

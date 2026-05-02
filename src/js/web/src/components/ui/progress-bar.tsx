@@ -34,7 +34,7 @@ export function RouteProgressBar() {
     }
   }
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional trigger dependency
+  // biome-ignore lint/correctness/useExhaustiveDependencies: clearTimers is a stable ref-based helper; phase is read inside but only isLoading should trigger
   useEffect(() => {
     if (isLoading) {
       // Start loading: reset and begin trickle
@@ -73,7 +73,7 @@ export function RouteProgressBar() {
     }
 
     return clearTimers
-  }, [isLoading]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isLoading])
 
   if (phase === "idle") {
     return null

@@ -137,8 +137,8 @@ export function useDeviceTemplateLookup(manufacturer: string | null | undefined,
     queryKey: ["device-template-lookup", manufacturer, model],
     queryFn: async () => {
       const query: LookupDeviceTemplateData["query"] = {
-        manufacturer: manufacturer!,
-        model: model!,
+        manufacturer: manufacturer as string,
+        model: model as string,
       }
       const response = await lookupDeviceTemplate({ query })
       return response.data as DeviceTemplateLookup

@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query"
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
+import { createFileRoute, Link } from "@tanstack/react-router"
 import {
   AlertCircle,
   CheckCircle2,
@@ -56,6 +56,15 @@ import type { AdminUserSummary } from "@/lib/generated/api"
 import { adminDeleteUser, adminUpdateUser } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/admin/users/")({
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): {
+    sort?: string
+    order?: string
+  } => ({
+    sort: typeof search.sort === "string" && search.sort ? search.sort : undefined,
+    order: typeof search.order === "string" && (search.order === "asc" || search.order === "desc") ? search.order : undefined,
+  }),
   component: AdminUsersPage,
 })
 
@@ -154,7 +163,12 @@ function matchesStatusFilter(user: AdminUserSummary, filters: string[]): boolean
 
 function AdminUsersPage() {
   useDocumentTitle("Admin — Users")
-  const navigate = useNavigate()
+  const { sort: sortParam, order: orderParam } = Route.useSearch()
+  const navigate = Route.useNavigate()
+
+  // Derive sort state from URL search params
+  const sortKey = sortParam ?? null
+  const sortDir: SortDirection = (orderParam as SortDirection) ?? null
 
   // Filter & search state
   const [search, setSearch] = useState("")
@@ -180,10 +194,6 @@ function AdminUsersPage() {
       // localStorage unavailable
     }
   }, [])
-
-  // Sort state
-  const [sortKey, setSortKey] = useState<string | null>(null)
-  const [sortDir, setSortDir] = useState<SortDirection>(null)
 
   // Selection state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -242,10 +252,15 @@ function AdminUsersPage() {
   const handleSort = useCallback(
     (key: string) => {
       const next = nextSortDirection(sortKey, sortDir, key)
-      setSortKey(next.sort)
-      setSortDir(next.direction)
+      navigate({
+        search: (prev) => ({
+          ...prev,
+          sort: next.sort || undefined,
+          order: next.direction || undefined,
+        }),
+      })
     },
-    [sortKey, sortDir],
+    [sortKey, sortDir, navigate],
   )
 
   // Bulk actions

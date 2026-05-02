@@ -124,7 +124,7 @@ function PhoneNumberDetailPage() {
     updatePhoneNumber.mutate({ isActive: !data.isActive })
   }
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional trigger dependency
+  // biome-ignore lint/correctness/useExhaustiveDependencies: startEditing is a stable form-populating function defined above
   useEffect(() => {
     if (edit && data && !editOpen && !editing) {
       startEditing()

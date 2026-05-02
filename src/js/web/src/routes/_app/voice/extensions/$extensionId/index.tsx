@@ -1128,7 +1128,7 @@ function RelatedResourcesSection({ extensionId, extension }: { extensionId: stri
             <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Phone Number</p>
             <Link
               to="/voice/phone-numbers/$phoneNumberId"
-              params={{ phoneNumberId: extension.phoneNumberId! }}
+              params={{ phoneNumberId: extension.phoneNumberId as string }}
               className="group flex items-center justify-between rounded-lg border border-border/40 p-3 transition-all hover:bg-muted/30 hover:shadow-sm"
             >
               <div className="flex items-center gap-3">

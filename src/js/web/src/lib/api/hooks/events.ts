@@ -247,7 +247,7 @@ export function useEventStream() {
 
   // ----- connect / reconnect -----
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional trigger dependency
+  // biome-ignore lint/correctness/useExhaustiveDependencies: connect and scheduleReconnect are mutually recursive — adding scheduleReconnect would create a circular dep
   const connect = useCallback(() => {
     if (!mountedRef.current) return
 

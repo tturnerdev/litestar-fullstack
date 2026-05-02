@@ -559,7 +559,7 @@ function ScheduleDetailPage() {
 
   useDocumentTitle(data?.name ? `${data.name} - Schedule` : "Schedule")
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional trigger dependency
+  // biome-ignore lint/correctness/useExhaustiveDependencies: startEditing is a stable form-populating function defined below
   useEffect(() => {
     if (editParam && data && !editing) {
       startEditing(data)

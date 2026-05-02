@@ -34,6 +34,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
+import { FilterDropdown, type FilterOption } from "@/components/ui/filter-dropdown"
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
@@ -62,11 +63,13 @@ export const Route = createFileRoute("/_app/e911/")({
   ): {
     q?: string
     page?: number
+    status?: string
     sort?: string
     order?: string
   } => ({
     q: typeof search.q === "string" && search.q ? search.q : undefined,
     page: Number(search.page) > 1 ? Number(search.page) : undefined,
+    status: typeof search.status === "string" && search.status ? search.status : undefined,
     sort: typeof search.sort === "string" && search.sort ? search.sort : undefined,
     order: typeof search.order === "string" && (search.order === "asc" || search.order === "desc") ? search.order : undefined,
   }),
@@ -127,6 +130,13 @@ function loadColumnVisibility(): ColumnVisibility {
     return {}
   }
 }
+
+// -- Filter options -----------------------------------------------------------
+
+const validationStatusOptions: FilterOption[] = [
+  { value: "validated", label: "Validated" },
+  { value: "pending", label: "Pending" },
+]
 
 // -- E911 Row -----------------------------------------------------------------
 
@@ -289,7 +299,7 @@ function E911Page() {
   const cellClass = compactMode ? "py-1 px-2 text-xs" : ""
 
   const { currentTeam } = useAuthStore()
-  const { q: searchParam, page: pageParam, sort: sortParam, order: orderParam } = Route.useSearch()
+  const { q: searchParam, page: pageParam, status: statusParam, sort: sortParam, order: orderParam } = Route.useSearch()
   const navigate = Route.useNavigate()
   const teamId = currentTeam?.id ?? ""
 
@@ -309,6 +319,7 @@ function E911Page() {
   const page = pageParam ?? 1
   const sortKey = sortParam ?? null
   const sortDir: SortDirection = (orderParam as SortDirection) ?? null
+  const statusFilter = useMemo(() => (statusParam ? statusParam.split(",").filter(Boolean) : []), [statusParam])
 
   // Local input state for search (so typing is smooth before debounce)
   const [searchInput, setSearchInput] = useState(search)
@@ -393,6 +404,16 @@ function E911Page() {
 
   const items = data?.items ?? []
 
+  // Apply client-side status filter
+  const filteredItems = useMemo(() => {
+    if (statusFilter.length === 0) return items
+    return items.filter((reg) => {
+      if (statusFilter.includes("validated") && reg.validated) return true
+      if (statusFilter.includes("pending") && !reg.validated) return true
+      return false
+    })
+  }, [items, statusFilter])
+
   // Registration summary stats (computed from ALL items on the current page)
   const registrationStats = useMemo(() => {
     const all = data?.items ?? []
@@ -406,9 +427,9 @@ function E911Page() {
   }, [data?.items, data?.total])
 
   // Selection helpers
-  const allVisibleIds = useMemo(() => items.map((r) => r.id), [items])
-  const allSelected = items.length > 0 && items.every((r) => selectedIds.has(r.id))
-  const someSelected = items.some((r) => selectedIds.has(r.id))
+  const allVisibleIds = useMemo(() => filteredItems.map((r) => r.id), [filteredItems])
+  const allSelected = filteredItems.length > 0 && filteredItems.every((r) => selectedIds.has(r.id))
+  const someSelected = filteredItems.some((r) => selectedIds.has(r.id))
 
   const toggleAll = useCallback(() => {
     if (allSelected) {
@@ -442,14 +463,16 @@ function E911Page() {
           deleteMutation.reset()
         },
       ),
-      createExportAction<E911Registration>("e911-registrations-selected", csvHeaders, (ids) => items.filter((r) => ids.includes(r.id))),
+      createExportAction<E911Registration>("e911-registrations-selected", csvHeaders, (ids) => filteredItems.filter((r) => ids.includes(r.id))),
     ],
-    [items, deleteMutation],
+    [filteredItems, deleteMutation],
   )
 
   const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / pageSize))
-  const hasData = items.length > 0
+  const hasData = filteredItems.length > 0
+  const hasAnyItems = items.length > 0
   const unregisteredCount = unregistered?.length ?? 0
+  const activeFilterCount = statusFilter.length
 
   const handleRowClick = useCallback(
     (registrationId: string) => {
@@ -459,9 +482,9 @@ function E911Page() {
   )
 
   const handleExportAll = useCallback(() => {
-    if (!items.length) return
-    exportToCsv("e911-registrations", csvHeaders, items)
-  }, [items])
+    if (!filteredItems.length) return
+    exportToCsv("e911-registrations", csvHeaders, filteredItems)
+  }, [filteredItems])
 
   const breadcrumbs = (
     <Breadcrumb>
@@ -579,6 +602,38 @@ function E911Page() {
               </button>
             )}
           </div>
+          <FilterDropdown
+            label="Status"
+            options={validationStatusOptions}
+            selected={statusFilter}
+            onChange={(v) => {
+              navigate({
+                search: (prev) => ({
+                  ...prev,
+                  status: v.length > 0 ? v.join(",") : undefined,
+                  page: undefined,
+                }),
+              })
+            }}
+          />
+          {activeFilterCount > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-xs text-muted-foreground"
+              onClick={() => {
+                navigate({
+                  search: (prev) => ({
+                    ...prev,
+                    status: undefined,
+                    page: undefined,
+                  }),
+                })
+              }}
+            >
+              Clear all filters
+            </Button>
+          )}
         </div>
       </PageSection>
 
@@ -630,7 +685,7 @@ function E911Page() {
                 </Button>
               }
             />
-          ) : !hasData && !search ? (
+          ) : !hasAnyItems && !search && activeFilterCount === 0 ? (
             <EmptyState
               icon={ShieldAlert}
               title="No E911 registrations"
@@ -650,10 +705,25 @@ function E911Page() {
               icon={ShieldAlert}
               variant="no-results"
               title="No results found"
-              description="No E911 registrations match your search. Try adjusting your query."
+              description="No E911 registrations match your current filters. Try adjusting your search or filters."
               action={
-                <Button variant="outline" size="sm" onClick={() => setSearchInput("")}>
-                  Clear search
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSearchInput("")
+                    navigate({
+                      search: {
+                        q: undefined,
+                        status: undefined,
+                        sort: undefined,
+                        order: undefined,
+                        page: undefined,
+                      },
+                    })
+                  }}
+                >
+                  Clear all filters
                 </Button>
               }
             />
@@ -661,7 +731,8 @@ function E911Page() {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <p className="text-xs text-muted-foreground">
-                  {data?.total ?? items.length} registration{(data?.total ?? items.length) === 1 ? "" : "s"}
+                  {data?.total ?? filteredItems.length} registration{(data?.total ?? filteredItems.length) === 1 ? "" : "s"}
+                  {activeFilterCount > 0 && " (filtered)"}
                 </p>
                 {totalPages > 1 && (
                   <p className="text-xs text-muted-foreground">
@@ -692,7 +763,7 @@ function E911Page() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {items.map((reg: E911Registration, index: number) => (
+                    {filteredItems.map((reg: E911Registration, index: number) => (
                       <E911Row
                         key={reg.id}
                         reg={reg}
@@ -708,7 +779,7 @@ function E911Page() {
                 </Table>
               </div>
               <div className="sr-only" aria-live="polite" aria-atomic="true">
-                {!isLoading && `Showing ${items.length} of ${data?.total ?? items.length} results, page ${page}`}
+                {!isLoading && `Showing ${filteredItems.length} of ${data?.total ?? filteredItems.length} results, page ${page}`}
               </div>
 
               {/* Pagination */}

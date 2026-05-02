@@ -93,7 +93,7 @@ function LocationDetailPage() {
   const [editPostalCode, setEditPostalCode] = useState("")
   const [editCountry, setEditCountry] = useState("")
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional trigger dependency
+  // biome-ignore lint/correctness/useExhaustiveDependencies: startEditing is a stable form-populating function defined below
   useEffect(() => {
     if (editParam && data && !editing) {
       startEditing(data)
@@ -429,7 +429,7 @@ function LocationDetailPage() {
                               <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Address</h4>
                               {buildGoogleMapsUrl(data) && (
                                 <Button variant="outline" size="sm" asChild>
-                                  <a href={buildGoogleMapsUrl(data)!} target="_blank" rel="noopener noreferrer">
+                                  <a href={buildGoogleMapsUrl(data) as string} target="_blank" rel="noopener noreferrer">
                                     <MapPin className="mr-2 h-3.5 w-3.5" />
                                     View on Map
                                     <ExternalLink className="ml-2 h-3 w-3" />
