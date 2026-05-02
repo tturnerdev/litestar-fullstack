@@ -25,6 +25,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { CopyButton } from "@/components/ui/copy-button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import {
@@ -461,11 +462,14 @@ function OrganizationSettingsPage() {
         </PageSection>
       )}
 
-      {org && <OrganizationOverview org={org} stats={stats} />}
+      <SectionErrorBoundary name="Organization Overview">
+        {org && <OrganizationOverview org={org} stats={stats} />}
+      </SectionErrorBoundary>
 
       <PageSection delay={0.1}>
         <div className="grid gap-6 lg:grid-cols-2">
           {/* General Information */}
+          <SectionErrorBoundary name="General Information">
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
@@ -537,8 +541,10 @@ function OrganizationSettingsPage() {
               </div>
             </CardContent>
           </Card>
+          </SectionErrorBoundary>
 
           {/* Contact Details */}
+          <SectionErrorBoundary name="Contact Details">
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
@@ -637,8 +643,10 @@ function OrganizationSettingsPage() {
               </div>
             </CardContent>
           </Card>
+          </SectionErrorBoundary>
 
           {/* Preferences */}
+          <SectionErrorBoundary name="Preferences">
           <Card className="lg:col-span-2">
             <CardHeader>
               <div className="flex items-center gap-2">
@@ -694,7 +702,9 @@ function OrganizationSettingsPage() {
               </div>
             </CardContent>
           </Card>
+          </SectionErrorBoundary>
           {/* Metadata */}
+          <SectionErrorBoundary name="Organization Details">
           <Card className="lg:col-span-2">
             <CardHeader>
               <div className="flex items-center gap-2">
@@ -735,13 +745,18 @@ function OrganizationSettingsPage() {
               </div>
             </CardContent>
           </Card>
+          </SectionErrorBoundary>
         </div>
       </PageSection>
       <PageSection>
-        <OrganizationStats />
+        <SectionErrorBoundary name="Organization Stats">
+          <OrganizationStats />
+        </SectionErrorBoundary>
       </PageSection>
       <PageSection>
-        <OrganizationQuickLinks />
+        <SectionErrorBoundary name="Quick Links">
+          <OrganizationQuickLinks />
+        </SectionErrorBoundary>
       </PageSection>
     </PageContainer>
 

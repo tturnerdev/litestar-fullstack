@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.213.0 (2026-05-02)
+
+### Added
+- **Organization error boundaries** — SectionErrorBoundary wrappers around 7 data sections on the organization page for resilient rendering
+- **Fax message history timeline** — Visual lifecycle timeline showing status transitions, delivery events, and audit trail on fax message detail
+- **Tags activity log** — Created/updated timestamps and EntityActivityPanel audit trail on the tag detail page
+- **Tag schema timestamps** — Exposed created_at and updated_at in the Tag API response
+
 ## v0.212.0 (2026-05-02)
 
 ### Added

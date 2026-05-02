@@ -4,6 +4,7 @@ import { toast } from "sonner"
 import {
   AlertCircle,
   ArrowLeft,
+  Clock,
   Copy,
   Home,
   Loader2,
@@ -48,7 +49,9 @@ import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Skeleton, SkeletonCard } from "@/components/ui/skeleton"
 import { CopyButton } from "@/components/ui/copy-button"
+import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { formatRelativeTime, formatDateTime } from "@/lib/date-utils"
 import { useTag, useUpdateTag, useDeleteTag } from "@/lib/api/hooks/tags"
 
 export const Route = createFileRoute("/_app/tags/$tagId/")({
@@ -347,6 +350,39 @@ function TagDetailPage() {
                   </p>
                   <CopyButton value={tag.id} label="tag ID" />
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+        </PageSection>
+
+        {/* Activity Section */}
+        <PageSection>
+          <Card className="max-w-xl">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="h-4 w-4 text-muted-foreground" />
+                Activity
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                {tag.createdAt && (
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium text-muted-foreground">Created</p>
+                    <p className="text-sm">{formatRelativeTime(tag.createdAt)}</p>
+                    <p className="text-xs text-muted-foreground">{formatDateTime(tag.createdAt)}</p>
+                  </div>
+                )}
+                {tag.updatedAt && (
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium text-muted-foreground">Last Updated</p>
+                    <p className="text-sm">{formatRelativeTime(tag.updatedAt)}</p>
+                    <p className="text-xs text-muted-foreground">{formatDateTime(tag.updatedAt)}</p>
+                  </div>
+                )}
+              </div>
+              <div className="border-t pt-4">
+                <EntityActivityPanel targetType="tag" targetId={tagId} />
               </div>
             </CardContent>
           </Card>
