@@ -296,7 +296,9 @@ function TaskDetailPage() {
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => retryMutation.mutate(taskId)}
+                onClick={() => retryMutation.mutate(taskId, {
+                  onSuccess: () => toast.success("Task retry initiated successfully"),
+                })}
                 disabled={retryMutation.isPending}
               >
                 {retryMutation.isPending ? (
@@ -540,7 +542,9 @@ function TaskDetailPage() {
             <AlertDialogCancel>Keep Running</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={() => cancelMutation.mutate(taskId)}
+              onClick={() => cancelMutation.mutate(taskId, {
+                onSuccess: () => toast.success("Task cancelled successfully"),
+              })}
               disabled={cancelMutation.isPending}
             >
               {cancelMutation.isPending && (

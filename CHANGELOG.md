@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.228.0 (2026-05-02)
+
+### Added
+- **Success toasts on save** for teams, devices, locations, fax numbers, tasks, and voice extensions detail pages
+- **Admin audit log page size selector** — choose 10/25/50/100 rows per page with localStorage persistence
+
+### Fixed
+- **Admin task delete confirmation** — individual task delete now shows confirmation dialog instead of deleting immediately
+
 ## v0.227.0 (2026-05-02)
 
 ### Added

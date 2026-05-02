@@ -17,6 +17,16 @@ import {
   Trash2,
   XCircle,
 } from "lucide-react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { toast } from "sonner"
 import { useQueryClient } from "@tanstack/react-query"
 import { TaskStatusBadge } from "@/components/tasks/task-status-badge"
@@ -313,6 +323,7 @@ function AdminTaskRow({
 }) {
   const cancelMutation = useAdminCancelTask()
   const deleteMutation = useAdminDeleteTask()
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const isActive = task.status === "pending" || task.status === "running"
   const isTerminal = task.status === "completed" || task.status === "failed" || task.status === "cancelled"
 
@@ -462,8 +473,7 @@ function AdminTaskRow({
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   variant="destructive"
-                  disabled={deleteMutation.isPending}
-                  onClick={() => deleteMutation.mutate(task.id)}
+                  onClick={() => setShowDeleteDialog(true)}
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
                   Delete task
@@ -472,6 +482,33 @@ function AdminTaskRow({
             )}
           </DropdownMenuContent>
         </DropdownMenu>
+
+        {/* Delete confirmation dialog */}
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete task</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete this task? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={deleteMutation.isPending}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => {
+                  deleteMutation.mutate(task.id, {
+                    onSuccess: () => setShowDeleteDialog(false),
+                  })
+                }}
+                disabled={deleteMutation.isPending}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {deleteMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </TableCell>
     </TableRow>
   )

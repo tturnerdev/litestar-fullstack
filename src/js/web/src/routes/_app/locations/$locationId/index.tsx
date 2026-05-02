@@ -33,6 +33,7 @@ import { CopyButton } from "@/components/ui/copy-button"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
+import { toast } from "sonner"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useAuthStore } from "@/lib/auth"
 import { formatDateTime, formatRelativeTime } from "@/lib/date-utils"
@@ -142,7 +143,10 @@ function LocationDetailPage() {
       if (editCountry !== (data?.country ?? "")) payload.country = editCountry || null
     }
     updateLocation.mutate(payload, {
-      onSuccess: () => setEditing(false),
+      onSuccess: () => {
+        toast.success("Location updated successfully")
+        setEditing(false)
+      },
     })
   }
 

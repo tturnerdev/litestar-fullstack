@@ -64,6 +64,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { CopyButton } from "@/components/ui/copy-button"
+import { toast } from "sonner"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useDevicesByTeam } from "@/lib/api/hooks/devices"
 import { useDeleteTeam, useUpdateTeam } from "@/lib/api/hooks/teams"
@@ -210,6 +211,7 @@ function TeamDetail() {
 
     updateTeamMutation.mutate(payload, {
       onSuccess: () => {
+        toast.success("Team updated successfully")
         setEditing(false)
       },
     })

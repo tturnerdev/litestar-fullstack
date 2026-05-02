@@ -73,6 +73,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { CopyButton } from "@/components/ui/copy-button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { toast } from "sonner"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import {
@@ -290,7 +291,10 @@ function DeviceDetailPage() {
     if (editLocationId !== (data?.locationId ?? null)) payload.locationId = editLocationId || null
     if (editConnectionId !== (data?.connectionId ?? null)) payload.connectionId = editConnectionId || null
     updateDevice.mutate(payload, {
-      onSuccess: () => setEditing(false),
+      onSuccess: () => {
+        toast.success("Device updated successfully")
+        setEditing(false)
+      },
     })
   }
 
@@ -1222,7 +1226,10 @@ function SettingsTab({ deviceId, data }: SettingsTabProps) {
     }
 
     updateDevice.mutate(payload, {
-      onSuccess: () => setDirty(false),
+      onSuccess: () => {
+        toast.success("Device settings saved successfully")
+        setDirty(false)
+      },
     })
   }
 

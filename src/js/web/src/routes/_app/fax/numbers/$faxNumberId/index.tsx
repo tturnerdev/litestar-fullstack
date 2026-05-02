@@ -72,6 +72,7 @@ import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { formatDateTime, formatRelativeTime } from "@/lib/date-utils"
 import { formatPhoneNumber } from "@/lib/format-utils"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
 
 export const Route = createFileRoute("/_app/fax/numbers/$faxNumberId/")({
   component: FaxNumberDetailPage,
@@ -650,6 +651,7 @@ function FaxNumberSettingsCard({
 
     updateMutation.mutate(payload, {
       onSuccess: () => {
+        toast.success("Fax number updated successfully")
         setEditing(false)
       },
     })

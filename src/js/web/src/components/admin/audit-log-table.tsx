@@ -26,6 +26,13 @@ import {
   X,
 } from "lucide-react"
 import { Fragment, useCallback, useMemo, useRef, useState } from "react"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -71,7 +78,22 @@ import type { AuditLogEntry } from "@/lib/generated/api"
 
 // ── Constants ──────────────────────────────────────────────────────────────
 
-const PAGE_SIZE = 50
+const PAGE_SIZES = [10, 25, 50, 100] as const
+const DEFAULT_PAGE_SIZE = 50
+const PAGE_SIZE_STORAGE_KEY = "admin-audit-page-size"
+
+function getStoredPageSize(): number {
+  try {
+    const stored = localStorage.getItem(PAGE_SIZE_STORAGE_KEY)
+    if (stored) {
+      const parsed = Number(stored)
+      if ((PAGE_SIZES as readonly number[]).includes(parsed)) return parsed
+    }
+  } catch {
+    // localStorage unavailable
+  }
+  return DEFAULT_PAGE_SIZE
+}
 
 /** Flat list of all known action types for the FilterDropdown. */
 const ACTION_FILTER_OPTIONS: FilterOption[] = [
@@ -932,6 +954,18 @@ function AuditLogStatsBar({ stats, isLoading }: { stats: AuditStats; isLoading: 
 export function AuditLogTable() {
   // Pagination
   const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(getStoredPageSize)
+
+  const handlePageSizeChange = useCallback((value: string) => {
+    const size = Number(value)
+    setPageSize(size)
+    setPage(1)
+    try {
+      localStorage.setItem(PAGE_SIZE_STORAGE_KEY, value)
+    } catch {
+      // localStorage unavailable
+    }
+  }, [])
 
   // Filters
   const [search, setSearch] = useState("")
@@ -964,7 +998,7 @@ export function AuditLogTable() {
   // Data query
   const { data, isLoading, isError } = useAdminAuditLogs({
     page,
-    pageSize: PAGE_SIZE,
+    pageSize,
     search: search || undefined,
     actorEmail: debouncedActorEmail || undefined,
     actions: selectedActions.length > 0 ? selectedActions : undefined,
@@ -987,8 +1021,8 @@ export function AuditLogTable() {
   })
 
   const totalPages = useMemo(
-    () => Math.max(1, Math.ceil((data?.total ?? 0) / PAGE_SIZE)),
-    [data?.total],
+    () => Math.max(1, Math.ceil((data?.total ?? 0) / pageSize)),
+    [data?.total, pageSize],
   )
 
   const stats = useMemo(
@@ -1555,23 +1589,40 @@ export function AuditLogTable() {
             <p className="text-xs text-muted-foreground">
               Page {page} of {totalPages} ({totalCount.toLocaleString()} total)
             </p>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page <= 1}
-              >
-                Previous
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page >= totalPages}
-              >
-                Next
-              </Button>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Rows per page</span>
+                <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
+                  <SelectTrigger className="h-8 w-[70px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PAGE_SIZES.map((size) => (
+                      <SelectItem key={size} value={String(size)}>
+                        {size}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page <= 1}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page >= totalPages}
+                >
+                  Next
+                </Button>
+              </div>
             </div>
           </div>
         </div>

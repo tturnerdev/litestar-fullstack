@@ -76,6 +76,7 @@ import { useDevicesByExtension } from "@/lib/api/hooks/devices"
 import { useGatewayLookupExtension } from "@/lib/api/hooks/gateway"
 import { useTeams } from "@/lib/api/hooks/teams"
 import { formatDuration } from "@/lib/format-utils"
+import { toast } from "sonner"
 
 const searchSchema = z.object({
   tab: z.string().optional(),
@@ -652,7 +653,10 @@ function CallForwardingCard({
       return
     }
     updateExtension.mutate(patch, {
-      onSuccess: () => setIsEditing(false),
+      onSuccess: () => {
+        toast.success("Extension updated successfully")
+        setIsEditing(false)
+      },
     })
   }
 
