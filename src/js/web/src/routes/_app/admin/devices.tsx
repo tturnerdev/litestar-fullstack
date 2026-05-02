@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useState } from "react"
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
+import { createFileRoute } from "@tanstack/react-router"
 import { cn } from "@/lib/utils"
 import {
   AlertCircle,
-  ArrowRight,
   Download,
   HardDrive,
   Monitor,
@@ -26,9 +25,9 @@ import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { EmptyState } from "@/components/ui/empty-state"
 import { useAdminDevices, useAdminDeviceStats } from "@/lib/api/hooks/admin"
+import type { AdminDeviceSummary } from "@/lib/generated/api/types.gen"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { formatDateTime } from "@/lib/date-utils"
-import type { AdminDeviceSummary } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/admin/devices")({
   component: AdminDevicesPage,
@@ -52,7 +51,6 @@ const statConfig = [
     color: "text-blue-600 dark:text-blue-400",
     bg: "bg-blue-500/10",
     hoverBg: "group-hover:bg-blue-500",
-    to: "/devices" as const,
   },
   {
     key: "active" as const,
@@ -62,7 +60,6 @@ const statConfig = [
     color: "text-emerald-600 dark:text-emerald-400",
     bg: "bg-emerald-500/10",
     hoverBg: "group-hover:bg-emerald-500",
-    to: "/devices" as const,
   },
   {
     key: "online" as const,
@@ -72,7 +69,6 @@ const statConfig = [
     color: "text-green-600 dark:text-green-400",
     bg: "bg-green-500/10",
     hoverBg: "group-hover:bg-green-500",
-    to: "/devices" as const,
   },
   {
     key: "offline" as const,
@@ -82,7 +78,6 @@ const statConfig = [
     color: "text-red-600 dark:text-red-400",
     bg: "bg-red-500/10",
     hoverBg: "group-hover:bg-red-500",
-    to: "/devices" as const,
   },
 ]
 
@@ -116,7 +111,6 @@ function StatsCardSkeleton() {
 
 function AdminDevicesPage() {
   useDocumentTitle("Admin Devices")
-  const navigate = useNavigate()
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState("")
   const debouncedSearch = useDebouncedValue(search)
@@ -181,22 +175,20 @@ function AdminDevicesPage() {
               const Icon = stat.icon
               const value = stats?.[stat.key] ?? 0
               return (
-                <Link key={stat.key} to={stat.to} className="group">
-                  <Card className="transition-all duration-200 group-hover:shadow-md group-hover:border-primary/30 group-hover:-translate-y-0.5">
-                    <CardHeader className="flex flex-row items-center justify-between pb-2">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">{stat.label}</CardTitle>
-                      <div
-                        className={`flex h-9 w-9 items-center justify-center rounded-lg ${stat.bg} ${stat.color} transition-colors ${stat.hoverBg} group-hover:text-primary-foreground`}
-                      >
-                        <Icon className="h-4 w-4" />
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <span className="text-3xl font-semibold tracking-tight">{value}</span>
-                      <p className="mt-1.5 text-xs text-muted-foreground">{stat.subtitle}</p>
-                    </CardContent>
-                  </Card>
-                </Link>
+                <Card key={stat.key} className="transition-all duration-200 hover:shadow-md hover:border-primary/30 hover:-translate-y-0.5">
+                  <CardHeader className="flex flex-row items-center justify-between pb-2">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">{stat.label}</CardTitle>
+                    <div
+                      className={`flex h-9 w-9 items-center justify-center rounded-lg ${stat.bg} ${stat.color}`}
+                    >
+                      <Icon className="h-4 w-4" />
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <span className="text-3xl font-semibold tracking-tight">{value}</span>
+                    <p className="mt-1.5 text-xs text-muted-foreground">{stat.subtitle}</p>
+                  </CardContent>
+                </Card>
               )
             })}
           </div>
@@ -217,12 +209,6 @@ function AdminDevicesPage() {
                   <CardDescription>Latest registered devices across all teams</CardDescription>
                 </div>
               </div>
-              <Link to="/devices">
-                <Button variant="outline" size="sm" className="gap-1.5">
-                  View all
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </Button>
-              </Link>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -256,7 +242,7 @@ function AdminDevicesPage() {
                   </TableHeader>
                   <TableBody>
                     {recentDevices.map((device, index) => (
-                      <TableRow key={device.id} className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")} onClick={() => navigate({ to: "/devices/$deviceId", params: { deviceId: device.id } })} tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter") navigate({ to: "/devices/$deviceId", params: { deviceId: device.id } }) }}>
+                      <TableRow key={device.id} className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")}>
                         <TableCell className="font-medium">{device.name}</TableCell>
                         <TableCell className="font-mono text-muted-foreground text-sm">{device.macAddress ?? "—"}</TableCell>
                         <TableCell className="text-muted-foreground">{device.model ?? "—"}</TableCell>
@@ -298,24 +284,30 @@ function AdminDevicesPage() {
                   <CardDescription>{total} device{total !== 1 ? "s" : ""} total</CardDescription>
                 </div>
               </div>
-              <div className="relative max-w-sm">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  placeholder="Search devices..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="pl-9 pr-8"
-                />
-                {search && (
-                  <button
-                    type="button"
-                    onClick={() => setSearch("")}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                    <span className="sr-only">Clear search</span>
-                  </button>
-                )}
+              <div className="flex items-center gap-2">
+                <div className="relative max-w-sm">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    placeholder="Search devices..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="pl-9 pr-8"
+                  />
+                  {search && (
+                    <button
+                      type="button"
+                      onClick={() => setSearch("")}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                      <span className="sr-only">Clear search</span>
+                    </button>
+                  )}
+                </div>
+                <Button variant="outline" size="sm" onClick={handleExport} disabled={!devices.length}>
+                  <Download className="mr-2 h-4 w-4" />
+                  Export
+                </Button>
               </div>
             </div>
           </CardHeader>
@@ -357,7 +349,7 @@ function AdminDevicesPage() {
                     </TableHeader>
                     <TableBody>
                       {devices.map((device, index) => (
-                        <TableRow key={device.id} className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")} onClick={() => navigate({ to: "/devices/$deviceId", params: { deviceId: device.id } })} tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter") navigate({ to: "/devices/$deviceId", params: { deviceId: device.id } }) }}>
+                        <TableRow key={device.id} className={cn("cursor-pointer hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")}>
                           <TableCell className="font-medium">{device.name}</TableCell>
                           <TableCell className="font-mono text-muted-foreground text-sm">{device.macAddress ?? "—"}</TableCell>
                           <TableCell className="text-muted-foreground">{device.model ?? "—"}</TableCell>
