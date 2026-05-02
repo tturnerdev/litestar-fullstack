@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router"
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 import {
@@ -8,6 +8,7 @@ import {
   ChevronDown,
   Clock,
   Download,
+  Eye,
   Home,
   Loader2,
   MoreVertical,
@@ -1022,13 +1023,21 @@ function WebhookRow({
 }) {
   const testWebhookMutation = useTestWebhook()
   const [deliveriesOpen, setDeliveriesOpen] = useState(false)
+  const navigate = useNavigate()
 
   return (
     <Collapsible open={deliveriesOpen} onOpenChange={setDeliveriesOpen} asChild>
       <>
         <TableRow
           data-state={selected ? "selected" : undefined}
-          className={`transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`}
+          className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`}
+          onClick={(e) => {
+            const target = e.target as HTMLElement
+            if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) {
+              return
+            }
+            navigate({ to: "/webhooks/$webhookId", params: { webhookId: webhook.id } })
+          }}
         >
           <TableCell>
             <Checkbox
@@ -1044,7 +1053,14 @@ function WebhookRow({
             <div className="flex items-center gap-2">
               <Webhook className="h-4 w-4 text-muted-foreground shrink-0" />
               <div className="min-w-0">
-                <span className="font-medium">{webhook.name}</span>
+                <Link
+                  to="/webhooks/$webhookId"
+                  params={{ webhookId: webhook.id }}
+                  className="font-medium hover:underline"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {webhook.name}
+                </Link>
                 <span className="block sm:hidden text-xs text-muted-foreground font-mono truncate" title={webhook.url}>
                   {truncateUrl(webhook.url, 30)}
                 </span>
@@ -1111,6 +1127,12 @@ function WebhookRow({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  <DropdownMenuItem asChild>
+                    <Link to="/webhooks/$webhookId" params={{ webhookId: webhook.id }}>
+                      <Eye className="mr-2 h-4 w-4" />
+                      View details
+                    </Link>
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={onEdit}>
                     <Pencil className="mr-2 h-4 w-4" />
                     Edit

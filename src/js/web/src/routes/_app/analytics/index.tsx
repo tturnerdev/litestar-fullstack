@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   AlertCircle,
   BarChart3,
+  ChevronDown,
   Clock,
   Download,
   FileText,
@@ -12,8 +13,19 @@ import {
   PhoneMissed,
   PhoneOutgoing,
   Search,
+  TrendingUp,
   X,
 } from "lucide-react"
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Legend,
+  ResponsiveContainer,
+  Tooltip as RechartsTooltip,
+  XAxis,
+  YAxis,
+} from "recharts"
 
 import { Badge } from "@/components/ui/badge"
 import {
@@ -28,6 +40,7 @@ import { BulkActionBar, createExportAction } from "@/components/ui/bulk-action-b
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { DateRangeFilter, getPresetDates } from "@/components/ui/date-range-filter"
 import {
   Dialog,
@@ -571,6 +584,138 @@ function DashboardTab() {
   )
 }
 
+// -- Call Volume chart (recharts) ---------------------------------------------
+
+interface CallVolumeChartData {
+  date: string
+  total: number
+  inbound: number
+  outbound: number
+}
+
+function CallVolumeSection({ items }: { items: CallRecord[] }) {
+  const [open, setOpen] = useState(true)
+
+  const chartData = useMemo<CallVolumeChartData[]>(() => {
+    const dailyCounts = new Map<string, { total: number; inbound: number; outbound: number }>()
+    for (const call of items) {
+      const date = call.startedAt
+        ? new Date(call.startedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+        : "Unknown"
+      const existing = dailyCounts.get(date) ?? { total: 0, inbound: 0, outbound: 0 }
+      existing.total++
+      if (call.direction === "inbound") existing.inbound++
+      else existing.outbound++
+      dailyCounts.set(date, existing)
+    }
+    return Array.from(dailyCounts.entries()).map(([date, counts]) => ({
+      date,
+      ...counts,
+    }))
+  }, [items])
+
+  const summaryStats = useMemo(() => {
+    const totalCalls = items.length
+    const inbound = items.filter((c) => c.direction === "inbound").length
+    const outbound = items.filter((c) => c.direction === "outbound").length
+    const uniqueDays = new Set(
+      items
+        .filter((c) => c.startedAt)
+        .map((c) => new Date(c.startedAt).toDateString()),
+    ).size
+    const avgPerDay = uniqueDays > 0 ? (totalCalls / uniqueDays).toFixed(1) : "0"
+    return { totalCalls, inbound, outbound, avgPerDay }
+  }, [items])
+
+  if (items.length === 0) return null
+
+  return (
+    <Collapsible open={open} onOpenChange={setOpen}>
+      <Card>
+        <CollapsibleTrigger asChild>
+          <CardHeader className="cursor-pointer select-none">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-base">Call Volume</CardTitle>
+              </div>
+              <ChevronDown
+                className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+              />
+            </div>
+          </CardHeader>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <CardContent className="space-y-4">
+            {/* Summary stats row */}
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <div className="rounded-md border p-3">
+                <p className="text-xs font-medium text-muted-foreground">Total Calls</p>
+                <p className="text-xl font-bold">{summaryStats.totalCalls.toLocaleString()}</p>
+              </div>
+              <div className="rounded-md border p-3">
+                <p className="text-xs font-medium text-muted-foreground">Inbound</p>
+                <p className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                  {summaryStats.inbound.toLocaleString()}
+                </p>
+              </div>
+              <div className="rounded-md border p-3">
+                <p className="text-xs font-medium text-muted-foreground">Outbound</p>
+                <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
+                  {summaryStats.outbound.toLocaleString()}
+                </p>
+              </div>
+              <div className="rounded-md border p-3">
+                <p className="text-xs font-medium text-muted-foreground">Avg / Day</p>
+                <p className="text-xl font-bold">{summaryStats.avgPerDay}</p>
+              </div>
+            </div>
+
+            {/* Recharts bar chart */}
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                <XAxis
+                  dataKey="date"
+                  className="text-xs"
+                  tick={{ fill: "hsl(var(--muted-foreground))" }}
+                />
+                <YAxis
+                  className="text-xs"
+                  tick={{ fill: "hsl(var(--muted-foreground))" }}
+                  allowDecimals={false}
+                />
+                <RechartsTooltip
+                  contentStyle={{
+                    background: "hsl(var(--card))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "8px",
+                  }}
+                />
+                <Legend />
+                <Bar
+                  dataKey="inbound"
+                  name="Inbound"
+                  fill="hsl(210, 100%, 60%)"
+                  stackId="calls"
+                  radius={[0, 0, 0, 0]}
+                />
+                <Bar
+                  dataKey="outbound"
+                  name="Outbound"
+                  fill="hsl(142, 76%, 46%)"
+                  stackId="calls"
+                  radius={[4, 4, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </CollapsibleContent>
+      </Card>
+    </Collapsible>
+  )
+}
+
 // -- Call Records tab ---------------------------------------------------------
 
 function CallRecordsTab() {
@@ -696,6 +841,9 @@ function CallRecordsTab() {
 
   return (
     <div className="space-y-4">
+      {/* Call Volume chart */}
+      <CallVolumeSection items={filteredItems} />
+
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative max-w-sm flex-1">

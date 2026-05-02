@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query"
 import { Link, createFileRoute, useNavigate, useSearch } from "@tanstack/react-router"
-import { AlertCircle, ArrowRight, Bell, Calendar, CheckCircle2, ChevronRight, Circle, KeyRound, Link2, Mail, Monitor, Palette, Phone, Shield, ShieldAlert, ShieldCheck, Sparkles, User as UserIcon, Users } from "lucide-react"
+import { AlertCircle, ArrowRight, Bell, Calendar, CheckCircle2, ChevronRight, Circle, Download, KeyRound, Link2, Mail, Monitor, Palette, Phone, Shield, ShieldAlert, ShieldCheck, Sparkles, User as UserIcon, Users } from "lucide-react"
 import { useEffect, useMemo } from "react"
 import { toast } from "sonner"
 import { z } from "zod"
@@ -26,6 +26,9 @@ import type { User } from "@/lib/generated/api/types.gen"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useAuthStore } from "@/lib/auth"
 import { formatDateLong } from "@/lib/date-utils"
+import { useNotificationPreferencesStore } from "@/lib/notification-preferences-store"
+import { useSettingsStore } from "@/lib/settings-store"
+import { useTheme } from "@/lib/theme-context"
 
 const profileSearchSchema = z
   .object({
@@ -356,6 +359,72 @@ function ProfileCompletenessCard({ user }: { user: User }) {
   )
 }
 
+function downloadJson(data: unknown, filename: string) {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement("a")
+  a.href = url
+  a.download = filename
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+function DataExportCard({ user }: { user: User }) {
+  const { mode } = useTheme()
+  const { compactMode, dateFormat, reducedMotion, highContrast, fontSize } = useSettingsStore()
+  const { systemAlerts, taskUpdates, teamActivity, supportTickets, deviceAlerts, security } = useNotificationPreferencesStore()
+
+  function handleExport() {
+    const exportData = {
+      exportedAt: new Date().toISOString(),
+      profile: {
+        name: user.name,
+        email: user.email,
+      },
+      preferences: {
+        theme: mode,
+        compactMode,
+        dateFormat,
+        reducedMotion,
+        highContrast,
+        fontSize,
+      },
+      notificationPreferences: {
+        systemAlerts,
+        taskUpdates,
+        teamActivity,
+        supportTickets,
+        deviceAlerts,
+        security,
+      },
+    }
+
+    const date = new Date().toISOString().slice(0, 10)
+    downloadJson(exportData, `profile-data-${date}.json`)
+    toast.success("Your data export has been downloaded.")
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Download className="h-4 w-4 text-muted-foreground" />
+          Your Data
+        </CardTitle>
+        <CardDescription>
+          Download a copy of your personal data. This includes your profile information, preferences, and account activity.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Button variant="outline" size="sm" onClick={handleExport}>
+          <Download className="mr-2 h-4 w-4" />
+          Export Data
+        </Button>
+      </CardContent>
+    </Card>
+  )
+}
+
 function ProfilePage() {
   useDocumentTitle("Profile")
   const queryClient = useQueryClient()
@@ -471,8 +540,15 @@ function ProfilePage() {
 
       <Separator />
 
-      {/* Quick links to Settings */}
+      {/* Data export */}
       <PageSection delay={0.4}>
+        <DataExportCard user={user} />
+      </PageSection>
+
+      <Separator />
+
+      {/* Quick links to Settings */}
+      <PageSection delay={0.5}>
         <QuickLinksCard />
       </PageSection>
     </PageContainer>
