@@ -39,6 +39,7 @@ import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/com
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
+import { CopyButton } from "@/components/ui/copy-button"
 import {
   Dialog,
   DialogContent,
@@ -667,22 +668,28 @@ function FaxEmailRoutesPage() {
                         />
                       </TableCell>
                       <TableCell className="font-mono text-sm">
-                        {route.emailAddress}
+                        <span className="inline-flex items-center gap-1">
+                          {route.emailAddress}
+                          <CopyButton value={route.emailAddress} label="email address" />
+                        </span>
                       </TableCell>
                       <TableCell>
-                        <Link
-                          to="/fax/numbers/$faxNumberId"
-                          params={{ faxNumberId: route.faxNumberId }}
-                          className="text-sm text-primary hover:underline"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <span className="font-mono">{route.faxNumber}</span>
-                          {route.faxNumberLabel && (
-                            <span className="ml-1.5 text-muted-foreground">
-                              ({route.faxNumberLabel})
-                            </span>
-                          )}
-                        </Link>
+                        <span className="inline-flex items-center gap-1">
+                          <Link
+                            to="/fax/numbers/$faxNumberId"
+                            params={{ faxNumberId: route.faxNumberId }}
+                            className="text-sm text-primary hover:underline"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <span className="font-mono">{route.faxNumber}</span>
+                            {route.faxNumberLabel && (
+                              <span className="ml-1.5 text-muted-foreground">
+                                ({route.faxNumberLabel})
+                              </span>
+                            )}
+                          </Link>
+                          <CopyButton value={route.faxNumber} label="fax number" />
+                        </span>
                       </TableCell>
                       <TableCell>
                         <Badge

@@ -12,6 +12,7 @@ import {
   Loader2,
   MoreVertical,
   Pause,
+  SlidersHorizontal,
   Timer,
   Trash2,
   XCircle,
@@ -27,8 +28,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
@@ -107,6 +110,26 @@ const csvHeaders: CsvHeader<AdminTaskSummary>[] = [
   { label: "Completed", accessor: (t) => (t.completedAt ? formatDateTime(t.completedAt) : "") },
   { label: "Created", accessor: (t) => (t.createdAt ? formatDateTime(t.createdAt) : "") },
 ]
+
+const COLUMN_VISIBILITY_KEY = "admin-tasks-columns"
+
+const TOGGLEABLE_COLUMNS = [
+  { key: "progress", label: "Progress" },
+  { key: "team", label: "Team" },
+  { key: "entity", label: "Entity" },
+  { key: "started", label: "Started" },
+  { key: "completed", label: "Completed" },
+] as const
+
+type ColumnVisibility = Record<string, boolean>
+
+function loadColumnVisibility(): ColumnVisibility {
+  try {
+    return JSON.parse(localStorage.getItem(COLUMN_VISIBILITY_KEY) ?? "{}")
+  } catch {
+    return {}
+  }
+}
 
 // -- Helpers ------------------------------------------------------------------
 
@@ -263,12 +286,14 @@ function AdminTaskRow({
   selected,
   onToggle,
   onRowClick,
+  isColumnVisible,
 }: {
   task: AdminTaskSummary
   index: number
   selected: boolean
   onToggle: () => void
   onRowClick: () => void
+  isColumnVisible: (col: string) => boolean
 }) {
   const cancelMutation = useAdminCancelTask()
   const deleteMutation = useAdminDeleteTask()
@@ -315,63 +340,73 @@ function AdminTaskRow({
       <TableCell>
         <TaskStatusBadge status={task.status} />
       </TableCell>
-      <TableCell>
-        {task.progress != null && task.progress > 0 ? (
-          <div className="flex items-center gap-2 min-w-[100px]">
-            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
-              <div
-                className={`h-full rounded-full transition-all duration-300 ${
-                  task.status === "failed"
-                    ? "bg-red-500"
-                    : task.status === "completed"
-                      ? "bg-green-500"
-                      : "bg-blue-500"
-                }`}
-                style={{ width: `${Math.min(task.progress, 100)}%` }}
-              />
+      {isColumnVisible("progress") && (
+        <TableCell>
+          {task.progress != null && task.progress > 0 ? (
+            <div className="flex items-center gap-2 min-w-[100px]">
+              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+                <div
+                  className={`h-full rounded-full transition-all duration-300 ${
+                    task.status === "failed"
+                      ? "bg-red-500"
+                      : task.status === "completed"
+                        ? "bg-green-500"
+                        : "bg-blue-500"
+                  }`}
+                  style={{ width: `${Math.min(task.progress, 100)}%` }}
+                />
+              </div>
+              <span className="text-xs font-medium text-muted-foreground w-8 text-right">
+                {Math.round(task.progress)}%
+              </span>
             </div>
-            <span className="text-xs font-medium text-muted-foreground w-8 text-right">
-              {Math.round(task.progress)}%
-            </span>
-          </div>
-        ) : (
-          <span className="text-xs text-muted-foreground">--</span>
-        )}
-      </TableCell>
-      <TableCell className="hidden lg:table-cell">
-        <span className="text-sm">{task.teamName ?? "--"}</span>
-      </TableCell>
-      <TableCell className="hidden md:table-cell">
-        <span className="text-sm">{formatEntityType(task.entityType)}</span>
-      </TableCell>
-      <TableCell className="hidden md:table-cell">
-        {task.startedAt ? (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="cursor-default text-xs text-muted-foreground">
-                {formatRelativeTimeShort(task.startedAt)}
-              </span>
-            </TooltipTrigger>
-            <TooltipContent>{formatDateTime(task.startedAt)}</TooltipContent>
-          </Tooltip>
-        ) : (
-          <span className="text-xs text-muted-foreground">--</span>
-        )}
-      </TableCell>
-      <TableCell className="hidden md:table-cell">
-        {task.completedAt ? (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="cursor-default text-xs text-muted-foreground">
-                {formatRelativeTimeShort(task.completedAt)}
-              </span>
-            </TooltipTrigger>
-            <TooltipContent>{formatDateTime(task.completedAt)}</TooltipContent>
-          </Tooltip>
-        ) : (
-          <span className="text-xs text-muted-foreground">--</span>
-        )}
-      </TableCell>
+          ) : (
+            <span className="text-xs text-muted-foreground">--</span>
+          )}
+        </TableCell>
+      )}
+      {isColumnVisible("team") && (
+        <TableCell>
+          <span className="text-sm">{task.teamName ?? "--"}</span>
+        </TableCell>
+      )}
+      {isColumnVisible("entity") && (
+        <TableCell>
+          <span className="text-sm">{formatEntityType(task.entityType)}</span>
+        </TableCell>
+      )}
+      {isColumnVisible("started") && (
+        <TableCell>
+          {task.startedAt ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="cursor-default text-xs text-muted-foreground">
+                  {formatRelativeTimeShort(task.startedAt)}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>{formatDateTime(task.startedAt)}</TooltipContent>
+            </Tooltip>
+          ) : (
+            <span className="text-xs text-muted-foreground">--</span>
+          )}
+        </TableCell>
+      )}
+      {isColumnVisible("completed") && (
+        <TableCell>
+          {task.completedAt ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="cursor-default text-xs text-muted-foreground">
+                  {formatRelativeTimeShort(task.completedAt)}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>{formatDateTime(task.completedAt)}</TooltipContent>
+            </Tooltip>
+          ) : (
+            <span className="text-xs text-muted-foreground">--</span>
+          )}
+        </TableCell>
+      )}
       <TableCell className="text-right">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -440,6 +475,20 @@ function AdminTasksPage() {
   const [taskTypeFilter, setTaskTypeFilter] = useState("all")
   const [entityTypeFilter, setEntityTypeFilter] = useState("all")
   const [page, setPage] = useState(1)
+
+  // Column visibility
+  const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(loadColumnVisibility)
+  const isColumnVisible = useCallback(
+    (col: string) => columnVisibility[col] !== false,
+    [columnVisibility],
+  )
+  const toggleColumn = useCallback((col: string) => {
+    setColumnVisibility((prev) => {
+      const updated = { ...prev, [col]: prev[col] !== false ? false : true }
+      localStorage.setItem(COLUMN_VISIBILITY_KEY, JSON.stringify(updated))
+      return updated
+    })
+  }, [])
 
   // Reset page when filters change
   useEffect(() => {
@@ -616,6 +665,27 @@ function AdminTasksPage() {
         breadcrumbs={<AdminBreadcrumbs />}
         actions={
           <div className="flex items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <SlidersHorizontal className="mr-1.5 h-3.5 w-3.5" />
+                  Columns
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-44">
+                <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {TOGGLEABLE_COLUMNS.map((col) => (
+                  <DropdownMenuCheckboxItem
+                    key={col.key}
+                    checked={isColumnVisible(col.key)}
+                    onCheckedChange={() => toggleColumn(col.key)}
+                  >
+                    {col.label}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button variant="outline" size="sm" onClick={handleExportAll} disabled={!hasData}>
               <Download className="mr-1.5 h-3.5 w-3.5" />
               Export
@@ -745,11 +815,11 @@ function AdminTasksPage() {
                     </TableHead>
                     <TableHead>Task Type</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Progress</TableHead>
-                    <TableHead className="hidden lg:table-cell">Team</TableHead>
-                    <TableHead className="hidden md:table-cell">Entity</TableHead>
-                    <TableHead className="hidden md:table-cell">Started</TableHead>
-                    <TableHead className="hidden md:table-cell">Completed</TableHead>
+                    {isColumnVisible("progress") && <TableHead>Progress</TableHead>}
+                    {isColumnVisible("team") && <TableHead>Team</TableHead>}
+                    {isColumnVisible("entity") && <TableHead>Entity</TableHead>}
+                    {isColumnVisible("started") && <TableHead>Started</TableHead>}
+                    {isColumnVisible("completed") && <TableHead>Completed</TableHead>}
                     <TableHead className="w-16 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -762,6 +832,7 @@ function AdminTasksPage() {
                       selected={selectedIds.has(task.id)}
                       onToggle={() => toggleOne(task.id)}
                       onRowClick={() => handleRowClick(task.id)}
+                      isColumnVisible={isColumnVisible}
                     />
                   ))}
                 </TableBody>

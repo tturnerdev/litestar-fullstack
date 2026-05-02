@@ -202,7 +202,10 @@ function PhoneNumberDetailPage() {
                 <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
                   <div>
                     <p className="text-muted-foreground">Number</p>
-                    <p className="font-mono text-base font-medium">{formatPhoneNumber(data.number)}</p>
+                    <div className="flex items-center gap-1">
+                      <p className="font-mono text-base font-medium">{formatPhoneNumber(data.number)}</p>
+                      <CopyButton value={data.number} label="phone number" />
+                    </div>
                   </div>
                   <div>
                     <p className="text-muted-foreground">Label</p>
@@ -226,7 +229,14 @@ function PhoneNumberDetailPage() {
                   </div>
                   <div>
                     <p className="text-muted-foreground">Team</p>
-                    <p>{data.teamId ?? "Not assigned"}</p>
+                    {data.teamId ? (
+                      <div className="flex items-center gap-1">
+                        <p>{data.teamId}</p>
+                        <CopyButton value={data.teamId} label="team ID" />
+                      </div>
+                    ) : (
+                      <p>Not assigned</p>
+                    )}
                   </div>
                   <div>
                     <p className="text-muted-foreground">E911 Status</p>
@@ -270,8 +280,24 @@ function PhoneNumberDetailPage() {
                   </div>
                   <div>
                     <p className="text-muted-foreground">Team</p>
-                    <p className="font-mono text-xs">{data.teamId ?? "None"}</p>
+                    {data.teamId ? (
+                      <div className="flex items-center gap-1">
+                        <p className="font-mono text-xs">{data.teamId}</p>
+                        <CopyButton value={data.teamId} label="team ID" />
+                      </div>
+                    ) : (
+                      <p className="font-mono text-xs">None</p>
+                    )}
                   </div>
+                  {data.e911RegistrationId && (
+                    <div>
+                      <p className="text-muted-foreground">E911 Registration ID</p>
+                      <div className="flex items-center gap-1">
+                        <p className="font-mono text-xs">{data.e911RegistrationId}</p>
+                        <CopyButton value={data.e911RegistrationId} label="E911 registration ID" />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

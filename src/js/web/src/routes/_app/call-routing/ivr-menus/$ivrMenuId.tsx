@@ -1,9 +1,11 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
-import { useState } from "react"
+import { useCallback, useRef, useState } from "react"
 import {
   AlertCircle,
   AlertTriangle,
+  ArrowDown,
   ArrowLeft,
+  ArrowUp,
   Loader2,
   Menu,
   Pencil,
@@ -45,6 +47,7 @@ import {
   useUpdateIvrMenu,
   useDeleteIvrMenu,
   useCreateIvrMenuOption,
+  useReorderIvrMenuOptions,
   useDeleteIvrMenuOption,
   type IvrMenu,
   type IvrMenuOption,
@@ -157,10 +160,28 @@ function AddOptionRow({ menuId }: { menuId: string }) {
 
 // -- Option Row ---------------------------------------------------------------
 
-function OptionRow({ option, menuId }: { option: IvrMenuOption; menuId: string }) {
+function OptionRow({
+  option,
+  menuId,
+  isFirst,
+  isLast,
+  isHighlighted,
+  onMoveUp,
+  onMoveDown,
+  isReordering,
+}: {
+  option: IvrMenuOption
+  menuId: string
+  isFirst: boolean
+  isLast: boolean
+  isHighlighted: boolean
+  onMoveUp: () => void
+  onMoveDown: () => void
+  isReordering: boolean
+}) {
   const deleteOption = useDeleteIvrMenuOption(menuId)
   return (
-    <TableRow>
+    <TableRow className={isHighlighted ? "animate-highlight-row" : ""}>
       <TableCell>
         <span className="flex h-7 w-7 items-center justify-center rounded-full bg-muted font-mono text-xs font-medium">
           {option.digit}
@@ -168,16 +189,39 @@ function OptionRow({ option, menuId }: { option: IvrMenuOption; menuId: string }
       </TableCell>
       <TableCell><span className="text-sm font-medium">{option.label}</span></TableCell>
       <TableCell><span className="text-sm text-muted-foreground">{option.destination}</span></TableCell>
-      <TableCell className="text-right">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
-          onClick={() => deleteOption.mutate(option.id)}
-          disabled={deleteOption.isPending}
-        >
-          {deleteOption.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
-        </Button>
+      <TableCell>
+        <div className="flex items-center justify-end gap-0.5">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 text-muted-foreground"
+            onClick={onMoveUp}
+            disabled={isFirst || isReordering}
+            aria-label="Move up"
+          >
+            <ArrowUp className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 text-muted-foreground"
+            onClick={onMoveDown}
+            disabled={isLast || isReordering}
+            aria-label="Move down"
+          >
+            <ArrowDown className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 text-muted-foreground hover:text-destructive"
+            onClick={() => deleteOption.mutate(option.id)}
+            disabled={deleteOption.isPending}
+            aria-label="Delete option"
+          >
+            {deleteOption.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+          </Button>
+        </div>
       </TableCell>
     </TableRow>
   )
@@ -243,15 +287,37 @@ function IvrMenuDetailPage() {
     router.navigate({ to: "/call-routing", search: { tab: "ivr-menus" } })
   }
 
+  const [highlightedId, setHighlightedId] = useState<string | null>(null)
+  const highlightTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const reorderMutation = useReorderIvrMenuOptions(ivrMenuId)
+
   const options = data?.options ?? []
-  const sortedOptions = [...options].sort((a, b) => {
-    const da = parseInt(a.digit, 10)
-    const db = parseInt(b.digit, 10)
-    if (isNaN(da) && isNaN(db)) return a.digit.localeCompare(b.digit)
-    if (isNaN(da)) return 1
-    if (isNaN(db)) return -1
-    return da - db
-  })
+  const sortedOptions = [...options].sort((a, b) => a.sortOrder - b.sortOrder)
+
+  const handleReorder = useCallback(
+    (index: number, direction: "up" | "down") => {
+      const swapIndex = direction === "up" ? index - 1 : index + 1
+      if (swapIndex < 0 || swapIndex >= sortedOptions.length) return
+
+      const optA = sortedOptions[index]
+      const optB = sortedOptions[swapIndex]
+
+      reorderMutation.mutate(
+        {
+          optionA: { id: optA.id, sortOrder: optA.sortOrder },
+          optionB: { id: optB.id, sortOrder: optB.sortOrder },
+        },
+        {
+          onSuccess: () => {
+            if (highlightTimer.current) clearTimeout(highlightTimer.current)
+            setHighlightedId(optA.id)
+            highlightTimer.current = setTimeout(() => setHighlightedId(null), 700)
+          },
+        },
+      )
+    },
+    [sortedOptions, reorderMutation],
+  )
 
   // Loading
   if (isLoading) {
@@ -432,12 +498,22 @@ function IvrMenuDetailPage() {
                         <TableHead className="w-16">Digit</TableHead>
                         <TableHead>Label</TableHead>
                         <TableHead>Destination</TableHead>
-                        <TableHead className="w-16 text-right">Actions</TableHead>
+                        <TableHead className="w-28 text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {sortedOptions.map((opt) => (
-                        <OptionRow key={opt.id} option={opt} menuId={ivrMenuId} />
+                      {sortedOptions.map((opt, idx) => (
+                        <OptionRow
+                          key={opt.id}
+                          option={opt}
+                          menuId={ivrMenuId}
+                          isFirst={idx === 0}
+                          isLast={idx === sortedOptions.length - 1}
+                          isHighlighted={highlightedId === opt.id}
+                          isReordering={reorderMutation.isPending}
+                          onMoveUp={() => handleReorder(idx, "up")}
+                          onMoveDown={() => handleReorder(idx, "down")}
+                        />
                       ))}
                     </TableBody>
                   </Table>

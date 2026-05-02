@@ -85,7 +85,12 @@
   --animate-float: float 3s ease-in-out infinite;
   --animate-grid: grid 15s linear infinite;
   --animate-star-drift: star-drift 22s linear infinite;
+  --animate-highlight-row: highlight-row 0.7s ease-out;
 
+  @keyframes highlight-row {
+    0% { background-color: hsl(var(--primary) / 0.15); }
+    100% { background-color: transparent; }
+  }
   @keyframes accordion-down {
     from { height: 0; }
     to { height: var(--radix-accordion-content-height); }

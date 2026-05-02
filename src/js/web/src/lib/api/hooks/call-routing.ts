@@ -500,6 +500,32 @@ export function useDeleteIvrMenuOption(menuId: string) {
   })
 }
 
+export function useReorderIvrMenuOptions(menuId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ optionA, optionB }: { optionA: { id: string; sortOrder: number }; optionB: { id: string; sortOrder: number } }) => {
+      await Promise.all([
+        apiFetch<IvrMenuOption>(`/api/ivr-menus/${menuId}/options/${optionA.id}`, {
+          method: "PATCH",
+          body: JSON.stringify({ sortOrder: optionB.sortOrder }),
+        }),
+        apiFetch<IvrMenuOption>(`/api/ivr-menus/${menuId}/options/${optionB.id}`, {
+          method: "PATCH",
+          body: JSON.stringify({ sortOrder: optionA.sortOrder }),
+        }),
+      ])
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["call-routing", "ivr-menu", menuId] })
+    },
+    onError: (error) => {
+      toast.error("Unable to reorder options", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
+    },
+  })
+}
+
 // ===========================================================================
 // Call Queues
 // ===========================================================================

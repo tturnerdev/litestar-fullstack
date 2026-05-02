@@ -275,12 +275,14 @@ function AdminTeamDetailPage() {
                     <span className="inline-flex items-center gap-1.5">
                       <Hash className="h-3.5 w-3.5" />
                       {data.slug}
+                      <CopyButton value={data.slug} label="slug" />
                     </span>
                   )}
                   {data.ownerEmail && (
                     <span className="inline-flex items-center gap-1.5">
                       <Mail className="h-3.5 w-3.5" />
                       {data.ownerEmail}
+                      <CopyButton value={data.ownerEmail} label="owner email" />
                     </span>
                   )}
                   <span className="inline-flex items-center gap-1.5">
@@ -325,11 +327,17 @@ function AdminTeamDetailPage() {
                 </div>
                 <div>
                   <p className="text-muted-foreground">Slug</p>
-                  <p className="font-mono text-xs">{data.slug}</p>
+                  <div className="flex items-center gap-1">
+                    <p className="font-mono text-xs">{data.slug}</p>
+                    {data.slug && <CopyButton value={data.slug} label="slug" />}
+                  </div>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Owner</p>
-                  <p>{data.ownerEmail ?? "---"}</p>
+                  <div className="flex items-center gap-1">
+                    <p>{data.ownerEmail ?? "---"}</p>
+                    {data.ownerEmail && <CopyButton value={data.ownerEmail} label="owner email" />}
+                  </div>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Status</p>
@@ -574,7 +582,12 @@ function MembersCard({ members }: MembersCardProps) {
                     </Link>
                   </div>
                 </TableCell>
-                <TableCell className="text-muted-foreground">{member.user.email}</TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-1 text-muted-foreground">
+                    {member.user.email}
+                    <CopyButton value={member.user.email} label="email" />
+                  </div>
+                </TableCell>
                 <TableCell>
                   <Badge variant="outline" className="capitalize">{member.role}</Badge>
                 </TableCell>
@@ -685,7 +698,12 @@ function InvitationsCard({ teamId }: { teamId: string }) {
           <TableBody>
             {data.items.map((inv) => (
               <TableRow key={inv.id}>
-                <TableCell className="font-medium">{inv.email}</TableCell>
+                <TableCell className="font-medium">
+                  <div className="flex items-center gap-1">
+                    {inv.email}
+                    <CopyButton value={inv.email} label="email" />
+                  </div>
+                </TableCell>
                 <TableCell>
                   <Badge variant="outline">{inv.role}</Badge>
                 </TableCell>
