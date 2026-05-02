@@ -57,6 +57,7 @@ import { Route as AppConnectionsIndexRouteImport } from './routes/_app/connectio
 import { Route as AppCallRoutingIndexRouteImport } from './routes/_app/call-routing/index'
 import { Route as AppAnalyticsIndexRouteImport } from './routes/_app/analytics/index'
 import { Route as AppAdminIndexRouteImport } from './routes/_app/admin/index'
+import { Route as AppWebhooksWebhookIdRouteImport } from './routes/_app/webhooks/$webhookId'
 import { Route as AppVoicemailBoxIdRouteImport } from './routes/_app/voicemail/$boxId'
 import { Route as AppVoicePhoneNumbersRouteImport } from './routes/_app/voice/phone-numbers'
 import { Route as AppTeamsNewRouteImport } from './routes/_app/teams/new'
@@ -357,6 +358,11 @@ const AppAdminIndexRoute = AppAdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppAdminRoute,
+} as any)
+const AppWebhooksWebhookIdRoute = AppWebhooksWebhookIdRouteImport.update({
+  id: '/webhooks/$webhookId',
+  path: '/webhooks/$webhookId',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppVoicemailBoxIdRoute = AppVoicemailBoxIdRouteImport.update({
   id: '/$boxId',
@@ -743,6 +749,7 @@ export interface FileRoutesByFullPath {
   '/teams/new': typeof AppTeamsNewRoute
   '/voice/phone-numbers': typeof AppVoicePhoneNumbersRouteWithChildren
   '/voicemail/$boxId': typeof AppVoicemailBoxIdRoute
+  '/webhooks/$webhookId': typeof AppWebhooksWebhookIdRoute
   '/admin/': typeof AppAdminIndexRoute
   '/analytics/': typeof AppAnalyticsIndexRoute
   '/call-routing/': typeof AppCallRoutingIndexRoute
@@ -837,6 +844,7 @@ export interface FileRoutesByTo {
   '/tags/new': typeof AppTagsNewRoute
   '/teams/new': typeof AppTeamsNewRoute
   '/voicemail/$boxId': typeof AppVoicemailBoxIdRoute
+  '/webhooks/$webhookId': typeof AppWebhooksWebhookIdRoute
   '/admin': typeof AppAdminIndexRoute
   '/analytics': typeof AppAnalyticsIndexRoute
   '/call-routing': typeof AppCallRoutingIndexRoute
@@ -950,6 +958,7 @@ export interface FileRoutesById {
   '/_app/teams/new': typeof AppTeamsNewRoute
   '/_app/voice/phone-numbers': typeof AppVoicePhoneNumbersRouteWithChildren
   '/_app/voicemail/$boxId': typeof AppVoicemailBoxIdRoute
+  '/_app/webhooks/$webhookId': typeof AppWebhooksWebhookIdRoute
   '/_app/admin/': typeof AppAdminIndexRoute
   '/_app/analytics/': typeof AppAnalyticsIndexRoute
   '/_app/call-routing/': typeof AppCallRoutingIndexRoute
@@ -1062,6 +1071,7 @@ export interface FileRouteTypes {
     | '/teams/new'
     | '/voice/phone-numbers'
     | '/voicemail/$boxId'
+    | '/webhooks/$webhookId'
     | '/admin/'
     | '/analytics/'
     | '/call-routing/'
@@ -1156,6 +1166,7 @@ export interface FileRouteTypes {
     | '/tags/new'
     | '/teams/new'
     | '/voicemail/$boxId'
+    | '/webhooks/$webhookId'
     | '/admin'
     | '/analytics'
     | '/call-routing'
@@ -1268,6 +1279,7 @@ export interface FileRouteTypes {
     | '/_app/teams/new'
     | '/_app/voice/phone-numbers'
     | '/_app/voicemail/$boxId'
+    | '/_app/webhooks/$webhookId'
     | '/_app/admin/'
     | '/_app/analytics/'
     | '/_app/call-routing/'
@@ -1670,6 +1682,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AppAdminIndexRouteImport
       parentRoute: typeof AppAdminRoute
+    }
+    '/_app/webhooks/$webhookId': {
+      id: '/_app/webhooks/$webhookId'
+      path: '/webhooks/$webhookId'
+      fullPath: '/webhooks/$webhookId'
+      preLoaderRoute: typeof AppWebhooksWebhookIdRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_app/voicemail/$boxId': {
       id: '/_app/voicemail/$boxId'
@@ -2406,6 +2425,7 @@ interface AppRouteChildren {
   AppFaxSendRoute: typeof AppFaxSendRoute
   AppTagsNewRoute: typeof AppTagsNewRoute
   AppVoicePhoneNumbersRoute: typeof AppVoicePhoneNumbersRouteWithChildren
+  AppWebhooksWebhookIdRoute: typeof AppWebhooksWebhookIdRoute
   AppFaxIndexRoute: typeof AppFaxIndexRoute
   AppGatewayIndexRoute: typeof AppGatewayIndexRoute
   AppNotificationsIndexRoute: typeof AppNotificationsIndexRoute
@@ -2448,6 +2468,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppFaxSendRoute: AppFaxSendRoute,
   AppTagsNewRoute: AppTagsNewRoute,
   AppVoicePhoneNumbersRoute: AppVoicePhoneNumbersRouteWithChildren,
+  AppWebhooksWebhookIdRoute: AppWebhooksWebhookIdRoute,
   AppFaxIndexRoute: AppFaxIndexRoute,
   AppGatewayIndexRoute: AppGatewayIndexRoute,
   AppNotificationsIndexRoute: AppNotificationsIndexRoute,

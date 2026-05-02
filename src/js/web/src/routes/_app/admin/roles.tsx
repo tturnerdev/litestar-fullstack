@@ -28,7 +28,7 @@ import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { EmptyState } from "@/components/ui/empty-state"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
@@ -84,6 +84,21 @@ const csvHeaders: CsvHeader<PermissionExportRow>[] = [
   { label: "Can View", accessor: (r) => r.canView },
   { label: "Can Edit", accessor: (r) => r.canEdit },
 ]
+
+const permissionMatrix = [
+  { permission: "View Dashboard", superuser: true, admin: true, member: true },
+  { permission: "Manage Team Members", superuser: true, admin: true, member: false },
+  { permission: "Create/Edit Devices", superuser: true, admin: true, member: false },
+  { permission: "View Analytics", superuser: true, admin: true, member: true },
+  { permission: "Manage Connections", superuser: true, admin: false, member: false },
+  { permission: "Admin Settings", superuser: true, admin: false, member: false },
+  { permission: "Bulk Import/Export", superuser: true, admin: true, member: false },
+  { permission: "Manage Webhooks", superuser: true, admin: true, member: false },
+  { permission: "View Audit Logs", superuser: true, admin: true, member: false },
+  { permission: "System Configuration", superuser: true, admin: false, member: false },
+  { permission: "User Management", superuser: true, admin: false, member: false },
+  { permission: "Gateway Configuration", superuser: true, admin: false, member: false },
+] as const
 
 // -- Helpers -----------------------------------------------------------------
 
@@ -258,6 +273,59 @@ function AdminRolesPage() {
             ))}
           </div>
         )}
+      </PageSection>
+
+      {/* Permissions reference matrix */}
+      <PageSection delay={0.2}>
+        <Card>
+          <CardHeader>
+            <CardTitle>Permissions Reference</CardTitle>
+            <CardDescription>
+              A quick-reference guide showing the default capabilities for each system role. Superusers
+              have full access and bypass all permission checks. Team-level overrides configured above
+              take precedence for Admin and Member roles.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto rounded-md border">
+              <Table aria-label="Permissions reference matrix">
+                <TableHeader className="sticky top-0 z-10 bg-background">
+                  <TableRow>
+                    <TableHead className="min-w-[200px]">Capability</TableHead>
+                    <TableHead className="w-[120px] text-center">
+                      <span className="font-semibold">Superuser</span>
+                    </TableHead>
+                    <TableHead className="w-[120px] text-center">
+                      <span className="font-semibold">Admin</span>
+                    </TableHead>
+                    <TableHead className="w-[120px] text-center">
+                      <span className="font-semibold">Member</span>
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {permissionMatrix.map((row, idx) => (
+                    <TableRow
+                      key={row.permission}
+                      className={idx % 2 === 0 ? "bg-muted/30" : ""}
+                    >
+                      <TableCell className="text-sm font-medium">{row.permission}</TableCell>
+                      <TableCell className="text-center">
+                        <PermissionIndicator allowed={row.superuser} />
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <PermissionIndicator allowed={row.admin} />
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <PermissionIndicator allowed={row.member} />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
       </PageSection>
     </PageContainer>
   )

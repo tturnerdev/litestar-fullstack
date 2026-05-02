@@ -34,6 +34,7 @@ import { Switch } from "@/components/ui/switch"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { cn } from "@/lib/utils"
+import { useNotificationPreferencesStore } from "@/lib/notification-preferences-store"
 import { useSettingsStore } from "@/lib/settings-store"
 import { useTheme } from "@/lib/theme-context"
 
@@ -56,6 +57,7 @@ function SettingsPage() {
   const [activeSection, setActiveSection] = useState<SectionId>("appearance")
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({})
   const { resetToDefaults } = useSettingsStore()
+  const { resetToDefaults: resetNotificationPreferences } = useNotificationPreferencesStore()
 
   const scrollToSection = useCallback((id: SectionId) => {
     setActiveSection(id)
@@ -67,10 +69,11 @@ function SettingsPage() {
 
   const handleReset = useCallback(() => {
     resetToDefaults()
+    resetNotificationPreferences()
     toast.success("Settings reset to defaults", {
       description: "All display preferences have been restored.",
     })
-  }, [resetToDefaults])
+  }, [resetToDefaults, resetNotificationPreferences])
 
   return (
     <PageContainer className="flex-1" maxWidth="xl">
