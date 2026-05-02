@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   AlertCircle,
   BellOff,
@@ -41,6 +41,13 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { FilterDropdown, type FilterOption } from "@/components/ui/filter-dropdown"
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { SkeletonTable } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -64,7 +71,8 @@ export const Route = createFileRoute("/_app/voice/extensions/")({
 
 // -- Constants ----------------------------------------------------------------
 
-const PAGE_SIZE = 25
+const DEFAULT_PAGE_SIZE = 25
+const PAGE_SIZE_OPTIONS = [10, 25, 50] as const
 
 const statusOptions: FilterOption[] = [
   { value: "active", label: "Active" },
@@ -166,6 +174,7 @@ function ExtensionsPage() {
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState<string[]>([])
   const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE)
 
   // Sort state
   const [sortKey, setSortKey] = useState<string | null>(null)
@@ -178,7 +187,7 @@ function ExtensionsPage() {
   const [showSyncDialog, setShowSyncDialog] = useState(false)
 
   // Queries & mutations
-  const { data, isLoading, isError, refetch } = useExtensions(page, PAGE_SIZE)
+  const { data, isLoading, isError, refetch } = useExtensions(page, pageSize)
   const { data: phoneData } = usePhoneNumbers(1, 100)
   const deleteExtension = useDeleteExtension()
   const syncExtensions = useSyncExtensions()
@@ -318,7 +327,33 @@ function ExtensionsPage() {
 
   const hasData = filteredItems.length > 0
   const hasAnyExtensions = (data?.items.length ?? 0) > 0
-  const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / PAGE_SIZE))
+  const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / pageSize))
+
+  // "Go to page" input state — kept in sync with the current page
+  const [pageInput, setPageInput] = useState(String(page))
+
+  useEffect(() => {
+    setPageInput(String(page))
+  }, [page])
+
+  const goToPage = useCallback(() => {
+    const parsed = Number.parseInt(pageInput, 10)
+    if (Number.isNaN(parsed) || parsed < 1) {
+      setPage(1)
+      setPageInput("1")
+    } else if (parsed > totalPages) {
+      setPage(totalPages)
+      setPageInput(String(totalPages))
+    } else {
+      setPage(parsed)
+    }
+  }, [pageInput, totalPages])
+
+  const handlePageSizeChange = useCallback((value: string) => {
+    const newSize = Number.parseInt(value, 10)
+    setPageSize(newSize)
+    setPage(1)
+  }, [])
 
   const breadcrumbs = (
     <Breadcrumb>
@@ -493,11 +528,6 @@ function ExtensionsPage() {
                 {data?.total ?? filteredItems.length} extension{(data?.total ?? filteredItems.length) === 1 ? "" : "s"}
                 {statusFilter.length > 0 && " (filtered)"}
               </p>
-              {totalPages > 1 && (
-                <p className="text-xs text-muted-foreground">
-                  Page {page} of {totalPages}
-                </p>
-              )}
             </div>
 
             {/* Table */}
@@ -563,8 +593,41 @@ function ExtensionsPage() {
             </div>
 
             {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-end gap-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Rows per page</span>
+                <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
+                  <SelectTrigger className="h-8 w-[70px]" aria-label="Rows per page">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PAGE_SIZE_OPTIONS.map((size) => (
+                      <SelectItem key={size} value={String(size)}>
+                        {size}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">Page</span>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={totalPages}
+                    value={pageInput}
+                    onChange={(e) => setPageInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") goToPage()
+                    }}
+                    onBlur={goToPage}
+                    className="h-8 w-16 text-center"
+                    aria-label="Go to page"
+                  />
+                  <span className="text-sm text-muted-foreground">of {totalPages}</span>
+                </div>
                 <Button
                   variant="outline"
                   size="sm"
@@ -582,7 +645,7 @@ function ExtensionsPage() {
                   Next
                 </Button>
               </div>
-            )}
+            </div>
           </div>
         )}
       </PageSection>

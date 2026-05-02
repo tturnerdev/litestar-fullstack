@@ -217,6 +217,17 @@ export function useExtensions(page = 1, pageSize = 25) {
   })
 }
 
+export function useExtensionsByPhoneNumber(phoneNumberId: string) {
+  return useQuery({
+    queryKey: ["voice", "extensions", "by-phone-number", phoneNumberId],
+    queryFn: async () => {
+      const response = await apiFetch<PaginatedResponse<Extension>>("/api/voice/extensions?pageSize=100")
+      return response.items.filter((ext) => ext.phoneNumberId === phoneNumberId)
+    },
+    enabled: !!phoneNumberId,
+  })
+}
+
 export function useExtension(id: string) {
   return useQuery({
     queryKey: ["voice", "extension", id],

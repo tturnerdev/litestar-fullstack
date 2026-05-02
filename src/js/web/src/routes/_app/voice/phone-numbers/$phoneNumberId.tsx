@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
-import { AlertCircle, ArrowLeft, Fingerprint, Home, Pencil, Phone, Shield, Trash2 } from "lucide-react"
+import { AlertCircle, ArrowLeft, Fingerprint, Home, Loader2, Pencil, Phone, PhoneForwarded, Shield, Trash2 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import { ExternalDataTab } from "@/components/gateway/external-data-tab"
@@ -21,9 +21,10 @@ import { CopyButton } from "@/components/ui/copy-button"
 import { EmptyState } from "@/components/ui/empty-state"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useDocumentTitle } from "@/hooks/use-document-title"
-import { usePhoneNumber } from "@/lib/api/hooks/voice"
+import { usePhoneNumber, useExtensionsByPhoneNumber } from "@/lib/api/hooks/voice"
 import { useGatewayLookupNumber } from "@/lib/api/hooks/gateway"
 import { formatPhoneNumber } from "@/lib/format-utils"
 
@@ -60,6 +61,7 @@ function PhoneNumberDetailPage() {
   const { data, isLoading, isError, refetch } = usePhoneNumber(phoneNumberId)
   useDocumentTitle(data ? formatPhoneNumber(data.number) : "Phone Number Details")
   const gatewayQuery = useGatewayLookupNumber(data?.number ?? "", tab === "external")
+  const extensionsQuery = useExtensionsByPhoneNumber(phoneNumberId)
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
 
@@ -299,6 +301,64 @@ function PhoneNumberDetailPage() {
                     </div>
                   )}
                 </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <PhoneForwarded className="h-5 w-5 text-muted-foreground" />
+                  <CardTitle>Related Extensions</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {extensionsQuery.isLoading ? (
+                  <div className="flex items-center justify-center py-6 text-muted-foreground">
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Loading extensions...
+                  </div>
+                ) : extensionsQuery.isError ? (
+                  <p className="py-4 text-center text-sm text-muted-foreground">
+                    Unable to load related extensions.
+                  </p>
+                ) : extensionsQuery.data && extensionsQuery.data.length > 0 ? (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Extension</TableHead>
+                        <TableHead>Display Name</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="w-[1%]" />
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {extensionsQuery.data.map((ext) => (
+                        <TableRow key={ext.id}>
+                          <TableCell className="font-mono font-medium">{ext.extensionNumber}</TableCell>
+                          <TableCell>{ext.displayName}</TableCell>
+                          <TableCell>
+                            <Badge variant={ext.isActive ? "default" : "secondary"}>
+                              {ext.isActive ? "Active" : "Inactive"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Link
+                              to="/voice/extensions/$extensionId"
+                              params={{ extensionId: ext.id }}
+                              className="text-sm text-primary hover:underline whitespace-nowrap"
+                            >
+                              View details
+                            </Link>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                ) : (
+                  <p className="py-4 text-center text-sm text-muted-foreground">
+                    No extensions are currently assigned to this phone number.
+                  </p>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
