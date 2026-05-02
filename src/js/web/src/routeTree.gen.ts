@@ -57,6 +57,7 @@ import { Route as AppConnectionsIndexRouteImport } from './routes/_app/connectio
 import { Route as AppCallRoutingIndexRouteImport } from './routes/_app/call-routing/index'
 import { Route as AppAnalyticsIndexRouteImport } from './routes/_app/analytics/index'
 import { Route as AppAdminIndexRouteImport } from './routes/_app/admin/index'
+import { Route as AppWebhooksNewRouteImport } from './routes/_app/webhooks/new'
 import { Route as AppWebhooksWebhookIdRouteImport } from './routes/_app/webhooks/$webhookId'
 import { Route as AppVoicemailBoxIdRouteImport } from './routes/_app/voicemail/$boxId'
 import { Route as AppVoicePhoneNumbersRouteImport } from './routes/_app/voice/phone-numbers'
@@ -69,6 +70,7 @@ import { Route as AppLocationsNewRouteImport } from './routes/_app/locations/new
 import { Route as AppLocationsLocationIdRouteImport } from './routes/_app/locations/$locationId'
 import { Route as AppFaxSendRouteImport } from './routes/_app/fax/send'
 import { Route as AppFaxEmailRoutesRouteImport } from './routes/_app/fax/email-routes'
+import { Route as AppE911NewRouteImport } from './routes/_app/e911/new'
 import { Route as AppE911RegistrationIdRouteImport } from './routes/_app/e911/$registrationId'
 import { Route as AppDevicesNewRouteImport } from './routes/_app/devices/new'
 import { Route as AppConnectionsNewRouteImport } from './routes/_app/connections/new'
@@ -360,6 +362,11 @@ const AppAdminIndexRoute = AppAdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppAdminRoute,
 } as any)
+const AppWebhooksNewRoute = AppWebhooksNewRouteImport.update({
+  id: '/webhooks/new',
+  path: '/webhooks/new',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppWebhooksWebhookIdRoute = AppWebhooksWebhookIdRouteImport.update({
   id: '/webhooks/$webhookId',
   path: '/webhooks/$webhookId',
@@ -419,6 +426,11 @@ const AppFaxEmailRoutesRoute = AppFaxEmailRoutesRouteImport.update({
   id: '/fax/email-routes',
   path: '/fax/email-routes',
   getParentRoute: () => AppRoute,
+} as any)
+const AppE911NewRoute = AppE911NewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AppE911Route,
 } as any)
 const AppE911RegistrationIdRoute = AppE911RegistrationIdRouteImport.update({
   id: '/$registrationId',
@@ -745,6 +757,7 @@ export interface FileRoutesByFullPath {
   '/connections/new': typeof AppConnectionsNewRoute
   '/devices/new': typeof AppDevicesNewRoute
   '/e911/$registrationId': typeof AppE911RegistrationIdRoute
+  '/e911/new': typeof AppE911NewRoute
   '/fax/email-routes': typeof AppFaxEmailRoutesRoute
   '/fax/send': typeof AppFaxSendRoute
   '/locations/$locationId': typeof AppLocationsLocationIdRouteWithChildren
@@ -757,6 +770,7 @@ export interface FileRoutesByFullPath {
   '/voice/phone-numbers': typeof AppVoicePhoneNumbersRouteWithChildren
   '/voicemail/$boxId': typeof AppVoicemailBoxIdRoute
   '/webhooks/$webhookId': typeof AppWebhooksWebhookIdRoute
+  '/webhooks/new': typeof AppWebhooksNewRoute
   '/admin/': typeof AppAdminIndexRoute
   '/analytics/': typeof AppAnalyticsIndexRoute
   '/call-routing/': typeof AppCallRoutingIndexRoute
@@ -844,6 +858,7 @@ export interface FileRoutesByTo {
   '/connections/new': typeof AppConnectionsNewRoute
   '/devices/new': typeof AppDevicesNewRoute
   '/e911/$registrationId': typeof AppE911RegistrationIdRoute
+  '/e911/new': typeof AppE911NewRoute
   '/fax/email-routes': typeof AppFaxEmailRoutesRoute
   '/fax/send': typeof AppFaxSendRoute
   '/locations/new': typeof AppLocationsNewRoute
@@ -853,6 +868,7 @@ export interface FileRoutesByTo {
   '/teams/new': typeof AppTeamsNewRoute
   '/voicemail/$boxId': typeof AppVoicemailBoxIdRoute
   '/webhooks/$webhookId': typeof AppWebhooksWebhookIdRoute
+  '/webhooks/new': typeof AppWebhooksNewRoute
   '/admin': typeof AppAdminIndexRoute
   '/analytics': typeof AppAnalyticsIndexRoute
   '/call-routing': typeof AppCallRoutingIndexRoute
@@ -956,6 +972,7 @@ export interface FileRoutesById {
   '/_app/connections/new': typeof AppConnectionsNewRoute
   '/_app/devices/new': typeof AppDevicesNewRoute
   '/_app/e911/$registrationId': typeof AppE911RegistrationIdRoute
+  '/_app/e911/new': typeof AppE911NewRoute
   '/_app/fax/email-routes': typeof AppFaxEmailRoutesRoute
   '/_app/fax/send': typeof AppFaxSendRoute
   '/_app/locations/$locationId': typeof AppLocationsLocationIdRouteWithChildren
@@ -968,6 +985,7 @@ export interface FileRoutesById {
   '/_app/voice/phone-numbers': typeof AppVoicePhoneNumbersRouteWithChildren
   '/_app/voicemail/$boxId': typeof AppVoicemailBoxIdRoute
   '/_app/webhooks/$webhookId': typeof AppWebhooksWebhookIdRoute
+  '/_app/webhooks/new': typeof AppWebhooksNewRoute
   '/_app/admin/': typeof AppAdminIndexRoute
   '/_app/analytics/': typeof AppAnalyticsIndexRoute
   '/_app/call-routing/': typeof AppCallRoutingIndexRoute
@@ -1070,6 +1088,7 @@ export interface FileRouteTypes {
     | '/connections/new'
     | '/devices/new'
     | '/e911/$registrationId'
+    | '/e911/new'
     | '/fax/email-routes'
     | '/fax/send'
     | '/locations/$locationId'
@@ -1082,6 +1101,7 @@ export interface FileRouteTypes {
     | '/voice/phone-numbers'
     | '/voicemail/$boxId'
     | '/webhooks/$webhookId'
+    | '/webhooks/new'
     | '/admin/'
     | '/analytics/'
     | '/call-routing/'
@@ -1169,6 +1189,7 @@ export interface FileRouteTypes {
     | '/connections/new'
     | '/devices/new'
     | '/e911/$registrationId'
+    | '/e911/new'
     | '/fax/email-routes'
     | '/fax/send'
     | '/locations/new'
@@ -1178,6 +1199,7 @@ export interface FileRouteTypes {
     | '/teams/new'
     | '/voicemail/$boxId'
     | '/webhooks/$webhookId'
+    | '/webhooks/new'
     | '/admin'
     | '/analytics'
     | '/call-routing'
@@ -1280,6 +1302,7 @@ export interface FileRouteTypes {
     | '/_app/connections/new'
     | '/_app/devices/new'
     | '/_app/e911/$registrationId'
+    | '/_app/e911/new'
     | '/_app/fax/email-routes'
     | '/_app/fax/send'
     | '/_app/locations/$locationId'
@@ -1292,6 +1315,7 @@ export interface FileRouteTypes {
     | '/_app/voice/phone-numbers'
     | '/_app/voicemail/$boxId'
     | '/_app/webhooks/$webhookId'
+    | '/_app/webhooks/new'
     | '/_app/admin/'
     | '/_app/analytics/'
     | '/_app/call-routing/'
@@ -1695,6 +1719,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminIndexRouteImport
       parentRoute: typeof AppAdminRoute
     }
+    '/_app/webhooks/new': {
+      id: '/_app/webhooks/new'
+      path: '/webhooks/new'
+      fullPath: '/webhooks/new'
+      preLoaderRoute: typeof AppWebhooksNewRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/webhooks/$webhookId': {
       id: '/_app/webhooks/$webhookId'
       path: '/webhooks/$webhookId'
@@ -1778,6 +1809,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/fax/email-routes'
       preLoaderRoute: typeof AppFaxEmailRoutesRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/_app/e911/new': {
+      id: '/_app/e911/new'
+      path: '/new'
+      fullPath: '/e911/new'
+      preLoaderRoute: typeof AppE911NewRouteImport
+      parentRoute: typeof AppE911Route
     }
     '/_app/e911/$registrationId': {
       id: '/_app/e911/$registrationId'
@@ -2275,11 +2313,13 @@ const AppDevicesRouteWithChildren = AppDevicesRoute._addFileChildren(
 
 interface AppE911RouteChildren {
   AppE911RegistrationIdRoute: typeof AppE911RegistrationIdRoute
+  AppE911NewRoute: typeof AppE911NewRoute
   AppE911IndexRoute: typeof AppE911IndexRoute
 }
 
 const AppE911RouteChildren: AppE911RouteChildren = {
   AppE911RegistrationIdRoute: AppE911RegistrationIdRoute,
+  AppE911NewRoute: AppE911NewRoute,
   AppE911IndexRoute: AppE911IndexRoute,
 }
 
@@ -2447,6 +2487,7 @@ interface AppRouteChildren {
   AppTagsNewRoute: typeof AppTagsNewRoute
   AppVoicePhoneNumbersRoute: typeof AppVoicePhoneNumbersRouteWithChildren
   AppWebhooksWebhookIdRoute: typeof AppWebhooksWebhookIdRoute
+  AppWebhooksNewRoute: typeof AppWebhooksNewRoute
   AppFaxIndexRoute: typeof AppFaxIndexRoute
   AppGatewayIndexRoute: typeof AppGatewayIndexRoute
   AppNotificationsIndexRoute: typeof AppNotificationsIndexRoute
@@ -2490,6 +2531,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppTagsNewRoute: AppTagsNewRoute,
   AppVoicePhoneNumbersRoute: AppVoicePhoneNumbersRouteWithChildren,
   AppWebhooksWebhookIdRoute: AppWebhooksWebhookIdRoute,
+  AppWebhooksNewRoute: AppWebhooksNewRoute,
   AppFaxIndexRoute: AppFaxIndexRoute,
   AppGatewayIndexRoute: AppGatewayIndexRoute,
   AppNotificationsIndexRoute: AppNotificationsIndexRoute,

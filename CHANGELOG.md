@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.202.0 (2026-05-02)
+
+### Added
+- **Support ticket inline editing** — Edit subject, category, and assignee directly on the ticket detail page with inline inputs/selects, dirty state warning, and save/cancel buttons
+- **Webhook create page** — New dedicated form at `/webhooks/new` with name, URL, description, event subscriptions, secret, custom headers, and active toggle
+- **E911 create page** — New dedicated form at `/e911/new` with address fields, phone number select, location prefill, and state/zip validation
+
+### Changed
+- Webhooks list "New webhook" button now navigates to `/webhooks/new` instead of inline dialog
+- E911 list "Register Number" button now navigates to `/e911/new` instead of inline dialog
+- Added `/webhooks` and `/e911` to keyboard shortcut "N" new-item routes
+
 ## v0.201.0 (2026-05-02)
 
 ### Added

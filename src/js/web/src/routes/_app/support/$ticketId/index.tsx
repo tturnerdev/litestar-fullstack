@@ -1,5 +1,5 @@
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   AlertCircle,
   AlertTriangle,
@@ -78,6 +78,14 @@ import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-lay
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { CopyButton } from "@/components/ui/copy-button"
+import { Input } from "@/components/ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import {
   useCloseTicket,
@@ -86,10 +94,13 @@ import {
   useTicket,
   useUpdateTicket,
 } from "@/lib/api/hooks/support"
+import { useAdminUsers } from "@/lib/api/hooks/admin"
 import { useTags, type Tag as TagType } from "@/lib/api/hooks/tags"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { toast } from "sonner"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
+
+const UNASSIGNED_VALUE = "__unassigned__"
 
 export const Route = createFileRoute("/_app/support/$ticketId/")({
   component: TicketDetailPage,
@@ -420,6 +431,67 @@ function TicketDetailPage() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [activityOpen, setActivityOpen] = useState(false)
 
+  // ── Inline editing state ───────────────────────────────────────────────
+  const { data: usersData } = useAdminUsers({ pageSize: 100 })
+  const [editing, setEditing] = useState(false)
+  const [editSubject, setEditSubject] = useState("")
+  const [editCategory, setEditCategory] = useState("")
+  const [editAssignedToId, setEditAssignedToId] = useState("")
+  const justSavedRef = useRef(false)
+
+  const editDirty = useMemo(() => {
+    if (!ticket || !editing) return false
+    return (
+      editSubject !== ticket.subject ||
+      editCategory !== (ticket.category ?? "") ||
+      editAssignedToId !== (ticket.assignedTo?.id ?? UNASSIGNED_VALUE)
+    )
+  }, [editing, editSubject, editCategory, editAssignedToId, ticket])
+
+  useBlocker({
+    shouldBlockFn: () => editDirty && !justSavedRef.current,
+    withResolver: true,
+  })
+
+  const handleStartEditing = useCallback(() => {
+    if (!ticket) return
+    setEditSubject(ticket.subject)
+    setEditCategory(ticket.category ?? "")
+    setEditAssignedToId(ticket.assignedTo?.id ?? UNASSIGNED_VALUE)
+    setEditing(true)
+  }, [ticket])
+
+  const handleCancelEditing = useCallback(() => {
+    setEditing(false)
+  }, [])
+
+  const handleSaveEditing = useCallback(() => {
+    if (!ticket) return
+    const payload: Record<string, unknown> = {}
+    if (editSubject !== ticket.subject) payload.subject = editSubject
+    const newCategory = editCategory || null
+    if (newCategory !== (ticket.category ?? null)) payload.category = newCategory
+    const newAssignedToId = editAssignedToId === UNASSIGNED_VALUE ? null : editAssignedToId
+    const currentAssignedToId = ticket.assignedTo?.id ?? null
+    if (newAssignedToId !== currentAssignedToId) payload.assignedToId = newAssignedToId
+
+    if (Object.keys(payload).length === 0) {
+      setEditing(false)
+      return
+    }
+
+    justSavedRef.current = true
+    updateTicket.mutate(payload, {
+      onSuccess: () => {
+        setEditing(false)
+        justSavedRef.current = false
+      },
+      onError: () => {
+        justSavedRef.current = false
+      },
+    })
+  }, [ticket, editSubject, editCategory, editAssignedToId, updateTicket])
+
   if (isLoading) {
     return <TicketDetailSkeleton />
   }
@@ -442,7 +514,15 @@ function TicketDetailPage() {
     <PageContainer className="flex-1 space-y-6">
       <PageHeader
         eyebrow="Helpdesk"
-        title={ticket.subject}
+        title={editing ? (
+          <Input
+            value={editSubject}
+            onChange={(e) => setEditSubject(e.target.value)}
+            className="h-9 text-lg font-semibold"
+            maxLength={200}
+            autoFocus
+          />
+        ) : ticket.subject}
         description={`${ticket.ticketNumber} · Created ${formatDateTime(ticket.createdAt, "")}`}
         breadcrumbs={
           <Breadcrumb>
@@ -467,11 +547,34 @@ function TicketDetailPage() {
         }
         actions={
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" asChild>
-              <Link to="/support/$ticketId/edit" params={{ ticketId }}>
+            {editing ? (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleCancelEditing}
+                  disabled={updateTicket.isPending}
+                >
+                  <X className="mr-2 h-4 w-4" /> Cancel
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleSaveEditing}
+                  disabled={!editDirty || updateTicket.isPending}
+                >
+                  {updateTicket.isPending ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Check className="mr-2 h-4 w-4" />
+                  )}
+                  Save
+                </Button>
+              </>
+            ) : (
+              <Button variant="outline" size="sm" onClick={handleStartEditing}>
                 <Pencil className="mr-2 h-4 w-4" /> Edit
-              </Link>
-            </Button>
+              </Button>
+            )}
             <Button variant="outline" size="sm" asChild>
               <Link to="/support">
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back
@@ -674,15 +777,31 @@ function TicketDetailPage() {
                   <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center">
                     <Tag className="h-3.5 w-3.5 text-muted-foreground" />
                   </div>
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                       Category
                     </p>
-                    <p className="mt-0.5 text-sm font-medium">
-                      {ticket.category
-                        ? (categoryLabels[ticket.category] ?? ticket.category)
-                        : "None"}
-                    </p>
+                    {editing ? (
+                      <Select value={editCategory} onValueChange={setEditCategory}>
+                        <SelectTrigger className="mt-1 h-8 text-sm">
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">None</SelectItem>
+                          {Object.entries(categoryLabels).map(([value, label]) => (
+                            <SelectItem key={value} value={value}>
+                              {label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <p className="mt-0.5 text-sm font-medium">
+                        {ticket.category
+                          ? (categoryLabels[ticket.category] ?? ticket.category)
+                          : "None"}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -723,11 +842,25 @@ function TicketDetailPage() {
                   <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center">
                     <Users className="h-3.5 w-3.5 text-muted-foreground" />
                   </div>
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                       Assigned To
                     </p>
-                    {ticket.assignedTo ? (
+                    {editing ? (
+                      <Select value={editAssignedToId} onValueChange={setEditAssignedToId}>
+                        <SelectTrigger className="mt-1 h-8 text-sm">
+                          <SelectValue placeholder="Select assignee" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value={UNASSIGNED_VALUE}>Unassigned</SelectItem>
+                          {(usersData?.items ?? []).map((u) => (
+                            <SelectItem key={u.id} value={u.id}>
+                              {u.name || u.email}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : ticket.assignedTo ? (
                       <>
                         <Tooltip>
                           <TooltipTrigger asChild>

@@ -32,15 +32,6 @@ import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/com
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -49,7 +40,6 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import {
   Select,
@@ -62,15 +52,12 @@ import { SkeletonCard } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
   useE911Registrations,
-  useCreateE911Registration,
   useDeleteE911Registration,
   useValidateE911Registration,
   useUnregisteredPhoneNumbers,
   type E911Registration,
-  type E911RegistrationCreate,
   type UnregisteredPhoneNumber,
 } from "@/lib/api/hooks/e911"
-import { useLocations, type Location } from "@/lib/api/hooks/locations"
 import { exportToCsv, type CsvHeader } from "@/lib/csv-export"
 import { useAuthStore } from "@/lib/auth"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
@@ -271,251 +258,6 @@ function E911Row({
 
 // -- Register dialog ----------------------------------------------------------
 
-function RegisterNumberDialog({ teamId }: { teamId: string }) {
-  const [open, setOpen] = useState(false)
-  const createMutation = useCreateE911Registration()
-  const { data: unregistered } = useUnregisteredPhoneNumbers(teamId)
-  const { data: locationsData } = useLocations({ teamId, pageSize: 100 })
-
-  const [phoneNumberId, setPhoneNumberId] = useState("")
-  const [locationId, setLocationId] = useState("")
-  const [addressLine1, setAddressLine1] = useState("")
-  const [addressLine2, setAddressLine2] = useState("")
-  const [city, setCity] = useState("")
-  const [state, setState] = useState("")
-  const [postalCode, setPostalCode] = useState("")
-  const [country, setCountry] = useState("US")
-
-  const [touched, setTouched] = useState<Record<string, boolean>>({})
-  const [submitAttempted, setSubmitAttempted] = useState(false)
-
-  const locations = locationsData?.items ?? []
-
-  function handleLocationSelect(locId: string) {
-    setLocationId(locId)
-    if (locId && locId !== "none") {
-      const loc = locations.find((l) => l.id === locId)
-      if (loc) {
-        setAddressLine1(loc.addressLine1 ?? "")
-        setAddressLine2(loc.addressLine2 ?? "")
-        setCity(loc.city ?? "")
-        setState(loc.state ?? "")
-        setPostalCode(loc.postalCode ?? "")
-        setCountry(loc.country ?? "US")
-      }
-    }
-  }
-
-  function resetForm() {
-    setPhoneNumberId("")
-    setLocationId("")
-    setAddressLine1("")
-    setAddressLine2("")
-    setCity("")
-    setState("")
-    setPostalCode("")
-    setCountry("US")
-    setTouched({})
-    setSubmitAttempted(false)
-  }
-
-  function handleBlur(field: string) {
-    setTouched((prev) => ({ ...prev, [field]: true }))
-  }
-
-  function showError(field: string, value: string): boolean {
-    return (touched[field] || submitAttempted) && !value.trim()
-  }
-
-  const postalCodeFormatError =
-    (touched.postalCode || submitAttempted) &&
-    postalCode.trim() !== "" &&
-    !/^\d{5}(-\d{4})?$/.test(postalCode.trim())
-
-  const stateFormatError =
-    (touched.state || submitAttempted) &&
-    state.trim() !== "" &&
-    !/^[A-Za-z]{2}$/.test(state.trim())
-
-  const isValid =
-    addressLine1.trim() &&
-    city.trim() &&
-    state.trim() &&
-    /^[A-Za-z]{2}$/.test(state.trim()) &&
-    postalCode.trim() &&
-    /^\d{5}(-\d{4})?$/.test(postalCode.trim())
-
-  function handleSubmit() {
-    if (!isValid) {
-      setSubmitAttempted(true)
-      return
-    }
-    const payload: E911RegistrationCreate = {
-      teamId,
-      phoneNumberId: phoneNumberId || undefined,
-      locationId: locationId && locationId !== "none" ? locationId : undefined,
-      addressLine1,
-      addressLine2: addressLine2 || undefined,
-      city,
-      state,
-      postalCode,
-      country,
-    }
-    createMutation.mutate(payload, {
-      onSuccess: () => {
-        toast.success("E911 registration created")
-        setOpen(false)
-        resetForm()
-      },
-      onError: (err) => {
-        toast.error("Failed to create E911 registration", {
-          description: err instanceof Error ? err.message : undefined,
-        })
-      },
-    })
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm() }}>
-      <DialogTrigger asChild>
-        <Button size="sm">
-          <Plus className="mr-2 h-4 w-4" /> Register Number
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>Register E911 Address</DialogTitle>
-          <DialogDescription>
-            Associate a phone number with an E911 emergency address.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="space-y-4 py-2">
-          {/* Phone number select */}
-          <div className="space-y-2">
-            <Label>Phone Number</Label>
-            <Select value={phoneNumberId} onValueChange={setPhoneNumberId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a phone number" />
-              </SelectTrigger>
-              <SelectContent>
-                {(unregistered ?? []).map((pn: UnregisteredPhoneNumber) => (
-                  <SelectItem key={pn.id} value={pn.id}>
-                    {pn.number}{pn.label ? ` (${pn.label})` : ""}
-                  </SelectItem>
-                ))}
-                {(!unregistered || unregistered.length === 0) && (
-                  <SelectItem value="__empty" disabled>
-                    No unregistered numbers available
-                  </SelectItem>
-                )}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Location select (prefill address) */}
-          <div className="space-y-2">
-            <Label>Copy from Location (optional)</Label>
-            <Select value={locationId} onValueChange={handleLocationSelect}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a location to prefill address" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">-- None --</SelectItem>
-                {locations.map((loc: Location) => (
-                  <SelectItem key={loc.id} value={loc.id}>
-                    {loc.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Address fields */}
-          <div className="space-y-2">
-            <Label>Address Line 1 *</Label>
-            <Input
-              value={addressLine1}
-              onChange={(e) => setAddressLine1(e.target.value)}
-              onBlur={() => handleBlur("addressLine1")}
-              placeholder="123 Main St"
-              className={showError("addressLine1", addressLine1) ? "border-destructive" : ""}
-            />
-            {showError("addressLine1", addressLine1) && (
-              <p className="text-sm text-destructive mt-1">Address line 1 is required</p>
-            )}
-          </div>
-          <div className="space-y-2">
-            <Label>Address Line 2</Label>
-            <Input value={addressLine2} onChange={(e) => setAddressLine2(e.target.value)} placeholder="Suite 100" />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label>City *</Label>
-              <Input
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                onBlur={() => handleBlur("city")}
-                placeholder="Springfield"
-                className={showError("city", city) ? "border-destructive" : ""}
-              />
-              {showError("city", city) && (
-                <p className="text-sm text-destructive mt-1">City is required</p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label>State *</Label>
-              <Input
-                value={state}
-                onChange={(e) => setState(e.target.value)}
-                onBlur={() => handleBlur("state")}
-                placeholder="IL"
-                className={showError("state", state) || stateFormatError ? "border-destructive" : ""}
-              />
-              {showError("state", state) && (
-                <p className="text-sm text-destructive mt-1">State is required</p>
-              )}
-              {stateFormatError && (
-                <p className="text-sm text-destructive mt-1">Enter a valid 2-letter state code</p>
-              )}
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label>Postal Code *</Label>
-              <Input
-                value={postalCode}
-                onChange={(e) => setPostalCode(e.target.value)}
-                onBlur={() => handleBlur("postalCode")}
-                placeholder="62701"
-                className={showError("postalCode", postalCode) || postalCodeFormatError ? "border-destructive" : ""}
-              />
-              {showError("postalCode", postalCode) && (
-                <p className="text-sm text-destructive mt-1">Postal code is required</p>
-              )}
-              {postalCodeFormatError && (
-                <p className="text-sm text-destructive mt-1">Enter a valid ZIP code (e.g. 62701 or 62701-1234)</p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label>Country</Label>
-              <Input value={country} onChange={(e) => setCountry(e.target.value)} placeholder="US" />
-            </div>
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => { setOpen(false); resetForm() }}>
-            Cancel
-          </Button>
-          <Button onClick={handleSubmit} disabled={createMutation.isPending}>
-            {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Register
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  )
-}
-
 // -- Main page ----------------------------------------------------------------
 
 function E911Page() {
@@ -689,7 +431,13 @@ function E911Page() {
               <Download className="mr-2 h-4 w-4" />
               Export
             </Button>
-            {teamId && <RegisterNumberDialog teamId={teamId} />}
+            {teamId && (
+              <Button size="sm" asChild>
+                <Link to="/e911/new">
+                  <Plus className="mr-2 h-4 w-4" /> Register Address
+                </Link>
+              </Button>
+            )}
           </div>
         }
       />
@@ -772,7 +520,13 @@ function E911Page() {
             title="No E911 registrations"
             description="Register E911 addresses for your phone numbers to ensure emergency services can locate callers."
             action={
-              teamId ? <RegisterNumberDialog teamId={teamId} /> : undefined
+              teamId ? (
+                <Button size="sm" asChild>
+                  <Link to="/e911/new">
+                    <Plus className="mr-2 h-4 w-4" /> Register Address
+                  </Link>
+                </Button>
+              ) : undefined
             }
           />
         ) : !hasData ? (

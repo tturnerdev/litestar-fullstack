@@ -613,13 +613,13 @@ function DeleteWebhookDialog({
 
 function WebhooksPage() {
   useDocumentTitle("Webhooks")
+  const navigate = useNavigate()
   const searchInputRef = useRef<HTMLInputElement>(null)
 
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(getStoredPageSize)
   const [search, setSearch] = useState("")
   const debouncedSearch = useDebouncedValue(search)
-  const [createOpen, setCreateOpen] = useState(false)
   const [editWebhook, setEditWebhook] = useState<WebhookList | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<WebhookList | null>(null)
   const [selected, setSelected] = useState<Set<string>>(new Set())
@@ -648,7 +648,7 @@ function WebhooksPage() {
       }
       if (e.key === "n" && !e.ctrlKey && !e.metaKey && !e.altKey) {
         e.preventDefault()
-        setCreateOpen(true)
+        navigate({ to: "/webhooks/new" })
       }
     }
     document.addEventListener("keydown", handleKeyDown)
@@ -785,9 +785,11 @@ function WebhooksPage() {
             <Button variant="outline" size="sm" onClick={handleExport} disabled={webhooks.length === 0}>
               <Download className="mr-2 h-4 w-4" /> Export
             </Button>
-            <Button size="sm" onClick={() => setCreateOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" /> New webhook
-              <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">N</kbd>
+            <Button size="sm" asChild>
+              <Link to="/webhooks/new">
+                <Plus className="mr-2 h-4 w-4" /> New webhook
+                <kbd className="ml-1.5 hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">N</kbd>
+              </Link>
             </Button>
           </div>
         }
@@ -842,8 +844,10 @@ function WebhooksPage() {
             title="No webhooks yet"
             description="Create your first webhook to receive event notifications via HTTP POST."
             action={
-              <Button size="sm" onClick={() => setCreateOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" /> New webhook
+              <Button size="sm" asChild>
+                <Link to="/webhooks/new">
+                  <Plus className="mr-2 h-4 w-4" /> New webhook
+                </Link>
               </Button>
             }
           />
@@ -972,9 +976,6 @@ function WebhooksPage() {
           </div>
         )}
       </PageSection>
-
-      {/* Create dialog */}
-      <WebhookFormDialog open={createOpen} onOpenChange={setCreateOpen} />
 
       {/* Edit dialog */}
       <WebhookFormDialog

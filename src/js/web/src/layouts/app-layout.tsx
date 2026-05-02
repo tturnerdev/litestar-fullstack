@@ -18,11 +18,13 @@ import { useAuthStore } from "@/lib/auth"
 const NEW_ITEM_ROUTES: Record<string, string> = {
   "/connections": "/connections/new",
   "/devices": "/devices/new",
+  "/e911": "/e911/new",
   "/fax/numbers": "/fax/numbers/new",
   "/locations": "/locations/new",
   "/support": "/support/new",
   "/tags": "/tags/new",
   "/teams": "/teams/new",
+  "/webhooks": "/webhooks/new",
   "/schedules": "/schedules/new",
   "/voice/extensions": "/voice/extensions/new",
 }
