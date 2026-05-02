@@ -37,6 +37,7 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { FilterDropdown, type FilterOption } from "@/components/ui/filter-dropdown"
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { SkeletonTable } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -55,7 +56,22 @@ export const Route = createFileRoute("/_app/support/")({
 
 // ── Constants ────────────────────────────────────────────────────────────
 
-const PAGE_SIZE = 25
+const PAGE_SIZES = [10, 25, 50, 100] as const
+const DEFAULT_PAGE_SIZE = 25
+const PAGE_SIZE_STORAGE_KEY = "support-page-size"
+
+function getStoredPageSize(): number {
+  try {
+    const stored = localStorage.getItem(PAGE_SIZE_STORAGE_KEY)
+    if (stored) {
+      const parsed = Number(stored)
+      if ((PAGE_SIZES as readonly number[]).includes(parsed)) return parsed
+    }
+  } catch {
+    // localStorage unavailable
+  }
+  return DEFAULT_PAGE_SIZE
+}
 
 const statusOptions: FilterOption[] = [
   { value: "open", label: "Open" },
@@ -127,11 +143,24 @@ function SupportPage() {
   const [startDate, setStartDate] = useState("")
   const [endDate, setEndDate] = useState("")
   const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(getStoredPageSize)
 
   // Reset page when debounced search changes
   useEffect(() => {
     setPage(1)
   }, [debouncedSearch])
+
+  // Persist page size preference
+  const handlePageSizeChange = useCallback((value: string) => {
+    const size = Number(value)
+    setPageSize(size)
+    setPage(1)
+    try {
+      localStorage.setItem(PAGE_SIZE_STORAGE_KEY, value)
+    } catch {
+      // localStorage unavailable
+    }
+  }, [])
 
   // Sort state
   const [sortKey, setSortKey] = useState<string | null>(null)
@@ -156,7 +185,7 @@ function SupportPage() {
     }
   }, [debouncedSearch, statusFilter, priorityFilter, categoryFilter, sortKey, sortDir])
 
-  const { data, isLoading, isError, refetch } = useTickets(page, PAGE_SIZE, serverFilters)
+  const { data, isLoading, isError, refetch } = useTickets(page, pageSize, serverFilters)
 
   // Apply client-side multi-value filters
   const filteredItems = useMemo(() => {
@@ -357,7 +386,7 @@ function SupportPage() {
 
   const hasData = filteredItems.length > 0
   const hasAnyTickets = (data?.items.length ?? 0) > 0
-  const totalPages = data ? Math.ceil(data.total / PAGE_SIZE) : 0
+  const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / pageSize))
 
   const breadcrumbs = (
     <Breadcrumb>
@@ -604,12 +633,24 @@ function SupportPage() {
             </div>
 
             {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-between pt-2">
-                <p className="text-xs text-muted-foreground">
-                  {data!.total} total ticket{data!.total === 1 ? "" : "s"}
-                </p>
-                <div className="flex gap-2">
+            <div className="flex items-center justify-end gap-4 pt-2">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Rows per page</span>
+                <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
+                  <SelectTrigger className="h-8 w-[70px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PAGE_SIZES.map((size) => (
+                      <SelectItem key={size} value={String(size)}>
+                        {size}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {totalPages > 1 && (
+                <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
                     size="sm"
@@ -627,8 +668,8 @@ function SupportPage() {
                     Next
                   </Button>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         )}
       </PageSection>
