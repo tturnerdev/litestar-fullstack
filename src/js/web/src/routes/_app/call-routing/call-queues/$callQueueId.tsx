@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
-import { useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import {
   AlertCircle,
   AlertTriangle,
@@ -34,6 +34,14 @@ import {
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { CopyButton } from "@/components/ui/copy-button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -101,6 +109,245 @@ function DeleteDialog({ name, onDelete, isPending }: { name: string; onDelete: (
         </AlertDialogContent>
       </AlertDialog>
     </>
+  )
+}
+
+// -- Edit Dialog --------------------------------------------------------------
+
+interface EditCallQueueDialogProps {
+  queue: CallQueue
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}
+
+function EditCallQueueDialog({ queue, open, onOpenChange }: EditCallQueueDialogProps) {
+  const [name, setName] = useState(queue.name)
+  const [number, setNumber] = useState(queue.number)
+  const [strategy, setStrategy] = useState(queue.strategy)
+  const [ringTime, setRingTime] = useState(queue.ringTime)
+  const [maxWaitTime, setMaxWaitTime] = useState(queue.maxWaitTime)
+  const [maxCallers, setMaxCallers] = useState(queue.maxCallers)
+  const [wrapupTime, setWrapupTime] = useState(queue.wrapupTime)
+  const [joinEmpty, setJoinEmpty] = useState(queue.joinEmpty)
+  const [leaveWhenEmpty, setLeaveWhenEmpty] = useState(queue.leaveWhenEmpty)
+  const [announceHoldtime, setAnnounceHoldtime] = useState(queue.announceHoldtime)
+  const [timeoutDestination, setTimeoutDestination] = useState(queue.timeoutDestination ?? "")
+  const updateMutation = useUpdateCallQueue(queue.id)
+
+  // Reset form state when the dialog opens or the queue data changes
+  useEffect(() => {
+    if (open) {
+      setName(queue.name)
+      setNumber(queue.number)
+      setStrategy(queue.strategy)
+      setRingTime(queue.ringTime)
+      setMaxWaitTime(queue.maxWaitTime)
+      setMaxCallers(queue.maxCallers)
+      setWrapupTime(queue.wrapupTime)
+      setJoinEmpty(queue.joinEmpty)
+      setLeaveWhenEmpty(queue.leaveWhenEmpty)
+      setAnnounceHoldtime(queue.announceHoldtime)
+      setTimeoutDestination(queue.timeoutDestination ?? "")
+    }
+  }, [open, queue])
+
+  const isDirty = useMemo(() => {
+    if (name !== queue.name) return true
+    if (number !== queue.number) return true
+    if (strategy !== queue.strategy) return true
+    if (ringTime !== queue.ringTime) return true
+    if (maxWaitTime !== queue.maxWaitTime) return true
+    if (maxCallers !== queue.maxCallers) return true
+    if (wrapupTime !== queue.wrapupTime) return true
+    if (joinEmpty !== queue.joinEmpty) return true
+    if (leaveWhenEmpty !== queue.leaveWhenEmpty) return true
+    if (announceHoldtime !== queue.announceHoldtime) return true
+    const dest = timeoutDestination || null
+    if (dest !== (queue.timeoutDestination ?? null)) return true
+    return false
+  }, [name, number, strategy, ringTime, maxWaitTime, maxCallers, wrapupTime, joinEmpty, leaveWhenEmpty, announceHoldtime, timeoutDestination, queue])
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+
+    const payload: Record<string, unknown> = {}
+    if (name !== queue.name) payload.name = name
+    if (number !== queue.number) payload.number = number
+    if (strategy !== queue.strategy) payload.strategy = strategy
+    if (ringTime !== queue.ringTime) payload.ringTime = ringTime
+    if (maxWaitTime !== queue.maxWaitTime) payload.maxWaitTime = maxWaitTime
+    if (maxCallers !== queue.maxCallers) payload.maxCallers = maxCallers
+    if (wrapupTime !== queue.wrapupTime) payload.wrapupTime = wrapupTime
+    if (joinEmpty !== queue.joinEmpty) payload.joinEmpty = joinEmpty
+    if (leaveWhenEmpty !== queue.leaveWhenEmpty) payload.leaveWhenEmpty = leaveWhenEmpty
+    if (announceHoldtime !== queue.announceHoldtime) payload.announceHoldtime = announceHoldtime
+    const dest = timeoutDestination || null
+    if (dest !== (queue.timeoutDestination ?? null)) payload.timeoutDestination = dest
+
+    if (Object.keys(payload).length === 0) {
+      onOpenChange(false)
+      return
+    }
+
+    updateMutation.mutate(payload, {
+      onSuccess: () => {
+        onOpenChange(false)
+      },
+    })
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg">
+        <form onSubmit={handleSubmit}>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Phone className="h-5 w-5 text-muted-foreground" />
+              Edit Call Queue
+            </DialogTitle>
+            <DialogDescription>
+              Update configuration for queue{" "}
+              <span className="font-mono font-medium">{queue.number}</span>.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="edit-cq-name">Name</Label>
+                <Input
+                  id="edit-cq-name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Sales Queue"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-cq-number">Number</Label>
+                <Input
+                  id="edit-cq-number"
+                  value={number}
+                  onChange={(e) => setNumber(e.target.value)}
+                  placeholder="8001"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Strategy</Label>
+              <Select value={strategy} onValueChange={setStrategy}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select strategy" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(strategyLabels).map(([k, v]) => (
+                    <SelectItem key={k} value={k}>{v}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Separator />
+
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div className="space-y-2">
+                <Label htmlFor="edit-cq-ring-time">Ring Time (s)</Label>
+                <Input
+                  id="edit-cq-ring-time"
+                  type="number"
+                  value={ringTime}
+                  onChange={(e) => setRingTime(Number(e.target.value))}
+                  min={5}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-cq-max-wait">Max Wait (s)</Label>
+                <Input
+                  id="edit-cq-max-wait"
+                  type="number"
+                  value={maxWaitTime}
+                  onChange={(e) => setMaxWaitTime(Number(e.target.value))}
+                  min={0}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-cq-max-callers">Max Callers</Label>
+                <Input
+                  id="edit-cq-max-callers"
+                  type="number"
+                  value={maxCallers}
+                  onChange={(e) => setMaxCallers(Number(e.target.value))}
+                  min={1}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-cq-wrapup">Wrapup Time (s)</Label>
+              <Input
+                id="edit-cq-wrapup"
+                type="number"
+                value={wrapupTime}
+                onChange={(e) => setWrapupTime(Number(e.target.value))}
+                min={0}
+              />
+            </div>
+
+            <Separator />
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="edit-cq-join-empty">Join when empty</Label>
+                  <p className="text-xs text-muted-foreground">Allow callers to enter the queue when no agents are available.</p>
+                </div>
+                <Switch id="edit-cq-join-empty" checked={joinEmpty} onCheckedChange={setJoinEmpty} />
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="edit-cq-leave-empty">Leave when empty</Label>
+                  <p className="text-xs text-muted-foreground">Remove callers from the queue if all agents leave.</p>
+                </div>
+                <Switch id="edit-cq-leave-empty" checked={leaveWhenEmpty} onCheckedChange={setLeaveWhenEmpty} />
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="edit-cq-announce">Announce hold time</Label>
+                  <p className="text-xs text-muted-foreground">Tell callers their estimated wait time.</p>
+                </div>
+                <Switch id="edit-cq-announce" checked={announceHoldtime} onCheckedChange={setAnnounceHoldtime} />
+              </div>
+            </div>
+
+            <Separator />
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-cq-timeout-dest">Timeout Destination</Label>
+              <Input
+                id="edit-cq-timeout-dest"
+                value={timeoutDestination}
+                onChange={(e) => setTimeoutDestination(e.target.value)}
+                placeholder="Destination on queue timeout (optional)"
+              />
+              <p className="text-xs text-muted-foreground">
+                Where to route callers when the max wait time is exceeded.
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={!name.trim() || !isDirty || updateMutation.isPending}>
+              {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {updateMutation.isPending ? "Saving..." : "Save changes"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   )
 }
 
@@ -232,55 +479,11 @@ function CallQueueDetailPage() {
   const router = useRouter()
 
   const { data, isLoading, isError, refetch } = useCallQueue(callQueueId)
-  const updateMutation = useUpdateCallQueue(callQueueId)
   const deleteMutation = useDeleteCallQueue()
 
-  const [editing, setEditing] = useState(false)
-  const [editName, setEditName] = useState("")
-  const [editNumber, setEditNumber] = useState("")
-  const [editStrategy, setEditStrategy] = useState("ring_all")
-  const [editRingTime, setEditRingTime] = useState(15)
-  const [editMaxWait, setEditMaxWait] = useState(300)
-  const [editMaxCallers, setEditMaxCallers] = useState(10)
-  const [editWrapup, setEditWrapup] = useState(0)
-  const [editJoinEmpty, setEditJoinEmpty] = useState(false)
-  const [editLeaveEmpty, setEditLeaveEmpty] = useState(true)
-  const [editAnnounceHold, setEditAnnounceHold] = useState(false)
-  const [editTimeoutDest, setEditTimeoutDest] = useState("")
+  const [showEditDialog, setShowEditDialog] = useState(false)
 
   useDocumentTitle(data ? `${data.name} - Call Queues` : "Call Queue Detail")
-
-  function startEditing(q: CallQueue) {
-    setEditName(q.name)
-    setEditNumber(q.number)
-    setEditStrategy(q.strategy)
-    setEditRingTime(q.ringTime)
-    setEditMaxWait(q.maxWaitTime)
-    setEditMaxCallers(q.maxCallers)
-    setEditWrapup(q.wrapupTime)
-    setEditJoinEmpty(q.joinEmpty)
-    setEditLeaveEmpty(q.leaveWhenEmpty)
-    setEditAnnounceHold(q.announceHoldtime)
-    setEditTimeoutDest(q.timeoutDestination ?? "")
-    setEditing(true)
-  }
-
-  function handleSave() {
-    const payload: Record<string, unknown> = {}
-    if (editName !== data?.name) payload.name = editName
-    if (editNumber !== data?.number) payload.number = editNumber
-    if (editStrategy !== data?.strategy) payload.strategy = editStrategy
-    if (editRingTime !== data?.ringTime) payload.ringTime = editRingTime
-    if (editMaxWait !== data?.maxWaitTime) payload.maxWaitTime = editMaxWait
-    if (editMaxCallers !== data?.maxCallers) payload.maxCallers = editMaxCallers
-    if (editWrapup !== data?.wrapupTime) payload.wrapupTime = editWrapup
-    if (editJoinEmpty !== data?.joinEmpty) payload.joinEmpty = editJoinEmpty
-    if (editLeaveEmpty !== data?.leaveWhenEmpty) payload.leaveWhenEmpty = editLeaveEmpty
-    if (editAnnounceHold !== data?.announceHoldtime) payload.announceHoldtime = editAnnounceHold
-    const dest = editTimeoutDest || null
-    if (dest !== data?.timeoutDestination) payload.timeoutDestination = dest
-    updateMutation.mutate(payload, { onSuccess: () => setEditing(false) })
-  }
 
   const handleDelete = async () => {
     await deleteMutation.mutateAsync(callQueueId)
@@ -358,11 +561,9 @@ function CallQueueDetailPage() {
         actions={
           <div className="flex items-center gap-3">
             <Badge variant="outline">{members.length} member{members.length === 1 ? "" : "s"}</Badge>
-            {!editing && (
-              <Button variant="outline" size="sm" onClick={() => startEditing(data)}>
-                <Pencil className="mr-2 h-4 w-4" /> Edit
-              </Button>
-            )}
+            <Button variant="outline" size="sm" onClick={() => setShowEditDialog(true)}>
+              <Pencil className="mr-2 h-4 w-4" /> Edit
+            </Button>
             <Button variant="outline" size="sm" asChild>
               <Link to="/call-routing" search={{ tab: "call-queues" }}>
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back
@@ -377,97 +578,26 @@ function CallQueueDetailPage() {
           <div className="space-y-6">
             {/* Queue Configuration */}
             <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
-              <CardHeader className="flex flex-row items-center justify-between">
+              <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Phone className="h-5 w-5 text-muted-foreground" />
                   Queue Configuration
                 </CardTitle>
-                {editing && (
-                  <div className="flex gap-2">
-                    <Button variant="ghost" size="sm" onClick={() => setEditing(false)}>Cancel</Button>
-                    <Button size="sm" onClick={handleSave} disabled={updateMutation.isPending}>
-                      {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      Save
-                    </Button>
-                  </div>
-                )}
               </CardHeader>
-              <CardContent className="space-y-4">
-                {editing ? (
-                  <div className="space-y-4">
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <div className="space-y-2">
-                        <Label>Name</Label>
-                        <Input value={editName} onChange={(e) => setEditName(e.target.value)} />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Number</Label>
-                        <Input value={editNumber} onChange={(e) => setEditNumber(e.target.value)} />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Strategy</Label>
-                      <Select value={editStrategy} onValueChange={setEditStrategy}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          {Object.entries(strategyLabels).map(([k, v]) => (
-                            <SelectItem key={k} value={k}>{v}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="grid gap-4 sm:grid-cols-3">
-                      <div className="space-y-2">
-                        <Label>Ring Time (s)</Label>
-                        <Input type="number" value={editRingTime} onChange={(e) => setEditRingTime(Number(e.target.value))} min={5} />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Max Wait (s)</Label>
-                        <Input type="number" value={editMaxWait} onChange={(e) => setEditMaxWait(Number(e.target.value))} min={0} />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Max Callers</Label>
-                        <Input type="number" value={editMaxCallers} onChange={(e) => setEditMaxCallers(Number(e.target.value))} min={1} />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Wrapup Time (s)</Label>
-                      <Input type="number" value={editWrapup} onChange={(e) => setEditWrapup(Number(e.target.value))} min={0} />
-                    </div>
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-3">
-                        <Switch checked={editJoinEmpty} onCheckedChange={setEditJoinEmpty} id="edit-join-empty" />
-                        <Label htmlFor="edit-join-empty">Join when empty</Label>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Switch checked={editLeaveEmpty} onCheckedChange={setEditLeaveEmpty} id="edit-leave-empty" />
-                        <Label htmlFor="edit-leave-empty">Leave when empty</Label>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Switch checked={editAnnounceHold} onCheckedChange={setEditAnnounceHold} id="edit-announce" />
-                        <Label htmlFor="edit-announce">Announce hold time</Label>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Timeout Destination</Label>
-                      <Input value={editTimeoutDest} onChange={(e) => setEditTimeoutDest(e.target.value)} placeholder="Destination on queue timeout (optional)" />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
-                    <InfoField label="Name" value={data.name} />
-                    <InfoField label="Number" value={data.number} />
-                    <InfoField label="Strategy" value={strategyLabels[data.strategy] ?? data.strategy} />
-                    <InfoField label="Ring Time" value={`${data.ringTime}s`} />
-                    <InfoField label="Max Wait" value={`${data.maxWaitTime}s`} />
-                    <InfoField label="Max Callers" value={data.maxCallers} />
-                    <InfoField label="Wrapup Time" value={`${data.wrapupTime}s`} />
-                    <InfoField label="Join Empty" value={data.joinEmpty} />
-                    <InfoField label="Leave Empty" value={data.leaveWhenEmpty} />
-                    <InfoField label="Announce Hold" value={data.announceHoldtime} />
-                    <InfoField label="Timeout Dest." value={data.timeoutDestination} />
-                  </div>
-                )}
+              <CardContent>
+                <div className="grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
+                  <InfoField label="Name" value={data.name} />
+                  <InfoField label="Number" value={data.number} />
+                  <InfoField label="Strategy" value={strategyLabels[data.strategy] ?? data.strategy} />
+                  <InfoField label="Ring Time" value={`${data.ringTime}s`} />
+                  <InfoField label="Max Wait" value={`${data.maxWaitTime}s`} />
+                  <InfoField label="Max Callers" value={data.maxCallers} />
+                  <InfoField label="Wrapup Time" value={`${data.wrapupTime}s`} />
+                  <InfoField label="Join Empty" value={data.joinEmpty} />
+                  <InfoField label="Leave Empty" value={data.leaveWhenEmpty} />
+                  <InfoField label="Announce Hold" value={data.announceHoldtime} />
+                  <InfoField label="Timeout Dest." value={data.timeoutDestination} />
+                </div>
               </CardContent>
             </Card>
 
@@ -588,6 +718,13 @@ function CallQueueDetailPage() {
           targetId={callQueueId}
         />
       </PageSection>
+
+      {/* Edit call queue dialog */}
+      <EditCallQueueDialog
+        queue={data}
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+      />
     </PageContainer>
   )
 }

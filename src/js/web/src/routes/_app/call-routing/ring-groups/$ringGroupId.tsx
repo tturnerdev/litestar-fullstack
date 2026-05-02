@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
-import { useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import {
   AlertCircle,
   AlertTriangle,
@@ -31,6 +31,14 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { EmptyState } from "@/components/ui/empty-state"
 import { CopyButton } from "@/components/ui/copy-button"
 import { Input } from "@/components/ui/input"
@@ -94,6 +102,169 @@ function DeleteDialog({ name, onDelete, isPending }: { name: string; onDelete: (
         </AlertDialogContent>
       </AlertDialog>
     </>
+  )
+}
+
+// -- Edit Dialog --------------------------------------------------------------
+
+interface EditRingGroupDialogProps {
+  ringGroup: RingGroup
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}
+
+function EditRingGroupDialog({ ringGroup, open, onOpenChange }: EditRingGroupDialogProps) {
+  const [name, setName] = useState(ringGroup.name)
+  const [number, setNumber] = useState(ringGroup.number)
+  const [strategy, setStrategy] = useState(ringGroup.strategy)
+  const [ringTime, setRingTime] = useState(ringGroup.ringTime)
+  const [noAnswerDest, setNoAnswerDest] = useState(ringGroup.noAnswerDestination ?? "")
+  const updateMutation = useUpdateRingGroup(ringGroup.id)
+
+  // Reset form state when the dialog opens or the ring group changes
+  useEffect(() => {
+    if (open) {
+      setName(ringGroup.name)
+      setNumber(ringGroup.number)
+      setStrategy(ringGroup.strategy)
+      setRingTime(ringGroup.ringTime)
+      setNoAnswerDest(ringGroup.noAnswerDestination ?? "")
+    }
+  }, [open, ringGroup])
+
+  const isDirty = useMemo(() => {
+    if (name !== ringGroup.name) return true
+    if (number !== ringGroup.number) return true
+    if (strategy !== ringGroup.strategy) return true
+    if (ringTime !== ringGroup.ringTime) return true
+    const currentDest = ringGroup.noAnswerDestination ?? ""
+    if (noAnswerDest !== currentDest) return true
+    return false
+  }, [name, number, strategy, ringTime, noAnswerDest, ringGroup])
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+
+    const payload: Record<string, unknown> = {}
+    if (name !== ringGroup.name) payload.name = name
+    if (number !== ringGroup.number) payload.number = number
+    if (strategy !== ringGroup.strategy) payload.strategy = strategy
+    if (ringTime !== ringGroup.ringTime) payload.ringTime = ringTime
+    const dest = noAnswerDest || null
+    if (dest !== ringGroup.noAnswerDestination) payload.noAnswerDestination = dest
+
+    if (Object.keys(payload).length === 0) {
+      onOpenChange(false)
+      return
+    }
+
+    updateMutation.mutate(payload, {
+      onSuccess: () => {
+        onOpenChange(false)
+      },
+    })
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <form onSubmit={handleSubmit}>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-muted-foreground" />
+              Edit Ring Group
+            </DialogTitle>
+            <DialogDescription>
+              Update properties for ring group{" "}
+              <span className="font-mono font-medium">{ringGroup.number}</span>.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="edit-rg-name">Name</Label>
+                <Input
+                  id="edit-rg-name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Ring group name"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-rg-number">Number</Label>
+                <Input
+                  id="edit-rg-number"
+                  value={number}
+                  onChange={(e) => setNumber(e.target.value)}
+                  placeholder="e.g., 600"
+                />
+              </div>
+            </div>
+
+            <Separator />
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-rg-strategy">Strategy</Label>
+              <Select value={strategy} onValueChange={setStrategy}>
+                <SelectTrigger id="edit-rg-strategy">
+                  <SelectValue placeholder="Select strategy" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(strategyLabels).map(([k, v]) => (
+                    <SelectItem key={k} value={k}>{v}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                How incoming calls are distributed to group members.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-rg-ringtime">Ring Time (seconds)</Label>
+              <Input
+                id="edit-rg-ringtime"
+                type="number"
+                value={ringTime}
+                onChange={(e) => setRingTime(Number(e.target.value))}
+                min={5}
+                max={300}
+              />
+              <p className="text-xs text-muted-foreground">
+                How long each member rings before moving on (5-300 seconds).
+              </p>
+            </div>
+
+            <Separator />
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-rg-noanswer">No Answer Destination</Label>
+              <Input
+                id="edit-rg-noanswer"
+                value={noAnswerDest}
+                onChange={(e) => setNoAnswerDest(e.target.value)}
+                placeholder="Destination when no one answers (optional)"
+              />
+              <p className="text-xs text-muted-foreground">
+                Where calls are routed when no group members answer.
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={!isDirty || !name.trim() || updateMutation.isPending}>
+              {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {updateMutation.isPending ? "Saving..." : "Save changes"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   )
 }
 
@@ -226,37 +397,10 @@ function RingGroupDetailPage() {
   const router = useRouter()
 
   const { data, isLoading, isError, refetch } = useRingGroup(ringGroupId)
-  const updateMutation = useUpdateRingGroup(ringGroupId)
   const deleteMutation = useDeleteRingGroup()
-
-  const [editing, setEditing] = useState(false)
-  const [editName, setEditName] = useState("")
-  const [editNumber, setEditNumber] = useState("")
-  const [editStrategy, setEditStrategy] = useState("ring_all")
-  const [editRingTime, setEditRingTime] = useState(20)
-  const [editNoAnswerDest, setEditNoAnswerDest] = useState("")
+  const [showEditDialog, setShowEditDialog] = useState(false)
 
   useDocumentTitle(data ? `${data.name} - Ring Groups` : "Ring Group Detail")
-
-  function startEditing(rg: RingGroup) {
-    setEditName(rg.name)
-    setEditNumber(rg.number)
-    setEditStrategy(rg.strategy)
-    setEditRingTime(rg.ringTime)
-    setEditNoAnswerDest(rg.noAnswerDestination ?? "")
-    setEditing(true)
-  }
-
-  function handleSave() {
-    const payload: Record<string, unknown> = {}
-    if (editName !== data?.name) payload.name = editName
-    if (editNumber !== data?.number) payload.number = editNumber
-    if (editStrategy !== data?.strategy) payload.strategy = editStrategy
-    if (editRingTime !== data?.ringTime) payload.ringTime = editRingTime
-    const dest = editNoAnswerDest || null
-    if (dest !== data?.noAnswerDestination) payload.noAnswerDestination = dest
-    updateMutation.mutate(payload, { onSuccess: () => setEditing(false) })
-  }
 
   const handleDelete = async () => {
     await deleteMutation.mutateAsync(ringGroupId)
@@ -336,11 +480,9 @@ function RingGroupDetailPage() {
         actions={
           <div className="flex items-center gap-3">
             <Badge variant="outline">{members.length} member{members.length === 1 ? "" : "s"}</Badge>
-            {!editing && (
-              <Button variant="outline" size="sm" onClick={() => startEditing(data)}>
-                <Pencil className="mr-2 h-4 w-4" /> Edit
-              </Button>
-            )}
+            <Button variant="outline" size="sm" onClick={() => setShowEditDialog(true)}>
+              <Pencil className="mr-2 h-4 w-4" /> Edit
+            </Button>
             <Button variant="outline" size="sm" asChild>
               <Link to="/call-routing" search={{ tab: "ring-groups" }}>
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back
@@ -355,63 +497,20 @@ function RingGroupDetailPage() {
           <div className="space-y-6">
             {/* Configuration */}
             <Card className="border-border/60 bg-card/80 shadow-md shadow-primary/10">
-              <CardHeader className="flex flex-row items-center justify-between">
+              <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Users className="h-5 w-5 text-muted-foreground" />
                   Group Configuration
                 </CardTitle>
-                {editing && (
-                  <div className="flex gap-2">
-                    <Button variant="ghost" size="sm" onClick={() => setEditing(false)}>Cancel</Button>
-                    <Button size="sm" onClick={handleSave} disabled={updateMutation.isPending}>
-                      {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      Save
-                    </Button>
-                  </div>
-                )}
               </CardHeader>
-              <CardContent className="space-y-4">
-                {editing ? (
-                  <div className="space-y-4">
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <div className="space-y-2">
-                        <Label>Name</Label>
-                        <Input value={editName} onChange={(e) => setEditName(e.target.value)} />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Number</Label>
-                        <Input value={editNumber} onChange={(e) => setEditNumber(e.target.value)} />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Strategy</Label>
-                      <Select value={editStrategy} onValueChange={setEditStrategy}>
-                        <SelectTrigger><SelectValue placeholder="Select strategy" /></SelectTrigger>
-                        <SelectContent>
-                          {Object.entries(strategyLabels).map(([k, v]) => (
-                            <SelectItem key={k} value={k}>{v}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Ring Time (seconds)</Label>
-                      <Input type="number" value={editRingTime} onChange={(e) => setEditRingTime(Number(e.target.value))} min={5} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>No Answer Destination</Label>
-                      <Input value={editNoAnswerDest} onChange={(e) => setEditNoAnswerDest(e.target.value)} placeholder="Destination when no one answers (optional)" />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="grid gap-4 text-sm md:grid-cols-2">
-                    <InfoField label="Name" value={data.name} />
-                    <InfoField label="Number" value={data.number} />
-                    <InfoField label="Strategy" value={strategyLabels[data.strategy] ?? data.strategy} />
-                    <InfoField label="Ring Time" value={`${data.ringTime}s`} />
-                    <InfoField label="No Answer Destination" value={data.noAnswerDestination} />
-                  </div>
-                )}
+              <CardContent>
+                <div className="grid gap-4 text-sm md:grid-cols-2">
+                  <InfoField label="Name" value={data.name} />
+                  <InfoField label="Number" value={data.number} />
+                  <InfoField label="Strategy" value={strategyLabels[data.strategy] ?? data.strategy} />
+                  <InfoField label="Ring Time" value={`${data.ringTime}s`} />
+                  <InfoField label="No Answer Destination" value={data.noAnswerDestination} />
+                </div>
               </CardContent>
             </Card>
 
@@ -531,6 +630,13 @@ function RingGroupDetailPage() {
           targetId={ringGroupId}
         />
       </PageSection>
+
+      {/* Edit ring group dialog */}
+      <EditRingGroupDialog
+        ringGroup={data}
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+      />
     </PageContainer>
   )
 }

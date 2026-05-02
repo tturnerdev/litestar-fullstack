@@ -377,8 +377,18 @@ function FaxMessageDetailPage() {
               <div>
                 <p className="text-muted-foreground">Fax Number ID</p>
                 <div className="flex items-center gap-1">
-                  <p className="font-mono text-xs">{data.faxNumberId}</p>
-                  <CopyButton value={data.faxNumberId} label="fax number ID" />
+                  {data.faxNumberId ? (
+                    <Link
+                      to="/fax/numbers/$faxNumberId"
+                      params={{ faxNumberId: data.faxNumberId }}
+                      className="font-mono text-xs text-primary hover:underline"
+                    >
+                      {data.faxNumberId}
+                    </Link>
+                  ) : (
+                    <p className="font-mono text-xs">---</p>
+                  )}
+                  {data.faxNumberId && <CopyButton value={data.faxNumberId} label="fax number ID" />}
                 </div>
               </div>
               <div>

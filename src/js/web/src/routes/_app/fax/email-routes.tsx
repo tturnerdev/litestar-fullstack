@@ -1,5 +1,6 @@
 import { toast } from "sonner"
 import { createFileRoute, Link } from "@tanstack/react-router"
+import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { cn } from "@/lib/utils"
 import {
@@ -13,7 +14,9 @@ import {
   MailPlus,
   MoreVertical,
   Pencil,
+  Search,
   Trash2,
+  X,
 } from "lucide-react"
 import { useCallback, useMemo, useState } from "react"
 import {
@@ -483,12 +486,27 @@ function FaxEmailRoutesPage() {
   const [editRoute, setEditRoute] = useState<FaxEmailRouteWithNumber | null>(null)
   const [deleteRoute, setDeleteRoute] = useState<FaxEmailRouteWithNumber | null>(null)
 
+  // Search state
+  const [search, setSearch] = useState("")
+  const debouncedSearch = useDebouncedValue(search)
+
+  const filteredRoutes = useMemo(() => {
+    if (!routes) return []
+    if (!debouncedSearch) return routes
+    const q = debouncedSearch.toLowerCase()
+    return routes.filter(
+      (route) =>
+        route.emailAddress?.toLowerCase().includes(q) ||
+        route.faxNumber?.toLowerCase().includes(q),
+    )
+  }, [routes, debouncedSearch])
+
   // Selection state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
-  const allVisibleIds = useMemo(() => (routes ?? []).map((r) => r.id), [routes])
-  const allSelected = (routes ?? []).length > 0 && (routes ?? []).every((r) => selectedIds.has(r.id))
-  const someSelected = (routes ?? []).some((r) => selectedIds.has(r.id))
+  const allVisibleIds = useMemo(() => filteredRoutes.map((r) => r.id), [filteredRoutes])
+  const allSelected = filteredRoutes.length > 0 && filteredRoutes.every((r) => selectedIds.has(r.id))
+  const someSelected = filteredRoutes.some((r) => selectedIds.has(r.id))
 
   const toggleAll = useCallback(() => {
     if (allSelected) {
@@ -609,9 +627,30 @@ function FaxEmailRoutesPage() {
               <div className="flex items-center justify-between">
                 <CardTitle>All Email Routes</CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  {routes.filter((r) => r.isActive).length} of {routes.length}{" "}
-                  routes active
+                  {debouncedSearch
+                    ? `Showing ${filteredRoutes.length} of ${routes.length} routes`
+                    : `${routes.filter((r) => r.isActive).length} of ${routes.length} routes active`}
                 </p>
+              </div>
+              <div className="relative mt-2 max-w-sm">
+                <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="Search by email or fax number..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-9 pr-9"
+                  aria-label="Search email routes"
+                />
+                {search && (
+                  <button
+                    type="button"
+                    onClick={() => setSearch("")}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    aria-label="Clear search"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
               </div>
             </CardHeader>
             <CardContent>
@@ -636,7 +675,14 @@ function FaxEmailRoutesPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {routes.map((route, index) => (
+                  {filteredRoutes.length === 0 && debouncedSearch ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
+                        No routes matching "{debouncedSearch}"
+                      </TableCell>
+                    </TableRow>
+                  ) : null}
+                  {filteredRoutes.map((route, index) => (
                     <TableRow
                       key={route.id}
                       data-state={selectedIds.has(route.id) ? "selected" : undefined}

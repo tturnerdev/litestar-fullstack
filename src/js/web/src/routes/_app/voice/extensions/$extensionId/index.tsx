@@ -328,14 +328,18 @@ function ExtensionDetailPage() {
                   <div>
                     <p className="text-muted-foreground">Phone Number</p>
                     {data.phoneNumberId ? (
-                      <p className="font-mono text-sm">
+                      <Link
+                        to="/voice/phone-numbers/$phoneNumberId"
+                        params={{ phoneNumberId: data.phoneNumberId }}
+                        className="inline-flex items-center gap-1 font-mono text-sm text-primary hover:underline"
+                      >
                         {phoneNumberQuery.data?.number ?? "Assigned"}
                         {phoneNumberQuery.data?.label && (
-                          <span className="ml-1 text-muted-foreground">
+                          <span className="text-muted-foreground">
                             ({phoneNumberQuery.data.label})
                           </span>
                         )}
-                      </p>
+                      </Link>
                     ) : (
                       <p className="text-muted-foreground">Not assigned</p>
                     )}
