@@ -177,9 +177,11 @@ export function useEventStream() {
         case "device.status_changed": {
           const d = data as unknown as DeviceStatusEventData
           queryClient.invalidateQueries({ queryKey: ["devices"] })
-          // Invalidate the specific device detail cache if we have the id
           if (d.deviceId) {
-            queryClient.invalidateQueries({ queryKey: ["devices", "detail", d.deviceId] })
+            queryClient.invalidateQueries({ queryKey: ["device", d.deviceId] })
+          }
+          if (d.status === "online" && d.previousStatus !== "online") {
+            toast.success(`${d.deviceName} is back online`)
           }
           break
         }
@@ -187,9 +189,11 @@ export function useEventStream() {
         // ---- Generic entity update -------------------------------------------
         case "entity.updated": {
           const d = data as unknown as EntityUpdatedEventData
+          // Invalidate the plural collection (e.g. ["devices", ...])
           queryClient.invalidateQueries({ queryKey: [`${d.entityType}s`] })
+          // Invalidate the singular detail query (e.g. ["device", id])
           if (d.entityId) {
-            queryClient.invalidateQueries({ queryKey: [`${d.entityType}s`, "detail", d.entityId] })
+            queryClient.invalidateQueries({ queryKey: [d.entityType, d.entityId] })
           }
           break
         }

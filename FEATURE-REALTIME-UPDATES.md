@@ -669,16 +669,16 @@ The `useEventStream()` hook implements reconnect with exponential backoff:
 
 ### Phase 5: Device Status Events
 - [ ] Publish `device.status_changed` from device status sync background task
-- [ ] Publish `device.status_changed` from `device_reboot_job` on status transitions
+- [x] Publish `device.status_changed` from `device_reboot_job` on status transitions
 - [ ] Invalidate device list and detail React Query cache on status change events
 - [ ] Update `DeviceStatusBadge` component to reflect real-time status without manual refresh
 
 ### Phase 6: Notification Badge + Polling Reduction
 - [x] Invalidate notification queries on `notification.created` events
-- [ ] Publish `notification.created` from notification domain listeners (task completed, voicemail received, etc.)
+- [x] Publish `notification.created` from notification domain listeners (task completed, voicemail received, etc.)
 - [ ] Increment unread notification badge count in real time
-- [ ] Remove `refetchInterval` from `useActiveTasks()` (replace with SSE-driven invalidation)
-- [ ] Remove `refetchInterval` from `useTask()` for active tasks
+- [x] Remove `refetchInterval` from `useActiveTasks()` (replace with SSE-driven invalidation)
+- [x] Remove `refetchInterval` from `useTask()` for active tasks
 - [ ] Implement polling fallback: re-enable 30s polling after 60s of SSE disconnection
 - [ ] Disable fallback polling on SSE reconnect
 - [ ] End-to-end test: create notification via backend, verify badge updates in browser without refresh

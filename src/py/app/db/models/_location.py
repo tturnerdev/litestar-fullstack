@@ -12,6 +12,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.models._location_type import LocationType
 
 if TYPE_CHECKING:
+    from app.db.models._device import Device
     from app.db.models._team import Team
 
 
@@ -68,4 +69,10 @@ class Location(UUIDv7AuditBase):
         cascade="all, delete",
         passive_deletes=True,
         lazy="selectin",
+    )
+    devices: Mapped[list[Device]] = relationship(
+        foreign_keys="Device.location_id",
+        uselist=True,
+        lazy="noload",
+        viewonly=True,
     )

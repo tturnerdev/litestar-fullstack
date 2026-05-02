@@ -654,6 +654,7 @@ export type ConnectionDetail = {
   isEnabled?: boolean;
   lastError?: string | null;
   lastHealthCheck?: string | null;
+  managedDeviceCount?: number;
   name: string;
   port?: number | null;
   provider: string;
@@ -678,6 +679,7 @@ export type ConnectionList = {
   isEnabled?: boolean;
   lastError?: string | null;
   lastHealthCheck?: string | null;
+  managedDeviceCount?: number;
   name: string;
   port?: number | null;
   provider: string;
@@ -1403,6 +1405,7 @@ export type Location = {
   city?: string | null;
   country?: string | null;
   description?: string | null;
+  deviceCount?: number;
   id: string;
   locationType: string;
   name: string;
@@ -3080,8 +3083,8 @@ export type AdminListAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetTypeIn?: Array<string> | null;
     actionIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     action?: string | null;
@@ -3159,8 +3162,8 @@ export type AdminExportAuditLogData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetTypeIn?: Array<string> | null;
     actionIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     action?: string | null;
@@ -3227,8 +3230,8 @@ export type AdminGetTargetAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetTypeIn?: Array<string> | null;
     actionIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     action?: string | null;
@@ -3307,8 +3310,8 @@ export type AdminGetUserAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetTypeIn?: Array<string> | null;
     actionIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     action?: string | null;

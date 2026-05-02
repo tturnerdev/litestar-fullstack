@@ -79,7 +79,7 @@ class LocationController(Controller):
         if location_type:
             extra_filters.append(m.Location.location_type == location_type)
         results, total = await locations_service.list_and_count(*filters, *extra_filters)
-        return locations_service.to_schema(results, total, filters, schema_type=Location)
+        return await locations_service.to_schema_enriched(results, total, filters)
 
     @post(
         operation_id="CreateLocation",
@@ -125,7 +125,7 @@ class LocationController(Controller):
             after=after,
             request=request,
         )
-        return locations_service.to_schema(db_obj, schema_type=Location)
+        return await locations_service.to_schema_enriched(db_obj)
 
     @get(
         operation_id="GetLocation",
@@ -149,7 +149,7 @@ class LocationController(Controller):
             Location
         """
         db_obj = await locations_service.get(location_id)
-        return locations_service.to_schema(db_obj, schema_type=Location)
+        return await locations_service.to_schema_enriched(db_obj)
 
     @patch(
         operation_id="UpdateLocation",
@@ -200,7 +200,7 @@ class LocationController(Controller):
             after=after,
             request=request,
         )
-        return locations_service.to_schema(fresh_obj, schema_type=Location)
+        return await locations_service.to_schema_enriched(fresh_obj)
 
     @delete(
         operation_id="DeleteLocation",

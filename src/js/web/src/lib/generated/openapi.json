@@ -2666,6 +2666,10 @@
               }
             ]
           },
+          "managedDeviceCount": {
+            "default": 0,
+            "type": "integer"
+          },
           "name": {
             "type": "string"
           },
@@ -2797,6 +2801,10 @@
                 "type": "null"
               }
             ]
+          },
+          "managedDeviceCount": {
+            "default": 0,
+            "type": "integer"
           },
           "name": {
             "type": "string"
@@ -5621,6 +5629,10 @@
                 "type": "null"
               }
             ]
+          },
+          "deviceCount": {
+            "default": 0,
+            "type": "integer"
           },
           "id": {
             "format": "uuid",
@@ -11354,7 +11366,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -11375,7 +11387,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -11743,7 +11755,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -11764,7 +11776,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -12130,7 +12142,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -12151,7 +12163,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -12511,7 +12523,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -12532,7 +12544,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [

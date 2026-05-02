@@ -2587,6 +2587,10 @@ export const ConnectionDetailSchema = {
         },
       ],
     },
+    managedDeviceCount: {
+      default: 0,
+      type: "integer",
+    },
     name: {
       type: "string",
     },
@@ -2719,6 +2723,10 @@ export const ConnectionListSchema = {
           type: "null",
         },
       ],
+    },
+    managedDeviceCount: {
+      default: 0,
+      type: "integer",
     },
     name: {
       type: "string",
@@ -5479,6 +5487,10 @@ export const LocationSchema = {
           type: "null",
         },
       ],
+    },
+    deviceCount: {
+      default: 0,
+      type: "integer",
     },
     id: {
       format: "uuid",

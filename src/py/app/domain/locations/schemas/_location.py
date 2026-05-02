@@ -31,6 +31,7 @@ class Location(CamelizedBaseStruct):
     postal_code: str | None = None
     country: str | None = None
     children: list[LocationChild] = []
+    device_count: int = 0
 
 
 class LocationCreate(CamelizedBaseStruct):

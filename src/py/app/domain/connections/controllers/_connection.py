@@ -90,7 +90,7 @@ class ConnectionController(Controller):
         if team_id is not None:
             extra_filters.append(m.Connection.team_id == team_id)
         results, total = await connections_service.list_and_count(*filters, *extra_filters)
-        return connections_service.to_schema(results, total, filters, schema_type=ConnectionList)
+        return await connections_service.to_schema_enriched(results, total, filters, schema_type=ConnectionList)
 
     @post(
         operation_id="CreateConnection",
@@ -133,7 +133,7 @@ class ConnectionController(Controller):
             after=after,
             request=request,
         )
-        return connections_service.to_schema(db_obj, schema_type=ConnectionList)
+        return await connections_service.to_schema_enriched(db_obj, schema_type=ConnectionList)
 
     @get(
         operation_id="GetConnection",
@@ -157,8 +157,8 @@ class ConnectionController(Controller):
             ConnectionDetail
         """
         db_obj = await connections_service.get(connection_id)
-        detail = connections_service.to_schema(db_obj, schema_type=ConnectionDetail)
-        detail.credential_fields = _mask_credentials(db_obj)
+        detail = await connections_service.to_schema_enriched(db_obj, schema_type=ConnectionDetail)
+        object.__setattr__(detail, "credential_fields", _mask_credentials(db_obj))
         return detail
 
     @patch(
@@ -208,8 +208,8 @@ class ConnectionController(Controller):
             after=after,
             request=request,
         )
-        detail = connections_service.to_schema(db_obj, schema_type=ConnectionDetail)
-        detail.credential_fields = _mask_credentials(db_obj)
+        detail = await connections_service.to_schema_enriched(db_obj, schema_type=ConnectionDetail)
+        object.__setattr__(detail, "credential_fields", _mask_credentials(db_obj))
         return detail
 
     @delete(

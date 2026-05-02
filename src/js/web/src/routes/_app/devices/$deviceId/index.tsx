@@ -5,6 +5,7 @@ import {
   AlertCircle,
   AlertTriangle,
   ArrowLeft,
+  ClipboardList,
   Cpu,
   Eye,
   EyeOff,
@@ -19,6 +20,7 @@ import {
   Wrench,
 } from "lucide-react"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
+import { TaskStatusBadge } from "@/components/tasks/task-status-badge"
 import { RebootButton, ReprovisionButton, ToggleActiveButton, DeleteButton } from "@/components/devices/device-actions"
 import { DeviceLineConfig } from "@/components/devices/device-line-config"
 import { DeviceStatusBadge } from "@/components/devices/device-status-badge"
@@ -45,6 +47,14 @@ import {
 } from "@/components/ui/select"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Skeleton } from "@/components/ui/skeleton"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { CopyButton } from "@/components/ui/copy-button"
@@ -60,6 +70,7 @@ import {
   useUpdateDevice,
 } from "@/lib/api/hooks/devices"
 import { useConnections } from "@/lib/api/hooks/connections"
+import { useTasks } from "@/lib/api/hooks/tasks"
 import { useGatewayLookupDevice } from "@/lib/api/hooks/gateway"
 import { useLocations } from "@/lib/api/hooks/locations"
 import { ExternalDataTab } from "@/components/gateway/external-data-tab"
@@ -82,6 +93,28 @@ const deviceTypeLabels: Record<string, string> = {
   ata: "ATA",
   conference: "Conference",
   other: "Other",
+}
+
+// ── Task helpers ───────────────────────────────────────────────────────
+
+function formatTaskType(taskType: string): string {
+  return taskType
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase())
+}
+
+function formatDuration(startedAt: string | null | undefined, completedAt: string | null | undefined): string {
+  if (!startedAt) return "--"
+  const start = new Date(startedAt).getTime()
+  const end = completedAt ? new Date(completedAt).getTime() : Date.now()
+  const seconds = Math.max(0, Math.round((end - start) / 1000))
+  if (seconds < 60) return `${seconds}s`
+  const minutes = Math.floor(seconds / 60)
+  const remainingSeconds = seconds % 60
+  if (minutes < 60) return `${minutes}m ${remainingSeconds}s`
+  const hours = Math.floor(minutes / 60)
+  const remainingMinutes = minutes % 60
+  return `${hours}h ${remainingMinutes}m`
 }
 
 // ── Timestamp with tooltip ──────────────────────────────────────────────
@@ -132,6 +165,13 @@ function DeviceDetailPage() {
   const gatewayQuery = useGatewayLookupDevice(data?.macAddress ?? "", tab === "external")
   const locationsQuery = useLocations({ teamId: data?.teamId ?? "", pageSize: 100 })
   const connectionsQuery = useConnections({ pageSize: 100 })
+  const tasksQuery = useTasks({
+    entityType: "device",
+    entityId: deviceId,
+    pageSize: 5,
+    orderBy: "created_at",
+    sortOrder: "desc",
+  })
 
   const [editing, setEditing] = useState(false)
   const [editName, setEditName] = useState("")
@@ -607,6 +647,104 @@ function DeviceDetailPage() {
                       </div>
                     ))}
                   </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Recent Tasks */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <ClipboardList className="h-5 w-5 text-muted-foreground" />
+                  <CardTitle>Recent Tasks</CardTitle>
+                </div>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/tasks">View all</Link>
+                </Button>
+              </CardHeader>
+              <CardContent>
+                {tasksQuery.isLoading ? (
+                  <div className="space-y-2">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <Skeleton key={i} className="h-10 w-full rounded-md" />
+                    ))}
+                  </div>
+                ) : !tasksQuery.data?.items?.length ? (
+                  <p className="text-sm text-muted-foreground py-4 text-center">
+                    No background tasks have been run for this device yet.
+                  </p>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="hidden sm:table-cell">Progress</TableHead>
+                        <TableHead className="hidden md:table-cell">Started</TableHead>
+                        <TableHead className="hidden md:table-cell">Duration</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {tasksQuery.data.items.map((task) => (
+                        <TableRow key={task.id} className="hover:bg-muted/50 transition-colors">
+                          <TableCell>
+                            <Link
+                              to="/tasks/$taskId"
+                              params={{ taskId: task.id }}
+                              className="font-medium text-sm hover:underline"
+                            >
+                              {formatTaskType(task.taskType)}
+                            </Link>
+                          </TableCell>
+                          <TableCell>
+                            <TaskStatusBadge status={task.status} />
+                          </TableCell>
+                          <TableCell className="hidden sm:table-cell">
+                            {task.progress != null && task.progress > 0 ? (
+                              <div className="flex items-center gap-2 min-w-[80px]">
+                                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+                                  <div
+                                    className={`h-full rounded-full transition-all duration-300 ${
+                                      task.status === "failed"
+                                        ? "bg-red-500"
+                                        : task.status === "completed"
+                                          ? "bg-green-500"
+                                          : "bg-blue-500"
+                                    }`}
+                                    style={{ width: `${Math.min(task.progress, 100)}%` }}
+                                  />
+                                </div>
+                                <span className="text-xs font-medium text-muted-foreground w-8 text-right">
+                                  {Math.round(task.progress)}%
+                                </span>
+                              </div>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">--</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            {task.startedAt ? (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="cursor-default text-xs text-muted-foreground">
+                                    {formatRelativeTimeShort(task.startedAt)}
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent>{formatDateTime(task.startedAt)}</TooltipContent>
+                              </Tooltip>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">--</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            <span className="text-xs text-muted-foreground">
+                              {formatDuration(task.startedAt, task.completedAt)}
+                            </span>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
                 )}
               </CardContent>
             </Card>

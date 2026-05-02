@@ -26,6 +26,7 @@ class ConnectionList(CamelizedBaseStruct):
     last_error: str | None = None
     created_at: datetime | None = None
     updated_at: datetime | None = None
+    managed_device_count: int = 0
 
 
 class ConnectionDetail(CamelizedBaseStruct):
@@ -48,6 +49,7 @@ class ConnectionDetail(CamelizedBaseStruct):
     last_error: str | None = None
     created_at: datetime | None = None
     updated_at: datetime | None = None
+    managed_device_count: int = 0
 
 
 # Alias for convenience — used as the "standard" representation

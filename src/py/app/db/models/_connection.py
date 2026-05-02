@@ -12,6 +12,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.models._connection_enums import ConnectionAuthType, ConnectionStatus, ConnectionType
 
 if TYPE_CHECKING:
+    from app.db.models._device import Device
     from app.db.models._team import Team
 
 
@@ -60,4 +61,10 @@ class Connection(UUIDv7AuditBase):
         innerjoin=True,
         uselist=False,
         lazy="joined",
+    )
+    devices: Mapped[list[Device]] = relationship(
+        foreign_keys="Device.connection_id",
+        uselist=True,
+        lazy="noload",
+        viewonly=True,
     )
