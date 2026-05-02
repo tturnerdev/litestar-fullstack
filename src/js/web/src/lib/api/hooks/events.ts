@@ -32,9 +32,10 @@ interface EntityUpdatedEventData {
 }
 
 interface NotificationEventData {
-  id: string
+  notificationId: string
   title?: string
-  message?: string
+  category?: string
+  actionUrl?: string | null
 }
 
 // ---------------------------------------------------------------------------
@@ -208,9 +209,19 @@ export function useEventStream() {
         // ---- Generic entity update -------------------------------------------
         case "entity.updated": {
           const d = data as unknown as EntityUpdatedEventData
-          // Invalidate the plural collection (e.g. ["devices", ...])
-          queryClient.invalidateQueries({ queryKey: [`${d.entityType}s`] })
-          // Invalidate the singular detail query (e.g. ["device", id])
+          const listKeys: Record<string, string[]> = {
+            device: ["devices"],
+            extension: ["voice", "extensions"],
+            phone_number: ["voice", "phone-numbers"],
+            location: ["locations"],
+            connection: ["connections"],
+            fax_number: ["fax", "numbers"],
+            ticket: ["tickets"],
+          }
+          const listKey = listKeys[d.entityType]
+          if (listKey) {
+            queryClient.invalidateQueries({ queryKey: listKey })
+          }
           if (d.entityId) {
             queryClient.invalidateQueries({ queryKey: [d.entityType, d.entityId] })
           }
@@ -222,9 +233,9 @@ export function useEventStream() {
           const d = data as unknown as NotificationEventData
           queryClient.invalidateQueries({ queryKey: ["notifications"] })
           queryClient.invalidateQueries({ queryKey: ["notifications", "unread-count"] })
-          if (d.title || d.message) {
-            toast.info(d.title ?? "New notification", {
-              description: d.message,
+          if (d.title) {
+            toast.info(d.title, {
+              description: d.category ? `Category: ${d.category}` : undefined,
             })
           }
           break

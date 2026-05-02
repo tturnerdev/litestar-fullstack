@@ -73,6 +73,7 @@ import { useConnections } from "@/lib/api/hooks/connections"
 import { useTasks } from "@/lib/api/hooks/tasks"
 import { useGatewayLookupDevice } from "@/lib/api/hooks/gateway"
 import { useLocations } from "@/lib/api/hooks/locations"
+import { useAuthStore } from "@/lib/auth"
 import { ExternalDataTab } from "@/components/gateway/external-data-tab"
 import { DeviceDiagnosticTab } from "@/components/devices/device-diagnostic-tab"
 import type { Device } from "@/lib/generated/api"
@@ -155,6 +156,8 @@ function DeviceDetailPage() {
   const { tab = "overview", edit: editParam } = Route.useSearch()
   const navigate = Route.useNavigate()
   const router = useRouter()
+  const { currentTeam } = useAuthStore()
+  const teamId = currentTeam?.id ?? ""
   const { data, isLoading, isError, refetch } = useDevice(deviceId)
   useDocumentTitle(data?.name ?? "Device Details")
   const updateDevice = useUpdateDevice(deviceId)
@@ -163,8 +166,8 @@ function DeviceDetailPage() {
   const reprovisionDevice = useReprovisionDevice(deviceId)
   const linesQuery = useDeviceLines(deviceId)
   const gatewayQuery = useGatewayLookupDevice(data?.macAddress ?? "", tab === "external")
-  const locationsQuery = useLocations({ teamId: data?.teamId ?? "", pageSize: 100 })
-  const connectionsQuery = useConnections({ pageSize: 100 })
+  const locationsQuery = useLocations({ teamId, pageSize: 100 })
+  const connectionsQuery = useConnections({ teamId, pageSize: 100 })
   const tasksQuery = useTasks({
     entityType: "device",
     entityId: deviceId,

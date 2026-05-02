@@ -66,18 +66,18 @@ class EventStreamController(Controller):
                 yield b": heartbeat\n\n"
 
                 heartbeat_interval = 30  # seconds
-                last_heartbeat = asyncio.get_event_loop().time()
+                last_heartbeat = asyncio.get_running_loop().time()
 
                 async for event_type, data in event_subscriber.listen():
                     sse_data = msgspec.json.encode(data).decode("utf-8")
                     yield f"event: {event_type}\ndata: {sse_data}\n\n".encode("utf-8")
 
                     # Send periodic heartbeats between events
-                    now = asyncio.get_event_loop().time()
+                    now = asyncio.get_running_loop().time()
                     if now - last_heartbeat > heartbeat_interval:
                         yield b": heartbeat\n\n"
                         last_heartbeat = now
             finally:
                 await event_subscriber.unsubscribe()
 
-        return Stream(iterator=event_generator(), media_type="text/event-stream")
+        return Stream(event_generator(), media_type="text/event-stream")

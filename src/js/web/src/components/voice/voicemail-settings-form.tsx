@@ -11,6 +11,7 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { SkeletonCard } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { useUpdateVoicemailSettings, useUploadVoicemailGreeting, useVoicemailSettings } from "@/lib/api/hooks/voice"
+import { useAuthStore } from "@/lib/auth"
 import { formatDurationHuman } from "@/lib/format-utils"
 
 const GREETING_TYPE_DESCRIPTIONS: Record<string, string> = {
@@ -40,6 +41,8 @@ function formatRetention(days: number): string {
 }
 
 export function VoicemailSettingsForm({ extensionId }: { extensionId: string }) {
+  const { user } = useAuthStore()
+  const isAdminOrSuper = user?.isSuperuser || user?.roles?.some((r) => r.roleSlug === "admin")
   const { data, isLoading, isError, refetch } = useVoicemailSettings(extensionId)
   const updateMutation = useUpdateVoicemailSettings(extensionId)
   const uploadMutation = useUploadVoicemailGreeting(extensionId)
@@ -52,6 +55,7 @@ export function VoicemailSettingsForm({ extensionId }: { extensionId: string }) 
   const [pin, setPin] = useState("")
   const [greetingType, setGreetingType] = useState("")
   const [maxLength, setMaxLength] = useState("")
+  const [emailAddress, setEmailAddress] = useState<string | null>(null)
   const [emailNotification, setEmailNotification] = useState<boolean | null>(null)
   const [emailAttachAudio, setEmailAttachAudio] = useState<boolean | null>(null)
   const [transcriptionEnabled, setTranscriptionEnabled] = useState<boolean | null>(null)
@@ -79,8 +83,11 @@ export function VoicemailSettingsForm({ extensionId }: { extensionId: string }) 
   const currentEnabled = isEnabled ?? data.isEnabled
   const currentGreeting = greetingType || data.greetingType
   const currentMaxLength = maxLength || String(data.maxMessageLengthSeconds)
+  const defaultEmail = isAdminOrSuper ? "" : (user?.email ?? "")
+  const currentEmailAddress = emailAddress ?? data.emailAddress ?? defaultEmail
   const currentEmailNotif = emailNotification ?? data.emailNotification
   const currentAttachAudio = emailAttachAudio ?? data.emailAttachAudio
+  const emailRequired = currentEmailNotif && !currentEmailAddress.trim()
   const currentTranscription = transcriptionEnabled ?? data.transcriptionEnabled
   const currentAutoDelete = autoDeleteDays || (data.autoDeleteDays != null ? String(data.autoDeleteDays) : "")
 
@@ -90,6 +97,7 @@ export function VoicemailSettingsForm({ extensionId }: { extensionId: string }) 
     if (pin) payload.pin = pin
     if (greetingType) payload.greetingType = greetingType
     if (maxLength) payload.maxMessageLengthSeconds = Number(maxLength)
+    if (emailAddress !== null) payload.emailAddress = emailAddress.trim() || null
     if (emailNotification !== null) payload.emailNotification = emailNotification
     if (emailAttachAudio !== null) payload.emailAttachAudio = emailAttachAudio
     if (transcriptionEnabled !== null) payload.transcriptionEnabled = transcriptionEnabled
@@ -100,6 +108,7 @@ export function VoicemailSettingsForm({ extensionId }: { extensionId: string }) 
         setDirty(false)
         setPin("")
         setPinError("")
+        setEmailAddress(null)
         setShowSaveSuccess(true)
       },
     })
@@ -109,6 +118,7 @@ export function VoicemailSettingsForm({ extensionId }: { extensionId: string }) 
     setIsEnabled(DEFAULTS.isEnabled)
     setGreetingType(DEFAULTS.greetingType)
     setMaxLength(DEFAULTS.maxLength)
+    setEmailAddress(defaultEmail)
     setEmailNotification(DEFAULTS.emailNotification)
     setEmailAttachAudio(DEFAULTS.emailAttachAudio)
     setTranscriptionEnabled(DEFAULTS.transcriptionEnabled)
@@ -315,6 +325,29 @@ export function VoicemailSettingsForm({ extensionId }: { extensionId: string }) 
             />
           </div>
 
+          {currentEmailNotif && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="vm-email-address">Notification email</Label>
+                {emailRequired && (
+                  <span className="text-xs text-destructive">Required when notifications are enabled</span>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">Email address where voicemail notifications will be sent.</p>
+              <Input
+                id="vm-email-address"
+                type="email"
+                placeholder={isAdminOrSuper ? "Enter email address" : user?.email ?? "Enter email address"}
+                className={emailRequired ? "border-destructive focus-visible:ring-destructive" : ""}
+                value={currentEmailAddress}
+                onChange={(e) => {
+                  setEmailAddress(e.target.value)
+                  setDirty(true)
+                }}
+              />
+            </div>
+          )}
+
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label>Attach audio to email</Label>
@@ -378,7 +411,7 @@ export function VoicemailSettingsForm({ extensionId }: { extensionId: string }) 
         <div className="flex items-center gap-3">
           <Button
             onClick={handleSave}
-            disabled={(!dirty && !showSaveSuccess) || updateMutation.isPending || !!pinError}
+            disabled={(!dirty && !showSaveSuccess) || updateMutation.isPending || !!pinError || !!emailRequired}
             variant={showSaveSuccess ? "outline" : "default"}
             className={showSaveSuccess ? "border-green-500/50 text-green-600 dark:text-green-400" : ""}
           >

@@ -15,11 +15,8 @@ export interface PhoneNumber {
   callerIdName: string | null
   isActive: boolean
   teamId: string | null
-  extensionId: string | null
-  e911Registered?: boolean
-  e911RegistrationId?: string | null
-  createdAt: string | null
-  updatedAt: string | null
+  e911Registered: boolean
+  e911RegistrationId: string | null
 }
 
 export interface Extension {
@@ -39,6 +36,8 @@ export interface Extension {
   forwardUnreachableEnabled: boolean
   forwardUnreachableDestination: string | null
   dndEnabled: boolean
+  e911Status: string
+  e911RegistrationId: string | null
   createdAt: string | null
   updatedAt: string | null
 }
@@ -50,6 +49,7 @@ export interface VoicemailSettings {
   greetingType: "default" | "custom" | "name_only"
   greetingFilePath: string | null
   maxMessageLengthSeconds: number
+  emailAddress: string | null
   emailNotification: boolean
   emailAttachAudio: boolean
   transcriptionEnabled: boolean

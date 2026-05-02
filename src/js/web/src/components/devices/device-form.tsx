@@ -34,6 +34,7 @@ import { Separator } from "@/components/ui/separator"
 import { useConnections } from "@/lib/api/hooks/connections"
 import { useCreateDevice } from "@/lib/api/hooks/devices"
 import { useLocations } from "@/lib/api/hooks/locations"
+import { useAuthStore } from "@/lib/auth"
 import { formatMacAddress } from "@/lib/format-utils"
 import { cn } from "@/lib/utils"
 
@@ -119,9 +120,11 @@ export function CreateDeviceForm() {
     },
   })
 
-  const teamId = form.watch("teamId") ?? ""
-  const locationsQuery = useLocations({ teamId, pageSize: 100 })
-  const connectionsQuery = useConnections({ pageSize: 100 })
+  const { currentTeam } = useAuthStore()
+  const formTeamId = form.watch("teamId") ?? ""
+  const effectiveTeamId = formTeamId || currentTeam?.id || ""
+  const locationsQuery = useLocations({ teamId: effectiveTeamId, pageSize: 100 })
+  const connectionsQuery = useConnections({ teamId: effectiveTeamId, pageSize: 100 })
 
   const { isDirty, isSubmitting } = form.formState
   const nameLength = (form.watch("name") ?? "").length

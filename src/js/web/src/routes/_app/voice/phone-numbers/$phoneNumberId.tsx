@@ -22,9 +22,7 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDocumentTitle } from "@/hooks/use-document-title"
-import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { usePhoneNumber } from "@/lib/api/hooks/voice"
 import { useGatewayLookupNumber } from "@/lib/api/hooks/gateway"
 import { formatPhoneNumber } from "@/lib/format-utils"
@@ -267,26 +265,12 @@ function PhoneNumberDetailPage() {
                     </div>
                   </div>
                   <div>
-                    <p className="text-muted-foreground">Created</p>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <p className="cursor-default">{data.createdAt ? formatRelativeTimeShort(data.createdAt) : "---"}</p>
-                      </TooltipTrigger>
-                      <TooltipContent>{data.createdAt ? formatDateTime(data.createdAt) : "Unknown"}</TooltipContent>
-                    </Tooltip>
+                    <p className="text-muted-foreground">E911 Registered</p>
+                    <p>{data.e911Registered ? "Yes" : "No"}</p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground">Updated</p>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <p className="cursor-default">{data.updatedAt ? formatRelativeTimeShort(data.updatedAt) : "---"}</p>
-                      </TooltipTrigger>
-                      <TooltipContent>{data.updatedAt ? formatDateTime(data.updatedAt) : "Unknown"}</TooltipContent>
-                    </Tooltip>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Extension</p>
-                    <p>{data.extensionId ?? "None"}</p>
+                    <p className="text-muted-foreground">Team</p>
+                    <p className="font-mono text-xs">{data.teamId ?? "None"}</p>
                   </div>
                 </div>
               </CardContent>

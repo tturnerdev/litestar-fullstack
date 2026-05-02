@@ -136,7 +136,7 @@ class AdminTasksController(Controller):
                 "previous_status": previous_status,
                 "entity_type": db_obj.entity_type,
                 "entity_id": str(db_obj.entity_id) if db_obj.entity_id else None,
-                "team_id": str(db_obj.team_id),
+                "team_id": str(db_obj.team_id) if db_obj.team_id else None,
             },
             request=request,
         )
@@ -167,7 +167,7 @@ class AdminTasksController(Controller):
                 "status": db_obj.status,
                 "entity_type": db_obj.entity_type,
                 "entity_id": str(db_obj.entity_id) if db_obj.entity_id else None,
-                "team_id": str(db_obj.team_id),
+                "team_id": str(db_obj.team_id) if db_obj.team_id else None,
             },
             request=request,
         )
