@@ -115,6 +115,14 @@ class E911RegistrationService(service.SQLAlchemyAsyncRepositoryService[m.E911Reg
                 object.__setattr__(schema, k, v)
             return schema
 
+        if total is not None and filters is not None:
+            paginated = self.to_schema(obj, total, filters, schema_type=E911RegistrationSchema)
+            for model, schema in zip(obj, paginated.items, strict=False):
+                extra = self._enrich_schema(model)
+                for k, v in extra.items():
+                    object.__setattr__(schema, k, v)
+            return paginated
+
         schemas = []
         for item in obj:
             schema = self.to_schema(item, schema_type=E911RegistrationSchema)
@@ -122,10 +130,6 @@ class E911RegistrationService(service.SQLAlchemyAsyncRepositoryService[m.E911Reg
             for k, v in extra.items():
                 object.__setattr__(schema, k, v)
             schemas.append(schema)
-
-        if total is not None and filters is not None:
-            return self.to_schema(obj, total, filters, schema_type=E911RegistrationSchema)
-
         return schemas
 
     async def validate_registration(self, item_id: UUID) -> m.E911Registration:

@@ -87,7 +87,7 @@ class E911RegistrationController(Controller):
         if team_id:
             extra_filters.append(m.E911Registration.team_id == team_id)
         results, total = await e911_service.list_and_count(*filters, *extra_filters)
-        return e911_service.to_schema(results, total, filters, schema_type=E911Registration)
+        return e911_service.to_schema_enriched(results, total, filters)
 
     @post(
         operation_id="CreateE911Registration",
@@ -133,7 +133,7 @@ class E911RegistrationController(Controller):
             after=after,
             request=request,
         )
-        return e911_service.to_schema(db_obj, schema_type=E911Registration)
+        return e911_service.to_schema_enriched(db_obj)
 
     @get(
         operation_id="GetE911Registration",
@@ -156,7 +156,7 @@ class E911RegistrationController(Controller):
             E911Registration
         """
         db_obj = await e911_service.get(registration_id)
-        return e911_service.to_schema(db_obj, schema_type=E911Registration)
+        return e911_service.to_schema_enriched(db_obj)
 
     @patch(
         operation_id="UpdateE911Registration",
@@ -206,7 +206,7 @@ class E911RegistrationController(Controller):
             after=after,
             request=request,
         )
-        return e911_service.to_schema(fresh_obj, schema_type=E911Registration)
+        return e911_service.to_schema_enriched(fresh_obj)
 
     @delete(
         operation_id="DeleteE911Registration",
@@ -297,7 +297,7 @@ class E911RegistrationController(Controller):
             after=after,
             request=request,
         )
-        return e911_service.to_schema(db_obj, schema_type=E911Registration)
+        return e911_service.to_schema_enriched(db_obj)
 
     @get(
         operation_id="ListUnregisteredPhoneNumbers",
