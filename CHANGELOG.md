@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.272.0 (2026-05-07)
+
+### Added
+- **Admin devices sorting + column visibility** — SortableHeader on all 6 columns with toggleable visibility for MAC address, model, team, status, and last seen
+- **Admin fax sorting + column visibility** — SortableHeader on all 6 columns with toggleable visibility for pages, status, and received
+- **Admin roles DataFreshness** — Last-updated indicator with refresh for the permissions matrix page
+- **Admin roles error boundaries** — SectionErrorBoundary on permissions overview and reference sections
+
 ## v0.271.0 (2026-05-07)
 
 ### Added
