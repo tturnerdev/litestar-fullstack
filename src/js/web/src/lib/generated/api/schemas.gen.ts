@@ -10517,6 +10517,17 @@ export const WebhookDetailSchema = {
         },
       ],
     },
+    lastValidatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     name: {
       type: "string",
     },
@@ -10548,6 +10559,16 @@ export const WebhookDetailSchema = {
       oneOf: [
         {
           format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    validationStatus: {
+      oneOf: [
+        {
           type: "string",
         },
         {
@@ -10928,11 +10949,32 @@ export const WebhookListSchema = {
         },
       ],
     },
+    lastValidatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     name: {
       type: "string",
     },
     url: {
       type: "string",
+    },
+    validationStatus: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
     },
   },
   required: ["events", "id", "isActive", "name", "url"],

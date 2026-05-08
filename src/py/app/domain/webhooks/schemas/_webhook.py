@@ -19,6 +19,8 @@ class WebhookList(CamelizedBaseStruct):
     last_triggered_at: datetime | None = None
     last_status_code: int | None = None
     failure_count: int = 0
+    validation_status: str | None = None
+    last_validated_at: datetime | None = None
     created_at: datetime | None = None
 
 
@@ -36,6 +38,8 @@ class WebhookDetail(CamelizedBaseStruct):
     last_triggered_at: datetime | None = None
     last_status_code: int | None = None
     failure_count: int = 0
+    validation_status: str | None = None
+    last_validated_at: datetime | None = None
     user_id: UUID | None = None
     created_at: datetime | None = None
     updated_at: datetime | None = None

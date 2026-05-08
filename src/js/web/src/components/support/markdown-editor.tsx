@@ -14,6 +14,7 @@ interface MarkdownEditorProps {
   minHeight?: string
   onPaste?: (e: React.ClipboardEvent<HTMLTextAreaElement>) => void
   onDrop?: (e: React.DragEvent<HTMLTextAreaElement>) => void
+  onBlur?: () => void
   disabled?: boolean
 }
 
@@ -134,6 +135,7 @@ export function MarkdownEditor({
   minHeight = "150px",
   onPaste,
   onDrop,
+  onBlur,
   disabled = false,
 }: MarkdownEditorProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -287,6 +289,7 @@ export function MarkdownEditor({
               e.preventDefault()
               setIsDragOver(true)
             }}
+            onBlur={onBlur}
             onDragLeave={(e) => {
               // Only hide if leaving the textarea entirely
               if (!e.currentTarget.contains(e.relatedTarget as Node)) {

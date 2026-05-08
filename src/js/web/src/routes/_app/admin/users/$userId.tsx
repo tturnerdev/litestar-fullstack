@@ -133,6 +133,31 @@ function SectionHeading({
   )
 }
 
+// -- Validation ---------------------------------------------------------------
+
+interface UserFieldErrors {
+  name?: string
+  username?: string
+}
+
+function validateUserField(field: keyof UserFieldErrors, value: string): string | undefined {
+  switch (field) {
+    case "name":
+      if (value.trim() === "") return "Name is required"
+      if (value.trim().length < 2) return "Name must be at least 2 characters"
+      return undefined
+    case "username":
+      if (value.trim() !== "" && value.trim().length < 3) return "Username must be at least 3 characters"
+      if (value.trim() !== "" && !/^[a-zA-Z0-9_]+$/.test(value.trim())) return "Username may only contain letters, numbers, and underscores"
+      return undefined
+  }
+}
+
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null
+  return <p className="text-sm text-destructive">{message}</p>
+}
+
 // -- Main page component ----------------------------------------------------
 
 function AdminUserDetailPage() {
@@ -150,6 +175,37 @@ function AdminUserDetailPage() {
   const [editUsername, setEditUsername] = useState("")
   const justSavedRef = useRef(false)
 
+  // -- Validation state -------------------------------------------------------
+
+  const [fieldErrors, setFieldErrors] = useState<UserFieldErrors>({})
+  const touchedRef = useRef<Record<string, boolean>>({})
+
+  const validateField = useCallback((field: keyof UserFieldErrors, value: string) => {
+    const error = validateUserField(field, value)
+    setFieldErrors((prev) => ({ ...prev, [field]: error }))
+    return error
+  }, [])
+
+  const handleFieldBlur = useCallback(
+    (field: keyof UserFieldErrors, value: string) => {
+      touchedRef.current[field] = true
+      validateField(field, value)
+    },
+    [validateField],
+  )
+
+  const handleFieldChange = useCallback(
+    (field: keyof UserFieldErrors, value: string, setter: (v: string) => void) => {
+      setter(value)
+      if (touchedRef.current[field]) {
+        validateField(field, value)
+      }
+    },
+    [validateField],
+  )
+
+  const hasValidationErrors = Object.values(fieldErrors).some((e) => !!e)
+
   const formDirty = useMemo(() => {
     if (!editing || !data) return false
     return editName !== (data.name ?? "") || editUsername !== (data.username ?? "")
@@ -164,15 +220,29 @@ function AdminUserDetailPage() {
     if (!data) return
     setEditName(data.name ?? "")
     setEditUsername(data.username ?? "")
+    setFieldErrors({})
+    touchedRef.current = {}
     setEditing(true)
   }, [data])
 
   const handleCancelEditing = useCallback(() => {
     setEditing(false)
+    setFieldErrors({})
+    touchedRef.current = {}
   }, [])
 
   const handleSaveEditing = useCallback(() => {
     if (!data) return
+
+    // Validate all fields before submit
+    const nameErr = validateField("name", editName)
+    const usernameErr = validateField("username", editUsername)
+    // Mark all as touched so errors display
+    for (const f of ["name", "username"] as const) {
+      touchedRef.current[f] = true
+    }
+    if (nameErr || usernameErr) return
+
     justSavedRef.current = true
     const payload: Record<string, unknown> = {}
     if (editName !== (data.name ?? "")) payload.name = editName || null
@@ -185,12 +255,14 @@ function AdminUserDetailPage() {
     updateUser.mutate(payload, {
       onSuccess: () => {
         setEditing(false)
+        setFieldErrors({})
+        touchedRef.current = {}
       },
       onSettled: () => {
         justSavedRef.current = false
       },
     })
-  }, [data, editName, editUsername, updateUser])
+  }, [data, editName, editUsername, updateUser, validateField])
 
   if (isLoading) {
     return (
@@ -311,7 +383,7 @@ function AdminUserDetailPage() {
                 <Button variant="outline" size="sm" onClick={handleCancelEditing} disabled={updateUser.isPending}>
                   <X className="mr-2 h-4 w-4" /> Cancel
                 </Button>
-                <Button size="sm" onClick={handleSaveEditing} disabled={updateUser.isPending || !formDirty}>
+                <Button size="sm" onClick={handleSaveEditing} disabled={updateUser.isPending || !formDirty || hasValidationErrors}>
                   {updateUser.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                   {updateUser.isPending ? "Saving..." : "Save changes"}
                 </Button>
@@ -510,14 +582,19 @@ function AdminUserDetailPage() {
                       Username
                     </Label>
                     {editing ? (
-                      <Input
-                        id="edit-user-username"
-                        value={editUsername}
-                        onChange={(e) => setEditUsername(e.target.value)}
-                        placeholder="Username"
-                        className="mt-1"
-                        disabled={updateUser.isPending}
-                      />
+                      <>
+                        <Input
+                          id="edit-user-username"
+                          value={editUsername}
+                          onChange={(e) => handleFieldChange("username", e.target.value, setEditUsername)}
+                          onBlur={() => handleFieldBlur("username", editUsername)}
+                          placeholder="Username"
+                          className="mt-1"
+                          disabled={updateUser.isPending}
+                          aria-invalid={!!fieldErrors.username}
+                        />
+                        <FieldError message={fieldErrors.username} />
+                      </>
                     ) : (
                       <p>{data.username ?? "---"}</p>
                     )}
@@ -527,14 +604,19 @@ function AdminUserDetailPage() {
                       Name
                     </Label>
                     {editing ? (
-                      <Input
-                        id="edit-user-name"
-                        value={editName}
-                        onChange={(e) => setEditName(e.target.value)}
-                        placeholder="Full name"
-                        className="mt-1"
-                        disabled={updateUser.isPending}
-                      />
+                      <>
+                        <Input
+                          id="edit-user-name"
+                          value={editName}
+                          onChange={(e) => handleFieldChange("name", e.target.value, setEditName)}
+                          onBlur={() => handleFieldBlur("name", editName)}
+                          placeholder="Full name"
+                          className="mt-1"
+                          disabled={updateUser.isPending}
+                          aria-invalid={!!fieldErrors.name}
+                        />
+                        <FieldError message={fieldErrors.name} />
+                      </>
                     ) : (
                       <p>{data.name ?? "---"}</p>
                     )}

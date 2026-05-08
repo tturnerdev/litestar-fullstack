@@ -60,6 +60,8 @@ def _to_detail(service: WebhookService, obj: m.Webhook) -> WebhookDetail:
         last_triggered_at=detail.last_triggered_at,
         last_status_code=detail.last_status_code,
         failure_count=detail.failure_count,
+        validation_status=detail.validation_status,
+        last_validated_at=detail.last_validated_at,
         user_id=detail.user_id,
         created_at=detail.created_at,
         updated_at=detail.updated_at,

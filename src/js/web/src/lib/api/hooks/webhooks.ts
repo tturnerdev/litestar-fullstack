@@ -34,6 +34,10 @@ export interface WebhookDelivery {
   success: boolean
   error: string | null
   createdAt: string | null
+  retryCount: number | null
+  maxRetries: number | null
+  nextRetryAt: string | null
+  endpointUrl: string | null
 }
 
 // ---------------------------------------------------------------------------

@@ -5,6 +5,7 @@ import {
   AlertTriangle,
   ArrowLeft,
   Check,
+  CheckCircle2,
   Clock,
   Copy,
   Eye,
@@ -15,6 +16,7 @@ import {
   MoreHorizontal,
   Pencil,
   Play,
+  RefreshCw,
   Save,
   Trash2,
   X,
@@ -52,7 +54,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import type { WebhookDelivery } from "@/lib/api/hooks/webhooks"
 import { useDeleteWebhook, useTestWebhook, useUpdateWebhook, useWebhook, useWebhookDeliveries } from "@/lib/api/hooks/webhooks"
-import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
+import { formatDateTime, formatRelativeFuture, formatRelativeTimeShort } from "@/lib/date-utils"
 
 export const Route = createFileRoute("/_app/webhooks/$webhookId")({
   component: WebhookDetailPage,
@@ -98,6 +100,58 @@ function FieldError({ message }: { message?: string }) {
 
 // -- Helpers ------------------------------------------------------------------
 
+function ValidationStatusBadge({ status, lastValidatedAt }: { status: string | null | undefined; lastValidatedAt: string | null | undefined }) {
+  if (!status) {
+    return (
+      <Badge variant="outline" className="gap-1 text-muted-foreground">
+        Not validated
+      </Badge>
+    )
+  }
+
+  const configs: Record<string, { icon: typeof CheckCircle2; className: string; badgeClassName: string; label: string }> = {
+    valid: {
+      icon: CheckCircle2,
+      className: "h-3 w-3",
+      badgeClassName: "gap-1 bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400",
+      label: "Valid",
+    },
+    unreachable: {
+      icon: AlertTriangle,
+      className: "h-3 w-3",
+      badgeClassName: "gap-1 bg-amber-100 text-amber-700 hover:bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400",
+      label: "Unreachable",
+    },
+    invalid_url: {
+      icon: XCircle,
+      className: "h-3 w-3",
+      badgeClassName: "gap-1 bg-red-100 text-red-700 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400",
+      label: "Invalid URL",
+    },
+  }
+
+  const config = configs[status]
+  if (!config) return null
+
+  const Icon = config.icon
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Badge className={config.badgeClassName}>
+          <Icon className={config.className} />
+          {config.label}
+        </Badge>
+      </TooltipTrigger>
+      {lastValidatedAt && (
+        <TooltipContent side="bottom" className="text-xs">
+          Last validated {formatRelativeTimeShort(lastValidatedAt)} ({formatDateTime(lastValidatedAt)})
+        </TooltipContent>
+      )}
+    </Tooltip>
+  )
+}
+
 function statusCodeBadge(code: number | null | undefined): React.ReactNode {
   if (code == null) {
     return (
@@ -113,6 +167,110 @@ function statusCodeBadge(code: number | null | undefined): React.ReactNode {
     return <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400">{code}</Badge>
   }
   return <Badge className="bg-red-100 text-red-700 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400">{code}</Badge>
+}
+
+function deliveryStatusIndicator(delivery: WebhookDelivery): React.ReactNode {
+  if (delivery.success) {
+    return (
+      <Badge className="gap-1 bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400">
+        <Check className="h-3 w-3" />
+        Success
+      </Badge>
+    )
+  }
+
+  const retryCount = delivery.retryCount ?? 0
+  const maxRetries = delivery.maxRetries ?? 0
+  const retriesExhausted = maxRetries > 0 && retryCount >= maxRetries
+
+  if (retriesExhausted) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Badge variant="destructive" className="gap-1 cursor-default">
+            <XCircle className="h-3 w-3" />
+            Final
+          </Badge>
+        </TooltipTrigger>
+        <TooltipContent className="max-w-xs">{delivery.error ? `${delivery.error} — retries exhausted` : "All retry attempts exhausted"}</TooltipContent>
+      </Tooltip>
+    )
+  }
+
+  if (delivery.nextRetryAt) {
+    const futureLabel = formatRelativeFuture(delivery.nextRetryAt)
+    if (futureLabel) {
+      return (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Badge className="gap-1 cursor-default bg-amber-100 text-amber-700 hover:bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400">
+              <Clock className="h-3 w-3" />
+              Retrying
+            </Badge>
+          </TooltipTrigger>
+          <TooltipContent className="max-w-xs">
+            {`Retrying ${futureLabel}`}
+            {delivery.error ? ` — ${delivery.error}` : ""}
+          </TooltipContent>
+        </Tooltip>
+      )
+    }
+  }
+
+  // Failed with no pending retry and retries not exhausted (e.g., retries not configured)
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Badge variant="destructive" className="gap-1 cursor-default">
+          <XCircle className="h-3 w-3" />
+          Failed
+        </Badge>
+      </TooltipTrigger>
+      {delivery.error && <TooltipContent className="max-w-xs">{delivery.error}</TooltipContent>}
+    </Tooltip>
+  )
+}
+
+function retryBadge(delivery: WebhookDelivery): React.ReactNode {
+  if (delivery.success) return null
+  const retryCount = delivery.retryCount ?? 0
+  const maxRetries = delivery.maxRetries ?? 0
+  if (maxRetries === 0) return null
+
+  const retriesExhausted = retryCount >= maxRetries
+
+  if (retriesExhausted) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Badge variant="outline" className="gap-1 cursor-default text-red-600 border-red-300 dark:text-red-400 dark:border-red-800">
+            <XCircle className="h-3 w-3" />
+            Retries exhausted
+          </Badge>
+        </TooltipTrigger>
+        <TooltipContent>{`${retryCount}/${maxRetries} attempts used`}</TooltipContent>
+      </Tooltip>
+    )
+  }
+
+  const futureLabel = delivery.nextRetryAt ? formatRelativeFuture(delivery.nextRetryAt) : null
+
+  return (
+    <div className="flex flex-col gap-1">
+      <Badge variant="outline" className="gap-1 w-fit">
+        <RefreshCw className="h-3 w-3" />
+        Retry {retryCount}/{maxRetries}
+      </Badge>
+      {futureLabel && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="text-xs text-amber-600 dark:text-amber-400 cursor-default">{`Next ${futureLabel}`}</span>
+          </TooltipTrigger>
+          <TooltipContent>{formatDateTime(delivery.nextRetryAt)}</TooltipContent>
+        </Tooltip>
+      )}
+    </div>
+  )
 }
 
 function TimestampField({ label, value }: { label: string; value: string | null | undefined }) {
@@ -520,9 +678,26 @@ function WebhookDetailPage() {
                       <FieldError message={fieldErrors.url} />
                     </>
                   ) : (
-                    <div className="flex items-center gap-1">
-                      <p className="font-mono text-xs break-all">{data.url}</p>
-                      <CopyButton value={data.url} label="URL" />
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-1">
+                        <p className="font-mono text-xs break-all">{data.url}</p>
+                        <CopyButton value={data.url} label="URL" />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <ValidationStatusBadge status={data.validationStatus} lastValidatedAt={data.lastValidatedAt} />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-7 gap-1 px-2 text-xs"
+                          onClick={() => {
+                            updateWebhook.mutate({ url: data.url })
+                          }}
+                          disabled={updateWebhook.isPending}
+                        >
+                          {updateWebhook.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+                          Re-validate
+                        </Button>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -688,6 +863,7 @@ function WebhookDetailPage() {
                   <p className="text-muted-foreground text-sm">Last Status Code</p>
                   <div className="mt-0.5">{statusCodeBadge(data.lastStatusCode)}</div>
                 </div>
+                <TimestampField label="Last Validated" value={data.lastValidatedAt} />
               </div>
             </CardContent>
           </Card>
@@ -736,6 +912,7 @@ function WebhookDetailPage() {
                       <TableRow>
                         <TableHead>Event</TableHead>
                         <TableHead>Result</TableHead>
+                        <TableHead>Retry</TableHead>
                         <TableHead>HTTP Status</TableHead>
                         <TableHead>Response Time</TableHead>
                         <TableHead>Timestamp</TableHead>
@@ -747,24 +924,8 @@ function WebhookDetailPage() {
                           <TableCell>
                             <span className="text-sm font-mono">{delivery.event}</span>
                           </TableCell>
-                          <TableCell>
-                            {delivery.success ? (
-                              <Badge className="gap-1 bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400">
-                                <Check className="h-3 w-3" />
-                                Success
-                              </Badge>
-                            ) : (
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Badge variant="destructive" className="gap-1 cursor-default">
-                                    <XCircle className="h-3 w-3" />
-                                    Failed
-                                  </Badge>
-                                </TooltipTrigger>
-                                {delivery.error && <TooltipContent className="max-w-xs">{delivery.error}</TooltipContent>}
-                              </Tooltip>
-                            )}
-                          </TableCell>
+                          <TableCell>{deliveryStatusIndicator(delivery)}</TableCell>
+                          <TableCell>{retryBadge(delivery) ?? <span className="text-muted-foreground">--</span>}</TableCell>
                           <TableCell>{statusCodeBadge(delivery.statusCode)}</TableCell>
                           <TableCell>
                             <span className="text-sm text-muted-foreground">{delivery.responseTimeMs}ms</span>

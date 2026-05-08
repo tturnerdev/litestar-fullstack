@@ -48,11 +48,21 @@ const DESC_MAX = 2000
 
 // ── Schema ──────────────────────────────────────────────────────────────
 
+const SUBJECT_MIN = 5
+
 const createTicketSchema = z.object({
-  subject: z.string().min(1, "Subject is required").max(SUBJECT_MAX, "Subject must be under 200 characters"),
-  bodyMarkdown: z.string().min(10, "Description must be at least 10 characters").max(DESC_MAX, "Description must be under 2000 characters"),
+  subject: z
+    .string()
+    .min(1, "Subject is required")
+    .refine((v) => v.trim().length >= SUBJECT_MIN, `Subject must be at least ${SUBJECT_MIN} characters`)
+    .pipe(z.string().max(SUBJECT_MAX, `Subject must be under ${SUBJECT_MAX} characters`)),
+  bodyMarkdown: z
+    .string()
+    .min(1, "Description is required")
+    .refine((v) => v.trim().length >= 10, "Description must be at least 10 characters")
+    .pipe(z.string().max(DESC_MAX, `Description must be under ${DESC_MAX} characters`)),
   priority: z.string().min(1, "Priority is required"),
-  category: z.string().optional(),
+  category: z.string().min(1, "Category is required"),
 })
 
 type CreateTicketFormData = z.infer<typeof createTicketSchema>
@@ -121,6 +131,8 @@ export function CreateTicketForm() {
 
   const form = useForm<CreateTicketFormData>({
     resolver: zodResolver(createTicketSchema),
+    mode: "onBlur",
+    reValidateMode: "onChange",
     defaultValues: {
       subject: "",
       bodyMarkdown: "",
@@ -129,7 +141,7 @@ export function CreateTicketForm() {
     },
   })
 
-  const { isDirty } = form.formState
+  const { isDirty, isValid } = form.formState
   const hasAttachments = attachments.length > 0
   const isFormDirty = isDirty || hasAttachments
 
@@ -157,7 +169,7 @@ export function CreateTicketForm() {
         subject: data.subject,
         bodyMarkdown: data.bodyMarkdown,
         priority: data.priority,
-        category: data.category || null,
+        category: data.category,
       })
       // Reset dirty state before navigating so blocker doesn't fire
       toast.success("Ticket created successfully")
@@ -216,7 +228,9 @@ export function CreateTicketForm() {
               name="category"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Category</FormLabel>
+                  <FormLabel>
+                    Category <RequiredIndicator />
+                  </FormLabel>
                   <div className="grid grid-cols-2 gap-2">
                     {categories.map((cat) => {
                       const isSelected = field.value === cat.value
@@ -224,7 +238,11 @@ export function CreateTicketForm() {
                         <button
                           key={cat.value}
                           type="button"
-                          onClick={() => field.onChange(isSelected ? "" : cat.value)}
+                          onClick={() => {
+                            field.onChange(isSelected ? "" : cat.value)
+                            // Defer trigger so react-hook-form processes the new value first
+                            queueMicrotask(() => form.trigger("category"))
+                          }}
                           className={cn(
                             "flex items-center gap-2 rounded-lg border px-3 py-2.5 text-left text-sm transition-all",
                             isSelected ? "border-primary bg-primary/5 ring-1 ring-primary/20" : "border-border/60 bg-card hover:border-border hover:bg-muted/40",
@@ -260,7 +278,10 @@ export function CreateTicketForm() {
                         <button
                           key={prio.value}
                           type="button"
-                          onClick={() => field.onChange(prio.value)}
+                          onClick={() => {
+                            field.onChange(prio.value)
+                            queueMicrotask(() => form.trigger("priority"))
+                          }}
                           className={cn(
                             "flex w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-all",
                             isSelected ? "border-primary bg-primary/5 ring-1 ring-primary/20" : "border-border/60 bg-card hover:border-border hover:bg-muted/40",
@@ -297,7 +318,13 @@ export function CreateTicketForm() {
                   Description <RequiredIndicator />
                 </FormLabel>
                 <FormControl>
-                  <MarkdownEditor value={field.value} onChange={field.onChange} placeholder="Describe your issue in detail... (Markdown supported)" minHeight="180px" />
+                  <MarkdownEditor
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    placeholder="Describe your issue in detail... (Markdown supported)"
+                    minHeight="180px"
+                  />
                 </FormControl>
                 <div className="flex items-center justify-between">
                   <FormDescription>Include steps to reproduce, expected behavior, and any error messages. Markdown formatting is supported.</FormDescription>
@@ -337,7 +364,7 @@ export function CreateTicketForm() {
             <Button type="button" variant="ghost" asChild>
               <Link to="/support">Cancel</Link>
             </Button>
-            <Button type="submit" disabled={form.formState.isSubmitting}>
+            <Button type="submit" disabled={form.formState.isSubmitting || (form.formState.isSubmitted && !isValid)}>
               {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {form.formState.isSubmitting ? "Creating..." : "Create Ticket"}
             </Button>

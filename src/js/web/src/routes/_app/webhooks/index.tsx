@@ -2,7 +2,9 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import {
   Activity,
   AlertCircle,
+  AlertTriangle,
   Check,
+  CheckCircle2,
   ChevronDown,
   Clock,
   Download,
@@ -49,6 +51,7 @@ import { nextSortDirection, SortableHeader, type SortDirection } from "@/compone
 import { Switch } from "@/components/ui/switch"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Textarea } from "@/components/ui/textarea"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import type { WebhookDelivery } from "@/lib/api/hooks/webhooks"
@@ -149,6 +152,44 @@ function loadColumnVisibility(): ColumnVisibility {
 function truncateUrl(url: string, maxLen = 40): string {
   if (url.length <= maxLen) return url
   return `${url.slice(0, maxLen)}...`
+}
+
+function ValidationStatusIndicator({ status, lastValidatedAt }: { status: string | null | undefined; lastValidatedAt: string | null | undefined }) {
+  if (!status) return null
+
+  const config = {
+    valid: {
+      icon: CheckCircle2,
+      className: "text-emerald-600 dark:text-emerald-400",
+      label: "URL validated successfully",
+    },
+    unreachable: {
+      icon: AlertTriangle,
+      className: "text-amber-600 dark:text-amber-400",
+      label: "URL is unreachable",
+    },
+    invalid_url: {
+      icon: XCircle,
+      className: "text-red-600 dark:text-red-400",
+      label: "Invalid URL",
+    },
+  }[status]
+
+  if (!config) return null
+
+  const Icon = config.icon
+  const tooltipText = lastValidatedAt ? `${config.label} -- Last checked ${formatDateTime(lastValidatedAt)}` : config.label
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Icon className={cn("h-3.5 w-3.5 shrink-0", config.className)} aria-label={config.label} />
+      </TooltipTrigger>
+      <TooltipContent side="top" className="max-w-xs text-xs">
+        {tooltipText}
+      </TooltipContent>
+    </Tooltip>
+  )
 }
 
 function statusCodeBadge(code: number | null): React.ReactNode {
@@ -1104,7 +1145,8 @@ function WebhookRow({
               <Link to="/webhooks/$webhookId" params={{ webhookId: webhook.id }} className="font-medium hover:underline" onClick={(e) => e.stopPropagation()}>
                 {webhook.name}
               </Link>
-              <span className="block sm:hidden text-xs text-muted-foreground font-mono truncate" title={webhook.url}>
+              <span className="flex items-center gap-1 sm:hidden text-xs text-muted-foreground font-mono truncate" title={webhook.url}>
+                <ValidationStatusIndicator status={webhook.validationStatus} lastValidatedAt={webhook.lastValidatedAt} />
                 {truncateUrl(webhook.url, 30)}
               </span>
             </div>
@@ -1112,7 +1154,8 @@ function WebhookRow({
         </TableCell>
         {isColumnVisible("url") && (
           <TableCell className={cn("hidden sm:table-cell", cellClass)}>
-            <span className="text-sm text-muted-foreground font-mono" title={webhook.url}>
+            <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground font-mono" title={webhook.url}>
+              <ValidationStatusIndicator status={webhook.validationStatus} lastValidatedAt={webhook.lastValidatedAt} />
               {truncateUrl(webhook.url)}
             </span>
           </TableCell>

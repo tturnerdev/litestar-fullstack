@@ -11,6 +11,11 @@ from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+# Valid values for validation_status
+VALIDATION_STATUS_VALID = "valid"
+VALIDATION_STATUS_UNREACHABLE = "unreachable"
+VALIDATION_STATUS_INVALID_URL = "invalid_url"
+
 if TYPE_CHECKING:
     from app.db.models._user import User
 
@@ -31,6 +36,10 @@ class Webhook(UUIDv7AuditBase):
     last_status_code: Mapped[int | None] = mapped_column(Integer, nullable=True, default=None)
     failure_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     description: Mapped[str] = mapped_column(String(length=500), nullable=False, default="")
+    validation_status: Mapped[str | None] = mapped_column(String(length=50), nullable=True, default=None)
+    """URL validation status: 'valid', 'unreachable', or 'invalid_url'."""
+    last_validated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
+    """When the URL was last validated for reachability."""
     user_id: Mapped[UUID] = mapped_column(
         ForeignKey("user_account.id", ondelete="CASCADE"),
         nullable=False,

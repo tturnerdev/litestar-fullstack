@@ -63,6 +63,28 @@ export function formatDateTime(dateStr: string | null | undefined, fallback = "-
 }
 
 /**
+ * Format a future date as a relative duration (e.g. "in 3 minutes", "in 1 hour").
+ * Returns `null` if the date is in the past or invalid.
+ */
+export function formatRelativeFuture(dateStr: string | null | undefined): string | null {
+  if (!dateStr) return null
+  const date = new Date(dateStr)
+  const now = new Date()
+  const diffMs = date.getTime() - now.getTime()
+  if (diffMs <= 0) return null
+
+  const seconds = Math.floor(diffMs / 1000)
+  const minutes = Math.floor(seconds / 60)
+  const hours = Math.floor(minutes / 60)
+
+  if (seconds < 60) return "in a few seconds"
+  if (minutes === 1) return "in 1 minute"
+  if (minutes < 60) return `in ${minutes} minutes`
+  if (hours === 1) return "in 1 hour"
+  return `in ${hours} hours`
+}
+
+/**
  * Format a date string as a long-form date (e.g. "January 15, 2026").
  * Returns the raw string on parse failure.
  */

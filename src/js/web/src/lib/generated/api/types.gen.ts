@@ -2822,11 +2822,13 @@ export type WebhookDetail = {
   isActive: boolean;
   lastStatusCode?: number | null;
   lastTriggeredAt?: string | null;
+  lastValidatedAt?: string | null;
   name: string;
   secret?: string | null;
   updatedAt?: string | null;
   url: string;
   userId?: string | null;
+  validationStatus?: string | null;
 };
 
 /**
@@ -2910,8 +2912,10 @@ export type WebhookList = {
   isActive: boolean;
   lastStatusCode?: number | null;
   lastTriggeredAt?: string | null;
+  lastValidatedAt?: string | null;
   name: string;
   url: string;
+  validationStatus?: string | null;
 };
 
 /**
@@ -3336,9 +3340,9 @@ export type AdminListAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
+    targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
-    targetIdIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
@@ -3415,9 +3419,9 @@ export type AdminExportAuditLogData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
+    targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
-    targetIdIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
@@ -3483,9 +3487,9 @@ export type AdminGetTargetAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
+    targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
-    targetIdIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
@@ -3563,9 +3567,9 @@ export type AdminGetUserAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
+    targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
-    targetIdIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
