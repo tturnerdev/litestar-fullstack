@@ -32,6 +32,8 @@ class DeviceTemplateService(service.SQLAlchemyAsyncRepositoryService[m.DeviceTem
     async def to_model_on_create(self, data: ModelDictT[m.DeviceTemplate]) -> ModelDictT[m.DeviceTemplate]:
         data = service.schema_dump(data)
         if service.is_dict(data):
+            data["manufacturer"] = data["manufacturer"].strip()
+            data["model"] = data["model"].strip()
             existing = await self.repository.list(
                 m.DeviceTemplate.manufacturer == data["manufacturer"],
                 m.DeviceTemplate.model == data["model"],
@@ -43,12 +45,17 @@ class DeviceTemplateService(service.SQLAlchemyAsyncRepositoryService[m.DeviceTem
     async def to_model_on_update(self, data: ModelDictT[m.DeviceTemplate], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.DeviceTemplate]:
         data = service.schema_dump(data)
         if service.is_dict(data) and ("manufacturer" in data or "model" in data):
-            existing = await self.repository.list(
-                m.DeviceTemplate.manufacturer == data["manufacturer"],
-                m.DeviceTemplate.model == data["model"],
-            )
-            if existing and any(str(e.id) != str(item_id) for e in existing):
-                raise ValidationException("A device template for this manufacturer and model already exists.")
+            if "manufacturer" in data:
+                data["manufacturer"] = data["manufacturer"].strip()
+            if "model" in data:
+                data["model"] = data["model"].strip()
+            if "manufacturer" in data and "model" in data:
+                existing = await self.repository.list(
+                    m.DeviceTemplate.manufacturer == data["manufacturer"],
+                    m.DeviceTemplate.model == data["model"],
+                )
+                if existing and any(str(e.id) != str(item_id) for e in existing):
+                    raise ValidationException("A device template for this manufacturer and model already exists.")
         return data
 
     async def to_model(

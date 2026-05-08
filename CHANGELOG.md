@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.362.0 (2026-05-08)
+
+### Fixed
+- **Extension number whitespace strip** — Strip leading/trailing whitespace from extension numbers before duplicate checks in extension service
+- **Device template field strip** — Strip whitespace from manufacturer and model fields before duplicate checks in device template service, and fix update duplicate check to only run when both fields are present
+
 ## v0.361.0 (2026-05-08)
 
 ### Fixed

@@ -32,6 +32,7 @@ class ExtensionService(service.SQLAlchemyAsyncRepositoryService[m.Extension]):
     async def to_model_on_create(self, data: ModelDictT[m.Extension]) -> ModelDictT[m.Extension]:
         data = service.schema_dump(data)
         if service.is_dict(data):
+            data["extension_number"] = data["extension_number"].strip()
             existing = await self.repository.list(
                 CollectionFilter(field_name="extension_number", values=[data["extension_number"]]),
             )
@@ -42,6 +43,7 @@ class ExtensionService(service.SQLAlchemyAsyncRepositoryService[m.Extension]):
     async def to_model_on_update(self, data: ModelDictT[m.Extension], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.Extension]:
         data = service.schema_dump(data)
         if service.is_dict(data) and "extension_number" in data:
+            data["extension_number"] = data["extension_number"].strip()
             existing = await self.repository.list(
                 CollectionFilter(field_name="extension_number", values=[data["extension_number"]]),
             )
