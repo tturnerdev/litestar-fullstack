@@ -41,8 +41,10 @@ class WebhookEventType(StrEnum):
     TEAM_INVITATION_CREATED = "team.invitation.created"
     TEAM_INVITATION_DELETED = "team.invitation.deleted"
     TEAM_MEMBER_REMOVED = "team.member.removed"
+    TEAM_PERMISSIONS_UPDATED = "team.permissions.updated"
 
     # Organization events
+    ORGANIZATION_CREATED = "organization.created"
     ORGANIZATION_UPDATED = "organization.updated"
 
     # Device events
@@ -50,7 +52,7 @@ class WebhookEventType(StrEnum):
     DEVICE_UPDATED = "device.updated"
     DEVICE_DELETED = "device.deleted"
     DEVICE_TEMPLATE_CREATED = "device.template.created"
-    DEVICE_TEMPLATE_DELETED = "device_template.deleted"
+    DEVICE_TEMPLATE_DELETED = "device.template.deleted"
 
     # Connection events
     CONNECTION_CREATED = "connection.created"
@@ -66,6 +68,8 @@ class WebhookEventType(StrEnum):
     SCHEDULE_CREATED = "schedule.created"
     SCHEDULE_UPDATED = "schedule.updated"
     SCHEDULE_DELETED = "schedule.deleted"
+    SCHEDULE_ENTRY_CREATED = "schedule.entry.created"
+    SCHEDULE_ENTRY_UPDATED = "schedule.entry.updated"
     SCHEDULE_ENTRY_DELETED = "schedule.entry.deleted"
 
     # E911 events
@@ -122,11 +126,16 @@ class WebhookEventType(StrEnum):
     FORWARDING_UPDATED = "forwarding.updated"
     FORWARDING_DELETED = "forwarding.deleted"
 
+    # Voice — DND events
+    DND_TOGGLED = "dnd.toggled"
+    DND_UPDATED = "dnd.updated"
+
     # Voicemail events
     VOICEMAIL_BOX_CREATED = "voicemail_box.created"
     VOICEMAIL_BOX_UPDATED = "voicemail_box.updated"
     VOICEMAIL_BOX_DELETED = "voicemail_box.deleted"
     VOICEMAIL_MESSAGE_DELETED = "voicemail.message.deleted"
+    VOICEMAIL_MESSAGE_UPDATED = "voicemail.message.updated"
 
     # Fax — fax number events
     FAX_NUMBER_CREATED = "fax_number.created"
@@ -148,13 +157,17 @@ class WebhookEventType(StrEnum):
     TICKET_ASSIGNED = "ticket.assigned"
     TICKET_MESSAGE_CREATED = "ticket.message.created"
     TICKET_MESSAGE_DELETED = "ticket.message.deleted"
+    TICKET_MESSAGE_UPDATED = "ticket.message.updated"
     TICKET_ATTACHMENT_DELETED = "ticket.attachment.deleted"
 
     # Tag events
+    TAG_CREATED = "tag.created"
+    TAG_UPDATED = "tag.updated"
     TAG_DELETED = "tag.deleted"
 
     # Notification events
     NOTIFICATION_DELETED = "notification.deleted"
+    NOTIFICATIONS_BULK_DELETED = "notifications.bulk_deleted"
 
     # Analytics events
     CALL_RECORD_CREATED = "call_record.created"
@@ -195,7 +208,9 @@ EVENT_DESCRIPTIONS: dict[WebhookEventType, str] = {
     WebhookEventType.TEAM_INVITATION_CREATED: "A team invitation was created",
     WebhookEventType.TEAM_INVITATION_DELETED: "A team invitation was deleted",
     WebhookEventType.TEAM_MEMBER_REMOVED: "A member was removed from a team",
+    WebhookEventType.TEAM_PERMISSIONS_UPDATED: "Team permissions were updated",
     # Organization events
+    WebhookEventType.ORGANIZATION_CREATED: "An organization was created",
     WebhookEventType.ORGANIZATION_UPDATED: "An organization was updated",
     # Device events
     WebhookEventType.DEVICE_CREATED: "A new device was provisioned",
@@ -215,6 +230,8 @@ EVENT_DESCRIPTIONS: dict[WebhookEventType, str] = {
     WebhookEventType.SCHEDULE_CREATED: "A new schedule was created",
     WebhookEventType.SCHEDULE_UPDATED: "A schedule was updated",
     WebhookEventType.SCHEDULE_DELETED: "A schedule was deleted",
+    WebhookEventType.SCHEDULE_ENTRY_CREATED: "A new schedule entry was created",
+    WebhookEventType.SCHEDULE_ENTRY_UPDATED: "A schedule entry was updated",
     WebhookEventType.SCHEDULE_ENTRY_DELETED: "A schedule entry was deleted",
     # E911 events
     WebhookEventType.E911_REGISTRATION_CREATED: "A new E911 registration was created",
@@ -261,11 +278,15 @@ EVENT_DESCRIPTIONS: dict[WebhookEventType, str] = {
     WebhookEventType.FORWARDING_CREATED: "A new call forwarding rule was created",
     WebhookEventType.FORWARDING_UPDATED: "A call forwarding rule was updated",
     WebhookEventType.FORWARDING_DELETED: "A call forwarding rule was deleted",
+    # Voice — DND events
+    WebhookEventType.DND_TOGGLED: "Do Not Disturb was toggled",
+    WebhookEventType.DND_UPDATED: "Do Not Disturb settings were updated",
     # Voicemail events
     WebhookEventType.VOICEMAIL_BOX_CREATED: "A new voicemail box was created",
     WebhookEventType.VOICEMAIL_BOX_UPDATED: "A voicemail box was updated",
     WebhookEventType.VOICEMAIL_BOX_DELETED: "A voicemail box was deleted",
     WebhookEventType.VOICEMAIL_MESSAGE_DELETED: "A voicemail message was deleted",
+    WebhookEventType.VOICEMAIL_MESSAGE_UPDATED: "A voicemail message was updated",
     # Fax — fax number events
     WebhookEventType.FAX_NUMBER_CREATED: "A new fax number was created",
     WebhookEventType.FAX_NUMBER_UPDATED: "A fax number was updated",
@@ -283,11 +304,15 @@ EVENT_DESCRIPTIONS: dict[WebhookEventType, str] = {
     WebhookEventType.TICKET_ASSIGNED: "A support ticket was assigned",
     WebhookEventType.TICKET_MESSAGE_CREATED: "A new message was added to a support ticket",
     WebhookEventType.TICKET_MESSAGE_DELETED: "A ticket message was deleted",
+    WebhookEventType.TICKET_MESSAGE_UPDATED: "A ticket message was updated",
     WebhookEventType.TICKET_ATTACHMENT_DELETED: "A ticket attachment was deleted",
     # Tag events
+    WebhookEventType.TAG_CREATED: "A new tag was created",
+    WebhookEventType.TAG_UPDATED: "A tag was updated",
     WebhookEventType.TAG_DELETED: "A tag was deleted",
     # Notification events
     WebhookEventType.NOTIFICATION_DELETED: "A notification was deleted",
+    WebhookEventType.NOTIFICATIONS_BULK_DELETED: "Multiple notifications were deleted",
     # Analytics events
     WebhookEventType.CALL_RECORD_CREATED: "A new call record was created",
     # Admin — music on hold events

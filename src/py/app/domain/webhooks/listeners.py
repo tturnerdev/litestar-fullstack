@@ -44,7 +44,9 @@ EVENT_MAP: dict[str, WebhookEventType] = {
     "team_invitation_created": WebhookEventType.TEAM_INVITATION_CREATED,
     "team_invitation_deleted": WebhookEventType.TEAM_INVITATION_DELETED,
     "team_member_removed": WebhookEventType.TEAM_MEMBER_REMOVED,
+    "team_permissions_updated": WebhookEventType.TEAM_PERMISSIONS_UPDATED,
     # Organization events
+    "organization_created": WebhookEventType.ORGANIZATION_CREATED,
     "organization_updated": WebhookEventType.ORGANIZATION_UPDATED,
     # Device events
     "device_created": WebhookEventType.DEVICE_CREATED,
@@ -64,6 +66,8 @@ EVENT_MAP: dict[str, WebhookEventType] = {
     "schedule_created": WebhookEventType.SCHEDULE_CREATED,
     "schedule_updated": WebhookEventType.SCHEDULE_UPDATED,
     "schedule_deleted": WebhookEventType.SCHEDULE_DELETED,
+    "schedule_entry_created": WebhookEventType.SCHEDULE_ENTRY_CREATED,
+    "schedule_entry_updated": WebhookEventType.SCHEDULE_ENTRY_UPDATED,
     "schedule_entry_deleted": WebhookEventType.SCHEDULE_ENTRY_DELETED,
     # E911 events
     "e911_registration_created": WebhookEventType.E911_REGISTRATION_CREATED,
@@ -110,11 +114,15 @@ EVENT_MAP: dict[str, WebhookEventType] = {
     "forwarding_created": WebhookEventType.FORWARDING_CREATED,
     "forwarding_updated": WebhookEventType.FORWARDING_UPDATED,
     "forwarding_deleted": WebhookEventType.FORWARDING_DELETED,
+    # Voice — DND events
+    "dnd_toggled": WebhookEventType.DND_TOGGLED,
+    "dnd_updated": WebhookEventType.DND_UPDATED,
     # Voicemail events
     "voicemail_box_created": WebhookEventType.VOICEMAIL_BOX_CREATED,
     "voicemail_box_updated": WebhookEventType.VOICEMAIL_BOX_UPDATED,
     "voicemail_box_deleted": WebhookEventType.VOICEMAIL_BOX_DELETED,
     "voicemail_message_deleted": WebhookEventType.VOICEMAIL_MESSAGE_DELETED,
+    "voicemail_message_updated": WebhookEventType.VOICEMAIL_MESSAGE_UPDATED,
     # Fax — fax number events
     "fax_number_created": WebhookEventType.FAX_NUMBER_CREATED,
     "fax_number_updated": WebhookEventType.FAX_NUMBER_UPDATED,
@@ -132,11 +140,15 @@ EVENT_MAP: dict[str, WebhookEventType] = {
     "ticket_assigned": WebhookEventType.TICKET_ASSIGNED,
     "ticket_message_created": WebhookEventType.TICKET_MESSAGE_CREATED,
     "ticket_message_deleted": WebhookEventType.TICKET_MESSAGE_DELETED,
+    "ticket_message_updated": WebhookEventType.TICKET_MESSAGE_UPDATED,
     "ticket_attachment_deleted": WebhookEventType.TICKET_ATTACHMENT_DELETED,
     # Tag events
+    "tag_created": WebhookEventType.TAG_CREATED,
+    "tag_updated": WebhookEventType.TAG_UPDATED,
     "tag_deleted": WebhookEventType.TAG_DELETED,
     # Notification events
     "notification_deleted": WebhookEventType.NOTIFICATION_DELETED,
+    "notifications_bulk_deleted": WebhookEventType.NOTIFICATIONS_BULK_DELETED,
     # Analytics events
     "call_record_created": WebhookEventType.CALL_RECORD_CREATED,
     # Admin — music on hold events
