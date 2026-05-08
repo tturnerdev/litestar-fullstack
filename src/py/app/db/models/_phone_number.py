@@ -33,7 +33,7 @@ class PhoneNumber(UUIDv7AuditBase):
     caller_id_name: Mapped[str | None] = mapped_column(String(length=50), nullable=True, default=None)
     is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
     team_id: Mapped[UUID | None] = mapped_column(
-        ForeignKey("team.id", ondelete="set null"), nullable=True, default=None
+        ForeignKey("team.id", ondelete="set null"), nullable=True, default=None, index=True
     )
 
     def __repr__(self) -> str:

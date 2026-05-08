@@ -57,6 +57,7 @@ const DEFAULT_PAGE_SIZE = 25
 const PAGE_SIZE_STORAGE_KEY = "tasks-page-size"
 const AUTO_REFRESH_STORAGE_KEY = "tasks-auto-refresh"
 const AUTO_REFRESH_INTERVAL = 30_000
+const ACTIVE_TASK_REFRESH_INTERVAL = 15_000
 
 // -- Column visibility ---------------------------------------------------------
 
@@ -378,7 +379,7 @@ function TasksPage() {
       taskType: taskTypeFilter !== "all" ? taskTypeFilter : undefined,
       orderBy: sortKey ?? "created_at",
       sortOrder: sortDir ?? "desc",
-      refetchInterval: autoRefresh ? AUTO_REFRESH_INTERVAL : hasActiveTasks ? 15000 : false,
+      refetchInterval: autoRefresh ? AUTO_REFRESH_INTERVAL : hasActiveTasks ? ACTIVE_TASK_REFRESH_INTERVAL : false,
     }),
     [page, pageSize, statusFilter, taskTypeFilter, sortKey, sortDir, autoRefresh, hasActiveTasks],
   )

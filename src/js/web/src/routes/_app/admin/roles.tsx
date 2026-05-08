@@ -448,11 +448,17 @@ function TeamPermissionCard({ teamId, teamName, memberCount }: { teamId: string;
             <Table aria-label="Loading permissions">
               <TableHeader>
                 <TableRow>
-                  <TableHead><Skeleton className="h-4 w-24" /></TableHead>
+                  <TableHead>
+                    <Skeleton className="h-4 w-24" />
+                  </TableHead>
                   {ROLES.map((role) => (
                     <Fragment key={`skel-hdr-${role}`}>
-                      <TableHead className="w-[100px] text-center"><Skeleton className="mx-auto h-4 w-14" /></TableHead>
-                      <TableHead className="w-[100px] text-center"><Skeleton className="mx-auto h-4 w-14" /></TableHead>
+                      <TableHead className="w-[100px] text-center">
+                        <Skeleton className="mx-auto h-4 w-14" />
+                      </TableHead>
+                      <TableHead className="w-[100px] text-center">
+                        <Skeleton className="mx-auto h-4 w-14" />
+                      </TableHead>
                     </Fragment>
                   ))}
                 </TableRow>
@@ -468,9 +474,14 @@ function TeamPermissionCard({ teamId, teamName, memberCount }: { teamId: string;
                       </div>
                     </TableCell>
                     {ROLES.map((role) => (
+                      // biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton placeholders with stable role key
                       <Fragment key={`skel-cell-${role}-${i}`}>
-                        <TableCell className="text-center"><Skeleton className="mx-auto h-4 w-4 rounded" /></TableCell>
-                        <TableCell className="text-center"><Skeleton className="mx-auto h-4 w-4 rounded" /></TableCell>
+                        <TableCell className="text-center">
+                          <Skeleton className="mx-auto h-4 w-4 rounded" />
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Skeleton className="mx-auto h-4 w-4 rounded" />
+                        </TableCell>
                       </Fragment>
                     ))}
                   </TableRow>

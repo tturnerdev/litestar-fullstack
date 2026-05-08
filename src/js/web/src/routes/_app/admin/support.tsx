@@ -3,6 +3,7 @@ import { AlertCircle, ArrowRight, CheckCircle2, Clock, Download, Loader2, Lock, 
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
+import { getTicketStatusDotColor } from "@/components/support/ticket-status-badge"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -22,7 +23,6 @@ import { useAdminSupportStats, useAdminTickets } from "@/lib/api/hooks/admin"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import type { AdminTicketSummary } from "@/lib/generated/api/types.gen"
-import { getTicketStatusDotColor } from "@/components/support/ticket-status-badge"
 import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/admin/support")({

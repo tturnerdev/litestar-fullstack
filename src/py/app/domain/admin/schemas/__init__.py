@@ -38,7 +38,7 @@ from app.domain.admin.schemas._dashboard import (
     RecentActivity,
     TrendPoint,
 )
-from app.domain.admin.schemas._teams import AdminTeamDetail, AdminTeamSummary, AdminTeamUpdate
+from app.domain.admin.schemas._teams import AdminTeamDetail, AdminTeamMember, AdminTeamSummary, AdminTeamUpdate
 from app.domain.admin.schemas._users import AdminUserDetail, AdminUserSummary, AdminUserUpdate
 
 __all__ = (
@@ -59,6 +59,7 @@ __all__ = (
     "AdminTaskStats",
     "AdminTaskSummary",
     "AdminTeamDetail",
+    "AdminTeamMember",
     "AdminTeamSummary",
     "AdminTeamUpdate",
     "AdminTicketSummary",

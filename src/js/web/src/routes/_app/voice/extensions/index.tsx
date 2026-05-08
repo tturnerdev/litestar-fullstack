@@ -35,6 +35,7 @@ import { useDocumentTitle } from "@/hooks/use-document-title"
 import { type Extension, useDeleteExtension, useExtensions, usePhoneNumbers, useSyncExtensions, useUpdateAnyExtension } from "@/lib/api/hooks/voice"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
+import { formatPhoneNumber } from "@/lib/format-utils"
 import { useSettingsStore } from "@/lib/settings-store"
 import { cn } from "@/lib/utils"
 
@@ -269,7 +270,7 @@ function ExtensionsPage() {
     const map = new Map<string, string>()
     if (phoneData?.items) {
       for (const pn of phoneData.items) {
-        map.set(pn.id, pn.number)
+        map.set(pn.id, formatPhoneNumber(pn.number))
       }
     }
     return map
