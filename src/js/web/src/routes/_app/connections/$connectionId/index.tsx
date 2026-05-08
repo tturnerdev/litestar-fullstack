@@ -481,8 +481,8 @@ function ConnectionDetailPage() {
       await deleteConnection.mutateAsync(connectionId)
       toast.success("Connection deleted")
       router.navigate({ to: "/connections" })
-    } catch {
-      toast.error("Failed to delete connection")
+    } catch (err) {
+      toast.error("Failed to delete connection", { description: err instanceof Error ? err.message : undefined })
     }
   }
 

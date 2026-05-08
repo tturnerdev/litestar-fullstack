@@ -282,8 +282,8 @@ function E911DetailPage() {
       await deleteMutation.mutateAsync(registrationId)
       toast.success("E911 registration deleted")
       router.navigate({ to: "/e911" })
-    } catch {
-      toast.error("Failed to delete E911 registration")
+    } catch (err) {
+      toast.error("Failed to delete E911 registration", { description: err instanceof Error ? err.message : undefined })
     }
   }
 

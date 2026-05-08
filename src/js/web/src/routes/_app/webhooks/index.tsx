@@ -1057,8 +1057,8 @@ function WebhooksPage() {
                       toast.success("Webhook deleted")
                       setDeleteTarget(null)
                     },
-                    onError: () => {
-                      toast.error("Failed to delete webhook")
+                    onError: (err) => {
+                      toast.error("Failed to delete webhook", { description: err instanceof Error ? err.message : undefined })
                     },
                   })
                 }
