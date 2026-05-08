@@ -123,7 +123,7 @@ class DeviceController(Controller):
         obj = data.to_dict()
         obj["user_id"] = current_user.id
         db_obj = await devices_service.create(obj)
-        request.app.emit(event_id="device_created", device_id=db_obj.id)
+        request.app.emit(event_id="device_created", entity_id=db_obj.id)
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,

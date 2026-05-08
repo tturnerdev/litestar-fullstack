@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.350.0 (2026-05-08)
+
+### Fixed
+- **Event emission param consistency** — Standardized all create event emissions to use `entity_id` instead of domain-specific param names (`schedule_id`, `connection_id`, `device_id`, `team_id`, `webhook_id`, `voicemail_box_id`, `registration_id`), matching the `entity_id` convention already used by update/delete events in the same controllers
+
 ## v0.349.0 (2026-05-08)
 
 ### Fixed

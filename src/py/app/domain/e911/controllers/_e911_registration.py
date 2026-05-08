@@ -118,7 +118,7 @@ class E911RegistrationController(Controller):
         """
         obj = data.to_dict()
         db_obj = await e911_service.create(obj)
-        request.app.emit(event_id="e911_registration_created", registration_id=db_obj.id)
+        request.app.emit(event_id="e911_registration_created", entity_id=db_obj.id)
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
