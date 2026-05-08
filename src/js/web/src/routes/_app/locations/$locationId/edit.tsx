@@ -479,7 +479,12 @@ function EditLocationPage() {
 
                   {/* Submit */}
                   <div className="flex items-center justify-end gap-2 pt-2">
-                    <Button type="button" variant="ghost" disabled={updateLocation.isPending} onClick={() => router.navigate({ to: "/locations/$locationId", params: { locationId } })}>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      disabled={updateLocation.isPending}
+                      onClick={() => router.navigate({ to: "/locations/$locationId", params: { locationId } })}
+                    >
                       Cancel
                     </Button>
                     <Button type="submit" disabled={!isValid || updateLocation.isPending}>

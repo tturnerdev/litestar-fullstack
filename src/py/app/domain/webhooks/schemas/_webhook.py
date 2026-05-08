@@ -51,25 +51,25 @@ class WebhookDetail(CamelizedBaseStruct):
 class WebhookCreate(CamelizedBaseStruct):
     """Schema for creating a webhook."""
 
-    name: Annotated[str, Meta(min_length=1, max_length=255)]
-    url: Annotated[str, Meta(min_length=1, max_length=2048)]
-    secret: Annotated[str, Meta(max_length=255)] | None = None
+    name: Annotated[str, Meta(min_length=1, max_length=100)]
+    url: Annotated[str, Meta(min_length=1, max_length=500)]
+    secret: Annotated[str, Meta(max_length=200)] | None = None
     events: list[str] = []
     is_active: bool = True
     headers: dict[str, str] = {}
-    description: Annotated[str, Meta(max_length=1000)] = ""
+    description: Annotated[str, Meta(max_length=500)] = ""
 
 
 class WebhookUpdate(CamelizedBaseStruct, omit_defaults=True):
     """Schema for updating a webhook."""
 
-    name: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType = msgspec.UNSET
-    url: Annotated[str, Meta(min_length=1, max_length=2048)] | msgspec.UnsetType = msgspec.UNSET
-    secret: Annotated[str, Meta(max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
+    name: Annotated[str, Meta(min_length=1, max_length=100)] | msgspec.UnsetType = msgspec.UNSET
+    url: Annotated[str, Meta(min_length=1, max_length=500)] | msgspec.UnsetType = msgspec.UNSET
+    secret: Annotated[str, Meta(max_length=200)] | msgspec.UnsetType | None = msgspec.UNSET
     events: list[str] | msgspec.UnsetType = msgspec.UNSET
     is_active: bool | msgspec.UnsetType = msgspec.UNSET
     headers: dict[str, str] | msgspec.UnsetType = msgspec.UNSET
-    description: Annotated[str, Meta(max_length=1000)] | msgspec.UnsetType = msgspec.UNSET
+    description: Annotated[str, Meta(max_length=500)] | msgspec.UnsetType = msgspec.UNSET
 
 
 class WebhookTestResult(CamelizedBaseStruct):
