@@ -607,7 +607,19 @@ function E911Page() {
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative max-w-sm flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input ref={searchInputRef} placeholder="Search by address..." value={searchInput} onChange={(e) => setSearchInput(e.target.value)} className="pl-9 pr-8" />
+            <Input
+              ref={searchInputRef}
+              placeholder="Search by address..."
+              value={searchInput}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") {
+                  setSearchInput("")
+                  e.currentTarget.blur()
+                }
+              }}
+              onChange={(e) => setSearchInput(e.target.value)}
+              className="pl-9 pr-8"
+            />
             {searchInput && (
               <button
                 type="button"
