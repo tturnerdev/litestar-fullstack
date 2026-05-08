@@ -574,7 +574,7 @@ function TimeConditionsTab({ search, onSearchChange, debouncedSearch, onFreshnes
             )}
           </div>
           <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
-            <Table aria-label="Time Conditions">
+            <Table aria-label="Time Conditions" aria-busy={isLoading || isRefetching}>
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-10">
@@ -903,7 +903,7 @@ function IvrMenusTab({ search, onSearchChange, debouncedSearch, onFreshnessChang
             )}
           </div>
           <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
-            <Table aria-label="IVR Menus">
+            <Table aria-label="IVR Menus" aria-busy={isLoading || isRefetching}>
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-10">
@@ -1213,7 +1213,7 @@ function CallQueuesTab({ search, onSearchChange, debouncedSearch, onFreshnessCha
             )}
           </div>
           <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
-            <Table aria-label="Call Queues">
+            <Table aria-label="Call Queues" aria-busy={isLoading || isRefetching}>
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-10">
@@ -1530,7 +1530,7 @@ function RingGroupsTab({ search, onSearchChange, debouncedSearch, onFreshnessCha
             )}
           </div>
           <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
-            <Table aria-label="Ring Groups">
+            <Table aria-label="Ring Groups" aria-busy={isLoading || isRefetching}>
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-10">

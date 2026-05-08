@@ -359,7 +359,7 @@ function AdminSupportPage() {
                 <EmptyState icon={TicketCheck} title="No recent tickets" description="Support tickets will appear here once created." />
               ) : (
                 <div className="overflow-x-auto">
-                  <Table aria-label="Recent support tickets">
+                  <Table aria-label="Recent support tickets" aria-busy={isLoading || isRefetching}>
                     <TableHeader>
                       <TableRow>
                         <SortableHeader label="Ticket #" sortKey="ticketNumber" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
@@ -496,7 +496,7 @@ function AdminSupportPage() {
               ) : (
                 <>
                   <div className="overflow-x-auto">
-                    <Table aria-label="All support tickets">
+                    <Table aria-label="All support tickets" aria-busy={isLoading || isRefetching}>
                       <TableHeader>
                         <TableRow>
                           <SortableHeader label="Ticket #" sortKey="ticketNumber" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />

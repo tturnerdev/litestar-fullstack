@@ -24,6 +24,16 @@ import {
 } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
@@ -551,56 +561,6 @@ function WebhookFormDialog({ open, onOpenChange, editWebhook }: { open: boolean;
   )
 }
 
-// -- Delete Confirmation Dialog ------------------------------------------------
-
-function DeleteWebhookDialog({ open, onOpenChange, webhook }: { open: boolean; onOpenChange: (open: boolean) => void; webhook: WebhookList | null }) {
-  const deleteWebhook = useDeleteWebhook()
-
-  const handleDelete = () => {
-    if (!webhook) return
-    deleteWebhook.mutate(webhook.id, {
-      onSuccess: () => {
-        toast.success("Webhook deleted")
-        onOpenChange(false)
-        // The deleted row is gone, so restore focus to the search input
-        setTimeout(() => {
-          const searchInput = document.querySelector<HTMLInputElement>('input[placeholder*="Search"]')
-          if (searchInput) {
-            searchInput.focus()
-          }
-        }, 0)
-      },
-      onError: (err) => {
-        toast.error("Failed to delete webhook", {
-          description: err instanceof Error ? err.message : undefined,
-        })
-      },
-    })
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Delete Webhook</DialogTitle>
-          <DialogDescription>
-            Are you sure you want to delete <strong>{webhook?.name}</strong>? This action cannot be undone.
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button variant="destructive" onClick={handleDelete} disabled={deleteWebhook.isPending}>
-            {deleteWebhook.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Delete
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  )
-}
-
 // -- Main page ----------------------------------------------------------------
 
 function WebhooksPage() {
@@ -1079,13 +1039,35 @@ function WebhooksPage() {
       />
 
       {/* Delete confirmation dialog */}
-      <DeleteWebhookDialog
-        open={!!deleteTarget}
-        onOpenChange={(isOpen) => {
-          if (!isOpen) setDeleteTarget(null)
-        }}
-        webhook={deleteTarget}
-      />
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Webhook</AlertDialogTitle>
+            <AlertDialogDescription>Are you sure you want to delete "{deleteTarget?.name}"? This action cannot be undone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (deleteTarget) {
+                  deleteWebhook.mutate(deleteTarget.id, {
+                    onSuccess: () => {
+                      toast.success("Webhook deleted")
+                      setDeleteTarget(null)
+                    },
+                    onError: () => {
+                      toast.error("Failed to delete webhook")
+                    },
+                  })
+                }
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <BulkActionBar selectedCount={selected.size} selectedIds={Array.from(selected)} onClearSelection={() => setSelected(new Set())} actions={bulkActions} />
     </PageContainer>

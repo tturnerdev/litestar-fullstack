@@ -641,7 +641,7 @@ function DashboardTab() {
             <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">No extension data for this period</div>
           ) : (
             <div className="overflow-x-auto rounded-md border border-border/60">
-              <Table aria-label="Call detail records">
+              <Table aria-label="Call detail records" aria-busy={extensionLoading}>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Extension</TableHead>
@@ -1236,7 +1236,7 @@ function CallRecordsTab() {
         ) : (
           <>
             <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80 print:shadow-none">
-              <Table aria-label="Call Records">
+              <Table aria-label="Call Records" aria-busy={isLoading || isRefetching}>
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-10">

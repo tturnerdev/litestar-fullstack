@@ -577,7 +577,7 @@ function AdminDeviceTemplatesPage() {
               ) : (
                 <>
                   <div className="overflow-x-auto">
-                    <Table aria-label="Device templates">
+                    <Table aria-label="Device templates" aria-busy={isLoading || isRefetching}>
                       <TableHeader>
                         <TableRow>
                           <SortableHeader label="Display Name" sortKey="displayName" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />

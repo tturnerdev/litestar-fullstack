@@ -319,7 +319,11 @@ function TeamPermissionCard({ teamId, teamName, memberCount }: { teamId: string;
   const queryClient = useQueryClient()
   const [isEditing, setIsEditing] = useState(false)
 
-  const { data: serverPermissions, isLoading } = useQuery({
+  const {
+    data: serverPermissions,
+    isLoading,
+    isRefetching,
+  } = useQuery({
     queryKey: ["team-permissions", teamId],
     queryFn: async () => {
       const response = await listTeamPermissions({
@@ -445,7 +449,7 @@ function TeamPermissionCard({ teamId, teamName, memberCount }: { teamId: string;
           </div>
         ) : (
           <div className="overflow-x-auto rounded-md border">
-            <Table aria-label="Role permissions matrix">
+            <Table aria-label="Role permissions matrix" aria-busy={isLoading || isRefetching}>
               <TableHeader className="sticky top-0 z-10 bg-background">
                 <TableRow>
                   <TableHead>Feature Area</TableHead>

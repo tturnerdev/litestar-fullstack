@@ -341,7 +341,7 @@ function AdminDevicesPage() {
                 <EmptyState icon={HardDrive} title="No recent devices" description="Devices will appear here once registered." />
               ) : (
                 <div className="overflow-x-auto">
-                  <Table aria-label="Recent devices">
+                  <Table aria-label="Recent devices" aria-busy={isLoading || isRefetching}>
                     <TableHeader>
                       <TableRow>
                         <TableHead>Name</TableHead>
@@ -453,7 +453,7 @@ function AdminDevicesPage() {
               ) : (
                 <>
                   <div className="overflow-x-auto">
-                    <Table aria-label="All devices">
+                    <Table aria-label="All devices" aria-busy={isLoading || isRefetching}>
                       <TableHeader>
                         <TableRow>
                           <SortableHeader label="Name" sortKey="name" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />

@@ -514,7 +514,7 @@ function AdminMusicOnHoldPage() {
               ) : (
                 <>
                   <div className="overflow-x-auto">
-                    <Table aria-label="Music on Hold classes">
+                    <Table aria-label="Music on Hold classes" aria-busy={isLoading || isRefetching}>
                       <TableHeader>
                         <TableRow>
                           <SortableHeader label="Name" sortKey="name" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />

@@ -765,7 +765,7 @@ function BatchTab() {
           </CardHeader>
           <CardContent>
             <div className="rounded-md border">
-              <Table aria-label="Gateway lookup results">
+              <Table aria-label="Gateway lookup results" aria-busy={isRunning}>
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-[200px]">Input</TableHead>

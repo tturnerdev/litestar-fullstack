@@ -392,7 +392,7 @@ function AdminVoicePage() {
               ) : (
                 <>
                   <div className="overflow-x-auto">
-                    <Table aria-label="Phone numbers">
+                    <Table aria-label="Phone numbers" aria-busy={phonesLoading || isRefetching}>
                       <TableHeader>
                         <TableRow>
                           <SortableHeader label="Number" sortKey="number" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
@@ -500,7 +500,7 @@ function AdminVoicePage() {
                 <EmptyState icon={Hash} title="No extensions found" description="Extensions will appear here once configured." />
               ) : (
                 <div className="overflow-x-auto">
-                  <Table aria-label="Extensions">
+                  <Table aria-label="Extensions" aria-busy={extensionsLoading || isRefetching}>
                     <TableHeader>
                       <TableRow>
                         <TableHead>Extension</TableHead>

@@ -119,6 +119,7 @@ class ConnectionController(Controller):
         """
         obj = data.to_dict()
         db_obj = await connections_service.create(obj)
+        request.app.emit(event_id="connection_created", connection_id=db_obj.id)
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,

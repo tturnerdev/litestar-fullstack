@@ -498,7 +498,7 @@ function MessagesTab() {
           </div>
 
           <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
-            <Table aria-label="Voicemail messages">
+            <Table aria-label="Voicemail messages" aria-busy={isLoading || isRefetching}>
               <TableHeader className="sticky top-0 z-10 bg-background">
                 <TableRow>
                   <TableHead className="w-10">
@@ -968,7 +968,7 @@ function BoxesTab() {
         <div className="space-y-3">
           <Skeleton className="h-4 w-32" />
           <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
-            <Table aria-label="Loading voicemail boxes">
+            <Table aria-label="Loading voicemail boxes" aria-busy={true}>
               <TableHeader>
                 <TableRow>
                   <TableHead>Extension</TableHead>
@@ -1035,7 +1035,7 @@ function BoxesTab() {
           </div>
 
           <div className="overflow-x-auto rounded-md border border-border/60 bg-card/80">
-            <Table aria-label="Voicemail boxes">
+            <Table aria-label="Voicemail boxes" aria-busy={isLoading}>
               <TableHeader className="sticky top-0 z-10 bg-background">
                 <TableRow>
                   <SortableHeader label="Extension" sortKey="name" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />

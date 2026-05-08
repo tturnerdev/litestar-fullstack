@@ -357,7 +357,7 @@ function AdminFaxPage() {
                 <EmptyState icon={FileText} title="No recent fax activity" description="Fax messages will appear here once sent or received." />
               ) : (
                 <div className="overflow-x-auto">
-                  <Table aria-label="Recent fax activity">
+                  <Table aria-label="Recent fax activity" aria-busy={messagesLoading || isRefetching}>
                     <TableHeader>
                       <TableRow>
                         <SortableHeader label="Direction" sortKey="direction" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
@@ -509,7 +509,7 @@ function AdminFaxPage() {
               ) : (
                 <>
                   <div className="overflow-x-auto">
-                    <Table aria-label="Fax numbers">
+                    <Table aria-label="Fax numbers" aria-busy={numbersLoading || isRefetching}>
                       <TableHeader>
                         <TableRow>
                           <TableHead>Number</TableHead>
