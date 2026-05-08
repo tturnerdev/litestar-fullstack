@@ -50,24 +50,8 @@ def _mask_secret(secret: str | None) -> str | None:
 def _to_detail(service: WebhookService, obj: m.Webhook) -> WebhookDetail:
     """Convert a Webhook model to a WebhookDetail schema with masked secret."""
     detail = service.to_schema(obj, schema_type=WebhookDetail)
-    return WebhookDetail(
-        id=detail.id,
-        name=detail.name,
-        url=detail.url,
-        secret=_mask_secret(obj.secret),
-        events=detail.events,
-        is_active=detail.is_active,
-        headers=detail.headers,
-        description=detail.description,
-        last_triggered_at=detail.last_triggered_at,
-        last_status_code=detail.last_status_code,
-        failure_count=detail.failure_count,
-        validation_status=detail.validation_status,
-        last_validated_at=detail.last_validated_at,
-        user_id=detail.user_id,
-        created_at=detail.created_at,
-        updated_at=detail.updated_at,
-    )
+    object.__setattr__(detail, "secret", _mask_secret(obj.secret))
+    return detail
 
 
 class WebhookController(Controller):
@@ -314,7 +298,7 @@ class WebhookController(Controller):
             LimitOffset(limit=20, offset=0),
             OrderBy(field_name="created_at", sort_order="desc"),
         )
-        return [delivery_service.to_schema(obj, schema_type=WebhookDeliveryList) for obj in results]
+        return delivery_service.to_schema(results, schema_type=WebhookDeliveryList)
 
     @post(
         operation_id="RedeliverWebhookDelivery",

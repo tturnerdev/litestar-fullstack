@@ -93,7 +93,7 @@ class BackgroundTaskController(Controller):
     ) -> list[BackgroundTaskList]:
         """List the current user's active (pending/running) tasks."""
         tasks = await task_service.list_active_for_user(current_user.id)
-        return [task_service.to_schema(t, schema_type=BackgroundTaskList) for t in tasks]
+        return task_service.to_schema(tasks, schema_type=BackgroundTaskList)
 
     @get(
         operation_id="GetTask",
@@ -180,12 +180,11 @@ class BackgroundTaskController(Controller):
             PermissionDeniedException: If the task is still pending or running.
         """
         terminal_states = {BackgroundTaskStatus.COMPLETED, BackgroundTaskStatus.FAILED, BackgroundTaskStatus.CANCELLED}
-        existing = await task_service.get(task_id)
-        if existing.status not in terminal_states:
-            raise PermissionDeniedException(
-                detail=f"Cannot delete a task with status '{existing.status}'. Only completed, failed, or cancelled tasks may be deleted.",
-            )
         db_obj = await task_service.get(task_id)
+        if db_obj.status not in terminal_states:
+            raise PermissionDeniedException(
+                detail=f"Cannot delete a task with status '{db_obj.status}'. Only completed, failed, or cancelled tasks may be deleted.",
+            )
         request.app.emit(event_id="background_task_deleted", task_id=task_id)
         await task_service.delete(task_id)
         await log_audit(
