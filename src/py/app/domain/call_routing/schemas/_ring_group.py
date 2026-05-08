@@ -25,7 +25,7 @@ class RingGroupMemberCreate(CamelizedBaseStruct):
 
     extension_id: UUID | None = None
     external_number: Annotated[str, Meta(min_length=1, max_length=20)] | None = None
-    sort_order: int = 0
+    sort_order: Annotated[int, Meta(ge=0)] = 0
 
 
 class RingGroupMemberUpdate(CamelizedBaseStruct, omit_defaults=True):
@@ -33,7 +33,7 @@ class RingGroupMemberUpdate(CamelizedBaseStruct, omit_defaults=True):
 
     extension_id: UUID | msgspec.UnsetType | None = msgspec.UNSET
     external_number: Annotated[str, Meta(min_length=1, max_length=20)] | msgspec.UnsetType | None = msgspec.UNSET
-    sort_order: int | msgspec.UnsetType = msgspec.UNSET
+    sort_order: Annotated[int, Meta(ge=0)] | msgspec.UnsetType = msgspec.UNSET
 
 
 class RingGroup(CamelizedBaseStruct):

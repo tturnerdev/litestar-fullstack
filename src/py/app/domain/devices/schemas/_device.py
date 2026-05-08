@@ -92,10 +92,10 @@ class DeviceActionResponse(CamelizedBaseStruct):
 class DeviceLineAssignmentInput(CamelizedBaseStruct):
     """Input for a single device line assignment."""
 
-    line_number: int
+    line_number: Annotated[int, Meta(ge=1)]
     label: Annotated[str, Meta(min_length=1, max_length=50)]
     extension_id: UUID | None = None
-    line_type: Annotated[str, Meta(max_length=100)] = "private"
+    line_type: Annotated[str, Meta(min_length=1, max_length=100)] = "private"
     is_active: bool = True
 
 

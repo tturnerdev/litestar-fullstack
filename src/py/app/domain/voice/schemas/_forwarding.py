@@ -32,9 +32,9 @@ class ForwardingRuleCreate(CamelizedBaseStruct):
     rule_type: ForwardingRuleType
     destination_type: ForwardingDestinationType
     destination_value: Annotated[str, Meta(min_length=1, max_length=255)]
-    ring_timeout_seconds: int | None = None
+    ring_timeout_seconds: Annotated[int, Meta(ge=1)] | None = None
     is_active: bool = True
-    priority: int = 0
+    priority: Annotated[int, Meta(ge=0)] = 0
 
 
 class ForwardingRuleUpdate(CamelizedBaseStruct, omit_defaults=True):
@@ -43,6 +43,6 @@ class ForwardingRuleUpdate(CamelizedBaseStruct, omit_defaults=True):
     rule_type: ForwardingRuleType | msgspec.UnsetType = msgspec.UNSET
     destination_type: ForwardingDestinationType | msgspec.UnsetType = msgspec.UNSET
     destination_value: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType = msgspec.UNSET
-    ring_timeout_seconds: int | msgspec.UnsetType | None = msgspec.UNSET
+    ring_timeout_seconds: Annotated[int, Meta(ge=1)] | msgspec.UnsetType | None = msgspec.UNSET
     is_active: bool | msgspec.UnsetType = msgspec.UNSET
-    priority: int | msgspec.UnsetType = msgspec.UNSET
+    priority: Annotated[int, Meta(ge=0)] | msgspec.UnsetType = msgspec.UNSET
