@@ -140,7 +140,7 @@ class WebhookController(Controller):
         obj = data.to_dict()
         obj["user_id"] = current_user.id
         db_obj = await webhooks_service.create(obj)
-        request.app.emit(event_id="webhook_created", entity_id=db_obj.id)
+        request.app.emit(event_id="webhook_created", webhook_id=db_obj.id)
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
@@ -218,7 +218,7 @@ class WebhookController(Controller):
             item_id=webhook_id,
             data=data.to_dict(),
         )
-        request.app.emit(event_id="webhook_updated", entity_id=fresh_obj.id)
+        request.app.emit(event_id="webhook_updated", webhook_id=fresh_obj.id)
         after = capture_snapshot(fresh_obj)
         await log_audit(
             audit_service,
@@ -264,7 +264,7 @@ class WebhookController(Controller):
             raise NotFoundException(detail="Webhook not found.")
         before = capture_snapshot(db_obj)
         target_label = db_obj.name
-        request.app.emit(event_id="webhook_deleted", entity_id=webhook_id)
+        request.app.emit(event_id="webhook_deleted", webhook_id=webhook_id)
         await webhooks_service.delete(webhook_id)
         await log_audit(
             audit_service,

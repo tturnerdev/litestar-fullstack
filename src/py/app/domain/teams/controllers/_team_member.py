@@ -94,7 +94,7 @@ class TeamMemberController(Controller):
         )
         after = capture_snapshot(member)
         team_obj = await teams_service.get(team_id)
-        request.app.emit(event_id="team_member_added", entity_id=member.id)
+        request.app.emit(event_id="team_member_added", member_id=member.id)
 
         await log_audit(
             audit_service,
@@ -167,7 +167,7 @@ class TeamMemberController(Controller):
                 status_code=409,
             )
         before = capture_snapshot(membership)
-        request.app.emit(event_id="team_member_removed", entity_id=membership.id)
+        request.app.emit(event_id="team_member_removed", member_id=membership.id)
         await team_members_service.delete(membership.id)
         team_obj = await teams_service.get(team_id)
 
@@ -227,7 +227,7 @@ class TeamMemberController(Controller):
         updated = await team_members_service.update(item_id=membership.id, data={"role": data.role})
         after = capture_snapshot(updated)
         team_obj = await teams_service.get(team_id)
-        request.app.emit(event_id="team_member_updated", entity_id=membership.id)
+        request.app.emit(event_id="team_member_updated", member_id=membership.id)
 
         await log_audit(
             audit_service,

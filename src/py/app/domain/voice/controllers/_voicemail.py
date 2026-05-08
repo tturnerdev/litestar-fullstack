@@ -131,7 +131,7 @@ class VoicemailController(Controller):
             after=after,
             request=request,
         )
-        request.app.emit(event_id="voicemail_box_updated", entity_id=db_obj.id)
+        request.app.emit(event_id="voicemail_box_updated", voicemail_box_id=db_obj.id)
 
         pbx_fields = ("is_enabled", "pin", "email_address", "email_attach_audio")
         has_pbx_change = any(

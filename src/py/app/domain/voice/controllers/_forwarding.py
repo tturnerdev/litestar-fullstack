@@ -97,7 +97,7 @@ class ForwardingController(Controller):
         obj = data.to_dict()
         obj["extension_id"] = ext_id
         db_obj = await forwarding_rules_service.create(obj)
-        request.app.emit(event_id="forwarding_created", entity_id=db_obj.id)
+        request.app.emit(event_id="forwarding_created", rule_id=db_obj.id)
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
@@ -163,7 +163,7 @@ class ForwardingController(Controller):
             after={"rules": after_rules},
             request=request,
         )
-        request.app.emit(event_id="forwarding_bulk_replaced", entity_id=ext_id)
+        request.app.emit(event_id="forwarding_bulk_replaced", extension_id=ext_id)
         request.app.emit(event_id="forwarding_rules_changed", extension_id=ext_id)
         return results
 
@@ -189,7 +189,7 @@ class ForwardingController(Controller):
         db_obj = await forwarding_rules_service.get_one(id=rule_id, extension_id=ext_id)
         before = capture_snapshot(db_obj)
         db_obj = await forwarding_rules_service.update(item_id=db_obj.id, data=data.to_dict())
-        request.app.emit(event_id="forwarding_updated", entity_id=db_obj.id)
+        request.app.emit(event_id="forwarding_updated", rule_id=db_obj.id)
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
@@ -230,7 +230,7 @@ class ForwardingController(Controller):
         db_obj = await forwarding_rules_service.get_one(id=rule_id, extension_id=ext_id)
         before = capture_snapshot(db_obj)
         target_label = db_obj.destination_value
-        request.app.emit(event_id="forwarding_deleted", entity_id=rule_id)
+        request.app.emit(event_id="forwarding_deleted", rule_id=rule_id)
         await forwarding_rules_service.delete(rule_id)
         await log_audit(
             audit_service,

@@ -95,5 +95,5 @@ class TeamRolePermissionController(Controller):
             after={"permissions": after_permissions},
             request=request,
         )
-        request.app.emit(event_id="team_permissions_updated", entity_id=team_id)
+        request.app.emit(event_id="team_permissions_updated", team_id=team_id)
         return [permissions_service.to_schema(r, schema_type=TeamRolePermission) for r in created]

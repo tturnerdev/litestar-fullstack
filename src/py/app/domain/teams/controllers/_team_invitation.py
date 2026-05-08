@@ -189,7 +189,7 @@ class TeamInvitationController(Controller):
         if invitation.team_id != team_id:
             raise ClientException(detail="Invitation does not belong to this team")
         before = capture_snapshot(invitation)
-        request.app.emit(event_id="team_invitation_deleted", entity_id=invitation_id)
+        request.app.emit(event_id="team_invitation_deleted", invitation_id=invitation_id)
         await team_invitations_service.delete(item_id=invitation_id)
 
         await log_audit(
@@ -258,7 +258,7 @@ class TeamInvitationController(Controller):
             }
         )
         await team_invitations_service.update(item_id=invitation_id, data={"is_accepted": True})
-        request.app.emit(event_id="team_invitation_accepted", entity_id=invitation_id)
+        request.app.emit(event_id="team_invitation_accepted", invitation_id=invitation_id)
 
         await log_audit(
             audit_service,
@@ -314,7 +314,7 @@ class TeamInvitationController(Controller):
             raise ClientException(detail="Invitation does not belong to this team")
         if db_obj.email != current_user.email:
             raise ClientException(detail="You are not authorized to reject this invitation")
-        request.app.emit(event_id="team_invitation_rejected", entity_id=invitation_id)
+        request.app.emit(event_id="team_invitation_rejected", invitation_id=invitation_id)
         await team_invitations_service.delete(item_id=invitation_id)
 
         await log_audit(

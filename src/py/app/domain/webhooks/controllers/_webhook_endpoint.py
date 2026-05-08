@@ -83,7 +83,7 @@ class WebhookEndpointController(Controller):
         data: WebhookEndpointCreate,
     ) -> WebhookEndpoint:
         db_obj = await webhook_service.create(data.to_dict())
-        request.app.emit(event_id="webhook_endpoint_created", entity_id=db_obj.id)
+        request.app.emit(event_id="webhook_endpoint_created", endpoint_id=db_obj.id)
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
@@ -113,7 +113,7 @@ class WebhookEndpointController(Controller):
         existing = await webhook_service.get(endpoint_id)
         before = capture_snapshot(existing)
         db_obj = await webhook_service.update(item_id=endpoint_id, data=data.to_dict())
-        request.app.emit(event_id="webhook_endpoint_updated", entity_id=db_obj.id)
+        request.app.emit(event_id="webhook_endpoint_updated", endpoint_id=db_obj.id)
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
@@ -142,7 +142,7 @@ class WebhookEndpointController(Controller):
         db_obj = await webhook_service.get(endpoint_id)
         before = capture_snapshot(db_obj)
         target_label = db_obj.url
-        request.app.emit(event_id="webhook_endpoint_deleted", entity_id=endpoint_id)
+        request.app.emit(event_id="webhook_endpoint_deleted", endpoint_id=endpoint_id)
         _ = await webhook_service.delete(endpoint_id)
         await log_audit(
             audit_service,

@@ -134,7 +134,7 @@ class ExtensionController(Controller):
         obj = data.to_dict()
         obj["user_id"] = current_user.id
         db_obj = await extensions_service.create(obj)
-        request.app.emit(event_id="extension_created", entity_id=db_obj.id)
+        request.app.emit(event_id="extension_created", extension_id=db_obj.id)
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
@@ -219,7 +219,7 @@ class ExtensionController(Controller):
         db_obj = await extensions_service.get_one(id=ext_id, user_id=current_user.id)
         before = capture_snapshot(db_obj)
         db_obj = await extensions_service.update(item_id=db_obj.id, data=data.to_dict())
-        request.app.emit(event_id="extension_updated", entity_id=db_obj.id)
+        request.app.emit(event_id="extension_updated", extension_id=db_obj.id)
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
@@ -272,7 +272,7 @@ class ExtensionController(Controller):
         before = capture_snapshot(db_obj)
         target_label = db_obj.extension_number
         extension_number = db_obj.extension_number
-        request.app.emit(event_id="extension_deleted", entity_id=ext_id)
+        request.app.emit(event_id="extension_deleted", extension_id=ext_id)
         await extensions_service.delete(ext_id)
         await log_audit(
             audit_service,

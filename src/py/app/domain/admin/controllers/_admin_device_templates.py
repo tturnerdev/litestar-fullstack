@@ -96,7 +96,7 @@ class AdminDeviceTemplatesController(Controller):
             after=after,
             request=request,
         )
-        request.app.emit(event_id="device_template_created", entity_id=db_obj.id)
+        request.app.emit(event_id="device_template_created", template_id=db_obj.id)
         return template_service.to_schema(db_obj, schema_type=DeviceTemplateDetail)
 
     @get(operation_id="AdminGetDeviceTemplate", summary="Get device template details", path="/{template_id:uuid}")
@@ -139,7 +139,7 @@ class AdminDeviceTemplatesController(Controller):
             after=after,
             request=request,
         )
-        request.app.emit(event_id="device_template_updated", entity_id=db_obj.id)
+        request.app.emit(event_id="device_template_updated", template_id=db_obj.id)
         return template_service.to_schema(db_obj, schema_type=DeviceTemplateDetail)
 
     @delete(operation_id="AdminDeleteDeviceTemplate", summary="Delete a device template", path="/{template_id:uuid}", status_code=HTTP_204_NO_CONTENT, return_dto=None)
@@ -154,7 +154,7 @@ class AdminDeviceTemplatesController(Controller):
         db_obj = await template_service.get(template_id)
         before = capture_snapshot(db_obj)
         target_label = f"{db_obj.manufacturer} {db_obj.model}"
-        request.app.emit(event_id="device_template_deleted", entity_id=template_id)
+        request.app.emit(event_id="device_template_deleted", template_id=template_id)
         await template_service.delete(template_id)
         await log_audit(
             audit_service,

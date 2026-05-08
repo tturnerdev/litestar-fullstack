@@ -107,14 +107,14 @@ class OrganizationController(Controller):
                 after=after,
                 request=request,
             )
-            request.app.emit(event_id="organization_created", entity_id=db_obj.id)
+            request.app.emit(event_id="organization_created", organization_id=db_obj.id)
         else:
             before = capture_snapshot(db_obj)
             db_obj = await organization_service.update(
                 item_id=db_obj.id,
                 data=data.to_dict(),
             )
-            request.app.emit(event_id="organization_updated", entity_id=db_obj.id)
+            request.app.emit(event_id="organization_updated", organization_id=db_obj.id)
             after = capture_snapshot(db_obj)
             await log_audit(
                 audit_service,

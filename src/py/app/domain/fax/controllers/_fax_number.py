@@ -139,7 +139,7 @@ class FaxNumberController(Controller):
             after=after,
             request=request,
         )
-        request.app.emit(event_id="fax_number_created", entity_id=db_obj.id)
+        request.app.emit(event_id="fax_number_created", fax_number_id=db_obj.id)
         try:
             await notifications_service.notify(
                 user_id=current_user.id,
@@ -232,7 +232,7 @@ class FaxNumberController(Controller):
             after=after,
             request=request,
         )
-        request.app.emit(event_id="fax_number_updated", entity_id=fax_number_id)
+        request.app.emit(event_id="fax_number_updated", fax_number_id=fax_number_id)
         return fax_numbers_service.to_schema(db_obj, schema_type=FaxNumber)
 
     @delete(
@@ -259,7 +259,7 @@ class FaxNumberController(Controller):
         before = capture_snapshot(existing)
         target_label = existing.number
         owner_id = existing.user_id
-        request.app.emit(event_id="fax_number_deleted", entity_id=fax_number_id)
+        request.app.emit(event_id="fax_number_deleted", fax_number_id=fax_number_id)
         await fax_numbers_service.delete(fax_number_id)
         await log_audit(
             audit_service,

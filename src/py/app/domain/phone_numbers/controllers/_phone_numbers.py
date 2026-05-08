@@ -118,7 +118,7 @@ class PhoneNumberController(Controller):
             Created phone number details.
         """
         result = await phone_number_service.create(data.to_dict(), auto_commit=True)
-        request.app.emit(event_id="phone_number_created", entity_id=result.id)
+        request.app.emit(event_id="phone_number_created", phone_number_id=result.id)
         after = capture_snapshot(result)
         await log_audit(
             audit_service,
@@ -165,7 +165,7 @@ class PhoneNumberController(Controller):
                 update_data[field] = value
 
         fresh_obj = await phone_number_service.update(item_id=phone_number_id, data=update_data, auto_commit=True)
-        request.app.emit(event_id="phone_number_updated", entity_id=fresh_obj.id)
+        request.app.emit(event_id="phone_number_updated", phone_number_id=fresh_obj.id)
         after = capture_snapshot(fresh_obj)
         await log_audit(
             audit_service,
@@ -195,7 +195,7 @@ class PhoneNumberController(Controller):
         phone = await phone_number_service.get(phone_number_id)
         before = capture_snapshot(phone)
         target_label = phone.number
-        request.app.emit(event_id="phone_number_deleted", entity_id=phone_number_id)
+        request.app.emit(event_id="phone_number_deleted", phone_number_id=phone_number_id)
         await phone_number_service.delete(phone_number_id, auto_commit=True)
         await log_audit(
             audit_service,

@@ -129,7 +129,7 @@ class RoleController(Controller):
             after=capture_snapshot(db_obj),
             request=request,
         )
-        request.app.emit(event_id="role_created", entity_id=db_obj.id)
+        request.app.emit(event_id="role_created", role_id=db_obj.id)
         return roles_service.to_schema(db_obj, schema_type=Role)
 
     @patch(operation_id="UpdateRole", summary="Update a role", path="/{role_id:uuid}")
@@ -161,7 +161,7 @@ class RoleController(Controller):
         db_obj = await roles_service.get(role_id)
         before = capture_snapshot(db_obj)
         db_obj = await roles_service.update(item_id=role_id, data=data.to_dict())
-        request.app.emit(event_id="role_updated", entity_id=db_obj.id)
+        request.app.emit(event_id="role_updated", role_id=db_obj.id)
         await log_audit(
             audit_service,
             action="account.role.updated",
@@ -201,7 +201,7 @@ class RoleController(Controller):
             raise ClientException(detail="Cannot delete default roles")
         before = capture_snapshot(db_obj)
         target_label = db_obj.name
-        request.app.emit(event_id="role_deleted", entity_id=role_id)
+        request.app.emit(event_id="role_deleted", role_id=role_id)
         _ = await roles_service.delete(role_id)
         await log_audit(
             audit_service,
@@ -265,7 +265,7 @@ class RoleController(Controller):
                 "assigned_at": datetime.now(UTC),
             },
         )
-        request.app.emit(event_id="user_role_assigned", entity_id=db_obj.id)
+        request.app.emit(event_id="user_role_assigned", user_role_id=db_obj.id)
         await log_audit(
             audit_service,
             action="account.role.assigned",
@@ -324,7 +324,7 @@ class RoleController(Controller):
             raise NotFoundException(detail=f"User '{data.user_name}' does not have role '{role_slug}'")
 
         before = capture_snapshot(existing_role)
-        request.app.emit(event_id="user_role_revoked", entity_id=existing_role.id)
+        request.app.emit(event_id="user_role_revoked", user_role_id=existing_role.id)
         await user_roles_service.delete(existing_role.id)
         await log_audit(
             audit_service,

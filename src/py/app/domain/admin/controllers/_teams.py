@@ -134,7 +134,7 @@ class AdminTeamsController(Controller):
             after=after,
             request=request,
         )
-        request.app.emit(event_id="admin_team_updated", entity_id=team.id)
+        request.app.emit(event_id="admin_team_updated", team_id=team.id)
         return teams_service.to_schema(team, schema_type=AdminTeamDetail)
 
     @delete(operation_id="AdminDeleteTeam", summary="Delete a team (admin)", path="/{team_id:uuid}", status_code=HTTP_204_NO_CONTENT, return_dto=None)
@@ -149,7 +149,7 @@ class AdminTeamsController(Controller):
         team = await teams_service.get(team_id)
         before = capture_snapshot(team)
         team_name = team.name
-        request.app.emit(event_id="admin_team_deleted", entity_id=team_id)
+        request.app.emit(event_id="admin_team_deleted", team_id=team_id)
         await teams_service.delete(team.id, auto_commit=True)
         await log_audit(
             audit_service,

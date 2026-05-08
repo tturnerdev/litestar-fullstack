@@ -125,7 +125,7 @@ class UserController(Controller):
             after=capture_snapshot(db_obj),
             request=request,
         )
-        request.app.emit(event_id="user_created", entity_id=db_obj.id)
+        request.app.emit(event_id="user_created", user_id=db_obj.id)
         return users_service.to_schema(db_obj, schema_type=User)
 
     @patch(operation_id="UpdateUser", summary="Update a user", path="/{user_id:uuid}")
@@ -152,7 +152,7 @@ class UserController(Controller):
         db_obj = await users_service.get(user_id)
         before = capture_snapshot(db_obj)
         db_obj = await users_service.update(item_id=user_id, data=data.to_dict())
-        request.app.emit(event_id="user_updated", entity_id=db_obj.id)
+        request.app.emit(event_id="user_updated", user_id=db_obj.id)
         await log_audit(
             audit_service,
             action="account.user.updated",
@@ -187,7 +187,7 @@ class UserController(Controller):
         db_obj = await users_service.get(user_id)
         before = capture_snapshot(db_obj)
         target_label = db_obj.email
-        request.app.emit(event_id="user_deleted", entity_id=user_id)
+        request.app.emit(event_id="user_deleted", user_id=user_id)
         _ = await users_service.delete(user_id)
         await log_audit(
             audit_service,

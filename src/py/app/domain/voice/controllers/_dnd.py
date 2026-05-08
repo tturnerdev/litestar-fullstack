@@ -89,7 +89,7 @@ class DndController(Controller):
             after=after,
             request=request,
         )
-        request.app.emit(event_id="dnd_updated", entity_id=db_obj.id)
+        request.app.emit(event_id="dnd_updated", extension_id=db_obj.id)
         return dnd_service.to_schema(db_obj, schema_type=DndSettings)
 
     @post(

@@ -129,7 +129,7 @@ class IvrMenuController(Controller):
             after=after,
             request=request,
         )
-        request.app.emit(event_id="ivr_menu_created", entity_id=db_obj.id)
+        request.app.emit(event_id="ivr_menu_created", ivr_menu_id=db_obj.id)
         return ivr_menus_service.to_schema(db_obj, schema_type=IvrMenu)
 
     @get(
@@ -199,7 +199,7 @@ class IvrMenuController(Controller):
             after=after,
             request=request,
         )
-        request.app.emit(event_id="ivr_menu_updated", entity_id=ivr_menu_id)
+        request.app.emit(event_id="ivr_menu_updated", ivr_menu_id=ivr_menu_id)
         return ivr_menus_service.to_schema(fresh_obj, schema_type=IvrMenu)
 
     @delete(
@@ -230,7 +230,7 @@ class IvrMenuController(Controller):
         db_obj = await ivr_menus_service.get(ivr_menu_id)
         before = capture_snapshot(db_obj)
         target_label = db_obj.name
-        request.app.emit(event_id="ivr_menu_deleted", entity_id=ivr_menu_id)
+        request.app.emit(event_id="ivr_menu_deleted", ivr_menu_id=ivr_menu_id)
         await ivr_menus_service.delete(ivr_menu_id)
         await log_audit(
             audit_service,
@@ -323,7 +323,7 @@ class IvrMenuController(Controller):
             after=after,
             request=request,
         )
-        request.app.emit(event_id="ivr_menu_option_created", entity_id=db_obj.id)
+        request.app.emit(event_id="ivr_menu_option_created", option_id=db_obj.id)
         return ivr_menu_options_service.to_schema(db_obj, schema_type=IvrMenuOption)
 
     @patch(
@@ -375,7 +375,7 @@ class IvrMenuController(Controller):
             after=after,
             request=request,
         )
-        request.app.emit(event_id="ivr_menu_option_updated", entity_id=option_id)
+        request.app.emit(event_id="ivr_menu_option_updated", option_id=option_id)
         return ivr_menu_options_service.to_schema(fresh_obj, schema_type=IvrMenuOption)
 
     @delete(
@@ -411,7 +411,7 @@ class IvrMenuController(Controller):
         db_obj = await ivr_menu_options_service.get_one(id=option_id, ivr_menu_id=ivr_menu_id)
         before = capture_snapshot(db_obj)
         target_label = f"digit:{db_obj.digit}"
-        request.app.emit(event_id="ivr_menu_option_deleted", entity_id=option_id)
+        request.app.emit(event_id="ivr_menu_option_deleted", option_id=option_id)
         await ivr_menu_options_service.delete(option_id)
         await log_audit(
             audit_service,

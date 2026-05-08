@@ -123,7 +123,7 @@ class TimeConditionController(Controller):
             after=after,
             request=request,
         )
-        request.app.emit(event_id="time_condition_created", entity_id=db_obj.id)
+        request.app.emit(event_id="time_condition_created", time_condition_id=db_obj.id)
         return time_conditions_service.to_schema(db_obj, schema_type=TimeCondition)
 
     @get(
@@ -197,7 +197,7 @@ class TimeConditionController(Controller):
             after=after,
             request=request,
         )
-        request.app.emit(event_id="time_condition_updated", entity_id=time_condition_id)
+        request.app.emit(event_id="time_condition_updated", time_condition_id=time_condition_id)
         return time_conditions_service.to_schema(fresh_obj, schema_type=TimeCondition)
 
     @delete(
@@ -230,7 +230,7 @@ class TimeConditionController(Controller):
         db_obj = await time_conditions_service.get(time_condition_id)
         before = capture_snapshot(db_obj)
         target_label = db_obj.name
-        request.app.emit(event_id="time_condition_deleted", entity_id=time_condition_id)
+        request.app.emit(event_id="time_condition_deleted", time_condition_id=time_condition_id)
         await time_conditions_service.delete(time_condition_id)
         await log_audit(
             audit_service,
@@ -295,7 +295,7 @@ class TimeConditionController(Controller):
             after=after,
             request=request,
         )
-        request.app.emit(event_id="time_condition_updated", entity_id=time_condition_id)
+        request.app.emit(event_id="time_condition_updated", time_condition_id=time_condition_id)
         request.app.emit(
             event_id="time_condition_override_changed",
             time_condition_id=time_condition_id,

@@ -129,7 +129,7 @@ class RingGroupController(Controller):
             after=after,
             request=request,
         )
-        request.app.emit(event_id="ring_group_created", entity_id=db_obj.id)
+        request.app.emit(event_id="ring_group_created", ring_group_id=db_obj.id)
         return ring_groups_service.to_schema(db_obj, schema_type=RingGroup)
 
     @get(
@@ -199,7 +199,7 @@ class RingGroupController(Controller):
             after=after,
             request=request,
         )
-        request.app.emit(event_id="ring_group_updated", entity_id=ring_group_id)
+        request.app.emit(event_id="ring_group_updated", ring_group_id=ring_group_id)
         return ring_groups_service.to_schema(fresh_obj, schema_type=RingGroup)
 
     @delete(
@@ -230,7 +230,7 @@ class RingGroupController(Controller):
         db_obj = await ring_groups_service.get(ring_group_id)
         before = capture_snapshot(db_obj)
         target_label = db_obj.name
-        request.app.emit(event_id="ring_group_deleted", entity_id=ring_group_id)
+        request.app.emit(event_id="ring_group_deleted", ring_group_id=ring_group_id)
         await ring_groups_service.delete(ring_group_id)
         await log_audit(
             audit_service,
@@ -323,7 +323,7 @@ class RingGroupController(Controller):
             after=after,
             request=request,
         )
-        request.app.emit(event_id="ring_group_member_created", entity_id=db_obj.id)
+        request.app.emit(event_id="ring_group_member_created", member_id=db_obj.id)
         return ring_group_members_service.to_schema(db_obj, schema_type=RingGroupMember)
 
     @patch(
@@ -377,7 +377,7 @@ class RingGroupController(Controller):
             after=after,
             request=request,
         )
-        request.app.emit(event_id="ring_group_member_updated", entity_id=member_id)
+        request.app.emit(event_id="ring_group_member_updated", member_id=member_id)
         return ring_group_members_service.to_schema(fresh_obj, schema_type=RingGroupMember)
 
     @delete(
@@ -412,7 +412,7 @@ class RingGroupController(Controller):
         await ring_groups_service.get(ring_group_id)
         db_obj = await ring_group_members_service.get_one(id=member_id, ring_group_id=ring_group_id)
         before = capture_snapshot(db_obj)
-        request.app.emit(event_id="ring_group_member_deleted", entity_id=member_id)
+        request.app.emit(event_id="ring_group_member_deleted", member_id=member_id)
         await ring_group_members_service.delete(member_id)
         await log_audit(
             audit_service,

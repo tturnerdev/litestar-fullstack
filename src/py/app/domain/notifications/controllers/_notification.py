@@ -206,7 +206,7 @@ class NotificationController(Controller):
             raise PermissionDeniedException(detail="Cannot access this notification.")
         before = capture_snapshot(db_obj)
         target_label = db_obj.title
-        request.app.emit(event_id="notification_deleted", entity_id=notification_id)
+        request.app.emit(event_id="notification_deleted", notification_id=notification_id)
         _ = await notifications_service.delete(notification_id)
         await log_audit(
             audit_service,
