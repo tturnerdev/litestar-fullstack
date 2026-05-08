@@ -50,9 +50,9 @@ class AdminUserDetail(CamelizedBaseStruct, kw_only=True):
 class AdminUserUpdate(CamelizedBaseStruct, gc=False, omit_defaults=True):
     """Update payload for admin user management."""
 
-    name: Annotated[str, Meta(max_length=255)] | UnsetType | None = UNSET
-    username: Annotated[str, Meta(max_length=30)] | UnsetType | None = UNSET
-    phone: Annotated[str, Meta(max_length=20)] | UnsetType | None = UNSET
+    name: Annotated[str, Meta(min_length=1, max_length=255)] | UnsetType | None = UNSET
+    username: Annotated[str, Meta(min_length=1, max_length=30)] | UnsetType | None = UNSET
+    phone: Annotated[str, Meta(min_length=1, max_length=20)] | UnsetType | None = UNSET
     is_active: bool | UnsetType = UNSET
     is_superuser: bool | UnsetType = UNSET
     is_verified: bool | UnsetType = UNSET

@@ -61,34 +61,34 @@ class CallRecordCreate(CamelizedBaseStruct):
     destination: Annotated[str, Meta(min_length=1, max_length=255)]
     direction: Annotated[str, Meta(min_length=1, max_length=50)]
     disposition: Annotated[str, Meta(min_length=1, max_length=50)]
-    caller_id: Annotated[str, Meta(max_length=255)] | None = None
+    caller_id: Annotated[str, Meta(min_length=1, max_length=255)] | None = None
     duration: Annotated[int, Meta(ge=0)] = 0
     billable_seconds: Annotated[int, Meta(ge=0)] = 0
-    channel: Annotated[str, Meta(max_length=100)] | None = None
-    unique_id: Annotated[str, Meta(max_length=255)] | None = None
-    recording_url: Annotated[str, Meta(max_length=2048)] | None = None
+    channel: Annotated[str, Meta(min_length=1, max_length=100)] | None = None
+    unique_id: Annotated[str, Meta(min_length=1, max_length=255)] | None = None
+    recording_url: Annotated[str, Meta(min_length=1, max_length=2048)] | None = None
     cost: float | None = None
     connection_id: UUID | None = None
-    notes: Annotated[str, Meta(max_length=5000)] | None = None
+    notes: Annotated[str, Meta(min_length=1, max_length=5000)] | None = None
 
 
 class CallRecordUpdate(CamelizedBaseStruct, omit_defaults=True):
     """Schema for updating a call record."""
 
     call_date: datetime | msgspec.UnsetType = msgspec.UNSET
-    caller_id: Annotated[str, Meta(max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
+    caller_id: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
     source: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType = msgspec.UNSET
     destination: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType = msgspec.UNSET
     duration: Annotated[int, Meta(ge=0)] | msgspec.UnsetType = msgspec.UNSET
     billable_seconds: Annotated[int, Meta(ge=0)] | msgspec.UnsetType = msgspec.UNSET
     direction: Annotated[str, Meta(min_length=1, max_length=50)] | msgspec.UnsetType = msgspec.UNSET
     disposition: Annotated[str, Meta(min_length=1, max_length=50)] | msgspec.UnsetType = msgspec.UNSET
-    channel: Annotated[str, Meta(max_length=100)] | msgspec.UnsetType | None = msgspec.UNSET
-    unique_id: Annotated[str, Meta(max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
-    recording_url: Annotated[str, Meta(max_length=2048)] | msgspec.UnsetType | None = msgspec.UNSET
+    channel: Annotated[str, Meta(min_length=1, max_length=100)] | msgspec.UnsetType | None = msgspec.UNSET
+    unique_id: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
+    recording_url: Annotated[str, Meta(min_length=1, max_length=2048)] | msgspec.UnsetType | None = msgspec.UNSET
     cost: float | msgspec.UnsetType | None = msgspec.UNSET
     connection_id: UUID | msgspec.UnsetType | None = msgspec.UNSET
-    notes: Annotated[str, Meta(max_length=5000)] | msgspec.UnsetType | None = msgspec.UNSET
+    notes: Annotated[str, Meta(min_length=1, max_length=5000)] | msgspec.UnsetType | None = msgspec.UNSET
 
 
 class CallAnalyticsSummary(CamelizedBaseStruct):
