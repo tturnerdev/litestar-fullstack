@@ -56,10 +56,10 @@ class DeviceCreate(CamelizedBaseStruct):
 
     name: Annotated[str, Meta(min_length=1, max_length=255)]
     device_type: Annotated[str, Meta(min_length=1, max_length=100)]
-    mac_address: Annotated[str, Meta(max_length=17)] | None = None
-    device_model: Annotated[str, Meta(max_length=100)] | None = None
-    manufacturer: Annotated[str, Meta(max_length=100)] | None = None
-    sip_username: Annotated[str, Meta(max_length=100)] | None = None
+    mac_address: Annotated[str, Meta(min_length=1, max_length=17)] | None = None
+    device_model: Annotated[str, Meta(min_length=1, max_length=100)] | None = None
+    manufacturer: Annotated[str, Meta(min_length=1, max_length=100)] | None = None
+    sip_username: Annotated[str, Meta(min_length=1, max_length=100)] | None = None
     team_id: UUID | None = None
     location_id: UUID | None = None
     connection_id: UUID | None = None
@@ -70,17 +70,19 @@ class DeviceUpdate(CamelizedBaseStruct, omit_defaults=True):
 
     name: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType = msgspec.UNSET
     is_active: bool | msgspec.UnsetType = msgspec.UNSET
-    mac_address: Annotated[str, Meta(max_length=17)] | msgspec.UnsetType | None = msgspec.UNSET
-    device_model: Annotated[str, Meta(max_length=100)] | msgspec.UnsetType | None = msgspec.UNSET
-    manufacturer: Annotated[str, Meta(max_length=100)] | msgspec.UnsetType | None = msgspec.UNSET
-    firmware_version: Annotated[str, Meta(max_length=50)] | msgspec.UnsetType | None = msgspec.UNSET
-    ip_address: Annotated[str, Meta(max_length=45)] | msgspec.UnsetType | None = msgspec.UNSET
+    mac_address: Annotated[str, Meta(min_length=1, max_length=17)] | msgspec.UnsetType | None = msgspec.UNSET
+    device_model: Annotated[str, Meta(min_length=1, max_length=100)] | msgspec.UnsetType | None = msgspec.UNSET
+    manufacturer: Annotated[str, Meta(min_length=1, max_length=100)] | msgspec.UnsetType | None = msgspec.UNSET
+    firmware_version: Annotated[str, Meta(min_length=1, max_length=50)] | msgspec.UnsetType | None = msgspec.UNSET
+    ip_address: Annotated[str, Meta(min_length=1, max_length=45)] | msgspec.UnsetType | None = msgspec.UNSET
     config_json: dict | msgspec.UnsetType | None = msgspec.UNSET
     location_id: UUID | msgspec.UnsetType | None = msgspec.UNSET
     connection_id: UUID | msgspec.UnsetType | None = msgspec.UNSET
 
 
 class DeviceActionResponse(CamelizedBaseStruct):
+    """Response from a device management action."""
+
     device_id: UUID
     action: str
     status: str
@@ -89,7 +91,7 @@ class DeviceActionResponse(CamelizedBaseStruct):
 
 class DeviceLineAssignmentInput(CamelizedBaseStruct):
     line_number: int
-    label: Annotated[str, Meta(max_length=50)]
+    label: Annotated[str, Meta(min_length=1, max_length=50)]
     extension_id: UUID | None = None
     line_type: Annotated[str, Meta(max_length=100)] = "private"
     is_active: bool = True

@@ -99,7 +99,7 @@ export function FaxNumberEditDialog({ faxNumber, trigger, open: controlledOpen, 
                 <FormItem>
                   <FormLabel>Label</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="e.g. Main Fax, Billing Dept" />
+                    <Input {...field} placeholder="e.g. Main Fax, Billing Dept" maxLength={100} />
                   </FormControl>
                   <FormDescription>A friendly name to identify this fax number.</FormDescription>
                   <FormMessage />

@@ -10,6 +10,8 @@ from app.lib.schema import CamelizedBaseStruct
 
 
 class PhoneNumberList(CamelizedBaseStruct, kw_only=True):
+    """Phone number summary for list views."""
+
     id: UUID
     number: str
     label: str | None = None
@@ -22,6 +24,8 @@ class PhoneNumberList(CamelizedBaseStruct, kw_only=True):
 
 
 class PhoneNumberDetail(CamelizedBaseStruct, kw_only=True):
+    """Full phone number representation."""
+
     id: UUID
     number: str
     label: str | None = None

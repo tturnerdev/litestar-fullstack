@@ -200,7 +200,7 @@ export function DeviceLineConfig({ deviceId }: DeviceLineConfigProps) {
                       </TableCell>
                       <TableCell className="font-mono font-medium">{line.lineNumber}</TableCell>
                       <TableCell>
-                        <Input value={line.label} onChange={(e) => updateLine(index, "label", e.target.value)} className="h-8" placeholder="Line label" />
+                        <Input value={line.label} onChange={(e) => updateLine(index, "label", e.target.value)} maxLength={50} className="h-8" placeholder="Line label" />
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">

@@ -130,6 +130,7 @@ export function EmailRouteEditor({ faxNumberId }: { faxNumberId: string }) {
                       setNewEmail(e.target.value)
                       if (emailError) setEmailError(null)
                     }}
+                    maxLength={320}
                     className="w-64 pr-8"
                     onKeyDown={(e) => e.key === "Enter" && handleAddRoute()}
                     aria-invalid={!!emailError || (emailTouched && (!emailValid || !!emailDuplicate))}
