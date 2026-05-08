@@ -556,7 +556,7 @@ function DeleteRuleDialog({ extensionId, rule, onOpenChange }: { extensionId: st
           </AlertDialogCancel>
           <AlertDialogAction className={buttonVariants({ variant: "destructive" })} onClick={handleDelete} disabled={deleteMutation.isPending}>
             {deleteMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Delete
+            {deleteMutation.isPending ? "Deleting..." : "Delete Rule"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

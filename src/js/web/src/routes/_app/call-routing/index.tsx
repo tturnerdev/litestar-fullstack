@@ -702,8 +702,9 @@ function TimeConditionsTab({ search, onSearchChange, debouncedSearch, onFreshnes
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleteTimeCondition.isPending}>Cancel</AlertDialogCancel>
             <AlertDialogAction
+              disabled={deleteTimeCondition.isPending}
               onClick={() => {
                 if (timeConditionToDelete) {
                   deleteTimeCondition.mutate(timeConditionToDelete.id, {
@@ -721,7 +722,7 @@ function TimeConditionsTab({ search, onSearchChange, debouncedSearch, onFreshnes
               }}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Delete
+              {deleteTimeCondition.isPending ? "Deleting..." : "Delete Time Condition"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -1012,8 +1013,9 @@ function IvrMenusTab({ search, onSearchChange, debouncedSearch, onFreshnessChang
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleteIvrMenu.isPending}>Cancel</AlertDialogCancel>
             <AlertDialogAction
+              disabled={deleteIvrMenu.isPending}
               onClick={() => {
                 if (ivrMenuToDelete) {
                   deleteIvrMenu.mutate(ivrMenuToDelete.id, {
@@ -1031,7 +1033,7 @@ function IvrMenusTab({ search, onSearchChange, debouncedSearch, onFreshnessChang
               }}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Delete
+              {deleteIvrMenu.isPending ? "Deleting..." : "Delete IVR Menu"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -1329,8 +1331,9 @@ function CallQueuesTab({ search, onSearchChange, debouncedSearch, onFreshnessCha
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleteCallQueue.isPending}>Cancel</AlertDialogCancel>
             <AlertDialogAction
+              disabled={deleteCallQueue.isPending}
               onClick={() => {
                 if (callQueueToDelete) {
                   deleteCallQueue.mutate(callQueueToDelete.id, {
@@ -1348,7 +1351,7 @@ function CallQueuesTab({ search, onSearchChange, debouncedSearch, onFreshnessCha
               }}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Delete
+              {deleteCallQueue.isPending ? "Deleting..." : "Delete Call Queue"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -1646,8 +1649,9 @@ function RingGroupsTab({ search, onSearchChange, debouncedSearch, onFreshnessCha
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleteRingGroup.isPending}>Cancel</AlertDialogCancel>
             <AlertDialogAction
+              disabled={deleteRingGroup.isPending}
               onClick={() => {
                 if (ringGroupToDelete) {
                   deleteRingGroup.mutate(ringGroupToDelete.id, {
@@ -1665,7 +1669,7 @@ function RingGroupsTab({ search, onSearchChange, debouncedSearch, onFreshnessCha
               }}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Delete
+              {deleteRingGroup.isPending ? "Deleting..." : "Delete Ring Group"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

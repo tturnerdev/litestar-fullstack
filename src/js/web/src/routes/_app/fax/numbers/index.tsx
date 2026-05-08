@@ -819,9 +819,9 @@ function FaxNumbersPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Delete
+            <AlertDialogCancel disabled={deleteFaxNumber.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction disabled={deleteFaxNumber.isPending} onClick={handleConfirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {deleteFaxNumber.isPending ? "Deleting..." : "Delete Fax Number"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

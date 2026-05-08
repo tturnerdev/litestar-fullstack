@@ -1046,9 +1046,10 @@ function WebhooksPage() {
             <AlertDialogDescription>Are you sure you want to delete "{deleteTarget?.name}"? This action cannot be undone.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleteWebhook.isPending}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deleteWebhook.isPending}
               onClick={() => {
                 if (deleteTarget) {
                   deleteWebhook.mutate(deleteTarget.id, {
@@ -1063,7 +1064,7 @@ function WebhooksPage() {
                 }
               }}
             >
-              Delete
+              {deleteWebhook.isPending ? "Deleting..." : "Delete Webhook"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
