@@ -30,6 +30,7 @@ class TagService(AutoSlugServiceMixin[m.Tag], service.SQLAlchemyAsyncRepositoryS
     ) -> service.ModelDictT[m.Tag]:
         data = service.schema_dump(data)
         if service.is_dict(data):
+            data["name"] = data["name"].strip()
             slug = slugify(data["name"])
             existing = await self.repository.list(
                 CollectionFilter(field_name="slug", values=[slug]),
@@ -42,6 +43,7 @@ class TagService(AutoSlugServiceMixin[m.Tag], service.SQLAlchemyAsyncRepositoryS
         """Validate that no other tag with the same slug already exists."""
         data = service.schema_dump(data)
         if service.is_dict(data) and "name" in data:
+            data["name"] = data["name"].strip()
             slug = slugify(data["name"])
             existing = await self.repository.list(
                 CollectionFilter(field_name="slug", values=[slug]),

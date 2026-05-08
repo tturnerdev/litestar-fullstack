@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.348.0 (2026-05-08)
+
+### Fixed
+- **Tag name whitespace bypass** — Strip leading/trailing whitespace from tag names before slug generation in both create and update paths, preventing duplicate tags via whitespace tricks
+- **Voicemail settings event emission** — Added missing `voicemail_box_updated` event emission to the update voicemail settings endpoint — the webhook event type already existed but the controller never emitted it
+
 ## v0.347.0 (2026-05-08)
 
 ### Fixed
