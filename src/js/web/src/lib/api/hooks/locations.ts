@@ -1,84 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
-import { client } from "@/lib/generated/api/client.gen"
+import {
+  createLocation as createLocationApi,
+  deleteLocation as deleteLocationApi,
+  getLocation,
+  type Location,
+  type LocationChild,
+  type LocationCreate,
+  type LocationUpdate,
+  listLocations,
+  updateLocation as updateLocationApi,
+} from "@/lib/generated/api"
 
-// ---------------------------------------------------------------------------
-// Helpers (for endpoints not yet in generated SDK)
-// ---------------------------------------------------------------------------
-
-async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
-  const config = client.getConfig()
-  const baseUrl = config.baseUrl ?? ""
-  const token = typeof window !== "undefined" ? window.localStorage.getItem("access_token") : null
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  }
-  const response = await fetch(`${baseUrl}${url}`, {
-    credentials: "include",
-    ...options,
-    headers: { ...headers, ...(options?.headers as Record<string, string>) },
-  })
-  if (!response.ok) {
-    const body = await response.json().catch(() => ({}))
-    throw new Error(body.detail ?? `Request failed (${response.status})`)
-  }
-  if (response.status === 204) return undefined as unknown as T
-  return response.json()
-}
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export interface LocationChild {
-  id: string
-  name: string
-  description?: string | null
-}
-
-export interface Location {
-  id: string
-  name: string
-  locationType: string
-  teamId: string
-  description?: string | null
-  parentId?: string | null
-  addressLine1?: string | null
-  addressLine2?: string | null
-  city?: string | null
-  state?: string | null
-  postalCode?: string | null
-  country?: string | null
-  children?: LocationChild[]
-  createdAt?: string | null
-  updatedAt?: string | null
-}
-
-export interface LocationCreate {
-  name: string
-  locationType: string
-  teamId: string
-  description?: string | null
-  parentId?: string | null
-  addressLine1?: string | null
-  addressLine2?: string | null
-  city?: string | null
-  state?: string | null
-  postalCode?: string | null
-  country?: string | null
-}
-
-export interface LocationUpdate {
-  name?: string
-  description?: string | null
-  addressLine1?: string | null
-  addressLine2?: string | null
-  city?: string | null
-  state?: string | null
-  postalCode?: string | null
-  country?: string | null
-}
+export type { Location, LocationChild, LocationCreate, LocationUpdate }
 
 // ---------------------------------------------------------------------------
 // Location List
@@ -100,17 +34,19 @@ export function useLocations(options: UseLocationsOptions) {
   return useQuery({
     queryKey: ["locations", teamId, page, pageSize, search, locationType, orderBy, sortOrder],
     queryFn: async () => {
-      const params = new URLSearchParams()
-      params.set("currentPage", String(page))
-      params.set("pageSize", String(pageSize))
-      if (search) {
-        params.set("searchString", search)
-        params.set("searchIgnoreCase", "true")
-      }
-      if (locationType) params.set("locationType", locationType)
-      if (orderBy) params.set("orderBy", orderBy)
-      if (sortOrder) params.set("sortOrder", sortOrder)
-      return apiFetch<{ items: Location[]; total: number }>(`/api/teams/${teamId}/locations?${params.toString()}`)
+      const response = await listLocations({
+        path: { team_id: teamId },
+        query: {
+          currentPage: page,
+          pageSize,
+          searchString: search,
+          searchIgnoreCase: search ? true : undefined,
+          locationType,
+          orderBy,
+          sortOrder,
+        },
+      })
+      return response.data as { items: Location[]; total: number }
     },
     enabled: !!teamId,
   })
@@ -124,7 +60,10 @@ export function useLocation(teamId: string, locationId: string) {
   return useQuery({
     queryKey: ["location", teamId, locationId],
     queryFn: async () => {
-      return apiFetch<Location>(`/api/teams/${teamId}/locations/${locationId}`)
+      const response = await getLocation({
+        path: { team_id: teamId, location_id: locationId },
+      })
+      return response.data as Location
     },
     enabled: !!teamId && !!locationId,
   })
@@ -138,10 +77,11 @@ export function useCreateLocation() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (payload: LocationCreate) => {
-      return apiFetch<Location>(`/api/teams/${payload.teamId}/locations`, {
-        method: "POST",
-        body: JSON.stringify(payload),
+      const response = await createLocationApi({
+        path: { team_id: payload.teamId },
+        body: payload,
       })
+      return response.data as Location
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["locations", variables.teamId] })
@@ -159,10 +99,11 @@ export function useUpdateLocation(teamId: string, locationId: string) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (payload: LocationUpdate) => {
-      return apiFetch<Location>(`/api/teams/${teamId}/locations/${locationId}`, {
-        method: "PATCH",
-        body: JSON.stringify(payload),
+      const response = await updateLocationApi({
+        path: { team_id: teamId, location_id: locationId },
+        body: payload,
       })
+      return response.data as Location
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["locations", teamId] })
@@ -181,8 +122,8 @@ export function useDeleteLocation(teamId: string) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (locationId: string) => {
-      return apiFetch<void>(`/api/teams/${teamId}/locations/${locationId}`, {
-        method: "DELETE",
+      await deleteLocationApi({
+        path: { team_id: teamId, location_id: locationId },
       })
     },
     onSuccess: (_data, locationId) => {
@@ -206,8 +147,8 @@ export function useBulkDeleteLocations(teamId: string) {
   const queryClient = useQueryClient()
   return {
     deleteOne: async (locationId: string) => {
-      await apiFetch<void>(`/api/teams/${teamId}/locations/${locationId}`, {
-        method: "DELETE",
+      await deleteLocationApi({
+        path: { team_id: teamId, location_id: locationId },
       })
     },
     invalidate: () => {

@@ -194,8 +194,9 @@ export function SystemHealthCard() {
           ) : (
             <div className="space-y-1.5">
               {connections.map((connection) => {
-                const isHealthy = connection.isEnabled && ["connected", "healthy", "active"].includes(connection.status.toLowerCase())
-                const statusLabel = !connection.isEnabled ? "Disabled" : isHealthy ? "Healthy" : connection.status.charAt(0).toUpperCase() + connection.status.slice(1)
+                const enabled = connection.isEnabled ?? true
+                const isHealthy = enabled && ["connected", "healthy", "active"].includes(connection.status.toLowerCase())
+                const statusLabel = !enabled ? "Disabled" : isHealthy ? "Healthy" : connection.status.charAt(0).toUpperCase() + connection.status.slice(1)
                 return (
                   <div key={connection.id} className="flex items-center justify-between rounded-md bg-muted/40 px-2.5 py-1.5">
                     <div className="flex items-center gap-2">

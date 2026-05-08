@@ -1479,6 +1479,8 @@ export interface RouteQueryParams {
     searchIgnoreCase?: boolean;
     searchString?: string;
     sortOrder?: "asc" | "desc";
+    updatedAfter?: DateTime;
+    updatedBefore?: DateTime;
   };
   'list_fax_numbers_api_fax_numbers': {
     createdAfter?: DateTime;
@@ -1563,6 +1565,8 @@ export interface RouteQueryParams {
     searchIgnoreCase?: boolean;
     searchString?: string;
     sortOrder?: "asc" | "desc";
+    updatedAfter?: DateTime;
+    updatedBefore?: DateTime;
   };
   'list_music_on_hold': {
     createdAfter?: DateTime;
@@ -1601,6 +1605,8 @@ export interface RouteQueryParams {
     searchIgnoreCase?: boolean;
     searchString?: string;
     sortOrder?: "asc" | "desc";
+    updatedAfter?: DateTime;
+    updatedBefore?: DateTime;
   };
   'list_phone_numbers_api_phone_numbers': {
     createdAfter?: DateTime;
@@ -3266,7 +3272,7 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: [] as const,
-    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder'] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
   },
   'list_fax_numbers_api_fax_numbers': {
     path: '/api/fax/numbers',
@@ -3323,7 +3329,7 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: ['ticket_id'] as const,
-    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder'] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
   },
   'list_music_on_hold': {
     path: '/api/admin/music-on-hold',
@@ -3351,7 +3357,7 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: [] as const,
-    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder'] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
   },
   'list_phone_numbers_api_phone_numbers': {
     path: '/api/phone-numbers',

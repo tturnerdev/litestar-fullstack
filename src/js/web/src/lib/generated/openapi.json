@@ -535,6 +535,7 @@
             ]
           },
           "defaultTimeout": {
+            "minimum": 1,
             "oneOf": [
               {
                 "type": "integer"
@@ -3966,14 +3967,17 @@
           },
           "label": {
             "maxLength": 50,
+            "minLength": 1,
             "type": "string"
           },
           "lineNumber": {
+            "minimum": 1.0,
             "type": "integer"
           },
           "lineType": {
             "default": "private",
             "maxLength": 100,
+            "minLength": 1,
             "type": "string"
           }
         },
@@ -5316,6 +5320,7 @@
         "properties": {
           "displayName": {
             "maxLength": 100,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
@@ -5516,6 +5521,7 @@
         "properties": {
           "emailAddress": {
             "maxLength": 320,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
@@ -5922,6 +5928,7 @@
           },
           "priority": {
             "default": 0,
+            "minimum": 0.0,
             "type": "integer"
           },
           "ringTimeoutSeconds": {
@@ -5968,6 +5975,7 @@
           },
           "destinationValue": {
             "maxLength": 255,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
@@ -6431,6 +6439,17 @@
               }
             ]
           },
+          "createdAt": {
+            "oneOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "description": {
             "oneOf": [
               {
@@ -6489,6 +6508,17 @@
           "teamId": {
             "format": "uuid",
             "type": "string"
+          },
+          "updatedAt": {
+            "oneOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -7011,6 +7041,7 @@
           },
           "description": {
             "maxLength": 500,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
@@ -8439,6 +8470,7 @@
           },
           "sortOrder": {
             "default": 0,
+            "minimum": 0.0,
             "type": "integer"
           }
         },
@@ -11255,6 +11287,7 @@
             ]
           },
           "maxMessageLengthSeconds": {
+            "minimum": 1,
             "oneOf": [
               {
                 "type": "integer"
@@ -11675,15 +11708,8 @@
             "type": "string"
           },
           "userId": {
-            "oneOf": [
-              {
-                "format": "uuid",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "format": "uuid",
+            "type": "string"
           },
           "validationStatus": {
             "oneOf": [
@@ -11701,7 +11727,8 @@
           "id",
           "isActive",
           "name",
-          "url"
+          "url",
+          "userId"
         ],
         "title": "WebhookDetail",
         "type": "object"
@@ -12174,6 +12201,7 @@
         "properties": {
           "description": {
             "maxLength": 500,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
@@ -13400,7 +13428,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13421,7 +13449,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13789,7 +13817,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13810,7 +13838,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -14176,7 +14204,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -14197,7 +14225,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -14557,7 +14585,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -14578,7 +14606,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -16236,6 +16264,44 @@
             "deprecated": false,
             "in": "query",
             "name": "createdAfter",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "updatedBefore",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "updatedAfter",
             "required": false,
             "schema": {
               "oneOf": [
@@ -19387,6 +19453,44 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
+            "name": "updatedBefore",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "updatedAfter",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
             "name": "searchString",
             "required": false,
             "schema": {
@@ -22428,7 +22532,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ConnectionList"
+                  "$ref": "#/components/schemas/ConnectionDetail"
                 }
               }
             },
@@ -33691,6 +33795,44 @@
             "deprecated": false,
             "in": "query",
             "name": "createdAfter",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "updatedBefore",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "updatedAfter",
             "required": false,
             "schema": {
               "oneOf": [

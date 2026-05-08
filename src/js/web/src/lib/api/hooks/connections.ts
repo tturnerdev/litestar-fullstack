@@ -1,73 +1,20 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
-import { client } from "@/lib/generated/api/client.gen"
+import {
+  type ConnectionCreate,
+  type ConnectionDetail,
+  type ConnectionList,
+  type ConnectionUpdate,
+  createConnection as createConnectionApi,
+  deleteConnection as deleteConnectionApi,
+  getConnection,
+  listConnections,
+  type Message,
+  testConnection as testConnectionApi,
+  updateConnection as updateConnectionApi,
+} from "@/lib/generated/api"
 
-// ── Types ──────────────────────────────────────────────────────────────
-
-export interface ConnectionList {
-  id: string
-  teamId: string
-  name: string
-  connectionType: string
-  provider: string
-  status: string
-  isEnabled: boolean
-  host?: string | null
-  port?: number | null
-  authType?: string | null
-  description?: string | null
-  lastHealthCheck?: string | null
-  lastError?: string | null
-  createdAt?: string | null
-  updatedAt?: string | null
-}
-
-export interface ConnectionDetail {
-  id: string
-  teamId: string
-  name: string
-  connectionType: string
-  provider: string
-  status: string
-  authType: string
-  isEnabled: boolean
-  host?: string | null
-  port?: number | null
-  description?: string | null
-  credentialFields: string[]
-  settings?: Record<string, unknown> | null
-  lastHealthCheck?: string | null
-  lastError?: string | null
-  createdAt?: string | null
-  updatedAt?: string | null
-}
-
-export interface ConnectionCreate {
-  name: string
-  connectionType: string
-  provider: string
-  teamId?: string | null
-  host?: string | null
-  port?: number | null
-  authType?: string
-  credentials?: Record<string, unknown> | null
-  settings?: Record<string, unknown> | null
-  description?: string | null
-  isEnabled?: boolean
-}
-
-export interface ConnectionUpdate {
-  name?: string
-  connectionType?: string
-  provider?: string
-  host?: string | null
-  port?: number | null
-  authType?: string
-  credentials?: Record<string, unknown> | null
-  settings?: Record<string, unknown> | null
-  description?: string | null
-  isEnabled?: boolean
-}
+export type { ConnectionCreate, ConnectionDetail, ConnectionList, ConnectionUpdate }
 
 // ── Connection List ───────────────────────────────────────────────────
 
@@ -88,20 +35,18 @@ export function useConnections(pageOrOptions: number | UseConnectionsOptions = 1
   return useQuery({
     queryKey: ["connections", page, pageSize, search, teamId, orderBy, sortOrder],
     queryFn: async () => {
-      const query: Record<string, unknown> = { currentPage: page, pageSize }
-      if (search) {
-        query.searchString = search
-        query.searchIgnoreCase = true
-      }
-      if (teamId) query.teamId = teamId
-      if (orderBy) query.orderBy = orderBy
-      if (sortOrder) query.sortOrder = sortOrder
-      const response = await client.get({
-        url: "/api/connections",
-        query,
-        security: [{ scheme: "bearer", type: "http" }],
-      } as never)
-      return (response as { data: unknown }).data as { items: ConnectionList[]; total: number }
+      const response = await listConnections({
+        query: {
+          currentPage: page,
+          pageSize,
+          searchString: search,
+          searchIgnoreCase: search ? true : undefined,
+          teamId,
+          orderBy,
+          sortOrder,
+        },
+      })
+      return response.data as { items: ConnectionList[]; total: number }
     },
     refetchInterval,
   })
@@ -113,11 +58,10 @@ export function useConnection(connectionId: string) {
   return useQuery({
     queryKey: ["connection", connectionId],
     queryFn: async () => {
-      const response = await client.get({
-        url: `/api/connections/${connectionId}`,
-        security: [{ scheme: "bearer", type: "http" }],
-      } as never)
-      return (response as { data: unknown }).data as ConnectionDetail
+      const response = await getConnection({
+        path: { connection_id: connectionId },
+      })
+      return response.data as ConnectionDetail
     },
     enabled: !!connectionId,
   })
@@ -129,12 +73,8 @@ export function useCreateConnection() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (payload: ConnectionCreate) => {
-      const response = await client.post({
-        url: "/api/connections",
-        body: payload,
-        security: [{ scheme: "bearer", type: "http" }],
-      } as never)
-      return (response as { data: unknown }).data as ConnectionList
+      const response = await createConnectionApi({ body: payload })
+      return response.data as ConnectionList
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["connections"] })
@@ -152,12 +92,11 @@ export function useUpdateConnection(connectionId: string) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (payload: ConnectionUpdate) => {
-      const response = await client.patch({
-        url: `/api/connections/${connectionId}`,
+      const response = await updateConnectionApi({
+        path: { connection_id: connectionId },
         body: payload,
-        security: [{ scheme: "bearer", type: "http" }],
-      } as never)
-      return (response as { data: unknown }).data as ConnectionDetail
+      })
+      return response.data as ConnectionDetail
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["connections"] })
@@ -176,10 +115,9 @@ export function useDeleteConnection() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (connectionId: string) => {
-      await client.delete({
-        url: `/api/connections/${connectionId}`,
-        security: [{ scheme: "bearer", type: "http" }],
-      } as never)
+      await deleteConnectionApi({
+        path: { connection_id: connectionId },
+      })
     },
     onSuccess: (_data, connectionId) => {
       queryClient.invalidateQueries({ queryKey: ["connections"] })
@@ -194,20 +132,15 @@ export function useDeleteConnection() {
   })
 }
 
-/**
- * Update any connection by passing connectionId as part of the mutation argument.
- * Useful for bulk operations where the target connection is not known at hook call time.
- */
 export function useUpdateAnyConnection() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async ({ connectionId, payload }: { connectionId: string; payload: ConnectionUpdate }) => {
-      const response = await client.patch({
-        url: `/api/connections/${connectionId}`,
+      const response = await updateConnectionApi({
+        path: { connection_id: connectionId },
         body: payload,
-        security: [{ scheme: "bearer", type: "http" }],
-      } as never)
-      return (response as { data: unknown }).data as ConnectionDetail
+      })
+      return response.data as ConnectionDetail
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["connections"] })
@@ -226,11 +159,10 @@ export function useTestConnection(connectionId: string) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async () => {
-      const response = await client.post({
-        url: `/api/connections/${connectionId}/test`,
-        security: [{ scheme: "bearer", type: "http" }],
-      } as never)
-      return (response as { data: unknown }).data as { message: string }
+      const response = await testConnectionApi({
+        path: { connection_id: connectionId },
+      })
+      return response.data as Message
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["connection", connectionId] })
@@ -245,19 +177,14 @@ export function useTestConnection(connectionId: string) {
   })
 }
 
-/**
- * Test any connection by passing connectionId as a mutation argument.
- * Useful for list pages where the target connection is not known at hook call time.
- */
 export function useTestAnyConnection() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (connectionId: string) => {
-      const response = await client.post({
-        url: `/api/connections/${connectionId}/test`,
-        security: [{ scheme: "bearer", type: "http" }],
-      } as never)
-      return (response as { data: unknown }).data as { message: string }
+      const response = await testConnectionApi({
+        path: { connection_id: connectionId },
+      })
+      return response.data as Message
     },
     onSuccess: (data, connectionId) => {
       queryClient.invalidateQueries({ queryKey: ["connection", connectionId] })

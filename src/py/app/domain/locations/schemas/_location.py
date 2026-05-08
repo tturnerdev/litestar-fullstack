@@ -1,5 +1,6 @@
 """Location schemas."""
 
+from datetime import datetime
 from typing import Annotated
 from uuid import UUID
 
@@ -34,6 +35,8 @@ class Location(CamelizedBaseStruct):
     country: str | None = None
     children: list[LocationChild] = []
     device_count: int = 0
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
 
 
 class LocationCreate(CamelizedBaseStruct):

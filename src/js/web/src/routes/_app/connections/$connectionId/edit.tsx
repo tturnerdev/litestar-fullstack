@@ -813,7 +813,7 @@ function EditConnectionPage() {
                               type={field.type}
                               value={credentials[field.key] ?? ""}
                               onChange={(e) => handleCredentialChange(field.key, e.target.value)}
-                              placeholder={data.credentialFields.includes(field.key) ? "••••••••" : (field.placeholder ?? `Enter ${field.label.toLowerCase()}`)}
+                              placeholder={(data.credentialFields ?? []).includes(field.key) ? "••••••••" : (field.placeholder ?? `Enter ${field.label.toLowerCase()}`)}
                             />
                           </div>
                         ))}

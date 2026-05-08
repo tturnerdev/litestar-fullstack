@@ -510,6 +510,7 @@ export const AdminGatewaySettingsUpdateSchema = {
       ],
     },
     defaultTimeout: {
+      minimum: 1,
       oneOf: [
         {
           type: "integer",
@@ -2282,7 +2283,7 @@ export const CallQueueCreateSchema = {
       type: "string",
     },
     number: {
-      maxLength: 50,
+      maxLength: 20,
       minLength: 1,
       type: "string",
     },
@@ -2510,7 +2511,7 @@ export const CallQueueUpdateSchema = {
       ],
     },
     number: {
-      maxLength: 50,
+      maxLength: 20,
       minLength: 1,
       oneOf: [
         {
@@ -3004,7 +3005,7 @@ export const ConnectionCreateSchema = {
       ],
     },
     provider: {
-      maxLength: 50,
+      maxLength: 100,
       minLength: 1,
       type: "string",
     },
@@ -3367,7 +3368,7 @@ export const ConnectionUpdateSchema = {
       ],
     },
     provider: {
-      maxLength: 50,
+      maxLength: 100,
       minLength: 1,
       oneOf: [
         {
@@ -3865,15 +3866,18 @@ export const DeviceLineAssignmentInputSchema = {
       type: "boolean",
     },
     label: {
-      maxLength: 255,
+      maxLength: 50,
+      minLength: 1,
       type: "string",
     },
     lineNumber: {
+      minimum: 1,
       type: "integer",
     },
     lineType: {
       default: "private",
       maxLength: 100,
+      minLength: 1,
       type: "string",
     },
   },
@@ -5032,7 +5036,7 @@ export const ExtensionCreateSchema = {
       type: "string",
     },
     extensionNumber: {
-      maxLength: 20,
+      maxLength: 10,
       minLength: 1,
       type: "string",
     },
@@ -5197,6 +5201,7 @@ export const ExtensionUpdateSchema = {
   properties: {
     displayName: {
       maxLength: 100,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
@@ -5392,6 +5397,7 @@ export const FaxEmailRouteUpdateSchema = {
   properties: {
     emailAddress: {
       maxLength: 320,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
@@ -5784,6 +5790,7 @@ export const ForwardingRuleCreateSchema = {
     },
     priority: {
       default: 0,
+      minimum: 0,
       type: "integer",
     },
     ringTimeoutSeconds: {
@@ -5823,6 +5830,7 @@ export const ForwardingRuleUpdateSchema = {
     },
     destinationValue: {
       maxLength: 255,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
@@ -6278,6 +6286,17 @@ export const LocationSchema = {
         },
       ],
     },
+    createdAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     description: {
       oneOf: [
         {
@@ -6336,6 +6355,17 @@ export const LocationSchema = {
     teamId: {
       format: "uuid",
       type: "string",
+    },
+    updatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
     },
   },
   required: ["id", "locationType", "name", "teamId"],
@@ -6421,6 +6451,8 @@ export const LocationCreateSchema = {
       ],
     },
     locationType: {
+      maxLength: 20,
+      minLength: 1,
       type: "string",
     },
     name: {
@@ -6699,7 +6731,7 @@ export const MusicOnHoldCreateSchema = {
     },
     description: {
       default: "",
-      maxLength: 1000,
+      maxLength: 500,
       type: "string",
     },
     fileList: {
@@ -6717,7 +6749,7 @@ export const MusicOnHoldCreateSchema = {
       type: "boolean",
     },
     name: {
-      maxLength: 255,
+      maxLength: 100,
       minLength: 1,
       type: "string",
     },
@@ -6842,7 +6874,8 @@ export const MusicOnHoldUpdateSchema = {
       ],
     },
     description: {
-      maxLength: 1000,
+      maxLength: 500,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
@@ -6874,7 +6907,7 @@ export const MusicOnHoldUpdateSchema = {
       ],
     },
     name: {
-      maxLength: 255,
+      maxLength: 100,
       minLength: 1,
       oneOf: [
         {
@@ -8219,6 +8252,7 @@ export const RingGroupMemberCreateSchema = {
     },
     sortOrder: {
       default: 0,
+      minimum: 0,
       type: "integer",
     },
   },
@@ -10906,6 +10940,7 @@ export const VoicemailSettingsUpdateSchema = {
       ],
     },
     maxMessageLengthSeconds: {
+      minimum: 1,
       oneOf: [
         {
           type: "integer",
@@ -10954,7 +10989,7 @@ export const WebhookCreateSchema = {
   properties: {
     description: {
       default: "",
-      maxLength: 1000,
+      maxLength: 500,
       type: "string",
     },
     events: {
@@ -10974,7 +11009,7 @@ export const WebhookCreateSchema = {
       type: "boolean",
     },
     name: {
-      maxLength: 255,
+      maxLength: 100,
       minLength: 1,
       type: "string",
     },
@@ -10989,7 +11024,7 @@ export const WebhookCreateSchema = {
       ],
     },
     url: {
-      maxLength: 2048,
+      maxLength: 500,
       minLength: 1,
       type: "string",
     },
@@ -11317,15 +11352,8 @@ export const WebhookDetailSchema = {
       type: "string",
     },
     userId: {
-      oneOf: [
-        {
-          format: "uuid",
-          type: "string",
-        },
-        {
-          type: "null",
-        },
-      ],
+      format: "uuid",
+      type: "string",
     },
     validationStatus: {
       oneOf: [
@@ -11338,7 +11366,7 @@ export const WebhookDetailSchema = {
       ],
     },
   },
-  required: ["events", "id", "isActive", "name", "url"],
+  required: ["events", "id", "isActive", "name", "url", "userId"],
   title: "WebhookDetail",
   type: "object",
 } as const;
@@ -11798,7 +11826,8 @@ export const WebhookTestResultSchema = {
 export const WebhookUpdateSchema = {
   properties: {
     description: {
-      maxLength: 1000,
+      maxLength: 500,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
@@ -11833,7 +11862,7 @@ export const WebhookUpdateSchema = {
       ],
     },
     name: {
-      maxLength: 255,
+      maxLength: 100,
       minLength: 1,
       oneOf: [
         {
@@ -11852,7 +11881,7 @@ export const WebhookUpdateSchema = {
       ],
     },
     url: {
-      maxLength: 2048,
+      maxLength: 500,
       minLength: 1,
       oneOf: [
         {

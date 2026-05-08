@@ -294,7 +294,7 @@ function ConnectionDetailPage() {
         description: data.description ?? "",
         host: data.host ?? "",
         port: data.port != null ? String(data.port) : "",
-        isEnabled: data.isEnabled,
+        isEnabled: data.isEnabled ?? true,
       })
     }
   }, [data, editing])
@@ -306,7 +306,7 @@ function ConnectionDetailPage() {
       editValues.description !== (data.description ?? "") ||
       editValues.host !== (data.host ?? "") ||
       editValues.port !== (data.port != null ? String(data.port) : "") ||
-      editValues.isEnabled !== data.isEnabled
+      editValues.isEnabled !== (data.isEnabled ?? true)
     )
   }, [editValues, data, editing])
 
@@ -322,7 +322,7 @@ function ConnectionDetailPage() {
       description: data.description ?? "",
       host: data.host ?? "",
       port: data.port != null ? String(data.port) : "",
-      isEnabled: data.isEnabled,
+      isEnabled: data.isEnabled ?? true,
     })
     setEditing(true)
   }, [data])
@@ -634,7 +634,7 @@ function ConnectionDetailPage() {
       <PageSection>
         <SectionErrorBoundary name="Connection Health">
           {(() => {
-            const health = deriveHealthLevel(data.status, data.lastError, data.isEnabled)
+            const health = deriveHealthLevel(data.status, data.lastError, data.isEnabled ?? true)
             const config = healthConfig[health]
 
             const borderColor = {
@@ -982,11 +982,11 @@ function ConnectionDetailPage() {
                       <p className="text-muted-foreground">Auth Type</p>
                       <p>{authTypeLabels[data.authType] ?? data.authType}</p>
                     </div>
-                    {data.credentialFields.length > 0 && (
+                    {(data.credentialFields ?? []).length > 0 && (
                       <div className="md:col-span-2 lg:col-span-3">
                         <p className="text-muted-foreground">Credentials</p>
                         <div className="mt-1.5 flex flex-wrap gap-2">
-                          {data.credentialFields.map((field) => (
+                          {(data.credentialFields ?? []).map((field) => (
                             <Badge key={field} variant="outline" className="gap-1.5 font-mono text-xs">
                               <Lock className="h-3 w-3 text-muted-foreground" />
                               {field}

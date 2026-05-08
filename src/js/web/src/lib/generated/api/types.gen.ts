@@ -1548,6 +1548,7 @@ export type Location = {
   children?: Array<LocationChild>;
   city?: string | null;
   country?: string | null;
+  createdAt?: string | null;
   description?: string | null;
   deviceCount?: number;
   id: string;
@@ -1557,6 +1558,7 @@ export type Location = {
   postalCode?: string | null;
   state?: string | null;
   teamId: string;
+  updatedAt?: string | null;
 };
 
 /**
@@ -2885,7 +2887,7 @@ export type WebhookDetail = {
   secret?: string | null;
   updatedAt?: string | null;
   url: string;
-  userId?: string | null;
+  userId: string;
   validationStatus?: string | null;
 };
 
@@ -3426,8 +3428,8 @@ export type AdminListAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    actionIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     action?: string | null;
@@ -3505,8 +3507,8 @@ export type AdminExportAuditLogData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    actionIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     action?: string | null;
@@ -3573,8 +3575,8 @@ export type AdminGetTargetAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    actionIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     action?: string | null;
@@ -3653,8 +3655,8 @@ export type AdminGetUserAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    actionIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     action?: string | null;
@@ -4323,6 +4325,8 @@ export type AdminListFaxNumbersData = {
     ids?: Array<string> | null;
     createdBefore?: string | null;
     createdAfter?: string | null;
+    updatedBefore?: string | null;
+    updatedAfter?: string | null;
     /**
      * Field to search
      */
@@ -5509,6 +5513,8 @@ export type AdminListPhoneNumbersData = {
     ids?: Array<string> | null;
     createdBefore?: string | null;
     createdAfter?: string | null;
+    updatedBefore?: string | null;
+    updatedAfter?: string | null;
     /**
      * Field to search
      */
@@ -6656,7 +6662,7 @@ export type CreateConnectionResponses = {
   /**
    * Document created, URL follows
    */
-  201: ConnectionList;
+  201: ConnectionDetail;
 };
 
 export type CreateConnectionResponse =
@@ -11679,6 +11685,8 @@ export type ListTicketMessagesData = {
     ids?: Array<string> | null;
     createdBefore?: string | null;
     createdAfter?: string | null;
+    updatedBefore?: string | null;
+    updatedAfter?: string | null;
     /**
      * Field to search
      */
