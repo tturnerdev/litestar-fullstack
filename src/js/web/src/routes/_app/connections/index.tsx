@@ -847,6 +847,7 @@ function ConnectionsPage() {
           <AlertDialogFooter>
             <AlertDialogCancel disabled={deleteConnection.isPending}>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleConfirmDelete} disabled={deleteConnection.isPending} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {deleteConnection.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {deleteConnection.isPending ? "Deleting..." : "Delete Connection"}
             </AlertDialogAction>
           </AlertDialogFooter>

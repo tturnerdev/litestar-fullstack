@@ -722,6 +722,7 @@ function TimeConditionsTab({ search, onSearchChange, debouncedSearch, onFreshnes
               }}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
+              {deleteTimeCondition.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {deleteTimeCondition.isPending ? "Deleting..." : "Delete Time Condition"}
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -1033,6 +1034,7 @@ function IvrMenusTab({ search, onSearchChange, debouncedSearch, onFreshnessChang
               }}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
+              {deleteIvrMenu.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {deleteIvrMenu.isPending ? "Deleting..." : "Delete IVR Menu"}
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -1351,6 +1353,7 @@ function CallQueuesTab({ search, onSearchChange, debouncedSearch, onFreshnessCha
               }}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
+              {deleteCallQueue.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {deleteCallQueue.isPending ? "Deleting..." : "Delete Call Queue"}
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -1669,6 +1672,7 @@ function RingGroupsTab({ search, onSearchChange, debouncedSearch, onFreshnessCha
               }}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
+              {deleteRingGroup.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {deleteRingGroup.isPending ? "Deleting..." : "Delete Ring Group"}
             </AlertDialogAction>
           </AlertDialogFooter>
