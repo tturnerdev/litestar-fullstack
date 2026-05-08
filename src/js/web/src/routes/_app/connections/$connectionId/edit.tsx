@@ -895,6 +895,7 @@ function EditConnectionPage() {
                     <Button
                       type="button"
                       variant="ghost"
+                      disabled={updateConnection.isPending}
                       onClick={() =>
                         router.navigate({
                           to: "/connections/$connectionId",

@@ -378,10 +378,13 @@ function EditTicketForm({ ticketId }: { ticketId: string }) {
                   <Separator />
 
                   <div className="flex items-center justify-between">
-                    <Button type="button" variant="ghost" asChild>
-                      <Link to="/support/$ticketId" params={{ ticketId }}>
-                        Cancel
-                      </Link>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      disabled={form.formState.isSubmitting}
+                      onClick={() => router.navigate({ to: "/support/$ticketId", params: { ticketId } })}
+                    >
+                      Cancel
                     </Button>
                     <Button type="submit" disabled={form.formState.isSubmitting}>
                       {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
