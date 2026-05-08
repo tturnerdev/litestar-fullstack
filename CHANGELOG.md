@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.349.0 (2026-05-08)
+
+### Fixed
+- **Missing success toasts** — Added toast notifications to `useUnlinkOAuthAccount`, `useUploadAttachment`, and `usePasteImage` mutation hooks, matching the pattern used by all other mutation hooks in the codebase
+
 ## v0.348.0 (2026-05-08)
 
 ### Fixed

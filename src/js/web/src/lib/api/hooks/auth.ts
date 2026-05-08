@@ -168,6 +168,7 @@ export function useUnlinkOAuthAccount() {
       queryClient.invalidateQueries({
         queryKey: profileOAuthAccountsQueryKey(),
       })
+      toast.success("OAuth account unlinked")
     },
     onError: (error) => {
       toast.error("Unable to unlink OAuth account", {

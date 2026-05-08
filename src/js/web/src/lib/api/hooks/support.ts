@@ -307,6 +307,7 @@ export function useUploadAttachment(ticketId: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["support", "ticket", ticketId, "messages"] })
+      toast.success("File uploaded")
     },
     onError: (error) => {
       toast.error("Unable to upload file", {
@@ -333,6 +334,7 @@ export function usePasteImage(ticketId: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["support", "ticket", ticketId, "messages"] })
+      toast.success("Image uploaded")
     },
     onError: (error) => {
       toast.error("Unable to upload image", {
