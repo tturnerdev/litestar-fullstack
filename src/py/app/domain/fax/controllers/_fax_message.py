@@ -171,6 +171,7 @@ class FaxMessageController(Controller):
         if not _can_access_fax_number(current_user, db_obj.fax_number):
             raise PermissionDeniedException(detail="Insufficient permissions to access this fax message.")
         before = capture_snapshot(db_obj)
+        request.app.emit(event_id="fax_message_deleted", entity_id=message_id)
         await fax_messages_service.delete(message_id)
         await log_audit(
             audit_service,

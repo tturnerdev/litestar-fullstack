@@ -223,6 +223,7 @@ class IvrMenuController(Controller):
         db_obj = await ivr_menus_service.get(ivr_menu_id)
         before = capture_snapshot(db_obj)
         target_label = db_obj.name
+        request.app.emit(event_id="ivr_menu_deleted", entity_id=ivr_menu_id)
         await ivr_menus_service.delete(ivr_menu_id)
         await log_audit(
             audit_service,
@@ -397,6 +398,7 @@ class IvrMenuController(Controller):
         db_obj = await ivr_menu_options_service.get_one(id=option_id, ivr_menu_id=ivr_menu_id)
         before = capture_snapshot(db_obj)
         target_label = f"digit:{db_obj.digit}"
+        request.app.emit(event_id="ivr_menu_option_deleted", entity_id=option_id)
         await ivr_menu_options_service.delete(option_id)
         await log_audit(
             audit_service,

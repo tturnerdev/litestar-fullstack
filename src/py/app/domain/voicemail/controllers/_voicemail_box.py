@@ -236,6 +236,7 @@ class VoicemailBoxController(Controller):
         db_obj = await voicemail_boxes_service.get(box_id)
         before = capture_snapshot(db_obj)
         target_label = f"extension:{db_obj.extension_id}"
+        request.app.emit(event_id="voicemail_box_deleted", entity_id=box_id)
         await voicemail_boxes_service.delete(box_id)
         await log_audit(
             audit_service,

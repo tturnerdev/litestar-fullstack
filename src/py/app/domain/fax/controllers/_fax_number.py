@@ -247,6 +247,7 @@ class FaxNumberController(Controller):
         before = capture_snapshot(existing)
         target_label = existing.number
         owner_id = existing.user_id
+        request.app.emit(event_id="fax_number_deleted", entity_id=fax_number_id)
         await fax_numbers_service.delete(fax_number_id)
         await log_audit(
             audit_service,

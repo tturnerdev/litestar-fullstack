@@ -223,6 +223,7 @@ class TimeConditionController(Controller):
         db_obj = await time_conditions_service.get(time_condition_id)
         before = capture_snapshot(db_obj)
         target_label = db_obj.name
+        request.app.emit(event_id="time_condition_deleted", entity_id=time_condition_id)
         await time_conditions_service.delete(time_condition_id)
         await log_audit(
             audit_service,

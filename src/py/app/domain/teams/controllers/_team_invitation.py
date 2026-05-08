@@ -185,6 +185,7 @@ class TeamInvitationController(Controller):
         if invitation.team_id != team_id:
             raise HTTPException(status_code=400, detail="Invitation does not belong to this team")
         before = capture_snapshot(invitation)
+        request.app.emit(event_id="team_invitation_deleted", entity_id=invitation_id)
         await team_invitations_service.delete(item_id=invitation_id)
 
         await log_audit(

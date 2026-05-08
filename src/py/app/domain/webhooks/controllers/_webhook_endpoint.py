@@ -89,9 +89,11 @@ class WebhookEndpointController(Controller):
     @delete(operation_id="DeleteWebhookEndpoint", path="/{endpoint_id:uuid}", return_dto=None)
     async def delete_endpoint(
         self,
+        request: Request[Any, Any, Any],
         webhook_service: WebhookEndpointService,
         endpoint_id: Annotated[UUID, Parameter(title="Endpoint ID")],
     ) -> None:
+        request.app.emit(event_id="webhook_endpoint_deleted", entity_id=endpoint_id)
         _ = await webhook_service.delete(endpoint_id)
 
     @get(

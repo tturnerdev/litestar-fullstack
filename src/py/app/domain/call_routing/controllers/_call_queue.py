@@ -224,6 +224,7 @@ class CallQueueController(Controller):
         db_obj = await call_queues_service.get(call_queue_id)
         before = capture_snapshot(db_obj)
         target_label = db_obj.name
+        request.app.emit(event_id="call_queue_deleted", entity_id=call_queue_id)
         await call_queues_service.delete(call_queue_id)
         await log_audit(
             audit_service,
@@ -399,6 +400,7 @@ class CallQueueController(Controller):
         await call_queues_service.get(call_queue_id)
         db_obj = await call_queue_members_service.get_one(id=member_id, call_queue_id=call_queue_id)
         before = capture_snapshot(db_obj)
+        request.app.emit(event_id="call_queue_member_deleted", entity_id=member_id)
         await call_queue_members_service.delete(member_id)
         await log_audit(
             audit_service,

@@ -145,6 +145,7 @@ class TeamMemberController(Controller):
             msg = "User is not a member of this team."
             raise IntegrityError(msg)
         before = capture_snapshot(membership)
+        request.app.emit(event_id="team_member_removed", entity_id=membership.id)
         await team_members_service.delete(membership.id)
         team_obj = await teams_service.get(team_id)
 

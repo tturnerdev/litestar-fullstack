@@ -238,6 +238,7 @@ class ScheduleController(Controller):
         db_obj = await schedules_service.get(schedule_id)
         before = capture_snapshot(db_obj)
         target_label = db_obj.name
+        request.app.emit(event_id="schedule_deleted", entity_id=schedule_id)
         await schedules_service.delete(schedule_id)
         await log_audit(
             audit_service,
@@ -426,6 +427,7 @@ class ScheduleController(Controller):
         db_obj = await entries_service.get(entry_id)
         before = capture_snapshot(db_obj)
         target_label = db_obj.label or f"Entry {entry_id}"
+        request.app.emit(event_id="schedule_entry_deleted", entity_id=entry_id)
         await entries_service.delete(entry_id)
         await log_audit(
             audit_service,

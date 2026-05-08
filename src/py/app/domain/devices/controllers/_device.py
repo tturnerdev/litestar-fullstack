@@ -307,6 +307,7 @@ class DeviceController(Controller):
         before = _capture_snapshot(db_obj)
         target_label = db_obj.name
         owner_id = db_obj.user_id
+        request.app.emit(event_id="device_deleted", entity_id=device_id)
         await devices_service.delete(device_id)
         await _log_audit(
             audit_service,

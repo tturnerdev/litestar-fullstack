@@ -272,6 +272,7 @@ class TeamController(Controller):
         team = await teams_service.get(team_id)
         before = _capture_snapshot(team)
         team_name = team.name
+        request.app.emit(event_id="team_deleted", entity_id=team_id)
         _ = await teams_service.delete(team_id)
 
         await _log_audit(

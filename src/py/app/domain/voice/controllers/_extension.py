@@ -263,6 +263,7 @@ class ExtensionController(Controller):
         before = capture_snapshot(db_obj)
         target_label = db_obj.extension_number
         extension_number = db_obj.extension_number
+        request.app.emit(event_id="extension_deleted", entity_id=ext_id)
         await extensions_service.delete(ext_id)
         await log_audit(
             audit_service,

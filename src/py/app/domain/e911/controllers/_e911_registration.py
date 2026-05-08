@@ -228,6 +228,7 @@ class E911RegistrationController(Controller):
         db_obj = await e911_service.get(registration_id)
         before = capture_snapshot(db_obj)
         target_label = f"{db_obj.address_line_1}, {db_obj.city}"
+        request.app.emit(event_id="e911_registration_deleted", entity_id=registration_id)
         await e911_service.delete(registration_id)
         await log_audit(
             audit_service,

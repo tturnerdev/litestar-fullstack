@@ -186,6 +186,7 @@ class UserController(Controller):
         db_obj = await users_service.get(user_id)
         before = capture_snapshot(db_obj)
         target_label = db_obj.email
+        request.app.emit(event_id="user_deleted", entity_id=user_id)
         _ = await users_service.delete(user_id)
         await log_audit(
             audit_service,

@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Annotated, Any
 from uuid import UUID
 
-from litestar import Controller, delete, get, patch, post
+from litestar import Controller, Request, delete, get, patch, post
 from litestar.di import Provide
 from litestar.params import Dependency, Parameter
 
@@ -22,7 +22,6 @@ from app.lib.schema import Message
 if TYPE_CHECKING:
     from advanced_alchemy.filters import FilterTypes
     from advanced_alchemy.service.pagination import OffsetPagination
-    from litestar import Request
     from litestar.security.jwt import Token
 
     from app.domain.admin.services import AuditLogService
@@ -239,6 +238,7 @@ class ConnectionController(Controller):
         db_obj = await connections_service.get(connection_id)
         before = capture_snapshot(db_obj)
         target_label = db_obj.name
+        request.app.emit(event_id="connection_deleted", entity_id=connection_id)
         await connections_service.delete(connection_id)
         await log_audit(
             audit_service,

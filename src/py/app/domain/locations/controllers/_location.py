@@ -231,6 +231,7 @@ class LocationController(Controller):
         db_obj = await locations_service.get(location_id)
         before = capture_snapshot(db_obj)
         target_label = db_obj.name
+        request.app.emit(event_id="location_deleted", entity_id=location_id)
         await locations_service.delete(location_id)
         await log_audit(
             audit_service,

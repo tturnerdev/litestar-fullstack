@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Annotated, Any
 from uuid import UUID
 
 import httpx
-from litestar import Controller, delete, get, patch, post
+from litestar import Controller, Request, delete, get, patch, post
 from litestar.di import Provide
 from litestar.exceptions import NotFoundException
 from litestar.params import Dependency, Parameter
@@ -31,7 +31,6 @@ from app.lib.deps import create_service_dependencies
 if TYPE_CHECKING:
     from advanced_alchemy.filters import FilterTypes
     from advanced_alchemy.service.pagination import OffsetPagination
-    from litestar import Request
     from litestar.security.jwt import Token
 
     from app.domain.admin.services import AuditLogService
@@ -258,6 +257,7 @@ class WebhookController(Controller):
             raise NotFoundException(detail="Webhook not found.")
         before = capture_snapshot(db_obj)
         target_label = db_obj.name
+        request.app.emit(event_id="webhook_deleted", entity_id=webhook_id)
         await webhooks_service.delete(webhook_id)
         await log_audit(
             audit_service,

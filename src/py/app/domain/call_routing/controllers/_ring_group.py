@@ -223,6 +223,7 @@ class RingGroupController(Controller):
         db_obj = await ring_groups_service.get(ring_group_id)
         before = capture_snapshot(db_obj)
         target_label = db_obj.name
+        request.app.emit(event_id="ring_group_deleted", entity_id=ring_group_id)
         await ring_groups_service.delete(ring_group_id)
         await log_audit(
             audit_service,
@@ -398,6 +399,7 @@ class RingGroupController(Controller):
         await ring_groups_service.get(ring_group_id)
         db_obj = await ring_group_members_service.get_one(id=member_id, ring_group_id=ring_group_id)
         before = capture_snapshot(db_obj)
+        request.app.emit(event_id="ring_group_member_deleted", entity_id=member_id)
         await ring_group_members_service.delete(member_id)
         await log_audit(
             audit_service,

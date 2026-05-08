@@ -116,6 +116,7 @@ class UserRoleController(Controller):
         for user_role in user_obj.roles:
             if user_role.role_slug == role_slug:
                 before = capture_snapshot(user_role)
+                request.app.emit(event_id="user_role_revoked", entity_id=user_role.id)
                 _ = await user_roles_service.delete(user_role.id)
                 await log_audit(
                     audit_service,

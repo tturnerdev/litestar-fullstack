@@ -176,6 +176,7 @@ class PhoneNumberController(Controller):
         db_obj = await phone_numbers_service.get_one(id=phone_number_id, user_id=current_user.id)
         before = capture_snapshot(db_obj)
         target_label = db_obj.number
+        request.app.emit(event_id="phone_number_deleted", entity_id=phone_number_id)
         await phone_numbers_service.delete(phone_number_id)
         await log_audit(
             audit_service,

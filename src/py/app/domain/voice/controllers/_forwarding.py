@@ -217,6 +217,7 @@ class ForwardingController(Controller):
         db_obj = await forwarding_rules_service.get_one(id=rule_id, extension_id=ext_id)
         before = capture_snapshot(db_obj)
         target_label = db_obj.destination_value
+        request.app.emit(event_id="forwarding_deleted", entity_id=rule_id)
         await forwarding_rules_service.delete(rule_id)
         await log_audit(
             audit_service,

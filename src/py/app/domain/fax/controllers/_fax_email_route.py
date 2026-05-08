@@ -252,6 +252,7 @@ class FaxEmailRouteController(Controller):
             raise HTTPException(status_code=400, detail="Route does not belong to this fax number.")
         before = capture_snapshot(existing)
         target_label = existing.email_address
+        request.app.emit(event_id="fax_email_route_deleted", entity_id=route_id)
         await fax_email_routes_service.delete(item_id=route_id)
         await log_audit(
             audit_service,

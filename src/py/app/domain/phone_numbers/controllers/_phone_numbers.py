@@ -270,6 +270,7 @@ class PhoneNumberController(Controller):
         phone = await phone_number_service.get(phone_number_id)
         before = _capture_snapshot(phone)
         target_label = phone.number
+        request.app.emit(event_id="phone_number_deleted", entity_id=phone_number_id)
         await phone_number_service.delete(phone_number_id)
         await _log_audit(
             audit_service,

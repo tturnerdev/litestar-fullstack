@@ -194,6 +194,7 @@ class RoleController(Controller):
             raise HTTPException(status_code=400, detail="Cannot delete default roles")
         before = capture_snapshot(db_obj)
         target_label = db_obj.name
+        request.app.emit(event_id="role_deleted", entity_id=role_id)
         _ = await roles_service.delete(role_id)
         await log_audit(
             audit_service,
