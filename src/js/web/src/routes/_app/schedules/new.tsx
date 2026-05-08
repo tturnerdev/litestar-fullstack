@@ -24,6 +24,7 @@ import { Switch } from "@/components/ui/switch"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { type ScheduleCreate, useCreateSchedule } from "@/lib/api/hooks/schedules"
 import { useAuthStore } from "@/lib/auth"
+import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/schedules/new")({
   component: NewSchedulePage,
@@ -271,8 +272,12 @@ function NewSchedulePage() {
                       autoFocus
                       maxLength={255}
                     />
-                    <FieldError message={fieldErrors.name} />
-                    <p className="text-xs text-muted-foreground">A descriptive name for this schedule.</p>
+                    <div className="flex items-center justify-between">
+                      {fieldErrors.name ? <FieldError message={fieldErrors.name} /> : <p className="text-xs text-muted-foreground">A descriptive name for this schedule.</p>}
+                      <p className={cn("shrink-0 text-xs", name.length >= 255 ? "text-destructive" : name.length >= 200 ? "text-amber-500" : "text-muted-foreground")}>
+                        {name.length}/255
+                      </p>
+                    </div>
                   </div>
 
                   {/* Schedule Type */}
@@ -336,7 +341,7 @@ function NewSchedulePage() {
 
                   {/* Actions */}
                   <div className="flex items-center justify-end gap-2 pt-2">
-                    <Button type="button" variant="ghost" onClick={handleCancel}>
+                    <Button type="button" variant="ghost" disabled={createSchedule.isPending} onClick={handleCancel}>
                       Cancel
                     </Button>
                     <Button type="submit" disabled={!isValid || createSchedule.isPending}>

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { Link, useBlocker, useRouter } from "@tanstack/react-router"
+import { useBlocker, useRouter } from "@tanstack/react-router"
 import { AlertCircle, AlertTriangle, Loader2, Plus, X } from "lucide-react"
 import { useCallback, useRef, useState } from "react"
 import { toast } from "sonner"
@@ -299,8 +299,8 @@ export function CreateTeamForm() {
 
         {/* Submit */}
         <div className="flex items-center justify-end gap-2 pt-2">
-          <Button type="button" variant="ghost" asChild>
-            <Link to="/teams">Cancel</Link>
+          <Button type="button" variant="ghost" disabled={isSubmitting} onClick={() => router.navigate({ to: "/teams" })}>
+            Cancel
           </Button>
           <Button type="submit" disabled={!isValid || isSubmitting}>
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
