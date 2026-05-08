@@ -24,7 +24,7 @@ class AuditLog(UUIDv7AuditBase):
     __table_args__ = {"comment": "Audit trail for system events and admin actions"}
 
     actor_id: Mapped[UUID | None] = mapped_column(
-        ForeignKey("user_account.id", ondelete="SET NULL"),
+        ForeignKey("user_account.id", ondelete="set null"),
         nullable=True,
         index=True,
     )

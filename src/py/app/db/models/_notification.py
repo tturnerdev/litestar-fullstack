@@ -24,7 +24,7 @@ class Notification(UUIDv7AuditBase):
     __table_args__ = {"comment": "In-app notifications for users"}
 
     user_id: Mapped[UUID] = mapped_column(
-        ForeignKey("user_account.id", ondelete="CASCADE"),
+        ForeignKey("user_account.id", ondelete="cascade"),
         nullable=False,
         index=True,
     )

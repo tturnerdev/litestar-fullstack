@@ -23,12 +23,12 @@ class WebhookDelivery(UUIDv7AuditBase):
     __table_args__ = {"comment": "Records of individual webhook delivery attempts"}
 
     webhook_id: Mapped[UUID] = mapped_column(
-        ForeignKey("webhook.id", ondelete="CASCADE"),
+        ForeignKey("webhook.id", ondelete="cascade"),
         nullable=False,
         index=True,
     )
     endpoint_id: Mapped[UUID | None] = mapped_column(
-        ForeignKey("webhook_endpoint.id", ondelete="SET NULL"),
+        ForeignKey("webhook_endpoint.id", ondelete="set null"),
         nullable=True,
         index=True,
         default=None,

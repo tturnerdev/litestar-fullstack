@@ -30,7 +30,7 @@ class DeviceLineAssignment(UUIDv7AuditBase):
     )
     line_number: Mapped[int] = mapped_column(nullable=False)
     extension_id: Mapped[UUID | None] = mapped_column(
-        ForeignKey("extension.id", ondelete="SET NULL"),
+        ForeignKey("extension.id", ondelete="set null"),
         nullable=True,
         default=None,
         index=True,

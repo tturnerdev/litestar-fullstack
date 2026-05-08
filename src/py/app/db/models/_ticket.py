@@ -23,17 +23,17 @@ class Ticket(UUIDv7AuditBase):
     __table_args__ = {"comment": "Support tickets for helpdesk system"}
 
     user_id: Mapped[UUID] = mapped_column(
-        ForeignKey("user_account.id", ondelete="CASCADE"),
+        ForeignKey("user_account.id", ondelete="cascade"),
         nullable=False,
         index=True,
     )
     assigned_to_id: Mapped[UUID | None] = mapped_column(
-        ForeignKey("user_account.id", ondelete="SET NULL"),
+        ForeignKey("user_account.id", ondelete="set null"),
         nullable=True,
         index=True,
     )
     team_id: Mapped[UUID | None] = mapped_column(
-        ForeignKey("team.id", ondelete="SET NULL"),
+        ForeignKey("team.id", ondelete="set null"),
         nullable=True,
         index=True,
     )

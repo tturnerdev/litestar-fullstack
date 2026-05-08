@@ -20,17 +20,17 @@ class TicketAttachment(UUIDv7AuditBase):
     __table_args__ = {"comment": "File attachments for support ticket messages"}
 
     ticket_message_id: Mapped[UUID] = mapped_column(
-        ForeignKey("ticket_message.id", ondelete="CASCADE"),
+        ForeignKey("ticket_message.id", ondelete="cascade"),
         nullable=False,
         index=True,
     )
     ticket_id: Mapped[UUID] = mapped_column(
-        ForeignKey("ticket.id", ondelete="CASCADE"),
+        ForeignKey("ticket.id", ondelete="cascade"),
         nullable=False,
         index=True,
     )
     uploaded_by_id: Mapped[UUID] = mapped_column(
-        ForeignKey("user_account.id", ondelete="CASCADE"),
+        ForeignKey("user_account.id", ondelete="cascade"),
         nullable=False,
         index=True,
     )

@@ -20,12 +20,12 @@ class TicketMessage(UUIDv7AuditBase):
     __table_args__ = {"comment": "Messages within support ticket threads"}
 
     ticket_id: Mapped[UUID] = mapped_column(
-        ForeignKey("ticket.id", ondelete="CASCADE"),
+        ForeignKey("ticket.id", ondelete="cascade"),
         nullable=False,
         index=True,
     )
     author_id: Mapped[UUID] = mapped_column(
-        ForeignKey("user_account.id", ondelete="CASCADE"),
+        ForeignKey("user_account.id", ondelete="cascade"),
         nullable=False,
         index=True,
     )

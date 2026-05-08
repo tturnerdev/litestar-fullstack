@@ -29,7 +29,7 @@ class RefreshToken(UUIDv7AuditBase):
     __table_args__ = {"comment": "JWT refresh tokens with rotation tracking"}
 
     user_id: Mapped[UUID] = mapped_column(
-        ForeignKey("user_account.id", ondelete="CASCADE"),
+        ForeignKey("user_account.id", ondelete="cascade"),
         nullable=False,
         index=True,
     )

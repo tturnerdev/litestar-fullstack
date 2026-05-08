@@ -52,14 +52,14 @@ class BackgroundTask(UUIDv7AuditBase):
     """ID of the entity this task operates on (polymorphic, no FK constraint)."""
 
     team_id: Mapped[UUID] = mapped_column(
-        ForeignKey("team.id", ondelete="CASCADE"),
+        ForeignKey("team.id", ondelete="cascade"),
         nullable=False,
         index=True,
     )
     """ID of the team this task belongs to."""
 
     initiated_by_id: Mapped[UUID | None] = mapped_column(
-        ForeignKey("user_account.id", ondelete="SET NULL"),
+        ForeignKey("user_account.id", ondelete="set null"),
         nullable=True,
         index=True,
     )

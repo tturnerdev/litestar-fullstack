@@ -21,7 +21,7 @@ class EmailVerificationToken(UUIDv7AuditBase):
     __tablename__ = "email_verification_token"
     __table_args__ = {"comment": "Email verification tokens for user account verification"}
 
-    user_id: Mapped[UUID] = mapped_column(ForeignKey("user_account.id", ondelete="CASCADE"), nullable=False, index=True)
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("user_account.id", ondelete="cascade"), nullable=False, index=True)
     token_hash: Mapped[str] = mapped_column(String(255), nullable=False, unique=True, index=True)
     email: Mapped[str] = mapped_column(String(255), nullable=False)
     expires_at: Mapped[datetime] = mapped_column(nullable=False)

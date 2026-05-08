@@ -31,7 +31,7 @@ class NotificationPreference(UUIDv7AuditBase):
     __table_args__ = {"comment": "User notification delivery preferences"}
 
     user_id: Mapped[UUID] = mapped_column(
-        ForeignKey("user_account.id", ondelete="CASCADE"),
+        ForeignKey("user_account.id", ondelete="cascade"),
         unique=True,
         nullable=False,
         index=True,

@@ -23,7 +23,7 @@ class WebhookEndpoint(UUIDv7AuditBase):
     __table_args__ = {"comment": "Registered webhook endpoints for event notifications"}
 
     team_id: Mapped[UUID | None] = mapped_column(
-        ForeignKey("team.id", ondelete="CASCADE"),
+        ForeignKey("team.id", ondelete="cascade"),
         nullable=True,
         index=True,
     )
