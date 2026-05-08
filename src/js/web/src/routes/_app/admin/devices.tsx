@@ -24,6 +24,17 @@ import type { AdminDeviceSummary } from "@/lib/generated/api/types.gen"
 import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/admin/devices")({
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): {
+    q?: string
+    sort?: string
+    order?: string
+  } => ({
+    q: typeof search.q === "string" && search.q ? search.q : undefined,
+    sort: typeof search.sort === "string" && search.sort ? search.sort : undefined,
+    order: typeof search.order === "string" && (search.order === "asc" || search.order === "desc") ? search.order : undefined,
+  }),
   component: AdminDevicesPage,
 })
 
@@ -129,21 +140,45 @@ function StatsCardSkeleton() {
 
 function AdminDevicesPage() {
   useDocumentTitle("Admin Devices")
+  const { q: searchParam, sort: sortParam, order: orderParam } = Route.useSearch()
+  const navigate = Route.useNavigate()
+
   const [page, setPage] = useState(1)
-  const [search, setSearch] = useState("")
+  const [search, setSearch] = useState(searchParam ?? "")
   const debouncedSearch = useDebouncedValue(search)
 
-  // Sort state
-  const [sortKey, setSortKey] = useState<string | null>(null)
-  const [sortDir, setSortDir] = useState<SortDirection>(null)
+  // Sync URL when debounced search settles
+  useEffect(() => {
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        q: debouncedSearch || undefined,
+      }),
+      replace: true,
+    })
+  }, [debouncedSearch, navigate])
+
+  // Keep local input in sync if URL search param changes externally
+  useEffect(() => {
+    setSearch(searchParam ?? "")
+  }, [searchParam])
+
+  // Sort state (URL-persisted)
+  const sortKey = sortParam ?? null
+  const sortDir: SortDirection = (orderParam as SortDirection) ?? null
 
   const handleSort = useCallback(
     (key: string) => {
       const next = nextSortDirection(sortKey, sortDir, key)
-      setSortKey(next.sort)
-      setSortDir(next.direction)
+      navigate({
+        search: (prev) => ({
+          ...prev,
+          sort: next.sort || undefined,
+          order: next.direction || undefined,
+        }),
+      })
     },
-    [sortKey, sortDir],
+    [sortKey, sortDir, navigate],
   )
 
   // Column visibility
