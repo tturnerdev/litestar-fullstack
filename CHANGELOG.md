@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.283.0 (2026-05-07)
+
+### Added
+- **Webhook event registry expansion** — WebhookEventType enum expanded from 11 to 89 event types covering all domains (devices, connections, locations, schedules, call routing, voice, voicemail, fax, support, analytics, admin)
+- **Duplicate validation on 4 more services** — locations (name), schedules (name), devices (mac_address), connections (name) — both create and update
+- **Keyboard shortcuts** — `/` key now opens global search; removed undocumented arrow-key pagination shortcuts from help dialog
+- **Phone number detail timestamps** — Created/updated timestamps now displayed on voice phone number detail page
+
 ## v0.282.0 (2026-05-07)
 
 ### Added
