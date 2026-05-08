@@ -473,12 +473,16 @@ function WebhookFormDialog({ open, onOpenChange, editWebhook }: { open: boolean;
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="webhook-name">Name</Label>
+            <Label htmlFor="webhook-name">
+              Name <span className="text-destructive">*</span>
+            </Label>
             <Input id="webhook-name" placeholder="e.g., Slack Notifications" value={name} onChange={(e) => setName(e.target.value)} maxLength={100} required />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="webhook-url">URL</Label>
+            <Label htmlFor="webhook-url">
+              URL <span className="text-destructive">*</span>
+            </Label>
             <Input id="webhook-url" type="url" placeholder="https://example.com/webhook" value={url} onChange={(e) => setUrl(e.target.value)} maxLength={500} required />
             <p className="text-xs text-muted-foreground mt-1">Must be an HTTPS URL that accepts POST requests with a JSON body.</p>
           </div>

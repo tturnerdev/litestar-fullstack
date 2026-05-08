@@ -174,16 +174,22 @@ function NewTimeConditionDialog({ open, onOpenChange }: { open: boolean; onOpenC
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="tc-name">Name</Label>
+            <Label htmlFor="tc-name">
+              Name <span className="text-destructive">*</span>
+            </Label>
             <Input id="tc-name" placeholder="e.g., Business Hours Check" value={name} onChange={(e) => setName(e.target.value)} required maxLength={255} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="tc-match">Match Destination</Label>
+            <Label htmlFor="tc-match">
+              Match Destination <span className="text-destructive">*</span>
+            </Label>
             <Input id="tc-match" placeholder="e.g., ext:100" value={matchDest} onChange={(e) => setMatchDest(e.target.value)} required maxLength={255} />
             <p className="text-xs text-muted-foreground">Where calls are routed when the time condition matches (e.g., during business hours).</p>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="tc-nomatch">No Match Destination</Label>
+            <Label htmlFor="tc-nomatch">
+              No Match Destination <span className="text-destructive">*</span>
+            </Label>
             <Input id="tc-nomatch" placeholder="e.g., voicemail:main" value={noMatchDest} onChange={(e) => setNoMatchDest(e.target.value)} required maxLength={255} />
             <p className="text-xs text-muted-foreground">Where calls are routed when the time condition does not match (e.g., after hours).</p>
           </div>
@@ -231,7 +237,9 @@ function NewIvrMenuDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="ivr-name">Name</Label>
+            <Label htmlFor="ivr-name">
+              Name <span className="text-destructive">*</span>
+            </Label>
             <Input id="ivr-name" placeholder="e.g., Main Auto Attendant" value={name} onChange={(e) => setName(e.target.value)} required maxLength={255} />
           </div>
           <DialogFooter>
@@ -282,11 +290,15 @@ function NewCallQueueDialog({ open, onOpenChange }: { open: boolean; onOpenChang
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="cq-name">Name</Label>
+            <Label htmlFor="cq-name">
+              Name <span className="text-destructive">*</span>
+            </Label>
             <Input id="cq-name" placeholder="e.g., Support Queue" value={name} onChange={(e) => setName(e.target.value)} required maxLength={255} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="cq-number">Number</Label>
+            <Label htmlFor="cq-number">
+              Number <span className="text-destructive">*</span>
+            </Label>
             <Input id="cq-number" placeholder="e.g., 400" value={number} onChange={(e) => setNumber(e.target.value)} required maxLength={20} />
           </div>
           <div className="space-y-2">
@@ -354,11 +366,15 @@ function NewRingGroupDialog({ open, onOpenChange }: { open: boolean; onOpenChang
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="rg-name">Name</Label>
+            <Label htmlFor="rg-name">
+              Name <span className="text-destructive">*</span>
+            </Label>
             <Input id="rg-name" placeholder="e.g., Sales Team" value={name} onChange={(e) => setName(e.target.value)} required maxLength={255} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="rg-number">Number</Label>
+            <Label htmlFor="rg-number">
+              Number <span className="text-destructive">*</span>
+            </Label>
             <Input id="rg-number" placeholder="e.g., 600" value={number} onChange={(e) => setNumber(e.target.value)} required maxLength={20} />
           </div>
           <div className="space-y-2">
