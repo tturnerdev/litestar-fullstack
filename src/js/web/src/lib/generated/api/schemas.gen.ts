@@ -6984,6 +6984,17 @@ export const OrganizationSchema = {
         },
       ],
     },
+    createdAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     defaultLanguage: {
       oneOf: [
         {
@@ -7077,6 +7088,17 @@ export const OrganizationSchema = {
     timezone: {
       oneOf: [
         {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    updatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
           type: "string",
         },
         {
@@ -8120,6 +8142,17 @@ export const ScheduleCreateSchema = {
 
 export const ScheduleDetailSchema = {
   properties: {
+    createdAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     entries: {
       items: {
         $ref: "#/components/schemas/ScheduleEntryList",
@@ -8145,6 +8178,17 @@ export const ScheduleDetailSchema = {
     },
     timezone: {
       type: "string",
+    },
+    updatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
     },
   },
   required: ["id", "isDefault", "name", "scheduleType", "teamId", "timezone"],
@@ -8385,6 +8429,17 @@ export const ScheduleEntryUpdateSchema = {
 
 export const ScheduleListSchema = {
   properties: {
+    createdAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     id: {
       format: "uuid",
       type: "string",
@@ -8404,6 +8459,17 @@ export const ScheduleListSchema = {
     },
     timezone: {
       type: "string",
+    },
+    updatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
     },
   },
   required: ["id", "isDefault", "name", "scheduleType", "teamId", "timezone"],

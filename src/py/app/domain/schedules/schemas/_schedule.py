@@ -65,6 +65,8 @@ class ScheduleList(CamelizedBaseStruct):
     is_default: bool
     schedule_type: str
     team_id: UUID
+    created_at: dt.datetime | None = None
+    updated_at: dt.datetime | None = None
 
 
 class ScheduleDetail(CamelizedBaseStruct, kw_only=True):
@@ -76,6 +78,8 @@ class ScheduleDetail(CamelizedBaseStruct, kw_only=True):
     is_default: bool
     schedule_type: str
     team_id: UUID
+    created_at: dt.datetime | None = None
+    updated_at: dt.datetime | None = None
     entries: list[ScheduleEntryList] = []
 
 

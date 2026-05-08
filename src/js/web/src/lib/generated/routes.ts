@@ -1429,6 +1429,8 @@ export interface RouteQueryParams {
     ids?: string[];
     orderBy?: string;
     pageSize?: number;
+    searchIgnoreCase?: boolean;
+    searchString?: string;
     sortOrder?: "asc" | "desc";
     updatedAfter?: DateTime;
     updatedBefore?: DateTime;
@@ -1451,6 +1453,8 @@ export interface RouteQueryParams {
     ids?: string[];
     orderBy?: string;
     pageSize?: number;
+    searchIgnoreCase?: boolean;
+    searchString?: string;
     sortOrder?: "asc" | "desc";
     updatedAfter?: DateTime;
     updatedBefore?: DateTime;
@@ -1473,6 +1477,8 @@ export interface RouteQueryParams {
     ids?: string[];
     orderBy?: string;
     pageSize?: number;
+    searchIgnoreCase?: boolean;
+    searchString?: string;
     sortOrder?: "asc" | "desc";
     updatedAfter?: DateTime;
     updatedBefore?: DateTime;
@@ -1564,6 +1570,8 @@ export interface RouteQueryParams {
     ids?: string[];
     orderBy?: string;
     pageSize?: number;
+    searchIgnoreCase?: boolean;
+    searchString?: string;
     sortOrder?: "asc" | "desc";
     updatedAfter?: DateTime;
     updatedBefore?: DateTime;
@@ -1829,6 +1837,8 @@ export interface RouteQueryParams {
     ids?: string[];
     orderBy?: string;
     pageSize?: number;
+    searchIgnoreCase?: boolean;
+    searchString?: string;
     sortOrder?: "asc" | "desc";
     updatedAfter?: DateTime;
     updatedBefore?: DateTime;
@@ -3207,7 +3217,7 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: [] as const,
-    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
   },
   'list_fax_email_routes': {
     path: '/api/fax/numbers/{fax_number_id}/email-routes',
@@ -3228,7 +3238,7 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: [] as const,
-    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
     component: 'fax/message-list',
   },
   'list_fax_numbers': {
@@ -3243,7 +3253,7 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: [] as const,
-    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
     component: 'fax/number-list',
   },
   'list_forwarding_rules': {
@@ -3307,7 +3317,7 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: [] as const,
-    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
   },
   'list_options': {
     path: '/api/ivr-menus/{ivr_menu_id}/options',
@@ -3476,7 +3486,7 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: [] as const,
-    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
   },
   'list_voicemail_messages': {
     path: '/api/voice/extensions/{ext_id}/voicemail/messages',

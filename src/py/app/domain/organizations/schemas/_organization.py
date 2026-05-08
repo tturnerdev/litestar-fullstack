@@ -1,5 +1,6 @@
 """Organization schemas."""
 
+import datetime as dt
 from uuid import UUID
 
 import msgspec
@@ -27,6 +28,8 @@ class Organization(CamelizedBaseStruct):
     timezone: str | None = None
     default_language: str | None = None
     settings: dict | None = None
+    created_at: dt.datetime | None = None
+    updated_at: dt.datetime | None = None
 
 
 class OrganizationDetail(CamelizedBaseStruct):
@@ -49,6 +52,8 @@ class OrganizationDetail(CamelizedBaseStruct):
     timezone: str | None = None
     default_language: str | None = None
     settings: dict | None = None
+    created_at: dt.datetime | None = None
+    updated_at: dt.datetime | None = None
 
 
 class OrganizationUpdate(CamelizedBaseStruct, omit_defaults=True):

@@ -1813,6 +1813,7 @@ export type Organization = {
   addressLine2?: string | null;
   city?: string | null;
   country?: string | null;
+  createdAt?: string | null;
   defaultLanguage?: string | null;
   description?: string | null;
   email?: string | null;
@@ -1827,6 +1828,7 @@ export type Organization = {
   slug: string;
   state?: string | null;
   timezone?: string | null;
+  updatedAt?: string | null;
   website?: string | null;
 };
 
@@ -2114,6 +2116,7 @@ export type ScheduleCreate = {
  * ScheduleDetail
  */
 export type ScheduleDetail = {
+  createdAt?: string | null;
   entries?: Array<ScheduleEntryList>;
   id: string;
   isDefault: boolean;
@@ -2121,6 +2124,7 @@ export type ScheduleDetail = {
   scheduleType: string;
   teamId: string;
   timezone: string;
+  updatedAt?: string | null;
 };
 
 /**
@@ -2179,12 +2183,14 @@ export type ScheduleEntryUpdate = {
  * ScheduleList
  */
 export type ScheduleList = {
+  createdAt?: string | null;
   id: string;
   isDefault: boolean;
   name: string;
   scheduleType: string;
   teamId: string;
   timezone: string;
+  updatedAt?: string | null;
 };
 
 /**
@@ -3371,10 +3377,10 @@ export type AdminListAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    actorIdIn?: Array<string> | null;
-    targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3450,10 +3456,10 @@ export type AdminExportAuditLogData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    actorIdIn?: Array<string> | null;
-    targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3518,10 +3524,10 @@ export type AdminGetTargetAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    actorIdIn?: Array<string> | null;
-    targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -3598,10 +3604,10 @@ export type AdminGetUserAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    actorIdIn?: Array<string> | null;
-    targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -7634,6 +7640,14 @@ export type ListFaxMessagesData = {
     createdAfter?: string | null;
     updatedBefore?: string | null;
     updatedAfter?: string | null;
+    /**
+     * Field to search
+     */
+    searchString?: string | null;
+    /**
+     * Search should be case sensitive
+     */
+    searchIgnoreCase?: boolean | null;
     currentPage?: number;
     pageSize?: number;
     /**
@@ -7785,6 +7799,14 @@ export type ListFaxNumbersData = {
     createdAfter?: string | null;
     updatedBefore?: string | null;
     updatedAfter?: string | null;
+    /**
+     * Field to search
+     */
+    searchString?: string | null;
+    /**
+     * Search should be case sensitive
+     */
+    searchIgnoreCase?: boolean | null;
     currentPage?: number;
     pageSize?: number;
     /**
@@ -9140,6 +9162,14 @@ export type ListNotificationsData = {
     createdAfter?: string | null;
     updatedBefore?: string | null;
     updatedAfter?: string | null;
+    /**
+     * Field to search
+     */
+    searchString?: string | null;
+    /**
+     * Search should be case sensitive
+     */
+    searchIgnoreCase?: boolean | null;
     currentPage?: number;
     pageSize?: number;
     /**
@@ -13874,6 +13904,14 @@ export type ListExtensionsData = {
     createdAfter?: string | null;
     updatedBefore?: string | null;
     updatedAfter?: string | null;
+    /**
+     * Field to search
+     */
+    searchString?: string | null;
+    /**
+     * Search should be case sensitive
+     */
+    searchIgnoreCase?: boolean | null;
     currentPage?: number;
     pageSize?: number;
     /**
@@ -15128,6 +15166,14 @@ export type ListVoicemailBoxesData = {
     createdAfter?: string | null;
     updatedBefore?: string | null;
     updatedAfter?: string | null;
+    /**
+     * Field to search
+     */
+    searchString?: string | null;
+    /**
+     * Search should be case sensitive
+     */
+    searchIgnoreCase?: boolean | null;
     currentPage?: number;
     pageSize?: number;
     /**
