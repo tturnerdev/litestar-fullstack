@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Annotated, Any
 from uuid import UUID
 
 from litestar import Controller, delete, get, patch, post
+from litestar.datastructures import CacheControlHeader
 from litestar.di import Provide
 from litestar.exceptions import HTTPException, NotFoundException
 from litestar.params import Dependency, Parameter
@@ -53,7 +54,11 @@ class RoleController(Controller):
         "audit_service": Provide(provide_audit_log_service),
     }
 
-    @get(operation_id="ListRoles")
+    @get(
+        operation_id="ListRoles",
+        cache=300,
+        cache_control=CacheControlHeader(private=True, max_age=300),
+    )
     async def list_roles(
         self,
         roles_service: RoleService,

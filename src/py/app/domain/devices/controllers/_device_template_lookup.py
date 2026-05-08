@@ -32,7 +32,8 @@ class DeviceTemplateLookupController(Controller):
     @get(
         operation_id="LookupDeviceTemplate",
         path="/lookup",
-        cache_control=CacheControlHeader(private=True, max_age=300),
+        cache=600,
+        cache_control=CacheControlHeader(private=True, max_age=600),
     )
     async def lookup_template(
         self,

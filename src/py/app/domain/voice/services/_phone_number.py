@@ -44,6 +44,16 @@ class PhoneNumberService(service.SQLAlchemyAsyncRepositoryService[m.PhoneNumber]
                 raise ValidationException("A phone number with this number already exists.")
         return data
 
+    async def to_model_on_update(self, data: ModelDictT[m.PhoneNumber], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.PhoneNumber]:
+        data = service.schema_dump(data)
+        if service.is_dict(data) and "number" in data:
+            existing = await self.repository.list(
+                CollectionFilter(field_name="number", values=[data["number"]]),
+            )
+            if existing and any(str(e.id) != str(item_id) for e in existing):
+                raise ValidationException("A phone number with this number already exists.")
+        return data
+
     async def check_duplicates(self, numbers: list[str]) -> set[str]:
         """Check which phone numbers already exist in the database.
 

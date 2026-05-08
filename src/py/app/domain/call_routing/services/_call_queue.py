@@ -11,6 +11,8 @@ from litestar.exceptions import ValidationException
 from app.db import models as m
 
 if TYPE_CHECKING:
+    from typing import Any
+
     from advanced_alchemy.service import ModelDictT
 
 
@@ -32,6 +34,16 @@ class CallQueueService(service.SQLAlchemyAsyncRepositoryService[m.CallQueue]):
                 CollectionFilter(field_name="name", values=[data["name"]]),
             )
             if existing:
+                raise ValidationException("A call queue with this name already exists.")
+        return data
+
+    async def to_model_on_update(self, data: ModelDictT[m.CallQueue], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.CallQueue]:
+        data = service.schema_dump(data)
+        if service.is_dict(data) and "name" in data:
+            existing = await self.repository.list(
+                CollectionFilter(field_name="name", values=[data["name"]]),
+            )
+            if existing and any(str(e.id) != str(item_id) for e in existing):
                 raise ValidationException("A call queue with this name already exists.")
         return data
 

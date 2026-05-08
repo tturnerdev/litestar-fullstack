@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import ipaddress
 from datetime import UTC, datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from urllib.parse import urlparse
 
 import httpx
@@ -15,6 +15,9 @@ from litestar.exceptions import ValidationException
 
 from app.db import models as m
 from app.lib.settings import get_settings
+
+if TYPE_CHECKING:
+    from advanced_alchemy.service import ModelDictT
 
 logger = structlog.get_logger()
 
@@ -50,6 +53,17 @@ class WebhookEndpointService(service.SQLAlchemyAsyncRepositoryService[m.WebhookE
                 CollectionFilter(field_name="url", values=[data["url"]]),
             )
             if existing:
+                raise ValidationException("A webhook endpoint with this URL already exists.")
+        return data
+
+    async def to_model_on_update(self, data: ModelDictT[m.WebhookEndpoint], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.WebhookEndpoint]:
+        """Validate that no other webhook endpoint with the same URL already exists."""
+        data = service.schema_dump(data)
+        if service.is_dict(data) and "url" in data:
+            existing = await self.repository.list(
+                CollectionFilter(field_name="url", values=[data["url"]]),
+            )
+            if existing and any(str(e.id) != str(item_id) for e in existing):
                 raise ValidationException("A webhook endpoint with this URL already exists.")
         return data
 
