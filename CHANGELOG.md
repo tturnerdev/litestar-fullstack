@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.271.0 (2026-05-07)
+
+### Added
+- **Admin music-on-hold sorting** — SortableHeader on all 6 columns (name, category, files, default, active, created) with client-side sort
+- **Admin support sorting** — SortableHeader on ticket number, subject, priority, status, and created columns
+- **Admin voice sorting** — SortableHeader on number, label, type, team, owner, and status columns
+- **Device templates column visibility** — Toggleable columns (type, active, created) with localStorage persistence
+
 ## v0.270.0 (2026-05-07)
 
 ### Added
