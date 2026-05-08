@@ -1,4 +1,4 @@
-import { ChevronDown, ShieldCheck } from "lucide-react"
+import { ChevronDown, Loader2, ShieldCheck } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 
@@ -148,7 +148,8 @@ export function MfaSetupDialog({ disabled }: MfaSetupDialogProps) {
             <Button onClick={() => setOpen(false)}>Done</Button>
           ) : (
             <Button onClick={handleConfirm} disabled={isLoading || code.length < 6}>
-              Verify &amp; finish
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isLoading ? "Verifying..." : "Verify & finish"}
             </Button>
           )}
         </DialogFooter>

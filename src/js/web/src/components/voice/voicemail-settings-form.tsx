@@ -1,4 +1,4 @@
-import { AlertCircle, BellRing, CheckCircle2, Mic, RotateCcw, Settings2, Upload, User, Volume2, Wrench } from "lucide-react"
+import { AlertCircle, BellRing, CheckCircle2, Loader2, Mic, RotateCcw, Settings2, Upload, User, Volume2, Wrench } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -227,7 +227,7 @@ export function VoicemailSettingsForm({ extensionId }: { extensionId: string }) 
               {data.greetingFilePath ? <Badge variant="secondary">Greeting uploaded</Badge> : <span className="text-sm text-muted-foreground">No custom greeting uploaded.</span>}
               <input ref={fileInputRef} type="file" accept="audio/*" className="hidden" onChange={handleGreetingUpload} />
               <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={uploadMutation.isPending}>
-                <Upload className="mr-1 h-4 w-4" />
+                {uploadMutation.isPending ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Upload className="mr-1 h-4 w-4" />}
                 {uploadMutation.isPending ? "Uploading..." : "Upload greeting"}
               </Button>
             </div>

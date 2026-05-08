@@ -1,4 +1,4 @@
-import { AlertCircle, BellOff, BellRing, Calendar, Clock, Moon, Sun, X } from "lucide-react"
+import { AlertCircle, BellOff, BellRing, Calendar, Clock, Loader2, Moon, Sun, X } from "lucide-react"
 import { type KeyboardEvent, useRef, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -263,6 +263,7 @@ export function DndSettingsForm({ extensionId }: { extensionId: string }) {
         <Separator />
 
         <Button onClick={handleSave} disabled={!dirty || updateMutation.isPending}>
+          {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {updateMutation.isPending ? "Saving..." : "Save changes"}
         </Button>
       </CardContent>

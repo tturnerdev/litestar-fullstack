@@ -1,4 +1,4 @@
-import { Pencil, Trash2 } from "lucide-react"
+import { Loader2, Pencil, Trash2 } from "lucide-react"
 import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -104,6 +104,7 @@ export function ForwardingRuleRow({ rule, onUpdate, onDelete, isUpdating, isDele
         </div>
         <div className="flex items-center gap-1">
           <Button size="sm" onClick={handleSave} disabled={isUpdating || !editDestValue}>
+            {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {isUpdating ? "Saving..." : "Save"}
           </Button>
           <Button size="sm" variant="outline" onClick={handleCancel}>

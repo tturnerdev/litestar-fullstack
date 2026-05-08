@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query"
-import { AlertCircle, Check, MailPlus, Plus, ToggleLeft, ToggleRight, X } from "lucide-react"
+import { AlertCircle, Check, Loader2, MailPlus, Plus, ToggleLeft, ToggleRight, X } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { EmailRouteRow } from "@/components/fax/email-route-row"
@@ -141,7 +141,8 @@ export function EmailRouteEditor({ faxNumberId }: { faxNumberId: string }) {
                   )}
                 </div>
                 <Button size="sm" onClick={handleAddRoute} disabled={createRoute.isPending || !newEmail.trim()}>
-                  <Plus className="mr-2 h-4 w-4" /> Add Email
+                  {createRoute.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
+                  {createRoute.isPending ? "Adding..." : "Add Email"}
                 </Button>
               </div>
               {emailError && <p className="text-xs text-destructive">{emailError}</p>}
