@@ -7,10 +7,13 @@ from uuid import UUID
 
 from litestar import Controller, Request, delete, get, patch, post
 from litestar.datastructures import CacheControlHeader
+from litestar.di import Provide
 from litestar.params import Dependency, Parameter
 from litestar.status_codes import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 
+from app.db import models as m
 from app.domain.accounts.guards import requires_superuser
+from app.domain.admin.deps import provide_audit_log_service
 from app.domain.webhooks.events import get_all_event_types
 from app.domain.webhooks.schemas import (
     WebhookEndpoint,
@@ -20,11 +23,15 @@ from app.domain.webhooks.schemas import (
     WebhookEventTypeInfo,
 )
 from app.domain.webhooks.services import WebhookEndpointService
+from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
 
 if TYPE_CHECKING:
     from advanced_alchemy.filters import FilterTypes
     from advanced_alchemy.service.pagination import OffsetPagination
+    from litestar.security.jwt import Token
+
+    from app.domain.admin.services import AuditLogService
 
 
 class WebhookEndpointController(Controller):
@@ -44,7 +51,9 @@ class WebhookEndpointController(Controller):
             "sort_field": "created_at",
             "sort_order": "desc",
         },
-    )
+    ) | {
+        "audit_service": Provide(provide_audit_log_service),
+    }
 
     @get(operation_id="ListWebhookEndpoints", summary="List webhook endpoints")
     async def list_endpoints(
@@ -67,35 +76,87 @@ class WebhookEndpointController(Controller):
     @post(operation_id="CreateWebhookEndpoint", summary="Create a webhook endpoint", status_code=HTTP_201_CREATED)
     async def create_endpoint(
         self,
-        request: Request[Any, Any, Any],
+        request: Request[m.User, Token, Any],
         webhook_service: WebhookEndpointService,
+        audit_service: AuditLogService,
+        current_user: m.User,
         data: WebhookEndpointCreate,
     ) -> WebhookEndpoint:
         db_obj = await webhook_service.create(data.to_dict())
         request.app.emit(event_id="webhook_endpoint_created", entity_id=db_obj.id)
+        after = capture_snapshot(db_obj)
+        await log_audit(
+            audit_service,
+            action="webhook.endpoint.created",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            actor_name=current_user.name,
+            target_type="webhook_endpoint",
+            target_id=db_obj.id,
+            target_label=db_obj.url,
+            before=None,
+            after=after,
+            request=request,
+        )
         return webhook_service.to_schema(db_obj, schema_type=WebhookEndpoint)
 
     @patch(operation_id="UpdateWebhookEndpoint", summary="Update a webhook endpoint", path="/{endpoint_id:uuid}")
     async def update_endpoint(
         self,
-        request: Request[Any, Any, Any],
+        request: Request[m.User, Token, Any],
         webhook_service: WebhookEndpointService,
+        audit_service: AuditLogService,
+        current_user: m.User,
         data: WebhookEndpointUpdate,
         endpoint_id: Annotated[UUID, Parameter(title="Endpoint ID")],
     ) -> WebhookEndpoint:
+        existing = await webhook_service.get(endpoint_id)
+        before = capture_snapshot(existing)
         db_obj = await webhook_service.update(item_id=endpoint_id, data=data.to_dict())
         request.app.emit(event_id="webhook_endpoint_updated", entity_id=db_obj.id)
+        after = capture_snapshot(db_obj)
+        await log_audit(
+            audit_service,
+            action="webhook.endpoint.updated",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            actor_name=current_user.name,
+            target_type="webhook_endpoint",
+            target_id=endpoint_id,
+            target_label=db_obj.url,
+            before=before,
+            after=after,
+            request=request,
+        )
         return webhook_service.to_schema(db_obj, schema_type=WebhookEndpoint)
 
     @delete(operation_id="DeleteWebhookEndpoint", summary="Delete a webhook endpoint", path="/{endpoint_id:uuid}", return_dto=None, status_code=HTTP_204_NO_CONTENT)
     async def delete_endpoint(
         self,
-        request: Request[Any, Any, Any],
+        request: Request[m.User, Token, Any],
         webhook_service: WebhookEndpointService,
+        audit_service: AuditLogService,
+        current_user: m.User,
         endpoint_id: Annotated[UUID, Parameter(title="Endpoint ID")],
     ) -> None:
+        db_obj = await webhook_service.get(endpoint_id)
+        before = capture_snapshot(db_obj)
+        target_label = db_obj.url
         request.app.emit(event_id="webhook_endpoint_deleted", entity_id=endpoint_id)
         _ = await webhook_service.delete(endpoint_id)
+        await log_audit(
+            audit_service,
+            action="webhook.endpoint.deleted",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            actor_name=current_user.name,
+            target_type="webhook_endpoint",
+            target_id=endpoint_id,
+            target_label=target_label,
+            before=before,
+            after=None,
+            request=request,
+        )
 
     @get(
         operation_id="ListWebhookEventTypes",

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from advanced_alchemy.extensions.litestar import repository, service
 from litestar.exceptions import ValidationException
@@ -30,5 +30,16 @@ class TeamMemberService(service.SQLAlchemyAsyncRepositoryService[m.TeamMember]):
                 m.TeamMember.team_id == data["team_id"],
             )
             if existing:
+                raise ValidationException("This user is already a member of this team.")
+        return data
+
+    async def to_model_on_update(self, data: ModelDictT[m.TeamMember], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.TeamMember]:
+        data = service.schema_dump(data)
+        if service.is_dict(data) and "user_id" in data and "team_id" in data:
+            existing = await self.repository.list(
+                m.TeamMember.user_id == data["user_id"],
+                m.TeamMember.team_id == data["team_id"],
+            )
+            if any(str(e.id) != str(item_id) for e in existing):
                 raise ValidationException("This user is already a member of this team.")
         return data

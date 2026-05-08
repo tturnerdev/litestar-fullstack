@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.308.0 (2026-05-08)
+
+### Added
+- **Audit logging for webhook endpoints** — WebhookEndpointController now logs before/after snapshots on create, update, and delete, matching the pattern used by WebhookController
+
+### Fixed
+- **TeamMember/UserRole duplicate bypass on update** — Added `to_model_on_update` to TeamMemberService and UserRoleService to enforce uniqueness checks on update operations
+- **Delete button double-click** — Teams and schedules delete confirmation dialogs now disable Cancel/Delete buttons while mutation is pending
+
 ## v0.307.0 (2026-05-08)
 
 ### Fixed
