@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.274.0 (2026-05-07)
+
+### Added
+- **Table aria-busy** — 23 tables across 13 pages now announce loading state to screen readers via `aria-busy`
+- **Webhook delete confirmation** — AlertDialog pattern replaces immediate delete on webhooks list page
+- **Connection created event** — `connection_created` event now emitted when a connection is created, triggering the existing audit/notification listener
+
 ## v0.273.0 (2026-05-07)
 
 ### Added
