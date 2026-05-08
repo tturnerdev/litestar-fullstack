@@ -1885,6 +1885,7 @@ export type PasswordUpdate = {
  */
 export type PhoneNumber = {
   callerIdName?: string | null;
+  createdAt?: string | null;
   e911Registered?: boolean;
   e911RegistrationId?: string | null;
   id: string;
@@ -1893,6 +1894,7 @@ export type PhoneNumber = {
   number: string;
   numberType?: PhoneNumberType;
   teamId?: string | null;
+  updatedAt?: string | null;
   userId: string;
 };
 
@@ -3385,9 +3387,9 @@ export type AdminListAuditLogsData = {
      */
     sortOrder?: "asc" | "desc" | null;
     targetTypeIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3464,9 +3466,9 @@ export type AdminExportAuditLogData = {
      */
     sortOrder?: "asc" | "desc" | null;
     targetTypeIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3532,9 +3534,9 @@ export type AdminGetTargetAuditLogsData = {
      */
     sortOrder?: "asc" | "desc" | null;
     targetTypeIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -3612,9 +3614,9 @@ export type AdminGetUserAuditLogsData = {
      */
     sortOrder?: "asc" | "desc" | null;
     targetTypeIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     actionIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };

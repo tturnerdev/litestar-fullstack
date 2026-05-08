@@ -143,8 +143,6 @@ export function AppLayout() {
           { keys: [`${modKey}+Shift+N`], description: "New ticket" },
           { keys: ["n"], description: "Create new item (context-dependent)" },
           { keys: ["/"], description: "Focus search input" },
-          { keys: ["←"], description: "Previous page" },
-          { keys: ["→"], description: "Next page" },
         ],
       },
       { category: "Help", shortcuts: [{ keys: ["?"], description: "Show keyboard shortcuts" }] },

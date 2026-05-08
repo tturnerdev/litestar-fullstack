@@ -17,6 +17,8 @@ export interface PhoneNumber {
   teamId: string | null
   e911Registered: boolean
   e911RegistrationId: string | null
+  createdAt: string
+  updatedAt: string
 }
 
 export interface Extension {

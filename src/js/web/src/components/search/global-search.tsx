@@ -267,12 +267,21 @@ export function GlobalSearch() {
     setDebouncedQuery("")
   }, [])
 
-  // Keyboard shortcut: Cmd+K / Ctrl+K.
+  // Keyboard shortcut: Cmd+K / Ctrl+K and "/" to open search.
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault()
         setOpen((prev) => !prev)
+        return
+      }
+      // "/" opens search when not typing in an editable field.
+      if (e.key === "/" && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        const target = e.target as HTMLElement | null
+        const tag = target?.tagName.toLowerCase()
+        if (tag === "input" || tag === "textarea" || tag === "select" || target?.isContentEditable) return
+        e.preventDefault()
+        setOpen(true)
       }
     }
     document.addEventListener("keydown", onKeyDown)

@@ -7,7 +7,9 @@ from typing import TYPE_CHECKING, Any
 from uuid import UUID
 from zoneinfo import ZoneInfo
 
+from advanced_alchemy.filters import CollectionFilter
 from advanced_alchemy.extensions.litestar import repository, service
+from litestar.exceptions import ValidationException
 
 from app.db import models as m
 from app.domain.schedules.schemas._schedule import ScheduleCheckResponse, ScheduleEntryDetail
@@ -29,6 +31,22 @@ class ScheduleService(service.SQLAlchemyAsyncRepositoryService[m.Schedule]):
 
     async def to_model_on_create(self, data: ModelDictT[m.Schedule]) -> ModelDictT[m.Schedule]:
         data = service.schema_dump(data)
+        if service.is_dict(data):
+            existing = await self.repository.list(
+                CollectionFilter(field_name="name", values=[data["name"]]),
+            )
+            if existing:
+                raise ValidationException("A schedule with this name already exists.")
+        return data
+
+    async def to_model_on_update(self, data: ModelDictT[m.Schedule], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.Schedule]:
+        data = service.schema_dump(data)
+        if service.is_dict(data) and "name" in data:
+            existing = await self.repository.list(
+                CollectionFilter(field_name="name", values=[data["name"]]),
+            )
+            if existing and any(str(e.id) != str(item_id) for e in existing):
+                raise ValidationException("A schedule with this name already exists.")
         return data
 
     async def update(self, data: ModelDictT[m.Schedule], item_id: Any | None = None, **kwargs: Any) -> m.Schedule:

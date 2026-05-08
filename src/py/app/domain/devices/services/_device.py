@@ -8,7 +8,9 @@ from collections.abc import Sequence
 from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
+from advanced_alchemy.filters import CollectionFilter
 from advanced_alchemy.extensions.litestar import repository, service
+from litestar.exceptions import ValidationException
 
 from app.db import models as m
 
@@ -35,10 +37,26 @@ class DeviceService(service.SQLAlchemyAsyncRepositoryService[m.Device]):
     async def to_model_on_create(self, data: ModelDictT[m.Device]) -> ModelDictT[m.Device]:
         data = service.schema_dump(data)
         if service.is_dict(data):
+            if data.get("mac_address"):
+                existing = await self.repository.list(
+                    CollectionFilter(field_name="mac_address", values=[data["mac_address"]]),
+                )
+                if existing:
+                    raise ValidationException("A device with this MAC address already exists.")
             if not data.get("sip_username"):
                 data["sip_username"] = f"dev_{secrets.token_hex(8)}"
             if not data.get("sip_server"):
                 data["sip_server"] = "sip.default.local"
+        return data
+
+    async def to_model_on_update(self, data: ModelDictT[m.Device], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.Device]:
+        data = service.schema_dump(data)
+        if service.is_dict(data) and "mac_address" in data:
+            existing = await self.repository.list(
+                CollectionFilter(field_name="mac_address", values=[data["mac_address"]]),
+            )
+            if existing and any(str(e.id) != str(item_id) for e in existing):
+                raise ValidationException("A device with this MAC address already exists.")
         return data
 
     @staticmethod

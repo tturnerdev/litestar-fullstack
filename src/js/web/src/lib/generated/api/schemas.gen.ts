@@ -7341,6 +7341,17 @@ export const PhoneNumberSchema = {
         },
       ],
     },
+    createdAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     e911Registered: {
       default: false,
       type: "boolean",
@@ -7384,6 +7395,17 @@ export const PhoneNumberSchema = {
       oneOf: [
         {
           format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    updatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
           type: "string",
         },
         {

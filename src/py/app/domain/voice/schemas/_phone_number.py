@@ -1,5 +1,6 @@
 """Phone number schemas."""
 
+from datetime import datetime
 from uuid import UUID
 
 import msgspec
@@ -21,6 +22,8 @@ class PhoneNumber(CamelizedBaseStruct):
     team_id: UUID | None = None
     e911_registered: bool = False
     e911_registration_id: UUID | None = None
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
 
 
 class PhoneNumberCreate(CamelizedBaseStruct):

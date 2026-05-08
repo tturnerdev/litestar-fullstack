@@ -4,11 +4,16 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from datetime import UTC, datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
+from advanced_alchemy.filters import CollectionFilter
 from advanced_alchemy.extensions.litestar import repository, service
+from litestar.exceptions import ValidationException
 from sqlalchemy import func, select
+
+if TYPE_CHECKING:
+    from advanced_alchemy.service import ModelDictT
 
 from app.db import models as m
 from app.domain.connections.schemas import ConnectionDetail, ConnectionList
@@ -24,6 +29,26 @@ class ConnectionService(service.SQLAlchemyAsyncRepositoryService[m.Connection]):
 
     repository_type = Repo
     match_fields = ["name", "team_id"]
+
+    async def to_model_on_create(self, data: ModelDictT[m.Connection]) -> ModelDictT[m.Connection]:
+        data = service.schema_dump(data)
+        if service.is_dict(data):
+            existing = await self.repository.list(
+                CollectionFilter(field_name="name", values=[data["name"]]),
+            )
+            if existing:
+                raise ValidationException("A connection with this name already exists.")
+        return data
+
+    async def to_model_on_update(self, data: ModelDictT[m.Connection], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.Connection]:
+        data = service.schema_dump(data)
+        if service.is_dict(data) and "name" in data:
+            existing = await self.repository.list(
+                CollectionFilter(field_name="name", values=[data["name"]]),
+            )
+            if existing and any(str(e.id) != str(item_id) for e in existing):
+                raise ValidationException("A connection with this name already exists.")
+        return data
 
     async def test_connection(self, connection_id: Any) -> tuple[bool, str | None]:
         """Test connectivity to an external data source.
