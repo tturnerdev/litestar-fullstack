@@ -3254,9 +3254,9 @@ export type RevokeAllSessionsData = {
 
 export type RevokeAllSessionsResponses = {
   /**
-   * Request fulfilled, document follows
+   * Request fulfilled, nothing follows
    */
-  200: Message;
+  204: void;
 };
 
 export type RevokeAllSessionsResponse =
@@ -3354,9 +3354,9 @@ export type RevokeSessionError = RevokeSessionErrors[keyof RevokeSessionErrors];
 
 export type RevokeSessionResponses = {
   /**
-   * Request fulfilled, document follows
+   * Request fulfilled, nothing follows
    */
-  200: Message;
+  204: void;
 };
 
 export type RevokeSessionResponse =
@@ -3424,8 +3424,8 @@ export type AdminListAuditLogsData = {
      */
     sortOrder?: "asc" | "desc" | null;
     actorIdIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
     actionIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
@@ -3503,8 +3503,8 @@ export type AdminExportAuditLogData = {
      */
     sortOrder?: "asc" | "desc" | null;
     actorIdIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
     actionIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
@@ -3571,8 +3571,8 @@ export type AdminGetTargetAuditLogsData = {
      */
     sortOrder?: "asc" | "desc" | null;
     actorIdIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
     actionIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
@@ -3651,8 +3651,8 @@ export type AdminGetUserAuditLogsData = {
      */
     sortOrder?: "asc" | "desc" | null;
     actorIdIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
     actionIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
@@ -9131,9 +9131,9 @@ export type DisableMfaError = DisableMfaErrors[keyof DisableMfaErrors];
 
 export type DisableMfaResponses = {
   /**
-   * Request fulfilled, document follows
+   * Request fulfilled, nothing follows
    */
-  200: Message;
+  204: void;
 };
 
 export type DisableMfaResponse = DisableMfaResponses[keyof DisableMfaResponses];
@@ -9888,9 +9888,9 @@ export type ProfileOAuthUnlinkError =
 
 export type ProfileOAuthUnlinkResponses = {
   /**
-   * Request fulfilled, document follows
+   * Request fulfilled, nothing follows
    */
-  200: Message;
+  204: void;
 };
 
 export type ProfileOAuthUnlinkResponse =
@@ -12371,9 +12371,9 @@ export type DeleteTaskError = DeleteTaskErrors[keyof DeleteTaskErrors];
 
 export type DeleteTaskResponses = {
   /**
-   * Request fulfilled, document follows
+   * Request fulfilled, nothing follows
    */
-  200: BackgroundTaskDetail;
+  204: void;
 };
 
 export type DeleteTaskResponse = DeleteTaskResponses[keyof DeleteTaskResponses];

@@ -173,7 +173,13 @@ EVENT_MAP: dict[str, WebhookEventType] = {
     # Notification preference events
     "notification_preferences_updated": WebhookEventType.NOTIFICATION_PREFERENCES_UPDATED,
     # Background task events
+    "background_task_cancelled": WebhookEventType.BACKGROUND_TASK_CANCELLED,
     "background_task_deleted": WebhookEventType.BACKGROUND_TASK_DELETED,
+    # Account security events
+    "mfa_disabled": WebhookEventType.MFA_DISABLED,
+    "oauth_account_unlinked": WebhookEventType.OAUTH_ACCOUNT_UNLINKED,
+    "session_revoked": WebhookEventType.SESSION_REVOKED,
+    "sessions_revoked_all": WebhookEventType.SESSIONS_REVOKED_ALL,
 }
 
 

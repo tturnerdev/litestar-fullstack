@@ -21,7 +21,7 @@ from app.domain.accounts.services import UserOAuthAccountService
 from app.domain.admin.deps import provide_audit_log_service
 from app.lib.audit import log_audit
 from app.lib.deps import create_service_dependencies
-from app.lib.schema import Message
+from litestar.status_codes import HTTP_204_NO_CONTENT
 from app.utils.oauth import create_oauth_state
 
 if TYPE_CHECKING:
@@ -137,7 +137,7 @@ class OAuthAccountController(Controller):
         )
         return OAuthAuthorization(authorization_url=authorization_url, state=state)
 
-    @delete(operation_id="ProfileOAuthUnlink", summary="Unlink an OAuth account", path="/{provider:str}", status_code=200)
+    @delete(operation_id="ProfileOAuthUnlink", summary="Unlink an OAuth account", path="/{provider:str}", status_code=HTTP_204_NO_CONTENT, return_dto=None)
     async def unlink(
         self,
         request: Request[Any, Any, Any],
@@ -146,7 +146,7 @@ class OAuthAccountController(Controller):
         oauth_account_service: UserOAuthAccountService,
         audit_service: AuditLogService,
         provider: str,
-    ) -> Message:
+    ) -> None:
         """Unlink an OAuth provider from the user's account.
 
         Args:
@@ -184,7 +184,7 @@ class OAuthAccountController(Controller):
             metadata={"provider": provider},
         )
 
-        return Message(message=f"Successfully unlinked {provider} account")
+        request.app.emit(event_id="oauth_account_unlinked", user_id=current_user.id, provider=provider)
 
     @post(operation_id="ProfileOAuthUpgradeScopes", summary="Upgrade OAuth scopes", path="/{provider:str}/upgrade-scopes")
     async def upgrade_scopes(

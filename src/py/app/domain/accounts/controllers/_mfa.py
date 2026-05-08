@@ -33,7 +33,7 @@ from app.lib.crypt import (
     verify_password,
     verify_totp_code,
 )
-from app.lib.schema import Message
+from litestar.status_codes import HTTP_204_NO_CONTENT
 from app.utils.oauth import create_oauth_state
 
 if TYPE_CHECKING:
@@ -254,14 +254,14 @@ class MfaController(Controller):
         )
         return MfaBackupCodes(codes=plaintext_codes)
 
-    @delete(operation_id="DisableMfa", summary="Disable MFA", path="/disable", status_code=200)
+    @delete(operation_id="DisableMfa", summary="Disable MFA", path="/disable", status_code=HTTP_204_NO_CONTENT, return_dto=None)
     async def disable_mfa(
         self,
         request: Request[m.User, Token, Any],
         users_service: UserService,
         audit_service: AuditLogService,
         data: MfaDisable,
-    ) -> Message:
+    ) -> None:
         """Disable MFA for the authenticated user.
 
         Requires password verification for security.
@@ -301,7 +301,7 @@ class MfaController(Controller):
             target_label=user.email,
             request=request,
         )
-        return Message(message="MFA has been disabled")
+        request.app.emit(event_id="mfa_disabled", user_id=user.id)
 
     @post(operation_id="RegenerateMfaBackupCodes", summary="Regenerate MFA backup codes", path="/regenerate-codes")
     async def regenerate_backup_codes(

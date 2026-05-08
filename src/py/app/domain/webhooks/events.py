@@ -201,7 +201,14 @@ class WebhookEventType(StrEnum):
     NOTIFICATION_PREFERENCES_UPDATED = "notification.preferences.updated"
 
     # Background task events
+    BACKGROUND_TASK_CANCELLED = "background_task.cancelled"
     BACKGROUND_TASK_DELETED = "background_task.deleted"
+
+    # Account security events
+    MFA_DISABLED = "user.mfa.disabled"
+    OAUTH_ACCOUNT_UNLINKED = "user.oauth.unlinked"
+    SESSION_REVOKED = "user.session.revoked"
+    SESSIONS_REVOKED_ALL = "user.sessions.revoked_all"
 
 
 # Human-readable descriptions for each event type, useful for UI display
@@ -355,7 +362,13 @@ EVENT_DESCRIPTIONS: dict[WebhookEventType, str] = {
     WebhookEventType.DEVICE_REPROVISIONED: "A device reprovision was initiated",
     WebhookEventType.DEVICE_LINES_UPDATED: "Device line assignments were updated",
     WebhookEventType.NOTIFICATION_PREFERENCES_UPDATED: "Notification preferences were updated",
+    WebhookEventType.BACKGROUND_TASK_CANCELLED: "A background task was cancelled",
     WebhookEventType.BACKGROUND_TASK_DELETED: "A background task was deleted",
+    # Account security events
+    WebhookEventType.MFA_DISABLED: "MFA was disabled for a user account",
+    WebhookEventType.OAUTH_ACCOUNT_UNLINKED: "An OAuth provider was unlinked from a user account",
+    WebhookEventType.SESSION_REVOKED: "A user session was revoked",
+    WebhookEventType.SESSIONS_REVOKED_ALL: "All other user sessions were revoked",
 }
 
 

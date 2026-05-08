@@ -14,6 +14,7 @@ from litestar.enums import RequestEncodingType
 from litestar.exceptions import ClientException, NotAuthorizedException, PermissionDeniedException
 from litestar.params import Body, Dependency, Parameter
 from litestar.security.jwt import Token as JWTToken
+from litestar.status_codes import HTTP_204_NO_CONTENT
 from sqlalchemy.orm import selectinload
 
 from app.db import models as m
@@ -384,14 +385,14 @@ class AccessController(Controller):
         ]
         return refresh_token_service.to_schema(items, total, filters, schema_type=ActiveSession)
 
-    @delete(operation_id="RevokeSession", summary="Revoke a session", path="/api/access/sessions/{session_id:uuid}", status_code=200)
+    @delete(operation_id="RevokeSession", summary="Revoke a session", path="/api/access/sessions/{session_id:uuid}", status_code=HTTP_204_NO_CONTENT, return_dto=None)
     async def revoke_session(
         self,
         request: Request[m.User, Token, Any],
         refresh_token_service: RefreshTokenService,
         audit_service: AuditLogService,
         session_id: UUID,
-    ) -> Message:
+    ) -> None:
         """Revoke a specific session.
 
         Args:
@@ -422,15 +423,15 @@ class AccessController(Controller):
             request=request,
         )
 
-        return Message(message="Session revoked successfully")
+        request.app.emit(event_id="session_revoked", user_id=request.user.id)
 
-    @delete(operation_id="RevokeAllSessions", summary="Revoke all other sessions", path="/api/access/sessions", status_code=200)
+    @delete(operation_id="RevokeAllSessions", summary="Revoke all other sessions", path="/api/access/sessions", status_code=HTTP_204_NO_CONTENT, return_dto=None)
     async def revoke_all_sessions(
         self,
         request: Request[m.User, Token, Any],
         refresh_token_service: RefreshTokenService,
         audit_service: AuditLogService,
-    ) -> Message:
+    ) -> None:
         """Revoke all sessions except the current one.
 
         Args:
@@ -463,7 +464,7 @@ class AccessController(Controller):
             metadata={"revoked_count": revoked_count},
         )
 
-        return Message(message=f"Revoked {revoked_count} session(s)")
+        request.app.emit(event_id="sessions_revoked_all", user_id=request.user.id, revoked_count=revoked_count)
 
     @post(operation_id="AccountRegister", summary="Register a new account", path="/api/access/signup")
     async def signup(

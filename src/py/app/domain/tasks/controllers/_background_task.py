@@ -6,9 +6,10 @@ from typing import TYPE_CHECKING, Annotated, Any
 from uuid import UUID
 
 from litestar import Controller, delete, get, post
-from litestar.exceptions import PermissionDeniedException
 from litestar.di import Provide
+from litestar.exceptions import PermissionDeniedException
 from litestar.params import Dependency, Parameter
+from litestar.status_codes import HTTP_204_NO_CONTENT
 
 from app.db import models as m
 from app.db.models._background_task_status import BackgroundTaskStatus
@@ -127,6 +128,7 @@ class BackgroundTaskController(Controller):
         existing = await task_service.get(task_id)
         previous_status = existing.status
         db_obj = await task_service.cancel_task(task_id)
+        request.app.emit(event_id="background_task_cancelled", task_id=task_id)
         await log_audit(
             audit_service,
             action="task.cancelled",
@@ -151,7 +153,8 @@ class BackgroundTaskController(Controller):
         summary="Delete a background task",
         path="/api/tasks/{task_id:uuid}",
         guards=[requires_task_access],
-        status_code=200,
+        status_code=HTTP_204_NO_CONTENT,
+        return_dto=None,
     )
     async def delete_task(
         self,
@@ -160,7 +163,7 @@ class BackgroundTaskController(Controller):
         audit_service: AuditLogService,
         current_user: m.User,
         task_id: Annotated[UUID, Parameter(title="Task ID", description="The task to delete.")],
-    ) -> BackgroundTaskDetail:
+    ) -> None:
         """Delete a completed, failed, or cancelled task.
 
         Only tasks in terminal states may be deleted. Attempting to delete a
@@ -182,8 +185,9 @@ class BackgroundTaskController(Controller):
             raise PermissionDeniedException(
                 detail=f"Cannot delete a task with status '{existing.status}'. Only completed, failed, or cancelled tasks may be deleted.",
             )
+        db_obj = await task_service.get(task_id)
         request.app.emit(event_id="background_task_deleted", task_id=task_id)
-        db_obj = await task_service.delete(task_id)
+        await task_service.delete(task_id)
         await log_audit(
             audit_service,
             action="task.deleted",
@@ -201,4 +205,3 @@ class BackgroundTaskController(Controller):
             },
             request=request,
         )
-        return task_service.to_schema(db_obj, schema_type=BackgroundTaskDetail)
