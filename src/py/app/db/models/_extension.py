@@ -22,10 +22,10 @@ class Extension(UUIDv7AuditBase):
     __tablename__ = "extension"
     __table_args__ = {"comment": "Internal phone extensions"}
 
-    user_id: Mapped[UUID] = mapped_column(ForeignKey("user_account.id", ondelete="cascade"), nullable=False)
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("user_account.id", ondelete="cascade"), nullable=False, index=True)
     extension_number: Mapped[str] = mapped_column(String(length=10), nullable=False, unique=True, index=True)
     phone_number_id: Mapped[UUID | None] = mapped_column(
-        ForeignKey("phone_number.id", ondelete="set null"), nullable=True, default=None
+        ForeignKey("phone_number.id", ondelete="set null"), nullable=True, default=None, index=True
     )
     display_name: Mapped[str] = mapped_column(String(length=100), nullable=False)
     is_active: Mapped[bool] = mapped_column(default=True, nullable=False)

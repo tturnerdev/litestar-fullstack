@@ -22,7 +22,7 @@ class PhoneNumber(UUIDv7AuditBase):
     __tablename__ = "phone_number"
     __table_args__ = {"comment": "Phone numbers assigned to users"}
 
-    user_id: Mapped[UUID] = mapped_column(ForeignKey("user_account.id", ondelete="cascade"), nullable=False)
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("user_account.id", ondelete="cascade"), nullable=False, index=True)
     number: Mapped[str] = mapped_column(String(length=20), nullable=False, unique=True, index=True)
     label: Mapped[str | None] = mapped_column(String(length=100), nullable=True, default=None)
     number_type: Mapped[PhoneNumberType] = mapped_column(

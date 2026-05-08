@@ -32,6 +32,7 @@ class TicketAttachment(UUIDv7AuditBase):
     uploaded_by_id: Mapped[UUID] = mapped_column(
         ForeignKey("user_account.id", ondelete="CASCADE"),
         nullable=False,
+        index=True,
     )
     file_name: Mapped[str] = mapped_column(String(length=255), nullable=False)
     file_path: Mapped[str] = mapped_column(String(length=500), nullable=False)

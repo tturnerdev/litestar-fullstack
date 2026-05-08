@@ -19,11 +19,11 @@ class TeamInvitation(UUIDv7AuditBase):
 
     __tablename__ = "team_invitation"
     __table_args__ = {"comment": "Pending team membership invitations"}
-    team_id: Mapped[UUID] = mapped_column(ForeignKey("team.id", ondelete="cascade"))
+    team_id: Mapped[UUID] = mapped_column(ForeignKey("team.id", ondelete="cascade"), index=True)
     email: Mapped[str] = mapped_column(index=True)
     role: Mapped[TeamRoles] = mapped_column(String(length=50), default=TeamRoles.MEMBER)
     is_accepted: Mapped[bool] = mapped_column(default=False)
-    invited_by_id: Mapped[UUID | None] = mapped_column(ForeignKey("user_account.id", ondelete="set null"))
+    invited_by_id: Mapped[UUID | None] = mapped_column(ForeignKey("user_account.id", ondelete="set null"), index=True)
     invited_by_email: Mapped[str]
     team: Mapped[Team] = relationship(foreign_keys="TeamInvitation.team_id", innerjoin=True, viewonly=True)
     invited_by: Mapped[User | None] = relationship(

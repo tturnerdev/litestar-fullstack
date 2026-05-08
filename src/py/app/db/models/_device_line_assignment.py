@@ -33,6 +33,7 @@ class DeviceLineAssignment(UUIDv7AuditBase):
         ForeignKey("extension.id", ondelete="SET NULL"),
         nullable=True,
         default=None,
+        index=True,
     )
     label: Mapped[str] = mapped_column(String(length=50), nullable=False)
     line_type: Mapped[DeviceLineType] = mapped_column(

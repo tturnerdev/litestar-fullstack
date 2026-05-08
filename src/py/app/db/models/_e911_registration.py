@@ -35,11 +35,13 @@ class E911Registration(UUIDv7AuditBase):
         ForeignKey("phone_number.id", ondelete="set null"),
         nullable=True,
         default=None,
+        index=True,
     )
     location_id: Mapped[UUID | None] = mapped_column(
         ForeignKey("location.id", ondelete="set null"),
         nullable=True,
         default=None,
+        index=True,
     )
     address_line_1: Mapped[str] = mapped_column(String(length=255), nullable=False)
     address_line_2: Mapped[str | None] = mapped_column(String(length=255), nullable=True, default=None)
