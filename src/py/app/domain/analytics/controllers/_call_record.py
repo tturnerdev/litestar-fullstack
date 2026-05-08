@@ -250,6 +250,11 @@ class CallRecordController(Controller):
         )
 
 
+def _escape_like(val: str) -> str:
+    """Escape SQL LIKE metacharacters so they match literally."""
+    return val.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+
+
 def _build_cdr_filters(
     *,
     current_user: m.User | None = None,
@@ -288,9 +293,9 @@ def _build_cdr_filters(
     if disposition is not None:
         clauses.append(m.CallRecord.disposition == disposition)
     if source is not None:
-        clauses.append(m.CallRecord.source.ilike(f"%{source}%"))
+        clauses.append(m.CallRecord.source.ilike(f"%{_escape_like(source)}%", escape="\\"))
     if destination is not None:
-        clauses.append(m.CallRecord.destination.ilike(f"%{destination}%"))
+        clauses.append(m.CallRecord.destination.ilike(f"%{_escape_like(destination)}%", escape="\\"))
     if min_duration is not None:
         clauses.append(m.CallRecord.duration >= min_duration)
     if max_duration is not None:

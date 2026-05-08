@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.306.0 (2026-05-08)
+
+### Security
+- **ILIKE wildcard injection in analytics** — Call record search now escapes `%` and `_` in source/destination filters, preventing wildcard amplification
+- **ILIKE wildcard injection in device templates** — Manufacturer/model lookup now escapes SQL LIKE metacharacters
+- **Tag endpoints missing auth guard** — Added `requires_active_user` class-level guard to TagController; read endpoints no longer accessible without active user check
+
+### Fixed
+- **FaxEmailRoute duplicate bypass on update** — Added `to_model_on_update` to FaxEmailRouteService so duplicate `(fax_number_id, email_address)` check is enforced on updates too
+- **Dead code cleanup** — Removed unused `useRowSelection` hook and 4 dead validation exports (`validateEmail`, `validateUsername`, `validatePhone`, `validateName`)
+
 ## v0.305.0 (2026-05-08)
 
 ### Security

@@ -13,6 +13,11 @@ if TYPE_CHECKING:
     from advanced_alchemy.service.typing import ModelDictT
 
 
+def _escape_like(val: str) -> str:
+    """Escape SQL LIKE metacharacters so they match literally."""
+    return val.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+
+
 class DeviceTemplateService(service.SQLAlchemyAsyncRepositoryService[m.DeviceTemplate]):
     """Handles CRUD operations on DeviceTemplate resources."""
 
@@ -72,8 +77,8 @@ class DeviceTemplateService(service.SQLAlchemyAsyncRepositoryService[m.DeviceTem
             The matching DeviceTemplate or None.
         """
         results = await self.list(
-            m.DeviceTemplate.manufacturer.ilike(manufacturer),
-            m.DeviceTemplate.model.ilike(model),
+            m.DeviceTemplate.manufacturer.ilike(_escape_like(manufacturer), escape="\\"),
+            m.DeviceTemplate.model.ilike(_escape_like(model), escape="\\"),
             m.DeviceTemplate.is_active.is_(True),
         )
         return results[0] if results else None

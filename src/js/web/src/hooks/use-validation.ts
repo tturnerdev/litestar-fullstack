@@ -83,7 +83,7 @@ const PHONE_MIN_DIGITS = 7
 const PHONE_MAX_DIGITS = 15
 
 // Built-in validation functions
-export const validateEmail = (email: string): string | null => {
+const validateEmail = (email: string): string | null => {
   if (!email) return null
 
   const cleanEmail = email.trim().toLowerCase()
@@ -258,7 +258,7 @@ export const getPasswordStrength = (password: string): PasswordStrength => {
   }
 }
 
-export const validateUsername = (username: string): string | null => {
+const validateUsername = (username: string): string | null => {
   if (!username) return null
 
   const cleanUsername = username.trim().toLowerCase()
@@ -294,7 +294,7 @@ export const validateUsername = (username: string): string | null => {
   return null
 }
 
-export const validatePhone = (phone: string): string | null => {
+const validatePhone = (phone: string): string | null => {
   if (!phone) return null
 
   const cleanPhone = phone.trim()
@@ -313,7 +313,7 @@ export const validatePhone = (phone: string): string | null => {
   return null
 }
 
-export const validateName = (name: string): string | null => {
+const validateName = (name: string): string | null => {
   if (!name) return null
 
   const cleanName = name.trim().replace(/\s+/g, " ")

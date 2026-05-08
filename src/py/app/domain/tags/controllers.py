@@ -14,7 +14,7 @@ from sqlalchemy import inspect as sa_inspect
 from sqlalchemy.orm import selectinload
 
 from app.db import models as m
-from app.domain.accounts.guards import requires_superuser
+from app.domain.accounts.guards import requires_active_user, requires_superuser
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.tags.schemas import Tag, TagCreate, TagUpdate
 from app.domain.tags.services import TagService
@@ -100,6 +100,7 @@ async def _log_audit(
 class TagController(Controller):
     """Tags."""
 
+    guards = [requires_active_user]
     tags = ["Tags"]
     path = "/api/tags"
     dependencies = create_service_dependencies(
