@@ -195,6 +195,7 @@ class CallQueueController(Controller):
             after=after,
             request=request,
         )
+        request.app.emit(event_id="call_queue_updated", entity_id=call_queue_id)
         return call_queues_service.to_schema(fresh_obj, schema_type=CallQueue)
 
     @delete(
@@ -365,6 +366,7 @@ class CallQueueController(Controller):
             after=after,
             request=request,
         )
+        request.app.emit(event_id="call_queue_member_updated", entity_id=member_id)
         return call_queue_members_service.to_schema(fresh_obj, schema_type=CallQueueMember)
 
     @delete(

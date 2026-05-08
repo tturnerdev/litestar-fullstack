@@ -194,6 +194,7 @@ class RingGroupController(Controller):
             after=after,
             request=request,
         )
+        request.app.emit(event_id="ring_group_updated", entity_id=ring_group_id)
         return ring_groups_service.to_schema(fresh_obj, schema_type=RingGroup)
 
     @delete(
@@ -364,6 +365,7 @@ class RingGroupController(Controller):
             after=after,
             request=request,
         )
+        request.app.emit(event_id="ring_group_member_updated", entity_id=member_id)
         return ring_group_members_service.to_schema(fresh_obj, schema_type=RingGroupMember)
 
     @delete(

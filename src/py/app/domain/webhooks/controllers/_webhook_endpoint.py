@@ -77,11 +77,13 @@ class WebhookEndpointController(Controller):
     @patch(operation_id="UpdateWebhookEndpoint", path="/{endpoint_id:uuid}")
     async def update_endpoint(
         self,
+        request: Request[Any, Any, Any],
         webhook_service: WebhookEndpointService,
         data: WebhookEndpointUpdate,
         endpoint_id: Annotated[UUID, Parameter(title="Endpoint ID")],
     ) -> WebhookEndpoint:
         db_obj = await webhook_service.update(item_id=endpoint_id, data=data.to_dict())
+        request.app.emit(event_id="webhook_endpoint_updated", entity_id=db_obj.id)
         return webhook_service.to_schema(db_obj, schema_type=WebhookEndpoint)
 
     @delete(operation_id="DeleteWebhookEndpoint", path="/{endpoint_id:uuid}", return_dto=None)

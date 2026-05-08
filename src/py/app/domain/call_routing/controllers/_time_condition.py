@@ -192,6 +192,7 @@ class TimeConditionController(Controller):
             after=after,
             request=request,
         )
+        request.app.emit(event_id="time_condition_updated", entity_id=time_condition_id)
         return time_conditions_service.to_schema(fresh_obj, schema_type=TimeCondition)
 
     @delete(
@@ -286,4 +287,5 @@ class TimeConditionController(Controller):
             after=after,
             request=request,
         )
+        request.app.emit(event_id="time_condition_updated", entity_id=time_condition_id)
         return time_conditions_service.to_schema(fresh_obj, schema_type=TimeCondition)

@@ -141,6 +141,7 @@ class PhoneNumberController(Controller):
         db_obj = await phone_numbers_service.get_one(id=phone_number_id, user_id=current_user.id)
         before = capture_snapshot(db_obj)
         db_obj = await phone_numbers_service.update(item_id=db_obj.id, data=data.to_dict())
+        request.app.emit(event_id="phone_number_updated", entity_id=db_obj.id)
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,

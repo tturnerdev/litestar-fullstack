@@ -212,6 +212,7 @@ class ExtensionController(Controller):
         db_obj = await extensions_service.get_one(id=ext_id, user_id=current_user.id)
         before = capture_snapshot(db_obj)
         db_obj = await extensions_service.update(item_id=db_obj.id, data=data.to_dict())
+        request.app.emit(event_id="extension_updated", entity_id=db_obj.id)
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,

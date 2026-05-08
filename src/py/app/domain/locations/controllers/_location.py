@@ -187,6 +187,7 @@ class LocationController(Controller):
             data=data.to_dict(),
         )
         fresh_obj = await locations_service.get_one(id=location_id)
+        request.app.emit(event_id="location_updated", entity_id=fresh_obj.id)
         after = capture_snapshot(fresh_obj)
         await log_audit(
             audit_service,

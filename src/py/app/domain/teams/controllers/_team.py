@@ -234,6 +234,7 @@ class TeamController(Controller):
         )
 
         fresh_obj = await teams_service.get_one(id=team_id)
+        request.app.emit(event_id="team_updated", entity_id=fresh_obj.id)
         after = _capture_snapshot(fresh_obj)
 
         await _log_audit(

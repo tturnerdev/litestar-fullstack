@@ -231,6 +231,7 @@ class PhoneNumberController(Controller):
 
         await phone_number_service.update(item_id=phone_number_id, data=update_data, auto_commit=True)
         fresh_obj = await phone_number_service.get_one(id=phone_number_id)
+        request.app.emit(event_id="phone_number_updated", entity_id=fresh_obj.id)
         after = _capture_snapshot(fresh_obj)
         await _log_audit(
             audit_service,

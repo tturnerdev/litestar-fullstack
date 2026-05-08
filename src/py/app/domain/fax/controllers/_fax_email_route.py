@@ -214,6 +214,7 @@ class FaxEmailRouteController(Controller):
             after=after,
             request=request,
         )
+        request.app.emit(event_id="fax_email_route_updated", entity_id=route_id)
         return fax_email_routes_service.to_schema(db_obj, schema_type=FaxEmailRoute)
 
     @delete(

@@ -179,6 +179,7 @@ class ForwardingController(Controller):
         db_obj = await forwarding_rules_service.get_one(id=rule_id, extension_id=ext_id)
         before = capture_snapshot(db_obj)
         db_obj = await forwarding_rules_service.update(item_id=db_obj.id, data=data.to_dict())
+        request.app.emit(event_id="forwarding_updated", entity_id=db_obj.id)
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,

@@ -223,6 +223,7 @@ class FaxNumberController(Controller):
             after=after,
             request=request,
         )
+        request.app.emit(event_id="fax_number_updated", entity_id=fax_number_id)
         return fax_numbers_service.to_schema(db_obj, schema_type=FaxNumber)
 
     @delete(

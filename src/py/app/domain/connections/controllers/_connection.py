@@ -195,6 +195,7 @@ class ConnectionController(Controller):
             data=data.to_dict(),
         )
         db_obj = await connections_service.get_one(id=connection_id)
+        request.app.emit(event_id="connection_updated", entity_id=db_obj.id)
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,

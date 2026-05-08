@@ -192,6 +192,7 @@ class VoicemailBoxController(Controller):
         """
         before = capture_snapshot(await voicemail_boxes_service.get(box_id))
         db_obj = await voicemail_boxes_service.update(item_id=box_id, data=data.to_dict())
+        request.app.emit(event_id="voicemail_box_updated", entity_id=db_obj.id)
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,

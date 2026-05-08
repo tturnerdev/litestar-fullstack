@@ -151,6 +151,7 @@ class UserController(Controller):
         db_obj = await users_service.get(user_id)
         before = capture_snapshot(db_obj)
         db_obj = await users_service.update(item_id=user_id, data=data.to_dict())
+        request.app.emit(event_id="user_updated", entity_id=db_obj.id)
         await log_audit(
             audit_service,
             action="account.user.updated",

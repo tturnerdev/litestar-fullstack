@@ -265,6 +265,7 @@ class DeviceController(Controller):
             data=data.to_dict(),
         )
         fresh_obj = await devices_service.get_one(id=device_id)
+        request.app.emit(event_id="device_updated", entity_id=device_id)
         after = _capture_snapshot(fresh_obj)
         await _log_audit(
             audit_service,

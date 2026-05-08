@@ -194,6 +194,7 @@ class IvrMenuController(Controller):
             after=after,
             request=request,
         )
+        request.app.emit(event_id="ivr_menu_updated", entity_id=ivr_menu_id)
         return ivr_menus_service.to_schema(fresh_obj, schema_type=IvrMenu)
 
     @delete(
@@ -362,6 +363,7 @@ class IvrMenuController(Controller):
             after=after,
             request=request,
         )
+        request.app.emit(event_id="ivr_menu_option_updated", entity_id=option_id)
         return ivr_menu_options_service.to_schema(fresh_obj, schema_type=IvrMenuOption)
 
     @delete(
