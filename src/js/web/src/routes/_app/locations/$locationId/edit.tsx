@@ -409,6 +409,7 @@ function EditLocationPage() {
                           <Input
                             id="location-address1"
                             placeholder="e.g., 123 Main Street"
+                            maxLength={255}
                             value={addressLine1}
                             onChange={(e) => handleFieldChange("addressLine1", e.target.value, setAddressLine1)}
                             onBlur={() => handleFieldBlur("addressLine1", addressLine1)}
@@ -419,7 +420,7 @@ function EditLocationPage() {
 
                         <div className="space-y-2">
                           <Label htmlFor="location-address2">Address Line 2</Label>
-                          <Input id="location-address2" placeholder="e.g., Suite 400" value={addressLine2} onChange={(e) => setAddressLine2(e.target.value)} />
+                          <Input id="location-address2" placeholder="e.g., Suite 400" maxLength={255} value={addressLine2} onChange={(e) => setAddressLine2(e.target.value)} />
                         </div>
 
                         <div className="grid gap-4 md:grid-cols-2">
@@ -430,6 +431,7 @@ function EditLocationPage() {
                             <Input
                               id="location-city"
                               placeholder="e.g., San Francisco"
+                              maxLength={100}
                               value={city}
                               onChange={(e) => handleFieldChange("city", e.target.value, setCity)}
                               onBlur={() => handleFieldBlur("city", city)}
@@ -444,6 +446,7 @@ function EditLocationPage() {
                             <Input
                               id="location-state"
                               placeholder="e.g., CA"
+                              maxLength={100}
                               value={state}
                               onChange={(e) => handleFieldChange("state", e.target.value, setState)}
                               onBlur={() => handleFieldBlur("state", state)}
@@ -461,6 +464,7 @@ function EditLocationPage() {
                             <Input
                               id="location-postal"
                               placeholder="e.g., 94105"
+                              maxLength={20}
                               value={postalCode}
                               onChange={(e) => handleFieldChange("postalCode", e.target.value, setPostalCode)}
                               onBlur={() => handleFieldBlur("postalCode", postalCode)}
@@ -470,7 +474,7 @@ function EditLocationPage() {
                           </div>
                           <div className="space-y-2">
                             <Label htmlFor="location-country">Country</Label>
-                            <Input id="location-country" placeholder="e.g., US" value={country} onChange={(e) => setCountry(e.target.value)} />
+                            <Input id="location-country" placeholder="e.g., US" maxLength={100} value={country} onChange={(e) => setCountry(e.target.value)} />
                           </div>
                         </div>
                       </div>

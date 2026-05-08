@@ -35,7 +35,7 @@ export const Route = createFileRoute("/_app/voice/phone-numbers/new")({
 
 const NUMBER_MAX = 20
 const LABEL_MAX = 100
-const CALLER_ID_MAX = 100
+const CALLER_ID_MAX = 50
 
 const TYPE_OPTIONS = [
   { value: "local", label: "Local", icon: MapPin },

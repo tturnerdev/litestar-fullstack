@@ -400,6 +400,7 @@ export function SendFaxForm() {
                       id="destination"
                       type="tel"
                       placeholder="+1 (212) 555-1234"
+                      maxLength={20}
                       value={remoteNumber}
                       onChange={handlePhoneChange}
                       onBlur={validateNumber}
