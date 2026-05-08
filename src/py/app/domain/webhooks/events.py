@@ -56,6 +56,7 @@ class WebhookEventType(StrEnum):
     DEVICE_UPDATED = "device.updated"
     DEVICE_DELETED = "device.deleted"
     DEVICE_TEMPLATE_CREATED = "device.template.created"
+    DEVICE_TEMPLATE_UPDATED = "device.template.updated"
     DEVICE_TEMPLATE_DELETED = "device.template.deleted"
 
     # Connection events
@@ -264,6 +265,7 @@ EVENT_DESCRIPTIONS: dict[WebhookEventType, str] = {
     WebhookEventType.DEVICE_UPDATED: "A device was updated",
     WebhookEventType.DEVICE_DELETED: "A device was deleted",
     WebhookEventType.DEVICE_TEMPLATE_CREATED: "A new device template was created",
+    WebhookEventType.DEVICE_TEMPLATE_UPDATED: "A device template was updated",
     WebhookEventType.DEVICE_TEMPLATE_DELETED: "A device template was deleted",
     # Connection events
     WebhookEventType.CONNECTION_CREATED: "A new connection was created",

@@ -208,8 +208,9 @@ export function useUpdateAnyConnection() {
       } as never)
       return (response as { data: unknown }).data as ConnectionDetail
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["connections"] })
+      queryClient.invalidateQueries({ queryKey: ["connection", variables.connectionId] })
       toast.success("Connection updated")
     },
     onError: (error) => {

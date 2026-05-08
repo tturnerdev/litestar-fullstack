@@ -57,6 +57,7 @@ EVENT_MAP: dict[str, WebhookEventType] = {
     "device_updated": WebhookEventType.DEVICE_UPDATED,
     "device_deleted": WebhookEventType.DEVICE_DELETED,
     "device_template_created": WebhookEventType.DEVICE_TEMPLATE_CREATED,
+    "device_template_updated": WebhookEventType.DEVICE_TEMPLATE_UPDATED,
     "device_template_deleted": WebhookEventType.DEVICE_TEMPLATE_DELETED,
     # Connection events
     "connection_created": WebhookEventType.CONNECTION_CREATED,

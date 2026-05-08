@@ -185,6 +185,7 @@ class AdminDeviceTemplatesController(Controller):
             after=after,
             request=request,
         )
+        request.app.emit(event_id="device_template_updated", entity_id=db_obj.id)
         return DeviceTemplateDetail(
             id=db_obj.id,
             manufacturer=db_obj.manufacturer,

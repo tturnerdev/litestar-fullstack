@@ -181,6 +181,7 @@ class ProfileController(Controller):
             after=after,
             request=request,
         )
+        request.app.emit(event_id="user_updated", user_id=current_user.id)
 
         return users_service.to_schema(db_obj, schema_type=User)
 
