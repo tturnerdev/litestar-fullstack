@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Annotated, Any
 
 from litestar import Controller, delete, get, patch, post
 from litestar.di import Provide
-from litestar.exceptions import HTTPException, NotFoundException, PermissionDeniedException
+from litestar.exceptions import ClientException, NotFoundException, PermissionDeniedException
 from litestar.params import Dependency, Parameter
 from litestar.status_codes import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from sqlalchemy.orm import selectinload
@@ -203,7 +203,7 @@ class FaxEmailRouteController(Controller):
         await self._verify_fax_number_access(fax_numbers_service, current_user, fax_number_id)
         existing = await fax_email_routes_service.get(route_id)
         if existing.fax_number_id != fax_number_id:
-            raise HTTPException(status_code=400, detail="Route does not belong to this fax number.")
+            raise ClientException(detail="Route does not belong to this fax number.")
         before = capture_snapshot(existing)
         db_obj = await fax_email_routes_service.update(item_id=route_id, data=data.to_dict())
         after = capture_snapshot(db_obj)
@@ -258,7 +258,7 @@ class FaxEmailRouteController(Controller):
         await self._verify_fax_number_access(fax_numbers_service, current_user, fax_number_id)
         existing = await fax_email_routes_service.get(route_id)
         if existing.fax_number_id != fax_number_id:
-            raise HTTPException(status_code=400, detail="Route does not belong to this fax number.")
+            raise ClientException(detail="Route does not belong to this fax number.")
         before = capture_snapshot(existing)
         target_label = existing.email_address
         request.app.emit(event_id="fax_email_route_deleted", entity_id=route_id)

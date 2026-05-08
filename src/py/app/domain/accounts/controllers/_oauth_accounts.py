@@ -8,9 +8,8 @@ from httpx_oauth.clients.github import GitHubOAuth2
 from httpx_oauth.clients.google import GoogleOAuth2
 from litestar import Controller, delete, get, post
 from litestar.di import Provide
-from litestar.exceptions import HTTPException, NotFoundException
+from litestar.exceptions import ClientException, NotFoundException
 from litestar.params import Dependency, Parameter
-from litestar.status_codes import HTTP_400_BAD_REQUEST
 from sqlalchemy.orm import undefer_group
 
 from app.db import models as m
@@ -166,7 +165,7 @@ class OAuthAccountController(Controller):
         user_with_password = await users_service.get(current_user.id, load=[undefer_group("security_sensitive")])
         can_unlink, reason = await oauth_account_service.can_unlink_oauth(user_with_password)
         if not can_unlink:
-            raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=reason)
+            raise ClientException(detail=reason)
         success = await oauth_account_service.unlink_oauth_account(user_id=current_user.id, provider=provider)
         if not success:
             raise NotFoundException(detail=f"No {provider} account linked to your profile")
@@ -240,14 +239,14 @@ def _get_oauth_client(provider: str, settings: AppSettings) -> GoogleOAuth2 | Gi
     """
     if provider == "google":
         if not settings.GOOGLE_OAUTH2_CLIENT_ID or not settings.GOOGLE_OAUTH2_CLIENT_SECRET:
-            raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="Google OAuth is not configured")
+            raise ClientException(detail="Google OAuth is not configured")
         return GoogleOAuth2(
             client_id=settings.GOOGLE_OAUTH2_CLIENT_ID,
             client_secret=settings.GOOGLE_OAUTH2_CLIENT_SECRET,
         )
     if provider == "github":
         if not settings.GITHUB_OAUTH2_CLIENT_ID or not settings.GITHUB_OAUTH2_CLIENT_SECRET:
-            raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="GitHub OAuth is not configured")
+            raise ClientException(detail="GitHub OAuth is not configured")
         return GitHubOAuth2(
             client_id=settings.GITHUB_OAUTH2_CLIENT_ID,
             client_secret=settings.GITHUB_OAUTH2_CLIENT_SECRET,

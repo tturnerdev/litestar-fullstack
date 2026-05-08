@@ -9,7 +9,7 @@ from uuid import UUID
 from litestar import Controller, delete, get, patch, post
 from litestar.datastructures import CacheControlHeader
 from litestar.di import Provide
-from litestar.exceptions import HTTPException, NotFoundException
+from litestar.exceptions import ClientException, NotFoundException
 from litestar.params import Dependency, Parameter
 from litestar.status_codes import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 
@@ -157,7 +157,7 @@ class RoleController(Controller):
             The updated role.
         """
         if data.name in {DEFAULT_ACCESS_ROLE, SUPERUSER_ACCESS_ROLE}:
-            raise HTTPException(status_code=400, detail="Cannot update default roles")
+            raise ClientException(detail="Cannot update default roles")
         db_obj = await roles_service.get(role_id)
         before = capture_snapshot(db_obj)
         db_obj = await roles_service.update(item_id=role_id, data=data.to_dict())
@@ -198,7 +198,7 @@ class RoleController(Controller):
         """
         db_obj = await roles_service.get(role_id)
         if db_obj.name in {DEFAULT_ACCESS_ROLE, SUPERUSER_ACCESS_ROLE}:
-            raise HTTPException(status_code=400, detail="Cannot delete default roles")
+            raise ClientException(detail="Cannot delete default roles")
         before = capture_snapshot(db_obj)
         target_label = db_obj.name
         request.app.emit(event_id="role_deleted", entity_id=role_id)
@@ -256,7 +256,7 @@ class RoleController(Controller):
 
         existing_role = await user_roles_service.get_one_or_none(user_id=user.id, role_id=role.id)
         if existing_role is not None:
-            raise HTTPException(status_code=409, detail=f"User '{data.user_name}' already has role '{role_slug}'")
+            raise ClientException(detail=f"User '{data.user_name}' already has role '{role_slug}'", status_code=409)
 
         db_obj = await user_roles_service.create(
             data={

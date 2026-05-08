@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Annotated, Any
 
 from litestar import Controller, Request, delete, get, post
 from litestar.di import Provide
-from litestar.exceptions import HTTPException
+from litestar.exceptions import ClientException
 from litestar.params import Dependency
 from litestar.status_codes import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from sqlalchemy.orm import selectinload
@@ -105,7 +105,7 @@ class TeamInvitationController(Controller):
         """
         team = await teams_service.get(team_id)
         if any(member.email == data.email for member in team.members):
-            raise HTTPException(status_code=400, detail="User is already a member of this team")
+            raise ClientException(detail="User is already a member of this team")
         payload = data.to_dict()
         payload["team_id"] = team_id
         payload["invited_by"] = current_user
@@ -187,7 +187,7 @@ class TeamInvitationController(Controller):
         """
         invitation = await team_invitations_service.get(invitation_id)
         if invitation.team_id != team_id:
-            raise HTTPException(status_code=400, detail="Invitation does not belong to this team")
+            raise ClientException(detail="Invitation does not belong to this team")
         before = capture_snapshot(invitation)
         request.app.emit(event_id="team_invitation_deleted", entity_id=invitation_id)
         await team_invitations_service.delete(item_id=invitation_id)
@@ -238,17 +238,17 @@ class TeamInvitationController(Controller):
         """
         db_obj = await team_invitations_service.get(item_id=invitation_id)
         if db_obj.team_id != team_id:
-            raise HTTPException(status_code=400, detail="Invitation does not belong to this team")
+            raise ClientException(detail="Invitation does not belong to this team")
         if db_obj.is_accepted:
-            raise HTTPException(status_code=400, detail="Invitation has already been accepted")
+            raise ClientException(detail="Invitation has already been accepted")
         if db_obj.email != current_user.email:
-            raise HTTPException(status_code=400, detail="You are not authorized to accept this invitation")
+            raise ClientException(detail="You are not authorized to accept this invitation")
         existing_membership = await team_members_service.get_one_or_none(
             team_id=team_id,
             user_id=current_user.id,
         )
         if existing_membership is not None:
-            raise HTTPException(status_code=400, detail="User is already a member of this team")
+            raise ClientException(detail="User is already a member of this team")
         _ = await team_members_service.create(
             {
                 "team_id": team_id,
@@ -308,9 +308,9 @@ class TeamInvitationController(Controller):
         """
         db_obj = await team_invitations_service.get(item_id=invitation_id)
         if db_obj.team_id != team_id:
-            raise HTTPException(status_code=400, detail="Invitation does not belong to this team")
+            raise ClientException(detail="Invitation does not belong to this team")
         if db_obj.email != current_user.email:
-            raise HTTPException(status_code=400, detail="You are not authorized to reject this invitation")
+            raise ClientException(detail="You are not authorized to reject this invitation")
         await team_invitations_service.delete(item_id=invitation_id)
 
         await log_audit(
