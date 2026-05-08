@@ -51,6 +51,7 @@ import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-lay
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { SkeletonTable } from "@/components/ui/skeleton"
+import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDocumentTitle } from "@/hooks/use-document-title"
@@ -131,6 +132,7 @@ const TOGGLEABLE_COLUMNS = [
   { key: "progress", label: "Progress" },
   { key: "team", label: "Team" },
   { key: "entity", label: "Entity" },
+  { key: "duration", label: "Duration" },
   { key: "started", label: "Started" },
   { key: "completed", label: "Completed" },
 ] as const
@@ -383,6 +385,17 @@ function AdminTaskRow({
           )}
         </TableCell>
       )}
+      {isColumnVisible("duration") && (
+        <TableCell>
+          {task.startedAt && task.completedAt ? (
+            <span className="text-xs text-muted-foreground tabular-nums">{formatDuration((new Date(task.completedAt).getTime() - new Date(task.startedAt).getTime()) / 1000)}</span>
+          ) : task.startedAt && !task.completedAt && (task.status === "running" || task.status === "pending") ? (
+            <span className="text-xs text-muted-foreground">In progress</span>
+          ) : (
+            <span className="text-xs text-muted-foreground">--</span>
+          )}
+        </TableCell>
+      )}
       {isColumnVisible("completed") && (
         <TableCell>
           {task.completedAt ? (
@@ -501,6 +514,19 @@ function AdminTasksPage() {
     })
   }, [])
 
+  // Sort state
+  const [sortKey, setSortKey] = useState<string | null>(null)
+  const [sortDir, setSortDir] = useState<SortDirection>(null)
+
+  const handleSort = useCallback(
+    (key: string) => {
+      const next = nextSortDirection(sortKey, sortDir, key)
+      setSortKey(next.sort)
+      setSortDir(next.direction)
+    },
+    [sortKey, sortDir],
+  )
+
   // biome-ignore lint/correctness/useExhaustiveDependencies: intentional — reset page when filters change
   useEffect(() => {
     setPage(1)
@@ -525,6 +551,63 @@ function AdminTasksPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
   const items = data?.items ?? []
+
+  // Client-side sorting
+  const sortedItems = useMemo(() => {
+    if (!sortKey || !sortDir) return items
+    const sorted = [...items]
+    sorted.sort((a, b) => {
+      switch (sortKey) {
+        case "taskType": {
+          const aVal = a.taskType.toLowerCase()
+          const bVal = b.taskType.toLowerCase()
+          return sortDir === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal)
+        }
+        case "status": {
+          const aVal = a.status.toLowerCase()
+          const bVal = b.status.toLowerCase()
+          return sortDir === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal)
+        }
+        case "progress": {
+          const aVal = a.progress ?? 0
+          const bVal = b.progress ?? 0
+          return sortDir === "asc" ? aVal - bVal : bVal - aVal
+        }
+        case "team": {
+          const aVal = (a.teamName ?? "").toLowerCase()
+          const bVal = (b.teamName ?? "").toLowerCase()
+          return sortDir === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal)
+        }
+        case "entity": {
+          const aVal = (a.entityType ?? "").toLowerCase()
+          const bVal = (b.entityType ?? "").toLowerCase()
+          return sortDir === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal)
+        }
+        case "startedAt": {
+          const aVal = a.startedAt ?? ""
+          const bVal = b.startedAt ?? ""
+          if (aVal < bVal) return sortDir === "asc" ? -1 : 1
+          if (aVal > bVal) return sortDir === "asc" ? 1 : -1
+          return 0
+        }
+        case "duration": {
+          const aDur = a.startedAt && a.completedAt ? new Date(a.completedAt).getTime() - new Date(a.startedAt).getTime() : 0
+          const bDur = b.startedAt && b.completedAt ? new Date(b.completedAt).getTime() - new Date(b.startedAt).getTime() : 0
+          return sortDir === "asc" ? aDur - bDur : bDur - aDur
+        }
+        case "completedAt": {
+          const aVal = a.completedAt ?? ""
+          const bVal = b.completedAt ?? ""
+          if (aVal < bVal) return sortDir === "asc" ? -1 : 1
+          if (aVal > bVal) return sortDir === "asc" ? 1 : -1
+          return 0
+        }
+        default:
+          return 0
+      }
+    })
+    return sorted
+  }, [items, sortKey, sortDir])
 
   // Selection helpers
   const allVisibleIds = useMemo(() => items.map((t) => t.id), [items])
@@ -816,18 +899,21 @@ function AdminTasksPage() {
                       <TableHead className="w-10">
                         <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all tasks" />
                       </TableHead>
-                      <TableHead>Task Type</TableHead>
-                      <TableHead>Status</TableHead>
-                      {isColumnVisible("progress") && <TableHead>Progress</TableHead>}
-                      {isColumnVisible("team") && <TableHead>Team</TableHead>}
-                      {isColumnVisible("entity") && <TableHead>Entity</TableHead>}
-                      {isColumnVisible("started") && <TableHead>Started</TableHead>}
-                      {isColumnVisible("completed") && <TableHead>Completed</TableHead>}
+                      <SortableHeader label="Task Type" sortKey="taskType" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                      <SortableHeader label="Status" sortKey="status" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                      {isColumnVisible("progress") && <SortableHeader label="Progress" sortKey="progress" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />}
+                      {isColumnVisible("team") && <SortableHeader label="Team" sortKey="team" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />}
+                      {isColumnVisible("entity") && <SortableHeader label="Entity" sortKey="entity" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />}
+                      {isColumnVisible("started") && <SortableHeader label="Started" sortKey="startedAt" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />}
+                      {isColumnVisible("duration") && <SortableHeader label="Duration" sortKey="duration" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />}
+                      {isColumnVisible("completed") && (
+                        <SortableHeader label="Completed" sortKey="completedAt" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                      )}
                       <TableHead className="w-16 text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {items.map((task, index) => (
+                    {sortedItems.map((task, index) => (
                       <AdminTaskRow
                         key={task.id}
                         task={task}

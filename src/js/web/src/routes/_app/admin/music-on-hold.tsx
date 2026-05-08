@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { AlertCircle, AlertTriangle, Check, Download, Loader2, Music, Plus, Search, Trash2, X } from "lucide-react"
+import { AlertCircle, AlertTriangle, Check, Download, Loader2, Music, Plus, Search, SlidersHorizontal, Trash2, X } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
@@ -20,6 +20,7 @@ import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { DataFreshness } from "@/components/ui/data-freshness"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -72,6 +73,28 @@ const csvHeaders: CsvHeader<MusicOnHoldList>[] = [
   { label: "Files", accessor: (m) => String(m.fileCount) },
   { label: "Created At", accessor: (m) => m.createdAt },
 ]
+
+// ── Column visibility ────────────────────────────────────────────────────
+
+const COLUMN_VISIBILITY_KEY = "admin-moh-columns"
+
+const TOGGLEABLE_COLUMNS = [
+  { key: "category", label: "Category" },
+  { key: "files", label: "Files" },
+  { key: "isDefault", label: "Default" },
+  { key: "isActive", label: "Active" },
+  { key: "createdAt", label: "Created" },
+] as const
+
+type ColumnVisibility = Record<string, boolean>
+
+function loadColumnVisibility(): ColumnVisibility {
+  try {
+    return JSON.parse(localStorage.getItem(COLUMN_VISIBILITY_KEY) ?? "{}")
+  } catch {
+    return {}
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Create / Edit Dialog
@@ -298,6 +321,17 @@ function AdminMusicOnHoldPage() {
     [sortKey, sortDir],
   )
 
+  // Column visibility
+  const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(loadColumnVisibility)
+  const isColumnVisible = useCallback((col: string) => columnVisibility[col] !== false, [columnVisibility])
+  const toggleColumn = useCallback((col: string) => {
+    setColumnVisibility((prev) => {
+      const updated = { ...prev, [col]: prev[col] === false }
+      localStorage.setItem(COLUMN_VISIBILITY_KEY, JSON.stringify(updated))
+      return updated
+    })
+  }, [])
+
   // Sync URL when debounced search value settles
   useEffect(() => {
     setPage(1)
@@ -378,7 +412,28 @@ function AdminMusicOnHoldPage() {
         title="Music on Hold"
         description="Manage Music on Hold classes, audio files, and playback settings."
         breadcrumbs={<AdminBreadcrumbs />}
-        actions={<DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />}
+        actions={
+          <div className="flex items-center gap-2">
+            <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <SlidersHorizontal className="mr-1.5 h-3.5 w-3.5" />
+                  Columns
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-44">
+                <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {TOGGLEABLE_COLUMNS.map((col) => (
+                  <DropdownMenuCheckboxItem key={col.key} checked={isColumnVisible(col.key)} onCheckedChange={() => toggleColumn(col.key)}>
+                    {col.label}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        }
       />
       <AdminNav />
 
@@ -463,11 +518,17 @@ function AdminMusicOnHoldPage() {
                       <TableHeader>
                         <TableRow>
                           <SortableHeader label="Name" sortKey="name" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
-                          <SortableHeader label="Category" sortKey="category" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
-                          <SortableHeader label="Files" sortKey="files" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
-                          <SortableHeader label="Default" sortKey="isDefault" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
-                          <SortableHeader label="Active" sortKey="isActive" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
-                          <SortableHeader label="Created" sortKey="createdAt" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                          {isColumnVisible("category") && (
+                            <SortableHeader label="Category" sortKey="category" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                          )}
+                          {isColumnVisible("files") && <SortableHeader label="Files" sortKey="files" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />}
+                          {isColumnVisible("isDefault") && (
+                            <SortableHeader label="Default" sortKey="isDefault" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                          )}
+                          {isColumnVisible("isActive") && <SortableHeader label="Active" sortKey="isActive" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />}
+                          {isColumnVisible("createdAt") && (
+                            <SortableHeader label="Created" sortKey="createdAt" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                          )}
                           <TableHead className="w-[60px]" />
                         </TableRow>
                       </TableHeader>
@@ -479,13 +540,19 @@ function AdminMusicOnHoldPage() {
                             onClick={() => setEditId(moh.id)}
                           >
                             <TableCell className="font-medium">{moh.name}</TableCell>
-                            <TableCell>
-                              <Badge variant={categoryVariants[moh.category] ?? "outline"}>{moh.category.charAt(0).toUpperCase() + moh.category.slice(1)}</Badge>
-                            </TableCell>
-                            <TableCell className="text-muted-foreground">{moh.fileCount}</TableCell>
-                            <TableCell>{moh.isDefault ? <Badge variant="default">Default</Badge> : <span className="text-muted-foreground text-sm">-</span>}</TableCell>
-                            <TableCell>{moh.isActive ? <Check className="h-4 w-4 text-emerald-500" /> : <X className="h-4 w-4 text-muted-foreground" />}</TableCell>
-                            <TableCell className="text-muted-foreground text-sm">{formatDateTime(moh.createdAt)}</TableCell>
+                            {isColumnVisible("category") && (
+                              <TableCell>
+                                <Badge variant={categoryVariants[moh.category] ?? "outline"}>{moh.category.charAt(0).toUpperCase() + moh.category.slice(1)}</Badge>
+                              </TableCell>
+                            )}
+                            {isColumnVisible("files") && <TableCell className="text-muted-foreground">{moh.fileCount}</TableCell>}
+                            {isColumnVisible("isDefault") && (
+                              <TableCell>{moh.isDefault ? <Badge variant="default">Default</Badge> : <span className="text-muted-foreground text-sm">-</span>}</TableCell>
+                            )}
+                            {isColumnVisible("isActive") && (
+                              <TableCell>{moh.isActive ? <Check className="h-4 w-4 text-emerald-500" /> : <X className="h-4 w-4 text-muted-foreground" />}</TableCell>
+                            )}
+                            {isColumnVisible("createdAt") && <TableCell className="text-muted-foreground text-sm">{formatDateTime(moh.createdAt)}</TableCell>}
                             <TableCell>
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>

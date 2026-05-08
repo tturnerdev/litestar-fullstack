@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
-import { AlertCircle, ArrowRight, CheckCircle2, Clock, Download, Loader2, Lock, Search, TicketCheck, X } from "lucide-react"
+import { AlertCircle, ArrowRight, CheckCircle2, Clock, Download, Loader2, Lock, Search, SlidersHorizontal, TicketCheck, X } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { DataFreshness } from "@/components/ui/data-freshness"
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
@@ -111,6 +112,26 @@ const csvHeaders: CsvHeader<AdminTicketSummary>[] = [
   { label: "Closed At", accessor: (t) => t.closedAt ?? "" },
 ]
 
+// ── Column visibility ────────────────────────────────────────────────────
+
+const COLUMN_VISIBILITY_KEY = "admin-support-columns"
+
+const TOGGLEABLE_COLUMNS = [
+  { key: "priority", label: "Priority" },
+  { key: "status", label: "Status" },
+  { key: "createdAt", label: "Created" },
+] as const
+
+type ColumnVisibility = Record<string, boolean>
+
+function loadColumnVisibility(): ColumnVisibility {
+  try {
+    return JSON.parse(localStorage.getItem(COLUMN_VISIBILITY_KEY) ?? "{}")
+  } catch {
+    return {}
+  }
+}
+
 function StatsCardSkeleton() {
   return (
     <Card>
@@ -158,6 +179,17 @@ function AdminSupportPage() {
     },
     [sortKey, sortDir],
   )
+
+  // Column visibility
+  const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(loadColumnVisibility)
+  const isColumnVisible = useCallback((col: string) => columnVisibility[col] !== false, [columnVisibility])
+  const toggleColumn = useCallback((col: string) => {
+    setColumnVisibility((prev) => {
+      const updated = { ...prev, [col]: prev[col] === false }
+      localStorage.setItem(COLUMN_VISIBILITY_KEY, JSON.stringify(updated))
+      return updated
+    })
+  }, [])
 
   const rawTickets = data?.items ?? []
   const total = data?.total ?? 0
@@ -210,6 +242,23 @@ function AdminSupportPage() {
         actions={
           <div className="flex items-center gap-2">
             <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={handleRefreshAll} isRefreshing={isRefetching} />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <SlidersHorizontal className="mr-1.5 h-3.5 w-3.5" />
+                  Columns
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-44">
+                <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {TOGGLEABLE_COLUMNS.map((col) => (
+                  <DropdownMenuCheckboxItem key={col.key} checked={isColumnVisible(col.key)} onCheckedChange={() => toggleColumn(col.key)}>
+                    {col.label}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button variant="outline" size="sm" onClick={handleExport} disabled={!tickets.length}>
               <Download className="mr-2 h-4 w-4" />
               Export
@@ -315,9 +364,11 @@ function AdminSupportPage() {
                       <TableRow>
                         <SortableHeader label="Ticket #" sortKey="ticketNumber" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
                         <SortableHeader label="Subject" sortKey="subject" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
-                        <SortableHeader label="Priority" sortKey="priority" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
-                        <SortableHeader label="Status" sortKey="status" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
-                        <SortableHeader label="Created" sortKey="createdAt" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                        {isColumnVisible("priority") && <SortableHeader label="Priority" sortKey="priority" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />}
+                        {isColumnVisible("status") && <SortableHeader label="Status" sortKey="status" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />}
+                        {isColumnVisible("createdAt") && (
+                          <SortableHeader label="Created" sortKey="createdAt" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                        )}
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -340,34 +391,38 @@ function AdminSupportPage() {
                               <TooltipContent>{ticket.subject}</TooltipContent>
                             </Tooltip>
                           </TableCell>
-                          <TableCell>
-                            <Badge variant={priorityVariant[ticket.priority] ?? "outline"} className="gap-1.5">
-                              <span
-                                className={cn("h-1.5 w-1.5 rounded-full", {
-                                  "bg-gray-400": ticket.priority === "low",
-                                  "bg-amber-500": ticket.priority === "medium",
-                                  "bg-orange-500": ticket.priority === "high",
-                                  "bg-red-500": ticket.priority === "urgent",
-                                })}
-                              />
-                              {ticket.priority}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={statusVariant[ticket.status] ?? "outline"} className="gap-1.5">
-                              <span
-                                className={cn("h-1.5 w-1.5 rounded-full", {
-                                  "bg-blue-500": ticket.status === "open",
-                                  "bg-amber-500": ticket.status === "in_progress",
-                                  "bg-violet-500": ticket.status === "waiting_on_customer" || ticket.status === "waiting_on_support",
-                                  "bg-emerald-500": ticket.status === "resolved",
-                                  "bg-gray-400": ticket.status === "closed",
-                                })}
-                              />
-                              {statusLabel[ticket.status] ?? ticket.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-muted-foreground text-sm">{formatRelativeTimeShort(ticket.createdAt)}</TableCell>
+                          {isColumnVisible("priority") && (
+                            <TableCell>
+                              <Badge variant={priorityVariant[ticket.priority] ?? "outline"} className="gap-1.5">
+                                <span
+                                  className={cn("h-1.5 w-1.5 rounded-full", {
+                                    "bg-gray-400": ticket.priority === "low",
+                                    "bg-amber-500": ticket.priority === "medium",
+                                    "bg-orange-500": ticket.priority === "high",
+                                    "bg-red-500": ticket.priority === "urgent",
+                                  })}
+                                />
+                                {ticket.priority}
+                              </Badge>
+                            </TableCell>
+                          )}
+                          {isColumnVisible("status") && (
+                            <TableCell>
+                              <Badge variant={statusVariant[ticket.status] ?? "outline"} className="gap-1.5">
+                                <span
+                                  className={cn("h-1.5 w-1.5 rounded-full", {
+                                    "bg-blue-500": ticket.status === "open",
+                                    "bg-amber-500": ticket.status === "in_progress",
+                                    "bg-violet-500": ticket.status === "waiting_on_customer" || ticket.status === "waiting_on_support",
+                                    "bg-emerald-500": ticket.status === "resolved",
+                                    "bg-gray-400": ticket.status === "closed",
+                                  })}
+                                />
+                                {statusLabel[ticket.status] ?? ticket.status}
+                              </Badge>
+                            </TableCell>
+                          )}
+                          {isColumnVisible("createdAt") && <TableCell className="text-muted-foreground text-sm">{formatRelativeTimeShort(ticket.createdAt)}</TableCell>}
                         </TableRow>
                       ))}
                     </TableBody>
@@ -448,9 +503,13 @@ function AdminSupportPage() {
                           <SortableHeader label="Subject" sortKey="subject" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
                           <TableHead>Creator</TableHead>
                           <TableHead>Assigned To</TableHead>
-                          <SortableHeader label="Priority" sortKey="priority" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
-                          <SortableHeader label="Status" sortKey="status" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
-                          <SortableHeader label="Created" sortKey="createdAt" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                          {isColumnVisible("priority") && (
+                            <SortableHeader label="Priority" sortKey="priority" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                          )}
+                          {isColumnVisible("status") && <SortableHeader label="Status" sortKey="status" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />}
+                          {isColumnVisible("createdAt") && (
+                            <SortableHeader label="Created" sortKey="createdAt" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                          )}
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -475,41 +534,47 @@ function AdminSupportPage() {
                             </TableCell>
                             <TableCell className="text-muted-foreground">{ticket.creatorEmail ?? "—"}</TableCell>
                             <TableCell className="text-muted-foreground">{ticket.assignedToEmail ?? "Unassigned"}</TableCell>
-                            <TableCell>
-                              <Badge variant={priorityVariant[ticket.priority] ?? "outline"} className="gap-1.5">
-                                <span
-                                  className={cn("h-1.5 w-1.5 rounded-full", {
-                                    "bg-gray-400": ticket.priority === "low",
-                                    "bg-amber-500": ticket.priority === "medium",
-                                    "bg-orange-500": ticket.priority === "high",
-                                    "bg-red-500": ticket.priority === "urgent",
-                                  })}
-                                />
-                                {ticket.priority}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant={statusVariant[ticket.status] ?? "outline"} className="gap-1.5">
-                                <span
-                                  className={cn("h-1.5 w-1.5 rounded-full", {
-                                    "bg-blue-500": ticket.status === "open",
-                                    "bg-amber-500": ticket.status === "in_progress",
-                                    "bg-violet-500": ticket.status === "waiting_on_customer" || ticket.status === "waiting_on_support",
-                                    "bg-emerald-500": ticket.status === "resolved",
-                                    "bg-gray-400": ticket.status === "closed",
-                                  })}
-                                />
-                                {statusLabel[ticket.status] ?? ticket.status}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-muted-foreground">
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <span>{formatRelativeTimeShort(ticket.createdAt)}</span>
-                                </TooltipTrigger>
-                                <TooltipContent>{formatDateTime(ticket.createdAt)}</TooltipContent>
-                              </Tooltip>
-                            </TableCell>
+                            {isColumnVisible("priority") && (
+                              <TableCell>
+                                <Badge variant={priorityVariant[ticket.priority] ?? "outline"} className="gap-1.5">
+                                  <span
+                                    className={cn("h-1.5 w-1.5 rounded-full", {
+                                      "bg-gray-400": ticket.priority === "low",
+                                      "bg-amber-500": ticket.priority === "medium",
+                                      "bg-orange-500": ticket.priority === "high",
+                                      "bg-red-500": ticket.priority === "urgent",
+                                    })}
+                                  />
+                                  {ticket.priority}
+                                </Badge>
+                              </TableCell>
+                            )}
+                            {isColumnVisible("status") && (
+                              <TableCell>
+                                <Badge variant={statusVariant[ticket.status] ?? "outline"} className="gap-1.5">
+                                  <span
+                                    className={cn("h-1.5 w-1.5 rounded-full", {
+                                      "bg-blue-500": ticket.status === "open",
+                                      "bg-amber-500": ticket.status === "in_progress",
+                                      "bg-violet-500": ticket.status === "waiting_on_customer" || ticket.status === "waiting_on_support",
+                                      "bg-emerald-500": ticket.status === "resolved",
+                                      "bg-gray-400": ticket.status === "closed",
+                                    })}
+                                  />
+                                  {statusLabel[ticket.status] ?? ticket.status}
+                                </Badge>
+                              </TableCell>
+                            )}
+                            {isColumnVisible("createdAt") && (
+                              <TableCell className="text-muted-foreground">
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span>{formatRelativeTimeShort(ticket.createdAt)}</span>
+                                  </TooltipTrigger>
+                                  <TooltipContent>{formatDateTime(ticket.createdAt)}</TooltipContent>
+                                </Tooltip>
+                              </TableCell>
+                            )}
                           </TableRow>
                         ))}
                       </TableBody>

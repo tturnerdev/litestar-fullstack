@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { AlertCircle, AlertTriangle, Bell, BellOff, Copy, Download, Eye, Mail, MailPlus, MoreVertical, Pencil, Search, Trash2, X } from "lucide-react"
+import { AlertCircle, AlertTriangle, Bell, BellOff, Copy, Download, Eye, Mail, MailPlus, MoreVertical, Pencil, Search, SlidersHorizontal, Trash2, X } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 import {
@@ -20,7 +20,15 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { CopyButton } from "@/components/ui/copy-button"
 import { DataFreshness } from "@/components/ui/data-freshness"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { FilterDropdown, type FilterOption } from "@/components/ui/filter-dropdown"
 import { Input } from "@/components/ui/input"
@@ -71,6 +79,29 @@ const statusFilterOptions: FilterOption[] = [
   { value: "active", label: "Active" },
   { value: "inactive", label: "Inactive" },
 ]
+
+// ---------------------------------------------------------------------------
+// Column visibility
+// ---------------------------------------------------------------------------
+
+const COLUMN_VISIBILITY_KEY = "fax-email-routes-columns"
+
+const TOGGLEABLE_COLUMNS = [
+  { key: "faxNumber", label: "Fax Number" },
+  { key: "status", label: "Status" },
+  { key: "failureAlerts", label: "Failure Alerts" },
+  { key: "created", label: "Created" },
+] as const
+
+type ColumnVisibility = Record<string, boolean>
+
+function loadColumnVisibility(): ColumnVisibility {
+  try {
+    return JSON.parse(localStorage.getItem(COLUMN_VISIBILITY_KEY) ?? "{}")
+  } catch {
+    return {}
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Create Dialog
@@ -423,6 +454,17 @@ function FaxEmailRoutesPage() {
     [sortKey, sortDir],
   )
 
+  // Column visibility
+  const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(loadColumnVisibility)
+  const isColumnVisible = useCallback((col: string) => columnVisibility[col] !== false, [columnVisibility])
+  const toggleColumn = useCallback((col: string) => {
+    setColumnVisibility((prev) => {
+      const updated = { ...prev, [col]: prev[col] === false }
+      localStorage.setItem(COLUMN_VISIBILITY_KEY, JSON.stringify(updated))
+      return updated
+    })
+  }, [])
+
   const filteredRoutes = useMemo(() => {
     if (!routes) return []
     let result = routes
@@ -566,6 +608,23 @@ function FaxEmailRoutesPage() {
         actions={
           <div className="flex items-center gap-3">
             <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <SlidersHorizontal className="mr-1.5 h-3.5 w-3.5" />
+                  Columns
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-44">
+                <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {TOGGLEABLE_COLUMNS.map((col) => (
+                  <DropdownMenuCheckboxItem key={col.key} checked={isColumnVisible(col.key)} onCheckedChange={() => toggleColumn(col.key)}>
+                    {col.label}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button variant="outline" size="sm" onClick={handleExportAll} disabled={!hasData}>
               <Download className="mr-2 h-4 w-4" />
               Export
@@ -664,10 +723,12 @@ function FaxEmailRoutesPage() {
                           <Checkbox checked={allSelected} indeterminate={someSelected && !allSelected} onChange={toggleAll} aria-label="Select all email routes" />
                         </TableHead>
                         <SortableHeader label="Email Address" sortKey="email" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
-                        <SortableHeader label="Fax Number" sortKey="faxNumber" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
-                        <SortableHeader label="Status" sortKey="status" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
-                        <TableHead>Failure Alerts</TableHead>
-                        <SortableHeader label="Created" sortKey="created" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                        {isColumnVisible("faxNumber") && (
+                          <SortableHeader label="Fax Number" sortKey="faxNumber" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                        )}
+                        {isColumnVisible("status") && <SortableHeader label="Status" sortKey="status" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />}
+                        {isColumnVisible("failureAlerts") && <TableHead>Failure Alerts</TableHead>}
+                        {isColumnVisible("created") && <SortableHeader label="Created" sortKey="created" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />}
                         <TableHead className="w-16 text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -701,45 +762,51 @@ function FaxEmailRoutesPage() {
                               <CopyButton value={route.emailAddress} label="email address" />
                             </span>
                           </TableCell>
-                          <TableCell>
-                            <span className="inline-flex items-center gap-1">
-                              <Link
-                                to="/fax/numbers/$faxNumberId"
-                                params={{ faxNumberId: route.faxNumberId }}
-                                className="text-sm text-primary hover:underline"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <span className="font-mono">{route.faxNumber}</span>
-                                {route.faxNumberLabel && <span className="ml-1.5 text-muted-foreground">({route.faxNumberLabel})</span>}
-                              </Link>
-                              <CopyButton value={route.faxNumber} label="fax number" />
-                            </span>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={route.isActive ? "default" : "secondary"}>{route.isActive ? "Active" : "Inactive"}</Badge>
-                          </TableCell>
-                          <TableCell>
-                            {route.notifyOnFailure ? (
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <span className="inline-flex items-center gap-1 text-sm text-emerald-600 dark:text-emerald-400">
-                                    <Bell className="h-3.5 w-3.5" /> On
-                                  </span>
-                                </TooltipTrigger>
-                                <TooltipContent>Failure notifications enabled</TooltipContent>
-                              </Tooltip>
-                            ) : (
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
-                                    <BellOff className="h-3.5 w-3.5" /> Off
-                                  </span>
-                                </TooltipTrigger>
-                                <TooltipContent>Failure notifications disabled</TooltipContent>
-                              </Tooltip>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-sm text-muted-foreground">{formatDateTime(route.createdAt, "--")}</TableCell>
+                          {isColumnVisible("faxNumber") && (
+                            <TableCell>
+                              <span className="inline-flex items-center gap-1">
+                                <Link
+                                  to="/fax/numbers/$faxNumberId"
+                                  params={{ faxNumberId: route.faxNumberId }}
+                                  className="text-sm text-primary hover:underline"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <span className="font-mono">{route.faxNumber}</span>
+                                  {route.faxNumberLabel && <span className="ml-1.5 text-muted-foreground">({route.faxNumberLabel})</span>}
+                                </Link>
+                                <CopyButton value={route.faxNumber} label="fax number" />
+                              </span>
+                            </TableCell>
+                          )}
+                          {isColumnVisible("status") && (
+                            <TableCell>
+                              <Badge variant={route.isActive ? "default" : "secondary"}>{route.isActive ? "Active" : "Inactive"}</Badge>
+                            </TableCell>
+                          )}
+                          {isColumnVisible("failureAlerts") && (
+                            <TableCell>
+                              {route.notifyOnFailure ? (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span className="inline-flex items-center gap-1 text-sm text-emerald-600 dark:text-emerald-400">
+                                      <Bell className="h-3.5 w-3.5" /> On
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent>Failure notifications enabled</TooltipContent>
+                                </Tooltip>
+                              ) : (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
+                                      <BellOff className="h-3.5 w-3.5" /> Off
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent>Failure notifications disabled</TooltipContent>
+                                </Tooltip>
+                              )}
+                            </TableCell>
+                          )}
+                          {isColumnVisible("created") && <TableCell className="text-sm text-muted-foreground">{formatDateTime(route.createdAt, "--")}</TableCell>}
                           <TableCell className="text-right">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>

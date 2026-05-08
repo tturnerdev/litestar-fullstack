@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
-import { AlertCircle, ArrowRight, Download, Hash, Phone, PhoneOff, Search, Signal, X } from "lucide-react"
+import { AlertCircle, ArrowRight, Download, Hash, Phone, PhoneOff, Search, Signal, SlidersHorizontal, X } from "lucide-react"
 import { useCallback, useMemo, useState } from "react"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { DataFreshness } from "@/components/ui/data-freshness"
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
@@ -88,6 +89,27 @@ const statConfig = [
   },
 ]
 
+// ── Column visibility ────────────────────────────────────────────────────
+
+const COLUMN_VISIBILITY_KEY = "admin-voice-columns"
+
+const TOGGLEABLE_COLUMNS = [
+  { key: "type", label: "Type" },
+  { key: "team", label: "Team" },
+  { key: "owner", label: "Owner" },
+  { key: "status", label: "Status" },
+] as const
+
+type ColumnVisibility = Record<string, boolean>
+
+function loadColumnVisibility(): ColumnVisibility {
+  try {
+    return JSON.parse(localStorage.getItem(COLUMN_VISIBILITY_KEY) ?? "{}")
+  } catch {
+    return {}
+  }
+}
+
 function StatsCardSkeleton() {
   return (
     <Card>
@@ -138,6 +160,17 @@ function AdminVoicePage() {
     },
     [sortKey, sortDir],
   )
+
+  // Column visibility
+  const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(loadColumnVisibility)
+  const isColumnVisible = useCallback((col: string) => columnVisibility[col] !== false, [columnVisibility])
+  const toggleColumn = useCallback((col: string) => {
+    setColumnVisibility((prev) => {
+      const updated = { ...prev, [col]: prev[col] === false }
+      localStorage.setItem(COLUMN_VISIBILITY_KEY, JSON.stringify(updated))
+      return updated
+    })
+  }, [])
 
   const rawPhoneNumbers = phoneData?.items ?? []
   const phoneTotal = phoneData?.total ?? 0
@@ -199,7 +232,28 @@ function AdminVoicePage() {
         title="Voice"
         description="Manage phone numbers and extensions across the organization."
         breadcrumbs={<AdminBreadcrumbs />}
-        actions={<DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={handleRefreshAll} isRefreshing={isRefetching} />}
+        actions={
+          <div className="flex items-center gap-2">
+            <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={handleRefreshAll} isRefreshing={isRefetching} />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <SlidersHorizontal className="mr-1.5 h-3.5 w-3.5" />
+                  Columns
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-44">
+                <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {TOGGLEABLE_COLUMNS.map((col) => (
+                  <DropdownMenuCheckboxItem key={col.key} checked={isColumnVisible(col.key)} onCheckedChange={() => toggleColumn(col.key)}>
+                    {col.label}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        }
       />
       <AdminNav />
 
@@ -343,10 +397,10 @@ function AdminVoicePage() {
                         <TableRow>
                           <SortableHeader label="Number" sortKey="number" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
                           <SortableHeader label="Label" sortKey="label" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
-                          <SortableHeader label="Type" sortKey="type" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
-                          <SortableHeader label="Team" sortKey="team" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
-                          <SortableHeader label="Owner" sortKey="owner" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
-                          <SortableHeader label="Status" sortKey="status" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />
+                          {isColumnVisible("type") && <SortableHeader label="Type" sortKey="type" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />}
+                          {isColumnVisible("team") && <SortableHeader label="Team" sortKey="team" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />}
+                          {isColumnVisible("owner") && <SortableHeader label="Owner" sortKey="owner" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />}
+                          {isColumnVisible("status") && <SortableHeader label="Status" sortKey="status" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />}
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -354,15 +408,17 @@ function AdminVoicePage() {
                           <TableRow key={pn.id} className={cn("hover:bg-muted/50 transition-colors", index % 2 === 1 && "bg-muted/20")}>
                             <TableCell className="font-mono font-medium">{pn.number}</TableCell>
                             <TableCell className="text-muted-foreground">{pn.label ?? "—"}</TableCell>
-                            <TableCell className="text-muted-foreground capitalize">{pn.numberType}</TableCell>
-                            <TableCell className="text-muted-foreground">{pn.teamName ?? "—"}</TableCell>
-                            <TableCell className="text-muted-foreground">{pn.ownerEmail ?? "Unassigned"}</TableCell>
-                            <TableCell>
-                              <Badge variant={pn.isActive ? "default" : "secondary"} className="gap-1.5">
-                                <span className={cn("h-1.5 w-1.5 rounded-full", pn.isActive ? "bg-emerald-500" : "bg-gray-400")} />
-                                {pn.isActive ? "Active" : "Inactive"}
-                              </Badge>
-                            </TableCell>
+                            {isColumnVisible("type") && <TableCell className="text-muted-foreground capitalize">{pn.numberType}</TableCell>}
+                            {isColumnVisible("team") && <TableCell className="text-muted-foreground">{pn.teamName ?? "—"}</TableCell>}
+                            {isColumnVisible("owner") && <TableCell className="text-muted-foreground">{pn.ownerEmail ?? "Unassigned"}</TableCell>}
+                            {isColumnVisible("status") && (
+                              <TableCell>
+                                <Badge variant={pn.isActive ? "default" : "secondary"} className="gap-1.5">
+                                  <span className={cn("h-1.5 w-1.5 rounded-full", pn.isActive ? "bg-emerald-500" : "bg-gray-400")} />
+                                  {pn.isActive ? "Active" : "Inactive"}
+                                </Badge>
+                              </TableCell>
+                            )}
                           </TableRow>
                         ))}
                       </TableBody>

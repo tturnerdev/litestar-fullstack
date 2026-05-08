@@ -16,6 +16,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -198,7 +199,7 @@ function TagsPage() {
     [sortKey, sortDir, navigate],
   )
 
-  const { data, isLoading, isRefetching, isError, refetch } = useTags({
+  const { data, isLoading, isRefetching, isError, refetch, dataUpdatedAt } = useTags({
     search: debouncedSearch || undefined,
     page,
     pageSize,
@@ -329,6 +330,7 @@ function TagsPage() {
         breadcrumbs={breadcrumbs}
         actions={
           <div className="flex items-center gap-2">
+            <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm">

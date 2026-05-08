@@ -34,6 +34,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { DataFreshness } from "@/components/ui/data-freshness"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -386,7 +387,7 @@ function E911Page() {
     return () => document.removeEventListener("keydown", handleKeyDown)
   }, [])
 
-  const { data, isLoading, isRefetching, isError, refetch } = useE911Registrations({
+  const { data, isLoading, isRefetching, isError, refetch, dataUpdatedAt } = useE911Registrations({
     page,
     pageSize,
     search: debouncedSearch || undefined,
@@ -525,6 +526,7 @@ function E911Page() {
         breadcrumbs={breadcrumbs}
         actions={
           <div className="flex items-center gap-2">
+            <DataFreshness dataUpdatedAt={dataUpdatedAt} onRefresh={() => refetch()} isRefreshing={isRefetching} />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm">
