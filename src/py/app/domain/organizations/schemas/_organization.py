@@ -61,18 +61,18 @@ class OrganizationDetail(CamelizedBaseStruct):
 class OrganizationUpdate(CamelizedBaseStruct, omit_defaults=True):
     """Schema for updating organization settings."""
 
-    name: Annotated[str, Meta(max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
-    description: Annotated[str, Meta(max_length=1000)] | msgspec.UnsetType | None = msgspec.UNSET
+    name: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
+    description: Annotated[str, Meta(min_length=1, max_length=1000)] | msgspec.UnsetType | None = msgspec.UNSET
     logo_url: Annotated[str, Meta(min_length=1, max_length=500)] | msgspec.UnsetType | None = msgspec.UNSET
-    website: Annotated[str, Meta(max_length=500)] | msgspec.UnsetType | None = msgspec.UNSET
-    email: Annotated[str, Meta(max_length=320)] | msgspec.UnsetType | None = msgspec.UNSET
-    phone: Annotated[str, Meta(max_length=20)] | msgspec.UnsetType | None = msgspec.UNSET
-    address_line_1: Annotated[str, Meta(max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
-    address_line_2: Annotated[str, Meta(max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
-    city: Annotated[str, Meta(max_length=100)] | msgspec.UnsetType | None = msgspec.UNSET
-    state: Annotated[str, Meta(max_length=100)] | msgspec.UnsetType | None = msgspec.UNSET
-    postal_code: Annotated[str, Meta(max_length=20)] | msgspec.UnsetType | None = msgspec.UNSET
-    country: Annotated[str, Meta(max_length=100)] | msgspec.UnsetType | None = msgspec.UNSET
-    timezone: Annotated[str, Meta(max_length=50)] | msgspec.UnsetType | None = msgspec.UNSET
-    default_language: Annotated[str, Meta(max_length=10)] | msgspec.UnsetType | None = msgspec.UNSET
+    website: Annotated[str, Meta(min_length=1, max_length=500)] | msgspec.UnsetType | None = msgspec.UNSET
+    email: Annotated[str, Meta(min_length=1, max_length=320)] | msgspec.UnsetType | None = msgspec.UNSET
+    phone: Annotated[str, Meta(min_length=1, max_length=20)] | msgspec.UnsetType | None = msgspec.UNSET
+    address_line_1: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
+    address_line_2: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
+    city: Annotated[str, Meta(min_length=1, max_length=100)] | msgspec.UnsetType | None = msgspec.UNSET
+    state: Annotated[str, Meta(min_length=1, max_length=100)] | msgspec.UnsetType | None = msgspec.UNSET
+    postal_code: Annotated[str, Meta(min_length=1, max_length=20)] | msgspec.UnsetType | None = msgspec.UNSET
+    country: Annotated[str, Meta(min_length=1, max_length=100)] | msgspec.UnsetType | None = msgspec.UNSET
+    timezone: Annotated[str, Meta(min_length=1, max_length=50)] | msgspec.UnsetType | None = msgspec.UNSET
+    default_language: Annotated[str, Meta(min_length=1, max_length=10)] | msgspec.UnsetType | None = msgspec.UNSET
     settings: dict | msgspec.UnsetType | None = msgspec.UNSET

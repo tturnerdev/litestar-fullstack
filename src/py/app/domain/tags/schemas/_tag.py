@@ -24,11 +24,11 @@ class TagCreate(CamelizedBaseStruct):
     """Tag Create Properties."""
 
     name: Annotated[str, Meta(min_length=1, max_length=100)]
-    description: Annotated[str, Meta(max_length=255)] | None = None
+    description: Annotated[str, Meta(min_length=1, max_length=255)] | None = None
 
 
 class TagUpdate(CamelizedBaseStruct, omit_defaults=True):
     """Tag Update Properties."""
 
     name: Annotated[str, Meta(min_length=1, max_length=100)] | None = None
-    description: Annotated[str, Meta(max_length=255)] | None = None
+    description: Annotated[str, Meta(min_length=1, max_length=255)] | None = None

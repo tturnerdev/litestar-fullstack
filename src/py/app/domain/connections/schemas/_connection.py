@@ -70,7 +70,7 @@ class ConnectionCreate(CamelizedBaseStruct):
     auth_type: Annotated[str, Meta(min_length=1, max_length=50)] = "none"
     credentials: dict | None = None
     settings: dict | None = None
-    description: Annotated[str, Meta(max_length=1000)] | None = None
+    description: Annotated[str, Meta(min_length=1, max_length=1000)] | None = None
     is_enabled: bool = True
 
 
@@ -85,5 +85,5 @@ class ConnectionUpdate(CamelizedBaseStruct, omit_defaults=True):
     auth_type: Annotated[str, Meta(min_length=1, max_length=50)] | msgspec.UnsetType = msgspec.UNSET
     credentials: dict | msgspec.UnsetType | None = msgspec.UNSET
     settings: dict | msgspec.UnsetType | None = msgspec.UNSET
-    description: Annotated[str, Meta(max_length=1000)] | msgspec.UnsetType | None = msgspec.UNSET
+    description: Annotated[str, Meta(min_length=1, max_length=1000)] | msgspec.UnsetType | None = msgspec.UNSET
     is_enabled: bool | msgspec.UnsetType = msgspec.UNSET

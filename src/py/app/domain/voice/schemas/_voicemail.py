@@ -33,8 +33,8 @@ class VoicemailSettingsUpdate(CamelizedBaseStruct, omit_defaults=True):
     """Voicemail settings update properties."""
 
     is_enabled: bool | msgspec.UnsetType = msgspec.UNSET
-    pin: Annotated[str, Meta(max_length=20)] | msgspec.UnsetType | None = msgspec.UNSET
-    email_address: Annotated[str, Meta(max_length=320)] | msgspec.UnsetType | None = msgspec.UNSET
+    pin: Annotated[str, Meta(min_length=1, max_length=20)] | msgspec.UnsetType | None = msgspec.UNSET
+    email_address: Annotated[str, Meta(min_length=1, max_length=320)] | msgspec.UnsetType | None = msgspec.UNSET
     greeting_type: GreetingType | msgspec.UnsetType = msgspec.UNSET
     max_message_length_seconds: int | msgspec.UnsetType = msgspec.UNSET
     email_notification: bool | msgspec.UnsetType = msgspec.UNSET

@@ -42,7 +42,7 @@ class ForwardingRuleUpdate(CamelizedBaseStruct, omit_defaults=True):
 
     rule_type: ForwardingRuleType | msgspec.UnsetType = msgspec.UNSET
     destination_type: ForwardingDestinationType | msgspec.UnsetType = msgspec.UNSET
-    destination_value: Annotated[str, Meta(max_length=255)] | msgspec.UnsetType = msgspec.UNSET
+    destination_value: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType = msgspec.UNSET
     ring_timeout_seconds: int | msgspec.UnsetType | None = msgspec.UNSET
     is_active: bool | msgspec.UnsetType = msgspec.UNSET
     priority: int | msgspec.UnsetType = msgspec.UNSET

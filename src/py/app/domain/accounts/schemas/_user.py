@@ -79,9 +79,9 @@ class User(CamelizedBaseStruct):
 class UserCreate(CamelizedBaseStruct):
     email: Annotated[str, Meta(min_length=1, max_length=255)]
     password: Annotated[str, Meta(min_length=1, max_length=255)]
-    name: Annotated[str, Meta(max_length=255)] | None = None
-    username: Annotated[str, Meta(max_length=50)] | None = None
-    phone: Annotated[str, Meta(max_length=20)] | None = None
+    name: Annotated[str, Meta(min_length=1, max_length=255)] | None = None
+    username: Annotated[str, Meta(min_length=1, max_length=50)] | None = None
+    phone: Annotated[str, Meta(min_length=1, max_length=20)] | None = None
     is_superuser: bool = False
     is_active: bool = True
     is_verified: bool = False
@@ -108,9 +108,9 @@ class UserCreate(CamelizedBaseStruct):
 class UserUpdate(CamelizedBaseStruct, omit_defaults=True):
     email: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
     password: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
-    name: Annotated[str, Meta(max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
-    username: Annotated[str, Meta(max_length=50)] | msgspec.UnsetType | None = msgspec.UNSET
-    phone: Annotated[str, Meta(max_length=20)] | msgspec.UnsetType | None = msgspec.UNSET
+    name: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
+    username: Annotated[str, Meta(min_length=1, max_length=50)] | msgspec.UnsetType | None = msgspec.UNSET
+    phone: Annotated[str, Meta(min_length=1, max_length=20)] | msgspec.UnsetType | None = msgspec.UNSET
     is_superuser: bool | msgspec.UnsetType | None = msgspec.UNSET
     is_active: bool | msgspec.UnsetType | None = msgspec.UNSET
     is_verified: bool | msgspec.UnsetType | None = msgspec.UNSET
@@ -144,9 +144,9 @@ class UserUpdate(CamelizedBaseStruct, omit_defaults=True):
 
 
 class ProfileUpdate(CamelizedBaseStruct, omit_defaults=True):
-    name: Annotated[str, Meta(max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
-    username: Annotated[str, Meta(max_length=50)] | msgspec.UnsetType | None = msgspec.UNSET
-    phone: Annotated[str, Meta(max_length=20)] | msgspec.UnsetType | None = msgspec.UNSET
+    name: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
+    username: Annotated[str, Meta(min_length=1, max_length=50)] | msgspec.UnsetType | None = msgspec.UNSET
+    phone: Annotated[str, Meta(min_length=1, max_length=20)] | msgspec.UnsetType | None = msgspec.UNSET
 
     def __post_init__(self) -> None:
         """Validate fields if provided."""
