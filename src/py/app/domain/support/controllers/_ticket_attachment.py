@@ -97,7 +97,7 @@ class TicketAttachmentController(Controller):
         db_obj = await attachments_service.get(attachment_id)
         before = capture_snapshot(db_obj)
         target_label = db_obj.file_name
-        request.app.emit(event_id="ticket_attachment_deleted", attachment_id=attachment_id)
+        request.app.emit(event_id="ticket_attachment_deleted", entity_id=attachment_id)
         await attachments_service.delete(attachment_id)
         await log_audit(
             audit_service,

@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.361.0 (2026-05-08)
+
+### Fixed
+- **Complete entity_id normalization** — Standardize all remaining domain-specific event params (`device_id`, `call_record_id`, `notification_id`, `attachment_id`, `team_id`) to `entity_id` across device actions, analytics, notifications, support attachments, and team permissions controllers
+
 ## v0.360.0 (2026-05-08)
 
 ### Fixed
