@@ -236,15 +236,23 @@ async def _dispatch_webhook(internal_event_id: str, **kwargs: Any) -> None:
             continue
         payload[key] = str(value) if isinstance(value, UUID) else value
 
-    async with provide_services(
-        deps.provide_webhook_endpoint_service,
-        deps.provide_webhook_delivery_service,
-    ) as (endpoint_service, delivery_service):
-        await dispatch_webhook_event(
-            event_type=webhook_event_type.value,
-            payload=payload,
-            endpoint_service=endpoint_service,
-            delivery_service=delivery_service,
+    try:
+        async with provide_services(
+            deps.provide_webhook_endpoint_service,
+            deps.provide_webhook_delivery_service,
+        ) as (endpoint_service, delivery_service):
+            await dispatch_webhook_event(
+                event_type=webhook_event_type.value,
+                payload=payload,
+                endpoint_service=endpoint_service,
+                delivery_service=delivery_service,
+            )
+    except Exception:
+        await logger.aerror(
+            "Failed to dispatch webhook event",
+            internal_event_id=internal_event_id,
+            webhook_event_type=webhook_event_type.value,
+            exc_info=True,
         )
 
 
