@@ -153,27 +153,6 @@ import type {
   AdminUpdateUserData,
   AdminUpdateUserErrors,
   AdminUpdateUserResponses,
-  ApiAuthOauthGithubCallbackGithubCallbackData,
-  ApiAuthOauthGithubCallbackGithubCallbackErrors,
-  ApiAuthOauthGithubCallbackGithubCallbackResponses,
-  ApiAuthOauthGithubGithubAuthorizeData,
-  ApiAuthOauthGithubGithubAuthorizeErrors,
-  ApiAuthOauthGithubGithubAuthorizeResponses,
-  ApiAuthOauthGoogleCallbackGoogleCallbackData,
-  ApiAuthOauthGoogleCallbackGoogleCallbackErrors,
-  ApiAuthOauthGoogleCallbackGoogleCallbackResponses,
-  ApiAuthOauthGoogleGoogleAuthorizeData,
-  ApiAuthOauthGoogleGoogleAuthorizeErrors,
-  ApiAuthOauthGoogleGoogleAuthorizeResponses,
-  ApiEmailVerificationRequestRequestVerificationData,
-  ApiEmailVerificationRequestRequestVerificationErrors,
-  ApiEmailVerificationRequestRequestVerificationResponses,
-  ApiEmailVerificationStatusUserIdGetVerificationStatusData,
-  ApiEmailVerificationStatusUserIdGetVerificationStatusErrors,
-  ApiEmailVerificationStatusUserIdGetVerificationStatusResponses,
-  ApiEmailVerificationVerifyVerifyEmailData,
-  ApiEmailVerificationVerifyVerifyEmailErrors,
-  ApiEmailVerificationVerifyVerifyEmailResponses,
   AssignRoleData,
   AssignRoleErrors,
   AssignRoleResponses,
@@ -444,6 +423,9 @@ import type {
   GetE911RegistrationData,
   GetE911RegistrationErrors,
   GetE911RegistrationResponses,
+  GetEmailVerificationStatusData,
+  GetEmailVerificationStatusErrors,
+  GetEmailVerificationStatusResponses,
   GetExtensionData,
   GetExtensionErrors,
   GetExtensionResponses,
@@ -523,9 +505,21 @@ import type {
   GetWebhookEndpointResponses,
   GetWebhookErrors,
   GetWebhookResponses,
+  GitHubOAuthAuthorizeData,
+  GitHubOAuthAuthorizeErrors,
+  GitHubOAuthAuthorizeResponses,
+  GitHubOAuthCallbackData,
+  GitHubOAuthCallbackErrors,
+  GitHubOAuthCallbackResponses,
   GlobalSearchData,
   GlobalSearchErrors,
   GlobalSearchResponses,
+  GoogleOAuthAuthorizeData,
+  GoogleOAuthAuthorizeErrors,
+  GoogleOAuthAuthorizeResponses,
+  GoogleOAuthCallbackData,
+  GoogleOAuthCallbackErrors,
+  GoogleOAuthCallbackResponses,
   InitiateDisableMfaOAuthData,
   InitiateDisableMfaOAuthErrors,
   InitiateDisableMfaOAuthResponses,
@@ -722,6 +716,9 @@ import type {
   ReprovisionDeviceData,
   ReprovisionDeviceErrors,
   ReprovisionDeviceResponses,
+  RequestEmailVerificationData,
+  RequestEmailVerificationErrors,
+  RequestEmailVerificationResponses,
   ResetPasswordData,
   ResetPasswordErrors,
   ResetPasswordResponses,
@@ -886,6 +883,9 @@ import type {
   ValidateResetTokenData,
   ValidateResetTokenErrors,
   ValidateResetTokenResponses,
+  VerifyEmailData,
+  VerifyEmailErrors,
+  VerifyEmailResponses,
   VerifyMfaChallengeData,
   VerifyMfaChallengeErrors,
   VerifyMfaChallengeResponses,
@@ -2053,14 +2053,12 @@ export const getCallVolume = <ThrowOnError extends boolean = false>(
 /**
  * GithubAuthorize
  */
-export const apiAuthOauthGithubGithubAuthorize = <
-  ThrowOnError extends boolean = false,
->(
-  options?: Options<ApiAuthOauthGithubGithubAuthorizeData, ThrowOnError>,
+export const gitHubOAuthAuthorize = <ThrowOnError extends boolean = false>(
+  options?: Options<GitHubOAuthAuthorizeData, ThrowOnError>,
 ) =>
   (options?.client ?? client).get<
-    ApiAuthOauthGithubGithubAuthorizeResponses,
-    ApiAuthOauthGithubGithubAuthorizeErrors,
+    GitHubOAuthAuthorizeResponses,
+    GitHubOAuthAuthorizeErrors,
     ThrowOnError
   >({
     security: [{ scheme: "bearer", type: "http" }],
@@ -2071,14 +2069,12 @@ export const apiAuthOauthGithubGithubAuthorize = <
 /**
  * GithubCallback
  */
-export const apiAuthOauthGithubCallbackGithubCallback = <
-  ThrowOnError extends boolean = false,
->(
-  options?: Options<ApiAuthOauthGithubCallbackGithubCallbackData, ThrowOnError>,
+export const gitHubOAuthCallback = <ThrowOnError extends boolean = false>(
+  options?: Options<GitHubOAuthCallbackData, ThrowOnError>,
 ) =>
   (options?.client ?? client).get<
-    ApiAuthOauthGithubCallbackGithubCallbackResponses,
-    ApiAuthOauthGithubCallbackGithubCallbackErrors,
+    GitHubOAuthCallbackResponses,
+    GitHubOAuthCallbackErrors,
     ThrowOnError
   >({
     security: [{ scheme: "bearer", type: "http" }],
@@ -2089,14 +2085,12 @@ export const apiAuthOauthGithubCallbackGithubCallback = <
 /**
  * GoogleAuthorize
  */
-export const apiAuthOauthGoogleGoogleAuthorize = <
-  ThrowOnError extends boolean = false,
->(
-  options?: Options<ApiAuthOauthGoogleGoogleAuthorizeData, ThrowOnError>,
+export const googleOAuthAuthorize = <ThrowOnError extends boolean = false>(
+  options?: Options<GoogleOAuthAuthorizeData, ThrowOnError>,
 ) =>
   (options?.client ?? client).get<
-    ApiAuthOauthGoogleGoogleAuthorizeResponses,
-    ApiAuthOauthGoogleGoogleAuthorizeErrors,
+    GoogleOAuthAuthorizeResponses,
+    GoogleOAuthAuthorizeErrors,
     ThrowOnError
   >({
     security: [{ scheme: "bearer", type: "http" }],
@@ -2107,14 +2101,12 @@ export const apiAuthOauthGoogleGoogleAuthorize = <
 /**
  * GoogleCallback
  */
-export const apiAuthOauthGoogleCallbackGoogleCallback = <
-  ThrowOnError extends boolean = false,
->(
-  options?: Options<ApiAuthOauthGoogleCallbackGoogleCallbackData, ThrowOnError>,
+export const googleOAuthCallback = <ThrowOnError extends boolean = false>(
+  options?: Options<GoogleOAuthCallbackData, ThrowOnError>,
 ) =>
   (options?.client ?? client).get<
-    ApiAuthOauthGoogleCallbackGoogleCallbackResponses,
-    ApiAuthOauthGoogleCallbackGoogleCallbackErrors,
+    GoogleOAuthCallbackResponses,
+    GoogleOAuthCallbackErrors,
     ThrowOnError
   >({
     security: [{ scheme: "bearer", type: "http" }],
@@ -2715,17 +2707,12 @@ export const validateE911Registration = <ThrowOnError extends boolean = false>(
 /**
  * RequestVerification
  */
-export const apiEmailVerificationRequestRequestVerification = <
-  ThrowOnError extends boolean = false,
->(
-  options: Options<
-    ApiEmailVerificationRequestRequestVerificationData,
-    ThrowOnError
-  >,
+export const requestEmailVerification = <ThrowOnError extends boolean = false>(
+  options: Options<RequestEmailVerificationData, ThrowOnError>,
 ) =>
   (options.client ?? client).post<
-    ApiEmailVerificationRequestRequestVerificationResponses,
-    ApiEmailVerificationRequestRequestVerificationErrors,
+    RequestEmailVerificationResponses,
+    RequestEmailVerificationErrors,
     ThrowOnError
   >({
     security: [{ scheme: "bearer", type: "http" }],
@@ -2740,17 +2727,14 @@ export const apiEmailVerificationRequestRequestVerification = <
 /**
  * GetVerificationStatus
  */
-export const apiEmailVerificationStatusUserIdGetVerificationStatus = <
+export const getEmailVerificationStatus = <
   ThrowOnError extends boolean = false,
 >(
-  options: Options<
-    ApiEmailVerificationStatusUserIdGetVerificationStatusData,
-    ThrowOnError
-  >,
+  options: Options<GetEmailVerificationStatusData, ThrowOnError>,
 ) =>
   (options.client ?? client).get<
-    ApiEmailVerificationStatusUserIdGetVerificationStatusResponses,
-    ApiEmailVerificationStatusUserIdGetVerificationStatusErrors,
+    GetEmailVerificationStatusResponses,
+    GetEmailVerificationStatusErrors,
     ThrowOnError
   >({
     security: [{ scheme: "bearer", type: "http" }],
@@ -2761,14 +2745,12 @@ export const apiEmailVerificationStatusUserIdGetVerificationStatus = <
 /**
  * VerifyEmail
  */
-export const apiEmailVerificationVerifyVerifyEmail = <
-  ThrowOnError extends boolean = false,
->(
-  options: Options<ApiEmailVerificationVerifyVerifyEmailData, ThrowOnError>,
+export const verifyEmail = <ThrowOnError extends boolean = false>(
+  options: Options<VerifyEmailData, ThrowOnError>,
 ) =>
   (options.client ?? client).post<
-    ApiEmailVerificationVerifyVerifyEmailResponses,
-    ApiEmailVerificationVerifyVerifyEmailErrors,
+    VerifyEmailResponses,
+    VerifyEmailErrors,
     ThrowOnError
   >({
     security: [{ scheme: "bearer", type: "http" }],

@@ -3386,10 +3386,10 @@ export type AdminListAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    actionIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3465,10 +3465,10 @@ export type AdminExportAuditLogData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    actionIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3533,10 +3533,10 @@ export type AdminGetTargetAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    actionIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -3613,10 +3613,10 @@ export type AdminGetUserAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    actionIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -5835,7 +5835,7 @@ export type GetCallVolumeResponses = {
 export type GetCallVolumeResponse =
   GetCallVolumeResponses[keyof GetCallVolumeResponses];
 
-export type ApiAuthOauthGithubGithubAuthorizeData = {
+export type GitHubOAuthAuthorizeData = {
   body?: never;
   path?: never;
   query?: {
@@ -5844,7 +5844,7 @@ export type ApiAuthOauthGithubGithubAuthorizeData = {
   url: "/api/auth/oauth/github";
 };
 
-export type ApiAuthOauthGithubGithubAuthorizeErrors = {
+export type GitHubOAuthAuthorizeErrors = {
   /**
    * Validation Exception
    */
@@ -5860,20 +5860,20 @@ export type ApiAuthOauthGithubGithubAuthorizeErrors = {
   };
 };
 
-export type ApiAuthOauthGithubGithubAuthorizeError =
-  ApiAuthOauthGithubGithubAuthorizeErrors[keyof ApiAuthOauthGithubGithubAuthorizeErrors];
+export type GitHubOAuthAuthorizeError =
+  GitHubOAuthAuthorizeErrors[keyof GitHubOAuthAuthorizeErrors];
 
-export type ApiAuthOauthGithubGithubAuthorizeResponses = {
+export type GitHubOAuthAuthorizeResponses = {
   /**
    * Request fulfilled, document follows
    */
   200: OAuthAuthorization;
 };
 
-export type ApiAuthOauthGithubGithubAuthorizeResponse =
-  ApiAuthOauthGithubGithubAuthorizeResponses[keyof ApiAuthOauthGithubGithubAuthorizeResponses];
+export type GitHubOAuthAuthorizeResponse =
+  GitHubOAuthAuthorizeResponses[keyof GitHubOAuthAuthorizeResponses];
 
-export type ApiAuthOauthGithubCallbackGithubCallbackData = {
+export type GitHubOAuthCallbackData = {
   body?: never;
   path?: never;
   query?: {
@@ -5885,7 +5885,7 @@ export type ApiAuthOauthGithubCallbackGithubCallbackData = {
   url: "/api/auth/oauth/github/callback";
 };
 
-export type ApiAuthOauthGithubCallbackGithubCallbackErrors = {
+export type GitHubOAuthCallbackErrors = {
   /**
    * Validation Exception
    */
@@ -5901,17 +5901,17 @@ export type ApiAuthOauthGithubCallbackGithubCallbackErrors = {
   };
 };
 
-export type ApiAuthOauthGithubCallbackGithubCallbackError =
-  ApiAuthOauthGithubCallbackGithubCallbackErrors[keyof ApiAuthOauthGithubCallbackGithubCallbackErrors];
+export type GitHubOAuthCallbackError =
+  GitHubOAuthCallbackErrors[keyof GitHubOAuthCallbackErrors];
 
-export type ApiAuthOauthGithubCallbackGithubCallbackResponses = {
+export type GitHubOAuthCallbackResponses = {
   /**
    * Redirect Response
    */
   200: unknown;
 };
 
-export type ApiAuthOauthGoogleGoogleAuthorizeData = {
+export type GoogleOAuthAuthorizeData = {
   body?: never;
   path?: never;
   query?: {
@@ -5920,7 +5920,7 @@ export type ApiAuthOauthGoogleGoogleAuthorizeData = {
   url: "/api/auth/oauth/google";
 };
 
-export type ApiAuthOauthGoogleGoogleAuthorizeErrors = {
+export type GoogleOAuthAuthorizeErrors = {
   /**
    * Validation Exception
    */
@@ -5936,20 +5936,20 @@ export type ApiAuthOauthGoogleGoogleAuthorizeErrors = {
   };
 };
 
-export type ApiAuthOauthGoogleGoogleAuthorizeError =
-  ApiAuthOauthGoogleGoogleAuthorizeErrors[keyof ApiAuthOauthGoogleGoogleAuthorizeErrors];
+export type GoogleOAuthAuthorizeError =
+  GoogleOAuthAuthorizeErrors[keyof GoogleOAuthAuthorizeErrors];
 
-export type ApiAuthOauthGoogleGoogleAuthorizeResponses = {
+export type GoogleOAuthAuthorizeResponses = {
   /**
    * Request fulfilled, document follows
    */
   200: OAuthAuthorization;
 };
 
-export type ApiAuthOauthGoogleGoogleAuthorizeResponse =
-  ApiAuthOauthGoogleGoogleAuthorizeResponses[keyof ApiAuthOauthGoogleGoogleAuthorizeResponses];
+export type GoogleOAuthAuthorizeResponse =
+  GoogleOAuthAuthorizeResponses[keyof GoogleOAuthAuthorizeResponses];
 
-export type ApiAuthOauthGoogleCallbackGoogleCallbackData = {
+export type GoogleOAuthCallbackData = {
   body?: never;
   path?: never;
   query?: {
@@ -5960,7 +5960,7 @@ export type ApiAuthOauthGoogleCallbackGoogleCallbackData = {
   url: "/api/auth/oauth/google/callback";
 };
 
-export type ApiAuthOauthGoogleCallbackGoogleCallbackErrors = {
+export type GoogleOAuthCallbackErrors = {
   /**
    * Validation Exception
    */
@@ -5976,10 +5976,10 @@ export type ApiAuthOauthGoogleCallbackGoogleCallbackErrors = {
   };
 };
 
-export type ApiAuthOauthGoogleCallbackGoogleCallbackError =
-  ApiAuthOauthGoogleCallbackGoogleCallbackErrors[keyof ApiAuthOauthGoogleCallbackGoogleCallbackErrors];
+export type GoogleOAuthCallbackError =
+  GoogleOAuthCallbackErrors[keyof GoogleOAuthCallbackErrors];
 
-export type ApiAuthOauthGoogleCallbackGoogleCallbackResponses = {
+export type GoogleOAuthCallbackResponses = {
   /**
    * Redirect Response
    */
@@ -7530,14 +7530,14 @@ export type ValidateE911RegistrationResponses = {
 export type ValidateE911RegistrationResponse =
   ValidateE911RegistrationResponses[keyof ValidateE911RegistrationResponses];
 
-export type ApiEmailVerificationRequestRequestVerificationData = {
+export type RequestEmailVerificationData = {
   body: EmailVerificationRequest;
   path?: never;
   query?: never;
   url: "/api/email-verification/request";
 };
 
-export type ApiEmailVerificationRequestRequestVerificationErrors = {
+export type RequestEmailVerificationErrors = {
   /**
    * Validation Exception
    */
@@ -7553,20 +7553,20 @@ export type ApiEmailVerificationRequestRequestVerificationErrors = {
   };
 };
 
-export type ApiEmailVerificationRequestRequestVerificationError =
-  ApiEmailVerificationRequestRequestVerificationErrors[keyof ApiEmailVerificationRequestRequestVerificationErrors];
+export type RequestEmailVerificationError =
+  RequestEmailVerificationErrors[keyof RequestEmailVerificationErrors];
 
-export type ApiEmailVerificationRequestRequestVerificationResponses = {
+export type RequestEmailVerificationResponses = {
   /**
    * Document created, URL follows
    */
   201: EmailVerificationSent;
 };
 
-export type ApiEmailVerificationRequestRequestVerificationResponse =
-  ApiEmailVerificationRequestRequestVerificationResponses[keyof ApiEmailVerificationRequestRequestVerificationResponses];
+export type RequestEmailVerificationResponse =
+  RequestEmailVerificationResponses[keyof RequestEmailVerificationResponses];
 
-export type ApiEmailVerificationStatusUserIdGetVerificationStatusData = {
+export type GetEmailVerificationStatusData = {
   body?: never;
   path: {
     user_id: string;
@@ -7575,7 +7575,7 @@ export type ApiEmailVerificationStatusUserIdGetVerificationStatusData = {
   url: "/api/email-verification/status/{user_id}";
 };
 
-export type ApiEmailVerificationStatusUserIdGetVerificationStatusErrors = {
+export type GetEmailVerificationStatusErrors = {
   /**
    * Validation Exception
    */
@@ -7591,27 +7591,27 @@ export type ApiEmailVerificationStatusUserIdGetVerificationStatusErrors = {
   };
 };
 
-export type ApiEmailVerificationStatusUserIdGetVerificationStatusError =
-  ApiEmailVerificationStatusUserIdGetVerificationStatusErrors[keyof ApiEmailVerificationStatusUserIdGetVerificationStatusErrors];
+export type GetEmailVerificationStatusError =
+  GetEmailVerificationStatusErrors[keyof GetEmailVerificationStatusErrors];
 
-export type ApiEmailVerificationStatusUserIdGetVerificationStatusResponses = {
+export type GetEmailVerificationStatusResponses = {
   /**
    * Request fulfilled, document follows
    */
   200: EmailVerificationStatus;
 };
 
-export type ApiEmailVerificationStatusUserIdGetVerificationStatusResponse =
-  ApiEmailVerificationStatusUserIdGetVerificationStatusResponses[keyof ApiEmailVerificationStatusUserIdGetVerificationStatusResponses];
+export type GetEmailVerificationStatusResponse =
+  GetEmailVerificationStatusResponses[keyof GetEmailVerificationStatusResponses];
 
-export type ApiEmailVerificationVerifyVerifyEmailData = {
+export type VerifyEmailData = {
   body: EmailVerificationConfirm;
   path?: never;
   query?: never;
   url: "/api/email-verification/verify";
 };
 
-export type ApiEmailVerificationVerifyVerifyEmailErrors = {
+export type VerifyEmailErrors = {
   /**
    * Validation Exception
    */
@@ -7627,18 +7627,17 @@ export type ApiEmailVerificationVerifyVerifyEmailErrors = {
   };
 };
 
-export type ApiEmailVerificationVerifyVerifyEmailError =
-  ApiEmailVerificationVerifyVerifyEmailErrors[keyof ApiEmailVerificationVerifyVerifyEmailErrors];
+export type VerifyEmailError = VerifyEmailErrors[keyof VerifyEmailErrors];
 
-export type ApiEmailVerificationVerifyVerifyEmailResponses = {
+export type VerifyEmailResponses = {
   /**
    * Request fulfilled, document follows
    */
   200: User;
 };
 
-export type ApiEmailVerificationVerifyVerifyEmailResponse =
-  ApiEmailVerificationVerifyVerifyEmailResponses[keyof ApiEmailVerificationVerifyVerifyEmailResponses];
+export type VerifyEmailResponse =
+  VerifyEmailResponses[keyof VerifyEmailResponses];
 
 export type ListFaxMessagesData = {
   body?: never;

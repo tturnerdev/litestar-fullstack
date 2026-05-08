@@ -59,13 +59,6 @@ import {
   adminUpdateMusicOnHold,
   adminUpdateTeam,
   adminUpdateUser,
-  apiAuthOauthGithubCallbackGithubCallback,
-  apiAuthOauthGithubGithubAuthorize,
-  apiAuthOauthGoogleCallbackGoogleCallback,
-  apiAuthOauthGoogleGoogleAuthorize,
-  apiEmailVerificationRequestRequestVerification,
-  apiEmailVerificationStatusUserIdGetVerificationStatus,
-  apiEmailVerificationVerifyVerifyEmail,
   assignRole,
   assignUserRole,
   cancelTask,
@@ -158,6 +151,7 @@ import {
   getDevice,
   getDndSettings,
   getE911Registration,
+  getEmailVerificationStatus,
   getExtension,
   getFaxMessage,
   getFaxNumber,
@@ -186,7 +180,11 @@ import {
   getVoicemailSettings,
   getWebhook,
   getWebhookEndpoint,
+  gitHubOAuthAuthorize,
+  gitHubOAuthCallback,
   globalSearch,
+  googleOAuthAuthorize,
+  googleOAuthCallback,
   initiateDisableMfaOAuth,
   initiateMfaSetup,
   listActiveTasks,
@@ -255,6 +253,7 @@ import {
   removeMemberFromTeam,
   reopenTicket,
   reprovisionDevice,
+  requestEmailVerification,
   resetPassword,
   revokeAllSessions,
   revokeRole,
@@ -311,6 +310,7 @@ import {
   uploadAttachment,
   validateE911Registration,
   validateResetToken,
+  verifyEmail,
   verifyMfaChallenge,
 } from "../sdk.gen";
 import type {
@@ -457,25 +457,6 @@ import type {
   AdminUpdateUserData,
   AdminUpdateUserError,
   AdminUpdateUserResponse,
-  ApiAuthOauthGithubCallbackGithubCallbackData,
-  ApiAuthOauthGithubCallbackGithubCallbackError,
-  ApiAuthOauthGithubGithubAuthorizeData,
-  ApiAuthOauthGithubGithubAuthorizeError,
-  ApiAuthOauthGithubGithubAuthorizeResponse,
-  ApiAuthOauthGoogleCallbackGoogleCallbackData,
-  ApiAuthOauthGoogleCallbackGoogleCallbackError,
-  ApiAuthOauthGoogleGoogleAuthorizeData,
-  ApiAuthOauthGoogleGoogleAuthorizeError,
-  ApiAuthOauthGoogleGoogleAuthorizeResponse,
-  ApiEmailVerificationRequestRequestVerificationData,
-  ApiEmailVerificationRequestRequestVerificationError,
-  ApiEmailVerificationRequestRequestVerificationResponse,
-  ApiEmailVerificationStatusUserIdGetVerificationStatusData,
-  ApiEmailVerificationStatusUserIdGetVerificationStatusError,
-  ApiEmailVerificationStatusUserIdGetVerificationStatusResponse,
-  ApiEmailVerificationVerifyVerifyEmailData,
-  ApiEmailVerificationVerifyVerifyEmailError,
-  ApiEmailVerificationVerifyVerifyEmailResponse,
   AssignRoleData,
   AssignRoleError,
   AssignRoleResponse,
@@ -746,6 +727,9 @@ import type {
   GetE911RegistrationData,
   GetE911RegistrationError,
   GetE911RegistrationResponse,
+  GetEmailVerificationStatusData,
+  GetEmailVerificationStatusError,
+  GetEmailVerificationStatusResponse,
   GetExtensionData,
   GetExtensionError,
   GetExtensionResponse,
@@ -825,9 +809,19 @@ import type {
   GetWebhookEndpointResponse,
   GetWebhookError,
   GetWebhookResponse,
+  GitHubOAuthAuthorizeData,
+  GitHubOAuthAuthorizeError,
+  GitHubOAuthAuthorizeResponse,
+  GitHubOAuthCallbackData,
+  GitHubOAuthCallbackError,
   GlobalSearchData,
   GlobalSearchError,
   GlobalSearchResponse,
+  GoogleOAuthAuthorizeData,
+  GoogleOAuthAuthorizeError,
+  GoogleOAuthAuthorizeResponse,
+  GoogleOAuthCallbackData,
+  GoogleOAuthCallbackError,
   InitiateDisableMfaOAuthData,
   InitiateDisableMfaOAuthError,
   InitiateDisableMfaOAuthResponse,
@@ -1024,6 +1018,9 @@ import type {
   ReprovisionDeviceData,
   ReprovisionDeviceError,
   ReprovisionDeviceResponse,
+  RequestEmailVerificationData,
+  RequestEmailVerificationError,
+  RequestEmailVerificationResponse,
   ResetPasswordData,
   ResetPasswordError,
   ResetPasswordResponse,
@@ -1188,6 +1185,9 @@ import type {
   ValidateResetTokenData,
   ValidateResetTokenError,
   ValidateResetTokenResponse,
+  VerifyEmailData,
+  VerifyEmailError,
+  VerifyEmailResponse,
   VerifyMfaChallengeData,
   VerifyMfaChallengeError,
   VerifyMfaChallengeResponse,
@@ -3029,24 +3029,24 @@ export const getCallVolumeOptions = (options: Options<GetCallVolumeData>) =>
     queryKey: getCallVolumeQueryKey(options),
   });
 
-export const apiAuthOauthGithubGithubAuthorizeQueryKey = (
-  options?: Options<ApiAuthOauthGithubGithubAuthorizeData>,
-) => createQueryKey("apiAuthOauthGithubGithubAuthorize", options);
+export const gitHubOAuthAuthorizeQueryKey = (
+  options?: Options<GitHubOAuthAuthorizeData>,
+) => createQueryKey("gitHubOAuthAuthorize", options);
 
 /**
  * GithubAuthorize
  */
-export const apiAuthOauthGithubGithubAuthorizeOptions = (
-  options?: Options<ApiAuthOauthGithubGithubAuthorizeData>,
+export const gitHubOAuthAuthorizeOptions = (
+  options?: Options<GitHubOAuthAuthorizeData>,
 ) =>
   queryOptions<
-    ApiAuthOauthGithubGithubAuthorizeResponse,
-    ApiAuthOauthGithubGithubAuthorizeError,
-    ApiAuthOauthGithubGithubAuthorizeResponse,
-    ReturnType<typeof apiAuthOauthGithubGithubAuthorizeQueryKey>
+    GitHubOAuthAuthorizeResponse,
+    GitHubOAuthAuthorizeError,
+    GitHubOAuthAuthorizeResponse,
+    ReturnType<typeof gitHubOAuthAuthorizeQueryKey>
   >({
     queryFn: async ({ queryKey, signal }) => {
-      const { data } = await apiAuthOauthGithubGithubAuthorize({
+      const { data } = await gitHubOAuthAuthorize({
         ...options,
         ...queryKey[0],
         signal,
@@ -3054,27 +3054,27 @@ export const apiAuthOauthGithubGithubAuthorizeOptions = (
       });
       return data;
     },
-    queryKey: apiAuthOauthGithubGithubAuthorizeQueryKey(options),
+    queryKey: gitHubOAuthAuthorizeQueryKey(options),
   });
 
-export const apiAuthOauthGithubCallbackGithubCallbackQueryKey = (
-  options?: Options<ApiAuthOauthGithubCallbackGithubCallbackData>,
-) => createQueryKey("apiAuthOauthGithubCallbackGithubCallback", options);
+export const gitHubOAuthCallbackQueryKey = (
+  options?: Options<GitHubOAuthCallbackData>,
+) => createQueryKey("gitHubOAuthCallback", options);
 
 /**
  * GithubCallback
  */
-export const apiAuthOauthGithubCallbackGithubCallbackOptions = (
-  options?: Options<ApiAuthOauthGithubCallbackGithubCallbackData>,
+export const gitHubOAuthCallbackOptions = (
+  options?: Options<GitHubOAuthCallbackData>,
 ) =>
   queryOptions<
     unknown,
-    ApiAuthOauthGithubCallbackGithubCallbackError,
+    GitHubOAuthCallbackError,
     unknown,
-    ReturnType<typeof apiAuthOauthGithubCallbackGithubCallbackQueryKey>
+    ReturnType<typeof gitHubOAuthCallbackQueryKey>
   >({
     queryFn: async ({ queryKey, signal }) => {
-      const { data } = await apiAuthOauthGithubCallbackGithubCallback({
+      const { data } = await gitHubOAuthCallback({
         ...options,
         ...queryKey[0],
         signal,
@@ -3082,27 +3082,27 @@ export const apiAuthOauthGithubCallbackGithubCallbackOptions = (
       });
       return data;
     },
-    queryKey: apiAuthOauthGithubCallbackGithubCallbackQueryKey(options),
+    queryKey: gitHubOAuthCallbackQueryKey(options),
   });
 
-export const apiAuthOauthGoogleGoogleAuthorizeQueryKey = (
-  options?: Options<ApiAuthOauthGoogleGoogleAuthorizeData>,
-) => createQueryKey("apiAuthOauthGoogleGoogleAuthorize", options);
+export const googleOAuthAuthorizeQueryKey = (
+  options?: Options<GoogleOAuthAuthorizeData>,
+) => createQueryKey("googleOAuthAuthorize", options);
 
 /**
  * GoogleAuthorize
  */
-export const apiAuthOauthGoogleGoogleAuthorizeOptions = (
-  options?: Options<ApiAuthOauthGoogleGoogleAuthorizeData>,
+export const googleOAuthAuthorizeOptions = (
+  options?: Options<GoogleOAuthAuthorizeData>,
 ) =>
   queryOptions<
-    ApiAuthOauthGoogleGoogleAuthorizeResponse,
-    ApiAuthOauthGoogleGoogleAuthorizeError,
-    ApiAuthOauthGoogleGoogleAuthorizeResponse,
-    ReturnType<typeof apiAuthOauthGoogleGoogleAuthorizeQueryKey>
+    GoogleOAuthAuthorizeResponse,
+    GoogleOAuthAuthorizeError,
+    GoogleOAuthAuthorizeResponse,
+    ReturnType<typeof googleOAuthAuthorizeQueryKey>
   >({
     queryFn: async ({ queryKey, signal }) => {
-      const { data } = await apiAuthOauthGoogleGoogleAuthorize({
+      const { data } = await googleOAuthAuthorize({
         ...options,
         ...queryKey[0],
         signal,
@@ -3110,27 +3110,27 @@ export const apiAuthOauthGoogleGoogleAuthorizeOptions = (
       });
       return data;
     },
-    queryKey: apiAuthOauthGoogleGoogleAuthorizeQueryKey(options),
+    queryKey: googleOAuthAuthorizeQueryKey(options),
   });
 
-export const apiAuthOauthGoogleCallbackGoogleCallbackQueryKey = (
-  options?: Options<ApiAuthOauthGoogleCallbackGoogleCallbackData>,
-) => createQueryKey("apiAuthOauthGoogleCallbackGoogleCallback", options);
+export const googleOAuthCallbackQueryKey = (
+  options?: Options<GoogleOAuthCallbackData>,
+) => createQueryKey("googleOAuthCallback", options);
 
 /**
  * GoogleCallback
  */
-export const apiAuthOauthGoogleCallbackGoogleCallbackOptions = (
-  options?: Options<ApiAuthOauthGoogleCallbackGoogleCallbackData>,
+export const googleOAuthCallbackOptions = (
+  options?: Options<GoogleOAuthCallbackData>,
 ) =>
   queryOptions<
     unknown,
-    ApiAuthOauthGoogleCallbackGoogleCallbackError,
+    GoogleOAuthCallbackError,
     unknown,
-    ReturnType<typeof apiAuthOauthGoogleCallbackGoogleCallbackQueryKey>
+    ReturnType<typeof googleOAuthCallbackQueryKey>
   >({
     queryFn: async ({ queryKey, signal }) => {
-      const { data } = await apiAuthOauthGoogleCallbackGoogleCallback({
+      const { data } = await googleOAuthCallback({
         ...options,
         ...queryKey[0],
         signal,
@@ -3138,7 +3138,7 @@ export const apiAuthOauthGoogleCallbackGoogleCallbackOptions = (
       });
       return data;
     },
-    queryKey: apiAuthOauthGoogleCallbackGoogleCallbackQueryKey(options),
+    queryKey: googleOAuthCallbackQueryKey(options),
   });
 
 export const listCallQueuesQueryKey = (options?: Options<ListCallQueuesData>) =>
@@ -4055,22 +4055,20 @@ export const validateE911RegistrationMutation = (
 /**
  * RequestVerification
  */
-export const apiEmailVerificationRequestRequestVerificationMutation = (
-  options?: Partial<
-    Options<ApiEmailVerificationRequestRequestVerificationData>
-  >,
+export const requestEmailVerificationMutation = (
+  options?: Partial<Options<RequestEmailVerificationData>>,
 ): UseMutationOptions<
-  ApiEmailVerificationRequestRequestVerificationResponse,
-  ApiEmailVerificationRequestRequestVerificationError,
-  Options<ApiEmailVerificationRequestRequestVerificationData>
+  RequestEmailVerificationResponse,
+  RequestEmailVerificationError,
+  Options<RequestEmailVerificationData>
 > => {
   const mutationOptions: UseMutationOptions<
-    ApiEmailVerificationRequestRequestVerificationResponse,
-    ApiEmailVerificationRequestRequestVerificationError,
-    Options<ApiEmailVerificationRequestRequestVerificationData>
+    RequestEmailVerificationResponse,
+    RequestEmailVerificationError,
+    Options<RequestEmailVerificationData>
   > = {
     mutationFn: async (fnOptions) => {
-      const { data } = await apiEmailVerificationRequestRequestVerification({
+      const { data } = await requestEmailVerification({
         ...options,
         ...fnOptions,
         throwOnError: true,
@@ -4081,59 +4079,51 @@ export const apiEmailVerificationRequestRequestVerificationMutation = (
   return mutationOptions;
 };
 
-export const apiEmailVerificationStatusUserIdGetVerificationStatusQueryKey = (
-  options: Options<ApiEmailVerificationStatusUserIdGetVerificationStatusData>,
-) =>
-  createQueryKey(
-    "apiEmailVerificationStatusUserIdGetVerificationStatus",
-    options,
-  );
+export const getEmailVerificationStatusQueryKey = (
+  options: Options<GetEmailVerificationStatusData>,
+) => createQueryKey("getEmailVerificationStatus", options);
 
 /**
  * GetVerificationStatus
  */
-export const apiEmailVerificationStatusUserIdGetVerificationStatusOptions = (
-  options: Options<ApiEmailVerificationStatusUserIdGetVerificationStatusData>,
+export const getEmailVerificationStatusOptions = (
+  options: Options<GetEmailVerificationStatusData>,
 ) =>
   queryOptions<
-    ApiEmailVerificationStatusUserIdGetVerificationStatusResponse,
-    ApiEmailVerificationStatusUserIdGetVerificationStatusError,
-    ApiEmailVerificationStatusUserIdGetVerificationStatusResponse,
-    ReturnType<
-      typeof apiEmailVerificationStatusUserIdGetVerificationStatusQueryKey
-    >
+    GetEmailVerificationStatusResponse,
+    GetEmailVerificationStatusError,
+    GetEmailVerificationStatusResponse,
+    ReturnType<typeof getEmailVerificationStatusQueryKey>
   >({
     queryFn: async ({ queryKey, signal }) => {
-      const { data } =
-        await apiEmailVerificationStatusUserIdGetVerificationStatus({
-          ...options,
-          ...queryKey[0],
-          signal,
-          throwOnError: true,
-        });
+      const { data } = await getEmailVerificationStatus({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
       return data;
     },
-    queryKey:
-      apiEmailVerificationStatusUserIdGetVerificationStatusQueryKey(options),
+    queryKey: getEmailVerificationStatusQueryKey(options),
   });
 
 /**
  * VerifyEmail
  */
-export const apiEmailVerificationVerifyVerifyEmailMutation = (
-  options?: Partial<Options<ApiEmailVerificationVerifyVerifyEmailData>>,
+export const verifyEmailMutation = (
+  options?: Partial<Options<VerifyEmailData>>,
 ): UseMutationOptions<
-  ApiEmailVerificationVerifyVerifyEmailResponse,
-  ApiEmailVerificationVerifyVerifyEmailError,
-  Options<ApiEmailVerificationVerifyVerifyEmailData>
+  VerifyEmailResponse,
+  VerifyEmailError,
+  Options<VerifyEmailData>
 > => {
   const mutationOptions: UseMutationOptions<
-    ApiEmailVerificationVerifyVerifyEmailResponse,
-    ApiEmailVerificationVerifyVerifyEmailError,
-    Options<ApiEmailVerificationVerifyVerifyEmailData>
+    VerifyEmailResponse,
+    VerifyEmailError,
+    Options<VerifyEmailData>
   > = {
     mutationFn: async (fnOptions) => {
-      const { data } = await apiEmailVerificationVerifyVerifyEmail({
+      const { data } = await verifyEmail({
         ...options,
         ...fnOptions,
         throwOnError: true,

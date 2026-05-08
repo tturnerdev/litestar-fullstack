@@ -41,12 +41,6 @@ import type {
   AdminListExtensionsResponses,
   AdminListFaxMessagesData,
   AdminListFaxMessagesResponses,
-  ApiEmailVerificationRequestRequestVerificationData,
-  ApiEmailVerificationRequestRequestVerificationErrors,
-  ApiEmailVerificationRequestRequestVerificationResponses,
-  ApiEmailVerificationVerifyVerifyEmailData,
-  ApiEmailVerificationVerifyVerifyEmailErrors,
-  ApiEmailVerificationVerifyVerifyEmailResponses,
   ConfirmMfaSetupData,
   ConfirmMfaSetupErrors,
   ConfirmMfaSetupResponses,
@@ -148,6 +142,9 @@ import type {
   RegenerateMfaBackupCodesData,
   RegenerateMfaBackupCodesErrors,
   RegenerateMfaBackupCodesResponses,
+  RequestEmailVerificationData,
+  RequestEmailVerificationErrors,
+  RequestEmailVerificationResponses,
   ResetPasswordData,
   ResetPasswordErrors,
   ResetPasswordResponses,
@@ -171,6 +168,9 @@ import type {
   UpdateOrganizationData,
   UpdateOrganizationErrors,
   UpdateOrganizationResponses,
+  VerifyEmailData,
+  VerifyEmailErrors,
+  VerifyEmailResponses,
   VerifyMfaChallengeData,
   VerifyMfaChallengeErrors,
   VerifyMfaChallengeResponses
@@ -367,7 +367,7 @@ export interface OperationDataTypes {
   'refresh_token': TokenRefreshData
   'regenerate_backup_codes': RegenerateMfaBackupCodesData
   'remove_account': AccountProfileUpdateData
-  'request_verification': ApiEmailVerificationRequestRequestVerificationData
+  'request_verification': RequestEmailVerificationData
   'reset_password_with_token': ResetPasswordData
   'revoke_all_sessions': RevokeAllSessionsData
   'send_fax': SendFaxData
@@ -382,7 +382,7 @@ export interface OperationDataTypes {
   'update_profile': AccountProfileUpdateData
   'validate_reset_token': ResetPasswordData
   'verify_challenge': VerifyMfaChallengeData
-  'verify_email': ApiEmailVerificationVerifyVerifyEmailData
+  'verify_email': VerifyEmailData
 }
 
 /**
@@ -468,7 +468,7 @@ export interface OperationResponseTypes {
   'refresh_token': TokenRefreshResponses
   'regenerate_backup_codes': RegenerateMfaBackupCodesResponses
   'remove_account': AccountProfileUpdateResponses
-  'request_verification': ApiEmailVerificationRequestRequestVerificationResponses
+  'request_verification': RequestEmailVerificationResponses
   'reset_password_with_token': ResetPasswordResponses
   'revoke_all_sessions': RevokeAllSessionsResponses
   'send_fax': SendFaxResponses
@@ -483,7 +483,7 @@ export interface OperationResponseTypes {
   'update_profile': AccountProfileUpdateResponses
   'validate_reset_token': ResetPasswordResponses
   'verify_challenge': VerifyMfaChallengeResponses
-  'verify_email': ApiEmailVerificationVerifyVerifyEmailResponses
+  'verify_email': VerifyEmailResponses
 }
 
 /**
@@ -569,7 +569,7 @@ export interface OperationErrorTypes {
   'refresh_token': never
   'regenerate_backup_codes': RegenerateMfaBackupCodesErrors
   'remove_account': AccountProfileUpdateErrors
-  'request_verification': ApiEmailVerificationRequestRequestVerificationErrors
+  'request_verification': RequestEmailVerificationErrors
   'reset_password_with_token': ResetPasswordErrors
   'revoke_all_sessions': never
   'send_fax': SendFaxErrors
@@ -584,7 +584,7 @@ export interface OperationErrorTypes {
   'update_profile': AccountProfileUpdateErrors
   'validate_reset_token': ResetPasswordErrors
   'verify_challenge': VerifyMfaChallengeErrors
-  'verify_email': ApiEmailVerificationVerifyVerifyEmailErrors
+  'verify_email': VerifyEmailErrors
 }
 
 // ============================================================================

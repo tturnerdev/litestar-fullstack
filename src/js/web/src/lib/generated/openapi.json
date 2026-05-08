@@ -12936,28 +12936,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
-            "name": "targetTypeIn",
+            "name": "targetIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -12999,7 +12978,28 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetIdIn",
+            "name": "targetTypeIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13325,28 +13325,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
-            "name": "targetTypeIn",
+            "name": "targetIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13388,7 +13367,28 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetIdIn",
+            "name": "targetTypeIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13712,28 +13712,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
-            "name": "targetTypeIn",
+            "name": "targetIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13775,7 +13754,28 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetIdIn",
+            "name": "targetTypeIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -14093,28 +14093,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
-            "required": false,
-            "schema": {
-              "oneOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          {
-            "allowEmptyValue": false,
-            "allowReserved": false,
-            "deprecated": false,
-            "in": "query",
-            "name": "targetTypeIn",
+            "name": "targetIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -14156,7 +14135,28 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetIdIn",
+            "name": "targetTypeIn",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -20030,7 +20030,7 @@
     "/api/auth/oauth/github": {
       "get": {
         "deprecated": false,
-        "operationId": "ApiAuthOauthGithubGithubAuthorize",
+        "operationId": "GitHubOAuthAuthorize",
         "parameters": [
           {
             "allowEmptyValue": false,
@@ -20111,7 +20111,7 @@
     "/api/auth/oauth/github/callback": {
       "get": {
         "deprecated": false,
-        "operationId": "ApiAuthOauthGithubCallbackGithubCallback",
+        "operationId": "GitHubOAuthCallback",
         "parameters": [
           {
             "allowEmptyValue": false,
@@ -20248,7 +20248,7 @@
     "/api/auth/oauth/google": {
       "get": {
         "deprecated": false,
-        "operationId": "ApiAuthOauthGoogleGoogleAuthorize",
+        "operationId": "GoogleOAuthAuthorize",
         "parameters": [
           {
             "allowEmptyValue": false,
@@ -20329,7 +20329,7 @@
     "/api/auth/oauth/google/callback": {
       "get": {
         "deprecated": false,
-        "operationId": "ApiAuthOauthGoogleCallbackGoogleCallback",
+        "operationId": "GoogleOAuthCallback",
         "parameters": [
           {
             "allowEmptyValue": false,
@@ -23938,7 +23938,7 @@
     "/api/email-verification/request": {
       "post": {
         "deprecated": false,
-        "operationId": "ApiEmailVerificationRequestRequestVerification",
+        "operationId": "RequestEmailVerification",
         "requestBody": {
           "content": {
             "application/json": {
@@ -24009,7 +24009,7 @@
     "/api/email-verification/status/{user_id}": {
       "get": {
         "deprecated": false,
-        "operationId": "ApiEmailVerificationStatusUserIdGetVerificationStatus",
+        "operationId": "GetEmailVerificationStatus",
         "parameters": [
           {
             "deprecated": false,
@@ -24082,7 +24082,7 @@
     "/api/email-verification/verify": {
       "post": {
         "deprecated": false,
-        "operationId": "ApiEmailVerificationVerifyVerifyEmail",
+        "operationId": "VerifyEmail",
         "requestBody": {
           "content": {
             "application/json": {

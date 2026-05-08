@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { Icons } from "@/components/icons"
 import { Button } from "@/components/ui/button"
-import { apiAuthOauthGithubGithubAuthorize } from "@/lib/generated/api"
+import { gitHubOAuthAuthorize } from "@/lib/generated/api"
 
 /** Key used to store the post-auth redirect destination in sessionStorage */
 export const GITHUB_AUTH_REDIRECT_KEY = "github_auth_redirect"
@@ -21,7 +21,7 @@ export function GitHubSignInButton({ variant = "signin", onSuccess, onError, red
   const { mutate: initiateOAuth, isPending } = useMutation({
     mutationFn: async () => {
       const targetUrl = redirectUrl ?? `${window.location.origin}/auth/github/callback`
-      const response = await apiAuthOauthGithubGithubAuthorize({
+      const response = await gitHubOAuthAuthorize({
         query: {
           redirect_url: targetUrl,
         },

@@ -214,12 +214,24 @@ export function useEventStream() {
             fax_number: ["fax", "numbers"],
             ticket: ["tickets"],
           }
+          const detailKeyPrefix: Record<string, string[]> = {
+            device: ["device"],
+            extension: ["voice", "extension"],
+            phone_number: ["voice", "phone-number"],
+            location: ["location"],
+            connection: ["connection"],
+            fax_number: ["fax", "number"],
+            ticket: ["ticket"],
+          }
           const listKey = listKeys[d.entityType]
           if (listKey) {
             queryClient.invalidateQueries({ queryKey: listKey })
           }
           if (d.entityId) {
-            queryClient.invalidateQueries({ queryKey: [d.entityType, d.entityId] })
+            const prefix = detailKeyPrefix[d.entityType]
+            if (prefix) {
+              queryClient.invalidateQueries({ queryKey: [...prefix, d.entityId] })
+            }
           }
           break
         }

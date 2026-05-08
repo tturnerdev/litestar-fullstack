@@ -41,7 +41,7 @@ class EmailVerificationController(Controller):
         "audit_service": Provide(provide_audit_log_service),
     }
 
-    @post("/request", status_code=HTTP_201_CREATED)
+    @post("/request", operation_id="RequestEmailVerification", status_code=HTTP_201_CREATED)
     async def request_verification(
         self,
         users_service: UserService,
@@ -62,7 +62,7 @@ class EmailVerificationController(Controller):
         request.app.emit(event_id="verification_requested", user_id=user.id, mailer=app_mailer)
         return EmailVerificationSent(message="Verification email sent")
 
-    @post("/verify", status_code=HTTP_200_OK)
+    @post("/verify", operation_id="VerifyEmail", status_code=HTTP_200_OK)
     async def verify_email(
         self,
         request: Request[m.User, Token, Any],
@@ -92,7 +92,7 @@ class EmailVerificationController(Controller):
 
         return users_service.to_schema(user, schema_type=User)
 
-    @get("/status/{user_id:uuid}")
+    @get("/status/{user_id:uuid}", operation_id="GetEmailVerificationStatus")
     async def get_verification_status(
         self,
         user_id: UUID,

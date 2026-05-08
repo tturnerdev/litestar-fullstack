@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { Icons } from "@/components/icons"
 import { Button } from "@/components/ui/button"
-import { apiAuthOauthGoogleGoogleAuthorize } from "@/lib/generated/api"
+import { googleOAuthAuthorize } from "@/lib/generated/api"
 
 /** Key used to store the post-auth redirect destination in sessionStorage */
 export const GOOGLE_AUTH_REDIRECT_KEY = "google_auth_redirect"
@@ -21,7 +21,7 @@ export function GoogleSignInButton({ variant = "signin", onSuccess, onError, red
   const { mutate: initiateOAuth, isPending } = useMutation({
     mutationFn: async () => {
       const targetUrl = redirectUrl ?? `${window.location.origin}/auth/google/callback`
-      const response = await apiAuthOauthGoogleGoogleAuthorize({
+      const response = await googleOAuthAuthorize({
         query: {
           redirect_url: targetUrl,
         },

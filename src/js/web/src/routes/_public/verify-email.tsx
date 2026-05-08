@@ -11,7 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { useAuth } from "@/hooks/use-auth"
-import { apiEmailVerificationRequestRequestVerification, apiEmailVerificationVerifyVerifyEmail } from "@/lib/generated/api"
+import { requestEmailVerification, verifyEmail as verifyEmailApi } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_public/verify-email")({
   validateSearch: (search) =>
@@ -34,7 +34,7 @@ function VerifyEmailPage() {
 
   const { mutate: verifyEmail, isPending: isVerifying } = useMutation({
     mutationFn: async (verificationToken: string) => {
-      const response = await apiEmailVerificationVerifyVerifyEmail({
+      const response = await verifyEmailApi({
         body: { token: verificationToken },
       })
 
@@ -161,7 +161,7 @@ export function ResendVerificationPage() {
       if (!user?.email) {
         throw new Error("User email not available")
       }
-      const response = await apiEmailVerificationRequestRequestVerification({
+      const response = await requestEmailVerification({
         body: { email: user.email },
       })
       if (response.error) {
