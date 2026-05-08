@@ -341,8 +341,8 @@ function EditCallQueueDialog({ queue, open, onOpenChange }: EditCallQueueDialogP
                     }
                   }}
                   onBlur={(e) => handleFieldBlur("ringTime", e.target.value)}
-                  min={5}
-                  max={300}
+                  min={1}
+                  max={600}
                   aria-invalid={!!fieldErrors.ringTime}
                 />
                 <FieldError message={fieldErrors.ringTime} />
@@ -369,13 +369,13 @@ function EditCallQueueDialog({ queue, open, onOpenChange }: EditCallQueueDialogP
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-cq-max-callers">Max Callers</Label>
-                <Input id="edit-cq-max-callers" type="number" value={maxCallers} onChange={(e) => setMaxCallers(Number(e.target.value))} min={1} />
+                <Input id="edit-cq-max-callers" type="number" value={maxCallers} onChange={(e) => setMaxCallers(Number(e.target.value))} min={1} max={100} />
               </div>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="edit-cq-wrapup">Wrapup Time (s)</Label>
-              <Input id="edit-cq-wrapup" type="number" value={wrapupTime} onChange={(e) => setWrapupTime(Number(e.target.value))} min={0} />
+              <Input id="edit-cq-wrapup" type="number" value={wrapupTime} onChange={(e) => setWrapupTime(Number(e.target.value))} min={0} max={300} />
             </div>
 
             <Separator />

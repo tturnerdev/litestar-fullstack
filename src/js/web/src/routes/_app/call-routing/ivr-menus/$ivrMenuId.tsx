@@ -651,7 +651,7 @@ function IvrMenuDetailPage() {
                             onChange={(e) => handleFieldChange("timeout", Number(e.target.value), setEditTimeout)}
                             onBlur={() => handleFieldBlur("timeout", editTimeout)}
                             min={1}
-                            max={300}
+                            max={120}
                             aria-invalid={!!fieldErrors.timeout}
                           />
                           <FieldError message={fieldErrors.timeout} />
@@ -663,7 +663,7 @@ function IvrMenuDetailPage() {
                             value={editMaxRetries}
                             onChange={(e) => handleFieldChange("maxRetries", Number(e.target.value), setEditMaxRetries)}
                             onBlur={() => handleFieldBlur("maxRetries", editMaxRetries)}
-                            min={1}
+                            min={0}
                             max={10}
                             aria-invalid={!!fieldErrors.maxRetries}
                           />

@@ -304,12 +304,12 @@ function EditRingGroupDialog({ ringGroup, open, onOpenChange }: EditRingGroupDia
                   }
                 }}
                 onBlur={(e) => handleFieldBlur("ringTime", e.target.value)}
-                min={5}
-                max={300}
+                min={1}
+                max={600}
                 aria-invalid={!!fieldErrors.ringTime}
               />
               <FieldError message={fieldErrors.ringTime} />
-              <p className="text-xs text-muted-foreground">How long each member rings before moving on (5-300 seconds).</p>
+              <p className="text-xs text-muted-foreground">How long each member rings before moving on (1-600 seconds).</p>
             </div>
 
             <Separator />
