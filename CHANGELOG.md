@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.273.0 (2026-05-07)
+
+### Added
+- **DataFreshness on E911 & tags** — Last-updated indicator with refresh on E911 registrations and tags list pages
+- **Admin tasks sorting** — SortableHeader on all 8 columns including computed duration
+- **Column visibility** — Toggleable columns with localStorage persistence on admin music-on-hold (5 cols), admin support (3 cols), admin voice (4 cols), and fax email-routes (4 cols)
+
 ## v0.272.0 (2026-05-07)
 
 ### Added
