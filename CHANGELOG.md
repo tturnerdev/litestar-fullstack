@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.268.0 (2026-05-07)
+
+### Added
+- **Column visibility toggles** — Extensions, teams, and tasks list pages now support hiding/showing columns with localStorage persistence
+- **Call-routing sortable headers** — All 4 tabs (time conditions, IVR menus, call queues, ring groups) have clickable column headers for client-side sorting
+- **Voice dashboard error boundaries** — Each sub-component wrapped in SectionErrorBoundary to prevent full-page crashes
+- **SortableHeader aria-sort** — Screen readers now announce current sort direction on all sortable table columns
+- **Duplicate member validation** — CallQueueMemberService and RingGroupMemberService now reject duplicate extension assignments
+
 ## v0.267.0 (2026-05-07)
 
 ### Added
