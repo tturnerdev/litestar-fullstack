@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.262.0 (2026-05-07)
+
+### Added
+- **Task deletion endpoint** — Backend DELETE endpoint for tasks in terminal states (completed/failed/cancelled) with audit logging; frontend wired with confirmation dialog and navigation
+- **Admin system health dashboard** — Real-time Redis/Valkey status, database connection pool visualization, resource counts (users, teams, devices, connections), Litestar version and environment info
+- **Profile data export enhancement** — Format selector (JSON/CSV), selective data categories with checkboxes, progress indicator, proper file download with timestamped filename
+- **API key management coming soon card** — Replaced misleading button with informational card describing planned capabilities
+
 ## v0.261.0 (2026-05-07)
 
 ### Added
