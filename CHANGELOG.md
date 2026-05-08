@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.281.0 (2026-05-07)
+
+### Added
+- **Error boundaries** — SectionErrorBoundary added to admin audit log, fax send, and team invitation accept pages
+- **Schema timestamp completeness** — Added missing `updated_at` to MusicOnHoldList, WebhookList, WebhookEndpointList; added both timestamps to ScheduleEntryList and ScheduleEntryDetail
+
 ## v0.280.0 (2026-05-07)
 
 ### Added
