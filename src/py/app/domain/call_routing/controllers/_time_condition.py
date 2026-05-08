@@ -182,8 +182,7 @@ class TimeConditionController(Controller):
             TimeCondition
         """
         before = capture_snapshot(await time_conditions_service.get(time_condition_id))
-        await time_conditions_service.update(item_id=time_condition_id, data=data.to_dict())
-        fresh_obj = await time_conditions_service.get_one(id=time_condition_id)
+        fresh_obj = await time_conditions_service.update(item_id=time_condition_id, data=data.to_dict())
         after = capture_snapshot(fresh_obj)
         await log_audit(
             audit_service,
@@ -278,11 +277,10 @@ class TimeConditionController(Controller):
             TimeCondition
         """
         before = capture_snapshot(await time_conditions_service.get(time_condition_id))
-        await time_conditions_service.update(
+        fresh_obj = await time_conditions_service.update(
             item_id=time_condition_id,
             data={"override_mode": data.override_mode},
         )
-        fresh_obj = await time_conditions_service.get_one(id=time_condition_id)
         after = capture_snapshot(fresh_obj)
         await log_audit(
             audit_service,

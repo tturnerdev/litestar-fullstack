@@ -184,8 +184,7 @@ class IvrMenuController(Controller):
             IvrMenu
         """
         before = capture_snapshot(await ivr_menus_service.get(ivr_menu_id))
-        await ivr_menus_service.update(item_id=ivr_menu_id, data=data.to_dict())
-        fresh_obj = await ivr_menus_service.get_one(id=ivr_menu_id)
+        fresh_obj = await ivr_menus_service.update(item_id=ivr_menu_id, data=data.to_dict())
         after = capture_snapshot(fresh_obj)
         await log_audit(
             audit_service,
@@ -360,8 +359,7 @@ class IvrMenuController(Controller):
         """
         await ivr_menus_service.get(ivr_menu_id)
         before = capture_snapshot(await ivr_menu_options_service.get_one(id=option_id, ivr_menu_id=ivr_menu_id))
-        await ivr_menu_options_service.update(item_id=option_id, data=data.to_dict())
-        fresh_obj = await ivr_menu_options_service.get_one(id=option_id)
+        fresh_obj = await ivr_menu_options_service.update(item_id=option_id, data=data.to_dict())
         after = capture_snapshot(fresh_obj)
         await log_audit(
             audit_service,

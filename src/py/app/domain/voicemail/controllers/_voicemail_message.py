@@ -54,7 +54,7 @@ class VoicemailMessageController(Controller):
         "audit_service": Provide(provide_audit_log_service),
     }
 
-    @get(operation_id="ListAllVoicemailMessages", path="/api/voicemail/messages", guards=[requires_voicemail_message_access])
+    @get(operation_id="ListAllVoicemailMessages", summary="List all voicemail messages", path="/api/voicemail/messages", guards=[requires_voicemail_message_access])
     async def list_voicemail_messages(
         self,
         voicemail_messages_service: VoicemailMessageService,
@@ -104,6 +104,7 @@ class VoicemailMessageController(Controller):
 
     @get(
         operation_id="ListVoicemailBoxMessages",
+        summary="List voicemail box messages",
         path="/api/voicemail/boxes/{box_id:uuid}/messages",
         guards=[requires_voicemail_message_access],
     )
@@ -143,6 +144,7 @@ class VoicemailMessageController(Controller):
 
     @get(
         operation_id="GetVoicemailMessageById",
+        summary="Get voicemail message details",
         path="/api/voicemail/messages/{message_id:uuid}",
         guards=[requires_voicemail_message_access],
     )
@@ -165,6 +167,7 @@ class VoicemailMessageController(Controller):
 
     @put(
         operation_id="ToggleVoicemailMessageRead",
+        summary="Toggle voicemail message read status",
         path="/api/voicemail/messages/{message_id:uuid}/read",
         guards=[requires_voicemail_message_access],
     )
@@ -192,6 +195,7 @@ class VoicemailMessageController(Controller):
 
     @delete(
         operation_id="DeleteVoicemailMessageById",
+        summary="Delete a voicemail message",
         path="/api/voicemail/messages/{message_id:uuid}",
         guards=[requires_voicemail_message_access],
         status_code=HTTP_204_NO_CONTENT,

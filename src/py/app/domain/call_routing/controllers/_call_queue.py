@@ -185,8 +185,7 @@ class CallQueueController(Controller):
             CallQueue
         """
         before = capture_snapshot(await call_queues_service.get(call_queue_id))
-        await call_queues_service.update(item_id=call_queue_id, data=data.to_dict())
-        fresh_obj = await call_queues_service.get_one(id=call_queue_id)
+        fresh_obj = await call_queues_service.update(item_id=call_queue_id, data=data.to_dict())
         after = capture_snapshot(fresh_obj)
         await log_audit(
             audit_service,
@@ -363,8 +362,7 @@ class CallQueueController(Controller):
         before = capture_snapshot(
             await call_queue_members_service.get_one(id=member_id, call_queue_id=call_queue_id)
         )
-        await call_queue_members_service.update(item_id=member_id, data=data.to_dict())
-        fresh_obj = await call_queue_members_service.get_one(id=member_id)
+        fresh_obj = await call_queue_members_service.update(item_id=member_id, data=data.to_dict())
         after = capture_snapshot(fresh_obj)
         await log_audit(
             audit_service,
@@ -466,11 +464,10 @@ class CallQueueController(Controller):
         before = capture_snapshot(
             await call_queue_members_service.get_one(id=member_id, call_queue_id=call_queue_id)
         )
-        await call_queue_members_service.update(
+        fresh_obj = await call_queue_members_service.update(
             item_id=member_id,
             data={"is_paused": data.is_paused},
         )
-        fresh_obj = await call_queue_members_service.get_one(id=member_id)
         after = capture_snapshot(fresh_obj)
         await log_audit(
             audit_service,

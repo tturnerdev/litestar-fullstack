@@ -57,7 +57,7 @@ class VoicemailBoxController(Controller):
         "notifications_service": Provide(provide_notifications_service),
     }
 
-    @get(operation_id="ListVoicemailBoxes", path="/api/voicemail/boxes", guards=[requires_voicemail_access])
+    @get(operation_id="ListVoicemailBoxes", summary="List voicemail boxes", path="/api/voicemail/boxes", guards=[requires_voicemail_access])
     async def list_voicemail_boxes(
         self,
         voicemail_boxes_service: VoicemailBoxService,
@@ -90,7 +90,7 @@ class VoicemailBoxController(Controller):
             )
         return voicemail_boxes_service.to_schema(results, total, filters, schema_type=VoicemailBox)
 
-    @post(operation_id="CreateVoicemailBox", path="/api/voicemail/boxes", status_code=HTTP_201_CREATED, guards=[requires_voicemail_access])
+    @post(operation_id="CreateVoicemailBox", summary="Create a voicemail box", path="/api/voicemail/boxes", status_code=HTTP_201_CREATED, guards=[requires_voicemail_access])
     async def create_voicemail_box(
         self,
         request: Request[m.User, Token, Any],
@@ -144,6 +144,7 @@ class VoicemailBoxController(Controller):
 
     @get(
         operation_id="GetVoicemailBox",
+        summary="Get voicemail box details",
         path="/api/voicemail/boxes/{box_id:uuid}",
         guards=[requires_voicemail_access],
     )
@@ -166,6 +167,7 @@ class VoicemailBoxController(Controller):
 
     @patch(
         operation_id="UpdateVoicemailBox",
+        summary="Update a voicemail box",
         path="/api/voicemail/boxes/{box_id:uuid}",
         guards=[requires_voicemail_access],
     )
@@ -212,6 +214,7 @@ class VoicemailBoxController(Controller):
 
     @delete(
         operation_id="DeleteVoicemailBox",
+        summary="Delete a voicemail box",
         path="/api/voicemail/boxes/{box_id:uuid}",
         guards=[requires_voicemail_access],
         status_code=HTTP_204_NO_CONTENT,
@@ -267,6 +270,7 @@ class VoicemailBoxController(Controller):
 
     @get(
         operation_id="GetVoicemailBoxUnreadCount",
+        summary="Get unread voicemail count",
         path="/api/voicemail/boxes/{box_id:uuid}/unread",
         guards=[requires_voicemail_access],
     )

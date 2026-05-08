@@ -184,8 +184,7 @@ class RingGroupController(Controller):
             RingGroup
         """
         before = capture_snapshot(await ring_groups_service.get(ring_group_id))
-        await ring_groups_service.update(item_id=ring_group_id, data=data.to_dict())
-        fresh_obj = await ring_groups_service.get_one(id=ring_group_id)
+        fresh_obj = await ring_groups_service.update(item_id=ring_group_id, data=data.to_dict())
         after = capture_snapshot(fresh_obj)
         await log_audit(
             audit_service,
@@ -362,8 +361,7 @@ class RingGroupController(Controller):
         before = capture_snapshot(
             await ring_group_members_service.get_one(id=member_id, ring_group_id=ring_group_id)
         )
-        await ring_group_members_service.update(item_id=member_id, data=data.to_dict())
-        fresh_obj = await ring_group_members_service.get_one(id=member_id)
+        fresh_obj = await ring_group_members_service.update(item_id=member_id, data=data.to_dict())
         after = capture_snapshot(fresh_obj)
         await log_audit(
             audit_service,

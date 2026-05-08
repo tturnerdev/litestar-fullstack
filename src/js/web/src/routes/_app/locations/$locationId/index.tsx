@@ -132,7 +132,6 @@ function LocationDetailPage() {
     }
     updateLocation.mutate(payload, {
       onSuccess: () => {
-        toast.success("Location updated successfully")
         setEditing(false)
       },
     })
@@ -141,7 +140,6 @@ function LocationDetailPage() {
   const handleDelete = async () => {
     try {
       await deleteLocation.mutateAsync(locationId)
-      toast.success("Location deleted successfully")
       router.navigate({ to: "/locations" })
     } catch {
       toast.error("Failed to delete location")

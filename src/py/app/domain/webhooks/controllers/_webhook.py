@@ -214,11 +214,10 @@ class WebhookController(Controller):
         if existing.user_id != current_user.id and not current_user.is_superuser:
             raise NotFoundException(detail="Webhook not found.")
         before = capture_snapshot(existing)
-        await webhooks_service.update(
+        fresh_obj = await webhooks_service.update(
             item_id=webhook_id,
             data=data.to_dict(),
         )
-        fresh_obj = await webhooks_service.get_one(id=webhook_id)
         request.app.emit(event_id="webhook_updated", entity_id=fresh_obj.id)
         after = capture_snapshot(fresh_obj)
         await log_audit(

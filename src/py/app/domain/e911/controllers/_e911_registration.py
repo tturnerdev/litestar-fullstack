@@ -187,11 +187,10 @@ class E911RegistrationController(Controller):
             E911Registration
         """
         before = capture_snapshot(await e911_service.get(registration_id))
-        await e911_service.update(
+        fresh_obj = await e911_service.update(
             item_id=registration_id,
             data=data.to_dict(),
         )
-        fresh_obj = await e911_service.get_one(id=registration_id)
         request.app.emit(event_id="e911_registration_updated", entity_id=fresh_obj.id)
         after = capture_snapshot(fresh_obj)
         await log_audit(
