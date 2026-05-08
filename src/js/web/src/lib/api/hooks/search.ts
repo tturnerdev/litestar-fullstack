@@ -1,31 +1,17 @@
 import { useQuery } from "@tanstack/react-query"
-import { client } from "@/lib/generated/api/client.gen"
+import { globalSearch, type SearchResponse, type SearchResultItem } from "@/lib/generated/api"
 
-export interface SearchResultItem {
-  type: string
-  id: string
-  label: string
-  description: string
-  url: string
-}
-
-export interface SearchResponse {
-  query: string
-  results: SearchResultItem[]
-  total: number
-}
+export type { SearchResultItem, SearchResponse }
 
 export function useGlobalSearch(query: string) {
   return useQuery({
     queryKey: ["global-search", query],
     queryFn: async () => {
-      const { data } = await client.get({
-        url: "/api/search",
+      const { data } = await globalSearch({
         query: { q: query, limit: 5 },
-        security: [{ scheme: "bearer", type: "http" }],
         throwOnError: true,
       })
-      return data as unknown as SearchResponse
+      return data as SearchResponse
     },
     enabled: query.trim().length >= 2,
     staleTime: 30_000,

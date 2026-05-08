@@ -1,28 +1,22 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
-import { client } from "@/lib/generated/api/client.gen"
+import {
+  deleteNotification as deleteNotificationApi,
+  deleteReadNotifications,
+  getNotificationPreferences,
+  getUnreadNotificationCount,
+  listNotifications,
+  markAllNotificationsRead,
+  markNotificationRead,
+  type Notification,
+  type NotificationPreference,
+  type NotificationPreferenceUpdate,
+  type UnreadCount,
+  updateNotificationPreferences as updatePrefsApi,
+} from "@/lib/generated/api"
 
-export interface NotificationItem {
-  id: string
-  userId: string
-  title: string
-  message: string
-  category: string
-  isRead: boolean
-  actionUrl: string | null
-  metadata: Record<string, unknown> | null
-  createdAt: string
-  updatedAt: string
-}
-
-interface NotificationListResponse {
-  items: NotificationItem[]
-  total: number
-}
-
-interface UnreadCountResponse {
-  count: number
-}
+export type NotificationItem = Notification
+export type { NotificationPreference, UnreadCount }
 
 export const notificationsQueryKey = (page = 1, pageSize = 20) => ["notifications", page, pageSize] as const
 export const unreadCountQueryKey = () => ["notifications", "unread-count"] as const
@@ -31,22 +25,16 @@ export function useNotifications(
   page = 1,
   pageSize = 20,
   options?: {
-    /** When set, the query will automatically refetch on this interval (ms). */
     refetchInterval?: number | false
   },
 ) {
   return useQuery({
     queryKey: notificationsQueryKey(page, pageSize),
     queryFn: async () => {
-      const response = await client.get({
-        url: "/api/notifications",
-        query: {
-          currentPage: page,
-          pageSize,
-        },
-        security: [{ scheme: "bearer", type: "http" }],
+      const response = await listNotifications({
+        query: { currentPage: page, pageSize },
       })
-      return response.data as NotificationListResponse
+      return response.data as { items: Notification[]; total: number }
     },
     ...(options?.refetchInterval !== undefined ? { refetchInterval: options.refetchInterval } : {}),
   })
@@ -56,11 +44,8 @@ export function useUnreadCount() {
   return useQuery({
     queryKey: unreadCountQueryKey(),
     queryFn: async () => {
-      const response = await client.get({
-        url: "/api/notifications/unread-count",
-        security: [{ scheme: "bearer", type: "http" }],
-      })
-      return response.data as UnreadCountResponse
+      const response = await getUnreadNotificationCount()
+      return response.data as UnreadCount
     },
     refetchInterval: 30_000,
   })
@@ -70,12 +55,10 @@ export function useMarkRead() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (notificationId: string) => {
-      const response = await client.patch({
-        url: "/api/notifications/{notification_id}/read",
+      const response = await markNotificationRead({
         path: { notification_id: notificationId },
-        security: [{ scheme: "bearer", type: "http" }],
       })
-      return response.data as NotificationItem
+      return response.data as Notification
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notifications"] })
@@ -92,11 +75,8 @@ export function useMarkAllRead() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async () => {
-      const response = await client.post({
-        url: "/api/notifications/mark-all-read",
-        security: [{ scheme: "bearer", type: "http" }],
-      })
-      return response.data as UnreadCountResponse
+      const response = await markAllNotificationsRead()
+      return response.data as UnreadCount
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notifications"] })
@@ -114,10 +94,8 @@ export function useDeleteNotification() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (notificationId: string) => {
-      await client.delete({
-        url: "/api/notifications/{notification_id}",
+      await deleteNotificationApi({
         path: { notification_id: notificationId },
-        security: [{ scheme: "bearer", type: "http" }],
       })
     },
     onSuccess: () => {
@@ -136,10 +114,7 @@ export function useDeleteAllRead() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async () => {
-      await client.delete({
-        url: "/api/notifications/read",
-        security: [{ scheme: "bearer", type: "http" }],
-      })
+      await deleteReadNotifications()
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notifications"] })
@@ -155,31 +130,16 @@ export function useDeleteAllRead() {
 
 // --- Notification Preferences ---
 
-export interface NotificationPreference {
-  id: string
-  userId: string
-  emailEnabled: boolean
-  categories: Record<string, boolean>
-}
-
-interface NotificationPreferenceUpdate {
-  emailEnabled?: boolean
-  categories?: Record<string, boolean>
-}
-
 const PREFERENCES_QUERY_KEY = ["notificationPreferences"] as const
 
 export function useNotificationPreferences() {
   return useQuery({
     queryKey: PREFERENCES_QUERY_KEY,
     queryFn: async () => {
-      const response = await client.get({
-        security: [{ scheme: "bearer", type: "http" }],
-        url: "/api/notifications/preferences",
-      })
+      const response = await getNotificationPreferences()
       return response.data as NotificationPreference
     },
-    staleTime: 5 * 60 * 1000, // user preferences change rarely
+    staleTime: 5 * 60 * 1000,
   })
 }
 
@@ -188,11 +148,7 @@ export function useUpdateNotificationPreferences() {
 
   return useMutation({
     mutationFn: async (body: NotificationPreferenceUpdate) => {
-      const response = await client.patch({
-        security: [{ scheme: "bearer", type: "http" }],
-        url: "/api/notifications/preferences",
-        body,
-      })
+      const response = await updatePrefsApi({ body })
       return response.data as NotificationPreference
     },
     onMutate: async (newData) => {
