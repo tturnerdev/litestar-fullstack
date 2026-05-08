@@ -905,6 +905,7 @@ function E911Page() {
                 })
               }}
             >
+              {deleteMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {deleteMutation.isPending ? "Deleting..." : "Delete Registration"}
             </AlertDialogAction>
           </AlertDialogFooter>

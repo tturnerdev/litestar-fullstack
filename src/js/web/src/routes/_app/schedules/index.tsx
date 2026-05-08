@@ -787,7 +787,8 @@ function ScheduleRow({
           <AlertDialogFooter>
             <AlertDialogCancel disabled={deleteSchedule.isPending}>Cancel</AlertDialogCancel>
             <AlertDialogAction disabled={deleteSchedule.isPending} onClick={handleConfirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Delete
+              {deleteSchedule.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {deleteSchedule.isPending ? "Deleting..." : "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
