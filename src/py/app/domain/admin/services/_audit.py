@@ -103,6 +103,30 @@ class AuditLogService(service.SQLAlchemyAsyncRepositoryService[m.AuditLog]):
             m.AuditLog.created_at >= cutoff_time,
         )
 
+    async def count_recent_actions_by_ip(
+        self,
+        *,
+        action: str,
+        ip_address: str,
+        window_minutes: int,
+    ) -> int:
+        """Count recent actions from a specific IP within a rolling window.
+
+        Args:
+            action: Action name to count.
+            ip_address: IP address to filter by.
+            window_minutes: Window size in minutes.
+
+        Returns:
+            Number of matching actions within the time window.
+        """
+        cutoff_time = datetime.now(UTC) - timedelta(minutes=window_minutes)
+        return await self.count(
+            m.AuditLog.action == action,
+            m.AuditLog.ip_address == ip_address,
+            m.AuditLog.created_at >= cutoff_time,
+        )
+
     async def get_user_activity(
         self,
         user_id: UUID,

@@ -66,6 +66,8 @@ REFRESH_COOKIE_NAME = "refresh_token"
 REFRESH_TOKEN_MAX_AGE = 604800 # 7 days
 LOGIN_RATE_LIMIT_WINDOW_MINUTES = 15
 LOGIN_RATE_LIMIT_MAX_ATTEMPTS = 10
+SIGNUP_RATE_LIMIT_WINDOW_MINUTES = 60
+SIGNUP_RATE_LIMIT_MAX_ATTEMPTS = 5
 
 
 class AccessController(Controller):
@@ -489,6 +491,19 @@ class AccessController(Controller):
         Returns:
             User
         """
+        client_ip = request.client.host if request.client else None
+        if client_ip:
+            recent_signups = await audit_service.count_recent_actions_by_ip(
+                action="account.register",
+                ip_address=client_ip,
+                window_minutes=SIGNUP_RATE_LIMIT_WINDOW_MINUTES,
+            )
+            if recent_signups >= SIGNUP_RATE_LIMIT_MAX_ATTEMPTS:
+                raise ClientException(
+                    detail="Too many registration attempts. Please try again later.",
+                    status_code=429,
+                )
+
         user_data = data.to_dict()
 
         role_obj = await roles_service.get_one_or_none(slug=slugify(users_service.default_role))
