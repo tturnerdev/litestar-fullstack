@@ -10,6 +10,7 @@ from litestar import Controller, get
 from litestar.datastructures import CacheControlHeader
 from litestar.di import Provide
 from litestar.params import Dependency
+from sqlalchemy import func, select
 from sqlalchemy.orm import selectinload
 
 from app.db import models as m
@@ -114,10 +115,9 @@ class AdminVoiceController(Controller):
         active_extensions = await extension_service.count(m.Extension.is_active.is_(True))
         active_dnd = await dnd_service.count(m.DoNotDisturb.is_enabled.is_(True))
 
-        all_numbers = await phone_number_service.list()
-        type_counts: dict[str, int] = {}
-        for pn in all_numbers:
-            type_counts[pn.number_type] = type_counts.get(pn.number_type, 0) + 1
+        stmt = select(m.PhoneNumber.number_type, func.count()).group_by(m.PhoneNumber.number_type)
+        result = await phone_number_service.repository.session.execute(stmt)
+        type_counts: dict[str, int] = dict(result.all())
 
         return AdminVoiceStats(
             total_phone_numbers=total_phone_numbers,

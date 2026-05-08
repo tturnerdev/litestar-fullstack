@@ -37,7 +37,7 @@ class NotificationCreate(CamelizedBaseStruct):
     metadata_: dict[str, Any] | None = None
 
 
-class NotificationUpdate(CamelizedBaseStruct):
+class NotificationUpdate(CamelizedBaseStruct, omit_defaults=True):
     """Schema for updating a notification (mark read)."""
 
     is_read: bool | msgspec.UnsetType = msgspec.UNSET

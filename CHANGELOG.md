@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.301.0 (2026-05-08)
+
+### Fixed
+- **Update schemas missing `omit_defaults=True`** — RoleUpdate, NotificationUpdate, WebhookEndpointUpdate, and TagUpdate now correctly omit UNSET fields during serialization
+- **Unbounded list() calls in admin stats** — Replaced full-table loads with SQL GROUP BY aggregation queries in admin device, voice, and support stats endpoints for better scalability
+
 ## v0.300.0 (2026-05-08)
 
 ### Fixed

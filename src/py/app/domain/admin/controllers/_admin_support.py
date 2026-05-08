@@ -9,6 +9,7 @@ from advanced_alchemy.service.pagination import OffsetPagination
 from litestar import Controller, get
 from litestar.datastructures import CacheControlHeader
 from litestar.params import Dependency
+from sqlalchemy import func, select
 from sqlalchemy.orm import selectinload
 
 from app.db import models as m
@@ -92,13 +93,15 @@ class AdminSupportController(Controller):
         resolved = await ticket_service.count(m.Ticket.status == "resolved")
         closed = await ticket_service.count(m.Ticket.status == "closed")
 
-        all_tickets = await ticket_service.list()
-        priority_counts: dict[str, int] = {}
-        category_counts: dict[str, int] = {}
-        for t in all_tickets:
-            priority_counts[t.priority] = priority_counts.get(t.priority, 0) + 1
-            cat = t.category or "uncategorized"
-            category_counts[cat] = category_counts.get(cat, 0) + 1
+        priority_stmt = select(m.Ticket.priority, func.count()).group_by(m.Ticket.priority)
+        priority_result = await ticket_service.repository.session.execute(priority_stmt)
+        priority_counts: dict[str, int] = dict(priority_result.all())
+
+        category_stmt = select(
+            func.coalesce(m.Ticket.category, "uncategorized"), func.count(),
+        ).group_by(func.coalesce(m.Ticket.category, "uncategorized"))
+        category_result = await ticket_service.repository.session.execute(category_stmt)
+        category_counts: dict[str, int] = dict(category_result.all())
 
         return AdminSupportStats(
             total=total,

@@ -37,5 +37,5 @@ class RoleCreate(CamelizedBaseStruct):
     name: str
 
 
-class RoleUpdate(CamelizedBaseStruct):
+class RoleUpdate(CamelizedBaseStruct, omit_defaults=True):
     name: str | msgspec.UnsetType | None = msgspec.UNSET

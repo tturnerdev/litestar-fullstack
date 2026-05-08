@@ -9,6 +9,7 @@ from advanced_alchemy.service.pagination import OffsetPagination
 from litestar import Controller, get
 from litestar.datastructures import CacheControlHeader
 from litestar.params import Dependency
+from sqlalchemy import func, select
 from sqlalchemy.orm import selectinload
 
 from app.db import models as m
@@ -91,10 +92,9 @@ class AdminDevicesController(Controller):
         offline = await device_service.count(m.Device.status == "offline")
         error = await device_service.count(m.Device.status == "error")
 
-        all_devices = await device_service.list()
-        type_counts: dict[str, int] = {}
-        for d in all_devices:
-            type_counts[d.device_type] = type_counts.get(d.device_type, 0) + 1
+        stmt = select(m.Device.device_type, func.count()).group_by(m.Device.device_type)
+        result = await device_service.repository.session.execute(stmt)
+        type_counts: dict[str, int] = dict(result.all())
 
         return AdminDeviceStats(
             total=total,

@@ -54,7 +54,7 @@ class WebhookEndpointCreate(CamelizedBaseStruct):
     team_id: UUID | None = None
 
 
-class WebhookEndpointUpdate(CamelizedBaseStruct):
+class WebhookEndpointUpdate(CamelizedBaseStruct, omit_defaults=True):
     """Webhook endpoint update schema."""
 
     url: Annotated[str, Meta(min_length=1, max_length=2048)] | None = msgspec.UNSET  # type: ignore[assignment]
