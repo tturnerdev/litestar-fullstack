@@ -2,13 +2,18 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from advanced_alchemy.extensions.litestar import repository, service
+from advanced_alchemy.filters import CollectionFilter
+from litestar.exceptions import ValidationException
 from sqlalchemy import cast
 from sqlalchemy.dialects.postgresql import JSONB
 
 from app.db import models as m
+
+if TYPE_CHECKING:
+    from advanced_alchemy.service import ModelDictT
 
 
 class WebhookService(service.SQLAlchemyAsyncRepositoryService[m.Webhook]):
@@ -36,6 +41,17 @@ class WebhookService(service.SQLAlchemyAsyncRepositoryService[m.Webhook]):
             cast(m.Webhook.events, JSONB).op("@>")(cast([event], JSONB)),
         )
         return list(results)
+
+    async def to_model_on_create(self, data: ModelDictT[m.Webhook]) -> ModelDictT[m.Webhook]:
+        """Validate that no webhook with the same name already exists."""
+        data = service.schema_dump(data)
+        if service.is_dict(data):
+            existing = await self.repository.list(
+                CollectionFilter(field_name="name", values=[data["name"]]),
+            )
+            if existing:
+                raise ValidationException("A webhook with this name already exists.")
+        return data
 
     async def update(self, data: Any, item_id: Any | None = None, **kwargs: Any) -> m.Webhook:
         return await super().update(data, item_id=item_id, **kwargs)

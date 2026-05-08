@@ -2,14 +2,19 @@ from __future__ import annotations
 
 import logging
 from collections.abc import Sequence
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
+from advanced_alchemy.filters import CollectionFilter
 from advanced_alchemy.extensions.litestar import repository, service
+from litestar.exceptions import ValidationException
 from sqlalchemy import select
 
 from app.db import models as m
 from app.domain.voice.schemas import PhoneNumber as PhoneNumberSchema
+
+if TYPE_CHECKING:
+    from advanced_alchemy.service import ModelDictT
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +33,16 @@ class PhoneNumberService(service.SQLAlchemyAsyncRepositoryService[m.PhoneNumber]
 
     repository_type = Repo
     match_fields = ["number"]
+
+    async def to_model_on_create(self, data: ModelDictT[m.PhoneNumber]) -> ModelDictT[m.PhoneNumber]:
+        data = service.schema_dump(data)
+        if service.is_dict(data):
+            existing = await self.repository.list(
+                CollectionFilter(field_name="number", values=[data["number"]]),
+            )
+            if existing:
+                raise ValidationException("A phone number with this number already exists.")
+        return data
 
     async def check_duplicates(self, numbers: list[str]) -> set[str]:
         """Check which phone numbers already exist in the database.

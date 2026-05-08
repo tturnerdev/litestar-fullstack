@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from advanced_alchemy.filters import CollectionFilter
 from advanced_alchemy.extensions.litestar import repository, service
 from litestar.exceptions import ValidationException
 
@@ -23,6 +24,16 @@ class CallQueueService(service.SQLAlchemyAsyncRepositoryService[m.CallQueue]):
 
     repository_type = Repo
     match_fields = ["name"]
+
+    async def to_model_on_create(self, data: ModelDictT[m.CallQueue]) -> ModelDictT[m.CallQueue]:
+        data = service.schema_dump(data)
+        if service.is_dict(data):
+            existing = await self.repository.list(
+                CollectionFilter(field_name="name", values=[data["name"]]),
+            )
+            if existing:
+                raise ValidationException("A call queue with this name already exists.")
+        return data
 
 
 class CallQueueMemberService(service.SQLAlchemyAsyncRepositoryService[m.CallQueueMember]):

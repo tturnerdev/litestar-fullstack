@@ -10,6 +10,8 @@ from urllib.parse import urlparse
 import httpx
 import structlog
 from advanced_alchemy.extensions.litestar import repository, service
+from advanced_alchemy.filters import CollectionFilter
+from litestar.exceptions import ValidationException
 
 from app.db import models as m
 from app.lib.settings import get_settings
@@ -38,6 +40,18 @@ class WebhookEndpointService(service.SQLAlchemyAsyncRepositoryService[m.WebhookE
 
     repository_type = Repo
     match_fields = ["url"]
+
+    async def to_model_on_create(
+        self, data: service.ModelDictT[m.WebhookEndpoint]
+    ) -> service.ModelDictT[m.WebhookEndpoint]:
+        data = service.schema_dump(data)
+        if service.is_dict(data):
+            existing = await self.repository.list(
+                CollectionFilter(field_name="url", values=[data["url"]]),
+            )
+            if existing:
+                raise ValidationException("A webhook endpoint with this URL already exists.")
+        return data
 
     async def create(self, data: dict[str, Any] | m.WebhookEndpoint, **kwargs: Any) -> m.WebhookEndpoint:
         """Create a webhook endpoint with URL validation.

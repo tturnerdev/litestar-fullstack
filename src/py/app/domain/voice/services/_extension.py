@@ -1,13 +1,18 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
+from advanced_alchemy.filters import CollectionFilter
 from advanced_alchemy.extensions.litestar import repository, service
+from litestar.exceptions import ValidationException
 from sqlalchemy import select
 
 from app.db import models as m
+
+if TYPE_CHECKING:
+    from advanced_alchemy.service import ModelDictT
 
 logger = logging.getLogger(__name__)
 from app.domain.voice.schemas import Extension as ExtensionSchema
@@ -23,6 +28,16 @@ class ExtensionService(service.SQLAlchemyAsyncRepositoryService[m.Extension]):
         model_type = m.Extension
 
     repository_type = Repo
+
+    async def to_model_on_create(self, data: ModelDictT[m.Extension]) -> ModelDictT[m.Extension]:
+        data = service.schema_dump(data)
+        if service.is_dict(data):
+            existing = await self.repository.list(
+                CollectionFilter(field_name="extension_number", values=[data["extension_number"]]),
+            )
+            if existing:
+                raise ValidationException("An extension with this extension number already exists.")
+        return data
 
     @staticmethod
     def _enrich_schema(db_obj: m.Extension) -> dict[str, Any]:

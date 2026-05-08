@@ -210,6 +210,7 @@ export function useUpdateAnyConnection() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["connections"] })
+      toast.success("Connection updated successfully")
     },
     onError: (error) => {
       toast.error("Unable to update connection", {
