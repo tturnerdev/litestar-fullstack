@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.275.0 (2026-05-07)
+
+### Added
+- **Event emissions across 8 domains** — Controllers now emit events that trigger existing listeners for audit logging and notifications:
+  - Devices (`device_created`), schedules (`schedule_created`), E911 (`e911_registration_created`), webhooks (`webhook_created`), teams (`team_created`), analytics (`call_record_created`), voicemail (`voicemail_box_created`)
+  - Support: `ticket_created`, `ticket_message_created`, `ticket_status_changed` (on close/reopen/update), `ticket_assigned`
+
 ## v0.274.0 (2026-05-07)
 
 ### Added
