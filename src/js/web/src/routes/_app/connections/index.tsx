@@ -136,9 +136,12 @@ const statusOptions: FilterOption[] = [
 
 const csvHeaders: CsvHeader<ConnectionList>[] = [
   { label: "Name", accessor: (c) => c.name },
-  { label: "Provider", accessor: (c) => c.provider },
-  { label: "Status", accessor: (c) => c.status },
   { label: "Type", accessor: (c) => typeLabels[c.connectionType] ?? c.connectionType },
+  { label: "Provider", accessor: (c) => c.provider },
+  { label: "Host", accessor: (c) => (c.host ? `${c.host}${c.port ? `:${c.port}` : ""}` : "") },
+  { label: "Status", accessor: (c) => c.status },
+  { label: "Enabled", accessor: (c) => (c.isEnabled ? "Yes" : "No") },
+  { label: "Created At", accessor: (c) => (c.createdAt ? formatDateTime(c.createdAt) : "") },
 ]
 
 // ── Column visibility ────────────────────────────────────────────────────

@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.289.0 (2026-05-08)
+
+### Added
+- **OpenAPI summaries on all remaining endpoints** — ~155 more endpoints across accounts (47), admin (47), support (16), e911 (7), locations (5), schedules (10), notifications (5), analytics (7), organizations (2), gateway (3), tasks (5) — every endpoint in the codebase now has an OpenAPI summary
+- **Timestamp columns on 4 more tables** — Devices, extensions, E911 registrations, and locations list tables now show sortable "Created" column with relative time and tooltip; extensions column upgraded from plain to sortable
+
 ## v0.288.0 (2026-05-08)
 
 ### Added

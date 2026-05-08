@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { Home, Plus, Search, SlidersHorizontal, X } from "lucide-react"
+import { Download, Home, Plus, Search, SlidersHorizontal, X } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { type LocationFreshnessState, LocationList } from "@/components/locations/location-list"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
@@ -12,6 +12,8 @@ import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import type { Location } from "@/lib/api/hooks/locations"
+import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { useSettingsStore } from "@/lib/settings-store"
 
 export const Route = createFileRoute("/_app/locations/")({
@@ -55,6 +57,17 @@ function loadColumnVisibility(): ColumnVisibility {
   }
 }
 
+const csvHeaders: CsvHeader<Location>[] = [
+  { label: "Name", accessor: (l) => l.name },
+  { label: "Type", accessor: (l) => l.locationType },
+  { label: "Address", accessor: (l) => l.addressLine1 ?? "" },
+  { label: "City", accessor: (l) => l.city ?? "" },
+  { label: "State", accessor: (l) => l.state ?? "" },
+  { label: "Postal Code", accessor: (l) => l.postalCode ?? "" },
+  { label: "Country", accessor: (l) => l.country ?? "" },
+  { label: "Description", accessor: (l) => l.description ?? "" },
+]
+
 function LocationsPage() {
   useDocumentTitle("Locations")
   const compactMode = useSettingsStore((s) => s.compactMode)
@@ -66,6 +79,15 @@ function LocationsPage() {
 
   // Data freshness state lifted from LocationList
   const [freshness, setFreshness] = useState<LocationFreshnessState | null>(null)
+
+  // Locations data lifted from LocationList for page-level export
+  const [locations, setLocations] = useState<Location[]>([])
+
+  // Export all visible locations
+  const handleExportAll = useCallback(() => {
+    if (!locations.length) return
+    exportToCsv("locations", csvHeaders, locations)
+  }, [locations])
 
   // Derive filter state from URL search params
   const search = searchParam ?? ""
@@ -162,6 +184,10 @@ function LocationsPage() {
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
+            <Button variant="outline" size="sm" onClick={handleExportAll} disabled={!locations.length}>
+              <Download className="mr-2 h-4 w-4" />
+              Export
+            </Button>
             <Button size="sm" asChild>
               <Link to="/locations/new">
                 <Plus className="mr-2 h-4 w-4" /> New location
@@ -245,6 +271,7 @@ function LocationsPage() {
             isColumnVisible={isColumnVisible}
             onSearchInputChange={setSearchInput}
             onFreshnessChange={setFreshness}
+            onLocationsChange={setLocations}
           />
         </SectionErrorBoundary>
       </PageSection>

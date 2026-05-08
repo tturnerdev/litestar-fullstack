@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router"
-import { AlertCircle, Building2, Download, Eye, MapPin, MoreVertical, Pencil, Trash2 } from "lucide-react"
+import { AlertCircle, Building2, Eye, MapPin, MoreVertical, Pencil, Trash2 } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   AlertDialog,
@@ -24,7 +24,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { type Location, useBulkDeleteLocations, useDeleteLocation, useLocations } from "@/lib/api/hooks/locations"
 import { useAuthStore } from "@/lib/auth"
-import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
+import type { CsvHeader } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { cn } from "@/lib/utils"
 
@@ -86,6 +86,7 @@ export function LocationList({
   isColumnVisible = () => true,
   onSearchInputChange,
   onFreshnessChange,
+  onLocationsChange,
 }: {
   searchParams: LocationSearchParams
   navigate: NavigateFn
@@ -93,6 +94,7 @@ export function LocationList({
   isColumnVisible?: (col: string) => boolean
   onSearchInputChange?: (value: string) => void
   onFreshnessChange?: (state: LocationFreshnessState) => void
+  onLocationsChange?: (locations: Location[]) => void
 }) {
   const { currentTeam } = useAuthStore()
 
@@ -141,6 +143,11 @@ export function LocationList({
   }, [onFreshnessChange, dataUpdatedAt, isRefetching, refetch])
 
   const locations = data?.items ?? []
+
+  // Report locations data to parent for page-level export
+  useEffect(() => {
+    onLocationsChange?.(locations)
+  }, [onLocationsChange, locations])
   const total = data?.total ?? 0
   const totalPages = Math.max(1, Math.ceil(total / pageSize))
 
@@ -200,12 +207,6 @@ export function LocationList({
     ],
     [bulk, locations],
   )
-
-  // Export all visible
-  const handleExportAll = useCallback(() => {
-    if (!locations.length) return
-    exportToCsv("locations", csvHeaders, locations)
-  }, [locations])
 
   // Row click handler
   const handleRowClick = useCallback(
@@ -291,10 +292,6 @@ export function LocationList({
             Total
             <span className="ml-0.5 font-semibold text-foreground">{total}</span>
           </span>
-          <Button variant="outline" size="sm" onClick={handleExportAll} disabled={locations.length === 0}>
-            <Download className="mr-2 h-4 w-4" />
-            Export
-          </Button>
         </div>
 
         {/* Result count & pagination info */}

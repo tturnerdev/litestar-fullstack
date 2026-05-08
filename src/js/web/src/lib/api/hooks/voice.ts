@@ -345,6 +345,7 @@ export function useUpdateAnyExtension() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["voice", "extensions"] })
+      toast.success("Extension updated successfully")
     },
     onError: (error) => {
       toast.error("Unable to update extension", {
