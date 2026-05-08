@@ -8,7 +8,12 @@ from pydantic import ConfigDict
 
 class BaseStruct(msgspec.Struct):
     def to_dict(self) -> dict[str, Any]:
-        return {f: getattr(self, f) for f in self.__struct_fields__ if getattr(self, f, None) != msgspec.UNSET}
+        result: dict[str, Any] = {}
+        for f in self.__struct_fields__:
+            val = getattr(self, f)
+            if val is not msgspec.UNSET:
+                result[f] = val
+        return result
 
 
 class CamelizedBaseStruct(BaseStruct, rename="camel"):

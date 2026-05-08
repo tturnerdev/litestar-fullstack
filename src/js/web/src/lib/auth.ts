@@ -5,6 +5,7 @@ import type { Team, User } from "@/lib/generated/api"
 import { accountLogin, accountLogout, accountProfile } from "@/lib/generated/api"
 
 const ACCESS_TOKEN_KEY = "access_token"
+const COOKIE_PROPAGATION_DELAY_MS = 100
 
 const setAccessToken = (token: string | null) => {
   if (typeof window === "undefined") {
@@ -60,8 +61,7 @@ export const useAuthStore = create<AuthState>()(
             if (loginData.access_token) {
               setAccessToken(loginData.access_token)
             }
-            // Add a small delay to ensure the cookie is set
-            await new Promise((resolve) => setTimeout(resolve, 100))
+            await new Promise((resolve) => setTimeout(resolve, COOKIE_PROPAGATION_DELAY_MS))
 
             // Verify the authentication by getting the profile
             const { data: user } = await accountProfile()

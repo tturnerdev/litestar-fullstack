@@ -1,12 +1,22 @@
-export function formatRelativeTime(dateStr: string | null | undefined): string {
-  if (!dateStr) return "Never"
-  const date = new Date(dateStr)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
+interface TimeDifferences {
+  seconds: number
+  minutes: number
+  hours: number
+  days: number
+}
+
+function getTimeDifferences(dateStr: string): TimeDifferences {
+  const diffMs = Date.now() - new Date(dateStr).getTime()
   const seconds = Math.floor(diffMs / 1000)
   const minutes = Math.floor(seconds / 60)
   const hours = Math.floor(minutes / 60)
   const days = Math.floor(hours / 24)
+  return { seconds, minutes, hours, days }
+}
+
+export function formatRelativeTime(dateStr: string | null | undefined): string {
+  if (!dateStr) return "Never"
+  const { seconds, minutes, hours, days } = getTimeDifferences(dateStr)
 
   if (seconds < 60) return "Just now"
   if (minutes === 1) return "1 minute ago"
@@ -22,13 +32,7 @@ export function formatRelativeTime(dateStr: string | null | undefined): string {
 
 export function formatRelativeTimeShort(dateStr: string | null | undefined): string {
   if (!dateStr) return "Never"
-  const date = new Date(dateStr)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const seconds = Math.floor(diffMs / 1000)
-  const minutes = Math.floor(seconds / 60)
-  const hours = Math.floor(minutes / 60)
-  const days = Math.floor(hours / 24)
+  const { seconds, minutes, hours, days } = getTimeDifferences(dateStr)
 
   if (seconds < 60) return "Just now"
   if (minutes < 60) return `${minutes}m ago`
@@ -68,9 +72,7 @@ export function formatDateTime(dateStr: string | null | undefined, fallback = "-
  */
 export function formatRelativeFuture(dateStr: string | null | undefined): string | null {
   if (!dateStr) return null
-  const date = new Date(dateStr)
-  const now = new Date()
-  const diffMs = date.getTime() - now.getTime()
+  const diffMs = new Date(dateStr).getTime() - Date.now()
   if (diffMs <= 0) return null
 
   const seconds = Math.floor(diffMs / 1000)

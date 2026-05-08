@@ -62,23 +62,8 @@ interface SettingsState {
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
-      // Appearance defaults
-      compactMode: SETTINGS_DEFAULTS.compactMode,
-
-      // Notification defaults
-      emailNotifications: SETTINGS_DEFAULTS.emailNotifications,
-      pushNotifications: SETTINGS_DEFAULTS.pushNotifications,
+      ...SETTINGS_DEFAULTS,
       notificationCategories: { ...SETTINGS_DEFAULTS.notificationCategories },
-
-      // Display defaults
-      defaultPageSize: SETTINGS_DEFAULTS.defaultPageSize,
-      dateFormat: SETTINGS_DEFAULTS.dateFormat,
-      sidebarCollapsed: SETTINGS_DEFAULTS.sidebarCollapsed,
-
-      // Accessibility defaults
-      reducedMotion: SETTINGS_DEFAULTS.reducedMotion,
-      highContrast: SETTINGS_DEFAULTS.highContrast,
-      fontSize: SETTINGS_DEFAULTS.fontSize,
 
       // Actions
       setCompactMode: (value) => set({ compactMode: value }),
@@ -99,16 +84,8 @@ export const useSettingsStore = create<SettingsState>()(
       setFontSize: (value) => set({ fontSize: value }),
       resetToDefaults: () =>
         set({
-          compactMode: SETTINGS_DEFAULTS.compactMode,
-          emailNotifications: SETTINGS_DEFAULTS.emailNotifications,
-          pushNotifications: SETTINGS_DEFAULTS.pushNotifications,
+          ...SETTINGS_DEFAULTS,
           notificationCategories: { ...SETTINGS_DEFAULTS.notificationCategories },
-          defaultPageSize: SETTINGS_DEFAULTS.defaultPageSize,
-          dateFormat: SETTINGS_DEFAULTS.dateFormat,
-          sidebarCollapsed: SETTINGS_DEFAULTS.sidebarCollapsed,
-          reducedMotion: SETTINGS_DEFAULTS.reducedMotion,
-          highContrast: SETTINGS_DEFAULTS.highContrast,
-          fontSize: SETTINGS_DEFAULTS.fontSize,
         }),
     }),
     {

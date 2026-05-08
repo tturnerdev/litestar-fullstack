@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.304.0 (2026-05-08)
+
+### Improved
+- **DRY date-utils** — Extracted shared `getTimeDifferences()` helper to eliminate duplicated time calculation logic between `formatRelativeTime` and `formatRelativeTimeShort`
+- **BaseStruct.to_dict() optimization** — Reduced from two `getattr` calls per field to one, using identity check (`is not`) instead of equality comparison for UNSET sentinel
+- **DRY settings store** — Eliminated 20 lines of duplicated defaults in initial state and `resetToDefaults` by spreading the `SETTINGS_DEFAULTS` constant
+- **Named cookie delay constant** — Extracted magic `100ms` timeout in auth login flow to `COOKIE_PROPAGATION_DELAY_MS`
+
 ## v0.303.0 (2026-05-08)
 
 ### Fixed
