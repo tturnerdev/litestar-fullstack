@@ -138,6 +138,7 @@ class WebhookController(Controller):
         obj = data.to_dict()
         obj["user_id"] = current_user.id
         db_obj = await webhooks_service.create(obj)
+        request.app.emit(event_id="webhook_created", webhook_id=db_obj.id)
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,

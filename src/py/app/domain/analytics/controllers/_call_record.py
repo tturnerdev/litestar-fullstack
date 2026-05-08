@@ -151,6 +151,7 @@ class CallRecordController(Controller):
             CallRecordDetail
         """
         db_obj = await call_records_service.create(data.to_dict())
+        request.app.emit(event_id="call_record_created", call_record_id=db_obj.id)
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,

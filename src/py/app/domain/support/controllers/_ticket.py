@@ -97,9 +97,10 @@ class TicketController(Controller):
         body_markdown = obj.pop("body_markdown")
         obj["user_id"] = current_user.id
         db_obj = await tickets_service.create(obj)
+        request.app.emit(event_id="ticket_created", ticket_id=db_obj.id)
         # Create initial message
         msg_service = TicketMessageService(session=tickets_service.repository.session)
-        await msg_service.create(
+        initial_msg = await msg_service.create(
             {
                 "ticket_id": db_obj.id,
                 "author_id": current_user.id,
@@ -107,6 +108,7 @@ class TicketController(Controller):
                 "body_html": render_markdown(body_markdown),
             }
         )
+        request.app.emit(event_id="ticket_message_created", ticket_id=db_obj.id, message_id=initial_msg.id)
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
@@ -162,11 +164,27 @@ class TicketController(Controller):
         ticket_id: Annotated[UUID, Parameter(title="Ticket ID", description="The ticket to update.")],
     ) -> Ticket:
         """Update ticket (status, priority, assign)."""
-        before = capture_snapshot(await tickets_service.get(ticket_id))
+        existing = await tickets_service.get(ticket_id)
+        old_status = existing.status
+        old_assigned_to_id = existing.assigned_to_id
+        before = capture_snapshot(existing)
         db_obj = await tickets_service.update(
             item_id=ticket_id,
             data=data.to_dict(),
         )
+        if db_obj.status != old_status:
+            request.app.emit(
+                event_id="ticket_status_changed",
+                ticket_id=ticket_id,
+                old_status=old_status,
+                new_status=db_obj.status,
+            )
+        if db_obj.assigned_to_id is not None and db_obj.assigned_to_id != old_assigned_to_id:
+            request.app.emit(
+                event_id="ticket_assigned",
+                ticket_id=ticket_id,
+                assigned_to_id=db_obj.assigned_to_id,
+            )
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
@@ -230,8 +248,16 @@ class TicketController(Controller):
         ticket_id: Annotated[UUID, Parameter(title="Ticket ID", description="The ticket to close.")],
     ) -> Ticket:
         """Close a ticket."""
-        before = capture_snapshot(await tickets_service.get(ticket_id))
+        existing = await tickets_service.get(ticket_id)
+        old_status = existing.status
+        before = capture_snapshot(existing)
         db_obj = await tickets_service.close_ticket(ticket_id)
+        request.app.emit(
+            event_id="ticket_status_changed",
+            ticket_id=ticket_id,
+            old_status=old_status,
+            new_status=db_obj.status,
+        )
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
@@ -273,8 +299,16 @@ class TicketController(Controller):
         ticket_id: Annotated[UUID, Parameter(title="Ticket ID", description="The ticket to reopen.")],
     ) -> Ticket:
         """Reopen a closed ticket."""
-        before = capture_snapshot(await tickets_service.get(ticket_id))
+        existing = await tickets_service.get(ticket_id)
+        old_status = existing.status
+        before = capture_snapshot(existing)
         db_obj = await tickets_service.reopen_ticket(ticket_id)
+        request.app.emit(
+            event_id="ticket_status_changed",
+            ticket_id=ticket_id,
+            old_status=old_status,
+            new_status=db_obj.status,
+        )
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,

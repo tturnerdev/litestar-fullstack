@@ -94,6 +94,7 @@ class TicketMessageController(Controller):
         obj["ticket_id"] = ticket_id
         obj["author_id"] = current_user.id
         db_obj = await messages_service.create(obj)
+        request.app.emit(event_id="ticket_message_created", ticket_id=ticket_id, message_id=db_obj.id)
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,

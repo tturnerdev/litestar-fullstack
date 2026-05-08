@@ -168,6 +168,7 @@ class TeamController(Controller):
         obj = data.to_dict()
         obj.update({"owner_id": current_user.id, "owner": current_user})
         db_obj = await teams_service.create(obj)
+        request.app.emit(event_id="team_created", team_id=db_obj.id)
         after = _capture_snapshot(db_obj)
 
         await _log_audit(

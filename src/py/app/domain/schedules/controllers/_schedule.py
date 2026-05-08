@@ -124,6 +124,7 @@ class ScheduleController(Controller):
         """
         obj = data.to_dict()
         db_obj = await schedules_service.create(obj)
+        request.app.emit(event_id="schedule_created", schedule_id=db_obj.id)
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
