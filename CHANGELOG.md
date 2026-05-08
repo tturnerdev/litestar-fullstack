@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.285.0 (2026-05-07)
+
+### Fixed
+- **SSE cache invalidation** — `entity.updated` SSE events now use correct query key prefixes for cache invalidation (e.g., `["voice", "extension", id]` instead of `["extension", id]`)
+
+### Added
+- **Operation IDs on 7 endpoints** — Email verification (3 endpoints) and OAuth (4 endpoints) now have explicit operation_id for cleaner generated client function names
+
 ## v0.284.0 (2026-05-07)
 
 ### Added
