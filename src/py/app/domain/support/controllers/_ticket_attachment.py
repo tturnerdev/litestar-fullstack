@@ -9,7 +9,7 @@ from litestar import Controller, delete, get, post
 from litestar.exceptions import NotImplementedException
 from litestar.di import Provide
 from litestar.params import Parameter
-from litestar.status_codes import HTTP_204_NO_CONTENT
+from litestar.status_codes import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 
 from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
@@ -43,6 +43,7 @@ class TicketAttachmentController(Controller):
         summary="Upload a ticket attachment",
         path="/api/support/tickets/{ticket_id:uuid}/attachments",
         guards=[requires_feature_permission("support", "edit"), requires_ticket_access],
+        status_code=HTTP_201_CREATED,
     )
     async def upload_attachment(
         self,
@@ -117,6 +118,7 @@ class TicketAttachmentController(Controller):
         summary="Upload a pasted image",
         path="/api/support/tickets/{ticket_id:uuid}/paste-image",
         guards=[requires_feature_permission("support", "edit"), requires_ticket_access],
+        status_code=HTTP_201_CREATED,
     )
     async def paste_image(
         self,

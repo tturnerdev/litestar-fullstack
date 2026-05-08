@@ -10,7 +10,7 @@ from litestar import Controller, delete, get, patch, post
 from litestar.di import Provide
 from litestar.exceptions import PermissionDeniedException
 from litestar.params import Dependency, Parameter
-from litestar.status_codes import HTTP_204_NO_CONTENT
+from litestar.status_codes import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
@@ -108,6 +108,7 @@ class FaxNumberController(Controller):
         summary="Create a fax number",
         path="/api/fax/numbers",
         guards=[requires_feature_permission("fax", "edit")],
+        status_code=HTTP_201_CREATED,
     )
     async def create_fax_number(
         self,
