@@ -159,6 +159,7 @@ class TicketMessageController(Controller):
         path="/api/support/tickets/{ticket_id:uuid}/messages/{msg_id:uuid}",
         guards=[requires_feature_permission("support", "edit"), requires_ticket_access, requires_ticket_message_edit],
         status_code=HTTP_204_NO_CONTENT,
+        return_dto=None,
     )
     async def delete_message(
         self,

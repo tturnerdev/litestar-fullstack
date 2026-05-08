@@ -216,6 +216,7 @@ class LocationController(Controller):
         path="/api/teams/{team_id:uuid}/locations/{location_id:uuid}",
         guards=[requires_feature_permission("locations", "edit"), requires_location_team_membership],
         status_code=HTTP_204_NO_CONTENT,
+        return_dto=None,
     )
     async def delete_location(
         self,

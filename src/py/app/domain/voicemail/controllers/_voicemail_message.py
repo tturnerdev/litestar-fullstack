@@ -195,6 +195,7 @@ class VoicemailMessageController(Controller):
         path="/api/voicemail/messages/{message_id:uuid}",
         guards=[requires_voicemail_message_access],
         status_code=HTTP_204_NO_CONTENT,
+        return_dto=None,
     )
     async def delete_voicemail_message(
         self,

@@ -168,7 +168,7 @@ class UserController(Controller):
         )
         return users_service.to_schema(db_obj, schema_type=User)
 
-    @delete(operation_id="DeleteUser", summary="Delete a user", path="/{user_id:uuid}", status_code=HTTP_204_NO_CONTENT)
+    @delete(operation_id="DeleteUser", summary="Delete a user", path="/{user_id:uuid}", status_code=HTTP_204_NO_CONTENT, return_dto=None)
     async def delete_user(
         self,
         request: Request[m.User, Token, Any],

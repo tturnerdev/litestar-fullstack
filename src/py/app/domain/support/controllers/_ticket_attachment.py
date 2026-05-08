@@ -81,6 +81,7 @@ class TicketAttachmentController(Controller):
         path="/api/support/attachments/{attachment_id:uuid}",
         guards=[requires_feature_permission("support", "edit")],
         status_code=HTTP_204_NO_CONTENT,
+        return_dto=None,
     )
     async def delete_attachment(
         self,

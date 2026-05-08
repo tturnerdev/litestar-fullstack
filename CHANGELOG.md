@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.307.0 (2026-05-08)
+
+### Fixed
+- **Missing `return_dto=None` on DELETE endpoints** — Added `return_dto=None` to all 23 DELETE endpoints that had `HTTP_204_NO_CONTENT` but were missing the DTO bypass, preventing serialization errors on void responses
+- **ValueError leaking as 500** — Location service now raises `ValidationException` instead of `ValueError` for the "physical locations must have a parent_id" constraint
+- **DND toggle race condition** — Replaced read-modify-write pattern with atomic SQL UPDATE using `~is_enabled`, preventing concurrent toggles from dropping state changes
+
 ## v0.306.0 (2026-05-08)
 
 ### Security

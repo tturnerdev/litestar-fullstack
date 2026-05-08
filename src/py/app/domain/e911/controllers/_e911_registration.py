@@ -215,6 +215,7 @@ class E911RegistrationController(Controller):
         path="/api/e911/{registration_id:uuid}",
         guards=[requires_feature_permission("e911", "edit"), requires_team_membership],
         status_code=HTTP_204_NO_CONTENT,
+        return_dto=None,
     )
     async def delete_registration(
         self,

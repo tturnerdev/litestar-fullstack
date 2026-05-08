@@ -200,7 +200,7 @@ class AdminDeviceTemplatesController(Controller):
             updated_at=db_obj.updated_at,
         )
 
-    @delete(operation_id="AdminDeleteDeviceTemplate", summary="Delete a device template", path="/{template_id:uuid}", status_code=HTTP_204_NO_CONTENT)
+    @delete(operation_id="AdminDeleteDeviceTemplate", summary="Delete a device template", path="/{template_id:uuid}", status_code=HTTP_204_NO_CONTENT, return_dto=None)
     async def delete_template(
         self,
         request: Request[m.User, Token, Any],

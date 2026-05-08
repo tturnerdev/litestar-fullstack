@@ -221,7 +221,7 @@ class ProfileController(Controller):
 
         return Message(message="Your password was successfully modified.")
 
-    @delete(operation_id="AccountDelete", summary="Delete account", path="/api/me", status_code=HTTP_204_NO_CONTENT)
+    @delete(operation_id="AccountDelete", summary="Delete account", path="/api/me", status_code=HTTP_204_NO_CONTENT, return_dto=None)
     async def remove_account(
         self,
         request: Request[m.User, Token, Any],

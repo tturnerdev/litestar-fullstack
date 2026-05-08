@@ -292,6 +292,7 @@ class DeviceController(Controller):
         path="/api/devices/{device_id:uuid}",
         guards=[requires_feature_permission("devices", "edit"), requires_device_ownership],
         status_code=HTTP_204_NO_CONTENT,
+        return_dto=None,
     )
     async def delete_device(
         self,

@@ -45,7 +45,7 @@ class LocationService(service.SQLAlchemyAsyncRepositoryService[m.Location]):
             # Ensure PHYSICAL locations have a parent_id
             if location_type == m.LocationType.PHYSICAL and not data.get("parent_id"):
                 msg = "Physical locations must have a parent_id."
-                raise ValueError(msg)
+                raise ValidationException(msg)
             # Ensure ADDRESSED locations do not have a parent_id
             if location_type == m.LocationType.ADDRESSED:
                 data.pop("parent_id", None)

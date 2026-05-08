@@ -213,6 +213,7 @@ class TicketController(Controller):
         path="/api/support/tickets/{ticket_id:uuid}",
         guards=[requires_feature_permission("support", "edit"), requires_support_agent],
         status_code=HTTP_204_NO_CONTENT,
+        return_dto=None,
     )
     async def delete_ticket(
         self,

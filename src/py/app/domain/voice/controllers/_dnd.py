@@ -93,7 +93,7 @@ class DndController(Controller):
         await extensions_service.get_one(id=ext_id, user_id=current_user.id)
         db_obj = await dnd_service.get_or_create_for_extension(ext_id)
         before = capture_snapshot(db_obj)
-        db_obj = await dnd_service.update(item_id=db_obj.id, data={"is_enabled": not db_obj.is_enabled})
+        db_obj = await dnd_service.toggle_dnd(db_obj.id)
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,

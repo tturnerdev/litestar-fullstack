@@ -241,6 +241,7 @@ class WebhookController(Controller):
         summary="Delete a webhook",
         path="/api/webhooks/{webhook_id:uuid}",
         status_code=HTTP_204_NO_CONTENT,
+        return_dto=None,
     )
     async def delete_webhook(
         self,

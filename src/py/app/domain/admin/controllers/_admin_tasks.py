@@ -150,7 +150,7 @@ class AdminTasksController(Controller):
         )
         return task_service.to_schema(db_obj, schema_type=BackgroundTaskDetail)
 
-    @delete(operation_id="AdminDeleteTask", summary="Delete a background task (admin)", path="/{task_id:uuid}", status_code=HTTP_204_NO_CONTENT)
+    @delete(operation_id="AdminDeleteTask", summary="Delete a background task (admin)", path="/{task_id:uuid}", status_code=HTTP_204_NO_CONTENT, return_dto=None)
     async def delete_task(
         self,
         request: Request[m.User, Token, Any],

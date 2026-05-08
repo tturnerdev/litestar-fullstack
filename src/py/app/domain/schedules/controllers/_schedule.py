@@ -225,6 +225,7 @@ class ScheduleController(Controller):
         path="/api/schedules/{schedule_id:uuid}",
         guards=[requires_feature_permission("schedules", "edit")],
         status_code=HTTP_204_NO_CONTENT,
+        return_dto=None,
     )
     async def delete_schedule(
         self,
@@ -419,6 +420,7 @@ class ScheduleController(Controller):
         path="/api/schedules/{schedule_id:uuid}/entries/{entry_id:uuid}",
         guards=[requires_feature_permission("schedules", "edit")],
         status_code=HTTP_204_NO_CONTENT,
+        return_dto=None,
     )
     async def delete_entry(
         self,

@@ -177,7 +177,7 @@ class RoleController(Controller):
         )
         return roles_service.to_schema(db_obj, schema_type=Role)
 
-    @delete(operation_id="DeleteRole", summary="Delete a role", path="/{role_id:uuid}", status_code=HTTP_204_NO_CONTENT)
+    @delete(operation_id="DeleteRole", summary="Delete a role", path="/{role_id:uuid}", status_code=HTTP_204_NO_CONTENT, return_dto=None)
     async def delete_role(
         self,
         request: Request[m.User, Token, Any],

@@ -150,6 +150,7 @@ class FaxMessageController(Controller):
         path="/api/fax/messages/{message_id:uuid}",
         guards=[requires_feature_permission("fax", "edit"), requires_fax_message_access],
         status_code=HTTP_204_NO_CONTENT,
+        return_dto=None,
     )
     async def delete_fax_message(
         self,

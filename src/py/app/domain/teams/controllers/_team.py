@@ -252,7 +252,7 @@ class TeamController(Controller):
 
         return teams_service.to_schema(fresh_obj, schema_type=Team)
 
-    @delete(operation_id="DeleteTeam", summary="Delete a team", path="/api/teams/{team_id:uuid}", guards=[requires_team_ownership], status_code=HTTP_204_NO_CONTENT)
+    @delete(operation_id="DeleteTeam", summary="Delete a team", path="/api/teams/{team_id:uuid}", guards=[requires_team_ownership], status_code=HTTP_204_NO_CONTENT, return_dto=None)
     async def delete_team(
         self,
         request: Request[m.User, Token, Any],

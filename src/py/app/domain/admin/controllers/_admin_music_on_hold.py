@@ -192,7 +192,7 @@ class AdminMusicOnHoldController(Controller):
             updated_at=db_obj.updated_at,
         )
 
-    @delete(operation_id="AdminDeleteMusicOnHold", summary="Delete a music on hold class", path="/{moh_id:uuid}", status_code=HTTP_204_NO_CONTENT)
+    @delete(operation_id="AdminDeleteMusicOnHold", summary="Delete a music on hold class", path="/{moh_id:uuid}", status_code=HTTP_204_NO_CONTENT, return_dto=None)
     async def delete_music_on_hold(
         self,
         request: Request[m.User, Token, Any],

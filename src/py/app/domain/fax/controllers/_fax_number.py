@@ -237,6 +237,7 @@ class FaxNumberController(Controller):
         path="/api/fax/numbers/{fax_number_id:uuid}",
         guards=[requires_feature_permission("fax", "edit"), requires_fax_number_access],
         status_code=HTTP_204_NO_CONTENT,
+        return_dto=None,
     )
     async def delete_fax_number(
         self,

@@ -225,6 +225,7 @@ class ConnectionController(Controller):
         path="/api/connections/{connection_id:uuid}",
         guards=[requires_feature_permission("connections", "edit"), requires_connections_admin],
         status_code=HTTP_204_NO_CONTENT,
+        return_dto=None,
     )
     async def delete_connection(
         self,
