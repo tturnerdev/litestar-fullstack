@@ -364,7 +364,7 @@ function LocationDetailPage() {
                     <div className="space-y-4">
                       <div className="space-y-2">
                         <Label>Name</Label>
-                        <Input value={editName} onChange={(e) => setEditName(e.target.value)} />
+                        <Input value={editName} onChange={(e) => setEditName(e.target.value)} maxLength={255} />
                       </div>
                       <div className="space-y-2">
                         <Label>Description</Label>
@@ -377,30 +377,30 @@ function LocationDetailPage() {
                           <div className="space-y-3">
                             <div className="space-y-2">
                               <Label>Address Line 1</Label>
-                              <Input value={editAddress1} onChange={(e) => setEditAddress1(e.target.value)} />
+                              <Input value={editAddress1} onChange={(e) => setEditAddress1(e.target.value)} maxLength={255} />
                             </div>
                             <div className="space-y-2">
                               <Label>Address Line 2</Label>
-                              <Input value={editAddress2} onChange={(e) => setEditAddress2(e.target.value)} />
+                              <Input value={editAddress2} onChange={(e) => setEditAddress2(e.target.value)} maxLength={255} />
                             </div>
                             <div className="grid grid-cols-2 gap-3">
                               <div className="space-y-2">
                                 <Label>City</Label>
-                                <Input value={editCity} onChange={(e) => setEditCity(e.target.value)} />
+                                <Input value={editCity} onChange={(e) => setEditCity(e.target.value)} maxLength={100} />
                               </div>
                               <div className="space-y-2">
                                 <Label>State</Label>
-                                <Input value={editState} onChange={(e) => setEditState(e.target.value)} />
+                                <Input value={editState} onChange={(e) => setEditState(e.target.value)} maxLength={100} />
                               </div>
                             </div>
                             <div className="grid grid-cols-2 gap-3">
                               <div className="space-y-2">
                                 <Label>Postal Code</Label>
-                                <Input value={editPostalCode} onChange={(e) => setEditPostalCode(e.target.value)} />
+                                <Input value={editPostalCode} onChange={(e) => setEditPostalCode(e.target.value)} maxLength={20} />
                               </div>
                               <div className="space-y-2">
                                 <Label>Country</Label>
-                                <Input value={editCountry} onChange={(e) => setEditCountry(e.target.value)} />
+                                <Input value={editCountry} onChange={(e) => setEditCountry(e.target.value)} maxLength={100} />
                               </div>
                             </div>
                           </div>

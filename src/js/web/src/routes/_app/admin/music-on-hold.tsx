@@ -216,7 +216,7 @@ function MohFormDialog({ mode, mohId, open, onOpenChange }: { mode: "create" | "
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="name">Name</Label>
-              <Input id="name" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} placeholder="e.g. Default Hold Music" />
+              <Input id="name" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} maxLength={100} placeholder="e.g. Default Hold Music" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="category">Category</Label>
@@ -241,6 +241,7 @@ function MohFormDialog({ mode, mohId, open, onOpenChange }: { mode: "create" | "
               id="description"
               value={form.description}
               onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+              maxLength={500}
               rows={2}
               placeholder="Optional description of this MOH class..."
             />

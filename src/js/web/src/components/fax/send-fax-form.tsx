@@ -564,6 +564,7 @@ export function SendFaxForm() {
                             setTextBody(e.target.value)
                             if (fileError) setFileError(null)
                           }}
+                          maxLength={MAX_TEXT_LENGTH}
                           aria-invalid={isTextOverLimit}
                           className={`min-h-[200px] ${isTextOverLimit ? "border-destructive focus-visible:ring-destructive" : ""}`}
                         />

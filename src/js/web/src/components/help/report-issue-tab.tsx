@@ -213,6 +213,7 @@ export function ReportIssueTab({ formData, onFormDataChange, onCaptureScreenshot
               updateField("description", e.target.value)
             }
           }}
+          maxLength={MAX_DESCRIPTION_LENGTH}
           rows={4}
           required
         />

@@ -257,18 +257,30 @@ function TemplateFormDialog({ mode, templateId, open, onOpenChange }: { mode: "c
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="manufacturer">Manufacturer</Label>
-              <Input id="manufacturer" value={form.manufacturer} onChange={(e) => setForm((f) => ({ ...f, manufacturer: e.target.value }))} placeholder="e.g. Yealink" />
+              <Input
+                id="manufacturer"
+                value={form.manufacturer}
+                onChange={(e) => setForm((f) => ({ ...f, manufacturer: e.target.value }))}
+                maxLength={100}
+                placeholder="e.g. Yealink"
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="model">Model</Label>
-              <Input id="model" value={form.model} onChange={(e) => setForm((f) => ({ ...f, model: e.target.value }))} placeholder="e.g. T31P" />
+              <Input id="model" value={form.model} onChange={(e) => setForm((f) => ({ ...f, model: e.target.value }))} maxLength={100} placeholder="e.g. T31P" />
             </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="displayName">Display Name</Label>
-              <Input id="displayName" value={form.displayName} onChange={(e) => setForm((f) => ({ ...f, displayName: e.target.value }))} placeholder="e.g. Yealink T31P" />
+              <Input
+                id="displayName"
+                value={form.displayName}
+                onChange={(e) => setForm((f) => ({ ...f, displayName: e.target.value }))}
+                maxLength={255}
+                placeholder="e.g. Yealink T31P"
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="deviceType">Device Type</Label>
@@ -309,6 +321,7 @@ function TemplateFormDialog({ mode, templateId, open, onOpenChange }: { mode: "c
               id="provisioningTemplate"
               value={form.provisioningTemplate}
               onChange={(e) => setForm((f) => ({ ...f, provisioningTemplate: e.target.value }))}
+              maxLength={50000}
               rows={8}
               className="font-mono text-xs"
               placeholder="Jinja2-style provisioning template..."
@@ -333,7 +346,7 @@ function TemplateFormDialog({ mode, templateId, open, onOpenChange }: { mode: "c
 
           <div className="space-y-2">
             <Label htmlFor="imageUrl">Image URL (optional)</Label>
-            <Input id="imageUrl" value={form.imageUrl} onChange={(e) => setForm((f) => ({ ...f, imageUrl: e.target.value }))} placeholder="https://..." />
+            <Input id="imageUrl" value={form.imageUrl} onChange={(e) => setForm((f) => ({ ...f, imageUrl: e.target.value }))} maxLength={500} placeholder="https://..." />
           </div>
 
           <div className="flex items-center gap-3">
