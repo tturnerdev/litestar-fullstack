@@ -469,26 +469,6 @@ export function useCreateIvrMenuOption(menuId: string) {
   })
 }
 
-export function useUpdateIvrMenuOption(menuId: string, optionId: string) {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: (payload: IvrMenuOptionUpdate) =>
-      apiFetch<IvrMenuOption>(`/api/ivr-menus/${menuId}/options/${optionId}`, {
-        method: "PATCH",
-        body: JSON.stringify(payload),
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["call-routing", "ivr-menu", menuId] })
-      toast.success("Option updated")
-    },
-    onError: (error) => {
-      toast.error("Unable to update option", {
-        description: error instanceof Error ? error.message : "Try again later",
-      })
-    },
-  })
-}
-
 export function useDeleteIvrMenuOption(menuId: string) {
   const queryClient = useQueryClient()
   return useMutation({

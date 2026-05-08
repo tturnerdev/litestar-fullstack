@@ -401,23 +401,6 @@ export function useVoicemailMessages(extensionId: string, page = 1, pageSize = 2
   })
 }
 
-export function useUpdateVoicemailMessage(extensionId: string, messageId: string) {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: (payload: Record<string, unknown>) =>
-      apiFetch<VoicemailMessage>(`/api/voice/extensions/${extensionId}/voicemail/messages/${messageId}`, { method: "PATCH", body: JSON.stringify(payload) }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["voice", "voicemail-messages", extensionId] })
-      toast.success("Message updated")
-    },
-    onError: (error) => {
-      toast.error("Unable to update message", {
-        description: error instanceof Error ? error.message : "Try again later",
-      })
-    },
-  })
-}
-
 export function useDeleteVoicemailMessage(extensionId: string) {
   const queryClient = useQueryClient()
   return useMutation({
@@ -495,26 +478,6 @@ export function useForwardingRules(extensionId: string) {
     queryKey: ["voice", "forwarding-rules", extensionId],
     queryFn: () => apiFetch<PaginatedResponse<ForwardingRule>>(`/api/voice/extensions/${extensionId}/forwarding`),
     enabled: !!extensionId,
-  })
-}
-
-export function useSetForwardingRules(extensionId: string) {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: (rules: Record<string, unknown>[]) =>
-      apiFetch<ForwardingRule[]>(`/api/voice/extensions/${extensionId}/forwarding`, {
-        method: "PUT",
-        body: JSON.stringify(rules),
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["voice", "forwarding-rules", extensionId] })
-      toast.success("Forwarding rules saved")
-    },
-    onError: (error) => {
-      toast.error("Unable to save forwarding rules", {
-        description: error instanceof Error ? error.message : "Try again later",
-      })
-    },
   })
 }
 

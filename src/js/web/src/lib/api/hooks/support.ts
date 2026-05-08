@@ -343,24 +343,3 @@ export function usePasteImage(ticketId: string) {
     },
   })
 }
-
-export function useDeleteAttachment(ticketId: string) {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: async (attachmentId: string) => {
-      await client.delete({
-        url: `/api/support/attachments/${attachmentId}`,
-        security: [{ scheme: "bearer", type: "http" }],
-      } as never)
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["support", "ticket", ticketId, "messages"] })
-      toast.success("Attachment deleted")
-    },
-    onError: (error) => {
-      toast.error("Unable to delete attachment", {
-        description: error instanceof Error ? error.message : "Try again later",
-      })
-    },
-  })
-}

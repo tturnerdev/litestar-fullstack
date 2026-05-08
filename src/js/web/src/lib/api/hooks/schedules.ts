@@ -247,28 +247,6 @@ export function useCreateScheduleEntry(scheduleId: string) {
   })
 }
 
-export function useUpdateScheduleEntry(scheduleId: string, entryId: string) {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: async (payload: ScheduleEntryUpdate) => {
-      return apiFetch<ScheduleEntry>(`/api/schedules/${scheduleId}/entries/${entryId}`, {
-        method: "PUT",
-        body: JSON.stringify(payload),
-      })
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["schedule", scheduleId] })
-      queryClient.invalidateQueries({ queryKey: ["schedule", scheduleId, "check"] })
-      toast.success("Entry updated")
-    },
-    onError: (error) => {
-      toast.error("Unable to update entry", {
-        description: error instanceof Error ? error.message : "Try again later",
-      })
-    },
-  })
-}
-
 export function useDeleteScheduleEntry(scheduleId: string) {
   const queryClient = useQueryClient()
   return useMutation({

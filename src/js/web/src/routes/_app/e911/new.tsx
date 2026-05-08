@@ -250,7 +250,9 @@ function NewE911RegistrationPage() {
 
                   {/* Address Line 1 */}
                   <div className="space-y-2">
-                    <Label htmlFor="address-line-1">Address Line 1 *</Label>
+                    <Label htmlFor="address-line-1">
+                      Address Line 1 <span className="text-destructive">*</span>
+                    </Label>
                     <Input
                       id="address-line-1"
                       value={addressLine1}
@@ -298,7 +300,9 @@ function NewE911RegistrationPage() {
                   {/* City / State row */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="city">City *</Label>
+                      <Label htmlFor="city">
+                        City <span className="text-destructive">*</span>
+                      </Label>
                       <Input
                         id="city"
                         value={city}
@@ -316,7 +320,9 @@ function NewE911RegistrationPage() {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="state">State *</Label>
+                      <Label htmlFor="state">
+                        State <span className="text-destructive">*</span>
+                      </Label>
                       <Input
                         id="state"
                         value={state}
@@ -339,7 +345,9 @@ function NewE911RegistrationPage() {
                   {/* Postal Code / Country row */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="postal-code">Postal Code *</Label>
+                      <Label htmlFor="postal-code">
+                        Postal Code <span className="text-destructive">*</span>
+                      </Label>
                       <Input
                         id="postal-code"
                         value={postalCode}
