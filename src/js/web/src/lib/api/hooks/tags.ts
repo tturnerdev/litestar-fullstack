@@ -1,27 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
-import { client } from "@/lib/generated/api/client.gen"
+import { createTag as createTagApi, deleteTag as deleteTagApi, getTag, listTags, type Tag, type TagCreate, type TagUpdate, updateTag as updateTagApi } from "@/lib/generated/api"
 
-// ── Types ──────────────────────────────────────────────────────────────
-
-export interface Tag {
-  id: string
-  name: string
-  slug: string
-  createdAt: string
-  updatedAt: string
-  description?: string | null
-}
-
-export interface TagCreate {
-  name: string
-  description?: string | null
-}
-
-export interface TagUpdate {
-  name?: string | null
-  description?: string | null
-}
+export type { Tag, TagCreate, TagUpdate }
 
 // ── Tag List ─────────────────────────────────────────────────────────
 
@@ -40,21 +21,19 @@ export function useTags(pageOrOptions: number | UseTagsOptions = 1, pageSizeArg 
   return useQuery({
     queryKey: ["tags", page, pageSize, search, orderBy, sortOrder],
     queryFn: async () => {
-      const query: Record<string, unknown> = { currentPage: page, pageSize }
-      if (search) {
-        query.searchString = search
-        query.searchIgnoreCase = true
-      }
-      if (orderBy) query.orderBy = orderBy
-      if (sortOrder) query.sortOrder = sortOrder
-      const response = await client.get({
-        url: "/api/tags",
-        query,
-        security: [{ scheme: "bearer", type: "http" }],
-      } as never)
-      return (response as { data: unknown }).data as { items: Tag[]; total: number }
+      const response = await listTags({
+        query: {
+          currentPage: page,
+          pageSize,
+          searchString: search,
+          searchIgnoreCase: search ? true : undefined,
+          orderBy,
+          sortOrder,
+        },
+      })
+      return response.data as { items: Tag[]; total: number }
     },
-    staleTime: 10 * 60 * 1000, // tags are reference data, change infrequently
+    staleTime: 10 * 60 * 1000,
   })
 }
 
@@ -64,11 +43,10 @@ export function useTag(tagId: string) {
   return useQuery({
     queryKey: ["tag", tagId],
     queryFn: async () => {
-      const response = await client.get({
-        url: `/api/tags/${tagId}`,
-        security: [{ scheme: "bearer", type: "http" }],
-      } as never)
-      return (response as { data: unknown }).data as Tag
+      const response = await getTag({
+        path: { tag_id: tagId },
+      })
+      return response.data as Tag
     },
     enabled: !!tagId,
   })
@@ -80,12 +58,10 @@ export function useCreateTag() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (payload: TagCreate) => {
-      const response = await client.post({
-        url: "/api/tags",
+      const response = await createTagApi({
         body: payload,
-        security: [{ scheme: "bearer", type: "http" }],
-      } as never)
-      return (response as { data: unknown }).data as Tag
+      })
+      return response.data as Tag
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tags"] })
@@ -103,12 +79,11 @@ export function useUpdateTag(tagId: string) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (payload: TagUpdate) => {
-      const response = await client.patch({
-        url: `/api/tags/${tagId}`,
+      const response = await updateTagApi({
+        path: { tag_id: tagId },
         body: payload,
-        security: [{ scheme: "bearer", type: "http" }],
-      } as never)
-      return (response as { data: unknown }).data as Tag
+      })
+      return response.data as Tag
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tags"] })
@@ -127,10 +102,9 @@ export function useDeleteTag() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (tagId: string) => {
-      await client.delete({
-        url: `/api/tags/${tagId}`,
-        security: [{ scheme: "bearer", type: "http" }],
-      } as never)
+      await deleteTagApi({
+        path: { tag_id: tagId },
+      })
     },
     onSuccess: (_data, tagId) => {
       queryClient.invalidateQueries({ queryKey: ["tags"] })

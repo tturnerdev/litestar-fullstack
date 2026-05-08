@@ -1,14 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import {
+  type AdminGatewaySettings,
+  type AdminGatewaySettingsUpdate,
   type DeviceGatewayResponse,
   type ExtensionGatewayResponse,
   gatewayLookupDevice,
   gatewayLookupExtension,
   gatewayLookupNumber,
+  getAdminGatewaySettings,
   type NumberGatewayResponse,
+  updateAdminGatewaySettings,
 } from "@/lib/generated/api"
-import { client } from "@/lib/generated/api/client.gen"
 
 // ---------------------------------------------------------------------------
 // Phone Number Lookup
@@ -68,25 +71,14 @@ export function useGatewayLookupDevice(macAddress: string, enabled = false) {
 // Admin Gateway Settings
 // ---------------------------------------------------------------------------
 
-export interface GatewaySettings {
-  defaultTimeout: number
-  defaultCacheTtl: number
-}
-
-export interface GatewaySettingsUpdate {
-  defaultTimeout?: number
-  defaultCacheTtl?: number
-}
+export type { AdminGatewaySettings, AdminGatewaySettingsUpdate }
 
 export function useAdminGatewaySettings() {
   return useQuery({
     queryKey: ["admin", "gateway", "settings"],
     queryFn: async () => {
-      const response = await client.get({
-        url: "/api/admin/gateway/settings",
-        security: [{ scheme: "bearer", type: "http" }],
-      } as never)
-      return (response as { data: unknown }).data as GatewaySettings
+      const response = await getAdminGatewaySettings()
+      return response.data as AdminGatewaySettings
     },
   })
 }
@@ -94,13 +86,11 @@ export function useAdminGatewaySettings() {
 export function useUpdateAdminGatewaySettings() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (payload: GatewaySettingsUpdate) => {
-      const response = await client.put({
-        url: "/api/admin/gateway/settings",
+    mutationFn: async (payload: AdminGatewaySettingsUpdate) => {
+      const response = await updateAdminGatewaySettings({
         body: payload,
-        security: [{ scheme: "bearer", type: "http" }],
-      } as never)
-      return (response as { data: unknown }).data as GatewaySettings
+      })
+      return response.data as AdminGatewaySettings
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "gateway", "settings"] })
