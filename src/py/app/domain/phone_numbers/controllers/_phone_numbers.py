@@ -10,6 +10,7 @@ import msgspec
 from litestar import Controller, delete, get, patch, post
 from litestar.di import Provide
 from litestar.params import Dependency
+from litestar.status_codes import HTTP_201_CREATED
 from sqlalchemy import inspect as sa_inspect
 
 from app.db import models as m
@@ -163,7 +164,7 @@ class PhoneNumberController(Controller):
         result = await phone_number_service.get(phone_number_id)
         return phone_number_service.to_schema(result, schema_type=PhoneNumberDetail)
 
-    @post(operation_id="ManageCreatePhoneNumber", summary="Create a phone number", path="/")
+    @post(operation_id="ManageCreatePhoneNumber", summary="Create a phone number", path="/", status_code=HTTP_201_CREATED)
     async def create_phone_number(
         self,
         request: Request[m.User, Token, Any],

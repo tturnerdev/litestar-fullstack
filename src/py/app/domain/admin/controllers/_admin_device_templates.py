@@ -10,7 +10,7 @@ from litestar import Controller, delete, get, patch, post
 from litestar.datastructures import CacheControlHeader
 from litestar.di import Provide
 from litestar.params import Dependency, Parameter
-from litestar.status_codes import HTTP_204_NO_CONTENT
+from litestar.status_codes import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 
 from app.domain.accounts.guards import requires_superuser
 from app.domain.admin.deps import provide_audit_log_service
@@ -92,7 +92,7 @@ class AdminDeviceTemplatesController(Controller):
             offset=limit_offset.offset if limit_offset else 0,
         )
 
-    @post(operation_id="AdminCreateDeviceTemplate", summary="Create a device template", path="/")
+    @post(operation_id="AdminCreateDeviceTemplate", summary="Create a device template", path="/", status_code=HTTP_201_CREATED)
     async def create_template(
         self,
         request: Request[m.User, Token, Any],

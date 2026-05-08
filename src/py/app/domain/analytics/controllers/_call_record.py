@@ -11,6 +11,7 @@ from uuid import UUID
 from litestar import Controller, Response, get, post
 from litestar.di import Provide
 from litestar.params import Dependency, Parameter
+from litestar.status_codes import HTTP_201_CREATED
 from sqlalchemy import select
 
 from app.db import models as m
@@ -130,7 +131,7 @@ class CallRecordController(Controller):
         db_obj = await call_records_service.get(cdr_id)
         return call_records_service.to_schema(db_obj, schema_type=CallRecordDetail)
 
-    @post(operation_id="CreateCallRecord", summary="Create a call record", path="/api/analytics/cdrs")
+    @post(operation_id="CreateCallRecord", summary="Create a call record", path="/api/analytics/cdrs", status_code=HTTP_201_CREATED)
     async def create_call_record(
         self,
         request: Request[m.User, Token, Any],
