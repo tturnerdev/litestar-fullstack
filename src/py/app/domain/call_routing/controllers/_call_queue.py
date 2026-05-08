@@ -484,4 +484,10 @@ class CallQueueController(Controller):
             request=request,
             metadata={"is_paused": data.is_paused},
         )
+        request.app.emit(
+            event_id="call_queue_member_paused",
+            call_queue_id=call_queue_id,
+            member_id=member_id,
+            is_paused=data.is_paused,
+        )
         return call_queue_members_service.to_schema(fresh_obj, schema_type=CallQueueMember)

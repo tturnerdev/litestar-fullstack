@@ -296,4 +296,9 @@ class TimeConditionController(Controller):
             request=request,
         )
         request.app.emit(event_id="time_condition_updated", entity_id=time_condition_id)
+        request.app.emit(
+            event_id="time_condition_override_changed",
+            time_condition_id=time_condition_id,
+            override_mode=data.override_mode,
+        )
         return time_conditions_service.to_schema(fresh_obj, schema_type=TimeCondition)
