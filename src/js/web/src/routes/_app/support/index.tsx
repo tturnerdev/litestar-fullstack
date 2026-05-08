@@ -2,6 +2,7 @@ import { useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import {
   AlertCircle,
+  AlertTriangle,
   ArrowDown,
   ArrowUp,
   Bookmark,
@@ -27,6 +28,16 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 import { TicketPriorityBadge } from "@/components/support/ticket-priority-badge"
 import { TicketStatusBadge } from "@/components/support/ticket-status-badge"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
@@ -1296,131 +1307,161 @@ function TicketRow({
   cellClass: string
   isColumnVisible: (col: string) => boolean
 }) {
+  const [deleteOpen, setDeleteOpen] = useState(false)
+
   return (
-    <TableRow
-      className={cn(
-        "cursor-pointer hover:bg-muted/50 transition-colors border-l-2",
-        priorityRowAccent[ticket.priority] ?? "border-l-transparent",
-        index % 2 === 1 ? "bg-muted/20" : "",
-        !ticket.isReadByUser && "bg-primary/[0.02]",
-      )}
-      data-state={selected ? "selected" : undefined}
-      onClick={(e) => {
-        const target = e.target as HTMLElement
-        if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) {
-          return
-        }
-        onRowClick()
-      }}
-    >
-      <TableCell className={cellClass}>
-        <Checkbox
-          checked={selected}
-          onChange={(e) => {
-            e.stopPropagation()
-            onToggle()
-          }}
-          aria-label={`Select ticket ${ticket.ticketNumber}`}
-        />
-      </TableCell>
-      <TableCell className={cn("font-mono text-xs text-muted-foreground", cellClass)}>
-        <div className="flex items-center gap-1.5">
-          {!ticket.isReadByUser && <span className="h-1.5 w-1.5 rounded-full bg-primary" />}
-          {ticket.ticketNumber}
-        </div>
-      </TableCell>
-      <TableCell className={cellClass}>
-        <Link to="/support/$ticketId" params={{ ticketId: ticket.id }} className={cn("group flex flex-col gap-0.5")} onClick={(e) => e.stopPropagation()}>
-          <span className={cn("group-hover:underline", ticket.isReadByUser ? "font-medium" : "font-semibold")}>{ticket.subject}</span>
-          {ticket.latestMessagePreview && <span className="text-xs text-muted-foreground line-clamp-1">{ticket.latestMessagePreview}</span>}
-        </Link>
-      </TableCell>
-      {isColumnVisible("status") && (
+    <>
+      <TableRow
+        className={cn(
+          "cursor-pointer hover:bg-muted/50 transition-colors border-l-2",
+          priorityRowAccent[ticket.priority] ?? "border-l-transparent",
+          index % 2 === 1 ? "bg-muted/20" : "",
+          !ticket.isReadByUser && "bg-primary/[0.02]",
+        )}
+        data-state={selected ? "selected" : undefined}
+        onClick={(e) => {
+          const target = e.target as HTMLElement
+          if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) {
+            return
+          }
+          onRowClick()
+        }}
+      >
         <TableCell className={cellClass}>
-          <div className="flex flex-col gap-1.5">
-            <TicketStatusBadge status={ticket.status} />
-            {ticket.assignedTo && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="flex items-center gap-1.5">
-                    <Avatar className="size-4">
-                      {ticket.assignedTo.avatarUrl ? <AvatarImage src={ticket.assignedTo.avatarUrl} alt={ticket.assignedTo.name ?? ticket.assignedTo.email} /> : null}
-                      <AvatarFallback className="text-[8px] font-medium bg-muted">{getInitials(ticket.assignedTo.name, ticket.assignedTo.email)}</AvatarFallback>
-                    </Avatar>
-                    <span className="text-xs text-muted-foreground truncate max-w-[100px]">{ticket.assignedTo.name ?? ticket.assignedTo.email}</span>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>Assigned to {ticket.assignedTo.name ?? ticket.assignedTo.email}</TooltipContent>
-              </Tooltip>
-            )}
+          <Checkbox
+            checked={selected}
+            onChange={(e) => {
+              e.stopPropagation()
+              onToggle()
+            }}
+            aria-label={`Select ticket ${ticket.ticketNumber}`}
+          />
+        </TableCell>
+        <TableCell className={cn("font-mono text-xs text-muted-foreground", cellClass)}>
+          <div className="flex items-center gap-1.5">
+            {!ticket.isReadByUser && <span className="h-1.5 w-1.5 rounded-full bg-primary" />}
+            {ticket.ticketNumber}
           </div>
         </TableCell>
-      )}
-      {isColumnVisible("priority") && (
-        <TableCell className={cn("hidden md:table-cell", cellClass)}>
-          <TicketPriorityBadge priority={ticket.priority} />
+        <TableCell className={cellClass}>
+          <Link to="/support/$ticketId" params={{ ticketId: ticket.id }} className={cn("group flex flex-col gap-0.5")} onClick={(e) => e.stopPropagation()}>
+            <span className={cn("group-hover:underline", ticket.isReadByUser ? "font-medium" : "font-semibold")}>{ticket.subject}</span>
+            {ticket.latestMessagePreview && <span className="text-xs text-muted-foreground line-clamp-1">{ticket.latestMessagePreview}</span>}
+          </Link>
         </TableCell>
-      )}
-      {isColumnVisible("category") && (
-        <TableCell className={cn("hidden md:table-cell", cellClass)}>
-          {ticket.category ? (
-            <Badge variant="outline" className="text-xs capitalize">
-              {ticket.category}
-            </Badge>
-          ) : (
-            <span className="text-xs text-muted-foreground">--</span>
-          )}
+        {isColumnVisible("status") && (
+          <TableCell className={cellClass}>
+            <div className="flex flex-col gap-1.5">
+              <TicketStatusBadge status={ticket.status} />
+              {ticket.assignedTo && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-1.5">
+                      <Avatar className="size-4">
+                        {ticket.assignedTo.avatarUrl ? <AvatarImage src={ticket.assignedTo.avatarUrl} alt={ticket.assignedTo.name ?? ticket.assignedTo.email} /> : null}
+                        <AvatarFallback className="text-[8px] font-medium bg-muted">{getInitials(ticket.assignedTo.name, ticket.assignedTo.email)}</AvatarFallback>
+                      </Avatar>
+                      <span className="text-xs text-muted-foreground truncate max-w-[100px]">{ticket.assignedTo.name ?? ticket.assignedTo.email}</span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>Assigned to {ticket.assignedTo.name ?? ticket.assignedTo.email}</TooltipContent>
+                </Tooltip>
+              )}
+            </div>
+          </TableCell>
+        )}
+        {isColumnVisible("priority") && (
+          <TableCell className={cn("hidden md:table-cell", cellClass)}>
+            <TicketPriorityBadge priority={ticket.priority} />
+          </TableCell>
+        )}
+        {isColumnVisible("category") && (
+          <TableCell className={cn("hidden md:table-cell", cellClass)}>
+            {ticket.category ? (
+              <Badge variant="outline" className="text-xs capitalize">
+                {ticket.category}
+              </Badge>
+            ) : (
+              <span className="text-xs text-muted-foreground">--</span>
+            )}
+          </TableCell>
+        )}
+        {isColumnVisible("created") && (
+          <TableCell className={cn("hidden md:table-cell", cellClass)}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="cursor-default text-xs text-muted-foreground">{formatRelativeTimeShort(ticket.createdAt)}</span>
+              </TooltipTrigger>
+              <TooltipContent>{formatDateTime(ticket.createdAt)}</TooltipContent>
+            </Tooltip>
+          </TableCell>
+        )}
+        {isColumnVisible("updated") && (
+          <TableCell className={cn("hidden md:table-cell", cellClass)}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="cursor-default text-xs text-muted-foreground">{formatRelativeTimeShort(ticket.updatedAt)}</span>
+              </TooltipTrigger>
+              <TooltipContent>{formatDateTime(ticket.updatedAt)}</TooltipContent>
+            </Tooltip>
+          </TableCell>
+        )}
+        <TableCell className={cn("text-right", cellClass)}>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" data-slot="dropdown" onClick={(e) => e.stopPropagation()}>
+                <MoreVertical className="h-4 w-4" />
+                <span className="sr-only">Actions for {ticket.ticketNumber}</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild>
+                <Link to="/support/$ticketId" params={{ ticketId: ticket.id }}>
+                  <Eye className="mr-2 h-4 w-4" />
+                  View details
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/support/$ticketId/edit" params={{ ticketId: ticket.id }}>
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Edit
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setDeleteOpen(true)}>
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </TableCell>
-      )}
-      {isColumnVisible("created") && (
-        <TableCell className={cn("hidden md:table-cell", cellClass)}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="cursor-default text-xs text-muted-foreground">{formatRelativeTimeShort(ticket.createdAt)}</span>
-            </TooltipTrigger>
-            <TooltipContent>{formatDateTime(ticket.createdAt)}</TooltipContent>
-          </Tooltip>
-        </TableCell>
-      )}
-      {isColumnVisible("updated") && (
-        <TableCell className={cn("hidden md:table-cell", cellClass)}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="cursor-default text-xs text-muted-foreground">{formatRelativeTimeShort(ticket.updatedAt)}</span>
-            </TooltipTrigger>
-            <TooltipContent>{formatDateTime(ticket.updatedAt)}</TooltipContent>
-          </Tooltip>
-        </TableCell>
-      )}
-      <TableCell className={cn("text-right", cellClass)}>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" data-slot="dropdown" onClick={(e) => e.stopPropagation()}>
-              <MoreVertical className="h-4 w-4" />
-              <span className="sr-only">Actions for {ticket.ticketNumber}</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem asChild>
-              <Link to="/support/$ticketId" params={{ ticketId: ticket.id }}>
-                <Eye className="mr-2 h-4 w-4" />
-                View details
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link to="/support/$ticketId/edit" params={{ ticketId: ticket.id }}>
-                <Pencil className="mr-2 h-4 w-4" />
-                Edit
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={onDelete}>
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </TableCell>
-    </TableRow>
+      </TableRow>
+
+      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Delete ticket?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete ticket <strong>{ticket.ticketNumber}</strong> ({ticket.subject}). This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                onDelete()
+                setDeleteOpen(false)
+              }}
+            >
+              Delete Ticket
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }

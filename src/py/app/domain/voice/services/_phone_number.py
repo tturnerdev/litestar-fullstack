@@ -37,6 +37,7 @@ class PhoneNumberService(service.SQLAlchemyAsyncRepositoryService[m.PhoneNumber]
     async def to_model_on_create(self, data: ModelDictT[m.PhoneNumber]) -> ModelDictT[m.PhoneNumber]:
         data = service.schema_dump(data)
         if service.is_dict(data):
+            data["number"] = data["number"].strip()
             existing = await self.repository.list(
                 CollectionFilter(field_name="number", values=[data["number"]]),
             )
@@ -47,6 +48,7 @@ class PhoneNumberService(service.SQLAlchemyAsyncRepositoryService[m.PhoneNumber]
     async def to_model_on_update(self, data: ModelDictT[m.PhoneNumber], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.PhoneNumber]:
         data = service.schema_dump(data)
         if service.is_dict(data) and "number" in data:
+            data["number"] = data["number"].strip()
             existing = await self.repository.list(
                 CollectionFilter(field_name="number", values=[data["number"]]),
             )
