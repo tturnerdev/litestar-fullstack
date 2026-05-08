@@ -375,7 +375,7 @@ function NewE911RegistrationPage() {
                     </Button>
                     <Button type="submit" disabled={!isValid || createMutation.isPending}>
                       {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      Register Address
+                      {createMutation.isPending ? "Registering..." : "Register Address"}
                     </Button>
                   </div>
                 </form>

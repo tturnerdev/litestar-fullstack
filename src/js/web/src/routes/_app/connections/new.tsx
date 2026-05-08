@@ -827,7 +827,7 @@ function NewConnectionPage() {
                     </Button>
                     <Button type="submit" disabled={!isValid || createConnection.isPending}>
                       {createConnection.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      Create Connection
+                      {createConnection.isPending ? "Creating..." : "Create Connection"}
                     </Button>
                   </div>
                 </form>

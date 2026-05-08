@@ -429,7 +429,7 @@ function NewWebhookPage() {
                     </Button>
                     <Button type="submit" disabled={!isValid || createWebhook.isPending}>
                       {createWebhook.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      Create Webhook
+                      {createWebhook.isPending ? "Creating..." : "Create Webhook"}
                     </Button>
                   </div>
                 </form>

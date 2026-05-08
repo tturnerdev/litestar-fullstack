@@ -346,7 +346,7 @@ function NewSchedulePage() {
                     </Button>
                     <Button type="submit" disabled={!isValid || createSchedule.isPending}>
                       {createSchedule.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      Create Schedule
+                      {createSchedule.isPending ? "Creating..." : "Create Schedule"}
                     </Button>
                   </div>
                 </form>

@@ -196,7 +196,7 @@ function NewFaxNumberPage() {
                   </Button>
                   <Button type="submit" disabled={!isValid || createFaxNumber.isPending}>
                     {createFaxNumber.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Create Number
+                    {createFaxNumber.isPending ? "Creating..." : "Create Number"}
                   </Button>
                 </div>
               </form>

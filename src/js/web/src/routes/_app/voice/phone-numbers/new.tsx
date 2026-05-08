@@ -302,7 +302,7 @@ function NewPhoneNumberPage() {
                     </Button>
                     <Button type="submit" disabled={!isValid || createMutation.isPending}>
                       {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      Create Phone Number
+                      {createMutation.isPending ? "Creating..." : "Create Phone Number"}
                     </Button>
                   </div>
                 </form>
