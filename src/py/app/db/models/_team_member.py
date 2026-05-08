@@ -19,7 +19,7 @@ class TeamMember(UUIDv7AuditBase):
     """Team Membership."""
 
     __tablename__ = "team_member"
-    __table_args__ = (UniqueConstraint("user_id", "team_id"),)
+    __table_args__ = (UniqueConstraint("user_id", "team_id", name="uq_team_member_user_team"),)
     user_id: Mapped[UUID] = mapped_column(ForeignKey("user_account.id", ondelete="cascade"), nullable=False)
     team_id: Mapped[UUID] = mapped_column(ForeignKey("team.id", ondelete="cascade"), nullable=False)
     role: Mapped[TeamRoles] = mapped_column(

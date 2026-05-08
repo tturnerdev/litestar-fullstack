@@ -16,7 +16,7 @@ class IvrMenuOption(UUIDv7AuditBase):
 
     __tablename__ = "ivr_menu_option"
     __table_args__ = (
-        UniqueConstraint("ivr_menu_id", "digit"),
+        UniqueConstraint("ivr_menu_id", "digit", name="uq_ivr_menu_option_menu_digit"),
         {"comment": "Key-press options for IVR menus"},
     )
 

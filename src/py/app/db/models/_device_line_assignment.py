@@ -19,7 +19,7 @@ class DeviceLineAssignment(UUIDv7AuditBase):
 
     __tablename__ = "device_line_assignment"
     __table_args__ = (
-        UniqueConstraint("device_id", "line_number"),
+        UniqueConstraint("device_id", "line_number", name="uq_device_line_assignment_device_line"),
         {"comment": "Line key assignments for devices"},
     )
 

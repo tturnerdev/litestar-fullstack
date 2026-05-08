@@ -18,7 +18,7 @@ class TeamRolePermission(UUIDv7AuditBase):
     """Per-role permission grants scoped to a team and feature area."""
 
     __tablename__ = "team_role_permission"
-    __table_args__ = (UniqueConstraint("team_id", "role", "feature_area"),)
+    __table_args__ = (UniqueConstraint("team_id", "role", "feature_area", name="uq_team_role_permission_team_role_feature"),)
 
     team_id: Mapped[UUID] = mapped_column(ForeignKey("team.id", ondelete="cascade"), nullable=False, index=True)
     role: Mapped[TeamRoles] = mapped_column(String(length=50), nullable=False, index=True)
