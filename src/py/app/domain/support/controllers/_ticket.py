@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Annotated, Any
 from uuid import UUID
 
 from litestar import Controller, delete, get, patch, post
+from litestar.exceptions import PermissionDeniedException
 from litestar.di import Provide
 from litestar.params import Dependency, Parameter
 from litestar.status_codes import HTTP_201_CREATED, HTTP_204_NO_CONTENT
@@ -97,6 +98,9 @@ class TicketController(Controller):
         data: TicketCreate,
     ) -> Ticket:
         """Open a new support ticket."""
+        if data.team_id and not current_user.is_superuser:
+            if not any(tm.team_id == data.team_id for tm in current_user.teams):
+                raise PermissionDeniedException(detail="You do not have access to this team")
         obj = data.to_dict()
         body_markdown = obj.pop("body_markdown")
         obj["user_id"] = current_user.id

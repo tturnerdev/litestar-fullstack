@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Annotated, Any
 from uuid import UUID
 
 from litestar import Controller, Request, delete, get, patch, post
+from litestar.exceptions import PermissionDeniedException
 from litestar.di import Provide
 from litestar.params import Dependency, Parameter
 from litestar.status_codes import HTTP_201_CREATED, HTTP_204_NO_CONTENT
@@ -120,6 +121,9 @@ class ConnectionController(Controller):
         Returns:
             ConnectionList
         """
+        if not current_user.is_superuser:
+            if not any(tm.team_id == data.team_id for tm in current_user.teams):
+                raise PermissionDeniedException(detail="You do not have access to this team")
         obj = data.to_dict()
         db_obj = await connections_service.create(obj)
         request.app.emit(event_id="connection_created", connection_id=db_obj.id)

@@ -118,6 +118,9 @@ class FaxNumberController(Controller):
         notifications_service: NotificationService,
         current_user: m.User,
     ) -> FaxNumber:
+        if data.team_id and not current_user.is_superuser:
+            if not any(tm.team_id == data.team_id for tm in current_user.teams):
+                raise PermissionDeniedException(detail="You do not have access to this team")
         obj = data.to_dict()
         obj["user_id"] = current_user.id
         db_obj = await fax_numbers_service.create(obj)
