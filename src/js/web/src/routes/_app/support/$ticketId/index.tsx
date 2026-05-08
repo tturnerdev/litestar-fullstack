@@ -64,7 +64,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useAdminUsers } from "@/lib/api/hooks/admin"
-import type { TicketMessage as TicketMessageType, Ticket as TicketType } from "@/lib/api/hooks/support"
+import type { TicketMessage as TicketMessageType, Ticket as TicketType, TicketUpdate } from "@/lib/api/hooks/support"
 import { useCloseTicket, useDeleteTicket, useReopenTicket, useTicket, useTicketMessages, useUpdateTicket } from "@/lib/api/hooks/support"
 import { type Tag as TagType, useTags } from "@/lib/api/hooks/tags"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
@@ -161,15 +161,11 @@ function TicketTagManager({ ticketId, initialTags }: { ticketId: string; initial
       // Optimistic update
       setAssignedTags(nextTags)
 
-      updateTicket.mutate(
-        { tagIds: nextTags.map((t) => t.id) },
-        {
-          onError: () => {
-            // Revert on failure
-            setAssignedTags(assignedTags)
-          },
+      updateTicket.mutate({ tagIds: nextTags.map((t) => t.id) } as unknown as TicketUpdate, {
+        onError: () => {
+          setAssignedTags(assignedTags)
         },
-      )
+      })
     },
     [assignedIds, assignedTags, updateTicket],
   )
@@ -178,18 +174,13 @@ function TicketTagManager({ ticketId, initialTags }: { ticketId: string; initial
     (tagId: string) => {
       const nextTags = assignedTags.filter((t) => t.id !== tagId)
 
-      // Optimistic update
       setAssignedTags(nextTags)
 
-      updateTicket.mutate(
-        { tagIds: nextTags.map((t) => t.id) },
-        {
-          onError: () => {
-            // Revert on failure
-            setAssignedTags(assignedTags)
-          },
+      updateTicket.mutate({ tagIds: nextTags.map((t) => t.id) } as unknown as TicketUpdate, {
+        onError: () => {
+          setAssignedTags(assignedTags)
         },
-      )
+      })
     },
     [assignedTags, updateTicket],
   )

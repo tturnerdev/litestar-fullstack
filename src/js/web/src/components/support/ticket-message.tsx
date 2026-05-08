@@ -1,4 +1,4 @@
-import { AlertTriangle, Check, Copy, Eye, Headphones, Loader2, Pencil, Reply, ThumbsUp, Trash2 } from "lucide-react"
+import { AlertTriangle, Check, Copy, Eye, Loader2, Pencil, Reply, ThumbsUp, Trash2 } from "lucide-react"
 import { useState } from "react"
 import { AttachmentList } from "@/components/support/attachment-list"
 import { TicketMessageSystem } from "@/components/support/ticket-message-system"
@@ -55,7 +55,6 @@ interface TicketMessageProps {
 export function TicketMessage({ message, ticketId, isFirstMessage = false, onReply }: TicketMessageProps) {
   const isInternal = message.isInternalNote
   const isSystem = message.isSystemMessage
-  const isStaff = message.isStaff === true
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [copied, setCopied] = useState(false)
   const [thumbsUp, setThumbsUp] = useState(false)
@@ -88,7 +87,7 @@ export function TicketMessage({ message, ticketId, isFirstMessage = false, onRep
     setThumbsUpCount((prev) => (thumbsUp ? prev - 1 : prev + 1))
   }
 
-  const leftBorderColor = isInternal ? "border-l-amber-500" : isStaff ? "border-l-blue-500" : "border-l-muted-foreground/20"
+  const leftBorderColor = isInternal ? "border-l-amber-500" : "border-l-muted-foreground/20"
 
   return (
     <>
@@ -122,12 +121,6 @@ export function TicketMessage({ message, ticketId, isFirstMessage = false, onRep
                   {isFirstMessage && (
                     <Badge variant="outline" className="h-4 border-primary/30 bg-primary/5 px-1.5 text-[10px] text-primary">
                       Original
-                    </Badge>
-                  )}
-                  {isStaff && (
-                    <Badge variant="outline" className="h-4 border-blue-500/30 bg-blue-500/10 px-1.5 text-[10px] text-blue-700 dark:text-blue-400">
-                      <Headphones className="mr-0.5 h-2.5 w-2.5" />
-                      Staff
                     </Badge>
                   )}
                 </div>

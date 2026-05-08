@@ -1,58 +1,26 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
+import {
+  closeTicket as closeTicketApi,
+  createTicketMessage as createMessageApi,
+  createTicket as createTicketApi,
+  deleteTicketMessage as deleteMessageApi,
+  deleteTicket as deleteTicketApi,
+  getTicket,
+  listTicketMessages,
+  listTickets,
+  reopenTicket as reopenTicketApi,
+  type Ticket,
+  type TicketAttachment,
+  type TicketCreate,
+  type TicketMessage,
+  type TicketUpdate,
+  type TicketUser,
+  updateTicket as updateTicketApi,
+} from "@/lib/generated/api"
 import { client } from "@/lib/generated/api/client.gen"
 
-// ── Types ──────────────────────────────────────────────────────────────
-
-export interface TicketUser {
-  id: string
-  email: string
-  name?: string | null
-  avatarUrl?: string | null
-}
-
-export interface Ticket {
-  id: string
-  ticketNumber: string
-  subject: string
-  status: string
-  priority: string
-  category?: string | null
-  isReadByUser: boolean
-  isReadByAgent: boolean
-  user?: TicketUser | null
-  assignedTo?: TicketUser | null
-  messageCount: number
-  latestMessagePreview?: string | null
-  createdAt?: string | null
-  updatedAt?: string | null
-  closedAt?: string | null
-  resolvedAt?: string | null
-}
-
-export interface TicketMessage {
-  id: string
-  bodyMarkdown: string
-  bodyHtml: string
-  author?: TicketUser | null
-  isInternalNote: boolean
-  isSystemMessage: boolean
-  isStaff?: boolean
-  attachments: TicketAttachment[]
-  createdAt?: string | null
-  updatedAt?: string | null
-}
-
-export interface TicketAttachment {
-  id: string
-  fileName: string
-  filePath: string
-  fileSizeBytes: number
-  contentType: string
-  isInline: boolean
-  url?: string | null
-  createdAt?: string | null
-}
+export type { Ticket, TicketAttachment, TicketCreate, TicketMessage, TicketUpdate, TicketUser }
 
 export interface PastedImage {
   id: string
@@ -75,19 +43,16 @@ export function useTickets(page = 1, pageSize = 25, filters?: TicketFilters, ref
   return useQuery({
     queryKey: ["support", "tickets", page, pageSize, filters],
     queryFn: async () => {
-      const query: Record<string, unknown> = { currentPage: page, pageSize }
-      if (filters?.status && filters.status !== "all") query.status = filters.status
-      if (filters?.priority && filters.priority !== "all") query.priority = filters.priority
-      if (filters?.category && filters.category !== "all") query.category = filters.category
-      if (filters?.search) query.search = filters.search
-      if (filters?.orderBy) query.orderBy = filters.orderBy
-      if (filters?.sortOrder) query.sortOrder = filters.sortOrder
-      const response = await client.get({
-        url: "/api/support/tickets",
-        query,
-        security: [{ scheme: "bearer", type: "http" }],
-      } as never)
-      return (response as { data: unknown }).data as { items: Ticket[]; total: number }
+      const response = await listTickets({
+        query: {
+          currentPage: page,
+          pageSize,
+          searchString: filters?.search,
+          orderBy: filters?.orderBy,
+          sortOrder: filters?.sortOrder as "asc" | "desc" | undefined,
+        },
+      })
+      return response.data as { items: Ticket[]; total: number }
     },
     refetchInterval,
   })
@@ -97,11 +62,10 @@ export function useTicket(ticketId: string) {
   return useQuery({
     queryKey: ["support", "ticket", ticketId],
     queryFn: async () => {
-      const response = await client.get({
-        url: `/api/support/tickets/${ticketId}`,
-        security: [{ scheme: "bearer", type: "http" }],
-      } as never)
-      return (response as { data: unknown }).data as Ticket
+      const response = await getTicket({
+        path: { ticket_id: ticketId },
+      })
+      return response.data as Ticket
     },
     enabled: !!ticketId,
   })
@@ -110,13 +74,9 @@ export function useTicket(ticketId: string) {
 export function useCreateTicket() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (payload: { subject: string; bodyMarkdown: string; priority?: string; category?: string | null; teamId?: string | null }) => {
-      const response = await client.post({
-        url: "/api/support/tickets",
-        body: payload,
-        security: [{ scheme: "bearer", type: "http" }],
-      } as never)
-      return (response as { data: unknown }).data as Ticket
+    mutationFn: async (payload: TicketCreate) => {
+      const response = await createTicketApi({ body: payload })
+      return response.data as Ticket
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["support", "tickets"] })
@@ -133,13 +93,12 @@ export function useCreateTicket() {
 export function useUpdateTicket(ticketId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (payload: Record<string, unknown>) => {
-      const response = await client.patch({
-        url: `/api/support/tickets/${ticketId}`,
+    mutationFn: async (payload: TicketUpdate) => {
+      const response = await updateTicketApi({
+        path: { ticket_id: ticketId },
         body: payload,
-        security: [{ scheme: "bearer", type: "http" }],
-      } as never)
-      return (response as { data: unknown }).data as Ticket
+      })
+      return response.data as Ticket
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["support", "tickets"] })
@@ -158,11 +117,10 @@ export function useCloseTicket(ticketId: string) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async () => {
-      const response = await client.post({
-        url: `/api/support/tickets/${ticketId}/close`,
-        security: [{ scheme: "bearer", type: "http" }],
-      } as never)
-      return (response as { data: unknown }).data as Ticket
+      const response = await closeTicketApi({
+        path: { ticket_id: ticketId },
+      })
+      return response.data as Ticket
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["support", "tickets"] })
@@ -181,11 +139,10 @@ export function useReopenTicket(ticketId: string) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async () => {
-      const response = await client.post({
-        url: `/api/support/tickets/${ticketId}/reopen`,
-        security: [{ scheme: "bearer", type: "http" }],
-      } as never)
-      return (response as { data: unknown }).data as Ticket
+      const response = await reopenTicketApi({
+        path: { ticket_id: ticketId },
+      })
+      return response.data as Ticket
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["support", "tickets"] })
@@ -204,10 +161,9 @@ export function useDeleteTicket(ticketId: string) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async () => {
-      await client.delete({
-        url: `/api/support/tickets/${ticketId}`,
-        security: [{ scheme: "bearer", type: "http" }],
-      } as never)
+      await deleteTicketApi({
+        path: { ticket_id: ticketId },
+      })
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["support", "tickets"] })
@@ -228,11 +184,10 @@ export function useTicketMessages(ticketId: string) {
   return useQuery({
     queryKey: ["support", "ticket", ticketId, "messages"],
     queryFn: async () => {
-      const response = await client.get({
-        url: `/api/support/tickets/${ticketId}/messages`,
-        security: [{ scheme: "bearer", type: "http" }],
-      } as never)
-      return (response as { data: unknown }).data as TicketMessage[]
+      const response = await listTicketMessages({
+        path: { ticket_id: ticketId },
+      })
+      return response.data as TicketMessage[]
     },
     enabled: !!ticketId,
   })
@@ -242,12 +197,11 @@ export function useCreateTicketMessage(ticketId: string) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (payload: { bodyMarkdown: string; isInternalNote?: boolean }) => {
-      const response = await client.post({
-        url: `/api/support/tickets/${ticketId}/messages`,
+      const response = await createMessageApi({
+        path: { ticket_id: ticketId },
         body: payload,
-        security: [{ scheme: "bearer", type: "http" }],
-      } as never)
-      return (response as { data: unknown }).data as TicketMessage
+      })
+      return response.data as TicketMessage
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["support", "ticket", ticketId, "messages"] })
@@ -267,10 +221,9 @@ export function useDeleteTicketMessage(ticketId: string) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (messageId: string) => {
-      await client.delete({
-        url: `/api/support/tickets/${ticketId}/messages/${messageId}`,
-        security: [{ scheme: "bearer", type: "http" }],
-      } as never)
+      await deleteMessageApi({
+        path: { ticket_id: ticketId, msg_id: messageId },
+      })
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["support", "ticket", ticketId, "messages"] })
@@ -286,7 +239,7 @@ export function useDeleteTicketMessage(ticketId: string) {
   })
 }
 
-// ── Attachment Hooks ───────────────────────────────────────────────────
+// ── Attachment Hooks (raw client — generated SDK lacks multipart body) ─
 
 export function useUploadAttachment(ticketId: string) {
   const queryClient = useQueryClient()
