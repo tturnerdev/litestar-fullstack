@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.363.0 (2026-05-08)
+
+### Fixed
+- **Input normalization across services** — Strip/normalize inputs before duplicate checks: fax email routes (strip + lowercase email), fax numbers (strip), device MAC addresses (strip + uppercase)
+
 ## v0.362.0 (2026-05-08)
 
 ### Fixed

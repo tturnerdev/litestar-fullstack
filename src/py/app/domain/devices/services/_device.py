@@ -38,6 +38,7 @@ class DeviceService(service.SQLAlchemyAsyncRepositoryService[m.Device]):
         data = service.schema_dump(data)
         if service.is_dict(data):
             if data.get("mac_address"):
+                data["mac_address"] = data["mac_address"].strip().upper()
                 existing = await self.repository.list(
                     CollectionFilter(field_name="mac_address", values=[data["mac_address"]]),
                 )
@@ -52,6 +53,7 @@ class DeviceService(service.SQLAlchemyAsyncRepositoryService[m.Device]):
     async def to_model_on_update(self, data: ModelDictT[m.Device], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.Device]:
         data = service.schema_dump(data)
         if service.is_dict(data) and "mac_address" in data:
+            data["mac_address"] = data["mac_address"].strip().upper()
             existing = await self.repository.list(
                 CollectionFilter(field_name="mac_address", values=[data["mac_address"]]),
             )
