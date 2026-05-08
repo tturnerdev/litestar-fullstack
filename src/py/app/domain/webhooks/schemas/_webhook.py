@@ -53,7 +53,7 @@ class WebhookCreate(CamelizedBaseStruct):
 
     name: Annotated[str, Meta(min_length=1, max_length=100)]
     url: Annotated[str, Meta(min_length=1, max_length=500)]
-    secret: Annotated[str, Meta(max_length=200)] | None = None
+    secret: Annotated[str, Meta(min_length=1, max_length=200)] | None = None
     events: list[str] = []
     is_active: bool = True
     headers: dict[str, str] = {}
@@ -65,11 +65,11 @@ class WebhookUpdate(CamelizedBaseStruct, omit_defaults=True):
 
     name: Annotated[str, Meta(min_length=1, max_length=100)] | msgspec.UnsetType = msgspec.UNSET
     url: Annotated[str, Meta(min_length=1, max_length=500)] | msgspec.UnsetType = msgspec.UNSET
-    secret: Annotated[str, Meta(max_length=200)] | msgspec.UnsetType | None = msgspec.UNSET
+    secret: Annotated[str, Meta(min_length=1, max_length=200)] | msgspec.UnsetType | None = msgspec.UNSET
     events: list[str] | msgspec.UnsetType = msgspec.UNSET
     is_active: bool | msgspec.UnsetType = msgspec.UNSET
     headers: dict[str, str] | msgspec.UnsetType = msgspec.UNSET
-    description: Annotated[str, Meta(max_length=500)] | msgspec.UnsetType = msgspec.UNSET
+    description: Annotated[str, Meta(min_length=1, max_length=500)] | msgspec.UnsetType = msgspec.UNSET
 
 
 class WebhookTestResult(CamelizedBaseStruct):

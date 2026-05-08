@@ -21,8 +21,8 @@ class AccountLogin(CamelizedBaseStruct):
 class AccountRegister(CamelizedBaseStruct):
     email: Annotated[str, Meta(min_length=1, max_length=255)]
     password: Annotated[str, Meta(min_length=1, max_length=255)]
-    name: Annotated[str, Meta(max_length=255)] | None = None
-    username: Annotated[str, Meta(max_length=255)] | None = None
+    name: Annotated[str, Meta(min_length=1, max_length=255)] | None = None
+    username: Annotated[str, Meta(min_length=1, max_length=255)] | None = None
     initial_team_name: str | msgspec.UnsetType | None = msgspec.UNSET
 
     def __post_init__(self) -> None:

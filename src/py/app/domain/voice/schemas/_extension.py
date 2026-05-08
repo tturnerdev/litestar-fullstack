@@ -47,7 +47,7 @@ class ExtensionCreate(CamelizedBaseStruct):
 class ExtensionUpdate(CamelizedBaseStruct, omit_defaults=True):
     """Extension update properties."""
 
-    display_name: Annotated[str, Meta(max_length=100)] | msgspec.UnsetType = msgspec.UNSET
+    display_name: Annotated[str, Meta(min_length=1, max_length=100)] | msgspec.UnsetType = msgspec.UNSET
     phone_number_id: UUID | msgspec.UnsetType | None = msgspec.UNSET
     is_active: bool | msgspec.UnsetType = msgspec.UNSET
     forward_always_enabled: bool | msgspec.UnsetType = msgspec.UNSET

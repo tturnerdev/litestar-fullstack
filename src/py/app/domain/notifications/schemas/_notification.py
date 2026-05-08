@@ -34,7 +34,7 @@ class NotificationCreate(CamelizedBaseStruct):
     title: Annotated[str, Meta(min_length=1, max_length=255)]
     message: Annotated[str, Meta(min_length=1, max_length=5000)]
     category: Annotated[str, Meta(min_length=1, max_length=50)]
-    action_url: Annotated[str, Meta(max_length=2048)] | None = None
+    action_url: Annotated[str, Meta(min_length=1, max_length=2048)] | None = None
     metadata_: dict[str, Any] | None = None
 
 

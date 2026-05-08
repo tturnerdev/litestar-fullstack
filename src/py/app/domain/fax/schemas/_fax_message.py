@@ -42,6 +42,6 @@ class SendFax(CamelizedBaseStruct):
     fax_number_id: UUID
     destination_number: Annotated[str, Meta(min_length=1, max_length=20)]
     team_id: UUID
-    subject: Annotated[str, Meta(max_length=255)] | None = None
-    body: Annotated[str, Meta(max_length=50000)] | None = None
-    media_url: Annotated[str, Meta(max_length=2048)] | None = None
+    subject: Annotated[str, Meta(min_length=1, max_length=255)] | None = None
+    body: Annotated[str, Meta(min_length=1, max_length=50000)] | None = None
+    media_url: Annotated[str, Meta(min_length=1, max_length=2048)] | None = None

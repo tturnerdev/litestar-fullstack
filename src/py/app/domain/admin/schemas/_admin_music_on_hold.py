@@ -54,7 +54,7 @@ class MusicOnHoldUpdate(CamelizedBaseStruct, omit_defaults=True):
     """Schema for updating a Music on Hold class."""
 
     name: Annotated[str, Meta(min_length=1, max_length=100)] | msgspec.UnsetType = msgspec.UNSET
-    description: Annotated[str, Meta(max_length=500)] | msgspec.UnsetType = msgspec.UNSET
+    description: Annotated[str, Meta(min_length=1, max_length=500)] | msgspec.UnsetType = msgspec.UNSET
     category: Annotated[str, Meta(min_length=1, max_length=50)] | msgspec.UnsetType = msgspec.UNSET
     is_default: bool | msgspec.UnsetType = msgspec.UNSET
     is_active: bool | msgspec.UnsetType = msgspec.UNSET
