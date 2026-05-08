@@ -5,11 +5,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Annotated, Any
 from uuid import UUID
 
-from litestar import Controller, get, post
+from litestar import Controller, delete, get, post
+from litestar.exceptions import PermissionDeniedException
 from litestar.di import Provide
 from litestar.params import Dependency, Parameter
 
 from app.db import models as m
+from app.db.models._background_task_status import BackgroundTaskStatus
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.tasks.guards import requires_task_access
 from app.domain.tasks.schemas import BackgroundTaskDetail, BackgroundTaskList
@@ -133,6 +135,61 @@ class BackgroundTaskController(Controller):
             metadata={
                 "task_type": db_obj.task_type,
                 "previous_status": previous_status,
+                "entity_type": db_obj.entity_type,
+                "entity_id": str(db_obj.entity_id) if db_obj.entity_id else None,
+            },
+            request=request,
+        )
+        return task_service.to_schema(db_obj, schema_type=BackgroundTaskDetail)
+
+    @delete(
+        operation_id="DeleteTask",
+        path="/api/tasks/{task_id:uuid}",
+        guards=[requires_task_access],
+        status_code=200,
+    )
+    async def delete_task(
+        self,
+        request: Request[m.User, Token, Any],
+        task_service: BackgroundTaskService,
+        audit_service: AuditLogService,
+        current_user: m.User,
+        task_id: Annotated[UUID, Parameter(title="Task ID", description="The task to delete.")],
+    ) -> BackgroundTaskDetail:
+        """Delete a completed, failed, or cancelled task.
+
+        Only tasks in terminal states may be deleted. Attempting to delete a
+        pending or running task will raise a permission error.
+
+        Args:
+            request: The current request
+            task_service: Background Task Service
+            audit_service: Audit Log Service
+            current_user: Current User
+            task_id: Task ID
+
+        Raises:
+            PermissionDeniedException: If the task is still pending or running.
+        """
+        terminal_states = {BackgroundTaskStatus.COMPLETED, BackgroundTaskStatus.FAILED, BackgroundTaskStatus.CANCELLED}
+        existing = await task_service.get(task_id)
+        if existing.status not in terminal_states:
+            raise PermissionDeniedException(
+                detail=f"Cannot delete a task with status '{existing.status}'. Only completed, failed, or cancelled tasks may be deleted.",
+            )
+        db_obj = await task_service.delete(task_id)
+        await log_audit(
+            audit_service,
+            action="task.deleted",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            actor_name=current_user.name,
+            target_type="background_task",
+            target_id=task_id,
+            target_label=db_obj.task_type,
+            metadata={
+                "task_type": db_obj.task_type,
+                "previous_status": db_obj.status,
                 "entity_type": db_obj.entity_type,
                 "entity_id": str(db_obj.entity_id) if db_obj.entity_id else None,
             },

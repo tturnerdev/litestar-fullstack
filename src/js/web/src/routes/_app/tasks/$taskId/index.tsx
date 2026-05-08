@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router"
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import {
   AlertCircle,
   ArrowLeft,
@@ -42,7 +42,7 @@ import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDocumentTitle } from "@/hooks/use-document-title"
-import { useCancelTask, useRetryTask, useTask } from "@/lib/api/hooks/tasks"
+import { useCancelTask, useDeleteTask, useRetryTask, useTask } from "@/lib/api/hooks/tasks"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 
 export const Route = createFileRoute("/_app/tasks/$taskId/")({
@@ -189,9 +189,11 @@ function TaskNotFound({ message }: { message: string }) {
 
 function TaskDetailPage() {
   const { taskId } = Route.useParams()
+  const navigate = useNavigate()
   const { data: task, isLoading, isError } = useTask(taskId)
   const cancelMutation = useCancelTask()
   const retryMutation = useRetryTask()
+  const deleteMutation = useDeleteTask()
   const [showCancelDialog, setShowCancelDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
@@ -488,11 +490,16 @@ function TaskDetailPage() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={() => {
-                toast.info("Task deletion is not yet implemented")
-                setShowDeleteDialog(false)
-              }}
+              onClick={() =>
+                deleteMutation.mutate(taskId, {
+                  onSuccess: () => {
+                    navigate({ to: "/tasks" })
+                  },
+                })
+              }
+              disabled={deleteMutation.isPending}
             >
+              {deleteMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Delete Task
             </AlertDialogAction>
           </AlertDialogFooter>

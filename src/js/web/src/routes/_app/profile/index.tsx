@@ -9,10 +9,13 @@ import {
   ChevronRight,
   Circle,
   Download,
+  FileJson,
+  FileSpreadsheet,
   Home,
   KeyRound,
   KeySquare,
   Link2,
+  Loader2,
   Mail,
   Monitor,
   Palette,
@@ -24,7 +27,7 @@ import {
   User as UserIcon,
   Users,
 } from "lucide-react"
-import { useEffect, useMemo } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 import { z } from "zod"
 import { ActiveSessions } from "@/components/profile/active-sessions"
@@ -38,8 +41,11 @@ import { Badge } from "@/components/ui/badge"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
 import { EmptyState } from "@/components/ui/empty-state"
+import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Separator } from "@/components/ui/separator"
 import { SkeletonCard } from "@/components/ui/skeleton"
@@ -377,31 +383,46 @@ function ApiKeysCard() {
           <KeySquare className="h-4 w-4 text-muted-foreground" />
           API Keys
         </CardTitle>
-        <CardDescription>
-          Generate API keys for programmatic access to the admin portal. Use keys to integrate with external tools, scripts, and automation workflows.
-        </CardDescription>
+        <CardDescription>Programmatic access to the admin portal API.</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-col items-center gap-4 rounded-lg border border-dashed py-8">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-            <KeySquare className="h-6 w-6 text-muted-foreground" />
+        <div className="rounded-lg border border-dashed bg-muted/30 p-6">
+          <div className="flex items-start gap-4">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted">
+              <KeySquare className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2">
+                <p className="text-sm font-medium">Coming soon</p>
+                <Badge variant="secondary" className="text-xs">
+                  Planned
+                </Badge>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                API key management will let you generate and revoke personal access tokens for authenticating with the admin portal API. Use them to integrate with external tools,
+                scripts, and CI/CD pipelines without relying on your browser session.
+              </p>
+              <ul className="mt-3 space-y-1 text-xs text-muted-foreground">
+                <li className="flex items-center gap-1.5">
+                  <Circle className="h-1.5 w-1.5 fill-current" /> Scoped permissions per key
+                </li>
+                <li className="flex items-center gap-1.5">
+                  <Circle className="h-1.5 w-1.5 fill-current" /> Configurable expiration dates
+                </li>
+                <li className="flex items-center gap-1.5">
+                  <Circle className="h-1.5 w-1.5 fill-current" /> Usage audit logging
+                </li>
+              </ul>
+            </div>
           </div>
-          <div className="text-center">
-            <p className="text-sm font-medium">No API keys yet</p>
-            <p className="mt-1 max-w-sm text-xs text-muted-foreground">API keys allow you to authenticate requests to the admin portal API without using your browser session.</p>
-          </div>
-          <Button variant="outline" size="sm" onClick={() => toast.info("API key management coming soon")}>
-            <KeySquare className="mr-2 h-4 w-4" />
-            Generate API Key
-          </Button>
         </div>
       </CardContent>
     </Card>
   )
 }
 
-function downloadJson(data: unknown, filename: string) {
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" })
+function downloadFile(content: string, filename: string, mimeType: string) {
+  const blob = new Blob([content], { type: mimeType })
   const url = URL.createObjectURL(blob)
   const a = document.createElement("a")
   a.href = url
@@ -410,54 +431,291 @@ function downloadJson(data: unknown, filename: string) {
   URL.revokeObjectURL(url)
 }
 
+function flattenForCsv(obj: Record<string, unknown>, prefix = ""): Record<string, string> {
+  const result: Record<string, string> = {}
+  for (const [key, value] of Object.entries(obj)) {
+    const fullKey = prefix ? `${prefix}.${key}` : key
+    if (value !== null && typeof value === "object" && !Array.isArray(value)) {
+      Object.assign(result, flattenForCsv(value as Record<string, unknown>, fullKey))
+    } else if (Array.isArray(value)) {
+      result[fullKey] = value.map((v) => (typeof v === "object" ? JSON.stringify(v) : String(v))).join("; ")
+    } else {
+      result[fullKey] = value == null ? "" : String(value)
+    }
+  }
+  return result
+}
+
+function objectToCsv(data: Record<string, unknown>): string {
+  const flat = flattenForCsv(data)
+  const keys = Object.keys(flat)
+  const escapeCsv = (val: string) => {
+    if (val.includes(",") || val.includes('"') || val.includes("\n")) {
+      return `"${val.replace(/"/g, '""')}"`
+    }
+    return val
+  }
+  const header = keys.map(escapeCsv).join(",")
+  const row = keys.map((k) => escapeCsv(flat[k])).join(",")
+  return `${header}\n${row}\n`
+}
+
+type ExportFormat = "json" | "csv"
+
+interface ExportSection {
+  id: string
+  label: string
+  description: string
+}
+
+const EXPORT_SECTIONS: ExportSection[] = [
+  { id: "profile", label: "Profile information", description: "Name, email, phone, username" },
+  { id: "teams", label: "Team memberships", description: "Teams you belong to and your roles" },
+  { id: "preferences", label: "Preferences", description: "Theme, display, and accessibility settings" },
+  { id: "notifications", label: "Notification preferences", description: "Notification category settings" },
+  { id: "security", label: "Security overview", description: "MFA status and connected OAuth accounts" },
+]
+
 function DataExportCard({ user }: { user: User }) {
   const { mode } = useTheme()
   const { compactMode, dateFormat, reducedMotion, highContrast, fontSize } = useSettingsStore()
-  const { systemAlerts, taskUpdates, teamActivity, supportTickets, deviceAlerts, security } = useNotificationPreferencesStore()
+  const { systemAlerts, taskUpdates, teamActivity, supportTickets, deviceAlerts, security: securityPref } = useNotificationPreferencesStore()
+  const { data: mfaData } = useMfaStatus()
 
-  function handleExport() {
-    const exportData = {
+  const [format, setFormat] = useState<ExportFormat>("json")
+  const [selectedSections, setSelectedSections] = useState<Set<string>>(() => new Set(EXPORT_SECTIONS.map((s) => s.id)))
+  const [isExporting, setIsExporting] = useState(false)
+  const [exportProgress, setExportProgress] = useState(0)
+
+  const allSelected = selectedSections.size === EXPORT_SECTIONS.length
+  const noneSelected = selectedSections.size === 0
+
+  const toggleSection = useCallback((id: string) => {
+    setSelectedSections((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      return next
+    })
+  }, [])
+
+  const toggleAll = useCallback(() => {
+    if (allSelected) {
+      setSelectedSections(new Set())
+    } else {
+      setSelectedSections(new Set(EXPORT_SECTIONS.map((s) => s.id)))
+    }
+  }, [allSelected])
+
+  const buildExportData = useCallback(() => {
+    const data: Record<string, unknown> = {
       exportedAt: new Date().toISOString(),
-      profile: {
-        name: user.name,
+      exportFormat: format,
+    }
+
+    if (selectedSections.has("profile")) {
+      data.profile = {
+        name: user.name ?? null,
         email: user.email,
-      },
-      preferences: {
+        phone: user.phone ?? null,
+        username: user.username ?? null,
+        isActive: user.isActive ?? false,
+        isVerified: user.isVerified ?? false,
+      }
+    }
+
+    if (selectedSections.has("teams")) {
+      data.teamMemberships = (user.teams ?? []).map((t) => ({
+        teamName: t.teamName,
+        teamId: t.teamId,
+        role: t.role ?? "member",
+        isOwner: t.isOwner ?? false,
+      }))
+    }
+
+    if (selectedSections.has("preferences")) {
+      data.preferences = {
         theme: mode,
         compactMode,
         dateFormat,
         reducedMotion,
         highContrast,
         fontSize,
-      },
-      notificationPreferences: {
+      }
+    }
+
+    if (selectedSections.has("notifications")) {
+      data.notificationPreferences = {
         systemAlerts,
         taskUpdates,
         teamActivity,
         supportTickets,
         deviceAlerts,
-        security,
-      },
+        security: securityPref,
+      }
     }
 
+    if (selectedSections.has("security")) {
+      data.securityOverview = {
+        mfaEnabled: user.isTwoFactorEnabled ?? false,
+        mfaConfirmedAt: mfaData?.confirmedAt ?? null,
+        backupCodesRemaining: mfaData?.backupCodesRemaining ?? null,
+        connectedOAuthProviders: (user.oauthAccounts ?? []).map((a) => a.oauthName),
+        roles: (user.roles ?? []).map((r) => ({
+          roleName: r.roleName,
+          assignedAt: r.assignedAt,
+        })),
+      }
+    }
+
+    return data
+  }, [
+    format,
+    selectedSections,
+    user,
+    mode,
+    compactMode,
+    dateFormat,
+    reducedMotion,
+    highContrast,
+    fontSize,
+    systemAlerts,
+    taskUpdates,
+    teamActivity,
+    supportTickets,
+    deviceAlerts,
+    securityPref,
+    mfaData,
+  ])
+
+  const handleExport = useCallback(async () => {
+    if (noneSelected) {
+      toast.error("Select at least one data category to export.")
+      return
+    }
+
+    setIsExporting(true)
+    setExportProgress(0)
+
+    // Simulate progress steps for data assembly
+    const progressSteps = [10, 30, 55, 75, 90, 100]
+    for (const step of progressSteps) {
+      await new Promise((resolve) => setTimeout(resolve, 120))
+      setExportProgress(step)
+    }
+
+    const data = buildExportData()
     const date = new Date().toISOString().slice(0, 10)
-    downloadJson(exportData, `profile-data-${date}.json`)
+
+    if (format === "json") {
+      downloadFile(JSON.stringify(data, null, 2), `profile-export-${date}.json`, "application/json")
+    } else {
+      downloadFile(objectToCsv(data), `profile-export-${date}.csv`, "text/csv")
+    }
+
+    // Brief pause to show 100% complete
+    await new Promise((resolve) => setTimeout(resolve, 300))
+    setIsExporting(false)
+    setExportProgress(0)
     toast.success("Your data export has been downloaded.")
-  }
+  }, [format, noneSelected, buildExportData])
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
           <Download className="h-4 w-4 text-muted-foreground" />
-          Your Data
+          Export your data
         </CardTitle>
-        <CardDescription>Download a copy of your personal data. This includes your profile information, preferences, and account activity.</CardDescription>
+        <CardDescription>Download a copy of your personal data. Choose which categories to include and your preferred file format.</CardDescription>
       </CardHeader>
-      <CardContent>
-        <Button variant="outline" size="sm" onClick={handleExport}>
-          <Download className="mr-2 h-4 w-4" />
-          Export Data
+      <CardContent className="space-y-6">
+        {/* Format selection */}
+        <div className="space-y-3">
+          <p className="text-sm font-medium">Export format</p>
+          <RadioGroup value={format} onValueChange={(v) => setFormat(v as ExportFormat)} className="flex gap-4">
+            <div className="flex items-center gap-2">
+              <RadioGroupItem value="json" id="format-json" />
+              <Label htmlFor="format-json" className="flex cursor-pointer items-center gap-1.5 text-sm font-normal">
+                <FileJson className="h-4 w-4 text-muted-foreground" />
+                JSON
+              </Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <RadioGroupItem value="csv" id="format-csv" />
+              <Label htmlFor="format-csv" className="flex cursor-pointer items-center gap-1.5 text-sm font-normal">
+                <FileSpreadsheet className="h-4 w-4 text-muted-foreground" />
+                CSV
+              </Label>
+            </div>
+          </RadioGroup>
+        </div>
+
+        <Separator />
+
+        {/* Data categories */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium">Data to include</p>
+            <button type="button" onClick={toggleAll} className="text-xs font-medium text-primary hover:underline">
+              {allSelected ? "Deselect all" : "Select all"}
+            </button>
+          </div>
+          <div className="space-y-2">
+            {EXPORT_SECTIONS.map((section) => (
+              <label
+                key={section.id}
+                htmlFor={`export-${section.id}`}
+                className="flex cursor-pointer items-start gap-3 rounded-lg border px-3 py-2.5 transition-colors hover:bg-accent/50"
+              >
+                <Checkbox
+                  id={`export-${section.id}`}
+                  checked={selectedSections.has(section.id)}
+                  onChange={() => toggleSection(section.id)}
+                  className="mt-0.5"
+                  disabled={isExporting}
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium leading-tight">{section.label}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{section.description}</p>
+                </div>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* Export progress */}
+        {isExporting && (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span className="flex items-center gap-1.5">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                Preparing export...
+              </span>
+              <span className="tabular-nums">{exportProgress}%</span>
+            </div>
+            <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+              <div className="h-full rounded-full bg-primary transition-all duration-200 ease-out" style={{ width: `${exportProgress}%` }} />
+            </div>
+          </div>
+        )}
+
+        {/* Export button */}
+        <Button variant="outline" size="sm" onClick={handleExport} disabled={isExporting || noneSelected}>
+          {isExporting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Exporting...
+            </>
+          ) : (
+            <>
+              <Download className="mr-2 h-4 w-4" />
+              Export {selectedSections.size} {selectedSections.size === 1 ? "category" : "categories"} as {format.toUpperCase()}
+            </>
+          )}
         </Button>
       </CardContent>
     </Card>

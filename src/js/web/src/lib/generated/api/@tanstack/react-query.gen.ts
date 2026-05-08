@@ -124,6 +124,7 @@ import {
   deleteSchedule,
   deleteScheduleEntry,
   deleteTag,
+  deleteTask,
   deleteTeam,
   deleteTeamInvitation,
   deleteTicket,
@@ -647,6 +648,9 @@ import type {
   DeleteTagData,
   DeleteTagError,
   DeleteTagResponse,
+  DeleteTaskData,
+  DeleteTaskError,
+  DeleteTaskResponse,
   DeleteTeamData,
   DeleteTeamError,
   DeleteTeamInvitationData,
@@ -7005,6 +7009,33 @@ export const listActiveTasksOptions = (
     },
     queryKey: listActiveTasksQueryKey(options),
   });
+
+/**
+ * DeleteTask
+ */
+export const deleteTaskMutation = (
+  options?: Partial<Options<DeleteTaskData>>,
+): UseMutationOptions<
+  DeleteTaskResponse,
+  DeleteTaskError,
+  Options<DeleteTaskData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    DeleteTaskResponse,
+    DeleteTaskError,
+    Options<DeleteTaskData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await deleteTask({
+        ...options,
+        ...fnOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
 
 export const getTaskQueryKey = (options: Options<GetTaskData>) =>
   createQueryKey("getTask", options);

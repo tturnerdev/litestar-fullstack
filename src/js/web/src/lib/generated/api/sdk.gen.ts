@@ -347,6 +347,9 @@ import type {
   DeleteTagData,
   DeleteTagErrors,
   DeleteTagResponses,
+  DeleteTaskData,
+  DeleteTaskErrors,
+  DeleteTaskResponses,
   DeleteTeamData,
   DeleteTeamErrors,
   DeleteTeamInvitationData,
@@ -4644,6 +4647,22 @@ export const listActiveTasks = <ThrowOnError extends boolean = false>(
   >({
     security: [{ scheme: "bearer", type: "http" }],
     url: "/api/tasks/active",
+    ...options,
+  });
+
+/**
+ * DeleteTask
+ */
+export const deleteTask = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteTaskData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    DeleteTaskResponses,
+    DeleteTaskErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/tasks/{task_id}",
     ...options,
   });
 

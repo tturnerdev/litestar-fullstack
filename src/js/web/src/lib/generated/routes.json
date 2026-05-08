@@ -766,6 +766,19 @@
       ],
       "uri": "/api/admin/tasks/{task_id}"
     },
+    "delete_task_api_tasks_task_id:uuid": {
+      "method": "delete",
+      "methods": [
+        "DELETE"
+      ],
+      "parameterTypes": {
+        "task_id": "UUID"
+      },
+      "parameters": [
+        "task_id"
+      ],
+      "uri": "/api/tasks/{task_id}"
+    },
     "delete_team": {
       "method": "delete",
       "methods": [

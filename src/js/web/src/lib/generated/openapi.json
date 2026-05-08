@@ -660,11 +660,31 @@
       },
       "AdminSystemStatus": {
         "properties": {
+          "activeConnections": {
+            "oneOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "appName": {
             "type": "string"
           },
           "appVersion": {
             "type": "string"
+          },
+          "databasePool": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DatabasePoolInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "databaseStatus": {
             "enum": [
@@ -676,12 +696,72 @@
           "debugMode": {
             "type": "boolean"
           },
+          "environment": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "litestarVersion": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "pythonVersion": {
             "type": "string"
+          },
+          "redisInfo": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/RedisInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "startedAt": {
             "format": "date-time",
             "type": "string"
+          },
+          "totalDevices": {
+            "oneOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "totalTeams": {
+            "oneOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "totalUsers": {
+            "oneOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "uptimeSeconds": {
             "type": "number"
@@ -3377,6 +3457,33 @@
           "verifiedUsers"
         ],
         "title": "DashboardStats",
+        "type": "object"
+      },
+      "DatabasePoolInfo": {
+        "properties": {
+          "checkedIn": {
+            "default": 0,
+            "type": "integer"
+          },
+          "checkedOut": {
+            "default": 0,
+            "type": "integer"
+          },
+          "maxOverflow": {
+            "default": 0,
+            "type": "integer"
+          },
+          "overflow": {
+            "default": 0,
+            "type": "integer"
+          },
+          "poolSize": {
+            "default": 0,
+            "type": "integer"
+          }
+        },
+        "required": [],
+        "title": "DatabasePoolInfo",
         "type": "object"
       },
       "Device": {
@@ -7697,6 +7804,61 @@
           "total"
         ],
         "title": "RecentActivity",
+        "type": "object"
+      },
+      "RedisInfo": {
+        "properties": {
+          "connectedClients": {
+            "oneOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "default": "offline",
+            "enum": [
+              "online",
+              "offline"
+            ],
+            "type": "string"
+          },
+          "uptimeSeconds": {
+            "oneOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "usedMemoryHuman": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "version": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [],
+        "title": "RedisInfo",
         "type": "object"
       },
       "ResetPasswordRequest": {
@@ -12267,7 +12429,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
+            "name": "actorIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -12288,7 +12450,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actorIdIn",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -12656,7 +12818,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
+            "name": "actorIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -12677,7 +12839,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actorIdIn",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13043,7 +13205,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
+            "name": "actorIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13064,7 +13226,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actorIdIn",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13424,7 +13586,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
+            "name": "actorIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13445,7 +13607,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actorIdIn",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -33799,6 +33961,80 @@
       }
     },
     "/api/tasks/{task_id}": {
+      "delete": {
+        "deprecated": false,
+        "operationId": "DeleteTask",
+        "parameters": [
+          {
+            "deprecated": false,
+            "description": "The task to delete.",
+            "in": "path",
+            "name": "task_id",
+            "required": true,
+            "schema": {
+              "description": "The task to delete.",
+              "format": "uuid",
+              "title": "Task ID",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackgroundTaskDetail"
+                }
+              }
+            },
+            "description": "Request fulfilled, document follows",
+            "headers": {}
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "detail": "Bad Request",
+                      "extra": {},
+                      "status_code": 400
+                    }
+                  ],
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    },
+                    "status_code": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Bad request syntax or unsupported method"
+          }
+        },
+        "summary": "DeleteTask",
+        "tags": [
+          "Background Tasks"
+        ]
+      },
       "get": {
         "deprecated": false,
         "operationId": "GetTask",

@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { client } from "@/lib/generated/api/client.gen"
-import type { BackgroundTaskDetail, BackgroundTaskList } from "@/lib/generated/api/types.gen"
+import { deleteTask } from "@/lib/generated/api/sdk.gen"
+import type { BackgroundTaskDetail, BackgroundTaskList, DeleteTaskData } from "@/lib/generated/api/types.gen"
 import { sseStatus } from "./events"
 
 // ---------------------------------------------------------------------------
@@ -200,6 +201,31 @@ export function useCancelTask() {
     },
     onError: (error) => {
       toast.error("Unable to cancel task", {
+        description: error instanceof Error ? error.message : "Try again later",
+      })
+    },
+  })
+}
+
+// ---------------------------------------------------------------------------
+// Delete Task
+// ---------------------------------------------------------------------------
+
+export function useDeleteTask() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (taskId: string) => {
+      const response = await deleteTask({
+        path: { task_id: taskId },
+      } as unknown as DeleteTaskData)
+      return response.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: taskKeys.all })
+      toast.success("Task deleted")
+    },
+    onError: (error) => {
+      toast.error("Unable to delete task", {
         description: error instanceof Error ? error.message : "Try again later",
       })
     },

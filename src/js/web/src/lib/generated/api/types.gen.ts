@@ -189,12 +189,20 @@ export type AdminSupportStats = {
  * AdminSystemStatus
  */
 export type AdminSystemStatus = {
+  activeConnections?: number | null;
   appName: string;
   appVersion: string;
+  databasePool?: DatabasePoolInfo | null;
   databaseStatus: "online" | "offline";
   debugMode: boolean;
+  environment?: string | null;
+  litestarVersion?: string | null;
   pythonVersion: string;
+  redisInfo?: RedisInfo | null;
   startedAt: string;
+  totalDevices?: number | null;
+  totalTeams?: number | null;
+  totalUsers?: number | null;
   uptimeSeconds: number;
   workerQueues?: Array<WorkerQueueInfo>;
 };
@@ -823,6 +831,17 @@ export type DashboardStats = {
   totalUsers: number;
   unreadVoicemails: number;
   verifiedUsers: number;
+};
+
+/**
+ * DatabasePoolInfo
+ */
+export type DatabasePoolInfo = {
+  checkedIn?: number;
+  checkedOut?: number;
+  maxOverflow?: number;
+  overflow?: number;
+  poolSize?: number;
 };
 
 /**
@@ -1944,6 +1963,17 @@ export type ProfileUpdate = {
 export type RecentActivity = {
   activities: Array<ActivityLogEntry>;
   total: number;
+};
+
+/**
+ * RedisInfo
+ */
+export type RedisInfo = {
+  connectedClients?: number | null;
+  status?: "online" | "offline";
+  uptimeSeconds?: number | null;
+  usedMemoryHuman?: string | null;
+  version?: string | null;
 };
 
 /**
@@ -3299,8 +3329,8 @@ export type AdminListAuditLogsData = {
      */
     sortOrder?: "asc" | "desc" | null;
     actionIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
@@ -3378,8 +3408,8 @@ export type AdminExportAuditLogData = {
      */
     sortOrder?: "asc" | "desc" | null;
     actionIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
@@ -3446,8 +3476,8 @@ export type AdminGetTargetAuditLogsData = {
      */
     sortOrder?: "asc" | "desc" | null;
     actionIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
@@ -3526,8 +3556,8 @@ export type AdminGetUserAuditLogsData = {
      */
     sortOrder?: "asc" | "desc" | null;
     actionIn?: Array<string> | null;
-    targetTypeIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
+    targetTypeIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
@@ -12124,6 +12154,47 @@ export type ListActiveTasksResponses = {
 
 export type ListActiveTasksResponse =
   ListActiveTasksResponses[keyof ListActiveTasksResponses];
+
+export type DeleteTaskData = {
+  body?: never;
+  path: {
+    /**
+     * Task ID
+     *
+     * The task to delete.
+     */
+    task_id: string;
+  };
+  query?: never;
+  url: "/api/tasks/{task_id}";
+};
+
+export type DeleteTaskErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type DeleteTaskError = DeleteTaskErrors[keyof DeleteTaskErrors];
+
+export type DeleteTaskResponses = {
+  /**
+   * Request fulfilled, document follows
+   */
+  200: BackgroundTaskDetail;
+};
+
+export type DeleteTaskResponse = DeleteTaskResponses[keyof DeleteTaskResponses];
 
 export type GetTaskData = {
   body?: never;

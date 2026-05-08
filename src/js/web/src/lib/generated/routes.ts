@@ -87,6 +87,7 @@ export type RouteName =
   | 'delete_schedule'
   | 'delete_tag'
   | 'delete_task'
+  | 'delete_task_api_tasks_task_id:uuid'
   | 'delete_team'
   | 'delete_team_api_teams_team_id:uuid'
   | 'delete_team_invitation'
@@ -501,6 +502,9 @@ export interface RoutePathParams {
     tag_id: UUID;
   };
   'delete_task': {
+    task_id: UUID;
+  };
+  'delete_task_api_tasks_task_id:uuid': {
     task_id: UUID;
   };
   'delete_team': {
@@ -1132,6 +1136,7 @@ export interface RouteQueryParams {
   'delete_schedule': Record<string, never>;
   'delete_tag': Record<string, never>;
   'delete_task': Record<string, never>;
+  'delete_task_api_tasks_task_id:uuid': Record<string, never>;
   'delete_team': Record<string, never>;
   'delete_team_api_teams_team_id:uuid': Record<string, never>;
   'delete_team_invitation': Record<string, never>;
@@ -2486,6 +2491,13 @@ export const routeDefinitions = {
   },
   'delete_task': {
     path: '/api/admin/tasks/{task_id}',
+    methods: ['DELETE'] as const,
+    method: 'delete',
+    pathParams: ['task_id'] as const,
+    queryParams: [] as const,
+  },
+  'delete_task_api_tasks_task_id:uuid': {
+    path: '/api/tasks/{task_id}',
     methods: ['DELETE'] as const,
     method: 'delete',
     pathParams: ['task_id'] as const,

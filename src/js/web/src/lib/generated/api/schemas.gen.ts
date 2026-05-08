@@ -632,11 +632,31 @@ export const AdminSupportStatsSchema = {
 
 export const AdminSystemStatusSchema = {
   properties: {
+    activeConnections: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     appName: {
       type: "string",
     },
     appVersion: {
       type: "string",
+    },
+    databasePool: {
+      oneOf: [
+        {
+          $ref: "#/components/schemas/DatabasePoolInfo",
+        },
+        {
+          type: "null",
+        },
+      ],
     },
     databaseStatus: {
       enum: ["online", "offline"],
@@ -645,12 +665,72 @@ export const AdminSystemStatusSchema = {
     debugMode: {
       type: "boolean",
     },
+    environment: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    litestarVersion: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     pythonVersion: {
       type: "string",
+    },
+    redisInfo: {
+      oneOf: [
+        {
+          $ref: "#/components/schemas/RedisInfo",
+        },
+        {
+          type: "null",
+        },
+      ],
     },
     startedAt: {
       format: "date-time",
       type: "string",
+    },
+    totalDevices: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    totalTeams: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    totalUsers: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+        {
+          type: "null",
+        },
+      ],
     },
     uptimeSeconds: {
       type: "number",
@@ -3281,6 +3361,34 @@ export const DashboardStatsSchema = {
     "verifiedUsers",
   ],
   title: "DashboardStats",
+  type: "object",
+} as const;
+
+export const DatabasePoolInfoSchema = {
+  properties: {
+    checkedIn: {
+      default: 0,
+      type: "integer",
+    },
+    checkedOut: {
+      default: 0,
+      type: "integer",
+    },
+    maxOverflow: {
+      default: 0,
+      type: "integer",
+    },
+    overflow: {
+      default: 0,
+      type: "integer",
+    },
+    poolSize: {
+      default: 0,
+      type: "integer",
+    },
+  },
+  required: [],
+  title: "DatabasePoolInfo",
   type: "object",
 } as const;
 
@@ -7494,6 +7602,59 @@ export const RecentActivitySchema = {
   },
   required: ["activities", "total"],
   title: "RecentActivity",
+  type: "object",
+} as const;
+
+export const RedisInfoSchema = {
+  properties: {
+    connectedClients: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    status: {
+      default: "offline",
+      enum: ["online", "offline"],
+      type: "string",
+    },
+    uptimeSeconds: {
+      oneOf: [
+        {
+          type: "integer",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    usedMemoryHuman: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    version: {
+      oneOf: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+  required: [],
+  title: "RedisInfo",
   type: "object",
 } as const;
 

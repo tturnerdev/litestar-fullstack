@@ -14,11 +14,15 @@ import {
   ExternalLink,
   Gauge,
   HardDrive,
+  Hash,
   Layers,
   Loader2,
+  Network,
   Radio,
   RefreshCw,
   Server,
+  Shield,
+  Users,
   XCircle,
   Zap,
 } from "lucide-react"
@@ -43,6 +47,7 @@ import { useConnections, useTestAnyConnection } from "@/lib/api/hooks/connection
 import { sseStatus } from "@/lib/api/hooks/events"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { formatUptime } from "@/lib/format-utils"
+import type { AdminSystemStatus, DatabasePoolInfo, RedisInfo } from "@/lib/generated/api"
 import { type SystemHealth, systemHealth } from "@/lib/generated/api"
 
 export const Route = createFileRoute("/_app/admin/system")({
@@ -87,7 +92,10 @@ function StatusDot({ ok, label }: { ok: boolean; label?: string }) {
   )
 }
 
-function OverallHealthBanner({ healthy }: { healthy: boolean }) {
+function OverallHealthBanner({ data }: { data: AdminSystemStatus }) {
+  const dbOk = data.databaseStatus === "online"
+  const redisOk = data.redisInfo?.status === "online"
+  const healthy = dbOk && redisOk !== false
   return (
     <div
       className={`flex items-center gap-3 rounded-lg border px-4 py-3 ${
@@ -107,7 +115,6 @@ function UptimeBanner({ startedAt, uptimeSeconds }: { startedAt: string; uptimeS
   const liveUptime = useTimeSince(startedAt)
   const display = liveUptime ?? formatUptime(uptimeSeconds, true)
 
-  // Parse into segments for the large display
   const totalSec = startedAt ? Math.max(0, Math.floor((Date.now() - new Date(startedAt).getTime()) / 1000)) : uptimeSeconds
   const days = Math.floor(totalSec / 86400)
   const hours = Math.floor((totalSec % 86400) / 3600)
@@ -246,28 +253,41 @@ function HealthIndicatorCard({ indicator }: { indicator: HealthIndicator }) {
   )
 }
 
-function SystemHealthIndicators({ autoRefresh }: { autoRefresh: boolean }) {
+function SystemHealthIndicators({ autoRefresh, systemData }: { autoRefresh: boolean; systemData: AdminSystemStatus }) {
   const { data: healthData, isError: healthError, dataUpdatedAt, refetch, isFetching } = useSystemHealthCheck(autoRefresh)
 
-  // Live "last checked X ago" ticker
   const [, setTick] = useState(0)
   useEffect(() => {
     const id = setInterval(() => setTick((t) => t + 1), 5_000)
     return () => clearInterval(id)
   }, [])
 
-  // Read SSE status reactively by polling the module-level object
   const [sseConnected, setSseConnected] = useState(sseStatus.connected)
   useEffect(() => {
     const id = setInterval(() => setSseConnected(sseStatus.connected), 2_000)
     return () => clearInterval(id)
   }, [])
 
-  // Determine individual statuses
   const apiStatus: HealthStatus = healthError ? "unhealthy" : healthData ? "healthy" : "unknown"
   const dbStatus: HealthStatus = healthError ? "unknown" : healthData?.databaseStatus === "online" ? "healthy" : healthData?.databaseStatus === "offline" ? "unhealthy" : "unknown"
-  const redisStatus: HealthStatus = healthError ? "unknown" : healthData ? "healthy" : "unknown"
   const sseIndicatorStatus: HealthStatus = sseConnected ? "healthy" : "degraded"
+
+  // Use real Redis info from systemData
+  const redisStatus: HealthStatus = systemData.redisInfo
+    ? systemData.redisInfo.status === "online"
+      ? "healthy"
+      : "unhealthy"
+    : healthError
+      ? "unknown"
+      : healthData
+        ? "healthy"
+        : "unknown"
+  const redisDetail =
+    systemData.redisInfo?.status === "online"
+      ? `Valkey ${systemData.redisInfo.version ?? ""} -- ${systemData.redisInfo.connectedClients ?? "?"} clients`.trim()
+      : systemData.redisInfo?.status === "offline"
+        ? "Connection failed"
+        : "Status unavailable"
 
   const indicators: HealthIndicator[] = [
     {
@@ -283,10 +303,10 @@ function SystemHealthIndicators({ autoRefresh }: { autoRefresh: boolean }) {
       detail: dbStatus === "healthy" ? "PostgreSQL connected" : dbStatus === "unhealthy" ? "Connection failed" : "Status unavailable",
     },
     {
-      name: "Redis / Queue",
+      name: "Redis / Valkey",
       icon: Zap,
       status: redisStatus,
-      detail: redisStatus === "healthy" ? "Broker reachable" : "Status unavailable",
+      detail: redisDetail,
     },
     {
       name: "SSE Connection",
@@ -329,15 +349,166 @@ function SystemHealthIndicators({ autoRefresh }: { autoRefresh: boolean }) {
   )
 }
 
+// ---------------------------------------------------------------------------
+// Resource Summary Cards
+// ---------------------------------------------------------------------------
+
+function ResourceSummaryCards({ data }: { data: AdminSystemStatus }) {
+  const resources = [
+    { label: "Users", value: data.totalUsers, icon: Users, href: "/admin/users" },
+    { label: "Teams", value: data.totalTeams, icon: Shield, href: "/admin/teams" },
+    { label: "Devices", value: data.totalDevices, icon: HardDrive, href: "/admin/devices" },
+    { label: "Connections", value: data.activeConnections, icon: Network, href: "/connections" },
+  ]
+
+  const hasAny = resources.some((r) => r.value != null)
+  if (!hasAny) return null
+
+  return (
+    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      {resources.map((res) => {
+        const Icon = res.icon
+        return (
+          <Link key={res.label} to={res.href} className="group">
+            <Card className="transition-colors group-hover:border-primary/30">
+              <CardContent className="flex items-center gap-3 p-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <Icon className="h-5 w-5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-medium text-muted-foreground">{res.label}</p>
+                  <p className="text-2xl font-bold tabular-nums">{res.value ?? "--"}</p>
+                </div>
+                <ExternalLink className="h-3.5 w-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+              </CardContent>
+            </Card>
+          </Link>
+        )
+      })}
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Redis Info Card
+// ---------------------------------------------------------------------------
+
+function RedisInfoCard({ redisInfo }: { redisInfo: RedisInfo }) {
+  const isOnline = redisInfo.status === "online"
+
+  const rows = [
+    { label: "Status", value: isOnline ? "Online" : "Offline", highlight: true },
+    ...(redisInfo.version ? [{ label: "Version", value: redisInfo.version, mono: true }] : []),
+    ...(redisInfo.usedMemoryHuman ? [{ label: "Memory Usage", value: redisInfo.usedMemoryHuman }] : []),
+    ...(redisInfo.connectedClients != null ? [{ label: "Connected Clients", value: String(redisInfo.connectedClients) }] : []),
+    ...(redisInfo.uptimeSeconds != null ? [{ label: "Uptime", value: formatUptime(redisInfo.uptimeSeconds, true) }] : []),
+  ]
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Zap className="h-4 w-4 text-muted-foreground" />
+          Redis / Valkey
+        </CardTitle>
+        <CardDescription>Cache and message broker status.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-1">
+        {rows.map((row) => (
+          <div key={row.label} className="flex items-center justify-between rounded-md px-2 py-2">
+            <span className="text-sm text-muted-foreground">{row.label}</span>
+            <div className="flex items-center gap-2">
+              <span className={`text-sm font-medium ${"mono" in row && row.mono ? "font-mono" : ""}`}>{row.value}</span>
+              {"highlight" in row && row.highlight && <StatusDot ok={isOnline} />}
+            </div>
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Database Pool Card
+// ---------------------------------------------------------------------------
+
+function DatabasePoolCard({ pool }: { pool: DatabasePoolInfo }) {
+  const total = (pool.poolSize ?? 0) + (pool.maxOverflow ?? 0)
+  const used = (pool.checkedOut ?? 0) + (pool.overflow ?? 0)
+  const usagePct = total > 0 ? Math.round((used / total) * 100) : 0
+
+  const getBarColor = (pct: number) => {
+    if (pct >= 90) return "bg-destructive"
+    if (pct >= 70) return "bg-amber-500"
+    return "bg-emerald-500"
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Database className="h-4 w-4 text-muted-foreground" />
+          Connection Pool
+        </CardTitle>
+        <CardDescription>PostgreSQL connection pool utilization.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Usage bar */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Pool Usage</span>
+            <span className="font-medium tabular-nums">{usagePct}%</span>
+          </div>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="h-2.5 w-full overflow-hidden rounded-full bg-muted">
+                <div className={`h-full rounded-full transition-all duration-500 ${getBarColor(usagePct)}`} style={{ width: `${usagePct}%` }} />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="text-xs">
+              {used} of {total} connections in use
+            </TooltipContent>
+          </Tooltip>
+        </div>
+
+        <Separator />
+
+        {/* Detail rows */}
+        <div className="space-y-1">
+          {[
+            { label: "Pool Size", value: pool.poolSize ?? 0 },
+            { label: "Checked In", value: pool.checkedIn ?? 0 },
+            { label: "Checked Out", value: pool.checkedOut ?? 0 },
+            { label: "Overflow", value: pool.overflow ?? 0 },
+            { label: "Max Overflow", value: pool.maxOverflow ?? 0 },
+          ].map((row) => (
+            <div key={row.label} className="flex items-center justify-between rounded-md px-2 py-1.5">
+              <span className="text-sm text-muted-foreground">{row.label}</span>
+              <span className="text-sm font-medium tabular-nums">{row.value}</span>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Service Status Grid
+// ---------------------------------------------------------------------------
+
 function ServiceStatusGrid({
   databaseStatus,
   workerQueues,
+  redisInfo,
 }: {
   databaseStatus: "online" | "offline"
   workerQueues?: Array<{ name: string; active?: number; queued?: number; scheduled?: number }>
+  redisInfo?: RedisInfo | null
 }) {
   const dbOnline = databaseStatus === "online"
   const hasWorkers = workerQueues && workerQueues.length > 0
+  const redisOnline = redisInfo?.status === "online"
 
   const services = [
     {
@@ -349,8 +520,8 @@ function ServiceStatusGrid({
     {
       name: "Cache / Queue Broker",
       icon: Zap,
-      status: hasWorkers ? ("healthy" as const) : ("unknown" as const),
-      detail: hasWorkers ? "Redis" : "Not detected",
+      status: redisInfo ? (redisOnline ? ("healthy" as const) : ("down" as const)) : hasWorkers ? ("healthy" as const) : ("unknown" as const),
+      detail: redisOnline ? `Valkey ${redisInfo?.version ?? ""}`.trim() : redisInfo ? "Connection failed" : hasWorkers ? "Redis" : "Not detected",
     },
     {
       name: "Task Workers",
@@ -414,35 +585,26 @@ function ServiceStatusGrid({
   )
 }
 
-function SystemInfoCard({
-  appName,
-  appVersion,
-  pythonVersion,
-  uptimeSeconds,
-  startedAt,
-  debugMode,
-}: {
-  appName: string
-  appVersion: string
-  pythonVersion: string
-  uptimeSeconds: number
-  startedAt: string
-  debugMode: boolean
-}) {
-  const liveUptime = useTimeSince(startedAt)
+// ---------------------------------------------------------------------------
+// System Info Card
+// ---------------------------------------------------------------------------
 
-  const rows = [
-    { label: "Application", value: appName, icon: Server },
-    { label: "App Version", value: appVersion, icon: Activity, mono: true },
-    { label: "Python Version", value: pythonVersion, icon: HardDrive, mono: true },
+function SystemInfoCard({ data }: { data: AdminSystemStatus }) {
+  const liveUptime = useTimeSince(data.startedAt)
+
+  const rows: Array<{ label: string; value: string; icon: typeof Server; mono?: boolean }> = [
+    { label: "Application", value: data.appName, icon: Server },
+    { label: "App Version", value: data.appVersion, icon: Activity, mono: true },
+    { label: "Python Version", value: data.pythonVersion, icon: HardDrive, mono: true },
+    ...(data.litestarVersion ? [{ label: "Litestar Version", value: data.litestarVersion, icon: Layers as typeof Server, mono: true }] : []),
     {
       label: "Uptime",
-      value: liveUptime ?? formatUptime(uptimeSeconds, true),
+      value: liveUptime ?? formatUptime(data.uptimeSeconds, true),
       icon: Clock,
     },
     {
       label: "Started",
-      value: formatDateTime(startedAt),
+      value: formatDateTime(data.startedAt),
       icon: Zap,
     },
   ]
@@ -469,21 +631,32 @@ function SystemInfoCard({
             </div>
           )
         })}
-        {debugMode && (
-          <>
-            <Separator className="my-2" />
-            <div className="flex items-center justify-between rounded-md px-2 py-2">
-              <span className="text-sm text-muted-foreground">Debug Mode</span>
-              <Badge variant="secondary" className="text-[10px]">
-                Enabled
-              </Badge>
-            </div>
-          </>
+        <Separator className="my-2" />
+        <div className="flex items-center justify-between rounded-md px-2 py-2">
+          <div className="flex items-center gap-2.5">
+            <Hash className="h-3.5 w-3.5 text-muted-foreground" />
+            <span className="text-sm text-muted-foreground">Environment</span>
+          </div>
+          <Badge variant={data.environment === "production" ? "default" : "secondary"} className="text-[10px]">
+            {data.environment ?? (data.debugMode ? "Development" : "Production")}
+          </Badge>
+        </div>
+        {data.debugMode && (
+          <div className="flex items-center justify-between rounded-md px-2 py-2">
+            <span className="text-sm text-muted-foreground">Debug Mode</span>
+            <Badge variant="secondary" className="text-[10px]">
+              Enabled
+            </Badge>
+          </div>
         )}
       </CardContent>
     </Card>
   )
 }
+
+// ---------------------------------------------------------------------------
+// Worker Queues Card
+// ---------------------------------------------------------------------------
 
 function WorkerQueuesCard({ queues }: { queues: Array<{ name: string; active?: number; queued?: number; scheduled?: number }> }) {
   const totalActive = queues.reduce((sum, q) => sum + (q.active ?? 0), 0)
@@ -501,7 +674,7 @@ function WorkerQueuesCard({ queues }: { queues: Array<{ name: string; active?: n
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Summary counters */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div className="rounded-lg border bg-muted/30 px-4 py-3 text-center">
             <p className="text-2xl font-bold tabular-nums">{totalActive}</p>
             <p className="text-xs text-muted-foreground">Active</p>
@@ -527,7 +700,6 @@ function WorkerQueuesCard({ queues }: { queues: Array<{ name: string; active?: n
             const total = active + queued + scheduled
             const isIdle = total === 0
 
-            // Compute segment percentages for the stacked bar
             const activePct = total > 0 ? (active / total) * 100 : 0
             const queuedPct = total > 0 ? (queued / total) * 100 : 0
             const scheduledPct = total > 0 ? (scheduled / total) * 100 : 0
@@ -762,7 +934,6 @@ function useQueueHistory(queues: Array<{ name: string; active?: number; queued?:
   useEffect(() => {
     if (!queues) return
     const now = Date.now()
-    // Throttle: only add a point every 10 seconds minimum
     if (now - lastUpdateRef.current < 10_000 && historyRef.current.length > 0) return
     lastUpdateRef.current = now
 
@@ -785,7 +956,6 @@ function useQueueHistory(queues: Array<{ name: string; active?: number; queued?:
 function WorkerQueueHistoryChart({ queues }: { queues?: Array<{ name: string; active?: number; queued?: number; scheduled?: number }> }) {
   const history = useQueueHistory(queues)
 
-  // Calculate throughput estimate from snapshot deltas
   const throughputEstimate = useMemo(() => {
     if (!queues) return null
     const totalActive = queues.reduce((sum, q) => sum + (q.active ?? 0), 0)
@@ -793,7 +963,6 @@ function WorkerQueueHistoryChart({ queues }: { queues?: Array<{ name: string; ac
     const totalScheduled = queues.reduce((sum, q) => sum + (q.scheduled ?? 0), 0)
     const total = totalActive + totalQueued + totalScheduled
     if (total === 0 && totalActive === 0) return { rate: 0, label: "Idle" }
-    // Estimate: active jobs are processing, so throughput ~ active jobs per refresh cycle
     return {
       rate: totalActive,
       label: totalActive > 0 ? `~${totalActive} jobs/cycle` : "Idle",
@@ -914,13 +1083,10 @@ function useStatusTimeline(startedAt: string, databaseStatus: "online" | "offlin
 
       let status: TimelineSegmentStatus
       if (segmentEnd <= serverStart) {
-        // Before server started -- unknown/down
         status = "unknown"
       } else if (segmentStart >= serverStart) {
-        // Server was running during this entire segment
         status = databaseStatus === "online" ? "up" : "degraded"
       } else {
-        // Server started partway through this segment
         status = "degraded"
       }
 
@@ -1042,7 +1208,6 @@ function CircularGauge({
   const circumference = 2 * Math.PI * radius
   const offset = circumference - (percentage / 100) * circumference
 
-  // Color based on utilization
   const getColor = (pct: number) => {
     if (pct >= 90) return "text-destructive"
     if (pct >= 70) return "text-amber-500"
@@ -1058,9 +1223,7 @@ function CircularGauge({
     <div className="flex flex-col items-center gap-2">
       <div className="relative" style={{ width: size, height: size }}>
         <svg width={size} height={size} className="-rotate-90">
-          {/* Background ring */}
           <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="hsl(var(--muted))" strokeWidth={strokeWidth} />
-          {/* Progress ring */}
           <circle
             cx={size / 2}
             cy={size / 2}
@@ -1074,7 +1237,6 @@ function CircularGauge({
             style={{ transition: "stroke-dashoffset 0.5s ease-in-out" }}
           />
         </svg>
-        {/* Center text */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span className={`text-lg font-bold tabular-nums ${getColor(percentage)}`}>{Math.round(percentage)}%</span>
         </div>
@@ -1088,16 +1250,13 @@ function CircularGauge({
 }
 
 function QueueUtilizationGauges({ queues }: { queues: Array<{ name: string; active?: number; queued?: number; scheduled?: number }> }) {
-  // Compute utilization metrics from queue data
   const metrics = useMemo(() => {
     const totalActive = queues.reduce((sum, q) => sum + (q.active ?? 0), 0)
     const totalQueued = queues.reduce((sum, q) => sum + (q.queued ?? 0), 0)
     const totalScheduled = queues.reduce((sum, q) => sum + (q.scheduled ?? 0), 0)
     const totalJobs = totalActive + totalQueued + totalScheduled
 
-    // Derive a capacity estimate: each queue can reasonably handle ~100 jobs
     const estimatedCapacity = Math.max(queues.length * 100, totalJobs, 1)
-    // Worker load: active as portion of total pipeline
     const pipelineTotal = totalActive + totalQueued
     const workerLoad = pipelineTotal > 0 ? (totalActive / pipelineTotal) * 100 : 0
 
@@ -1209,21 +1368,26 @@ function AdminSystemPage() {
               {/* Overall health banner + uptime */}
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex-1">
-                  <OverallHealthBanner healthy={data.databaseStatus === "online"} />
+                  <OverallHealthBanner data={data} />
                 </div>
                 <div className="shrink-0">
                   <UptimeBanner startedAt={data.startedAt} uptimeSeconds={data.uptimeSeconds} />
                 </div>
               </div>
 
+              {/* Resource summary cards */}
+              <SectionErrorBoundary name="Resource Summary">
+                <ResourceSummaryCards data={data} />
+              </SectionErrorBoundary>
+
               {/* System health indicators */}
               <SectionErrorBoundary name="System Health">
-                <SystemHealthIndicators autoRefresh={autoRefresh} />
+                <SystemHealthIndicators autoRefresh={autoRefresh} systemData={data} />
               </SectionErrorBoundary>
 
               {/* Service status grid */}
               <SectionErrorBoundary name="Service Status">
-                <ServiceStatusGrid databaseStatus={data.databaseStatus} workerQueues={data.workerQueues} />
+                <ServiceStatusGrid databaseStatus={data.databaseStatus} workerQueues={data.workerQueues} redisInfo={data.redisInfo} />
               </SectionErrorBoundary>
 
               {/* System status timeline */}
@@ -1231,19 +1395,53 @@ function AdminSystemPage() {
                 <SystemStatusTimeline startedAt={data.startedAt} databaseStatus={data.databaseStatus} />
               </SectionErrorBoundary>
 
-              {/* Two-column layout: System info + Worker queues */}
-              <div className="grid gap-6 lg:grid-cols-2">
+              {/* Three-column layout: System info + Redis + DB Pool */}
+              <div className="grid gap-6 lg:grid-cols-3">
                 <SectionErrorBoundary name="System Information">
-                  <SystemInfoCard
-                    appName={data.appName}
-                    appVersion={data.appVersion}
-                    pythonVersion={data.pythonVersion}
-                    uptimeSeconds={data.uptimeSeconds}
-                    startedAt={data.startedAt}
-                    debugMode={data.debugMode}
-                  />
+                  <SystemInfoCard data={data} />
                 </SectionErrorBoundary>
 
+                <SectionErrorBoundary name="Redis Info">
+                  {data.redisInfo ? (
+                    <RedisInfoCard redisInfo={data.redisInfo} />
+                  ) : (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-base">
+                          <Zap className="h-4 w-4 text-muted-foreground" />
+                          Redis / Valkey
+                        </CardTitle>
+                        <CardDescription>Cache and message broker status.</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-muted-foreground">Redis info not available. Workers may not be running.</p>
+                      </CardContent>
+                    </Card>
+                  )}
+                </SectionErrorBoundary>
+
+                <SectionErrorBoundary name="Connection Pool">
+                  {data.databasePool ? (
+                    <DatabasePoolCard pool={data.databasePool} />
+                  ) : (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-base">
+                          <Database className="h-4 w-4 text-muted-foreground" />
+                          Connection Pool
+                        </CardTitle>
+                        <CardDescription>PostgreSQL connection pool utilization.</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-muted-foreground">Pool statistics not available.</p>
+                      </CardContent>
+                    </Card>
+                  )}
+                </SectionErrorBoundary>
+              </div>
+
+              {/* Two-column layout: Worker queues + Queue activity */}
+              <div className="grid gap-6 lg:grid-cols-2">
                 <SectionErrorBoundary name="Worker Queues">
                   {data.workerQueues && data.workerQueues.length > 0 ? (
                     <WorkerQueuesCard queues={data.workerQueues} />
@@ -1262,33 +1460,18 @@ function AdminSystemPage() {
                     </Card>
                   )}
                 </SectionErrorBoundary>
-              </div>
 
-              {/* Queue activity chart + utilization gauges */}
-              <div className="grid gap-6 lg:grid-cols-2">
                 <SectionErrorBoundary name="Queue Activity">
                   <WorkerQueueHistoryChart queues={data.workerQueues} />
                 </SectionErrorBoundary>
-
-                <SectionErrorBoundary name="Queue Utilization">
-                  {data.workerQueues && data.workerQueues.length > 0 ? (
-                    <QueueUtilizationGauges queues={data.workerQueues} />
-                  ) : (
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-base">
-                          <Gauge className="h-4 w-4 text-muted-foreground" />
-                          Queue Utilization
-                        </CardTitle>
-                        <CardDescription>Worker and queue capacity gauges.</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-muted-foreground">No queue data available. Workers may not be running.</p>
-                      </CardContent>
-                    </Card>
-                  )}
-                </SectionErrorBoundary>
               </div>
+
+              {/* Queue utilization gauges */}
+              {data.workerQueues && data.workerQueues.length > 0 && (
+                <SectionErrorBoundary name="Queue Utilization">
+                  <QueueUtilizationGauges queues={data.workerQueues} />
+                </SectionErrorBoundary>
+              )}
 
               {/* External connections overview */}
               <SectionErrorBoundary name="External Connections">

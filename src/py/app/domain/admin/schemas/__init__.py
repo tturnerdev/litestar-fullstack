@@ -22,7 +22,12 @@ from app.domain.admin.schemas._admin_music_on_hold import (
     MusicOnHoldUpdate,
 )
 from app.domain.admin.schemas._admin_support import AdminSupportStats, AdminTicketSummary
-from app.domain.admin.schemas._admin_system import AdminSystemStatus, WorkerQueueInfo
+from app.domain.admin.schemas._admin_system import (
+    AdminSystemStatus,
+    DatabasePoolInfo,
+    RedisInfo,
+    WorkerQueueInfo,
+)
 from app.domain.admin.schemas._admin_tasks import AdminTaskStats, AdminTaskSummary
 from app.domain.admin.schemas._admin_voice import AdminExtensionSummary, AdminPhoneNumberSummary, AdminVoiceStats
 from app.domain.admin.schemas._audit import AuditLogEntry
@@ -49,6 +54,8 @@ __all__ = (
     "AdminPhoneNumberSummary",
     "AdminSupportStats",
     "AdminSystemStatus",
+    "DatabasePoolInfo",
+    "RedisInfo",
     "AdminTaskStats",
     "AdminTaskSummary",
     "AdminTeamDetail",

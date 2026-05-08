@@ -13,7 +13,12 @@ from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.domain.accounts.guards import requires_superuser
-from app.domain.admin.schemas._admin_system import AdminSystemStatus, WorkerQueueInfo
+from app.domain.admin.schemas._admin_system import (
+    AdminSystemStatus,
+    DatabasePoolInfo,
+    RedisInfo,
+    WorkerQueueInfo,
+)
 
 if TYPE_CHECKING:
     from litestar import Request
@@ -27,6 +32,67 @@ logger = structlog.get_logger()
 
 _process_start_time = time.time()
 _process_started_at = datetime.now(UTC)
+
+
+async def _get_redis_info(request: Any) -> RedisInfo | None:
+    """Retrieve Redis/Valkey server info via the SAQ plugin's queue redis client."""
+    try:
+        from litestar_saq import get_saq_plugin
+
+        saq_plugin = get_saq_plugin(request.app)
+        queues = saq_plugin.get_queues()
+        if not queues:
+            return None
+        # Get the redis client from the first available queue
+        queue = next(iter(queues.values()))
+        info = await queue.redis.info()
+        return RedisInfo(
+            status="online",
+            version=info.get("redis_version"),
+            used_memory_human=info.get("used_memory_human"),
+            connected_clients=info.get("connected_clients"),
+            uptime_seconds=info.get("uptime_in_seconds"),
+        )
+    except Exception:  # noqa: BLE001
+        return RedisInfo(status="offline")
+
+
+def _get_db_pool_info(db_session: Any) -> DatabasePoolInfo | None:
+    """Get database connection pool statistics from the engine."""
+    try:
+        engine = db_session.get_bind()
+        pool = engine.pool
+        return DatabasePoolInfo(
+            pool_size=pool.size(),
+            checked_in=pool.checkedin(),
+            checked_out=pool.checkedout(),
+            overflow=pool.overflow(),
+            max_overflow=pool._max_overflow,  # noqa: SLF001
+        )
+    except Exception:  # noqa: BLE001
+        return None
+
+
+async def _get_resource_counts(db_session: Any) -> dict[str, int | None]:
+    """Fetch quick count aggregates for key resources."""
+    counts: dict[str, int | None] = {
+        "total_users": None,
+        "total_teams": None,
+        "total_devices": None,
+        "active_connections": None,
+    }
+    try:
+        for key, table in [
+            ("total_users", "user_account"),
+            ("total_teams", "team"),
+            ("total_devices", "device"),
+            ("active_connections", "connection"),
+        ]:
+            result = await db_session.execute(text(f"SELECT count(*) FROM {table}"))  # noqa: S608
+            counts[key] = result.scalar()
+    except Exception:  # noqa: BLE001
+        pass
+    return counts
 
 
 class AdminSystemController(Controller):
@@ -83,6 +149,27 @@ class AdminSystemController(Controller):
         except Exception:  # noqa: BLE001
             await logger.adebug("SAQ plugin not available for system status")
 
+        # Collect Redis info
+        redis_info = await _get_redis_info(request)
+
+        # Collect database pool info
+        database_pool = _get_db_pool_info(db_session)
+
+        # Collect resource counts
+        resource_counts = await _get_resource_counts(db_session) if db_status == "online" else {}
+
+        # Get Litestar version
+        litestar_version: str | None = None
+        try:
+            import litestar
+
+            litestar_version = litestar.__version__
+        except Exception:  # noqa: BLE001
+            pass
+
+        # Determine environment label
+        environment = "development" if settings.DEBUG else "production"
+
         return AdminSystemStatus(
             database_status=db_status,
             app_name=settings.NAME,
@@ -92,4 +179,12 @@ class AdminSystemController(Controller):
             started_at=_process_started_at,
             debug_mode=settings.DEBUG,
             worker_queues=worker_queues,
+            redis_info=redis_info,
+            database_pool=database_pool,
+            litestar_version=litestar_version,
+            environment=environment,
+            total_users=resource_counts.get("total_users"),
+            total_teams=resource_counts.get("total_teams"),
+            total_devices=resource_counts.get("total_devices"),
+            active_connections=resource_counts.get("active_connections"),
         )
