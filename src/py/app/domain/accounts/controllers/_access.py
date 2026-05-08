@@ -142,6 +142,7 @@ class AccessController(Controller):
                     action="account.login.failed",
                     actor_id=existing_user.id,
                     actor_email=existing_user.email,
+                    actor_name=existing_user.name,
                     target_type="user",
                     target_id=existing_user.id,
                     target_label=existing_user.email,
@@ -217,6 +218,7 @@ class AccessController(Controller):
             action="account.login",
             actor_id=user.id,
             actor_email=user.email,
+            actor_name=user.name,
             target_type="user",
             target_id=user.id,
             target_label=user.email,
@@ -252,10 +254,12 @@ class AccessController(Controller):
         # Try to extract actor info before clearing session
         actor_id = None
         actor_email = None
+        actor_name = None
         try:
             if hasattr(request, "user") and request.user:
                 actor_id = request.user.id
                 actor_email = request.user.email
+                actor_name = request.user.name
         except Exception:  # noqa: BLE001
             logger.warning("Failed to extract actor info during logout", exc_info=True)
 
@@ -270,6 +274,7 @@ class AccessController(Controller):
             action="account.logout",
             actor_id=actor_id,
             actor_email=actor_email,
+            actor_name=actor_name,
             target_type="user",
             target_id=actor_id,
             target_label=actor_email,
@@ -411,6 +416,7 @@ class AccessController(Controller):
             action="account.session_revoke",
             actor_id=request.user.id,
             actor_email=request.user.email,
+            actor_name=request.user.name,
             target_type="session",
             target_id=session_id,
             request=request,
@@ -449,6 +455,7 @@ class AccessController(Controller):
             action="account.sessions_revoke_all",
             actor_id=request.user.id,
             actor_email=request.user.email,
+            actor_name=request.user.name,
             target_type="user",
             target_id=request.user.id,
             target_label=request.user.email,
@@ -497,6 +504,7 @@ class AccessController(Controller):
             action="account.register",
             actor_id=user.id,
             actor_email=user.email,
+            actor_name=user.name,
             target_type="user",
             target_id=user.id,
             target_label=user.email,
@@ -610,6 +618,7 @@ class AccessController(Controller):
             action="account.password_reset",
             actor_id=user.id,
             actor_email=user.email,
+            actor_name=user.name,
             target_type="user",
             target_id=user.id,
             target_label=user.email,

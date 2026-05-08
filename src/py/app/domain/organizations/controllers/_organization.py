@@ -11,7 +11,8 @@ from litestar.di import Provide
 from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.organizations.deps import provide_organization_service
-from app.domain.organizations.guards import requires_admin_role, requires_superuser
+from app.domain.accounts.guards import requires_superuser
+from app.domain.organizations.guards import requires_admin_role
 from app.domain.organizations.schemas import Organization, OrganizationUpdate
 from app.lib.audit import capture_snapshot, log_audit
 
@@ -98,6 +99,7 @@ class OrganizationController(Controller):
                 action="organization.settings_update",
                 actor_id=request.user.id,
                 actor_email=request.user.email,
+                actor_name=request.user.name,
                 target_type="organization",
                 target_id=db_obj.id,
                 target_label=db_obj.name,
@@ -119,6 +121,7 @@ class OrganizationController(Controller):
                 action="organization.settings_update",
                 actor_id=request.user.id,
                 actor_email=request.user.email,
+                actor_name=request.user.name,
                 target_type="organization",
                 target_id=db_obj.id,
                 target_label=db_obj.name,

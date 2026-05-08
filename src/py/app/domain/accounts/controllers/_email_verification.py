@@ -84,6 +84,7 @@ class EmailVerificationController(Controller):
             action="account.email.verified",
             actor_id=user.id,
             actor_email=user.email,
+            actor_name=user.name,
             target_type="user",
             target_id=user.id,
             target_label=user.email,
