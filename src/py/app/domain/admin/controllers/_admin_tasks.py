@@ -18,7 +18,7 @@ from app.domain.admin.deps import provide_audit_log_service
 from app.domain.admin.schemas import AdminTaskStats, AdminTaskSummary
 from app.domain.tasks.schemas import BackgroundTaskDetail
 from app.domain.tasks.services import BackgroundTaskService
-from app.lib.audit import log_audit
+from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
 
 if TYPE_CHECKING:
@@ -130,7 +130,7 @@ class AdminTasksController(Controller):
         existing = await task_service.get(task_id)
         previous_status = existing.status
         db_obj = await task_service.cancel_task(task_id)
-        request.app.emit(event_id="background_task_cancelled", task_id=task_id)
+        request.app.emit(event_id="background_task_cancelled", entity_id=task_id)
         await log_audit(
             audit_service,
             action="admin.task.cancelled",
@@ -161,7 +161,8 @@ class AdminTasksController(Controller):
     ) -> None:
         """Delete a completed/failed/cancelled task (admin)."""
         db_obj = await task_service.get(task_id)
-        request.app.emit(event_id="background_task_deleted", task_id=task_id)
+        before = capture_snapshot(db_obj)
+        request.app.emit(event_id="background_task_deleted", entity_id=task_id)
         await task_service.delete(task_id)
         await log_audit(
             audit_service,
@@ -172,6 +173,8 @@ class AdminTasksController(Controller):
             target_type="background_task",
             target_id=task_id,
             target_label=db_obj.task_type,
+            before=before,
+            after=None,
             metadata={
                 "task_type": db_obj.task_type,
                 "status": db_obj.status,

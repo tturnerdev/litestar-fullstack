@@ -182,6 +182,7 @@ class WebhookEventType(StrEnum):
 
     # Admin — music on hold events
     MUSIC_ON_HOLD_CREATED = "music_on_hold.created"
+    MUSIC_ON_HOLD_UPDATED = "music_on_hold.updated"
     MUSIC_ON_HOLD_DELETED = "music_on_hold.deleted"
 
     # Admin — bulk import events
@@ -364,6 +365,7 @@ EVENT_DESCRIPTIONS: dict[WebhookEventType, str] = {
     WebhookEventType.CALL_RECORD_CREATED: "A new call record was created",
     # Admin — music on hold events
     WebhookEventType.MUSIC_ON_HOLD_CREATED: "A new music on hold entry was created",
+    WebhookEventType.MUSIC_ON_HOLD_UPDATED: "A music on hold entry was updated",
     WebhookEventType.MUSIC_ON_HOLD_DELETED: "A music on hold entry was deleted",
     # Background task events
     WebhookEventType.DEVICES_BULK_IMPORTED: "Devices were bulk-imported from CSV",

@@ -148,7 +148,7 @@ class AdminUsersController(Controller):
             request=request,
         )
 
-        request.app.emit(event_id="admin_user_updated", user_id=user.id)
+        request.app.emit(event_id="admin_user_updated", entity_id=user.id)
         return users_service.to_schema(user, schema_type=AdminUserDetail)
 
     @delete(operation_id="AdminDeleteUser", summary="Delete a user (admin)", path="/{user_id:uuid}", status_code=HTTP_204_NO_CONTENT, return_dto=None)
@@ -163,8 +163,9 @@ class AdminUsersController(Controller):
         user = await users_service.get(user_id)
         if user.id == request.user.id:
             raise NotAuthorizedException(detail="Cannot delete your own account")
+        before = capture_snapshot(user)
         user_email = user.email
-        request.app.emit(event_id="admin_user_deleted", user_id=user_id)
+        request.app.emit(event_id="admin_user_deleted", entity_id=user_id)
         await users_service.delete(user_id, auto_commit=True)
         await log_audit(
             audit_service,
@@ -175,5 +176,7 @@ class AdminUsersController(Controller):
             target_type="user",
             target_id=user_id,
             target_label=user_email,
+            before=before,
+            after=None,
             request=request,
         )

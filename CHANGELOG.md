@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.358.0 (2026-05-08)
+
+### Fixed
+- **Admin delete audit snapshots** — Add missing `before` state capture to admin user, team, and task delete audit logs so the deleted entity's state is recorded
+- **Music on hold update event** — Add missing `music_on_hold_updated` event emission and webhook type to the update endpoint
+- **Event param normalization** — Standardize remaining `task_id`, `template_id`, `user_id`, `team_id` event params to `entity_id` in admin controllers and background task controller
+
 ## v0.357.0 (2026-05-08)
 
 ### Enhanced

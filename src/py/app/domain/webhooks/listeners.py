@@ -161,6 +161,7 @@ EVENT_MAP: dict[str, WebhookEventType] = {
     "call_record_created": WebhookEventType.CALL_RECORD_CREATED,
     # Admin — music on hold events
     "music_on_hold_created": WebhookEventType.MUSIC_ON_HOLD_CREATED,
+    "music_on_hold_updated": WebhookEventType.MUSIC_ON_HOLD_UPDATED,
     "music_on_hold_deleted": WebhookEventType.MUSIC_ON_HOLD_DELETED,
     # Admin bulk import events
     "devices_bulk_imported": WebhookEventType.DEVICES_BULK_IMPORTED,
