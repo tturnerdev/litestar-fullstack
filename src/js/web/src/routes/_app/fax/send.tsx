@@ -4,6 +4,7 @@ import { SendFaxForm } from "@/components/fax/send-fax-form"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 
 export const Route = createFileRoute("/_app/fax/send")({
@@ -48,7 +49,9 @@ function SendFaxPage() {
         }
       />
       <PageSection>
-        <SendFaxForm />
+        <SectionErrorBoundary name="Send Fax">
+          <SendFaxForm />
+        </SectionErrorBoundary>
       </PageSection>
     </PageContainer>
   )

@@ -1688,6 +1688,7 @@ export type MusicOnHoldList = {
   isActive: boolean;
   isDefault: boolean;
   name: string;
+  updatedAt: string;
 };
 
 /**
@@ -2143,6 +2144,7 @@ export type ScheduleEntryCreate = {
  * ScheduleEntryDetail
  */
 export type ScheduleEntryDetail = {
+  createdAt?: string | null;
   date?: string | null;
   dayOfWeek?: number | null;
   endTime: string;
@@ -2151,12 +2153,14 @@ export type ScheduleEntryDetail = {
   label?: string | null;
   scheduleId: string;
   startTime: string;
+  updatedAt?: string | null;
 };
 
 /**
  * ScheduleEntryList
  */
 export type ScheduleEntryList = {
+  createdAt?: string | null;
   date?: string | null;
   dayOfWeek?: number | null;
   endTime: string;
@@ -2165,6 +2169,7 @@ export type ScheduleEntryList = {
   label?: string | null;
   scheduleId: string;
   startTime: string;
+  updatedAt?: string | null;
 };
 
 /**
@@ -2912,6 +2917,7 @@ export type WebhookEndpointList = {
   id: string;
   isActive?: boolean;
   teamId?: string | null;
+  updatedAt?: string | null;
   url: string;
   validationStatus?: string | null;
 };
@@ -2951,6 +2957,7 @@ export type WebhookList = {
   lastTriggeredAt?: string | null;
   lastValidatedAt?: string | null;
   name: string;
+  updatedAt?: string | null;
   url: string;
   validationStatus?: string | null;
 };
@@ -3377,9 +3384,9 @@ export type AdminListAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    actionIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
@@ -3456,9 +3463,9 @@ export type AdminExportAuditLogData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    actionIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
@@ -3524,9 +3531,9 @@ export type AdminGetTargetAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    actionIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
@@ -3604,9 +3611,9 @@ export type AdminGetUserAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    actionIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
     targetIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
@@ -14892,6 +14899,14 @@ export type ListPhoneNumbersData = {
     createdAfter?: string | null;
     updatedBefore?: string | null;
     updatedAfter?: string | null;
+    /**
+     * Field to search
+     */
+    searchString?: string | null;
+    /**
+     * Search should be case sensitive
+     */
+    searchIgnoreCase?: boolean | null;
     currentPage?: number;
     pageSize?: number;
     /**
@@ -15828,6 +15843,14 @@ export type ListWebhookEndpointsData = {
     createdAfter?: string | null;
     updatedBefore?: string | null;
     updatedAfter?: string | null;
+    /**
+     * Field to search
+     */
+    searchString?: string | null;
+    /**
+     * Search should be case sensitive
+     */
+    searchIgnoreCase?: boolean | null;
     currentPage?: number;
     pageSize?: number;
     /**

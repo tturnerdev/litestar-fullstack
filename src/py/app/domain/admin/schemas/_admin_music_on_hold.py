@@ -18,6 +18,7 @@ class MusicOnHoldList(CamelizedBaseStruct, kw_only=True):
     is_active: bool
     file_count: int
     created_at: datetime
+    updated_at: datetime
 
 
 class MusicOnHoldDetail(CamelizedBaseStruct, kw_only=True):

@@ -22,6 +22,7 @@ class WebhookList(CamelizedBaseStruct):
     validation_status: str | None = None
     last_validated_at: datetime | None = None
     created_at: datetime | None = None
+    updated_at: datetime | None = None
 
 
 class WebhookDetail(CamelizedBaseStruct):

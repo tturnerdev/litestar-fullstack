@@ -38,6 +38,7 @@ class WebhookEndpointList(CamelizedBaseStruct):
     team_id: UUID | None = None
     validation_status: str | None = None
     created_at: datetime | None = None
+    updated_at: datetime | None = None
 
 
 class WebhookEndpointCreate(CamelizedBaseStruct):

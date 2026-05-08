@@ -1414,6 +1414,8 @@ export interface RouteQueryParams {
     ids?: string[];
     orderBy?: string;
     pageSize?: number;
+    searchIgnoreCase?: boolean;
+    searchString?: string;
     sortOrder?: "asc" | "desc";
     updatedAfter?: DateTime;
     updatedBefore?: DateTime;
@@ -1608,6 +1610,8 @@ export interface RouteQueryParams {
     ids?: string[];
     orderBy?: string;
     pageSize?: number;
+    searchIgnoreCase?: boolean;
+    searchString?: string;
     sortOrder?: "asc" | "desc";
     updatedAfter?: DateTime;
     updatedBefore?: DateTime;
@@ -3182,7 +3186,7 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: [] as const,
-    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
   },
   'list_entries': {
     path: '/api/schedules/{schedule_id}/entries',
@@ -3345,7 +3349,7 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: [] as const,
-    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
   },
   'list_registrations': {
     path: '/api/e911',

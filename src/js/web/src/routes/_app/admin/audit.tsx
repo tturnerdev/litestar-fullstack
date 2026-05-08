@@ -3,6 +3,7 @@ import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { AuditLogTable } from "@/components/admin/audit-log-table"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
+import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 
 export const Route = createFileRoute("/_app/admin/audit")({
@@ -16,7 +17,9 @@ function AdminAuditPage() {
       <PageHeader eyebrow="Administration" title="Audit Log" description="Track system events and user actions." breadcrumbs={<AdminBreadcrumbs />} />
       <AdminNav />
       <PageSection>
-        <AuditLogTable />
+        <SectionErrorBoundary name="Audit Log">
+          <AuditLogTable />
+        </SectionErrorBoundary>
       </PageSection>
     </PageContainer>
   )

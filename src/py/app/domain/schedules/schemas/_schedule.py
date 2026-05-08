@@ -19,6 +19,8 @@ class ScheduleEntryList(CamelizedBaseStruct, kw_only=True):
     date: dt.date | None = None
     label: str | None = None
     is_closed: bool = False
+    created_at: dt.datetime | None = None
+    updated_at: dt.datetime | None = None
 
 
 class ScheduleEntryDetail(CamelizedBaseStruct, kw_only=True):
@@ -32,6 +34,8 @@ class ScheduleEntryDetail(CamelizedBaseStruct, kw_only=True):
     date: dt.date | None = None
     label: str | None = None
     is_closed: bool = False
+    created_at: dt.datetime | None = None
+    updated_at: dt.datetime | None = None
 
 
 class ScheduleEntryCreate(CamelizedBaseStruct, kw_only=True):

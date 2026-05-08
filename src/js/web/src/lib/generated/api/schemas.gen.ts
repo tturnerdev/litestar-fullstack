@@ -6580,6 +6580,10 @@ export const MusicOnHoldListSchema = {
     name: {
       type: "string",
     },
+    updatedAt: {
+      format: "date-time",
+      type: "string",
+    },
   },
   required: [
     "category",
@@ -6589,6 +6593,7 @@ export const MusicOnHoldListSchema = {
     "isActive",
     "isDefault",
     "name",
+    "updatedAt",
   ],
   title: "MusicOnHoldList",
   type: "object",
@@ -8249,6 +8254,17 @@ export const ScheduleEntryCreateSchema = {
 
 export const ScheduleEntryDetailSchema = {
   properties: {
+    createdAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     date: {
       oneOf: [
         {
@@ -8299,6 +8315,17 @@ export const ScheduleEntryDetailSchema = {
     startTime: {
       format: "duration",
       type: "string",
+    },
+    updatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
     },
   },
   required: ["endTime", "id", "scheduleId", "startTime"],
@@ -8308,6 +8335,17 @@ export const ScheduleEntryDetailSchema = {
 
 export const ScheduleEntryListSchema = {
   properties: {
+    createdAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     date: {
       oneOf: [
         {
@@ -8358,6 +8396,17 @@ export const ScheduleEntryListSchema = {
     startTime: {
       format: "duration",
       type: "string",
+    },
+    updatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
     },
   },
   required: ["endTime", "id", "scheduleId", "startTime"],
@@ -11067,6 +11116,17 @@ export const WebhookEndpointListSchema = {
         },
       ],
     },
+    updatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     url: {
       type: "string",
     },
@@ -11236,6 +11296,17 @@ export const WebhookListSchema = {
     },
     name: {
       type: "string",
+    },
+    updatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
     },
     url: {
       type: "string",
