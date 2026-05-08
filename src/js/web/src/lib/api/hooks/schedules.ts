@@ -1,95 +1,29 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
-import { client } from "@/lib/generated/api/client.gen"
+import {
+  checkSchedule,
+  createScheduleEntry as createEntryApi,
+  createSchedule as createScheduleApi,
+  deleteScheduleEntry as deleteEntryApi,
+  deleteSchedule as deleteScheduleApi,
+  getSchedule,
+  listSchedules,
+  type ScheduleCheckResponse,
+  type ScheduleCreate,
+  type ScheduleDetail,
+  type ScheduleEntryCreate,
+  type ScheduleEntryList,
+  type ScheduleEntryUpdate,
+  type ScheduleList,
+  type ScheduleUpdate,
+  updateSchedule as updateScheduleApi,
+} from "@/lib/generated/api"
 
-// ---------------------------------------------------------------------------
-// Helpers (for endpoints not yet in generated SDK)
-// ---------------------------------------------------------------------------
+export type Schedule = ScheduleDetail
+export type ScheduleEntry = ScheduleEntryList
+export type ScheduleCheckResult = ScheduleCheckResponse
 
-async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
-  const config = client.getConfig()
-  const baseUrl = config.baseUrl ?? ""
-  const token = typeof window !== "undefined" ? window.localStorage.getItem("access_token") : null
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  }
-  const response = await fetch(`${baseUrl}${url}`, {
-    credentials: "include",
-    ...options,
-    headers: { ...headers, ...(options?.headers as Record<string, string>) },
-  })
-  if (!response.ok) {
-    const body = await response.json().catch(() => ({}))
-    throw new Error(body.detail ?? `Request failed (${response.status})`)
-  }
-  if (response.status === 204) return undefined as unknown as T
-  return response.json()
-}
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export interface Schedule {
-  id: string
-  teamId: string
-  name: string
-  timezone: string
-  isDefault: boolean
-  scheduleType: "business_hours" | "holiday" | "custom"
-  entries?: ScheduleEntry[]
-  createdAt: string
-  updatedAt: string
-}
-
-export interface ScheduleEntry {
-  id: string
-  scheduleId: string
-  dayOfWeek: number | null // 0-6 (Mon-Sun), null for holidays
-  startTime: string // "HH:MM"
-  endTime: string // "HH:MM"
-  date: string | null // ISO date for holidays
-  label: string | null
-  isClosed: boolean
-}
-
-export interface ScheduleCreate {
-  name: string
-  timezone: string
-  scheduleType: "business_hours" | "holiday" | "custom"
-  isDefault?: boolean
-}
-
-export interface ScheduleUpdate {
-  name?: string
-  timezone?: string
-  scheduleType?: "business_hours" | "holiday" | "custom"
-  isDefault?: boolean
-}
-
-export interface ScheduleEntryCreate {
-  dayOfWeek?: number | null
-  startTime: string
-  endTime: string
-  date?: string | null
-  label?: string | null
-  isClosed?: boolean
-}
-
-export interface ScheduleEntryUpdate {
-  dayOfWeek?: number | null
-  startTime?: string
-  endTime?: string
-  date?: string | null
-  label?: string | null
-  isClosed?: boolean
-}
-
-export interface ScheduleCheckResult {
-  isOpen: boolean
-  currentEntry: ScheduleEntry | null
-}
+export type { ScheduleCreate, ScheduleEntryCreate, ScheduleEntryUpdate, ScheduleUpdate }
 
 // ---------------------------------------------------------------------------
 // Schedule List
@@ -110,16 +44,17 @@ export function useSchedules(pageOrOptions: number | UseSchedulesOptions = 1, pa
   return useQuery({
     queryKey: ["schedules", page, pageSize, search, orderBy, sortOrder],
     queryFn: async () => {
-      const params = new URLSearchParams()
-      params.set("currentPage", String(page))
-      params.set("pageSize", String(pageSize))
-      if (search) {
-        params.set("searchString", search)
-        params.set("searchIgnoreCase", "true")
-      }
-      if (orderBy) params.set("orderBy", orderBy)
-      if (sortOrder) params.set("sortOrder", sortOrder)
-      return apiFetch<{ items: Schedule[]; total: number }>(`/api/schedules?${params.toString()}`)
+      const response = await listSchedules({
+        query: {
+          currentPage: page,
+          pageSize,
+          searchString: search,
+          searchIgnoreCase: search ? true : undefined,
+          orderBy,
+          sortOrder,
+        },
+      })
+      return response.data as { items: ScheduleList[]; total: number }
     },
   })
 }
@@ -132,7 +67,10 @@ export function useSchedule(scheduleId: string) {
   return useQuery({
     queryKey: ["schedule", scheduleId],
     queryFn: async () => {
-      return apiFetch<Schedule>(`/api/schedules/${scheduleId}`)
+      const response = await getSchedule({
+        path: { schedule_id: scheduleId },
+      })
+      return response.data as ScheduleDetail
     },
     enabled: !!scheduleId,
   })
@@ -146,10 +84,13 @@ export function useCheckSchedule(scheduleId: string) {
   return useQuery({
     queryKey: ["schedule", scheduleId, "check"],
     queryFn: async () => {
-      return apiFetch<ScheduleCheckResult>(`/api/schedules/${scheduleId}/check`)
+      const response = await checkSchedule({
+        path: { schedule_id: scheduleId },
+      })
+      return response.data as ScheduleCheckResponse
     },
     enabled: !!scheduleId,
-    refetchInterval: 60_000, // re-check every minute
+    refetchInterval: 60_000,
   })
 }
 
@@ -161,10 +102,8 @@ export function useCreateSchedule() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (payload: ScheduleCreate) => {
-      return apiFetch<Schedule>("/api/schedules", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      })
+      const response = await createScheduleApi({ body: payload })
+      return response.data as ScheduleDetail
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["schedules"] })
@@ -182,10 +121,11 @@ export function useUpdateSchedule(scheduleId: string) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (payload: ScheduleUpdate) => {
-      return apiFetch<Schedule>(`/api/schedules/${scheduleId}`, {
-        method: "PUT",
-        body: JSON.stringify(payload),
+      const response = await updateScheduleApi({
+        path: { schedule_id: scheduleId },
+        body: payload,
       })
+      return response.data as ScheduleDetail
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["schedules"] })
@@ -204,8 +144,8 @@ export function useDeleteSchedule() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (scheduleId: string) => {
-      return apiFetch<void>(`/api/schedules/${scheduleId}`, {
-        method: "DELETE",
+      await deleteScheduleApi({
+        path: { schedule_id: scheduleId },
       })
     },
     onSuccess: (_data, scheduleId) => {
@@ -229,10 +169,11 @@ export function useCreateScheduleEntry(scheduleId: string) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (payload: ScheduleEntryCreate) => {
-      return apiFetch<ScheduleEntry>(`/api/schedules/${scheduleId}/entries`, {
-        method: "POST",
-        body: JSON.stringify(payload),
+      const response = await createEntryApi({
+        path: { schedule_id: scheduleId },
+        body: payload,
       })
+      return response.data as ScheduleEntryList
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["schedule", scheduleId] })
@@ -251,8 +192,8 @@ export function useDeleteScheduleEntry(scheduleId: string) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (entryId: string) => {
-      return apiFetch<void>(`/api/schedules/${scheduleId}/entries/${entryId}`, {
-        method: "DELETE",
+      await deleteEntryApi({
+        path: { schedule_id: scheduleId, entry_id: entryId },
       })
     },
     onSuccess: () => {

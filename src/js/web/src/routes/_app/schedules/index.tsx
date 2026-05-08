@@ -276,7 +276,8 @@ function SchedulesPage() {
     let active = 0
     let inactive = 0
     for (const s of schedules) {
-      const hasEntries = s.entries && s.entries.length > 0
+      const entries = (s as { entries?: unknown[] }).entries
+      const hasEntries = entries != null && entries.length > 0
       if (hasEntries) active++
       else inactive++
     }

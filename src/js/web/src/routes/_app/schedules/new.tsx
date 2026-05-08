@@ -30,7 +30,7 @@ export const Route = createFileRoute("/_app/schedules/new")({
   component: NewSchedulePage,
 })
 
-const SCHEDULE_TYPES: { value: ScheduleCreate["scheduleType"]; label: string }[] = [
+const SCHEDULE_TYPES: { value: string; label: string }[] = [
   { value: "business_hours", label: "Business Hours" },
   { value: "holiday", label: "Holiday" },
   { value: "custom", label: "Custom" },
@@ -185,6 +185,7 @@ function NewSchedulePage() {
 
     const payload: ScheduleCreate = {
       name: name.trim(),
+      teamId: currentTeam.id,
       scheduleType,
       timezone,
       ...(isDefault ? { isDefault: true } : {}),
