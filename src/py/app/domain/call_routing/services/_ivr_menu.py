@@ -62,6 +62,7 @@ class IvrMenuOptionService(service.SQLAlchemyAsyncRepositoryService[m.IvrMenuOpt
     async def to_model_on_create(self, data: ModelDictT[m.IvrMenuOption]) -> ModelDictT[m.IvrMenuOption]:
         data = service.schema_dump(data)
         if service.is_dict(data):
+            data["digit"] = data["digit"].strip()
             existing = await self.repository.list(
                 m.IvrMenuOption.ivr_menu_id == data["ivr_menu_id"],
                 m.IvrMenuOption.digit == data["digit"],
@@ -73,6 +74,7 @@ class IvrMenuOptionService(service.SQLAlchemyAsyncRepositoryService[m.IvrMenuOpt
     async def to_model_on_update(self, data: ModelDictT[m.IvrMenuOption], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.IvrMenuOption]:
         data = service.schema_dump(data)
         if service.is_dict(data) and "digit" in data:
+            data["digit"] = data["digit"].strip()
             ivr_menu_id = data.get("ivr_menu_id")
             if ivr_menu_id:
                 existing = await self.repository.list(

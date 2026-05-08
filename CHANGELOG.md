@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.364.0 (2026-05-08)
+
+### Fixed
+- **IVR menu option digit strip** — Strip whitespace from digit field before duplicate checks in IVR menu option service, completing input normalization across all services with duplicate validation
+
 ## v0.363.0 (2026-05-08)
 
 ### Fixed
