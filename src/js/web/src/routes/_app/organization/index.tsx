@@ -619,6 +619,7 @@ function OrganizationSettingsPage() {
                           onChange={(e) => updateFieldWithValidation("name", e.target.value)}
                           onBlur={() => handleFieldBlur("name", formData.name)}
                           placeholder="Organization name"
+                          maxLength={255}
                           disabled={updateOrg.isPending}
                           aria-invalid={!!fieldErrors.name}
                         />
@@ -636,6 +637,7 @@ function OrganizationSettingsPage() {
                         value={formData.description}
                         onChange={(e) => updateField("description", e.target.value)}
                         placeholder="A brief description of your organization"
+                        maxLength={1000}
                         rows={3}
                         disabled={updateOrg.isPending}
                       />
@@ -655,6 +657,7 @@ function OrganizationSettingsPage() {
                           onBlur={() => handleFieldBlur("logoUrl", formData.logoUrl)}
                           placeholder="https://example.com/logo.png"
                           type="url"
+                          maxLength={500}
                           disabled={updateOrg.isPending}
                           aria-invalid={!!fieldErrors.logoUrl}
                         />
@@ -698,6 +701,7 @@ function OrganizationSettingsPage() {
                           onBlur={() => handleFieldBlur("website", formData.website)}
                           placeholder="https://example.com"
                           type="url"
+                          maxLength={500}
                           disabled={updateOrg.isPending}
                           aria-invalid={!!fieldErrors.website}
                         />
@@ -746,6 +750,7 @@ function OrganizationSettingsPage() {
                           onBlur={() => handleFieldBlur("email", formData.email)}
                           placeholder="contact@example.com"
                           type="email"
+                          maxLength={320}
                           disabled={updateOrg.isPending}
                           aria-invalid={!!fieldErrors.email}
                         />
@@ -777,6 +782,7 @@ function OrganizationSettingsPage() {
                           onBlur={() => handleFieldBlur("phone", formData.phone)}
                           placeholder="+1 (555) 000-0000"
                           type="tel"
+                          maxLength={20}
                           disabled={updateOrg.isPending}
                           aria-invalid={!!fieldErrors.phone}
                         />
@@ -802,6 +808,7 @@ function OrganizationSettingsPage() {
                         value={formData.addressLine1}
                         onChange={(e) => updateField("addressLine1", e.target.value)}
                         placeholder="123 Main Street"
+                        maxLength={255}
                         disabled={updateOrg.isPending}
                       />
                     ) : (
@@ -816,6 +823,7 @@ function OrganizationSettingsPage() {
                         value={formData.addressLine2}
                         onChange={(e) => updateField("addressLine2", e.target.value)}
                         placeholder="Suite 100"
+                        maxLength={255}
                         disabled={updateOrg.isPending}
                       />
                     ) : (
@@ -826,7 +834,14 @@ function OrganizationSettingsPage() {
                     <div className="space-y-2">
                       <Label htmlFor="org-city">City</Label>
                       {isEditing ? (
-                        <Input id="org-city" value={formData.city} onChange={(e) => updateField("city", e.target.value)} placeholder="City" disabled={updateOrg.isPending} />
+                        <Input
+                          id="org-city"
+                          value={formData.city}
+                          onChange={(e) => updateField("city", e.target.value)}
+                          placeholder="City"
+                          maxLength={100}
+                          disabled={updateOrg.isPending}
+                        />
                       ) : (
                         <p className="text-sm">{org?.city || <span className="text-muted-foreground italic">Not set</span>}</p>
                       )}
@@ -834,7 +849,14 @@ function OrganizationSettingsPage() {
                     <div className="space-y-2">
                       <Label htmlFor="org-state">State / Province</Label>
                       {isEditing ? (
-                        <Input id="org-state" value={formData.state} onChange={(e) => updateField("state", e.target.value)} placeholder="State" disabled={updateOrg.isPending} />
+                        <Input
+                          id="org-state"
+                          value={formData.state}
+                          onChange={(e) => updateField("state", e.target.value)}
+                          placeholder="State"
+                          maxLength={100}
+                          disabled={updateOrg.isPending}
+                        />
                       ) : (
                         <p className="text-sm">{org?.state || <span className="text-muted-foreground italic">Not set</span>}</p>
                       )}
@@ -849,6 +871,7 @@ function OrganizationSettingsPage() {
                           value={formData.postalCode}
                           onChange={(e) => updateField("postalCode", e.target.value)}
                           placeholder="12345"
+                          maxLength={20}
                           disabled={updateOrg.isPending}
                         />
                       ) : (
@@ -863,6 +886,7 @@ function OrganizationSettingsPage() {
                           value={formData.country}
                           onChange={(e) => updateField("country", e.target.value)}
                           placeholder="Country"
+                          maxLength={100}
                           disabled={updateOrg.isPending}
                         />
                       ) : (

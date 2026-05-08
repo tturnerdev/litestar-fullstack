@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { useCreateExtension } from "@/lib/api/hooks/voice"
 
-const DISPLAY_NAME_MAX_LENGTH = 50
+const DISPLAY_NAME_MAX_LENGTH = 100
 
 export function CreateExtensionDialog({ trigger }: { trigger: React.ReactNode }) {
   const [open, setOpen] = useState(false)
