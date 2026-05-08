@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.261.0 (2026-05-07)
+
+### Added
+- **Fax number edit validation** — Label field validated on blur with clear-on-fix and pre-submit checks
+- **Webhook form validation** — URL format, name, and description validation on both create and edit pages
+- **Extension create validation enhanced** — Number must be 2-6 digits with format regex; display name max 100 chars with counter; edit dialog validation added
+- **Location form validation** — Per-field address validation (create uses superRefine, edit uses touchedRef pattern); postal code format validation
+
+## v0.260.0 (2026-05-07)
+
+### Added
+- **Analytics URL-persisted filters** — Date range, direction, disposition, and search filters now stored in URL params for shareable analytics views
+- **E911 address form validation** — Required field checks for address, city, state, postal code with format validation and pre-submit checks
+- **Phone number E911 link enhanced** — Related Resources card now shows actual address instead of truncated registration UUID
+- **Device bulk reboot/reprovision** — Bulk action bar supports reboot and reprovision with confirmation dialogs and success/failure toasts
+
 ## v0.259.0 (2026-05-07)
 
 ### Added
