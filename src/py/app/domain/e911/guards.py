@@ -41,7 +41,7 @@ def requires_team_membership(
         return
     if connection.user.teams:
         return
-    raise PermissionDeniedException(detail="Insufficient permissions to manage E911 registrations.")
+    raise PermissionDeniedException(detail="A team membership is required to manage E911 registrations.")
 
 
 __all__ = ("requires_team_membership",)

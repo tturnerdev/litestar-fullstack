@@ -37,7 +37,7 @@ def requires_webhook_ownership(connection: ASGIConnection[Any, m.User, Token, An
     )
     if has_system_role:
         return
-    raise PermissionDeniedException(detail="Insufficient permissions to access this webhook.")
+    raise PermissionDeniedException(detail="Admin or superuser access is required to manage webhooks.")
 
 
 __all__ = ("requires_webhook_ownership",)

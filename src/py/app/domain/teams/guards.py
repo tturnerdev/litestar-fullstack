@@ -38,7 +38,7 @@ def requires_team_membership(connection: ASGIConnection[Any, m.User, Token, Any]
     has_team_role = any(membership.team.id == team_id for membership in connection.user.teams)
     if connection.user.is_superuser or has_system_role or has_team_role:
         return
-    raise PermissionDeniedException(detail="Insufficient permissions to access team.")
+    raise PermissionDeniedException(detail="You must be a member of this team to access it.")
 
 
 def requires_team_admin(connection: ASGIConnection[Any, m.User, Token, Any], _: BaseRouteHandler) -> None:
@@ -62,7 +62,7 @@ def requires_team_admin(connection: ASGIConnection[Any, m.User, Token, Any], _: 
     )
     if connection.user.is_superuser or has_system_role or has_team_role:
         return
-    raise PermissionDeniedException(detail="Insufficient permissions to access team.")
+    raise PermissionDeniedException(detail="Team admin role is required for this action.")
 
 
 def requires_team_ownership(connection: ASGIConnection[Any, m.User, Token, Any], _: BaseRouteHandler) -> None:
@@ -85,8 +85,7 @@ def requires_team_ownership(connection: ASGIConnection[Any, m.User, Token, Any],
     if connection.user.is_superuser or has_system_role or has_team_role:
         return
 
-    msg = "Insufficient permissions to access team."
-    raise PermissionDeniedException(msg)
+    raise PermissionDeniedException(detail="Team owner role is required for this action.")
 
 
 def _is_superuser(user: m.User) -> bool:
@@ -142,7 +141,7 @@ def requires_feature_permission(
 
         # No team memberships -> deny.
         if not user.teams:
-            raise PermissionDeniedException(detail="Insufficient permissions.")
+            raise PermissionDeniedException(detail=f"No team membership found. Access to {feature_area} requires a team role.")
 
         # Obtain a database session from the connection to query permission rows.
         from app.config import alchemy
@@ -180,7 +179,7 @@ def requires_feature_permission(
                 return
                 # MEMBER without explicit entry -> denied for this team, continue checking.
 
-        raise PermissionDeniedException(detail="Insufficient permissions.")
+        raise PermissionDeniedException(detail=f"You do not have {action} permission for {feature_area}.")
 
     return _guard
 

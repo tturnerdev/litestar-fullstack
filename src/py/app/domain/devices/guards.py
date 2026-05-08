@@ -37,7 +37,7 @@ def requires_device_ownership(connection: ASGIConnection[Any, m.User, Token, Any
     )
     if has_system_role:
         return
-    raise PermissionDeniedException(detail="Insufficient permissions to access this device.")
+    raise PermissionDeniedException(detail="Admin or superuser access is required to manage devices.")
 
 
 def requires_device_team_access(connection: ASGIConnection[Any, m.User, Token, Any], _: BaseRouteHandler) -> None:
@@ -59,7 +59,7 @@ def requires_device_team_access(connection: ASGIConnection[Any, m.User, Token, A
     )
     if has_system_role:
         return
-    raise PermissionDeniedException(detail="Insufficient permissions to access this device.")
+    raise PermissionDeniedException(detail="You must be a member of the device's team to access it.")
 
 
 __all__ = (

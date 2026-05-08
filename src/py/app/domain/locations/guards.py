@@ -38,7 +38,7 @@ def requires_location_team_membership(
     has_team_role = any(membership.team.id == team_id for membership in connection.user.teams)
     if connection.user.is_superuser or has_system_role or has_team_role:
         return
-    raise PermissionDeniedException(detail="Insufficient permissions to access this location.")
+    raise PermissionDeniedException(detail="You must be a member of this team to access its locations.")
 
 
 __all__ = ("requires_location_team_membership",)

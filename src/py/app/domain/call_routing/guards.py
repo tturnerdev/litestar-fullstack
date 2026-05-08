@@ -39,7 +39,7 @@ def requires_call_routing_access(
     )
     if has_system_role:
         return
-    raise PermissionDeniedException(detail="Insufficient permissions to access call routing resources.")
+    raise PermissionDeniedException(detail="Admin or superuser access is required to manage call routing.")
 
 
 __all__ = ("requires_call_routing_access",)

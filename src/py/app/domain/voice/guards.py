@@ -31,7 +31,7 @@ def requires_extension_ownership(
     )
     if has_system_role:
         return
-    raise PermissionDeniedException(detail="Insufficient permissions to access this extension.")
+    raise PermissionDeniedException(detail="Admin or superuser access is required to manage this extension.")
 
 
 def requires_phone_number_access(
@@ -47,7 +47,7 @@ def requires_phone_number_access(
     )
     if has_system_role:
         return
-    raise PermissionDeniedException(detail="Insufficient permissions to access this phone number.")
+    raise PermissionDeniedException(detail="Admin or superuser access is required to manage this phone number.")
 
 
 __all__ = (
