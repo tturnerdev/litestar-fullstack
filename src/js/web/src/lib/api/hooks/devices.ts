@@ -260,10 +260,12 @@ export function useSetDeviceLines(deviceId: string) {
 // ---------------------------------------------------------------------------
 
 export function useDeviceAction(deviceId: string) {
+  const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (key: string) =>
       apiFetch<{ deviceId: string; action: string; status: string; message: string }>(`/api/devices/${deviceId}/action?key=${encodeURIComponent(key)}`, { method: "POST" }),
     onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["device", deviceId] })
       toast.success(data.message || "Action completed")
     },
     onError: (error) => {

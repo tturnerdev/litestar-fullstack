@@ -107,7 +107,7 @@ class TimeConditionController(Controller):
             TimeCondition
         """
         obj = data.to_dict()
-        obj["team_id"] = current_user.team_id if hasattr(current_user, "team_id") else None
+        obj["team_id"] = current_user.teams[0].team_id if current_user.teams else None
         db_obj = await time_conditions_service.create(obj)
         after = capture_snapshot(db_obj)
         await log_audit(

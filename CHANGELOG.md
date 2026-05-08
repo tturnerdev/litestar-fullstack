@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.305.0 (2026-05-08)
+
+### Security
+- **SQL LIKE metacharacter injection** — Global search now escapes `%` and `_` in user queries before building ILIKE patterns, preventing wildcard amplification DoS
+- **Missing voicemail access guards** — Added `requires_voicemail_access` to list/create voicemail box endpoints and `requires_voicemail_message_access` to list-all messages endpoint
+
+### Fixed
+- **Broken team_id on call routing create** — All 4 call routing controllers used `current_user.team_id` (which doesn't exist on User model); now correctly reads from `current_user.teams[0].team_id`
+- **React Query cache collision** — Home dashboard and admin panel shared `["admin", "activity"]` query key with different params, poisoning each other's cache; keys now include limit parameters
+- **useDeviceAction missing cache invalidation** — Custom device actions now invalidate device queries on success, matching reboot/reprovision behavior
+- **Dead code cleanup** — Removed unused `CreatePhoneNumberDialog` component (never imported)
+
 ## v0.304.0 (2026-05-08)
 
 ### Improved

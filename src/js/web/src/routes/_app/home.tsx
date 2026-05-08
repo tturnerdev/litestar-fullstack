@@ -602,7 +602,7 @@ function HomePage() {
   })
 
   const { data: activityData, isLoading: activityLoading } = useQuery({
-    queryKey: ["admin", "activity"],
+    queryKey: ["admin", "activity", { limit: 8 }],
     queryFn: async () => {
       const response = await getRecentActivity({ query: { limit: 8 } })
       return response.data as RecentActivity
@@ -611,7 +611,7 @@ function HomePage() {
   })
 
   const { data: chartActivityData } = useQuery({
-    queryKey: ["admin", "activity-chart"],
+    queryKey: ["admin", "activity-chart", { limit: 200 }],
     queryFn: async () => {
       const response = await getRecentActivity({ query: { limit: 200, hours: 168 } })
       return response.data as RecentActivity

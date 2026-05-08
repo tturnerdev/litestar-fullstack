@@ -54,7 +54,7 @@ class VoicemailMessageController(Controller):
         "audit_service": Provide(provide_audit_log_service),
     }
 
-    @get(operation_id="ListAllVoicemailMessages", path="/api/voicemail/messages")
+    @get(operation_id="ListAllVoicemailMessages", path="/api/voicemail/messages", guards=[requires_voicemail_message_access])
     async def list_voicemail_messages(
         self,
         voicemail_messages_service: VoicemailMessageService,

@@ -184,12 +184,13 @@ async def _search_entity(
         return []
 
     # Build ILIKE conditions across all search fields.
-    pattern = f"%{query}%"
+    escaped = query.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+    pattern = f"%{escaped}%"
     ilike_conditions = []
     for field_name in entry.search_fields:
         col = getattr(model_cls, field_name, None)
         if col is not None:
-            ilike_conditions.append(col.ilike(pattern))
+            ilike_conditions.append(col.ilike(pattern, escape="\\"))
 
     if not ilike_conditions:
         return []

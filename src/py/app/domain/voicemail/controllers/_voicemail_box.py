@@ -57,7 +57,7 @@ class VoicemailBoxController(Controller):
         "notifications_service": Provide(provide_notifications_service),
     }
 
-    @get(operation_id="ListVoicemailBoxes", path="/api/voicemail/boxes")
+    @get(operation_id="ListVoicemailBoxes", path="/api/voicemail/boxes", guards=[requires_voicemail_access])
     async def list_voicemail_boxes(
         self,
         voicemail_boxes_service: VoicemailBoxService,
@@ -90,7 +90,7 @@ class VoicemailBoxController(Controller):
             )
         return voicemail_boxes_service.to_schema(results, total, filters, schema_type=VoicemailBox)
 
-    @post(operation_id="CreateVoicemailBox", path="/api/voicemail/boxes", status_code=HTTP_201_CREATED)
+    @post(operation_id="CreateVoicemailBox", path="/api/voicemail/boxes", status_code=HTTP_201_CREATED, guards=[requires_voicemail_access])
     async def create_voicemail_box(
         self,
         request: Request[m.User, Token, Any],
