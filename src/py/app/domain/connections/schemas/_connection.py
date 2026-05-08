@@ -65,25 +65,25 @@ class ConnectionCreate(CamelizedBaseStruct):
     connection_type: str
     provider: str
     team_id: UUID | None = None
-    host: str | None = None
+    host: Annotated[str, Meta(max_length=255)] | None = None
     port: int | None = None
     auth_type: str = "none"
     credentials: dict | None = None
     settings: dict | None = None
-    description: str | None = None
+    description: Annotated[str, Meta(max_length=1000)] | None = None
     is_enabled: bool = True
 
 
 class ConnectionUpdate(CamelizedBaseStruct, omit_defaults=True):
     """Schema for updating a connection."""
 
-    name: str | msgspec.UnsetType = msgspec.UNSET
+    name: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType = msgspec.UNSET
     connection_type: str | msgspec.UnsetType = msgspec.UNSET
     provider: str | msgspec.UnsetType = msgspec.UNSET
-    host: str | msgspec.UnsetType | None = msgspec.UNSET
+    host: Annotated[str, Meta(max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
     port: int | msgspec.UnsetType | None = msgspec.UNSET
     auth_type: str | msgspec.UnsetType = msgspec.UNSET
     credentials: dict | msgspec.UnsetType | None = msgspec.UNSET
     settings: dict | msgspec.UnsetType | None = msgspec.UNSET
-    description: str | msgspec.UnsetType | None = msgspec.UNSET
+    description: Annotated[str, Meta(max_length=1000)] | msgspec.UnsetType | None = msgspec.UNSET
     is_enabled: bool | msgspec.UnsetType = msgspec.UNSET

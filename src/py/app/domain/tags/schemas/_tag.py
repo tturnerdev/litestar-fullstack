@@ -28,4 +28,4 @@ class TagCreate(CamelizedBaseStruct):
 class TagUpdate(CamelizedBaseStruct):
     """Tag Update Properties."""
 
-    name: str | None = None
+    name: Annotated[str, Meta(min_length=1, max_length=100)] | None = None

@@ -1,9 +1,11 @@
 """Admin Music on Hold schemas."""
 
 from datetime import datetime
+from typing import Annotated
 from uuid import UUID
 
 import msgspec
+from msgspec import Meta
 
 from app.lib.schema import CamelizedBaseStruct
 
@@ -39,8 +41,8 @@ class MusicOnHoldDetail(CamelizedBaseStruct, kw_only=True):
 class MusicOnHoldCreate(CamelizedBaseStruct):
     """Schema for creating a Music on Hold class."""
 
-    name: str
-    description: str = ""
+    name: Annotated[str, Meta(min_length=1, max_length=255)]
+    description: Annotated[str, Meta(max_length=1000)] = ""
     category: str = "custom"
     is_default: bool = False
     is_active: bool = True
@@ -51,8 +53,8 @@ class MusicOnHoldCreate(CamelizedBaseStruct):
 class MusicOnHoldUpdate(CamelizedBaseStruct, omit_defaults=True):
     """Schema for updating a Music on Hold class."""
 
-    name: str | msgspec.UnsetType = msgspec.UNSET
-    description: str | msgspec.UnsetType = msgspec.UNSET
+    name: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType = msgspec.UNSET
+    description: Annotated[str, Meta(max_length=1000)] | msgspec.UnsetType = msgspec.UNSET
     category: str | msgspec.UnsetType = msgspec.UNSET
     is_default: bool | msgspec.UnsetType = msgspec.UNSET
     is_active: bool | msgspec.UnsetType = msgspec.UNSET

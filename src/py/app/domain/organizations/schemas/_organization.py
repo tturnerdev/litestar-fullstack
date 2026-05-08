@@ -1,9 +1,11 @@
 """Organization schemas."""
 
 import datetime as dt
+from typing import Annotated
 from uuid import UUID
 
 import msgspec
+from msgspec import Meta
 
 from app.lib.schema import CamelizedBaseStruct
 
@@ -59,18 +61,18 @@ class OrganizationDetail(CamelizedBaseStruct):
 class OrganizationUpdate(CamelizedBaseStruct, omit_defaults=True):
     """Schema for updating organization settings."""
 
-    name: str | msgspec.UnsetType | None = msgspec.UNSET
-    description: str | msgspec.UnsetType | None = msgspec.UNSET
-    logo_url: str | msgspec.UnsetType | None = msgspec.UNSET
-    website: str | msgspec.UnsetType | None = msgspec.UNSET
-    email: str | msgspec.UnsetType | None = msgspec.UNSET
-    phone: str | msgspec.UnsetType | None = msgspec.UNSET
-    address_line_1: str | msgspec.UnsetType | None = msgspec.UNSET
-    address_line_2: str | msgspec.UnsetType | None = msgspec.UNSET
-    city: str | msgspec.UnsetType | None = msgspec.UNSET
-    state: str | msgspec.UnsetType | None = msgspec.UNSET
-    postal_code: str | msgspec.UnsetType | None = msgspec.UNSET
-    country: str | msgspec.UnsetType | None = msgspec.UNSET
-    timezone: str | msgspec.UnsetType | None = msgspec.UNSET
-    default_language: str | msgspec.UnsetType | None = msgspec.UNSET
+    name: Annotated[str, Meta(max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
+    description: Annotated[str, Meta(max_length=1000)] | msgspec.UnsetType | None = msgspec.UNSET
+    logo_url: Annotated[str, Meta(max_length=2048)] | msgspec.UnsetType | None = msgspec.UNSET
+    website: Annotated[str, Meta(max_length=2048)] | msgspec.UnsetType | None = msgspec.UNSET
+    email: Annotated[str, Meta(max_length=320)] | msgspec.UnsetType | None = msgspec.UNSET
+    phone: Annotated[str, Meta(max_length=20)] | msgspec.UnsetType | None = msgspec.UNSET
+    address_line_1: Annotated[str, Meta(max_length=500)] | msgspec.UnsetType | None = msgspec.UNSET
+    address_line_2: Annotated[str, Meta(max_length=500)] | msgspec.UnsetType | None = msgspec.UNSET
+    city: Annotated[str, Meta(max_length=100)] | msgspec.UnsetType | None = msgspec.UNSET
+    state: Annotated[str, Meta(max_length=100)] | msgspec.UnsetType | None = msgspec.UNSET
+    postal_code: Annotated[str, Meta(max_length=20)] | msgspec.UnsetType | None = msgspec.UNSET
+    country: Annotated[str, Meta(max_length=100)] | msgspec.UnsetType | None = msgspec.UNSET
+    timezone: Annotated[str, Meta(max_length=100)] | msgspec.UnsetType | None = msgspec.UNSET
+    default_language: Annotated[str, Meta(max_length=10)] | msgspec.UnsetType | None = msgspec.UNSET
     settings: dict | msgspec.UnsetType | None = msgspec.UNSET

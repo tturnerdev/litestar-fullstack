@@ -1,7 +1,10 @@
 """Ticket message schemas."""
 
 import datetime as dt
+from typing import Annotated
 from uuid import UUID
+
+from msgspec import Meta
 
 from app.domain.support.schemas._ticket import TicketUser
 from app.domain.support.schemas._ticket_attachment import TicketAttachment
@@ -21,5 +24,5 @@ class TicketMessage(CamelizedBaseStruct):
 
 
 class TicketMessageCreate(CamelizedBaseStruct):
-    body_markdown: str
+    body_markdown: Annotated[str, Meta(min_length=1, max_length=50000)]
     is_internal_note: bool = False

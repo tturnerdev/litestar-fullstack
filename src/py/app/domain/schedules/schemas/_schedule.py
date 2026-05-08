@@ -102,7 +102,7 @@ class ScheduleCreate(CamelizedBaseStruct, kw_only=True):
 class ScheduleUpdate(CamelizedBaseStruct, omit_defaults=True):
     """Schema for updating a schedule."""
 
-    name: str | msgspec.UnsetType = msgspec.UNSET
+    name: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType = msgspec.UNSET
     timezone: str | msgspec.UnsetType = msgspec.UNSET
     is_default: bool | msgspec.UnsetType = msgspec.UNSET
     schedule_type: str | msgspec.UnsetType = msgspec.UNSET

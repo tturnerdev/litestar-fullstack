@@ -37,7 +37,7 @@ class TimeConditionCreate(CamelizedBaseStruct):
 class TimeConditionUpdate(CamelizedBaseStruct, omit_defaults=True):
     """Schema for updating a time condition."""
 
-    name: str | msgspec.UnsetType = msgspec.UNSET
+    name: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType = msgspec.UNSET
     match_destination: str | msgspec.UnsetType = msgspec.UNSET
     no_match_destination: str | msgspec.UnsetType = msgspec.UNSET
     schedule_id: UUID | msgspec.UnsetType | None = msgspec.UNSET

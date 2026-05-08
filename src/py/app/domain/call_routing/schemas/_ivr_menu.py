@@ -73,7 +73,7 @@ class IvrMenuCreate(CamelizedBaseStruct):
 class IvrMenuUpdate(CamelizedBaseStruct, omit_defaults=True):
     """Schema for updating an IVR menu."""
 
-    name: str | msgspec.UnsetType = msgspec.UNSET
+    name: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType = msgspec.UNSET
     greeting_type: str | msgspec.UnsetType = msgspec.UNSET
     greeting_text: str | msgspec.UnsetType | None = msgspec.UNSET
     greeting_file_url: str | msgspec.UnsetType | None = msgspec.UNSET

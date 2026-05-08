@@ -64,7 +64,7 @@ class RingGroupCreate(CamelizedBaseStruct):
 class RingGroupUpdate(CamelizedBaseStruct, omit_defaults=True):
     """Schema for updating a ring group."""
 
-    name: str | msgspec.UnsetType = msgspec.UNSET
+    name: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType = msgspec.UNSET
     number: str | msgspec.UnsetType = msgspec.UNSET
     strategy: str | msgspec.UnsetType = msgspec.UNSET
     ring_time: int | msgspec.UnsetType = msgspec.UNSET

@@ -37,21 +37,21 @@ class E911RegistrationCreate(CamelizedBaseStruct, kw_only=True):
     city: Annotated[str, Meta(min_length=1, max_length=255)]
     state: Annotated[str, Meta(min_length=1, max_length=255)]
     postal_code: Annotated[str, Meta(min_length=1, max_length=20)]
-    country: str = "US"
+    country: Annotated[str, Meta(min_length=2, max_length=2)] = "US"
     phone_number_id: UUID | None = None
     location_id: UUID | None = None
-    address_line_2: str | None = None
+    address_line_2: Annotated[str, Meta(max_length=255)] | None = None
 
 
 class E911RegistrationUpdate(CamelizedBaseStruct, omit_defaults=True):
     phone_number_id: UUID | msgspec.UnsetType | None = msgspec.UNSET
     location_id: UUID | msgspec.UnsetType | None = msgspec.UNSET
-    address_line_1: str | msgspec.UnsetType = msgspec.UNSET
-    address_line_2: str | msgspec.UnsetType | None = msgspec.UNSET
-    city: str | msgspec.UnsetType = msgspec.UNSET
-    state: str | msgspec.UnsetType = msgspec.UNSET
-    postal_code: str | msgspec.UnsetType = msgspec.UNSET
-    country: str | msgspec.UnsetType = msgspec.UNSET
+    address_line_1: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType = msgspec.UNSET
+    address_line_2: Annotated[str, Meta(max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
+    city: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType = msgspec.UNSET
+    state: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType = msgspec.UNSET
+    postal_code: Annotated[str, Meta(min_length=1, max_length=20)] | msgspec.UnsetType = msgspec.UNSET
+    country: Annotated[str, Meta(min_length=2, max_length=2)] | msgspec.UnsetType = msgspec.UNSET
 
 
 class UnregisteredPhoneNumber(CamelizedBaseStruct, kw_only=True):

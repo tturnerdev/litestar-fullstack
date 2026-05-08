@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.295.0 (2026-05-08)
+
+### Added
+- **Schema input validation constraints** — Added max_length constraints to all user-writable string fields across 22 Create and Update schemas spanning 14 domains, preventing oversized input payloads (descriptions: 1000, names: 255, URLs: 2048, emails: 320, etc.)
+
 ## v0.294.0 (2026-05-08)
 
 ### Added

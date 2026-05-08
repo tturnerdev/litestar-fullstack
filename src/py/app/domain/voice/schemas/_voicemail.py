@@ -1,9 +1,11 @@
 """Voicemail schemas."""
 
 import datetime as dt
+from typing import Annotated
 from uuid import UUID
 
 import msgspec
+from msgspec import Meta
 
 from app.db.models._voice_enums import GreetingType
 from app.lib.schema import CamelizedBaseStruct
@@ -31,8 +33,8 @@ class VoicemailSettingsUpdate(CamelizedBaseStruct, omit_defaults=True):
     """Voicemail settings update properties."""
 
     is_enabled: bool | msgspec.UnsetType = msgspec.UNSET
-    pin: str | msgspec.UnsetType | None = msgspec.UNSET
-    email_address: str | msgspec.UnsetType | None = msgspec.UNSET
+    pin: Annotated[str, Meta(max_length=20)] | msgspec.UnsetType | None = msgspec.UNSET
+    email_address: Annotated[str, Meta(max_length=320)] | msgspec.UnsetType | None = msgspec.UNSET
     greeting_type: GreetingType | msgspec.UnsetType = msgspec.UNSET
     max_message_length_seconds: int | msgspec.UnsetType = msgspec.UNSET
     email_notification: bool | msgspec.UnsetType = msgspec.UNSET
