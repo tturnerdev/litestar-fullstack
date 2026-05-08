@@ -19,7 +19,7 @@ from app.lib.settings import get_settings
 class ExtensionsGatewayController(Controller):
     """Extension gateway lookups."""
 
-    tags = ["Gateway - Extensions"]
+    tags = ["Gateway Extensions"]
     dependencies = {
         "gateway_connections": Provide(provide_gateway_connections),
         "gateway_redis": Provide(provide_gateway_redis),

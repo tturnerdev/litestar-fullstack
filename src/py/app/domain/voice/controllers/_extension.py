@@ -47,7 +47,7 @@ if TYPE_CHECKING:
 class ExtensionController(Controller):
     """Extensions."""
 
-    tags = ["Voice - Extensions"]
+    tags = ["Voice Extensions"]
     path = "/api/voice/extensions"
     dependencies = create_service_dependencies(
         ExtensionService,

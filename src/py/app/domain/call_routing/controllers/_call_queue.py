@@ -40,7 +40,7 @@ if TYPE_CHECKING:
 class CallQueueController(Controller):
     """Call Queues."""
 
-    tags = ["Call Routing - Call Queues"]
+    tags = ["Call Routing"]
     dependencies = create_service_dependencies(
         CallQueueService,
         key="call_queues_service",

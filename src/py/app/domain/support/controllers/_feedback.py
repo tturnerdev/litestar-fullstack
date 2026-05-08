@@ -212,7 +212,7 @@ def _build_feedback_html(
 class FeedbackController(Controller):
     """Portal feedback / issue reports."""
 
-    tags = ["Support"]
+    tags = ["Feedback"]
     guards = [requires_active_user]
     dependencies = {
         "audit_service": Provide(provide_audit_log_service),

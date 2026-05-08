@@ -13,6 +13,7 @@ from sqlalchemy.orm import selectinload
 
 from app.db import models as m
 from app.domain.accounts.deps import provide_users_service
+from app.domain.accounts.guards import requires_active_user
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.notifications.deps import provide_notifications_service
 from app.domain.teams.deps import provide_team_members_service, provide_teams_service
@@ -42,7 +43,8 @@ class TeamInvitationController(Controller):
     """Team Invitations."""
 
     path = "/api/teams/{team_id:uuid}/invitations"
-    tags = ["Teams"]
+    tags = ["Team Invitations"]
+    guards = [requires_active_user]
     dependencies = create_service_dependencies(
         TeamInvitationService,
         key="team_invitations_service",

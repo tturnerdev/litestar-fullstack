@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.291.0 (2026-05-08)
+
+### Added
+- **Security headers middleware** — All HTTP responses now include X-Content-Type-Options (nosniff), X-Frame-Options (DENY), Referrer-Policy (strict-origin-when-cross-origin), and Permissions-Policy headers
+- **Explicit auth guards on 6 controllers** — Added `requires_active_user` guard to notifications, notification preferences, webhooks, device actions, feedback, and call records controllers for defense-in-depth
+
 ## v0.290.0 (2026-05-08)
 
 ### Fixed

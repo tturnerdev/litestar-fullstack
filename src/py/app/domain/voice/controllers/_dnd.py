@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 class DndController(Controller):
     """Do Not Disturb."""
 
-    tags = ["Voice - DND"]
+    tags = ["Voice DND"]
     dependencies = {
         "extensions_service": Provide(provide_extensions_service),
         "dnd_service": Provide(provide_dnd_service),

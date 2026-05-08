@@ -19,7 +19,7 @@ from app.lib.settings import get_settings
 class DevicesGatewayController(Controller):
     """Device gateway lookups by MAC address."""
 
-    tags = ["Gateway - Devices"]
+    tags = ["Gateway Devices"]
     dependencies = {
         "gateway_connections": Provide(provide_gateway_connections),
         "gateway_redis": Provide(provide_gateway_redis),

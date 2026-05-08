@@ -15,6 +15,7 @@ from litestar.exceptions import ClientException
 from sqlalchemy.orm import undefer_group
 
 from app.domain.accounts.deps import provide_user_oauth_service, provide_users_service
+from app.domain.accounts.guards import requires_active_user
 from app.domain.accounts.schemas import (
     MfaBackupCodes,
     MfaConfirm,
@@ -55,6 +56,7 @@ class MfaController(Controller):
 
     tags = ["MFA"]
     path = "/api/mfa"
+    guards = [requires_active_user]
     dependencies = {
         "users_service": Provide(provide_users_service),
         "audit_service": Provide(provide_audit_log_service),

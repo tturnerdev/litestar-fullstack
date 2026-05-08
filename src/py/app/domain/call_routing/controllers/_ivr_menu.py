@@ -39,7 +39,7 @@ if TYPE_CHECKING:
 class IvrMenuController(Controller):
     """IVR Menus."""
 
-    tags = ["Call Routing - IVR Menus"]
+    tags = ["Call Routing"]
     dependencies = create_service_dependencies(
         IvrMenuService,
         key="ivr_menus_service",

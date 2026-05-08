@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 
 
 class WebhookEndpointController(Controller):
-    tags = ["Webhooks"]
+    tags = ["Webhook Endpoints"]
     path = "/api/webhooks/endpoints"
     guards = [requires_superuser]
     dependencies = create_service_dependencies(

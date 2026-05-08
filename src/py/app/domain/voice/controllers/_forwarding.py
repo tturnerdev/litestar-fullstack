@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 class ForwardingController(Controller):
     """Call Forwarding Rules."""
 
-    tags = ["Voice - Forwarding"]
+    tags = ["Voice Forwarding"]
     dependencies = {
         "extensions_service": Provide(provide_extensions_service),
         "audit_service": Provide(provide_audit_log_service),

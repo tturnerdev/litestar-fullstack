@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 class TicketMessageController(Controller):
     """Ticket Messages."""
 
-    tags = ["Support"]
+    tags = ["Ticket Messages"]
     dependencies = create_service_dependencies(
         TicketMessageService,
         key="messages_service",

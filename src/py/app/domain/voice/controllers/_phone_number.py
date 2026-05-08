@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 class PhoneNumberController(Controller):
     """Phone Numbers."""
 
-    tags = ["Voice - Phone Numbers"]
+    tags = ["Voice Phone Numbers"]
     path = "/api/voice/phone-numbers"
     dependencies = create_service_dependencies(
         PhoneNumberService,

@@ -43,7 +43,7 @@ if TYPE_CHECKING:
 class VoicemailController(Controller):
     """Voicemail settings and messages."""
 
-    tags = ["Voice - Voicemail"]
+    tags = ["Voice Voicemail"]
     signature_types = [
         ExtensionService,
         VoicemailBoxService,

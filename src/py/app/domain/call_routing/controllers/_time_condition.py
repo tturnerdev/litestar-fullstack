@@ -35,7 +35,7 @@ if TYPE_CHECKING:
 class TimeConditionController(Controller):
     """Time Conditions."""
 
-    tags = ["Call Routing - Time Conditions"]
+    tags = ["Call Routing"]
     dependencies = create_service_dependencies(
         TimeConditionService,
         key="time_conditions_service",

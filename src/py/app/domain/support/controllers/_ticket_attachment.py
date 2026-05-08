@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 class TicketAttachmentController(Controller):
     """Ticket Attachments."""
 
-    tags = ["Support"]
+    tags = ["Ticket Attachments"]
     dependencies = create_service_dependencies(
         TicketAttachmentService,
         key="attachments_service",

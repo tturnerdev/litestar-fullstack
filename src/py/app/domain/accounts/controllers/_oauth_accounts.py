@@ -15,6 +15,7 @@ from sqlalchemy.orm import undefer_group
 
 from app.db import models as m
 from app.domain.accounts.deps import provide_users_service
+from app.domain.accounts.guards import requires_active_user
 from app.domain.accounts.schemas import OAuthAccountInfo, OAuthAuthorization
 from app.domain.accounts.services import UserOAuthAccountService
 from app.domain.admin.deps import provide_audit_log_service
@@ -43,6 +44,7 @@ class OAuthAccountController(Controller):
 
     path = "/api/profile/oauth"
     tags = ["Profile"]
+    guards = [requires_active_user]
     dependencies = create_service_dependencies(
         UserOAuthAccountService,
         key="oauth_account_service",

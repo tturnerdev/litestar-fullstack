@@ -59,7 +59,7 @@ def _get_phone_auth(device: m.Device) -> tuple[str, str]:
 class DeviceActionsController(Controller):
     """Device action and line assignment endpoints."""
 
-    tags = ["Devices"]
+    tags = ["Device Actions"]
     guards = [requires_active_user]
     dependencies = {
         "devices_service": Provide(provide_devices_service),

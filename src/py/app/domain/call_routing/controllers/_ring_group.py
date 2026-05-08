@@ -39,7 +39,7 @@ if TYPE_CHECKING:
 class RingGroupController(Controller):
     """Ring Groups."""
 
-    tags = ["Call Routing - Ring Groups"]
+    tags = ["Call Routing"]
     dependencies = create_service_dependencies(
         RingGroupService,
         key="ring_groups_service",

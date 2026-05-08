@@ -13,6 +13,7 @@ from litestar.status_codes import HTTP_202_ACCEPTED
 
 from app.db import models as m
 from app.domain.accounts.deps import provide_users_service
+from app.domain.accounts.guards import requires_active_user
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.notifications.deps import provide_notifications_service
 from app.domain.teams.deps import provide_team_members_service, provide_teams_service
@@ -36,6 +37,7 @@ class TeamMemberController(Controller):
     """Team Members."""
 
     tags = ["Team Members"]
+    guards = [requires_active_user]
     dependencies = {
         "teams_service": Provide(provide_teams_service),
         "team_members_service": Provide(provide_team_members_service),

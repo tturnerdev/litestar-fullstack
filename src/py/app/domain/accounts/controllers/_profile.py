@@ -9,6 +9,7 @@ from litestar import Controller, Request, delete, get, patch
 from litestar.di import Provide
 
 from app.domain.accounts.deps import provide_users_service
+from app.domain.accounts.guards import requires_active_user
 from app.domain.accounts.schemas import PasswordUpdate, ProfileUpdate, SecurityActivityEntry, User
 from app.domain.admin.deps import provide_audit_log_service
 from app.lib.audit import capture_snapshot, log_audit
@@ -28,6 +29,7 @@ class ProfileController(Controller):
     """Handles the current user profile operations."""
 
     tags = ["Access"]
+    guards = [requires_active_user]
     dependencies = {
         "users_service": Provide(provide_users_service),
         "audit_service": Provide(provide_audit_log_service),
