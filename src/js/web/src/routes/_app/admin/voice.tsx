@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { AlertCircle, ArrowRight, Download, Hash, Phone, PhoneOff, Search, Signal, SlidersHorizontal, X } from "lucide-react"
 import { useCallback, useMemo, useState } from "react"
+import { toast } from "sonner"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { Badge } from "@/components/ui/badge"
@@ -224,10 +225,14 @@ function AdminVoicePage() {
   }, [phoneNumbers])
 
   const handleExportExtensions = useCallback(async () => {
-    const response = await adminListExtensions({ query: { currentPage: 1, pageSize: 10000 } as never })
-    const all = (response.data as { items: AdminExtensionSummary[] })?.items ?? []
-    if (!all.length) return
-    exportToCsv("admin-extensions", extensionCsvHeaders, all)
+    try {
+      const response = await adminListExtensions({ query: { currentPage: 1, pageSize: 10000 } as never })
+      const all = (response.data as { items: AdminExtensionSummary[] })?.items ?? []
+      if (!all.length) return
+      exportToCsv("admin-extensions", extensionCsvHeaders, all)
+    } catch {
+      toast.error("Failed to export extensions")
+    }
   }, [])
 
   return (

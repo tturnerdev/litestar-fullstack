@@ -181,7 +181,7 @@ class AccessController(Controller):
                 max_age=300,
                 httponly=True,
                 secure=settings.COOKIE_SECURE,
-                samesite="lax",
+                samesite="strict",
                 path="/api/mfa",
             )
             return response

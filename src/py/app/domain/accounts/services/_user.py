@@ -51,6 +51,8 @@ class UserService(CompositeServiceMixin, service.SQLAlchemyAsyncRepositoryServic
     async def to_model_on_upsert(self, data: service.ModelDictT[m.User]) -> service.ModelDictT[m.User]:
         return await self._populate_model(data)
 
+    _DUMMY_HASH: str = "$argon2id$v=19$m=65536,t=3,p=4$c29tZXNhbHQ$RdescudvJCsgt3ub+b+daw"
+
     async def authenticate(self, username: str, password: bytes | str) -> m.User:
         """Authenticate a user against the stored hashed password.
 
@@ -62,9 +64,11 @@ class UserService(CompositeServiceMixin, service.SQLAlchemyAsyncRepositoryServic
         """
         db_obj = await self.get_one_or_none(email=username, load=[undefer_group("security_sensitive")])
         if db_obj is None:
+            await crypt.verify_password(password, self._DUMMY_HASH)
             msg = "User not found or password invalid"
             raise PermissionDeniedException(detail=msg)
         if db_obj.hashed_password is None:
+            await crypt.verify_password(password, self._DUMMY_HASH)
             msg = "User not found or password invalid."
             raise PermissionDeniedException(detail=msg)
         if not await crypt.verify_password(password, db_obj.hashed_password):

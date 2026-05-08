@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.342.0 (2026-05-08)
+
+### Security
+- **Timing-safe authentication** — `authenticate()` now performs a dummy Argon2 hash comparison when user is not found or has no password, preventing username enumeration via response timing
+- **SameSite cookie hardening** — MFA challenge cookie changed from `samesite="lax"` to `samesite="strict"` for consistency with all other auth cookies
+- **CORS config hardening** — Explicit `allow_methods`, `allow_headers`, and `allow_credentials` (disabled when origins is wildcard) instead of relying on framework defaults
+
+### Fixed
+- **Voice export error handling** — Admin extensions export now catches API failures and shows a toast instead of silently rejecting
+
 ## v0.341.0 (2026-05-08)
 
 ### Security

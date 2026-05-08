@@ -409,7 +409,14 @@ class AppSettings:
         return CompressionConfig(backend="gzip")
 
     def get_cors_config(self) -> CORSConfig:
-        return CORSConfig(allow_origins=cast("list[str]", self.ALLOWED_CORS_ORIGINS))
+        origins = cast("list[str]", self.ALLOWED_CORS_ORIGINS)
+        allow_wildcard = origins == ["*"]
+        return CORSConfig(
+            allow_origins=origins,
+            allow_methods=["*"],
+            allow_headers=["Authorization", "Content-Type", "X-XSRF-TOKEN"],
+            allow_credentials=not allow_wildcard,
+        )
 
     def get_problem_details_config(self) -> ProblemDetailsConfig:
         return ProblemDetailsConfig(enable_for_all_http_exceptions=True)
