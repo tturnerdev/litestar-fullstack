@@ -33,7 +33,7 @@ class VoicemailMessageCreate(CamelizedBaseStruct):
     voicemail_box_id: UUID
     caller_number: Annotated[str, Meta(min_length=1, max_length=20)]
     caller_name: Annotated[str, Meta(min_length=1, max_length=100)] | None = None
-    duration_seconds: int = 0
+    duration_seconds: Annotated[int, Meta(ge=0)] = 0
     audio_file_path: Annotated[str, Meta(max_length=500)] = ""
     transcription: str | None = None
     is_urgent: bool = False
