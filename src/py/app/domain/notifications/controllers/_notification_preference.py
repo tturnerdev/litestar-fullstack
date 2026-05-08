@@ -12,6 +12,7 @@ from litestar.di import Provide
 from sqlalchemy import inspect as sa_inspect
 
 from app.db import models as m
+from app.domain.accounts.guards import requires_active_user
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.notifications.deps import provide_notification_preference_service
 from app.domain.notifications.schemas import NotificationPreference, NotificationPreferenceUpdate
@@ -94,6 +95,7 @@ class NotificationPreferenceController(Controller):
 
     tags = ["Notifications"]
     path = "/api/notifications/preferences"
+    guards = [requires_active_user]
     dependencies = {
         "notification_preference_service": Provide(provide_notification_preference_service),
         "audit_service": Provide(provide_audit_log_service),

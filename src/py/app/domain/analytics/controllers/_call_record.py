@@ -14,6 +14,7 @@ from litestar.params import Dependency, Parameter
 from sqlalchemy import select
 
 from app.db import models as m
+from app.domain.accounts.guards import requires_active_user
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.analytics.guards import requires_analytics_access
 from app.domain.analytics.schemas import CallRecordCreate, CallRecordDetail, CallRecordList
@@ -34,7 +35,7 @@ class CallRecordController(Controller):
     """Call Detail Records."""
 
     tags = ["Analytics"]
-    guards = [requires_analytics_access]
+    guards = [requires_active_user, requires_analytics_access]
     dependencies = create_service_dependencies(
         CallRecordService,
         key="call_records_service",

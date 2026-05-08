@@ -19,6 +19,7 @@ from litestar.security.jwt import Token
 from sqlalchemy import inspect as sa_inspect
 
 from app.db import models as m
+from app.domain.accounts.guards import requires_active_user
 from app.domain.admin.deps import provide_audit_log_service
 from app.lib.schema import Message
 
@@ -212,6 +213,7 @@ class FeedbackController(Controller):
     """Portal feedback / issue reports."""
 
     tags = ["Support"]
+    guards = [requires_active_user]
     dependencies = {
         "audit_service": Provide(provide_audit_log_service),
     }

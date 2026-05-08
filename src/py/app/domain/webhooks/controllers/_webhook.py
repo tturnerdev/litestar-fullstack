@@ -13,6 +13,7 @@ from litestar.exceptions import NotFoundException
 from litestar.params import Dependency, Parameter
 
 from app.db import models as m
+from app.domain.accounts.guards import requires_active_user
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.webhooks.deps import provide_webhook_delivery_service
 from app.domain.webhooks.schemas import (
@@ -72,6 +73,7 @@ class WebhookController(Controller):
     """Webhooks."""
 
     tags = ["Webhooks"]
+    guards = [requires_active_user]
     dependencies = create_service_dependencies(
         WebhookService,
         key="webhooks_service",

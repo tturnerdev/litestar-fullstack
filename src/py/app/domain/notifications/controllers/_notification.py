@@ -13,6 +13,7 @@ from litestar.params import Dependency, Parameter
 from sqlalchemy import inspect as sa_inspect
 
 from app.db import models as m
+from app.domain.accounts.guards import requires_active_user
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.notifications.schemas import Notification, UnreadCount
 from app.domain.notifications.services import NotificationService
@@ -96,6 +97,7 @@ class NotificationController(Controller):
 
     tags = ["Notifications"]
     path = "/api/notifications"
+    guards = [requires_active_user]
     dependencies = create_service_dependencies(
         NotificationService,
         key="notifications_service",

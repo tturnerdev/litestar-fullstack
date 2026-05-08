@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.290.0 (2026-05-08)
+
+### Fixed
+- **Missing success toasts on 5 mutations** — Extension update, ticket message create, IVR option reorder, call queue member reorder, and ring group member reorder now show success feedback
+
+### Added
+- **CSV export for locations** — 8-column export (name, type, address, city, state, postal code, country, description) with Export button in page header
+- **Expanded connections CSV export** — Added host, enabled, and created at columns (4 → 7 columns)
+
 ## v0.289.0 (2026-05-08)
 
 ### Added

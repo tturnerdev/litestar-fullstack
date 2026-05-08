@@ -14,6 +14,7 @@ from litestar.exceptions import NotFoundException, ValidationException
 from litestar.params import Parameter
 
 from app.db import models as m
+from app.domain.accounts.guards import requires_active_user
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.devices.deps import provide_devices_service
 from app.domain.devices.jobs import device_reboot_job, device_reprovision_job
@@ -59,6 +60,7 @@ class DeviceActionsController(Controller):
     """Device action and line assignment endpoints."""
 
     tags = ["Devices"]
+    guards = [requires_active_user]
     dependencies = {
         "devices_service": Provide(provide_devices_service),
         "audit_service": Provide(provide_audit_log_service),

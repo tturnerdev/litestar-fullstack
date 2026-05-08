@@ -26,6 +26,7 @@ from app.lib.exceptions import (
     ApplicationError,
     exception_to_http_response,
 )
+from app.lib.middleware import SecurityHeadersMiddleware
 from app.lib.settings import AppSettings, get_settings, provide_app_settings
 from app.lib.validation import ValidationError
 from app.server import plugins
@@ -79,6 +80,7 @@ class ApplicationCore(InitPluginProtocol, CLIPluginProtocol):
         )
         app_config = auth.on_app_init(app_config)
         app_config.cors_config = config.cors
+        app_config.middleware = [*app_config.middleware, SecurityHeadersMiddleware]
 
         app_config.plugins.extend(
             [
