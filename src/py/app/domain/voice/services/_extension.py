@@ -28,11 +28,14 @@ class ExtensionService(service.SQLAlchemyAsyncRepositoryService[m.Extension]):
         model_type = m.Extension
 
     repository_type = Repo
+    match_fields = ["extension_number"]
 
     async def to_model_on_create(self, data: ModelDictT[m.Extension]) -> ModelDictT[m.Extension]:
         data = service.schema_dump(data)
         if service.is_dict(data):
             data["extension_number"] = data["extension_number"].strip()
+            if "display_name" in data:
+                data["display_name"] = data["display_name"].strip()
             existing = await self.repository.list(
                 CollectionFilter(field_name="extension_number", values=[data["extension_number"]]),
             )
@@ -42,13 +45,16 @@ class ExtensionService(service.SQLAlchemyAsyncRepositoryService[m.Extension]):
 
     async def to_model_on_update(self, data: ModelDictT[m.Extension], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.Extension]:
         data = service.schema_dump(data)
-        if service.is_dict(data) and "extension_number" in data:
-            data["extension_number"] = data["extension_number"].strip()
-            existing = await self.repository.list(
-                CollectionFilter(field_name="extension_number", values=[data["extension_number"]]),
-            )
-            if existing and any(str(e.id) != str(item_id) for e in existing):
-                raise ValidationException("An extension with this extension number already exists.")
+        if service.is_dict(data):
+            if "display_name" in data:
+                data["display_name"] = data["display_name"].strip()
+            if "extension_number" in data:
+                data["extension_number"] = data["extension_number"].strip()
+                existing = await self.repository.list(
+                    CollectionFilter(field_name="extension_number", values=[data["extension_number"]]),
+                )
+                if existing and any(str(e.id) != str(item_id) for e in existing):
+                    raise ValidationException("An extension with this extension number already exists.")
         return data
 
     @staticmethod

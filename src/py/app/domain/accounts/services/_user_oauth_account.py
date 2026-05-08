@@ -23,6 +23,7 @@ class UserOAuthAccountService(SQLAlchemyAsyncRepositoryService[m.UserOAuthAccoun
         model_type = m.UserOAuthAccount
 
     repository_type = Repo
+    match_fields = ["user_id", "oauth_name"]
 
     async def can_unlink_oauth(self, user: m.User) -> tuple[bool, str]:
         """Check if user can safely unlink an OAuth provider.

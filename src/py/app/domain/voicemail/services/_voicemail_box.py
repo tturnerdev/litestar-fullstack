@@ -22,6 +22,7 @@ class VoicemailBoxService(service.SQLAlchemyAsyncRepositoryService[m.VoicemailBo
         model_type = m.VoicemailBox
 
     repository_type = Repo
+    match_fields = ["extension_id"]
 
     async def get_or_create_for_extension(self, extension_id: UUID) -> m.VoicemailBox:
         """Get or create a voicemail box for the given extension.
