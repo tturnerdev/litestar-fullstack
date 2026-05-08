@@ -256,7 +256,7 @@ function EditRingGroupDialog({ ringGroup, open, onOpenChange }: EditRingGroupDia
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-rg-number">Number</Label>
-                <Input id="edit-rg-number" value={number} onChange={(e) => setNumber(e.target.value)} placeholder="e.g., 600" />
+                <Input id="edit-rg-number" value={number} onChange={(e) => setNumber(e.target.value)} placeholder="e.g., 600" maxLength={50} />
               </div>
             </div>
 

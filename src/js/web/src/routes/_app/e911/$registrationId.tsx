@@ -514,6 +514,7 @@ function E911DetailPage() {
                         onChange={(e) => handleFieldChange("state", e.target.value, setEditState)}
                         onBlur={() => handleFieldBlur("state", editState)}
                         aria-invalid={!!fieldErrors.state}
+                        maxLength={100}
                       />
                       <FieldError message={fieldErrors.state} />
                     </div>
@@ -526,6 +527,7 @@ function E911DetailPage() {
                         onChange={(e) => handleFieldChange("postalCode", e.target.value, setEditPostalCode)}
                         onBlur={() => handleFieldBlur("postalCode", editPostalCode)}
                         aria-invalid={!!fieldErrors.postalCode}
+                        maxLength={20}
                       />
                       <FieldError message={fieldErrors.postalCode} />
                     </div>

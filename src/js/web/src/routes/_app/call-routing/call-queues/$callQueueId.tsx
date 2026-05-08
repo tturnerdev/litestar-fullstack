@@ -293,7 +293,7 @@ function EditCallQueueDialog({ queue, open, onOpenChange }: EditCallQueueDialogP
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-cq-number">Number</Label>
-                <Input id="edit-cq-number" value={number} onChange={(e) => setNumber(e.target.value)} placeholder="8001" />
+                <Input id="edit-cq-number" value={number} onChange={(e) => setNumber(e.target.value)} placeholder="8001" maxLength={20} />
               </div>
             </div>
 

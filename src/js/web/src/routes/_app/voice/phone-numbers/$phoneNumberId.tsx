@@ -346,7 +346,7 @@ function PhoneNumberDetailPage() {
                       </div>
                       <div className="space-y-2">
                         <Label>Label</Label>
-                        <Input value={editLabel} onChange={(e) => setEditLabel(e.target.value)} placeholder="e.g. Main Line" />
+                        <Input value={editLabel} onChange={(e) => setEditLabel(e.target.value)} placeholder="e.g. Main Line" maxLength={100} />
                       </div>
                       <div>
                         <p className="text-muted-foreground text-sm">Type</p>
@@ -354,7 +354,7 @@ function PhoneNumberDetailPage() {
                       </div>
                       <div className="space-y-2">
                         <Label>Caller ID Name</Label>
-                        <Input value={editCallerIdName} onChange={(e) => setEditCallerIdName(e.target.value)} placeholder="e.g. Acme Corp" />
+                        <Input value={editCallerIdName} onChange={(e) => setEditCallerIdName(e.target.value)} placeholder="e.g. Acme Corp" maxLength={50} />
                       </div>
                       <div>
                         <p className="text-muted-foreground text-sm">Status</p>

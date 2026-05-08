@@ -126,7 +126,7 @@ function AddOptionRow({ menuId }: { menuId: string }) {
         </div>
         <div className="space-y-2">
           <Label>Label</Label>
-          <Input placeholder="e.g., Sales" value={label} onChange={(e) => setLabel(e.target.value)} />
+          <Input placeholder="e.g., Sales" value={label} onChange={(e) => setLabel(e.target.value)} maxLength={100} />
         </div>
       </div>
       <DestinationPicker label="Destination" value={destination} onChange={setDestination} />
