@@ -326,7 +326,12 @@ function NewWebhookPage() {
                       aria-invalid={!!fieldErrors.url}
                     />
                     <FieldError message={fieldErrors.url} />
-                    <p className="text-xs text-muted-foreground">Must be an HTTPS URL that accepts POST requests with a JSON body.</p>
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs text-muted-foreground">Must be an HTTPS URL that accepts POST requests with a JSON body.</p>
+                      <p className={cn("shrink-0 text-xs", url.length >= URL_MAX ? "text-destructive" : "text-muted-foreground")}>
+                        {url.length}/{URL_MAX}
+                      </p>
+                    </div>
                   </div>
 
                   {/* Description */}
@@ -372,7 +377,12 @@ function NewWebhookPage() {
                       onChange={(e) => setSecret(e.target.value)}
                       maxLength={SECRET_MAX}
                     />
-                    <p className="text-xs text-muted-foreground">Used to sign payloads so you can verify they came from us. Keep this value secret.</p>
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs text-muted-foreground">Used to sign payloads so you can verify they came from us. Keep this value secret.</p>
+                      <p className={cn("shrink-0 text-xs", secret.length >= SECRET_MAX ? "text-destructive" : "text-muted-foreground")}>
+                        {secret.length}/{SECRET_MAX}
+                      </p>
+                    </div>
                   </div>
 
                   {/* Custom Headers */}
