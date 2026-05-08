@@ -822,7 +822,7 @@ function NewConnectionPage() {
 
                   {/* Submit */}
                   <div className="flex items-center justify-end gap-2 pt-2">
-                    <Button type="button" variant="ghost" onClick={() => router.navigate({ to: "/connections" })}>
+                    <Button type="button" variant="ghost" disabled={createConnection.isPending} onClick={() => router.navigate({ to: "/connections" })}>
                       Cancel
                     </Button>
                     <Button type="submit" disabled={!isValid || createConnection.isPending}>

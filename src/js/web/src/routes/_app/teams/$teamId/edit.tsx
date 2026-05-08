@@ -370,7 +370,7 @@ function EditTeamPage() {
 
                   {/* Submit */}
                   <div className="flex items-center justify-end gap-2 pt-2">
-                    <Button type="button" variant="ghost" onClick={() => router.navigate({ to: "/teams/$teamId", params: { teamId } })}>
+                    <Button type="button" variant="ghost" disabled={updateTeam.isPending} onClick={() => router.navigate({ to: "/teams/$teamId", params: { teamId } })}>
                       Cancel
                     </Button>
                     <Button type="submit" disabled={!isValid || updateTeam.isPending}>

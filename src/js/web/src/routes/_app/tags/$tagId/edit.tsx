@@ -202,7 +202,7 @@ function EditTagPage() {
                 </div>
 
                 <div className="flex items-center justify-end gap-2 pt-2">
-                  <Button type="button" variant="ghost" onClick={() => router.navigate({ to: "/tags" })}>
+                  <Button type="button" variant="ghost" disabled={updateTag.isPending} onClick={() => router.navigate({ to: "/tags" })}>
                     Cancel
                   </Button>
                   <Button type="submit" disabled={!isValid || updateTag.isPending}>

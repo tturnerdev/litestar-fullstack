@@ -208,7 +208,7 @@ function NewTagPage() {
                 </div>
 
                 <div className="flex items-center justify-end gap-2 pt-2">
-                  <Button type="button" variant="ghost" onClick={() => router.navigate({ to: "/tags" })}>
+                  <Button type="button" variant="ghost" disabled={createTag.isPending} onClick={() => router.navigate({ to: "/tags" })}>
                     Cancel
                   </Button>
                   <Button type="submit" disabled={!isValid || createTag.isPending}>

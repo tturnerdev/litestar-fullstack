@@ -191,7 +191,7 @@ function NewFaxNumberPage() {
                 </div>
 
                 <div className="flex items-center justify-end gap-2 pt-2">
-                  <Button type="button" variant="ghost" onClick={() => router.navigate({ to: "/fax/numbers" })}>
+                  <Button type="button" variant="ghost" disabled={createFaxNumber.isPending} onClick={() => router.navigate({ to: "/fax/numbers" })}>
                     Cancel
                   </Button>
                   <Button type="submit" disabled={!isValid || createFaxNumber.isPending}>

@@ -424,7 +424,7 @@ function NewWebhookPage() {
 
                   {/* Actions */}
                   <div className="flex items-center justify-end gap-2 border-t pt-4">
-                    <Button type="button" variant="ghost" onClick={() => router.navigate({ to: "/webhooks" })}>
+                    <Button type="button" variant="ghost" disabled={createWebhook.isPending} onClick={() => router.navigate({ to: "/webhooks" })}>
                       Cancel
                     </Button>
                     <Button type="submit" disabled={!isValid || createWebhook.isPending}>
