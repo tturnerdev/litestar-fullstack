@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.341.0 (2026-05-08)
+
+### Security
+- **Signup rate limiting** — Registration endpoint now enforces 5 attempts per IP per hour, using the same audit-based pattern as login rate limiting
+
+### Refactored
+- **Exception consistency** — Replaced raw `HTTPException(status_code=400)` with semantic `ClientException` across roles, OAuth accounts, team invitations, and fax email route controllers
+- **apiFetch unification** — Converted tasks.ts and voicemail.ts from manual localStorage token handling to `client.request()`, matching the fax.ts pattern
+
+### Fixed
+- **Team persistence** — `currentTeam` selection now survives page refreshes (added to auth store's `partialize` config)
+
 ## v0.337.0 (2026-05-08)
 
 ### Fixed
