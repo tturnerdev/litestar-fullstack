@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any
 
 from advanced_alchemy.filters import LimitOffset
 from litestar import Controller, get
+from litestar.datastructures import CacheControlHeader
 from litestar.di import Provide
 
 from app.db import models as m
@@ -49,7 +50,12 @@ class DashboardController(Controller):
         "voicemail_message_service": Provide(provide_voicemail_messages_service),
     }
 
-    @get(operation_id="GetDashboardStats", path="/stats")
+    @get(
+        operation_id="GetDashboardStats",
+        path="/stats",
+        cache=300,
+        cache_control=CacheControlHeader(private=True, max_age=300),
+    )
     async def get_stats(
         self,
         request: Request[m.User, Token, Any],
@@ -119,7 +125,12 @@ class DashboardController(Controller):
             unread_voicemails=unread_voicemails,
         )
 
-    @get(operation_id="GetRecentActivity", path="/activity")
+    @get(
+        operation_id="GetRecentActivity",
+        path="/activity",
+        cache=300,
+        cache_control=CacheControlHeader(private=True, max_age=300),
+    )
     async def get_activity(
         self,
         request: Request[m.User, Token, Any],
@@ -159,7 +170,13 @@ class DashboardController(Controller):
 
         return RecentActivity(activities=items, total=total)
 
-    @get(operation_id="GetDashboardTrends", path="/trends", summary="Get 7-day trend data for dashboard charts")
+    @get(
+        operation_id="GetDashboardTrends",
+        path="/trends",
+        summary="Get 7-day trend data for dashboard charts",
+        cache=300,
+        cache_control=CacheControlHeader(private=True, max_age=300),
+    )
     async def get_trends(
         self,
         request: Request[m.User, Token, Any],

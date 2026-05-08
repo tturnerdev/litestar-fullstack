@@ -1,5 +1,6 @@
 """Do Not Disturb schemas."""
 
+import datetime as dt
 from datetime import time
 from uuid import UUID
 
@@ -20,6 +21,8 @@ class DndSettings(CamelizedBaseStruct):
     schedule_end: time | None = None
     schedule_days: list[int] | None = None
     allow_list: list[str] | None = None
+    created_at: dt.datetime | None = None
+    updated_at: dt.datetime | None = None
 
 
 class DndSettingsUpdate(CamelizedBaseStruct, omit_defaults=True):

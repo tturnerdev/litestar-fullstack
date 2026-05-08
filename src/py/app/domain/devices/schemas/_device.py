@@ -1,6 +1,6 @@
 """Device schemas."""
 
-from datetime import datetime
+import datetime as dt
 from typing import Annotated
 from uuid import UUID
 
@@ -44,9 +44,11 @@ class Device(CamelizedBaseStruct):
     firmware_version: str | None = None
     ip_address: str | None = None
     is_active: bool = True
-    last_seen_at: datetime | None = None
-    provisioned_at: datetime | None = None
+    last_seen_at: dt.datetime | None = None
+    provisioned_at: dt.datetime | None = None
     lines: list[DeviceLineAssignment] = []
+    created_at: dt.datetime | None = None
+    updated_at: dt.datetime | None = None
 
 
 class DeviceCreate(CamelizedBaseStruct):

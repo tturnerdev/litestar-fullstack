@@ -8,6 +8,7 @@ from uuid import UUID
 
 from advanced_alchemy.service.pagination import OffsetPagination
 from litestar import Controller, get
+from litestar.datastructures import CacheControlHeader
 from litestar.di import Provide
 from litestar.params import Dependency
 
@@ -94,7 +95,12 @@ class AdminFaxController(Controller):
             for msg in results
         ]
 
-    @get(operation_id="AdminGetFaxStats", path="/stats")
+    @get(
+        operation_id="AdminGetFaxStats",
+        path="/stats",
+        cache=300,
+        cache_control=CacheControlHeader(private=True, max_age=300),
+    )
     async def get_stats(
         self,
         fax_number_service: FaxNumberService,

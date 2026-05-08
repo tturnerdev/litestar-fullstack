@@ -53,6 +53,7 @@ class FaxEmailRouteController(Controller):
             "updated_at": True,
             "sort_field": "created_at",
             "sort_order": "desc",
+            "search": "email_address",
         },
     ) | {
         "fax_numbers_service": Provide(provide_fax_numbers_service),

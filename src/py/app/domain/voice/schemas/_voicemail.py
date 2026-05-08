@@ -1,6 +1,6 @@
 """Voicemail schemas."""
 
-from datetime import datetime
+import datetime as dt
 from uuid import UUID
 
 import msgspec
@@ -23,6 +23,8 @@ class VoicemailSettings(CamelizedBaseStruct):
     email_attach_audio: bool = False
     transcription_enabled: bool = False
     auto_delete_days: int | None = None
+    created_at: dt.datetime | None = None
+    updated_at: dt.datetime | None = None
 
 
 class VoicemailSettingsUpdate(CamelizedBaseStruct, omit_defaults=True):
@@ -51,7 +53,9 @@ class VoicemailMessage(CamelizedBaseStruct):
     transcription: str | None = None
     is_read: bool = False
     is_urgent: bool = False
-    received_at: datetime | None = None
+    received_at: dt.datetime | None = None
+    created_at: dt.datetime | None = None
+    updated_at: dt.datetime | None = None
 
 
 class VoicemailMessageUpdate(CamelizedBaseStruct, omit_defaults=True):

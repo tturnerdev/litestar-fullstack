@@ -1,5 +1,6 @@
 """Forwarding rule schemas."""
 
+import datetime as dt
 from uuid import UUID
 
 import msgspec
@@ -19,6 +20,8 @@ class ForwardingRule(CamelizedBaseStruct):
     ring_timeout_seconds: int | None = None
     is_active: bool = True
     priority: int = 0
+    created_at: dt.datetime | None = None
+    updated_at: dt.datetime | None = None
 
 
 class ForwardingRuleCreate(CamelizedBaseStruct):

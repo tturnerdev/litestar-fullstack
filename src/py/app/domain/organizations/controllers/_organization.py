@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 from litestar import Controller, get, put
+from litestar.datastructures import CacheControlHeader
 from litestar.di import Provide
 
 from app.db import models as m
@@ -35,6 +36,8 @@ class OrganizationController(Controller):
     @get(
         operation_id="GetOrganization",
         guards=[requires_admin_role],
+        cache=300,
+        cache_control=CacheControlHeader(private=True, max_age=300),
     )
     async def get_organization(
         self,

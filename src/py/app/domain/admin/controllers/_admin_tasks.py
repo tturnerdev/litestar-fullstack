@@ -7,6 +7,7 @@ from uuid import UUID
 
 from advanced_alchemy.service.pagination import OffsetPagination
 from litestar import Controller, delete, get, post
+from litestar.datastructures import CacheControlHeader
 from litestar.di import Provide
 from litestar.params import Dependency, Parameter
 
@@ -51,7 +52,12 @@ class AdminTasksController(Controller):
         "audit_service": Provide(provide_audit_log_service),
     }
 
-    @get(operation_id="GetAdminTaskStats", path="/stats")
+    @get(
+        operation_id="GetAdminTaskStats",
+        path="/stats",
+        cache=300,
+        cache_control=CacheControlHeader(private=True, max_age=300),
+    )
     async def get_task_stats(
         self,
         task_service: BackgroundTaskService,

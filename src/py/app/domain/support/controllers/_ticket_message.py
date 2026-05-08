@@ -43,6 +43,7 @@ class TicketMessageController(Controller):
             "created_at": True,
             "sort_field": "created_at",
             "sort_order": "asc",
+            "search": "body_markdown",
         },
     ) | {
         "audit_service": Provide(provide_audit_log_service),

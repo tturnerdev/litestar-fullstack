@@ -58,6 +58,7 @@ class TeamInvitationController(Controller):
             "updated_at": True,
             "sort_field": "created_at",
             "sort_order": "desc",
+            "search": "email,invited_by_email",
         },
     ) | {
         "teams_service": Provide(provide_teams_service),

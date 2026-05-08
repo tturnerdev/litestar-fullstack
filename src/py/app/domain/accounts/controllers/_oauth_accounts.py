@@ -52,6 +52,7 @@ class OAuthAccountController(Controller):
             "created_at": True,
             "sort_field": "created_at",
             "sort_order": "desc",
+            "search": "oauth_name,account_email",
         },
     ) | {
         "users_service": Provide(provide_users_service),

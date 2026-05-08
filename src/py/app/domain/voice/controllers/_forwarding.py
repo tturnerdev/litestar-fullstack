@@ -47,6 +47,7 @@ class ForwardingController(Controller):
                 "updated_at": True,
                 "sort_field": "priority",
                 "sort_order": "asc",
+                "search": "destination_value",
             },
         ),
     }

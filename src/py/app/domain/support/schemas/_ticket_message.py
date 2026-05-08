@@ -1,6 +1,6 @@
 """Ticket message schemas."""
 
-from datetime import datetime
+import datetime as dt
 from uuid import UUID
 
 from app.domain.support.schemas._ticket import TicketUser
@@ -16,7 +16,8 @@ class TicketMessage(CamelizedBaseStruct):
     is_internal_note: bool = False
     is_system_message: bool = False
     attachments: list[TicketAttachment] = []
-    created_at: datetime | None = None
+    created_at: dt.datetime | None = None
+    updated_at: dt.datetime | None = None
 
 
 class TicketMessageCreate(CamelizedBaseStruct):

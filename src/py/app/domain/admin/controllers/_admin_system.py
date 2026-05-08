@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import structlog
 from litestar import Controller, get
+from litestar.datastructures import CacheControlHeader
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -104,7 +105,12 @@ class AdminSystemController(Controller):
     path = "/api/admin/system"
     guards = [requires_superuser]
 
-    @get(operation_id="GetAdminSystemStatus", path="/status")
+    @get(
+        operation_id="GetAdminSystemStatus",
+        path="/status",
+        cache=60,
+        cache_control=CacheControlHeader(private=True, max_age=60),
+    )
     async def get_system_status(
         self,
         request: Request[m.User, Token, Any],

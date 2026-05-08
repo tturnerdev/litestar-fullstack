@@ -64,6 +64,7 @@ class VoicemailController(Controller):
             "updated_at": True,
             "sort_field": "created_at",
             "sort_order": "desc",
+            "search": "caller_number,caller_name,transcription",
         },
     ) | create_service_dependencies(
         VoicemailBoxService,

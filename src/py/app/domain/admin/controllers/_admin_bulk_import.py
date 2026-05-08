@@ -166,7 +166,7 @@ class AdminBulkImportController(Controller):
     dependencies = create_service_dependencies(
         DeviceService,
         key="device_service",
-        filters={},
+        filters={"sort_field": "created_at", "sort_order": "desc"},
     ) | {
         "audit_service": Provide(provide_audit_log_service),
     }

@@ -3441,6 +3441,17 @@ export const DeviceSchema = {
         },
       ],
     },
+    createdAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     deviceModel: {
       oneOf: [
         {
@@ -3567,6 +3578,17 @@ export const DeviceSchema = {
       oneOf: [
         {
           format: "uuid",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    updatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
           type: "string",
         },
         {
@@ -4272,6 +4294,17 @@ export const DndSettingsSchema = {
         },
       ],
     },
+    createdAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     extensionId: {
       format: "uuid",
       type: "string",
@@ -4315,6 +4348,17 @@ export const DndSettingsSchema = {
       oneOf: [
         {
           format: "duration",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    updatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
           type: "string",
         },
         {
@@ -5553,6 +5597,17 @@ export const ForwardingDestinationTypeSchema = {
 
 export const ForwardingRuleSchema = {
   properties: {
+    createdAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     destinationType: {
       $ref: "#/components/schemas/ForwardingDestinationType",
     },
@@ -5587,6 +5642,17 @@ export const ForwardingRuleSchema = {
     },
     ruleType: {
       $ref: "#/components/schemas/ForwardingRuleType",
+    },
+    updatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
     },
   },
   required: [
@@ -9361,6 +9427,17 @@ export const TicketAttachmentSchema = {
     contentType: {
       type: "string",
     },
+    createdAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     fileName: {
       type: "string",
     },
@@ -9374,6 +9451,17 @@ export const TicketAttachmentSchema = {
     isInline: {
       default: false,
       type: "boolean",
+    },
+    updatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
     },
     url: {
       default: "",
@@ -9473,6 +9561,17 @@ export const TicketMessageSchema = {
     isSystemMessage: {
       default: false,
       type: "boolean",
+    },
+    updatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
     },
   },
   required: ["bodyHtml", "bodyMarkdown", "id"],
@@ -10425,6 +10524,17 @@ export const VoicemailSettingsSchema = {
         },
       ],
     },
+    createdAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     emailAddress: {
       oneOf: [
         {
@@ -10475,6 +10585,17 @@ export const VoicemailSettingsSchema = {
     transcriptionEnabled: {
       default: false,
       type: "boolean",
+    },
+    updatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
     },
   },
   required: ["extensionId", "id"],
@@ -11537,6 +11658,17 @@ export const voice_schemas__voicemail_VoicemailMessageSchema = {
     callerNumber: {
       type: "string",
     },
+    createdAt: {
+      oneOf: [
+        {
+          format: "date-time",
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     durationSeconds: {
       default: 0,
       type: "integer",
@@ -11567,6 +11699,17 @@ export const voice_schemas__voicemail_VoicemailMessageSchema = {
     transcription: {
       oneOf: [
         {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    updatedAt: {
+      oneOf: [
+        {
+          format: "date-time",
           type: "string",
         },
         {

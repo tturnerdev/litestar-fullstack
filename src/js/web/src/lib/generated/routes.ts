@@ -1315,6 +1315,8 @@ export interface RouteQueryParams {
     currentPage?: number;
     orderBy?: string;
     pageSize?: number;
+    searchIgnoreCase?: boolean;
+    searchString?: string;
     sortOrder?: "asc" | "desc";
   };
   'list_active_tasks': Record<string, never>;
@@ -1443,6 +1445,8 @@ export interface RouteQueryParams {
     currentPage?: number;
     orderBy?: string;
     pageSize?: number;
+    searchIgnoreCase?: boolean;
+    searchString?: string;
     sortOrder?: "asc" | "desc";
     updatedAfter?: DateTime;
     updatedBefore?: DateTime;
@@ -1492,6 +1496,8 @@ export interface RouteQueryParams {
     ids?: string[];
     orderBy?: string;
     pageSize?: number;
+    searchIgnoreCase?: boolean;
+    searchString?: string;
     sortOrder?: "asc" | "desc";
     updatedAfter?: DateTime;
     updatedBefore?: DateTime;
@@ -1550,6 +1556,8 @@ export interface RouteQueryParams {
     ids?: string[];
     orderBy?: string;
     pageSize?: number;
+    searchIgnoreCase?: boolean;
+    searchString?: string;
     sortOrder?: "asc" | "desc";
   };
   'list_music_on_hold': {
@@ -1719,6 +1727,8 @@ export interface RouteQueryParams {
     currentPage?: number;
     orderBy?: string;
     pageSize?: number;
+    searchIgnoreCase?: boolean;
+    searchString?: string;
     sortOrder?: "asc" | "desc";
     updatedAfter?: DateTime;
     updatedBefore?: DateTime;
@@ -1854,6 +1864,8 @@ export interface RouteQueryParams {
     ids?: string[];
     orderBy?: string;
     pageSize?: number;
+    searchIgnoreCase?: boolean;
+    searchString?: string;
     sortOrder?: "asc" | "desc";
     updatedAfter?: DateTime;
     updatedBefore?: DateTime;
@@ -3116,7 +3128,7 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: [] as const,
-    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'orderBy', 'pageSize', 'sortOrder'] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder'] as const,
   },
   'list_active_tasks': {
     path: '/api/tasks/active',
@@ -3228,7 +3240,7 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: ['fax_number_id'] as const,
-    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'orderBy', 'pageSize', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
   },
   'list_fax_messages': {
     path: '/api/admin/fax/messages',
@@ -3265,7 +3277,7 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: ['ext_id'] as const,
-    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
   },
   'list_ivr_menus': {
     path: '/api/ivr-menus',
@@ -3307,7 +3319,7 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: ['ticket_id'] as const,
-    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'sortOrder'] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder'] as const,
   },
   'list_music_on_hold': {
     path: '/api/admin/music-on-hold',
@@ -3405,7 +3417,7 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: ['team_id'] as const,
-    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'orderBy', 'pageSize', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
   },
   'list_team_permissions': {
     path: '/api/teams/{team_id}/permissions',
@@ -3497,7 +3509,7 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: ['ext_id'] as const,
-    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
+    queryParams: ['createdAfter', 'createdBefore', 'currentPage', 'ids', 'orderBy', 'pageSize', 'searchIgnoreCase', 'searchString', 'sortOrder', 'updatedAfter', 'updatedBefore'] as const,
   },
   'list_voicemail_messages_api_voicemail_messages': {
     path: '/api/voicemail/messages',

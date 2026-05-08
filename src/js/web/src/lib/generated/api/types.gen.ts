@@ -852,6 +852,7 @@ export type DatabasePoolInfo = {
 export type Device = {
   connectionId?: string | null;
   connectionName?: string | null;
+  createdAt?: string | null;
   deviceModel?: string | null;
   deviceType: string;
   firmwareVersion?: string | null;
@@ -870,6 +871,7 @@ export type Device = {
   sipUsername: string;
   status: string;
   teamId?: string | null;
+  updatedAt?: string | null;
   userId: string;
 };
 
@@ -1050,6 +1052,7 @@ export type DndMode = "always" | "scheduled" | "off";
  */
 export type DndSettings = {
   allowList?: Array<string> | null;
+  createdAt?: string | null;
   extensionId: string;
   id: string;
   isEnabled?: boolean;
@@ -1057,6 +1060,7 @@ export type DndSettings = {
   scheduleDays?: Array<number> | null;
   scheduleEnd?: string | null;
   scheduleStart?: string | null;
+  updatedAt?: string | null;
 };
 
 /**
@@ -1402,6 +1406,7 @@ export type ForwardingDestinationType = "extension" | "external" | "voicemail";
  * ForwardingRule
  */
 export type ForwardingRule = {
+  createdAt?: string | null;
   destinationType: ForwardingDestinationType;
   destinationValue: string;
   extensionId: string;
@@ -1410,6 +1415,7 @@ export type ForwardingRule = {
   priority?: number;
   ringTimeoutSeconds?: number | null;
   ruleType: ForwardingRuleType;
+  updatedAt?: string | null;
 };
 
 /**
@@ -2472,10 +2478,12 @@ export type Ticket = {
  */
 export type TicketAttachment = {
   contentType: string;
+  createdAt?: string | null;
   fileName: string;
   fileSizeBytes: number;
   id: string;
   isInline?: boolean;
+  updatedAt?: string | null;
   url?: string;
 };
 
@@ -2502,6 +2510,7 @@ export type TicketMessage = {
   id: string;
   isInternalNote?: boolean;
   isSystemMessage?: boolean;
+  updatedAt?: string | null;
 };
 
 /**
@@ -2759,6 +2768,7 @@ export type VoicemailReadToggle = {
  */
 export type VoicemailSettings = {
   autoDeleteDays?: number | null;
+  createdAt?: string | null;
   emailAddress?: string | null;
   emailAttachAudio?: boolean;
   emailNotification?: boolean;
@@ -2769,6 +2779,7 @@ export type VoicemailSettings = {
   isEnabled?: boolean;
   maxMessageLengthSeconds?: number;
   transcriptionEnabled?: boolean;
+  updatedAt?: string | null;
 };
 
 /**
@@ -3006,12 +3017,14 @@ export type VoiceSchemasVoicemailVoicemailMessage = {
   audioFilePath?: string;
   callerName?: string | null;
   callerNumber: string;
+  createdAt?: string | null;
   durationSeconds?: number;
   id: string;
   isRead?: boolean;
   isUrgent?: boolean;
   receivedAt?: string | null;
   transcription?: string | null;
+  updatedAt?: string | null;
   voicemailBoxId: string;
 };
 
@@ -3387,9 +3400,9 @@ export type AdminListAuditLogsData = {
      */
     sortOrder?: "asc" | "desc" | null;
     targetIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
-    actionIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3466,9 +3479,9 @@ export type AdminExportAuditLogData = {
      */
     sortOrder?: "asc" | "desc" | null;
     targetIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
-    actionIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3534,9 +3547,9 @@ export type AdminGetTargetAuditLogsData = {
      */
     sortOrder?: "asc" | "desc" | null;
     targetIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
-    actionIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -3614,9 +3627,9 @@ export type AdminGetUserAuditLogsData = {
      */
     sortOrder?: "asc" | "desc" | null;
     targetIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     actorIdIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
-    actionIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -8046,6 +8059,14 @@ export type ListFaxEmailRoutesData = {
     createdAfter?: string | null;
     updatedBefore?: string | null;
     updatedAfter?: string | null;
+    /**
+     * Field to search
+     */
+    searchString?: string | null;
+    /**
+     * Search should be case sensitive
+     */
+    searchIgnoreCase?: boolean | null;
     currentPage?: number;
     pageSize?: number;
     /**
@@ -9708,6 +9729,14 @@ export type ProfileOAuthAccountsData = {
   query?: {
     createdBefore?: string | null;
     createdAfter?: string | null;
+    /**
+     * Field to search
+     */
+    searchString?: string | null;
+    /**
+     * Search should be case sensitive
+     */
+    searchIgnoreCase?: boolean | null;
     currentPage?: number;
     pageSize?: number;
     /**
@@ -11583,6 +11612,14 @@ export type ListTicketMessagesData = {
     ids?: Array<string> | null;
     createdBefore?: string | null;
     createdAfter?: string | null;
+    /**
+     * Field to search
+     */
+    searchString?: string | null;
+    /**
+     * Search should be case sensitive
+     */
+    searchIgnoreCase?: boolean | null;
     currentPage?: number;
     pageSize?: number;
     /**
@@ -12598,6 +12635,14 @@ export type ListTeamInvitationsData = {
     createdAfter?: string | null;
     updatedBefore?: string | null;
     updatedAfter?: string | null;
+    /**
+     * Field to search
+     */
+    searchString?: string | null;
+    /**
+     * Search should be case sensitive
+     */
+    searchIgnoreCase?: boolean | null;
     currentPage?: number;
     pageSize?: number;
     /**
@@ -14344,6 +14389,14 @@ export type ListForwardingRulesData = {
     createdAfter?: string | null;
     updatedBefore?: string | null;
     updatedAfter?: string | null;
+    /**
+     * Field to search
+     */
+    searchString?: string | null;
+    /**
+     * Search should be case sensitive
+     */
+    searchIgnoreCase?: boolean | null;
     currentPage?: number;
     pageSize?: number;
     /**
@@ -14687,6 +14740,14 @@ export type ListVoicemailMessagesData = {
     createdAfter?: string | null;
     updatedBefore?: string | null;
     updatedAfter?: string | null;
+    /**
+     * Field to search
+     */
+    searchString?: string | null;
+    /**
+     * Search should be case sensitive
+     */
+    searchIgnoreCase?: boolean | null;
     currentPage?: number;
     pageSize?: number;
     /**

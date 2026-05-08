@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.286.0 (2026-05-07)
+
+### Fixed
+- **Webhook kwarg extraction** — Replaced hardcoded entity_id key list in webhook dispatcher with dynamic UUID detection; any kwarg ending in `_id` with a UUID value is now picked up automatically, eliminating sync issues as new domains are added
+
+### Added
+- **Global query error handling** — Background refetch failures now surface as toast notifications via QueryCache onError (only fires when stale data exists, not on initial loads)
+- **Missing event emissions** — Added `user_role_assigned` webhook event type; wired event emissions for role assignment/revocation in RoleController and UserRoleController; added `user_deleted` emission to ProfileController.remove_account
+- **PWA support** — Added manifest link, apple-touch-icon, and theme-color meta tag to index.html
+
 ## v0.285.0 (2026-05-07)
 
 ### Fixed

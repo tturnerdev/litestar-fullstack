@@ -7,6 +7,7 @@ from uuid import UUID
 
 from advanced_alchemy.service.pagination import OffsetPagination
 from litestar import Controller, get
+from litestar.datastructures import CacheControlHeader
 from litestar.params import Dependency
 
 from app.db import models as m
@@ -71,7 +72,12 @@ class AdminDevicesController(Controller):
             offset=limit_offset.offset if limit_offset else 0,
         )
 
-    @get(operation_id="AdminGetDeviceStats", path="/stats")
+    @get(
+        operation_id="AdminGetDeviceStats",
+        path="/stats",
+        cache=300,
+        cache_control=CacheControlHeader(private=True, max_age=300),
+    )
     async def get_stats(
         self,
         device_service: DeviceService,
