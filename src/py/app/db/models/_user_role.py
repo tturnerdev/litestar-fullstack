@@ -19,8 +19,8 @@ class UserRole(UUIDv7AuditBase):
 
     __tablename__ = "user_account_role"
     __table_args__ = {"comment": "Links a user to a specific role."}
-    user_id: Mapped[UUID] = mapped_column(ForeignKey("user_account.id", ondelete="cascade"), nullable=False)
-    role_id: Mapped[UUID] = mapped_column(ForeignKey("role.id", ondelete="cascade"), nullable=False)
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("user_account.id", ondelete="cascade"), nullable=False, index=True)
+    role_id: Mapped[UUID] = mapped_column(ForeignKey("role.id", ondelete="cascade"), nullable=False, index=True)
     assigned_at: Mapped[datetime] = mapped_column(default=datetime.now(UTC))
 
     user: Mapped[User] = relationship(back_populates="roles", innerjoin=True, uselist=False, lazy="joined")

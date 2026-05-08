@@ -197,11 +197,10 @@ class ScheduleController(Controller):
             ScheduleDetail
         """
         before = capture_snapshot(await schedules_service.get(schedule_id))
-        await schedules_service.update(
+        fresh_obj = await schedules_service.update(
             item_id=schedule_id,
             data=data.to_dict(),
         )
-        fresh_obj = await schedules_service.get_one(id=schedule_id)
         request.app.emit(event_id="schedule_updated", entity_id=fresh_obj.id)
         after = capture_snapshot(fresh_obj)
         await log_audit(
@@ -393,11 +392,10 @@ class ScheduleController(Controller):
             ScheduleEntryDetail
         """
         before = capture_snapshot(await entries_service.get(entry_id))
-        await entries_service.update(
+        fresh_obj = await entries_service.update(
             item_id=entry_id,
             data=data.to_dict(),
         )
-        fresh_obj = await entries_service.get_one(id=entry_id)
         after = capture_snapshot(fresh_obj)
         await log_audit(
             audit_service,

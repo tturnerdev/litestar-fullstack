@@ -15,6 +15,7 @@ import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useAdminExtensions, useAdminPhoneNumbers, useAdminVoiceStats } from "@/lib/api/hooks/admin"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
@@ -130,6 +131,7 @@ function AdminVoicePage() {
   const navigate = useNavigate()
   const [phoneNumberPage, setPhoneNumberPage] = useState(1)
   const [phoneSearch, setPhoneSearch] = useState("")
+  const debouncedPhoneSearch = useDebouncedValue(phoneSearch)
 
   const { data: stats, isLoading: statsLoading, isError: statsError, refetch: refetchStats } = useAdminVoiceStats()
   const {
@@ -139,7 +141,7 @@ function AdminVoicePage() {
     refetch: refetchPhones,
     dataUpdatedAt,
     isRefetching,
-  } = useAdminPhoneNumbers(phoneNumberPage, PAGE_SIZE, phoneSearch || undefined)
+  } = useAdminPhoneNumbers(phoneNumberPage, PAGE_SIZE, debouncedPhoneSearch || undefined)
   const { data: extensions, isLoading: extensionsLoading, isError: extensionsError, refetch: refetchExtensions } = useAdminExtensions()
 
   const handleRefreshAll = useCallback(() => {

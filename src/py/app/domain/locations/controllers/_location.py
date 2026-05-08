@@ -188,11 +188,10 @@ class LocationController(Controller):
             Location
         """
         before = capture_snapshot(await locations_service.get(location_id))
-        await locations_service.update(
+        fresh_obj = await locations_service.update(
             item_id=location_id,
             data=data.to_dict(),
         )
-        fresh_obj = await locations_service.get_one(id=location_id)
         request.app.emit(event_id="location_updated", entity_id=fresh_obj.id)
         after = capture_snapshot(fresh_obj)
         await log_audit(

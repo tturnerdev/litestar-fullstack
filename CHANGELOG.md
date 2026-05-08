@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.309.0 (2026-05-08)
+
+### Improved
+- **Eliminated redundant queries after update** — Tags, teams, locations, and schedules update handlers now use the return value from `service.update()` instead of issuing a separate `get_one()` query
+- **Search debounce in admin pages** — Admin fax and voice search inputs now use `useDebouncedValue` to prevent per-keystroke API requests
+- **Database index annotations** — Added `index=True` to `UserRole.user_id/role_id`, `FaxMessage.fax_number_id`, and `FaxEmailRoute.fax_number_id` foreign key columns used in frequent queries
+
 ## v0.308.0 (2026-05-08)
 
 ### Added

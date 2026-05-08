@@ -229,12 +229,10 @@ class TeamController(Controller):
         before_obj = await teams_service.get(team_id)
         before = _capture_snapshot(before_obj)
 
-        await teams_service.update(
+        fresh_obj = await teams_service.update(
             item_id=team_id,
             data=data.to_dict(),
         )
-
-        fresh_obj = await teams_service.get_one(id=team_id)
         request.app.emit(event_id="team_updated", entity_id=fresh_obj.id)
         after = _capture_snapshot(fresh_obj)
 

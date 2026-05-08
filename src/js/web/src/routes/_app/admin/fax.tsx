@@ -16,6 +16,7 @@ import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useAdminFaxMessages, useAdminFaxNumbers, useAdminFaxStats } from "@/lib/api/hooks/admin"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
@@ -131,6 +132,7 @@ function AdminFaxPage() {
   const navigate = useNavigate()
   const [numberPage, setNumberPage] = useState(1)
   const [numberSearch, setNumberSearch] = useState("")
+  const debouncedNumberSearch = useDebouncedValue(numberSearch)
 
   // Column visibility
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(loadColumnVisibility)
@@ -151,7 +153,7 @@ function AdminFaxPage() {
     refetch: refetchNumbers,
     dataUpdatedAt,
     isRefetching,
-  } = useAdminFaxNumbers(numberPage, PAGE_SIZE, numberSearch || undefined)
+  } = useAdminFaxNumbers(numberPage, PAGE_SIZE, debouncedNumberSearch || undefined)
   const { data: messages, isLoading: messagesLoading, isError: messagesError, refetch: refetchMessages } = useAdminFaxMessages()
 
   const handleRefreshAll = useCallback(() => {

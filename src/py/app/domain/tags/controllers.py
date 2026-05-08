@@ -216,8 +216,7 @@ class TagController(Controller):
             The updated tag.
         """
         before = _capture_snapshot(await tags_service.get(tag_id))
-        await tags_service.update(item_id=tag_id, data=data.to_dict())
-        fresh_obj = await tags_service.get_one(id=tag_id)
+        fresh_obj = await tags_service.update(item_id=tag_id, data=data.to_dict())
         after = _capture_snapshot(fresh_obj)
         await _log_audit(
             audit_service,
