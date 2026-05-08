@@ -55,6 +55,7 @@ class TeamMemberController(Controller):
         team_members_service: TeamMemberService,
         users_service: UserService,
         audit_service: AuditLogService,
+        notifications_service: NotificationService,
         current_user: m.User,
         data: TeamMemberModify,
         team_id: Annotated[UUID, Parameter(title="Team ID", description="The team to update.")],
@@ -67,6 +68,7 @@ class TeamMemberController(Controller):
             team_members_service: Team Member Service
             users_service: User Service
             audit_service: Audit log service
+            notifications_service: Notification Service
             current_user: Current User
             data: Team Member Modify
             team_id: Team ID
@@ -106,6 +108,17 @@ class TeamMemberController(Controller):
             after=after,
             request=request,
         )
+
+        try:
+            await notifications_service.notify(
+                user_id=user_obj.id,
+                title="Added to Team",
+                message=f"You have been added to team '{team_obj.name}'.",
+                category="team",
+                action_url=f"/teams/{team_id}",
+            )
+        except Exception:
+            logger.warning("Failed to send team member addition notification", exc_info=True)
 
         return teams_service.to_schema(team_obj, schema_type=Team)
 
@@ -188,8 +201,10 @@ class TeamMemberController(Controller):
     async def update_team_member(
         self,
         request: Request[m.User, Token, Any],
+        teams_service: TeamService,
         team_members_service: TeamMemberService,
         audit_service: AuditLogService,
+        notifications_service: NotificationService,
         current_user: m.User,
         team_id: Annotated[UUID, Parameter(title="Team ID", description="The team to update.")],
         user_id: Annotated[UUID, Parameter(title="User ID", description="The user to update.")],
@@ -223,5 +238,17 @@ class TeamMemberController(Controller):
             after=after,
             request=request,
         )
+
+        try:
+            team_obj = await teams_service.get(team_id)
+            await notifications_service.notify(
+                user_id=user_id,
+                title="Team Role Updated",
+                message=f"Your role in team '{team_obj.name}' has been updated to {data.role}.",
+                category="team",
+                action_url=f"/teams/{team_id}",
+            )
+        except Exception:
+            logger.warning("Failed to send team member role update notification", exc_info=True)
 
         return team_members_service.to_schema(updated, schema_type=TeamMember)

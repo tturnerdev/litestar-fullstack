@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.355.0 (2026-05-08)
+
+### Enhanced
+- **Team member notifications** — Notify users when added to a team or when their team role is updated, matching the existing notification pattern for member removal
+
 ## v0.354.0 (2026-05-08)
 
 ### Fixed
