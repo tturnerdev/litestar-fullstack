@@ -319,7 +319,7 @@ export function CreateLocationForm() {
                         <RequiredIndicator />
                       </FormLabel>
                       <FormControl>
-                        <Input placeholder="123 Main Street" {...field} />
+                        <Input placeholder="123 Main Street" maxLength={255} {...field} />
                       </FormControl>
                       <FormDescription>Street address or P.O. Box number.</FormDescription>
                       <FormMessage />
@@ -333,7 +333,7 @@ export function CreateLocationForm() {
                     <FormItem>
                       <FormLabel>Address Line 2</FormLabel>
                       <FormControl>
-                        <Input placeholder="Suite 200" {...field} />
+                        <Input placeholder="Suite 200" maxLength={255} {...field} />
                       </FormControl>
                       <FormDescription>Apartment, suite, unit, building, or floor.</FormDescription>
                       <FormMessage />
@@ -351,7 +351,7 @@ export function CreateLocationForm() {
                           <RequiredIndicator />
                         </FormLabel>
                         <FormControl>
-                          <Input placeholder="Austin" {...field} />
+                          <Input placeholder="Austin" maxLength={100} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -367,7 +367,7 @@ export function CreateLocationForm() {
                           <RequiredIndicator />
                         </FormLabel>
                         <FormControl>
-                          <Input placeholder="TX" {...field} />
+                          <Input placeholder="TX" maxLength={100} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -385,7 +385,7 @@ export function CreateLocationForm() {
                           <RequiredIndicator />
                         </FormLabel>
                         <FormControl>
-                          <Input placeholder="78701" {...field} />
+                          <Input placeholder="78701" maxLength={20} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -398,7 +398,7 @@ export function CreateLocationForm() {
                       <FormItem>
                         <FormLabel>Country</FormLabel>
                         <FormControl>
-                          <Input placeholder="US" {...field} />
+                          <Input placeholder="US" maxLength={100} {...field} />
                         </FormControl>
                         <FormDescription>ISO country code (e.g., US, CA, GB).</FormDescription>
                         <FormMessage />

@@ -274,7 +274,7 @@ export function CreateDeviceForm() {
                   </Tooltip>
                 </div>
                 <FormControl>
-                  <Input placeholder="192.168.1.100" {...field} />
+                  <Input placeholder="192.168.1.100" maxLength={45} {...field} />
                 </FormControl>
                 <FormDescription>Static IP of the device on your network, if known.</FormDescription>
                 <FormMessage />
@@ -290,7 +290,7 @@ export function CreateDeviceForm() {
                 <FormItem>
                   <FormLabel>Manufacturer</FormLabel>
                   <FormControl>
-                    <Input placeholder="Polycom" {...field} />
+                    <Input placeholder="Polycom" maxLength={100} {...field} />
                   </FormControl>
                   <FormDescription>Brand or vendor of the device.</FormDescription>
                   <FormMessage />
@@ -305,7 +305,7 @@ export function CreateDeviceForm() {
                 <FormItem>
                   <FormLabel>Model</FormLabel>
                   <FormControl>
-                    <Input placeholder="VVX 450" {...field} />
+                    <Input placeholder="VVX 450" maxLength={100} {...field} />
                   </FormControl>
                   <FormDescription>Specific model identifier.</FormDescription>
                   <FormMessage />
