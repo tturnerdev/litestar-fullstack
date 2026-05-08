@@ -112,6 +112,7 @@ class ForwardingController(Controller):
             after=after,
             request=request,
         )
+        request.app.emit(event_id="forwarding_rules_changed", extension_id=ext_id)
         return forwarding_rules_service.to_schema(db_obj, schema_type=ForwardingRule)
 
     @put(
@@ -163,6 +164,7 @@ class ForwardingController(Controller):
             request=request,
         )
         request.app.emit(event_id="forwarding_bulk_replaced", entity_id=ext_id)
+        request.app.emit(event_id="forwarding_rules_changed", extension_id=ext_id)
         return results
 
     @patch(
@@ -202,6 +204,7 @@ class ForwardingController(Controller):
             after=after,
             request=request,
         )
+        request.app.emit(event_id="forwarding_rules_changed", extension_id=ext_id)
         return forwarding_rules_service.to_schema(db_obj, schema_type=ForwardingRule)
 
     @delete(
@@ -242,3 +245,4 @@ class ForwardingController(Controller):
             after=None,
             request=request,
         )
+        request.app.emit(event_id="forwarding_rules_changed", extension_id=ext_id)

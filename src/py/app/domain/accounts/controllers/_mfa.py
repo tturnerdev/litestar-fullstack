@@ -157,6 +157,7 @@ class MfaController(Controller):
         self,
         request: Request[m.User, Token, Any],
         users_service: UserService,
+        audit_service: AuditLogService,
         settings: AppSettings,
     ) -> MfaSetup:
         """Initiate MFA setup - generates TOTP secret and QR code.
@@ -179,6 +180,16 @@ class MfaController(Controller):
             raise ClientException(detail="MFA is already enabled", status_code=400)
         secret = generate_totp_secret()
         await users_service.update({"totp_secret": secret}, item_id=user.id)
+        await audit_service.log_action(
+            action="mfa.setup.initiated",
+            actor_id=user.id,
+            actor_email=user.email,
+            actor_name=user.name,
+            target_type="user",
+            target_id=str(user.id),
+            target_label=user.email,
+            request=request,
+        )
         qr_code_bytes = await generate_totp_qr_code(secret, user.email, issuer=settings.slug)
         qr_code_base64 = base64.b64encode(qr_code_bytes).decode("utf-8")
         return MfaSetup(
