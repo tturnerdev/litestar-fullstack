@@ -235,7 +235,7 @@ function E911DetailPage() {
     setEditCity(data.city)
     setEditState(data.state)
     setEditPostalCode(data.postalCode)
-    setEditCountry(data.country)
+    setEditCountry(data.country ?? "US")
     setFieldErrors({})
     touchedRef.current = {}
     setEditing(true)
