@@ -748,6 +748,7 @@ function WebhookDetailPage() {
                         placeholder="What is this webhook used for?"
                         className="mt-1 resize-none"
                         rows={2}
+                        maxLength={500}
                         disabled={updateWebhook.isPending}
                         aria-invalid={!!fieldErrors.description}
                       />

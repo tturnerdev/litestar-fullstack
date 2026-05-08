@@ -400,8 +400,20 @@ function NewWebhookPage() {
                         {headers.map((header, index) => (
                           // biome-ignore lint/suspicious/noArrayIndexKey: Header pairs have no stable ID
                           <div key={index} className="flex items-center gap-2">
-                            <Input placeholder="Header name" value={header.key} onChange={(e) => updateHeader(index, "key", e.target.value)} className="flex-1 font-mono text-xs" />
-                            <Input placeholder="Value" value={header.value} onChange={(e) => updateHeader(index, "value", e.target.value)} className="flex-1 font-mono text-xs" />
+                            <Input
+                              placeholder="Header name"
+                              value={header.key}
+                              onChange={(e) => updateHeader(index, "key", e.target.value)}
+                              maxLength={128}
+                              className="flex-1 font-mono text-xs"
+                            />
+                            <Input
+                              placeholder="Value"
+                              value={header.value}
+                              onChange={(e) => updateHeader(index, "value", e.target.value)}
+                              maxLength={500}
+                              className="flex-1 font-mono text-xs"
+                            />
                             <Button type="button" variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => removeHeader(index)} aria-label="Remove header">
                               <Minus className="h-4 w-4" />
                             </Button>
