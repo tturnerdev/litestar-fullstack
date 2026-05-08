@@ -38,6 +38,12 @@ class RingGroupService(service.SQLAlchemyAsyncRepositoryService[m.RingGroup]):
                 raise ValidationException("A ring group with this name already exists.")
         return data
 
+    async def to_model_on_upsert(self, data: ModelDictT[m.RingGroup]) -> ModelDictT[m.RingGroup]:
+        data = service.schema_dump(data)
+        if service.is_dict(data) and "name" in data:
+            data["name"] = data["name"].strip()
+        return data
+
     async def to_model_on_update(self, data: ModelDictT[m.RingGroup], item_id: Any | None = None, **kwargs: Any) -> ModelDictT[m.RingGroup]:
         data = service.schema_dump(data)
         if service.is_dict(data) and "name" in data:
