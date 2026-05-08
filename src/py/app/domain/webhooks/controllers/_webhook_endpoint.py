@@ -45,7 +45,7 @@ class WebhookEndpointController(Controller):
         },
     )
 
-    @get(operation_id="ListWebhookEndpoints")
+    @get(operation_id="ListWebhookEndpoints", summary="List webhook endpoints")
     async def list_endpoints(
         self,
         webhook_service: WebhookEndpointService,
@@ -54,7 +54,7 @@ class WebhookEndpointController(Controller):
         results, total = await webhook_service.list_and_count(*filters)
         return webhook_service.to_schema(results, total, filters, schema_type=WebhookEndpointList)
 
-    @get(operation_id="GetWebhookEndpoint", path="/{endpoint_id:uuid}")
+    @get(operation_id="GetWebhookEndpoint", summary="Get webhook endpoint details", path="/{endpoint_id:uuid}")
     async def get_endpoint(
         self,
         webhook_service: WebhookEndpointService,
@@ -63,7 +63,7 @@ class WebhookEndpointController(Controller):
         db_obj = await webhook_service.get(endpoint_id)
         return webhook_service.to_schema(db_obj, schema_type=WebhookEndpoint)
 
-    @post(operation_id="CreateWebhookEndpoint")
+    @post(operation_id="CreateWebhookEndpoint", summary="Create a webhook endpoint")
     async def create_endpoint(
         self,
         request: Request[Any, Any, Any],
@@ -74,7 +74,7 @@ class WebhookEndpointController(Controller):
         request.app.emit(event_id="webhook_endpoint_created", entity_id=db_obj.id)
         return webhook_service.to_schema(db_obj, schema_type=WebhookEndpoint)
 
-    @patch(operation_id="UpdateWebhookEndpoint", path="/{endpoint_id:uuid}")
+    @patch(operation_id="UpdateWebhookEndpoint", summary="Update a webhook endpoint", path="/{endpoint_id:uuid}")
     async def update_endpoint(
         self,
         request: Request[Any, Any, Any],
@@ -86,7 +86,7 @@ class WebhookEndpointController(Controller):
         request.app.emit(event_id="webhook_endpoint_updated", entity_id=db_obj.id)
         return webhook_service.to_schema(db_obj, schema_type=WebhookEndpoint)
 
-    @delete(operation_id="DeleteWebhookEndpoint", path="/{endpoint_id:uuid}", return_dto=None)
+    @delete(operation_id="DeleteWebhookEndpoint", summary="Delete a webhook endpoint", path="/{endpoint_id:uuid}", return_dto=None)
     async def delete_endpoint(
         self,
         request: Request[Any, Any, Any],
@@ -98,6 +98,7 @@ class WebhookEndpointController(Controller):
 
     @get(
         operation_id="ListWebhookEventTypes",
+        summary="List webhook event types",
         path="/event-types",
         cache=300,
         cache_control=CacheControlHeader(private=True, max_age=300),

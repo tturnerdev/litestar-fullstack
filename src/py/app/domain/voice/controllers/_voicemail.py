@@ -78,6 +78,7 @@ class VoicemailController(Controller):
 
     @get(
         operation_id="GetVoicemailSettings",
+        summary="Get voicemail settings",
         path="/api/voice/extensions/{ext_id:uuid}/voicemail",
         guards=[requires_feature_permission("voice", "view"), requires_extension_ownership],
     )
@@ -95,6 +96,7 @@ class VoicemailController(Controller):
 
     @patch(
         operation_id="UpdateVoicemailSettings",
+        summary="Update voicemail settings",
         path="/api/voice/extensions/{ext_id:uuid}/voicemail",
         guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],
     )
@@ -165,6 +167,7 @@ class VoicemailController(Controller):
 
     @get(
         operation_id="ListVoicemailMessages",
+        summary="List voicemail messages",
         path="/api/voice/extensions/{ext_id:uuid}/voicemail/messages",
         guards=[requires_feature_permission("voice", "view"), requires_extension_ownership],
     )
@@ -188,6 +191,7 @@ class VoicemailController(Controller):
 
     @get(
         operation_id="GetVoicemailMessage",
+        summary="Get a voicemail message",
         path="/api/voice/extensions/{ext_id:uuid}/voicemail/messages/{msg_id:uuid}",
         guards=[requires_feature_permission("voice", "view"), requires_extension_ownership],
     )
@@ -208,6 +212,7 @@ class VoicemailController(Controller):
 
     @patch(
         operation_id="UpdateVoicemailMessage",
+        summary="Update a voicemail message",
         path="/api/voice/extensions/{ext_id:uuid}/voicemail/messages/{msg_id:uuid}",
         guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],
     )
@@ -230,6 +235,7 @@ class VoicemailController(Controller):
 
     @delete(
         operation_id="DeleteVoicemailMessage",
+        summary="Delete a voicemail message",
         path="/api/voice/extensions/{ext_id:uuid}/voicemail/messages/{msg_id:uuid}",
         return_dto=None,
         guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],

@@ -61,6 +61,7 @@ class RingGroupController(Controller):
 
     @get(
         operation_id="ListRingGroups",
+        summary="List ring groups",
         path="/api/ring-groups",
         guards=[requires_feature_permission("call_routing", "view"), requires_call_routing_access],
     )
@@ -85,6 +86,7 @@ class RingGroupController(Controller):
 
     @post(
         operation_id="CreateRingGroup",
+        summary="Create a ring group",
         path="/api/ring-groups",
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
     )
@@ -130,6 +132,7 @@ class RingGroupController(Controller):
 
     @get(
         operation_id="GetRingGroup",
+        summary="Get ring group details",
         path="/api/ring-groups/{ring_group_id:uuid}",
         guards=[requires_feature_permission("call_routing", "view"), requires_call_routing_access],
     )
@@ -152,6 +155,7 @@ class RingGroupController(Controller):
 
     @patch(
         operation_id="UpdateRingGroup",
+        summary="Update a ring group",
         path="/api/ring-groups/{ring_group_id:uuid}",
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
     )
@@ -199,6 +203,7 @@ class RingGroupController(Controller):
 
     @delete(
         operation_id="DeleteRingGroup",
+        summary="Delete a ring group",
         path="/api/ring-groups/{ring_group_id:uuid}",
         return_dto=None,
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
@@ -243,6 +248,7 @@ class RingGroupController(Controller):
 
     @get(
         operation_id="ListRingGroupMembers",
+        summary="List ring group members",
         path="/api/ring-groups/{ring_group_id:uuid}/members",
         guards=[requires_feature_permission("call_routing", "view"), requires_call_routing_access],
     )
@@ -268,6 +274,7 @@ class RingGroupController(Controller):
 
     @post(
         operation_id="CreateRingGroupMember",
+        summary="Add a ring group member",
         path="/api/ring-groups/{ring_group_id:uuid}/members",
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
     )
@@ -317,6 +324,7 @@ class RingGroupController(Controller):
 
     @patch(
         operation_id="UpdateRingGroupMember",
+        summary="Update a ring group member",
         path="/api/ring-groups/{ring_group_id:uuid}/members/{member_id:uuid}",
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
     )
@@ -371,6 +379,7 @@ class RingGroupController(Controller):
 
     @delete(
         operation_id="DeleteRingGroupMember",
+        summary="Remove a ring group member",
         path="/api/ring-groups/{ring_group_id:uuid}/members/{member_id:uuid}",
         return_dto=None,
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],

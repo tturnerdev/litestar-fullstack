@@ -74,6 +74,7 @@ class FaxMessageController(Controller):
     @get(
         component="fax/message-list",
         operation_id="ListFaxMessages",
+        summary="List fax messages",
         path="/api/fax/messages",
         guards=[requires_feature_permission("fax", "view")],
     )
@@ -115,6 +116,7 @@ class FaxMessageController(Controller):
 
     @get(
         operation_id="GetFaxMessage",
+        summary="Get fax message details",
         path="/api/fax/messages/{message_id:uuid}",
         guards=[requires_feature_permission("fax", "view"), requires_fax_message_access],
     )
@@ -144,6 +146,7 @@ class FaxMessageController(Controller):
 
     @delete(
         operation_id="DeleteFaxMessage",
+        summary="Delete a fax message",
         path="/api/fax/messages/{message_id:uuid}",
         guards=[requires_feature_permission("fax", "edit"), requires_fax_message_access],
     )
@@ -189,6 +192,7 @@ class FaxMessageController(Controller):
 
     @post(
         operation_id="SendFax",
+        summary="Send a fax",
         path="/api/fax/send",
         status_code=HTTP_202_ACCEPTED,
         guards=[requires_feature_permission("fax", "edit")],

@@ -81,6 +81,7 @@ class FaxEmailRouteController(Controller):
 
     @get(
         operation_id="ListFaxEmailRoutes",
+        summary="List fax email routes",
         path="",
         guards=[requires_feature_permission("fax", "view"), requires_fax_number_access],
     )
@@ -113,6 +114,7 @@ class FaxEmailRouteController(Controller):
 
     @post(
         operation_id="CreateFaxEmailRoute",
+        summary="Create a fax email route",
         path="",
         guards=[requires_feature_permission("fax", "edit"), requires_fax_number_access],
     )
@@ -163,6 +165,7 @@ class FaxEmailRouteController(Controller):
 
     @patch(
         operation_id="UpdateFaxEmailRoute",
+        summary="Update a fax email route",
         path="/{route_id:uuid}",
         guards=[requires_feature_permission("fax", "edit"), requires_fax_number_access],
     )
@@ -220,6 +223,7 @@ class FaxEmailRouteController(Controller):
 
     @delete(
         operation_id="DeleteFaxEmailRoute",
+        summary="Delete a fax email route",
         path="/{route_id:uuid}",
         guards=[requires_feature_permission("fax", "edit"), requires_fax_number_access],
     )

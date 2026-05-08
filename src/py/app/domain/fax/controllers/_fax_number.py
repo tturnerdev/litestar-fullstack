@@ -75,6 +75,7 @@ class FaxNumberController(Controller):
     @get(
         component="fax/number-list",
         operation_id="ListFaxNumbers",
+        summary="List fax numbers",
         path="/api/fax/numbers",
         guards=[requires_feature_permission("fax", "view")],
     )
@@ -103,6 +104,7 @@ class FaxNumberController(Controller):
 
     @post(
         operation_id="CreateFaxNumber",
+        summary="Create a fax number",
         path="/api/fax/numbers",
         guards=[requires_feature_permission("fax", "edit")],
     )
@@ -147,6 +149,7 @@ class FaxNumberController(Controller):
 
     @get(
         operation_id="GetFaxNumber",
+        summary="Get fax number details",
         path="/api/fax/numbers/{fax_number_id:uuid}",
         guards=[requires_feature_permission("fax", "view"), requires_fax_number_access],
     )
@@ -176,6 +179,7 @@ class FaxNumberController(Controller):
 
     @patch(
         operation_id="UpdateFaxNumber",
+        summary="Update a fax number",
         path="/api/fax/numbers/{fax_number_id:uuid}",
         guards=[requires_feature_permission("fax", "edit"), requires_fax_number_access],
     )
@@ -228,6 +232,7 @@ class FaxNumberController(Controller):
 
     @delete(
         operation_id="DeleteFaxNumber",
+        summary="Delete a fax number",
         path="/api/fax/numbers/{fax_number_id:uuid}",
         guards=[requires_feature_permission("fax", "edit"), requires_fax_number_access],
     )

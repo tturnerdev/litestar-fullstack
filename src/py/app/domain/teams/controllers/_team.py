@@ -116,7 +116,7 @@ class TeamController(Controller):
         "audit_service": Provide(provide_audit_log_service),
     }
 
-    @get(component="team/list", operation_id="ListTeams", path="/api/teams")
+    @get(component="team/list", operation_id="ListTeams", summary="List teams", path="/api/teams")
     async def list_teams(
         self,
         teams_service: TeamService,
@@ -144,7 +144,7 @@ class TeamController(Controller):
             results, total = await teams_service.list_and_count(*filters)
         return teams_service.to_schema(results, total, filters, schema_type=Team)
 
-    @post(operation_id="CreateTeam", path="/api/teams")
+    @post(operation_id="CreateTeam", summary="Create a team", path="/api/teams")
     async def create_team(
         self,
         request: Request[m.User, Token, Any],
@@ -184,7 +184,7 @@ class TeamController(Controller):
 
         return teams_service.to_schema(db_obj, schema_type=Team)
 
-    @get(operation_id="GetTeam", path="/api/teams/{team_id:uuid}", guards=[requires_team_membership])
+    @get(operation_id="GetTeam", summary="Get team details", path="/api/teams/{team_id:uuid}", guards=[requires_team_membership])
     async def get_team(
         self,
         teams_service: TeamService,
@@ -202,7 +202,7 @@ class TeamController(Controller):
         db_obj = await teams_service.get(team_id)
         return teams_service.to_schema(db_obj, schema_type=Team)
 
-    @patch(operation_id="UpdateTeam", path="/api/teams/{team_id:uuid}", guards=[requires_team_admin])
+    @patch(operation_id="UpdateTeam", summary="Update a team", path="/api/teams/{team_id:uuid}", guards=[requires_team_admin])
     async def update_team(
         self,
         request: Request[m.User, Token, Any],
@@ -251,7 +251,7 @@ class TeamController(Controller):
 
         return teams_service.to_schema(fresh_obj, schema_type=Team)
 
-    @delete(operation_id="DeleteTeam", path="/api/teams/{team_id:uuid}", guards=[requires_team_ownership])
+    @delete(operation_id="DeleteTeam", summary="Delete a team", path="/api/teams/{team_id:uuid}", guards=[requires_team_ownership])
     async def delete_team(
         self,
         request: Request[m.User, Token, Any],

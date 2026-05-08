@@ -90,7 +90,7 @@ class WebhookController(Controller):
         "delivery_service": Provide(provide_webhook_delivery_service),
     }
 
-    @get(operation_id="ListWebhooks", path="/api/webhooks")
+    @get(operation_id="ListWebhooks", summary="List webhooks", path="/api/webhooks")
     async def list_webhooks(
         self,
         webhooks_service: WebhookService,
@@ -113,7 +113,7 @@ class WebhookController(Controller):
         )
         return webhooks_service.to_schema(results, total, filters, schema_type=WebhookList)
 
-    @post(operation_id="CreateWebhook", path="/api/webhooks")
+    @post(operation_id="CreateWebhook", summary="Create a webhook", path="/api/webhooks")
     async def create_webhook(
         self,
         request: Request[m.User, Token, Any],
@@ -156,6 +156,7 @@ class WebhookController(Controller):
 
     @get(
         operation_id="GetWebhook",
+        summary="Get webhook details",
         path="/api/webhooks/{webhook_id:uuid}",
     )
     async def get_webhook(
@@ -181,6 +182,7 @@ class WebhookController(Controller):
 
     @patch(
         operation_id="UpdateWebhook",
+        summary="Update a webhook",
         path="/api/webhooks/{webhook_id:uuid}",
     )
     async def update_webhook(
@@ -233,6 +235,7 @@ class WebhookController(Controller):
 
     @delete(
         operation_id="DeleteWebhook",
+        summary="Delete a webhook",
         path="/api/webhooks/{webhook_id:uuid}",
     )
     async def delete_webhook(
@@ -275,6 +278,7 @@ class WebhookController(Controller):
 
     @get(
         operation_id="ListWebhookDeliveries",
+        summary="List webhook deliveries",
         path="/api/webhooks/{webhook_id:uuid}/deliveries",
     )
     async def list_deliveries(
@@ -310,6 +314,7 @@ class WebhookController(Controller):
 
     @post(
         operation_id="RedeliverWebhookDelivery",
+        summary="Redeliver a webhook",
         path="/api/webhooks/{webhook_id:uuid}/deliveries/{delivery_id:uuid}/redeliver",
     )
     async def redeliver_delivery(
@@ -346,6 +351,7 @@ class WebhookController(Controller):
 
     @post(
         operation_id="TestWebhook",
+        summary="Send a test webhook",
         path="/api/webhooks/{webhook_id:uuid}/test",
     )
     async def test_webhook(

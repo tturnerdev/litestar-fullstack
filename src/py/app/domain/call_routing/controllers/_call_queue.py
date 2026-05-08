@@ -62,6 +62,7 @@ class CallQueueController(Controller):
 
     @get(
         operation_id="ListCallQueues",
+        summary="List call queues",
         path="/api/call-queues",
         guards=[requires_feature_permission("call_routing", "view"), requires_call_routing_access],
     )
@@ -86,6 +87,7 @@ class CallQueueController(Controller):
 
     @post(
         operation_id="CreateCallQueue",
+        summary="Create a call queue",
         path="/api/call-queues",
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
     )
@@ -131,6 +133,7 @@ class CallQueueController(Controller):
 
     @get(
         operation_id="GetCallQueue",
+        summary="Get call queue details",
         path="/api/call-queues/{call_queue_id:uuid}",
         guards=[requires_feature_permission("call_routing", "view"), requires_call_routing_access],
     )
@@ -153,6 +156,7 @@ class CallQueueController(Controller):
 
     @patch(
         operation_id="UpdateCallQueue",
+        summary="Update a call queue",
         path="/api/call-queues/{call_queue_id:uuid}",
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
     )
@@ -200,6 +204,7 @@ class CallQueueController(Controller):
 
     @delete(
         operation_id="DeleteCallQueue",
+        summary="Delete a call queue",
         path="/api/call-queues/{call_queue_id:uuid}",
         return_dto=None,
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
@@ -244,6 +249,7 @@ class CallQueueController(Controller):
 
     @get(
         operation_id="ListCallQueueMembers",
+        summary="List call queue members",
         path="/api/call-queues/{call_queue_id:uuid}/members",
         guards=[requires_feature_permission("call_routing", "view"), requires_call_routing_access],
     )
@@ -269,6 +275,7 @@ class CallQueueController(Controller):
 
     @post(
         operation_id="CreateCallQueueMember",
+        summary="Add a call queue member",
         path="/api/call-queues/{call_queue_id:uuid}/members",
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
     )
@@ -318,6 +325,7 @@ class CallQueueController(Controller):
 
     @patch(
         operation_id="UpdateCallQueueMember",
+        summary="Update a call queue member",
         path="/api/call-queues/{call_queue_id:uuid}/members/{member_id:uuid}",
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
     )
@@ -372,6 +380,7 @@ class CallQueueController(Controller):
 
     @delete(
         operation_id="DeleteCallQueueMember",
+        summary="Remove a call queue member",
         path="/api/call-queues/{call_queue_id:uuid}/members/{member_id:uuid}",
         return_dto=None,
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
@@ -418,6 +427,7 @@ class CallQueueController(Controller):
 
     @put(
         operation_id="PauseCallQueueMember",
+        summary="Pause or unpause a call queue member",
         path="/api/call-queues/{call_queue_id:uuid}/members/{member_id:uuid}/pause",
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
     )

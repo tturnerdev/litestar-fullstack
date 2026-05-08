@@ -65,7 +65,7 @@ class DeviceActionsController(Controller):
         "task_service": Provide(provide_background_tasks_service),
     }
 
-    @post(operation_id="RebootDevice", path="/api/devices/{device_id:uuid}/reboot")
+    @post(operation_id="RebootDevice", summary="Reboot a device", path="/api/devices/{device_id:uuid}/reboot")
     async def reboot_device(
         self,
         request: Request[m.User, Token, Any],
@@ -102,7 +102,7 @@ class DeviceActionsController(Controller):
         )
         return task_service.to_schema(task, schema_type=BackgroundTaskDetail)
 
-    @post(operation_id="ReprovisionDevice", path="/api/devices/{device_id:uuid}/reprovision")
+    @post(operation_id="ReprovisionDevice", summary="Reprovision a device", path="/api/devices/{device_id:uuid}/reprovision")
     async def reprovision_device(
         self,
         request: Request[m.User, Token, Any],
@@ -139,7 +139,7 @@ class DeviceActionsController(Controller):
         )
         return task_service.to_schema(task, schema_type=BackgroundTaskDetail)
 
-    @get(operation_id="ListDeviceLines", path="/api/devices/{device_id:uuid}/lines")
+    @get(operation_id="ListDeviceLines", summary="List device line assignments", path="/api/devices/{device_id:uuid}/lines")
     async def list_device_lines(
         self,
         devices_service: DeviceService,
@@ -153,7 +153,7 @@ class DeviceActionsController(Controller):
             schemas.append(schema)
         return schemas
 
-    @put(operation_id="SetDeviceLines", path="/api/devices/{device_id:uuid}/lines")
+    @put(operation_id="SetDeviceLines", summary="Set device line assignments", path="/api/devices/{device_id:uuid}/lines")
     async def set_device_lines(
         self,
         request: Request[m.User, Token, Any],

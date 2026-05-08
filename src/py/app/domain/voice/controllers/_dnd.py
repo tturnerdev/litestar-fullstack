@@ -38,6 +38,7 @@ class DndController(Controller):
 
     @get(
         operation_id="GetDndSettings",
+        summary="Get do-not-disturb settings",
         path="/api/voice/extensions/{ext_id:uuid}/dnd",
         guards=[requires_feature_permission("voice", "view"), requires_extension_ownership],
     )
@@ -55,6 +56,7 @@ class DndController(Controller):
 
     @patch(
         operation_id="UpdateDndSettings",
+        summary="Update do-not-disturb settings",
         path="/api/voice/extensions/{ext_id:uuid}/dnd",
         guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],
     )
@@ -74,6 +76,7 @@ class DndController(Controller):
 
     @post(
         operation_id="ToggleDnd",
+        summary="Toggle do-not-disturb",
         path="/api/voice/extensions/{ext_id:uuid}/dnd/toggle",
         guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],
     )

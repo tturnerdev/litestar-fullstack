@@ -68,7 +68,7 @@ class TeamInvitationController(Controller):
         "users_service": Provide(provide_users_service),
     }
 
-    @post(operation_id="CreateTeamInvitation", path="")
+    @post(operation_id="CreateTeamInvitation", summary="Create a team invitation", path="")
     async def create_team_invitation(
         self,
         current_user: m.User,
@@ -139,7 +139,7 @@ class TeamInvitationController(Controller):
 
         return team_invitations_service.to_schema(db_obj, schema_type=TeamInvitation)
 
-    @get(operation_id="ListTeamInvitations", path="")
+    @get(operation_id="ListTeamInvitations", summary="List team invitations", path="")
     async def list_team_invitations(
         self,
         team_invitations_service: TeamInvitationService,
@@ -159,7 +159,7 @@ class TeamInvitationController(Controller):
         db_objs, total = await team_invitations_service.list_and_count(*filters, m.TeamInvitation.team_id == team_id)
         return team_invitations_service.to_schema(db_objs, total, filters, schema_type=TeamInvitation)
 
-    @delete(operation_id="DeleteTeamInvitation", path="/{invitation_id:uuid}")
+    @delete(operation_id="DeleteTeamInvitation", summary="Delete a team invitation", path="/{invitation_id:uuid}")
     async def delete_team_invitation(
         self,
         request: Request[m.User, Token, Any],
@@ -203,7 +203,7 @@ class TeamInvitationController(Controller):
             request=request,
         )
 
-    @post(operation_id="AcceptTeamInvitation", path="/{invitation_id:uuid}/accept")
+    @post(operation_id="AcceptTeamInvitation", summary="Accept a team invitation", path="/{invitation_id:uuid}/accept")
     async def accept_team_invitation(
         self,
         request: Request[m.User, Token, Any],
@@ -285,7 +285,7 @@ class TeamInvitationController(Controller):
 
         return Message(message="Team invitation accepted")
 
-    @post(operation_id="RejectTeamInvitation", path="/{invitation_id:uuid}/reject")
+    @post(operation_id="RejectTeamInvitation", summary="Reject a team invitation", path="/{invitation_id:uuid}/reject")
     async def reject_team_invitation(
         self,
         request: Request[m.User, Token, Any],

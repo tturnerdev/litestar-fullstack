@@ -71,6 +71,7 @@ class ExtensionController(Controller):
 
     @get(
         operation_id="ListExtensions",
+        summary="List extensions",
         guards=[requires_feature_permission("voice", "view")],
     )
     async def list_extensions(
@@ -88,6 +89,7 @@ class ExtensionController(Controller):
 
     @post(
         operation_id="CreateExtension",
+        summary="Create an extension",
         guards=[requires_feature_permission("voice", "edit")],
     )
     async def create_extension(
@@ -164,6 +166,7 @@ class ExtensionController(Controller):
 
     @get(
         operation_id="GetExtension",
+        summary="Get extension details",
         path="/{ext_id:uuid}",
         guards=[requires_feature_permission("voice", "view"), requires_extension_ownership],
     )
@@ -179,6 +182,7 @@ class ExtensionController(Controller):
 
     @get(
         operation_id="ListExtensionDevices",
+        summary="List devices for an extension",
         path="/{ext_id:uuid}/devices",
         guards=[requires_feature_permission("voice", "view"), requires_extension_ownership],
     )
@@ -195,6 +199,7 @@ class ExtensionController(Controller):
 
     @patch(
         operation_id="UpdateExtension",
+        summary="Update an extension",
         path="/{ext_id:uuid}",
         guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],
     )
@@ -245,6 +250,7 @@ class ExtensionController(Controller):
 
     @delete(
         operation_id="DeleteExtension",
+        summary="Delete an extension",
         path="/{ext_id:uuid}",
         guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],
         return_dto=None,
@@ -294,6 +300,7 @@ class ExtensionController(Controller):
 
     @post(
         operation_id="SyncExtensions",
+        summary="Sync extensions from PBX",
         path="/sync",
         guards=[requires_feature_permission("voice", "edit")],
     )

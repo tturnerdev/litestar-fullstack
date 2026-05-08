@@ -129,6 +129,7 @@ class DeviceController(Controller):
 
     @get(
         operation_id="ListDevices",
+        summary="List devices",
         path="/api/devices",
         guards=[requires_feature_permission("devices", "view")],
     )
@@ -159,6 +160,7 @@ class DeviceController(Controller):
 
     @post(
         operation_id="CreateDevice",
+        summary="Register a device",
         path="/api/devices",
         guards=[requires_feature_permission("devices", "edit")],
     )
@@ -212,6 +214,7 @@ class DeviceController(Controller):
 
     @get(
         operation_id="GetDevice",
+        summary="Get device details",
         path="/api/devices/{device_id:uuid}",
         guards=[requires_feature_permission("devices", "view"), requires_device_ownership],
     )
@@ -234,6 +237,7 @@ class DeviceController(Controller):
 
     @patch(
         operation_id="UpdateDevice",
+        summary="Update a device",
         path="/api/devices/{device_id:uuid}",
         guards=[requires_feature_permission("devices", "edit"), requires_device_ownership],
     )
@@ -282,6 +286,7 @@ class DeviceController(Controller):
 
     @delete(
         operation_id="DeleteDevice",
+        summary="Delete a device",
         path="/api/devices/{device_id:uuid}",
         guards=[requires_feature_permission("devices", "edit"), requires_device_ownership],
     )

@@ -64,6 +64,7 @@ class ConnectionController(Controller):
 
     @get(
         operation_id="ListConnections",
+        summary="List connections",
         path="/api/connections",
         guards=[requires_feature_permission("connections", "view"), requires_connections_admin],
     )
@@ -93,6 +94,7 @@ class ConnectionController(Controller):
 
     @post(
         operation_id="CreateConnection",
+        summary="Create a connection",
         path="/api/connections",
         guards=[requires_feature_permission("connections", "edit"), requires_connections_admin],
     )
@@ -137,6 +139,7 @@ class ConnectionController(Controller):
 
     @get(
         operation_id="GetConnection",
+        summary="Get connection details",
         path="/api/connections/{connection_id:uuid}",
         guards=[requires_feature_permission("connections", "view"), requires_connections_admin],
     )
@@ -163,6 +166,7 @@ class ConnectionController(Controller):
 
     @patch(
         operation_id="UpdateConnection",
+        summary="Update a connection",
         path="/api/connections/{connection_id:uuid}",
         guards=[requires_feature_permission("connections", "edit"), requires_connections_admin],
     )
@@ -215,6 +219,7 @@ class ConnectionController(Controller):
 
     @delete(
         operation_id="DeleteConnection",
+        summary="Delete a connection",
         path="/api/connections/{connection_id:uuid}",
         guards=[requires_feature_permission("connections", "edit"), requires_connections_admin],
     )
@@ -256,6 +261,7 @@ class ConnectionController(Controller):
 
     @post(
         operation_id="TestConnection",
+        summary="Test a connection",
         path="/api/connections/{connection_id:uuid}/test",
         guards=[requires_feature_permission("connections", "edit"), requires_connections_admin],
     )

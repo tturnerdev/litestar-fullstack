@@ -119,7 +119,7 @@ class TagController(Controller):
         "audit_service": Provide(provide_audit_log_service),
     }
 
-    @get(operation_id="ListTags")
+    @get(operation_id="ListTags", summary="List tags")
     async def list_tags(
         self,
         tags_service: TagService,
@@ -137,7 +137,7 @@ class TagController(Controller):
         results, total = await tags_service.list_and_count(*filters)
         return tags_service.to_schema(results, total, filters, schema_type=Tag)
 
-    @get(operation_id="GetTag", path="/{tag_id:uuid}")
+    @get(operation_id="GetTag", summary="Get a tag", path="/{tag_id:uuid}")
     async def get_tag(
         self,
         tags_service: TagService,
@@ -155,7 +155,7 @@ class TagController(Controller):
         db_obj = await tags_service.get(tag_id)
         return tags_service.to_schema(db_obj, schema_type=Tag)
 
-    @post(operation_id="CreateTag", path="", guards=[requires_superuser])
+    @post(operation_id="CreateTag", summary="Create a tag", path="", guards=[requires_superuser])
     async def create_tag(
         self,
         request: Request[m.User, Token, Any],
@@ -190,7 +190,7 @@ class TagController(Controller):
         )
         return tags_service.to_schema(db_obj, schema_type=Tag)
 
-    @patch(operation_id="UpdateTag", path="/{tag_id:uuid}", guards=[requires_superuser])
+    @patch(operation_id="UpdateTag", summary="Update a tag", path="/{tag_id:uuid}", guards=[requires_superuser])
     async def update_tag(
         self,
         request: Request[m.User, Token, Any],
@@ -230,7 +230,7 @@ class TagController(Controller):
         )
         return tags_service.to_schema(fresh_obj, schema_type=Tag)
 
-    @delete(operation_id="DeleteTag", path="/{tag_id:uuid}", guards=[requires_superuser], return_dto=None)
+    @delete(operation_id="DeleteTag", summary="Delete a tag", path="/{tag_id:uuid}", guards=[requires_superuser], return_dto=None)
     async def delete_tag(
         self,
         request: Request[m.User, Token, Any],

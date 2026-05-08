@@ -54,6 +54,7 @@ class ForwardingController(Controller):
 
     @get(
         operation_id="ListForwardingRules",
+        summary="List forwarding rules",
         path="/api/voice/extensions/{ext_id:uuid}/forwarding",
         guards=[requires_feature_permission("voice", "view"), requires_extension_ownership],
     )
@@ -75,6 +76,7 @@ class ForwardingController(Controller):
 
     @post(
         operation_id="CreateForwardingRule",
+        summary="Create a forwarding rule",
         path="/api/voice/extensions/{ext_id:uuid}/forwarding",
         guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],
     )
@@ -112,6 +114,7 @@ class ForwardingController(Controller):
 
     @put(
         operation_id="SetForwardingRules",
+        summary="Replace all forwarding rules",
         path="/api/voice/extensions/{ext_id:uuid}/forwarding",
         guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],
     )
@@ -161,6 +164,7 @@ class ForwardingController(Controller):
 
     @patch(
         operation_id="UpdateForwardingRule",
+        summary="Update a forwarding rule",
         path="/api/voice/extensions/{ext_id:uuid}/forwarding/{rule_id:uuid}",
         guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],
     )
@@ -199,6 +203,7 @@ class ForwardingController(Controller):
 
     @delete(
         operation_id="DeleteForwardingRule",
+        summary="Delete a forwarding rule",
         path="/api/voice/extensions/{ext_id:uuid}/forwarding/{rule_id:uuid}",
         return_dto=None,
         guards=[requires_feature_permission("voice", "edit"), requires_extension_ownership],

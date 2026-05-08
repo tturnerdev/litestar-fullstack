@@ -36,6 +36,7 @@ class TeamRolePermissionController(Controller):
 
     @get(
         operation_id="ListTeamPermissions",
+        summary="List team permissions",
         path="/api/teams/{team_id:uuid}/permissions",
         guards=[requires_team_membership],
     )
@@ -49,6 +50,7 @@ class TeamRolePermissionController(Controller):
 
     @put(
         operation_id="UpdateTeamPermissions",
+        summary="Update team permissions",
         path="/api/teams/{team_id:uuid}/permissions",
         guards=[requires_team_admin],
     )

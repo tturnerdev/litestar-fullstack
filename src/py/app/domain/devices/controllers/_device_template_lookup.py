@@ -31,6 +31,7 @@ class DeviceTemplateLookupController(Controller):
 
     @get(
         operation_id="LookupDeviceTemplate",
+        summary="Look up device template",
         path="/lookup",
         cache=600,
         cache_control=CacheControlHeader(private=True, max_age=600),

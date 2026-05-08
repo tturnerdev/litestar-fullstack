@@ -53,6 +53,7 @@ class PhoneNumberController(Controller):
 
     @get(
         operation_id="ListPhoneNumbers",
+        summary="List phone numbers",
         guards=[requires_feature_permission("voice", "view")],
     )
     async def list_phone_numbers(
@@ -70,6 +71,7 @@ class PhoneNumberController(Controller):
 
     @post(
         operation_id="CreatePhoneNumber",
+        summary="Create a phone number",
         guards=[requires_feature_permission("voice", "edit")],
     )
     async def create_phone_number(
@@ -103,6 +105,7 @@ class PhoneNumberController(Controller):
 
     @get(
         operation_id="ListUnregisteredE911PhoneNumbers",
+        summary="List phone numbers without E911",
         path="/unregistered-e911",
         guards=[requires_feature_permission("voice", "view")],
     )
@@ -116,7 +119,7 @@ class PhoneNumberController(Controller):
         results = await phone_numbers_service.get_unregistered_e911_numbers(team_id)
         return phone_numbers_service.to_schema_enriched(results)
 
-    @get(operation_id="GetPhoneNumber", path="/{phone_number_id:uuid}", guards=[requires_feature_permission("voice", "view"), requires_phone_number_access])
+    @get(operation_id="GetPhoneNumber", summary="Get phone number details", path="/{phone_number_id:uuid}", guards=[requires_feature_permission("voice", "view"), requires_phone_number_access])
     async def get_phone_number(
         self,
         phone_numbers_service: PhoneNumberService,
@@ -127,7 +130,7 @@ class PhoneNumberController(Controller):
         db_obj = await phone_numbers_service.get_one(id=phone_number_id, user_id=current_user.id)
         return phone_numbers_service.to_schema_enriched(db_obj)
 
-    @patch(operation_id="UpdatePhoneNumber", path="/{phone_number_id:uuid}", guards=[requires_feature_permission("voice", "edit"), requires_phone_number_access])
+    @patch(operation_id="UpdatePhoneNumber", summary="Update a phone number", path="/{phone_number_id:uuid}", guards=[requires_feature_permission("voice", "edit"), requires_phone_number_access])
     async def update_phone_number(
         self,
         request: Request[m.User, Token, Any],
@@ -160,6 +163,7 @@ class PhoneNumberController(Controller):
 
     @delete(
         operation_id="DeletePhoneNumber",
+        summary="Delete a phone number",
         path="/{phone_number_id:uuid}",
         guards=[requires_feature_permission("voice", "edit"), requires_phone_number_access],
         return_dto=None,

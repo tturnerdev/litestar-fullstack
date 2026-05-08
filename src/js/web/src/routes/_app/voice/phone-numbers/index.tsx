@@ -43,11 +43,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { E911StatusBadge } from "@/components/voice/e911-status-badge"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { type PhoneNumber, useDeletePhoneNumber, usePhoneNumbers, useUpdatePhoneNumber } from "@/lib/api/hooks/voice"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { useSettingsStore } from "@/lib/settings-store"
 import { cn } from "@/lib/utils"
 
@@ -130,6 +132,7 @@ const TOGGLEABLE_COLUMNS = [
   { key: "type", label: "Type" },
   { key: "callerId", label: "Caller ID" },
   { key: "e911", label: "E911" },
+  { key: "created", label: "Created" },
 ] as const
 
 type ColumnVisibility = Record<string, boolean>
@@ -283,6 +286,16 @@ function PhoneNumberRow({
       {isColumnVisible("e911") && (
         <TableCell className={cn("hidden md:table-cell", cellClass)}>
           <E911StatusBadge registered={pn.e911Registered ?? false} registrationId={pn.e911RegistrationId} />
+        </TableCell>
+      )}
+      {isColumnVisible("created") && (
+        <TableCell className={cn("hidden md:table-cell", cellClass)}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="text-xs text-muted-foreground">{formatRelativeTimeShort(pn.createdAt)}</span>
+            </TooltipTrigger>
+            <TooltipContent>{formatDateTime(pn.createdAt)}</TooltipContent>
+          </Tooltip>
         </TableCell>
       )}
       <TableCell className={cn("text-right", cellClass)}>
@@ -459,6 +472,10 @@ function PhoneNumbersPage() {
           case "caller_id_name":
             aVal = a.callerIdName ?? ""
             bVal = b.callerIdName ?? ""
+            break
+          case "created_at":
+            aVal = a.createdAt ?? ""
+            bVal = b.createdAt ?? ""
             break
           default:
             return 0
@@ -867,6 +884,16 @@ function PhoneNumbersPage() {
                       )}
                       {isColumnVisible("status") && <SortableHeader label="Status" sortKey="is_active" currentSort={sortKey} currentDirection={sortDir} onSort={handleSort} />}
                       {isColumnVisible("e911") && <TableHead className="hidden md:table-cell">E911</TableHead>}
+                      {isColumnVisible("created") && (
+                        <SortableHeader
+                          label="Created"
+                          sortKey="created_at"
+                          currentSort={sortKey}
+                          currentDirection={sortDir}
+                          onSort={handleSort}
+                          className="hidden md:table-cell"
+                        />
+                      )}
                       <TableHead className="w-20 text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>

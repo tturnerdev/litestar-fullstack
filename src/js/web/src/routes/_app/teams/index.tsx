@@ -35,11 +35,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton, SkeletonTable } from "@/components/ui/skeleton"
 import { nextSortDirection, SortableHeader, type SortDirection } from "@/components/ui/sortable-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useDeleteTeam, useTeams } from "@/lib/api/hooks/teams"
 import { useAuthStore } from "@/lib/auth"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
+import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import type { Team } from "@/lib/generated/api"
 import { useSettingsStore } from "@/lib/settings-store"
 import { cn } from "@/lib/utils"
@@ -89,6 +91,7 @@ const TOGGLEABLE_COLUMNS = [
   { key: "role", label: "Your Role" },
   { key: "tags", label: "Tags" },
   { key: "status", label: "Status" },
+  { key: "created", label: "Created" },
 ] as const
 
 type ColumnVisibility = Record<string, boolean>
@@ -546,6 +549,16 @@ function TeamsPage() {
                       {isColumnVisible("role") && <TableHead className="hidden md:table-cell">Your Role</TableHead>}
                       {isColumnVisible("tags") && <TableHead className="hidden md:table-cell">Tags</TableHead>}
                       {isColumnVisible("status") && <TableHead className="hidden md:table-cell">Status</TableHead>}
+                      {isColumnVisible("created") && (
+                        <SortableHeader
+                          label="Created"
+                          sortKey="created_at"
+                          currentSort={sortKey}
+                          currentDirection={sortDir}
+                          onSort={handleSort}
+                          className="hidden md:table-cell"
+                        />
+                      )}
                       <TableHead className="w-16 text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -787,6 +800,16 @@ function TeamRow({
                 Active
               </span>
             )}
+          </TableCell>
+        )}
+        {isColumnVisible("created") && (
+          <TableCell className={cn("hidden md:table-cell", cellClass)}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="text-xs text-muted-foreground">{formatRelativeTimeShort(team.createdAt)}</span>
+              </TooltipTrigger>
+              <TooltipContent>{formatDateTime(team.createdAt)}</TooltipContent>
+            </Tooltip>
           </TableCell>
         )}
         <TableCell className={cn("text-right", cellClass)}>

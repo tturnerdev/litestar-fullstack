@@ -55,6 +55,7 @@ class TimeConditionController(Controller):
 
     @get(
         operation_id="ListTimeConditions",
+        summary="List time conditions",
         path="/api/time-conditions",
         guards=[requires_feature_permission("call_routing", "view"), requires_call_routing_access],
     )
@@ -79,6 +80,7 @@ class TimeConditionController(Controller):
 
     @post(
         operation_id="CreateTimeCondition",
+        summary="Create a time condition",
         path="/api/time-conditions",
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
     )
@@ -124,6 +126,7 @@ class TimeConditionController(Controller):
 
     @get(
         operation_id="GetTimeCondition",
+        summary="Get time condition details",
         path="/api/time-conditions/{time_condition_id:uuid}",
         guards=[requires_feature_permission("call_routing", "view"), requires_call_routing_access],
     )
@@ -148,6 +151,7 @@ class TimeConditionController(Controller):
 
     @patch(
         operation_id="UpdateTimeCondition",
+        summary="Update a time condition",
         path="/api/time-conditions/{time_condition_id:uuid}",
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
     )
@@ -197,6 +201,7 @@ class TimeConditionController(Controller):
 
     @delete(
         operation_id="DeleteTimeCondition",
+        summary="Delete a time condition",
         path="/api/time-conditions/{time_condition_id:uuid}",
         return_dto=None,
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
@@ -241,6 +246,7 @@ class TimeConditionController(Controller):
 
     @put(
         operation_id="SetTimeConditionOverride",
+        summary="Set time condition override",
         path="/api/time-conditions/{time_condition_id:uuid}/override",
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
     )

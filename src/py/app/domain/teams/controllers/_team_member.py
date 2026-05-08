@@ -44,7 +44,7 @@ class TeamMemberController(Controller):
         "notifications_service": Provide(provide_notifications_service),
     }
 
-    @post(operation_id="AddMemberToTeam", path="/api/teams/{team_id:uuid}/members")
+    @post(operation_id="AddMemberToTeam", summary="Add a team member", path="/api/teams/{team_id:uuid}/members")
     async def add_member_to_team(
         self,
         request: Request[m.User, Token, Any],
@@ -107,7 +107,7 @@ class TeamMemberController(Controller):
         return teams_service.to_schema(team_obj, schema_type=Team)
 
     @delete(
-        operation_id="RemoveMemberFromTeam", path="/api/teams/{team_id:uuid}/members", status_code=HTTP_202_ACCEPTED
+        operation_id="RemoveMemberFromTeam", summary="Remove a team member", path="/api/teams/{team_id:uuid}/members", status_code=HTTP_202_ACCEPTED
     )
     async def remove_member_from_team(
         self,
@@ -176,7 +176,7 @@ class TeamMemberController(Controller):
 
         return teams_service.to_schema(team_obj, schema_type=Team)
 
-    @patch(operation_id="UpdateTeamMember", path="/api/teams/{team_id:uuid}/members/{user_id:uuid}")
+    @patch(operation_id="UpdateTeamMember", summary="Update a team member's role", path="/api/teams/{team_id:uuid}/members/{user_id:uuid}")
     async def update_team_member(
         self,
         request: Request[m.User, Token, Any],

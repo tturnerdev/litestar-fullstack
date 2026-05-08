@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.287.0 (2026-05-08)
+
+### Added
+- **Text search on 6 list endpoints** — Fax email routes (email_address), team invitations (email, invited_by_email), voicemail messages (caller_number, caller_name, transcription), forwarding rules (destination_value), OAuth accounts (oauth_name, account_email), ticket messages (body_markdown)
+- **HTTP response caching on 10 endpoints** — Dashboard stats/activity/trends (300s), admin device/voice/fax/support/task stats (300s), system status (60s), organization settings (300s)
+- **Schema timestamps on 7 response types** — Device, TicketMessage, TicketAttachment, ForwardingRule, VoicemailSettings, VoicemailMessage, DndSettings now expose created_at/updated_at
+- **Sort default** — Admin bulk import list now defaults to created_at desc
+
 ## v0.286.0 (2026-05-07)
 
 ### Fixed

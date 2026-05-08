@@ -61,6 +61,7 @@ class IvrMenuController(Controller):
 
     @get(
         operation_id="ListIvrMenus",
+        summary="List IVR menus",
         path="/api/ivr-menus",
         guards=[requires_feature_permission("call_routing", "view"), requires_call_routing_access],
     )
@@ -85,6 +86,7 @@ class IvrMenuController(Controller):
 
     @post(
         operation_id="CreateIvrMenu",
+        summary="Create an IVR menu",
         path="/api/ivr-menus",
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
     )
@@ -130,6 +132,7 @@ class IvrMenuController(Controller):
 
     @get(
         operation_id="GetIvrMenu",
+        summary="Get IVR menu details",
         path="/api/ivr-menus/{ivr_menu_id:uuid}",
         guards=[requires_feature_permission("call_routing", "view"), requires_call_routing_access],
     )
@@ -152,6 +155,7 @@ class IvrMenuController(Controller):
 
     @patch(
         operation_id="UpdateIvrMenu",
+        summary="Update an IVR menu",
         path="/api/ivr-menus/{ivr_menu_id:uuid}",
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
     )
@@ -199,6 +203,7 @@ class IvrMenuController(Controller):
 
     @delete(
         operation_id="DeleteIvrMenu",
+        summary="Delete an IVR menu",
         path="/api/ivr-menus/{ivr_menu_id:uuid}",
         return_dto=None,
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
@@ -243,6 +248,7 @@ class IvrMenuController(Controller):
 
     @get(
         operation_id="ListIvrMenuOptions",
+        summary="List IVR menu options",
         path="/api/ivr-menus/{ivr_menu_id:uuid}/options",
         guards=[requires_feature_permission("call_routing", "view"), requires_call_routing_access],
     )
@@ -268,6 +274,7 @@ class IvrMenuController(Controller):
 
     @post(
         operation_id="CreateIvrMenuOption",
+        summary="Add an IVR menu option",
         path="/api/ivr-menus/{ivr_menu_id:uuid}/options",
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
     )
@@ -317,6 +324,7 @@ class IvrMenuController(Controller):
 
     @patch(
         operation_id="UpdateIvrMenuOption",
+        summary="Update an IVR menu option",
         path="/api/ivr-menus/{ivr_menu_id:uuid}/options/{option_id:uuid}",
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
     )
@@ -369,6 +377,7 @@ class IvrMenuController(Controller):
 
     @delete(
         operation_id="DeleteIvrMenuOption",
+        summary="Delete an IVR menu option",
         path="/api/ivr-menus/{ivr_menu_id:uuid}/options/{option_id:uuid}",
         return_dto=None,
         guards=[requires_feature_permission("call_routing", "edit"), requires_call_routing_access],
