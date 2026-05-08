@@ -162,6 +162,13 @@ class ScheduleEntryService(service.SQLAlchemyAsyncRepositoryService[m.ScheduleEn
                     raise ValidationException("A schedule entry for this day and start time already exists.")
         return data
 
+    async def to_model_on_upsert(self, data: ModelDictT[m.ScheduleEntry]) -> ModelDictT[m.ScheduleEntry]:
+        data = service.schema_dump(data)
+        if service.is_dict(data):
+            if "label" in data and data["label"]:
+                data["label"] = data["label"].strip()
+        return data
+
 
 def _entry_to_schema(entry: m.ScheduleEntry) -> ScheduleEntryDetail:
     """Convert a ScheduleEntry model instance to a detail schema."""

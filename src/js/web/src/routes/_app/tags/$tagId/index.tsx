@@ -284,6 +284,14 @@ function TagDetailPage() {
                   )}
                 </div>
 
+                {/* Description */}
+                {tag.description && (
+                  <div className="space-y-2">
+                    <Label>Description</Label>
+                    <p className="text-sm text-muted-foreground">{tag.description}</p>
+                  </div>
+                )}
+
                 {/* Slug */}
                 <div className="space-y-2">
                   <Label>Slug</Label>

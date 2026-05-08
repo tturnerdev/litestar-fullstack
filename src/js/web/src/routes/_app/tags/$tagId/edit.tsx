@@ -21,8 +21,10 @@ import { Label } from "@/components/ui/label"
 import { PageContainer, PageHeader, PageSection } from "@/components/ui/page-layout"
 import { SectionErrorBoundary } from "@/components/ui/section-error-boundary"
 import { SkeletonCard } from "@/components/ui/skeleton"
+import { Textarea } from "@/components/ui/textarea"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { type TagUpdate, useTag, useUpdateTag } from "@/lib/api/hooks/tags"
+import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/tags/$tagId/edit")({
   component: EditTagPage,
@@ -36,6 +38,7 @@ function EditTagPage() {
   const updateTag = useUpdateTag(tagId)
 
   const [name, setName] = useState("")
+  const [description, setDescription] = useState("")
   const [initialized, setInitialized] = useState(false)
   const justSubmittedRef = useRef(false)
 
@@ -49,11 +52,12 @@ function EditTagPage() {
   useEffect(() => {
     if (data && !initialized) {
       setName(data.name)
+      setDescription(data.description ?? "")
       setInitialized(true)
     }
   }, [data, initialized])
 
-  const isDirty = initialized && data != null && name !== data.name
+  const isDirty = initialized && data != null && (name !== data.name || description !== (data.description ?? ""))
 
   // Block navigation when form has unsaved changes
   const blocker = useBlocker({
@@ -70,6 +74,9 @@ function EditTagPage() {
 
     // Only include fields that changed
     if (name.trim() !== data.name) payload.name = name.trim()
+    if (description !== (data.description ?? "")) {
+      payload.description = description.trim() || null
+    }
 
     justSubmittedRef.current = true
     updateTag.mutate(payload, {
@@ -174,6 +181,23 @@ function EditTagPage() {
                       Current slug: <span className="font-mono">{data.slug}</span>
                     </p>
                     <span className={`text-xs ${name.length >= 50 ? "text-destructive" : name.length > 40 ? "text-amber-500" : "text-muted-foreground"}`}>{name.length}/50</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="tag-description">Description</Label>
+                  <Textarea
+                    id="tag-description"
+                    placeholder="Optional description for this tag..."
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    maxLength={255}
+                    rows={3}
+                    className="resize-none"
+                  />
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-muted-foreground">Optional notes about when or how to use this tag.</p>
+                    <p className={cn("shrink-0 text-xs", description.length >= 255 ? "text-destructive" : "text-muted-foreground")}>{description.length}/255</p>
                   </div>
                 </div>
 

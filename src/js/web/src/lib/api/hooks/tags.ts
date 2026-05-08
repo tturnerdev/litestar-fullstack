@@ -10,6 +10,7 @@ export interface Tag {
   slug: string
   createdAt: string
   updatedAt: string
+  description?: string | null
 }
 
 export interface TagCreate {
