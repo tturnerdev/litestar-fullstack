@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
 import { Calendar, ChevronRight, Clock, Globe, Loader2, SlidersHorizontal, Star } from "lucide-react"
-import { useRef, useState } from "react"
+import { useCallback, useRef, useState } from "react"
 import { toast } from "sonner"
 import {
   AlertDialog,
@@ -89,6 +89,36 @@ const tips = [
   },
 ]
 
+// ---------------------------------------------------------------------------
+// Validation
+// ---------------------------------------------------------------------------
+
+interface ScheduleFieldErrors {
+  name?: string
+  timezone?: string
+}
+
+function validateScheduleField(field: keyof ScheduleFieldErrors, value: string): string | undefined {
+  switch (field) {
+    case "name":
+      if (value.trim() === "") return "Schedule name is required"
+      if (value.trim().length < 2) return "Name must be at least 2 characters"
+      return undefined
+    case "timezone":
+      if (!value) return "Timezone is required"
+      return undefined
+  }
+}
+
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null
+  return <p className="text-sm text-destructive">{message}</p>
+}
+
+// ---------------------------------------------------------------------------
+// Page component
+// ---------------------------------------------------------------------------
+
 function NewSchedulePage() {
   useDocumentTitle("New Schedule")
   const router = useRouter()
@@ -101,6 +131,34 @@ function NewSchedulePage() {
   const [timezone, setTimezone] = useState(getDefaultTimezone)
   const [isDefault, setIsDefault] = useState(false)
 
+  // Validation state
+  const [fieldErrors, setFieldErrors] = useState<ScheduleFieldErrors>({})
+  const touchedRef = useRef<Record<string, boolean>>({})
+
+  const validateField = useCallback((field: keyof ScheduleFieldErrors, value: string) => {
+    const error = validateScheduleField(field, value)
+    setFieldErrors((prev) => ({ ...prev, [field]: error }))
+    return error
+  }, [])
+
+  const handleFieldBlur = useCallback(
+    (field: keyof ScheduleFieldErrors, value: string) => {
+      touchedRef.current[field] = true
+      validateField(field, value)
+    },
+    [validateField],
+  )
+
+  const handleNameChange = useCallback(
+    (value: string) => {
+      setName(value)
+      if (touchedRef.current.name) {
+        validateField("name", value)
+      }
+    },
+    [validateField],
+  )
+
   const formDirty = name.trim() !== "" || scheduleType !== "business_hours" || timezone !== getDefaultTimezone() || isDefault
 
   const blocker = useBlocker({
@@ -110,7 +168,17 @@ function NewSchedulePage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!name.trim() || !currentTeam) return
+
+    // Validate all fields before submit
+    const nameErr = validateField("name", name)
+    const timezoneErr = validateField("timezone", timezone)
+    // Mark all as touched so errors show
+    for (const f of ["name", "timezone"] as const) {
+      touchedRef.current[f] = true
+    }
+    if (nameErr || timezoneErr) return
+
+    if (!currentTeam) return
 
     justSubmittedRef.current = true
 
@@ -132,7 +200,18 @@ function NewSchedulePage() {
     })
   }
 
-  const isValid = name.trim() !== "" && currentTeam !== null
+  const handleCancel = () => {
+    setName("")
+    setScheduleType("business_hours")
+    setTimezone(getDefaultTimezone())
+    setIsDefault(false)
+    setFieldErrors({})
+    touchedRef.current = {}
+    router.navigate({ to: "/schedules" })
+  }
+
+  const hasValidationErrors = Object.values(fieldErrors).some((e) => !!e)
+  const isValid = name.trim().length >= 2 && timezone !== "" && currentTeam !== null && !hasValidationErrors
 
   return (
     <>
@@ -182,7 +261,16 @@ function NewSchedulePage() {
                     <Label htmlFor="schedule-name">
                       Name <span className="text-red-500">*</span>
                     </Label>
-                    <Input id="schedule-name" placeholder="e.g., Main Office Hours" value={name} onChange={(e) => setName(e.target.value)} required autoFocus />
+                    <Input
+                      id="schedule-name"
+                      placeholder="e.g., Main Office Hours"
+                      value={name}
+                      onChange={(e) => handleNameChange(e.target.value)}
+                      onBlur={() => handleFieldBlur("name", name)}
+                      aria-invalid={!!fieldErrors.name}
+                      autoFocus
+                    />
+                    <FieldError message={fieldErrors.name} />
                     <p className="text-xs text-muted-foreground">A descriptive name for this schedule.</p>
                   </div>
 
@@ -206,9 +294,19 @@ function NewSchedulePage() {
 
                   {/* Timezone */}
                   <div className="space-y-2">
-                    <Label htmlFor="schedule-timezone">Timezone</Label>
-                    <Select value={timezone} onValueChange={setTimezone}>
-                      <SelectTrigger id="schedule-timezone">
+                    <Label htmlFor="schedule-timezone">
+                      Timezone <span className="text-red-500">*</span>
+                    </Label>
+                    <Select
+                      value={timezone}
+                      onValueChange={(v) => {
+                        setTimezone(v)
+                        if (touchedRef.current.timezone) {
+                          validateField("timezone", v)
+                        }
+                      }}
+                    >
+                      <SelectTrigger id="schedule-timezone" onBlur={() => handleFieldBlur("timezone", timezone)} aria-invalid={!!fieldErrors.timezone}>
                         <SelectValue placeholder="Select a timezone" />
                       </SelectTrigger>
                       <SelectContent>
@@ -219,6 +317,7 @@ function NewSchedulePage() {
                         ))}
                       </SelectContent>
                     </Select>
+                    <FieldError message={fieldErrors.timezone} />
                     <p className="text-xs text-muted-foreground">All schedule entries will be evaluated in this timezone.</p>
                   </div>
 
@@ -236,7 +335,7 @@ function NewSchedulePage() {
 
                   {/* Actions */}
                   <div className="flex items-center justify-end gap-2 pt-2">
-                    <Button type="button" variant="ghost" onClick={() => router.navigate({ to: "/schedules" })}>
+                    <Button type="button" variant="ghost" onClick={handleCancel}>
                       Cancel
                     </Button>
                     <Button type="submit" disabled={!isValid || createSchedule.isPending}>

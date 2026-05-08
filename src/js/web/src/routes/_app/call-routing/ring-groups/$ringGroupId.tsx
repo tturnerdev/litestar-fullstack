@@ -40,6 +40,7 @@ import {
   useRingGroup,
   useUpdateRingGroup,
 } from "@/lib/api/hooks/call-routing"
+import { type Extension, useExtensions } from "@/lib/api/hooks/voice"
 
 export const Route = createFileRoute("/_app/call-routing/ring-groups/$ringGroupId")({
   component: RingGroupDetailPage,
@@ -221,7 +222,7 @@ function EditRingGroupDialog({ ringGroup, open, onOpenChange }: EditRingGroupDia
 
 // -- Add Member Inline --------------------------------------------------------
 
-function AddMemberRow({ groupId }: { groupId: string }) {
+function AddMemberRow({ groupId, extensions }: { groupId: string; extensions: Extension[] }) {
   const createMember = useCreateRingGroupMember(groupId)
   const [adding, setAdding] = useState(false)
   const [memberType, setMemberType] = useState<"extension" | "external">("extension")
@@ -273,8 +274,19 @@ function AddMemberRow({ groupId }: { groupId: string }) {
       <div className="grid gap-3 sm:grid-cols-2">
         {memberType === "extension" ? (
           <div className="space-y-2">
-            <Label>Extension ID</Label>
-            <Input placeholder="Extension UUID" value={extensionId} onChange={(e) => setExtensionId(e.target.value)} />
+            <Label>Extension</Label>
+            <Select value={extensionId} onValueChange={setExtensionId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select extension" />
+              </SelectTrigger>
+              <SelectContent>
+                {extensions.map((ext) => (
+                  <SelectItem key={ext.id} value={ext.id}>
+                    {ext.extensionNumber} — {ext.displayName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         ) : (
           <div className="space-y-2">
@@ -288,7 +300,7 @@ function AddMemberRow({ groupId }: { groupId: string }) {
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <Button size="sm" onClick={handleSave} disabled={createMember.isPending || (memberType === "extension" ? !extensionId.trim() : !externalNumber.trim())}>
+        <Button size="sm" onClick={handleSave} disabled={createMember.isPending || (memberType === "extension" ? !extensionId : !externalNumber.trim())}>
           {createMember.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Add
         </Button>
@@ -311,6 +323,7 @@ function MemberRow({
   onMoveUp,
   onMoveDown,
   isReordering,
+  extensionLookup,
 }: {
   member: RingGroupMember
   groupId: string
@@ -320,8 +333,10 @@ function MemberRow({
   onMoveUp: () => void
   onMoveDown: () => void
   isReordering: boolean
+  extensionLookup: Map<string, Extension>
 }) {
   const deleteMember = useDeleteRingGroupMember(groupId)
+  const ext = member.extensionId ? extensionLookup.get(member.extensionId) : undefined
 
   const memberType = member.extensionId ? "Extension" : "External"
 
@@ -337,8 +352,9 @@ function MemberRow({
       </TableCell>
       <TableCell>
         {member.extensionId ? (
-          <Link to="/voice/extensions/$extensionId" params={{ extensionId: member.extensionId }} className="text-primary hover:underline font-mono text-sm">
-            {`${member.extensionId.slice(0, 8)}...`}
+          <Link to="/voice/extensions/$extensionId" params={{ extensionId: member.extensionId }} className="text-primary hover:underline">
+            <span className="font-mono text-sm">{ext?.extensionNumber ?? member.extensionId.slice(0, 8)}</span>
+            {ext?.displayName && <span className="ml-1.5 text-xs text-muted-foreground">{ext.displayName}</span>}
           </Link>
         ) : (
           <span className="text-sm">{member.externalNumber ?? "---"}</span>
@@ -385,6 +401,7 @@ function RingGroupDetailPage() {
   const router = useRouter()
 
   const { data, isLoading, isError, refetch } = useRingGroup(ringGroupId)
+  const { data: extensionsData } = useExtensions(1, 200)
   const deleteMutation = useDeleteRingGroup()
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [showDeleteAlert, setShowDeleteAlert] = useState(false)
@@ -404,6 +421,8 @@ function RingGroupDetailPage() {
   const sortedMembers = [...members].sort((a, b) => a.sortOrder - b.sortOrder)
   const extensionCount = members.filter((m) => m.extensionId).length
   const externalCount = members.filter((m) => m.externalNumber).length
+  const allExtensions = extensionsData?.items ?? []
+  const extensionLookup = useMemo(() => new Map(allExtensions.map((e) => [e.id, e])), [allExtensions])
 
   const handleReorder = useCallback(
     (index: number, direction: "up" | "down") => {
@@ -634,6 +653,7 @@ function RingGroupDetailPage() {
                               isReordering={reorderMutation.isPending}
                               onMoveUp={() => handleReorder(idx, "up")}
                               onMoveDown={() => handleReorder(idx, "down")}
+                              extensionLookup={extensionLookup}
                             />
                           ))}
                         </TableBody>
@@ -642,7 +662,7 @@ function RingGroupDetailPage() {
                   ) : (
                     <p className="text-sm text-muted-foreground py-4 text-center">No members assigned.</p>
                   )}
-                  <AddMemberRow groupId={ringGroupId} />
+                  <AddMemberRow groupId={ringGroupId} extensions={allExtensions} />
                 </CardContent>
               </Card>
             </SectionErrorBoundary>

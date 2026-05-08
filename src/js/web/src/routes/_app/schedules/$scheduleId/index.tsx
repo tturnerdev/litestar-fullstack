@@ -18,7 +18,7 @@ import {
   Trash2,
   XCircle,
 } from "lucide-react"
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import {
@@ -538,6 +538,30 @@ function WeeklyViewGrid({ weeklyEntries }: { weeklyEntries: Map<number, Schedule
   )
 }
 
+// -- Validation ---------------------------------------------------------------
+
+interface ScheduleFieldErrors {
+  name?: string
+  timezone?: string
+}
+
+function validateScheduleField(field: keyof ScheduleFieldErrors, value: string): string | undefined {
+  switch (field) {
+    case "name":
+      if (value.trim() === "") return "Schedule name is required"
+      if (value.trim().length < 2) return "Name must be at least 2 characters"
+      return undefined
+    case "timezone":
+      if (!value) return "Timezone is required"
+      return undefined
+  }
+}
+
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null
+  return <p className="text-sm text-destructive">{message}</p>
+}
+
 // -- Main page ----------------------------------------------------------------
 
 function ScheduleDetailPage() {
@@ -557,6 +581,37 @@ function ScheduleDetailPage() {
   const [editDefault, setEditDefault] = useState(false)
   const [showDeleteFromMenu, setShowDeleteFromMenu] = useState(false)
 
+  // Validation state
+  const [fieldErrors, setFieldErrors] = useState<ScheduleFieldErrors>({})
+  const touchedRef = useRef<Record<string, boolean>>({})
+
+  const validateField = useCallback((field: keyof ScheduleFieldErrors, value: string) => {
+    const error = validateScheduleField(field, value)
+    setFieldErrors((prev) => ({ ...prev, [field]: error }))
+    return error
+  }, [])
+
+  const handleFieldBlur = useCallback(
+    (field: keyof ScheduleFieldErrors, value: string) => {
+      touchedRef.current[field] = true
+      validateField(field, value)
+    },
+    [validateField],
+  )
+
+  const handleEditNameChange = useCallback(
+    (value: string) => {
+      setEditName(value)
+      if (touchedRef.current.name) {
+        validateField("name", value)
+      }
+    },
+    [validateField],
+  )
+
+  const hasValidationErrors = Object.values(fieldErrors).some((e) => !!e)
+  const isEditFormValid = editName.trim().length >= 2 && editTimezone !== "" && !hasValidationErrors
+
   useDocumentTitle(data?.name ? `${data.name} - Schedule` : "Schedule")
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: startEditing is a stable form-populating function defined below
@@ -572,17 +627,37 @@ function ScheduleDetailPage() {
     setEditTimezone(schedule.timezone)
     setEditType(schedule.scheduleType)
     setEditDefault(schedule.isDefault)
+    setFieldErrors({})
+    touchedRef.current = {}
     setEditing(true)
   }
 
+  function handleCancelEdit() {
+    setEditing(false)
+    setFieldErrors({})
+    touchedRef.current = {}
+  }
+
   function handleSave() {
+    // Validate all fields before submit
+    const nameErr = validateField("name", editName)
+    const timezoneErr = validateField("timezone", editTimezone)
+    for (const f of ["name", "timezone"] as const) {
+      touchedRef.current[f] = true
+    }
+    if (nameErr || timezoneErr) return
+
     const payload: Record<string, unknown> = {}
     if (editName !== data?.name) payload.name = editName
     if (editTimezone !== data?.timezone) payload.timezone = editTimezone
     if (editType !== data?.scheduleType) payload.scheduleType = editType
     if (editDefault !== data?.isDefault) payload.isDefault = editDefault
     updateSchedule.mutate(payload, {
-      onSuccess: () => setEditing(false),
+      onSuccess: () => {
+        setEditing(false)
+        setFieldErrors({})
+        touchedRef.current = {}
+      },
     })
   }
 
@@ -786,10 +861,10 @@ function ScheduleDetailPage() {
                   </CardTitle>
                   {editing && (
                     <div className="flex gap-2">
-                      <Button variant="ghost" size="sm" onClick={() => setEditing(false)}>
+                      <Button variant="ghost" size="sm" onClick={handleCancelEdit}>
                         Cancel
                       </Button>
-                      <Button size="sm" onClick={handleSave} disabled={updateSchedule.isPending}>
+                      <Button size="sm" onClick={handleSave} disabled={updateSchedule.isPending || !isEditFormValid}>
                         {updateSchedule.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         Save
                       </Button>
@@ -800,8 +875,16 @@ function ScheduleDetailPage() {
                   {editing ? (
                     <div className="space-y-4">
                       <div className="space-y-2">
-                        <Label>Name</Label>
-                        <Input value={editName} onChange={(e) => setEditName(e.target.value)} />
+                        <Label>
+                          Name <span className="text-red-500">*</span>
+                        </Label>
+                        <Input
+                          value={editName}
+                          onChange={(e) => handleEditNameChange(e.target.value)}
+                          onBlur={() => handleFieldBlur("name", editName)}
+                          aria-invalid={!!fieldErrors.name}
+                        />
+                        <FieldError message={fieldErrors.name} />
                       </div>
                       <div className="space-y-2">
                         <Label>Type</Label>
@@ -817,9 +900,19 @@ function ScheduleDetailPage() {
                         </Select>
                       </div>
                       <div className="space-y-2">
-                        <Label>Timezone</Label>
-                        <Select value={editTimezone} onValueChange={setEditTimezone}>
-                          <SelectTrigger>
+                        <Label>
+                          Timezone <span className="text-red-500">*</span>
+                        </Label>
+                        <Select
+                          value={editTimezone}
+                          onValueChange={(v) => {
+                            setEditTimezone(v)
+                            if (touchedRef.current.timezone) {
+                              validateField("timezone", v)
+                            }
+                          }}
+                        >
+                          <SelectTrigger onBlur={() => handleFieldBlur("timezone", editTimezone)} aria-invalid={!!fieldErrors.timezone}>
                             <SelectValue placeholder="Select timezone" />
                           </SelectTrigger>
                           <SelectContent>
@@ -830,6 +923,7 @@ function ScheduleDetailPage() {
                             ))}
                           </SelectContent>
                         </Select>
+                        <FieldError message={fieldErrors.timezone} />
                       </div>
                       <div className="flex items-center gap-3">
                         <Switch checked={editDefault} onCheckedChange={setEditDefault} id="edit-default" />
