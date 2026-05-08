@@ -45,6 +45,8 @@ export const Route = createFileRoute("/_app/fax/messages/")({
     number?: string
     direction?: string
     status?: string
+    from?: string
+    to?: string
     sort?: string
     order?: string
   } => ({
@@ -53,6 +55,8 @@ export const Route = createFileRoute("/_app/fax/messages/")({
     number: typeof search.number === "string" && search.number ? search.number : undefined,
     direction: typeof search.direction === "string" && search.direction ? search.direction : undefined,
     status: typeof search.status === "string" && search.status ? search.status : undefined,
+    from: typeof search.from === "string" && search.from ? search.from : undefined,
+    to: typeof search.to === "string" && search.to ? search.to : undefined,
     sort: typeof search.sort === "string" && search.sort ? search.sort : undefined,
     order: typeof search.order === "string" && (search.order === "asc" || search.order === "desc") ? search.order : undefined,
   }),
@@ -194,7 +198,7 @@ function FaxMessagesPage() {
   useDocumentTitle("Fax Messages")
   const compactMode = useSettingsStore((s) => s.compactMode)
   const cellClass = compactMode ? "py-1 px-2 text-xs" : ""
-  const { q: searchParam, page: pageParam, direction: directionParam, status: statusParam, sort: sortParam, order: orderParam } = Route.useSearch()
+  const { q: searchParam, page: pageParam, direction: directionParam, status: statusParam, from: fromParam, to: toParam, sort: sortParam, order: orderParam } = Route.useSearch()
   const navigate = Route.useNavigate()
   const searchInputRef = useRef<HTMLInputElement>(null)
 
@@ -259,9 +263,9 @@ function FaxMessagesPage() {
     })
   }, [])
 
-  // Date range state (client-side only, not in URL)
-  const [startDate, setStartDate] = useState("")
-  const [endDate, setEndDate] = useState("")
+  // Date range state (URL-persisted)
+  const startDate = fromParam ?? ""
+  const endDate = toParam ?? ""
   const [pageSize, setPageSize] = useState(getStoredPageSize)
 
   // Persist page size preference
@@ -373,9 +377,7 @@ function FaxMessagesPage() {
   const handleDatePreset = useCallback(
     (days: number) => {
       const { start, end } = getPresetDates(days)
-      setStartDate(start)
-      setEndDate(end)
-      navigate({ search: (prev) => ({ ...prev, page: undefined }) })
+      navigate({ search: (prev) => ({ ...prev, from: start || undefined, to: end || undefined, page: undefined }) })
     },
     [navigate],
   )
@@ -383,14 +385,14 @@ function FaxMessagesPage() {
   // Reset filters helper
   const clearAllFilters = useCallback(() => {
     setSearchInput("")
-    setStartDate("")
-    setEndDate("")
     navigate({
       search: {
         q: undefined,
         number: undefined,
         direction: undefined,
         status: undefined,
+        from: undefined,
+        to: undefined,
         sort: undefined,
         order: undefined,
         page: undefined,
@@ -599,12 +601,10 @@ function FaxMessagesPage() {
             startDate={startDate}
             endDate={endDate}
             onStartDateChange={(v) => {
-              setStartDate(v)
-              navigate({ search: (prev) => ({ ...prev, page: undefined }) })
+              navigate({ search: (prev) => ({ ...prev, from: v || undefined, page: undefined }) })
             }}
             onEndDateChange={(v) => {
-              setEndDate(v)
-              navigate({ search: (prev) => ({ ...prev, page: undefined }) })
+              navigate({ search: (prev) => ({ ...prev, to: v || undefined, page: undefined }) })
             }}
             onPreset={handleDatePreset}
             label="Date"

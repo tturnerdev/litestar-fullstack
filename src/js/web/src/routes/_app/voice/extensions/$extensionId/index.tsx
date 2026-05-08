@@ -12,6 +12,7 @@ import {
   Link2,
   Loader2,
   Mail,
+  MapPin,
   Monitor,
   MoreHorizontal,
   Pencil,
@@ -51,12 +52,14 @@ import { EditExtensionDialog } from "@/components/voice/edit-extension-dialog"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useCallQueues, useRingGroups } from "@/lib/api/hooks/call-routing"
 import { useDevicesByExtension } from "@/lib/api/hooks/devices"
+import { useE911Registration } from "@/lib/api/hooks/e911"
 import { useGatewayLookupExtension } from "@/lib/api/hooks/gateway"
 import { useTeams } from "@/lib/api/hooks/teams"
 import {
   type Extension as ExtensionType,
   useDndSettings,
   useExtension,
+  useExtensions,
   useForwardingRules,
   usePhoneNumber,
   useUpdateExtension,
@@ -594,6 +597,13 @@ function CallForwardingCard({ extensionId, extension }: { extensionId: string; e
   const [state, setState] = useState<ForwardingState>(() => stateFromExtension(extension))
   const original = stateFromExtension(extension)
 
+  // Fetch all extensions to build a lookup map for forwarding destinations
+  const allExtensionsQuery = useExtensions(1, 200)
+  const extensionsByNumber = new Map<string, { id: string; displayName: string }>()
+  for (const ext of allExtensionsQuery.data?.items ?? []) {
+    extensionsByNumber.set(ext.extensionNumber, { id: ext.id, displayName: ext.displayName ?? ext.extensionNumber })
+  }
+
   // Sync state when extension data refreshes (e.g. after save)
   useEffect(() => {
     if (!isEditing) {
@@ -696,6 +706,7 @@ function CallForwardingCard({ extensionId, extension }: { extensionId: string; e
             destination={isEditing ? state.forwardAlwaysDestination : (extension.forwardAlwaysDestination ?? "")}
             onEnabledChange={(v) => update("forwardAlwaysEnabled", v)}
             onDestinationChange={(v) => update("forwardAlwaysDestination", v)}
+            extensionLookup={extensionsByNumber}
             isEditing={isEditing}
             disabled={updateExtension.isPending}
           />
@@ -707,6 +718,7 @@ function CallForwardingCard({ extensionId, extension }: { extensionId: string; e
             destination={isEditing ? state.forwardBusyDestination : (extension.forwardBusyDestination ?? "")}
             onEnabledChange={(v) => update("forwardBusyEnabled", v)}
             onDestinationChange={(v) => update("forwardBusyDestination", v)}
+            extensionLookup={extensionsByNumber}
             isEditing={isEditing}
             disabled={updateExtension.isPending}
           />
@@ -720,6 +732,7 @@ function CallForwardingCard({ extensionId, extension }: { extensionId: string; e
             onEnabledChange={(v) => update("forwardNoAnswerEnabled", v)}
             onDestinationChange={(v) => update("forwardNoAnswerDestination", v)}
             onRingCountChange={(v) => update("forwardNoAnswerRingCount", v)}
+            extensionLookup={extensionsByNumber}
             showRingCount
             isEditing={isEditing}
             disabled={updateExtension.isPending}
@@ -732,6 +745,7 @@ function CallForwardingCard({ extensionId, extension }: { extensionId: string; e
             destination={isEditing ? state.forwardUnreachableDestination : (extension.forwardUnreachableDestination ?? "")}
             onEnabledChange={(v) => update("forwardUnreachableEnabled", v)}
             onDestinationChange={(v) => update("forwardUnreachableDestination", v)}
+            extensionLookup={extensionsByNumber}
             isEditing={isEditing}
             disabled={updateExtension.isPending}
           />
@@ -753,6 +767,7 @@ function ForwardingRuleRow({
   onDestinationChange,
   onRingCountChange,
   showRingCount = false,
+  extensionLookup,
   isEditing,
   disabled,
 }: {
@@ -765,9 +780,13 @@ function ForwardingRuleRow({
   onDestinationChange: (v: string) => void
   onRingCountChange?: (v: number) => void
   showRingCount?: boolean
+  extensionLookup?: Map<string, { id: string; displayName: string }>
   isEditing: boolean
   disabled: boolean
 }) {
+  // Try to resolve the destination as a known extension number
+  const resolvedExtension = destination ? extensionLookup?.get(destination) : undefined
+
   if (!isEditing) {
     // Read-only view
     return (
@@ -790,7 +809,14 @@ function ForwardingRuleRow({
             <p className="text-xs text-muted-foreground">{description}</p>
             {enabled && destination && (
               <p className="mt-1 font-mono text-xs text-muted-foreground">
-                Destination: {destination}
+                Destination:{" "}
+                {resolvedExtension ? (
+                  <Link to="/voice/extensions/$extensionId" params={{ extensionId: resolvedExtension.id }} className="text-primary hover:underline">
+                    {destination} ({resolvedExtension.displayName})
+                  </Link>
+                ) : (
+                  destination
+                )}
                 {showRingCount && ringCount != null && ` (${ringCount} rings)`}
               </p>
             )}
@@ -1051,6 +1077,11 @@ function RelatedResourcesSection({ extensionId, extension }: { extensionId: stri
   const ringGroupsQuery = useRingGroups({ pageSize: 100 })
   const callQueuesQuery = useCallQueues({ pageSize: 100 })
   const teamsQuery = useTeams({ pageSize: 100 })
+  const devicesQuery = useDevicesByExtension(extensionId)
+
+  // Resolve E911 registration ID from the extension or its phone number
+  const e911RegId = extension.e911RegistrationId ?? phoneNumberQuery.data?.e911RegistrationId ?? ""
+  const e911Query = useE911Registration(e911RegId)
 
   // Find ring groups where this extension is a member
   const memberRingGroups = (ringGroupsQuery.data?.items ?? []).filter((rg) => rg.members.some((m) => m.extensionId === extensionId))
@@ -1062,10 +1093,12 @@ function RelatedResourcesSection({ extensionId, extension }: { extensionId: stri
   const userTeams = (teamsQuery.data?.items ?? []).filter((team) => (team.members ?? []).some((m) => m.userId === extension.userId))
 
   const hasPhoneNumber = !!extension.phoneNumberId
+  const hasE911 = !!e911RegId
   const hasRingGroups = memberRingGroups.length > 0
   const hasCallQueues = memberCallQueues.length > 0
   const hasTeams = userTeams.length > 0
-  const hasAnyRelated = hasPhoneNumber || hasRingGroups || hasCallQueues || hasTeams
+  const hasDevices = (devicesQuery.data ?? []).length > 0
+  const hasAnyRelated = hasPhoneNumber || hasE911 || hasRingGroups || hasCallQueues || hasTeams || hasDevices
 
   const isLoading = ringGroupsQuery.isLoading || callQueuesQuery.isLoading || teamsQuery.isLoading
 
@@ -1150,6 +1183,83 @@ function RelatedResourcesSection({ extensionId, extension }: { extensionId: stri
           </div>
         )}
 
+        {/* E911 Registration */}
+        {hasE911 && (
+          <div className="space-y-2">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">E911 Registration</p>
+            <Link
+              to="/e911/$registrationId"
+              params={{ registrationId: e911RegId }}
+              className="group flex items-center justify-between rounded-lg border border-border/40 p-3 transition-all hover:bg-muted/30 hover:shadow-sm"
+            >
+              <div className="flex items-center gap-3">
+                <MapPin className="h-4 w-4 text-emerald-600" />
+                <div>
+                  {e911Query.isLoading ? (
+                    <Skeleton className="h-4 w-36" />
+                  ) : e911Query.data ? (
+                    <>
+                      <p className="text-sm font-medium group-hover:text-primary">
+                        {e911Query.data.addressLine1}
+                        {e911Query.data.addressLine2 ? `, ${e911Query.data.addressLine2}` : ""}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {e911Query.data.city}, {e911Query.data.state} {e911Query.data.postalCode}
+                      </p>
+                    </>
+                  ) : (
+                    <p className="text-sm font-medium group-hover:text-primary">E911 Registration</p>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {e911Query.data && (
+                  <Badge variant={e911Query.data.validated ? "default" : "outline"} className={e911Query.data.validated ? "bg-emerald-600 text-white text-xs" : "text-xs"}>
+                    {e911Query.data.validated ? "Validated" : "Pending"}
+                  </Badge>
+                )}
+                <ArrowRight className="h-4 w-4 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" />
+              </div>
+            </Link>
+          </div>
+        )}
+
+        {/* Assigned Devices */}
+        {hasDevices && (
+          <div className="space-y-2">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Devices ({devicesQuery.data?.length})</p>
+            <div className="space-y-2">
+              {(devicesQuery.data ?? []).map((device) => (
+                <Link
+                  key={`${device.deviceId}-${device.lineId}`}
+                  to="/devices/$deviceId"
+                  params={{ deviceId: device.deviceId }}
+                  className="group flex items-center justify-between rounded-lg border border-border/40 p-3 transition-all hover:bg-muted/30 hover:shadow-sm"
+                >
+                  <div className="flex items-center gap-3">
+                    <Monitor className="h-4 w-4 text-orange-600" />
+                    <div>
+                      <p className="text-sm font-medium group-hover:text-primary">{device.deviceName}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {device.deviceModel ?? device.deviceType}
+                        {" · "}
+                        Line {device.lineNumber}
+                        {device.lineLabel ? ` (${device.lineLabel})` : ""}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant={device.status === "online" ? "default" : "outline"} className={device.status === "online" ? "bg-emerald-600 text-white text-xs" : "text-xs"}>
+                      {device.status}
+                    </Badge>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" />
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Ring Groups */}
         {hasRingGroups && (
           <div className="space-y-2">
@@ -1209,7 +1319,7 @@ function RelatedResourcesSection({ extensionId, extension }: { extensionId: stri
         {/* Teams */}
         {hasTeams && (
           <div className="space-y-2">
-            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Team</p>
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Teams</p>
             <div className="space-y-2">
               {userTeams.map((team) => (
                 <Link
