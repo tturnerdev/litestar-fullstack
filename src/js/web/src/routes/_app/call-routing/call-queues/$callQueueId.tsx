@@ -286,6 +286,7 @@ function EditCallQueueDialog({ queue, open, onOpenChange }: EditCallQueueDialogP
                   onBlur={() => handleFieldBlur("name", name)}
                   placeholder="Sales Queue"
                   aria-invalid={!!fieldErrors.name}
+                  maxLength={255}
                 />
                 <FieldError message={fieldErrors.name} />
               </div>

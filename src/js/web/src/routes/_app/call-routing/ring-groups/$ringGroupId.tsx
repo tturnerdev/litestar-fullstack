@@ -249,6 +249,7 @@ function EditRingGroupDialog({ ringGroup, open, onOpenChange }: EditRingGroupDia
                   onBlur={() => handleFieldBlur("name", name)}
                   placeholder="Ring group name"
                   aria-invalid={!!fieldErrors.name}
+                  maxLength={255}
                 />
                 <FieldError message={fieldErrors.name} />
               </div>

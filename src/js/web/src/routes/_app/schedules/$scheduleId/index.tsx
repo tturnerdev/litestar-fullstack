@@ -888,6 +888,7 @@ function ScheduleDetailPage() {
                           onChange={(e) => handleEditNameChange(e.target.value)}
                           onBlur={() => handleFieldBlur("name", editName)}
                           aria-invalid={!!fieldErrors.name}
+                          maxLength={255}
                         />
                         <FieldError message={fieldErrors.name} />
                       </div>

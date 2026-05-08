@@ -619,6 +619,7 @@ function IvrMenuDetailPage() {
                           onChange={(e) => handleFieldChange("name", e.target.value, setEditName)}
                           onBlur={() => handleFieldBlur("name", editName)}
                           aria-invalid={!!fieldErrors.name}
+                          maxLength={255}
                         />
                         <FieldError message={fieldErrors.name} />
                       </div>
@@ -638,7 +639,7 @@ function IvrMenuDetailPage() {
                       {editGreetingType === "text" && (
                         <div className="space-y-2">
                           <Label>Greeting Text</Label>
-                          <Input value={editGreetingText} onChange={(e) => setEditGreetingText(e.target.value)} placeholder="Enter greeting text..." />
+                          <Input value={editGreetingText} onChange={(e) => setEditGreetingText(e.target.value)} placeholder="Enter greeting text..." maxLength={2000} />
                         </div>
                       )}
                       <div className="grid gap-4 sm:grid-cols-2">

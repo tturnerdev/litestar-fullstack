@@ -331,7 +331,7 @@ function TimeConditionDetailPage() {
                     <div className="space-y-4">
                       <div className="space-y-2">
                         <Label>Name</Label>
-                        <Input value={editName} onChange={(e) => setEditName(e.target.value)} />
+                        <Input value={editName} onChange={(e) => setEditName(e.target.value)} maxLength={255} />
                       </div>
                       <DestinationPicker label="Match Destination" value={editMatchDest} onChange={setEditMatchDest} />
                       <DestinationPicker label="No-Match Destination" value={editNoMatchDest} onChange={setEditNoMatchDest} />
