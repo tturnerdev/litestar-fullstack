@@ -345,6 +345,7 @@ class ScheduleController(Controller):
         obj = data.to_dict()
         obj["schedule_id"] = schedule_id
         db_obj = await entries_service.create(obj)
+        request.app.emit(event_id="schedule_entry_created", entity_id=db_obj.id)
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
@@ -396,6 +397,7 @@ class ScheduleController(Controller):
             item_id=entry_id,
             data=data.to_dict(),
         )
+        request.app.emit(event_id="schedule_entry_updated", entity_id=entry_id)
         after = capture_snapshot(fresh_obj)
         await log_audit(
             audit_service,

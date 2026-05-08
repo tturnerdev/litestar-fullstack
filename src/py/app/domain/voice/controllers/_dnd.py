@@ -62,8 +62,10 @@ class DndController(Controller):
     )
     async def update_dnd_settings(
         self,
+        request: Request[m.User, Token, Any],
         extensions_service: ExtensionService,
         dnd_service: DoNotDisturbService,
+        audit_service: AuditLogService,
         current_user: m.User,
         data: DndSettingsUpdate,
         ext_id: Annotated[UUID, Parameter(title="Extension ID", description="The extension.")],
@@ -71,7 +73,23 @@ class DndController(Controller):
         """Update DND settings."""
         await extensions_service.get_one(id=ext_id, user_id=current_user.id)
         db_obj = await dnd_service.get_or_create_for_extension(ext_id)
+        before = capture_snapshot(db_obj)
         db_obj = await dnd_service.update(item_id=db_obj.id, data=data.to_dict())
+        after = capture_snapshot(db_obj)
+        await log_audit(
+            audit_service,
+            action="voice.dnd.updated",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            actor_name=current_user.name,
+            target_type="dnd",
+            target_id=db_obj.id,
+            target_label=f"extension:{ext_id}",
+            before=before,
+            after=after,
+            request=request,
+        )
+        request.app.emit(event_id="dnd_updated", entity_id=db_obj.id)
         return dnd_service.to_schema(db_obj, schema_type=DndSettings)
 
     @post(
@@ -108,4 +126,5 @@ class DndController(Controller):
             after=after,
             request=request,
         )
+        request.app.emit(event_id="dnd_toggled", entity_id=db_obj.id)
         return dnd_service.to_schema(db_obj, schema_type=DndToggleResponse)

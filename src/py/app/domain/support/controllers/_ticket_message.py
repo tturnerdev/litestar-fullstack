@@ -137,6 +137,7 @@ class TicketMessageController(Controller):
             item_id=msg_id,
             data=data.to_dict(),
         )
+        request.app.emit(event_id="ticket_message_updated", ticket_id=ticket_id, message_id=msg_id)
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,

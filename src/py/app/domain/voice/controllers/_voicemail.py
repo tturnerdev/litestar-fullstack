@@ -219,9 +219,11 @@ class VoicemailController(Controller):
     )
     async def update_voicemail_message(
         self,
+        request: Request[m.User, Token, Any],
         extensions_service: ExtensionService,
         voicemail_boxes_service: VoicemailBoxService,
         voicemail_messages_service: VoicemailMessageService,
+        audit_service: AuditLogService,
         current_user: m.User,
         data: VoicemailMessageUpdate,
         ext_id: Annotated[UUID, Parameter(title="Extension ID", description="The extension.")],
@@ -231,7 +233,23 @@ class VoicemailController(Controller):
         await extensions_service.get_one(id=ext_id, user_id=current_user.id)
         voicemail_box = await voicemail_boxes_service.get_one(extension_id=ext_id)
         db_obj = await voicemail_messages_service.get_one(id=msg_id, voicemail_box_id=voicemail_box.id)
+        before = capture_snapshot(db_obj)
         db_obj = await voicemail_messages_service.update(item_id=db_obj.id, data=data.to_dict())
+        after = capture_snapshot(db_obj)
+        await log_audit(
+            audit_service,
+            action="voice.voicemail_message.updated",
+            actor_id=current_user.id,
+            actor_email=current_user.email,
+            actor_name=current_user.name,
+            target_type="voicemail_message",
+            target_id=msg_id,
+            target_label=db_obj.caller_number,
+            before=before,
+            after=after,
+            request=request,
+        )
+        request.app.emit(event_id="voicemail_message_updated", message_id=msg_id)
         return voicemail_messages_service.to_schema(db_obj, schema_type=VoicemailMessage)
 
     @delete(
