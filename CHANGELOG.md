@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.279.0 (2026-05-07)
+
+### Added
+- **Delete event emissions across 26 controllers** — All delete methods now emit events (`entity_deleted`) before deletion across call routing, fax, voice, devices, teams, webhooks, connections, locations, schedules, E911, phone numbers, voicemail, accounts
+
 ## v0.278.0 (2026-05-07)
 
 ### Added
