@@ -55,10 +55,16 @@ import { client } from "@/lib/generated/api/client.gen"
 // Route definition
 // ---------------------------------------------------------------------------
 
+interface CallRoutingSearchParams {
+  tab?: string
+  q?: string
+}
+
 export const Route = createFileRoute("/_app/call-routing/")({
   component: CallRoutingPage,
-  validateSearch: (search: Record<string, unknown>): { tab?: string } => ({
+  validateSearch: (search: Record<string, unknown>): CallRoutingSearchParams => ({
     tab: (search.tab as string) || undefined,
+    q: typeof search.q === "string" && search.q ? search.q : undefined,
   }),
 })
 
@@ -387,10 +393,14 @@ function NewRingGroupDialog({ open, onOpenChange }: { open: boolean; onOpenChang
 // Tab content components
 // ---------------------------------------------------------------------------
 
-function TimeConditionsTab() {
+interface TabSearchProps {
+  search: string
+  onSearchChange: (value: string) => void
+  debouncedSearch: string
+}
+
+function TimeConditionsTab({ search, onSearchChange, debouncedSearch }: TabSearchProps) {
   const navigate = useNavigate()
-  const [search, setSearch] = useState("")
-  const debouncedSearch = useDebouncedValue(search)
   const [page, setPage] = useState(1)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -456,9 +466,13 @@ function TimeConditionsTab() {
       <div className="flex items-center justify-between gap-3">
         <div className="relative max-w-sm flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input placeholder="Search time conditions..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 pr-8" />
+          <Input placeholder="Search time conditions..." value={search} onChange={(e) => onSearchChange(e.target.value)} className="pl-9 pr-8" />
           {search && (
-            <button type="button" onClick={() => setSearch("")} className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground">
+            <button
+              type="button"
+              onClick={() => onSearchChange("")}
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
+            >
               <X className="h-3.5 w-3.5" />
               <span className="sr-only">Clear search</span>
             </button>
@@ -500,7 +514,7 @@ function TimeConditionsTab() {
           variant={search ? "no-results" : undefined}
           action={
             search ? (
-              <Button variant="outline" size="sm" onClick={() => setSearch("")}>
+              <Button variant="outline" size="sm" onClick={() => onSearchChange("")}>
                 Clear search
               </Button>
             ) : (
@@ -666,10 +680,8 @@ function TimeConditionsTab() {
   )
 }
 
-function IvrMenusTab() {
+function IvrMenusTab({ search, onSearchChange, debouncedSearch }: TabSearchProps) {
   const navigate = useNavigate()
-  const [search, setSearch] = useState("")
-  const debouncedSearch = useDebouncedValue(search)
   const [page, setPage] = useState(1)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -735,9 +747,13 @@ function IvrMenusTab() {
       <div className="flex items-center justify-between gap-3">
         <div className="relative max-w-sm flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input placeholder="Search IVR menus..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 pr-8" />
+          <Input placeholder="Search IVR menus..." value={search} onChange={(e) => onSearchChange(e.target.value)} className="pl-9 pr-8" />
           {search && (
-            <button type="button" onClick={() => setSearch("")} className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground">
+            <button
+              type="button"
+              onClick={() => onSearchChange("")}
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
+            >
               <X className="h-3.5 w-3.5" />
               <span className="sr-only">Clear search</span>
             </button>
@@ -779,7 +795,7 @@ function IvrMenusTab() {
           variant={search ? "no-results" : undefined}
           action={
             search ? (
-              <Button variant="outline" size="sm" onClick={() => setSearch("")}>
+              <Button variant="outline" size="sm" onClick={() => onSearchChange("")}>
                 Clear search
               </Button>
             ) : (
@@ -940,10 +956,8 @@ function IvrMenusTab() {
   )
 }
 
-function CallQueuesTab() {
+function CallQueuesTab({ search, onSearchChange, debouncedSearch }: TabSearchProps) {
   const navigate = useNavigate()
-  const [search, setSearch] = useState("")
-  const debouncedSearch = useDebouncedValue(search)
   const [page, setPage] = useState(1)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -1009,9 +1023,13 @@ function CallQueuesTab() {
       <div className="flex items-center justify-between gap-3">
         <div className="relative max-w-sm flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input placeholder="Search call queues..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 pr-8" />
+          <Input placeholder="Search call queues..." value={search} onChange={(e) => onSearchChange(e.target.value)} className="pl-9 pr-8" />
           {search && (
-            <button type="button" onClick={() => setSearch("")} className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground">
+            <button
+              type="button"
+              onClick={() => onSearchChange("")}
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
+            >
               <X className="h-3.5 w-3.5" />
               <span className="sr-only">Clear search</span>
             </button>
@@ -1053,7 +1071,7 @@ function CallQueuesTab() {
           variant={search ? "no-results" : undefined}
           action={
             search ? (
-              <Button variant="outline" size="sm" onClick={() => setSearch("")}>
+              <Button variant="outline" size="sm" onClick={() => onSearchChange("")}>
                 Clear search
               </Button>
             ) : (
@@ -1221,10 +1239,8 @@ function CallQueuesTab() {
   )
 }
 
-function RingGroupsTab() {
+function RingGroupsTab({ search, onSearchChange, debouncedSearch }: TabSearchProps) {
   const navigate = useNavigate()
-  const [search, setSearch] = useState("")
-  const debouncedSearch = useDebouncedValue(search)
   const [page, setPage] = useState(1)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -1290,9 +1306,13 @@ function RingGroupsTab() {
       <div className="flex items-center justify-between gap-3">
         <div className="relative max-w-sm flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input placeholder="Search ring groups..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 pr-8" />
+          <Input placeholder="Search ring groups..." value={search} onChange={(e) => onSearchChange(e.target.value)} className="pl-9 pr-8" />
           {search && (
-            <button type="button" onClick={() => setSearch("")} className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground">
+            <button
+              type="button"
+              onClick={() => onSearchChange("")}
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
+            >
               <X className="h-3.5 w-3.5" />
               <span className="sr-only">Clear search</span>
             </button>
@@ -1334,7 +1354,7 @@ function RingGroupsTab() {
           variant={search ? "no-results" : undefined}
           action={
             search ? (
-              <Button variant="outline" size="sm" onClick={() => setSearch("")}>
+              <Button variant="outline" size="sm" onClick={() => onSearchChange("")}>
                 Clear search
               </Button>
             ) : (
@@ -1509,8 +1529,29 @@ function RingGroupsTab() {
 function CallRoutingPage() {
   useDocumentTitle("Call Routing")
 
-  const { tab = "time-conditions" } = Route.useSearch()
+  const { tab = "time-conditions", q: searchParam } = Route.useSearch()
   const navigate = Route.useNavigate()
+
+  // URL-persisted search: local input state for smooth typing, debounced for URL sync
+  const search = searchParam ?? ""
+  const [searchInput, setSearchInput] = useState(search)
+  const debouncedSearch = useDebouncedValue(searchInput)
+
+  // Sync URL when debounced search value settles
+  useEffect(() => {
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        q: debouncedSearch || undefined,
+      }),
+      replace: true,
+    })
+  }, [debouncedSearch, navigate])
+
+  // Keep local input in sync if URL search param changes externally (back/forward)
+  useEffect(() => {
+    setSearchInput(search)
+  }, [search])
 
   // Summary stat queries — fetch page 1 with pageSize 1 just to get totals
   const { data: tcData, isLoading: tcLoading } = useTimeConditions({ page: 1, pageSize: 1 })
@@ -1520,7 +1561,7 @@ function CallRoutingPage() {
 
   const setTab = useCallback(
     (value: string) => {
-      navigate({ search: () => ({ tab: value }), replace: true })
+      navigate({ search: (prev) => ({ ...prev, tab: value }), replace: true })
     },
     [navigate],
   )
@@ -1595,22 +1636,22 @@ function CallRoutingPage() {
 
           <TabsContent value="time-conditions" className="mt-6">
             <SectionErrorBoundary name="Time Conditions">
-              <TimeConditionsTab />
+              <TimeConditionsTab search={searchInput} onSearchChange={setSearchInput} debouncedSearch={debouncedSearch} />
             </SectionErrorBoundary>
           </TabsContent>
           <TabsContent value="ivr-menus" className="mt-6">
             <SectionErrorBoundary name="IVR Menus">
-              <IvrMenusTab />
+              <IvrMenusTab search={searchInput} onSearchChange={setSearchInput} debouncedSearch={debouncedSearch} />
             </SectionErrorBoundary>
           </TabsContent>
           <TabsContent value="call-queues" className="mt-6">
             <SectionErrorBoundary name="Call Queues">
-              <CallQueuesTab />
+              <CallQueuesTab search={searchInput} onSearchChange={setSearchInput} debouncedSearch={debouncedSearch} />
             </SectionErrorBoundary>
           </TabsContent>
           <TabsContent value="ring-groups" className="mt-6">
             <SectionErrorBoundary name="Ring Groups">
-              <RingGroupsTab />
+              <RingGroupsTab search={searchInput} onSearchChange={setSearchInput} debouncedSearch={debouncedSearch} />
             </SectionErrorBoundary>
           </TabsContent>
         </Tabs>

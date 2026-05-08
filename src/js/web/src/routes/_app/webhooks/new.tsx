@@ -2,6 +2,7 @@ import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-ro
 import { Globe, Info, Key, Loader2, Minus, Plus, Send, Shield, Webhook } from "lucide-react"
 import { useCallback, useRef, useState } from "react"
 import { toast } from "sonner"
+import { EventTypeSelector } from "@/components/shared/event-type-selector"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,50 +39,6 @@ const NAME_MAX = 100
 const URL_MAX = 500
 const DESC_MAX = 500
 const SECRET_MAX = 200
-
-const AVAILABLE_EVENTS = [
-  "extension.created",
-  "extension.updated",
-  "extension.deleted",
-  "device.created",
-  "device.updated",
-  "device.deleted",
-  "phone_number.created",
-  "phone_number.updated",
-  "ticket.created",
-  "ticket.updated",
-  "ticket.closed",
-  "user.created",
-  "user.updated",
-  "voicemail.received",
-] as const
-
-const EVENT_CATEGORIES: { label: string; events: string[] }[] = [
-  {
-    label: "Extensions",
-    events: ["extension.created", "extension.updated", "extension.deleted"],
-  },
-  {
-    label: "Devices",
-    events: ["device.created", "device.updated", "device.deleted"],
-  },
-  {
-    label: "Phone Numbers",
-    events: ["phone_number.created", "phone_number.updated"],
-  },
-  {
-    label: "Tickets",
-    events: ["ticket.created", "ticket.updated", "ticket.closed"],
-  },
-  {
-    label: "Users",
-    events: ["user.created", "user.updated"],
-  },
-  {
-    label: "Voicemail",
-    events: ["voicemail.received"],
-  },
-]
 
 const tips = [
   {
@@ -148,19 +105,6 @@ function NewWebhookPage() {
     shouldBlockFn: () => formDirty && !justSubmittedRef.current,
     withResolver: true,
   })
-
-  // Event toggles
-  const toggleEvent = useCallback((event: string) => {
-    setEvents((prev) => (prev.includes(event) ? prev.filter((e) => e !== event) : [...prev, event]))
-  }, [])
-
-  const selectAllEvents = useCallback(() => {
-    setEvents([...AVAILABLE_EVENTS])
-  }, [])
-
-  const clearAllEvents = useCallback(() => {
-    setEvents([])
-  }, [])
 
   // Header management
   const addHeader = useCallback(() => {
@@ -320,38 +264,8 @@ function NewWebhookPage() {
 
                   {/* Events */}
                   <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label>Events</Label>
-                      <div className="flex items-center gap-2">
-                        <Button type="button" variant="ghost" size="sm" className="h-6 px-2 text-xs" onClick={selectAllEvents}>
-                          Select all
-                        </Button>
-                        <Button type="button" variant="ghost" size="sm" className="h-6 px-2 text-xs" onClick={clearAllEvents} disabled={events.length === 0}>
-                          Clear
-                        </Button>
-                      </div>
-                    </div>
-                    <p className="text-xs text-muted-foreground">Select which events should trigger this webhook. If none are selected, all events will be sent.</p>
-                    <div className="space-y-3 rounded-md border p-4">
-                      {EVENT_CATEGORIES.map((category) => (
-                        <div key={category.label}>
-                          <p className="mb-1.5 text-xs font-medium text-muted-foreground uppercase tracking-wider">{category.label}</p>
-                          <div className="grid grid-cols-2 gap-1.5">
-                            {category.events.map((event) => (
-                              <label key={event} className="flex items-center gap-2 cursor-pointer text-sm hover:bg-muted/50 rounded px-2 py-1">
-                                <input type="checkbox" checked={events.includes(event)} onChange={() => toggleEvent(event)} className="rounded border-input" />
-                                <span className="text-xs font-mono">{event}</span>
-                              </label>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    {events.length > 0 && (
-                      <p className="text-xs text-muted-foreground">
-                        {events.length} event{events.length === 1 ? "" : "s"} selected
-                      </p>
-                    )}
+                    <Label>Events</Label>
+                    <EventTypeSelector selected={events} onChange={setEvents} />
                   </div>
 
                   {/* Secret */}

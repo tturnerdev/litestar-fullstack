@@ -6,8 +6,11 @@ import {
   ArrowRight,
   Bell,
   BellOff,
+  Calendar,
+  CheckCircle2,
   ClipboardList,
   Database,
+  Gauge,
   Inbox,
   Laptop,
   ListTodo,
@@ -24,6 +27,7 @@ import {
   TicketCheck,
   TrendingUp,
   Users,
+  Zap,
 } from "lucide-react"
 import { useMemo } from "react"
 import { Area, AreaChart, Tooltip as RechartsTooltip, ResponsiveContainer, XAxis, YAxis } from "recharts"
@@ -49,10 +53,13 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useAdminSystemStatus } from "@/lib/api/hooks/admin"
+import { useConnections } from "@/lib/api/hooks/connections"
 import { useDevices } from "@/lib/api/hooks/devices"
 import { useNotifications, useUnreadCount } from "@/lib/api/hooks/notifications"
+import { useSchedules } from "@/lib/api/hooks/schedules"
 import { useTickets } from "@/lib/api/hooks/support"
 import { useActiveTasks, useTasks } from "@/lib/api/hooks/tasks"
+import { useExtensions, usePhoneNumbers } from "@/lib/api/hooks/voice"
 import { useAuthStore } from "@/lib/auth"
 import { formatRelativeTimeShort } from "@/lib/date-utils"
 import { type DashboardStats, getDashboardStats, getRecentActivity, listRoles, listTags, listTeams, type RecentActivity } from "@/lib/generated/api"
@@ -465,6 +472,82 @@ function SystemStatusIndicator() {
   )
 }
 
+// --- System Overview Card (all users) ---
+
+interface OverviewMetric {
+  label: string
+  value: number | undefined
+  icon: LucideIcon
+  iconClassName: string
+  href: string
+  isLoading: boolean
+}
+
+function SystemOverviewCard() {
+  const { data: phoneNumbersData, isLoading: phoneNumbersLoading } = usePhoneNumbers(1, 1)
+  const { data: extensionsData, isLoading: extensionsLoading } = useExtensions(1, 1)
+  const { data: schedulesData, isLoading: schedulesLoading } = useSchedules({ page: 1, pageSize: 1 })
+  const { data: connectionsData, isLoading: connectionsLoading } = useConnections({ page: 1, pageSize: 1 })
+
+  const metrics: OverviewMetric[] = [
+    {
+      label: "Phone Numbers",
+      value: phoneNumbersData?.total,
+      icon: Phone,
+      iconClassName: "text-green-600 dark:text-green-400",
+      href: "/voice/phone-numbers",
+      isLoading: phoneNumbersLoading,
+    },
+    {
+      label: "Extensions",
+      value: extensionsData?.total,
+      icon: Zap,
+      iconClassName: "text-indigo-600 dark:text-indigo-400",
+      href: "/voice/extensions",
+      isLoading: extensionsLoading,
+    },
+    {
+      label: "Schedules",
+      value: schedulesData?.total,
+      icon: Calendar,
+      iconClassName: "text-teal-600 dark:text-teal-400",
+      href: "/schedules",
+      isLoading: schedulesLoading,
+    },
+    {
+      label: "Connections",
+      value: connectionsData?.total,
+      icon: CheckCircle2,
+      iconClassName: "text-emerald-600 dark:text-emerald-400",
+      href: "/connections",
+      isLoading: connectionsLoading,
+    },
+  ]
+
+  return (
+    <Card>
+      <CardHeader className="space-y-1 pb-4">
+        <div className="flex items-center gap-2">
+          <Gauge className="h-4 w-4 text-muted-foreground" />
+          <CardTitle className="text-lg">System Overview</CardTitle>
+        </div>
+        <CardDescription>Platform resource summary</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-1">
+          {metrics.map((metric) => (
+            <Link key={metric.label} to={metric.href} className="flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-muted/50">
+              <metric.icon className={`h-4 w-4 shrink-0 ${metric.iconClassName}`} />
+              <span className="flex-1 text-sm text-muted-foreground">{metric.label}</span>
+              {metric.isLoading ? <Skeleton className="h-5 w-8" /> : <span className="text-sm font-semibold tabular-nums">{metric.value ?? 0}</span>}
+            </Link>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
 function HomePage() {
   useDocumentTitle("Dashboard")
   const user = useAuthStore((state) => state.user)
@@ -736,10 +819,13 @@ function HomePage() {
 
       {/* Main Content Grid */}
       <PageSection delay={0.12}>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2">
           <TeamsCard teams={teams} isLoading={teamsLoading} />
           <SectionErrorBoundary name="Recent Notifications">
             <RecentNotificationsCard />
+          </SectionErrorBoundary>
+          <SectionErrorBoundary name="System Overview">
+            <SystemOverviewCard />
           </SectionErrorBoundary>
           <SectionErrorBoundary name="Integration Status">
             <ConnectionsStatusCard />

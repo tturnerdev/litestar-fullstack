@@ -8,12 +8,14 @@ import {
   type GetWebhookData,
   getWebhook,
   type ListWebhooksData,
+  listWebhookEventTypes,
   listWebhooks,
   testWebhook,
   type UpdateWebhookData,
   updateWebhook,
   type WebhookCreate,
   type WebhookDetail,
+  type WebhookEventTypeInfo,
   type WebhookList,
   type WebhookTestResult,
   type WebhookUpdate,
@@ -51,6 +53,21 @@ export function useWebhooks(page = 1, pageSize = 25, search?: string) {
       const response = await listWebhooks({ query })
       return response.data as { items: WebhookList[]; total: number }
     },
+  })
+}
+
+// ---------------------------------------------------------------------------
+// Webhook Event Types
+// ---------------------------------------------------------------------------
+
+export function useWebhookEventTypes() {
+  return useQuery({
+    queryKey: ["webhook-event-types"],
+    queryFn: async () => {
+      const response = await listWebhookEventTypes()
+      return response.data as WebhookEventTypeInfo[]
+    },
+    staleTime: 5 * 60 * 1000, // event types change infrequently
   })
 }
 

@@ -22,6 +22,7 @@ import {
 } from "lucide-react"
 import { useCallback, useMemo, useRef, useState } from "react"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
+import { EventTypeSelector } from "@/components/shared/event-type-selector"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -56,52 +57,6 @@ import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 export const Route = createFileRoute("/_app/webhooks/$webhookId")({
   component: WebhookDetailPage,
 })
-
-// -- Constants ----------------------------------------------------------------
-
-const AVAILABLE_EVENTS = [
-  "extension.created",
-  "extension.updated",
-  "extension.deleted",
-  "device.created",
-  "device.updated",
-  "device.deleted",
-  "phone_number.created",
-  "phone_number.updated",
-  "ticket.created",
-  "ticket.updated",
-  "ticket.closed",
-  "user.created",
-  "user.updated",
-  "voicemail.received",
-] as const
-
-const EVENT_CATEGORIES: { label: string; events: string[] }[] = [
-  {
-    label: "Extensions",
-    events: ["extension.created", "extension.updated", "extension.deleted"],
-  },
-  {
-    label: "Devices",
-    events: ["device.created", "device.updated", "device.deleted"],
-  },
-  {
-    label: "Phone Numbers",
-    events: ["phone_number.created", "phone_number.updated"],
-  },
-  {
-    label: "Tickets",
-    events: ["ticket.created", "ticket.updated", "ticket.closed"],
-  },
-  {
-    label: "Users",
-    events: ["user.created", "user.updated"],
-  },
-  {
-    label: "Voicemail",
-    events: ["voicemail.received"],
-  },
-]
 
 // -- Helpers ------------------------------------------------------------------
 
@@ -226,18 +181,6 @@ function WebhookDetailPage() {
       },
     })
   }, [data, editName, editUrl, editDescription, editActive, editEvents, updateWebhook])
-
-  const toggleEvent = useCallback((event: string) => {
-    setEditEvents((prev) => (prev.includes(event) ? prev.filter((e) => e !== event) : [...prev, event]))
-  }, [])
-
-  const selectAllEvents = useCallback(() => {
-    setEditEvents([...AVAILABLE_EVENTS])
-  }, [])
-
-  const clearAllEvents = useCallback(() => {
-    setEditEvents([])
-  }, [])
 
   // -- Loading state ----------------------------------------------------------
 
@@ -543,42 +486,8 @@ function WebhookDetailPage() {
                 <div className="md:col-span-2 lg:col-span-2">
                   <p className="text-muted-foreground">Events</p>
                   {editing ? (
-                    <div className="mt-1 space-y-2">
-                      <div className="flex items-center gap-2">
-                        <Button type="button" variant="ghost" size="sm" className="h-6 px-2 text-xs" onClick={selectAllEvents}>
-                          Select all
-                        </Button>
-                        <Button type="button" variant="ghost" size="sm" className="h-6 px-2 text-xs" onClick={clearAllEvents} disabled={editEvents.length === 0}>
-                          Clear
-                        </Button>
-                      </div>
-                      <p className="text-xs text-muted-foreground">Select which events should trigger this webhook. If none are selected, all events will be sent.</p>
-                      <div className="space-y-3 rounded-md border p-4">
-                        {EVENT_CATEGORIES.map((category) => (
-                          <div key={category.label}>
-                            <p className="mb-1.5 text-xs font-medium text-muted-foreground uppercase tracking-wider">{category.label}</p>
-                            <div className="grid grid-cols-2 gap-1.5">
-                              {category.events.map((event) => (
-                                <label key={event} className="flex items-center gap-2 cursor-pointer text-sm hover:bg-muted/50 rounded px-2 py-1">
-                                  <input
-                                    type="checkbox"
-                                    checked={editEvents.includes(event)}
-                                    onChange={() => toggleEvent(event)}
-                                    className="rounded border-input"
-                                    disabled={updateWebhook.isPending}
-                                  />
-                                  <span className="text-xs font-mono">{event}</span>
-                                </label>
-                              ))}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      {editEvents.length > 0 && (
-                        <p className="text-xs text-muted-foreground">
-                          {editEvents.length} event{editEvents.length === 1 ? "" : "s"} selected
-                        </p>
-                      )}
+                    <div className="mt-1">
+                      <EventTypeSelector selected={editEvents} onChange={setEditEvents} disabled={updateWebhook.isPending} />
                     </div>
                   ) : (
                     <div className="mt-1 flex flex-wrap gap-1.5">

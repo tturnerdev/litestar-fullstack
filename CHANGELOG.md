@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.256.0 (2026-05-07)
+
+### Added
+- **Call routing URL-persisted search** — Search text across all call routing tabs now stored in URL `q` param, preserved across tab switches and browser navigation
+- **Organization form validation** — Inline field validation for name, email, website, logo URL, and phone with real-time feedback on blur and pre-submit checks
+- **Home dashboard system overview** — New card showing platform resource counts (phone numbers, extensions, schedules, connections) with navigable links
+- **Quick shortcuts expansion** — Added New Extension, Create Schedule, and Send Fax shortcuts with descriptions and staggered animation
+- **Webhook event type selector** — Shared `EventTypeSelector` component fetches event types from API, groups by domain, supports per-group toggle with select-all/clear; wired into webhook create and edit pages
+
 ## v0.255.0 (2026-05-07)
 
 ### Added

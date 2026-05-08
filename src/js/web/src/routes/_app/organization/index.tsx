@@ -21,7 +21,7 @@ import {
   UsersRound,
   X,
 } from "lucide-react"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 import { OrganizationQuickLinks } from "@/components/organization/organization-quick-links"
 import { OrganizationStats } from "@/components/organization/organization-stats"
@@ -86,6 +86,52 @@ const LANGUAGES = [
   { value: "zh", label: "Chinese" },
   { value: "pt", label: "Portuguese" },
 ]
+
+// ---------------------------------------------------------------------------
+// Validation
+// ---------------------------------------------------------------------------
+
+interface OrgFieldErrors {
+  name?: string
+  email?: string
+  website?: string
+  logoUrl?: string
+  phone?: string
+}
+
+function validateOrgField(field: keyof OrgFieldErrors, value: string): string | undefined {
+  switch (field) {
+    case "name":
+      if (value.trim() === "") return "Organization name is required"
+      if (value.trim().length < 2) return "Name must be at least 2 characters"
+      return undefined
+    case "email":
+      if (!value) return undefined
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return "Enter a valid email address"
+      return undefined
+    case "website":
+    case "logoUrl": {
+      if (!value) return undefined
+      try {
+        const url = new URL(value)
+        if (!["http:", "https:"].includes(url.protocol)) return "URL must start with http:// or https://"
+      } catch {
+        return "Enter a valid URL (e.g., https://example.com)"
+      }
+      return undefined
+    }
+    case "phone":
+      if (!value) return undefined
+      // Strip formatting characters, then require at least 7 digits
+      if (!/^[+\d\s()./-]{7,}$/.test(value)) return "Enter a valid phone number"
+      return undefined
+  }
+}
+
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null
+  return <p className="text-sm text-destructive">{message}</p>
+}
 
 // ---------------------------------------------------------------------------
 // Organization Overview (completeness + quick stats + setup checklist)
@@ -270,6 +316,46 @@ function OrganizationSettingsPage() {
     defaultLanguage: "en",
   })
 
+  // Validation state
+  const [fieldErrors, setFieldErrors] = useState<OrgFieldErrors>({})
+  const touchedRef = useRef<Record<string, boolean>>({})
+
+  const validateField = useCallback((field: keyof OrgFieldErrors, value: string) => {
+    const error = validateOrgField(field, value)
+    setFieldErrors((prev) => ({ ...prev, [field]: error }))
+    return error
+  }, [])
+
+  const handleFieldBlur = useCallback(
+    (field: keyof OrgFieldErrors, value: string) => {
+      touchedRef.current[field] = true
+      validateField(field, value)
+    },
+    [validateField],
+  )
+
+  const updateFieldWithValidation = useCallback(
+    (field: keyof OrgFormData, value: string) => {
+      setFormData((prev) => ({ ...prev, [field]: value }))
+      // Re-validate on change only if the field has already been touched
+      if (field in touchedRef.current && touchedRef.current[field]) {
+        validateField(field as keyof OrgFieldErrors, value)
+      }
+    },
+    [validateField],
+  )
+
+  const hasValidationErrors = useMemo(() => {
+    return Object.values(fieldErrors).some((e) => !!e)
+  }, [fieldErrors])
+
+  // Also check that required fields pass (name might not have been blurred yet)
+  const isFormValid = useMemo(() => {
+    if (hasValidationErrors) return false
+    if (formData.name.trim() === "" || formData.name.trim().length < 2) return false
+    return true
+  }, [hasValidationErrors, formData.name])
+
   const syncFormFromOrg = useCallback(() => {
     if (org) {
       setFormData({
@@ -288,6 +374,8 @@ function OrganizationSettingsPage() {
         timezone: org.timezone ?? "UTC",
         defaultLanguage: org.defaultLanguage ?? "en",
       })
+      setFieldErrors({})
+      touchedRef.current = {}
     }
   }, [org])
 
@@ -323,6 +411,18 @@ function OrganizationSettingsPage() {
   })
 
   const handleSave = async () => {
+    // Validate all validatable fields before submit
+    const nameErr = validateField("name", formData.name)
+    const emailErr = validateField("email", formData.email)
+    const websiteErr = validateField("website", formData.website)
+    const logoUrlErr = validateField("logoUrl", formData.logoUrl)
+    const phoneErr = validateField("phone", formData.phone)
+    // Mark all as touched so errors show
+    for (const f of ["name", "email", "website", "logoUrl", "phone"] as const) {
+      touchedRef.current[f] = true
+    }
+    if (nameErr || emailErr || websiteErr || logoUrlErr || phoneErr) return
+
     const payload: Record<string, unknown> = {}
     if (formData.name !== (org?.name ?? "")) payload.name = formData.name
     if (formData.description !== (org?.description ?? "")) payload.description = formData.description || null
@@ -357,6 +457,8 @@ function OrganizationSettingsPage() {
 
   const handleCancel = () => {
     syncFormFromOrg()
+    setFieldErrors({})
+    touchedRef.current = {}
     setIsEditing(false)
   }
 
@@ -419,7 +521,7 @@ function OrganizationSettingsPage() {
                       <Button size="sm" variant="outline" onClick={handleCancel} disabled={updateOrg.isPending}>
                         <X className="mr-2 h-4 w-4" /> Cancel
                       </Button>
-                      <Button size="sm" onClick={handleSave} disabled={updateOrg.isPending}>
+                      <Button size="sm" onClick={handleSave} disabled={updateOrg.isPending || !isFormValid}>
                         {updateOrg.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}{" "}
                         {updateOrg.isPending ? "Saving..." : "Save changes"}
                       </Button>
@@ -507,13 +609,18 @@ function OrganizationSettingsPage() {
                   <div className="space-y-2">
                     <Label htmlFor="org-name">Organization name</Label>
                     {isEditing ? (
-                      <Input
-                        id="org-name"
-                        value={formData.name}
-                        onChange={(e) => updateField("name", e.target.value)}
-                        placeholder="Organization name"
-                        disabled={updateOrg.isPending}
-                      />
+                      <>
+                        <Input
+                          id="org-name"
+                          value={formData.name}
+                          onChange={(e) => updateFieldWithValidation("name", e.target.value)}
+                          onBlur={() => handleFieldBlur("name", formData.name)}
+                          placeholder="Organization name"
+                          disabled={updateOrg.isPending}
+                          aria-invalid={!!fieldErrors.name}
+                        />
+                        <FieldError message={fieldErrors.name} />
+                      </>
                     ) : (
                       <p className="text-sm">{org?.name || <span className="text-muted-foreground italic">Not set</span>}</p>
                     )}
@@ -537,14 +644,19 @@ function OrganizationSettingsPage() {
                   <div className="space-y-2">
                     <Label htmlFor="org-logo">Logo URL</Label>
                     {isEditing ? (
-                      <Input
-                        id="org-logo"
-                        value={formData.logoUrl}
-                        onChange={(e) => updateField("logoUrl", e.target.value)}
-                        placeholder="https://example.com/logo.png"
-                        type="url"
-                        disabled={updateOrg.isPending}
-                      />
+                      <>
+                        <Input
+                          id="org-logo"
+                          value={formData.logoUrl}
+                          onChange={(e) => updateFieldWithValidation("logoUrl", e.target.value)}
+                          onBlur={() => handleFieldBlur("logoUrl", formData.logoUrl)}
+                          placeholder="https://example.com/logo.png"
+                          type="url"
+                          disabled={updateOrg.isPending}
+                          aria-invalid={!!fieldErrors.logoUrl}
+                        />
+                        <FieldError message={fieldErrors.logoUrl} />
+                      </>
                     ) : (
                       <div className="flex items-center gap-3">
                         {org?.logoUrl ? (
@@ -575,14 +687,19 @@ function OrganizationSettingsPage() {
                   <div className="space-y-2">
                     <Label htmlFor="org-website">Website</Label>
                     {isEditing ? (
-                      <Input
-                        id="org-website"
-                        value={formData.website}
-                        onChange={(e) => updateField("website", e.target.value)}
-                        placeholder="https://example.com"
-                        type="url"
-                        disabled={updateOrg.isPending}
-                      />
+                      <>
+                        <Input
+                          id="org-website"
+                          value={formData.website}
+                          onChange={(e) => updateFieldWithValidation("website", e.target.value)}
+                          onBlur={() => handleFieldBlur("website", formData.website)}
+                          placeholder="https://example.com"
+                          type="url"
+                          disabled={updateOrg.isPending}
+                          aria-invalid={!!fieldErrors.website}
+                        />
+                        <FieldError message={fieldErrors.website} />
+                      </>
                     ) : (
                       <div className="flex items-center gap-1.5">
                         <p className="text-sm">
@@ -618,14 +735,19 @@ function OrganizationSettingsPage() {
                   <div className="space-y-2">
                     <Label htmlFor="org-email">Email</Label>
                     {isEditing ? (
-                      <Input
-                        id="org-email"
-                        value={formData.email}
-                        onChange={(e) => updateField("email", e.target.value)}
-                        placeholder="contact@example.com"
-                        type="email"
-                        disabled={updateOrg.isPending}
-                      />
+                      <>
+                        <Input
+                          id="org-email"
+                          value={formData.email}
+                          onChange={(e) => updateFieldWithValidation("email", e.target.value)}
+                          onBlur={() => handleFieldBlur("email", formData.email)}
+                          placeholder="contact@example.com"
+                          type="email"
+                          disabled={updateOrg.isPending}
+                          aria-invalid={!!fieldErrors.email}
+                        />
+                        <FieldError message={fieldErrors.email} />
+                      </>
                     ) : (
                       <div className="flex items-center gap-1.5">
                         <p className="text-sm">
@@ -644,14 +766,19 @@ function OrganizationSettingsPage() {
                   <div className="space-y-2">
                     <Label htmlFor="org-phone">Phone</Label>
                     {isEditing ? (
-                      <Input
-                        id="org-phone"
-                        value={formData.phone}
-                        onChange={(e) => updateField("phone", e.target.value)}
-                        placeholder="+1 (555) 000-0000"
-                        type="tel"
-                        disabled={updateOrg.isPending}
-                      />
+                      <>
+                        <Input
+                          id="org-phone"
+                          value={formData.phone}
+                          onChange={(e) => updateFieldWithValidation("phone", e.target.value)}
+                          onBlur={() => handleFieldBlur("phone", formData.phone)}
+                          placeholder="+1 (555) 000-0000"
+                          type="tel"
+                          disabled={updateOrg.isPending}
+                          aria-invalid={!!fieldErrors.phone}
+                        />
+                        <FieldError message={fieldErrors.phone} />
+                      </>
                     ) : (
                       <div className="flex items-center gap-1.5">
                         <p className="text-sm">{org?.phone || <span className="text-muted-foreground italic">Not set</span>}</p>
