@@ -13,8 +13,8 @@ interface FaxNumberCardProps {
 }
 
 export function FaxNumberCard({ faxNumber }: FaxNumberCardProps) {
-  const emailRouteCount = faxNumber.emailRoutes?.length ?? 0
-  const messageCount = faxNumber.messageCount ?? 0
+  const emailRouteCount: number = 0
+  const messageCount: number = 0
 
   return (
     <Card className="transition-transform duration-200 hover:scale-[1.02]">

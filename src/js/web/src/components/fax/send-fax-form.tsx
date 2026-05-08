@@ -23,6 +23,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useFaxMessages, useFaxNumbers, useSendFax } from "@/lib/api/hooks/fax"
+import { useAuthStore } from "@/lib/auth"
 import { formatBytes, formatPhoneNumber } from "@/lib/format-utils"
 
 // ---------------------------------------------------------------------------
@@ -66,11 +67,11 @@ function stripPhone(value: string): string {
 export function SendFaxForm() {
   const { data: faxNumbers, isLoading } = useFaxNumbers(1, 100)
   const { data: recentMessages } = useFaxMessages({
-    direction: "outbound",
     pageSize: 50,
     sortOrder: "desc",
     orderBy: "createdAt",
   })
+  const currentTeam = useAuthStore((s) => s.currentTeam)
   const sendFax = useSendFax()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const dropZoneRef = useRef<HTMLButtonElement>(null)
@@ -95,7 +96,7 @@ export function SendFaxForm() {
   const [sentMessageId, setSentMessageId] = useState<string | null>(null)
 
   // Derived
-  const activeNumbers = faxNumbers?.items.filter((n) => n.isActive) ?? []
+  const activeNumbers = faxNumbers?.items?.filter((n) => n.isActive) ?? []
   const selectedNumber = activeNumbers.find((n) => n.id === faxNumberId)
   const hasContent = contentMode === "file" ? !!file : textBody.trim().length > 0
   const canSubmit = !!faxNumberId && !!remoteNumber.trim() && hasContent && !sendFax.isPending
@@ -252,6 +253,7 @@ export function SendFaxForm() {
         destinationNumber: stripPhone(remoteNumber),
         subject: contentMode === "file" ? file?.name : "Text Fax",
         body: contentMode === "text" ? textBody : undefined,
+        teamId: currentTeam?.id ?? "",
       },
       {
         onSuccess: (data) => {

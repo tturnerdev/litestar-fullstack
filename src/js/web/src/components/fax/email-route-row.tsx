@@ -11,8 +11,8 @@ interface EmailRouteRowProps {
   route: {
     id: string
     emailAddress: string
-    isActive: boolean
-    notifyOnFailure: boolean
+    isActive?: boolean
+    notifyOnFailure?: boolean
   }
   faxNumberId: string
   onDelete: () => void
@@ -40,7 +40,7 @@ export function EmailRouteRow({ route, faxNumberId, onDelete, isDeleting, onTest
   }, [route.emailAddress])
 
   function handleToggleActive() {
-    const nextActive = !route.isActive
+    const nextActive = !(route.isActive ?? false)
     updateRoute.mutate(
       { isActive: nextActive },
       {
@@ -66,7 +66,7 @@ export function EmailRouteRow({ route, faxNumberId, onDelete, isDeleting, onTest
     <TableRow className="transition-colors hover:bg-muted/50 animate-in fade-in slide-in-from-bottom-1 duration-300">
       <TableCell>
         <div className="flex items-center gap-2">
-          <Mail className={`h-4 w-4 shrink-0 ${route.isActive ? "text-green-500" : "text-muted-foreground"}`} />
+          <Mail className={`h-4 w-4 shrink-0 ${(route.isActive ?? false) ? "text-green-500" : "text-muted-foreground"}`} />
           <span className="font-mono text-sm">{route.emailAddress}</span>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -80,14 +80,18 @@ export function EmailRouteRow({ route, faxNumberId, onDelete, isDeleting, onTest
       </TableCell>
       <TableCell>
         <div className="flex items-center gap-2">
-          <Switch checked={route.isActive} onCheckedChange={handleToggleActive} disabled={updateRoute.isPending} />
-          <span className="text-sm text-muted-foreground">{route.isActive ? "Active" : "Inactive"}</span>
+          <Switch checked={route.isActive ?? false} onCheckedChange={handleToggleActive} disabled={updateRoute.isPending} />
+          <span className="text-sm text-muted-foreground">{(route.isActive ?? false) ? "Active" : "Inactive"}</span>
         </div>
       </TableCell>
       <TableCell>
         <div className="flex items-center gap-2">
-          <Switch checked={route.notifyOnFailure} onCheckedChange={() => updateRoute.mutate({ notifyOnFailure: !route.notifyOnFailure })} disabled={updateRoute.isPending} />
-          <span className="text-sm text-muted-foreground">{route.notifyOnFailure ? "Enabled" : "Disabled"}</span>
+          <Switch
+            checked={route.notifyOnFailure ?? true}
+            onCheckedChange={() => updateRoute.mutate({ notifyOnFailure: !(route.notifyOnFailure ?? true) })}
+            disabled={updateRoute.isPending}
+          />
+          <span className="text-sm text-muted-foreground">{(route.notifyOnFailure ?? true) ? "Enabled" : "Disabled"}</span>
         </div>
       </TableCell>
       <TableCell className="text-right">

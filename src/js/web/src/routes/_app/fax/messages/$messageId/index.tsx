@@ -398,7 +398,7 @@ function FaxMessageDetailPage() {
         }
         actions={
           <div className="flex items-center gap-3">
-            <FaxStatusBadge status={data.status} />
+            <FaxStatusBadge status={data.status ?? ""} />
             <DirectionBadge direction={data.direction} />
             <Button variant="outline" size="sm" asChild>
               <a href={`/api/fax/messages/${messageId}/download`} download>
@@ -470,7 +470,7 @@ function FaxMessageDetailPage() {
                 <div>
                   <p className="text-muted-foreground">Status</p>
                   <div className="mt-1">
-                    <FaxStatusBadge status={data.status} />
+                    <FaxStatusBadge status={data.status ?? ""} />
                   </div>
                 </div>
                 <div>

@@ -34,10 +34,10 @@ export function EmailRouteEditor({ faxNumberId }: { faxNumberId: string }) {
 
   const emailTouched = newEmail.trim().length > 0
   const emailValid = EMAIL_REGEX.test(newEmail.trim())
-  const emailDuplicate = emailTouched && emailValid && data?.items.some((r) => r.emailAddress.toLowerCase() === newEmail.trim().toLowerCase())
+  const emailDuplicate = emailTouched && emailValid && data?.items?.some((r) => r.emailAddress.toLowerCase() === newEmail.trim().toLowerCase())
 
-  const activeCount = data?.items.filter((r) => r.isActive).length ?? 0
-  const totalCount = data?.items.length ?? 0
+  const activeCount = data?.items?.filter((r) => r.isActive).length ?? 0
+  const totalCount = data?.items?.length ?? 0
   const allActive = totalCount > 0 && activeCount === totalCount
   const allInactive = totalCount > 0 && activeCount === 0
 
@@ -50,7 +50,7 @@ export function EmailRouteEditor({ faxNumberId }: { faxNumberId: string }) {
       setEmailError("Please enter a valid email address")
       return false
     }
-    if (data?.items.some((r) => r.emailAddress.toLowerCase() === email.trim().toLowerCase())) {
+    if (data?.items?.some((r) => r.emailAddress.toLowerCase() === email.trim().toLowerCase())) {
       setEmailError("This email address is already configured")
       return false
     }
@@ -162,7 +162,7 @@ export function EmailRouteEditor({ faxNumberId }: { faxNumberId: string }) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.items.length === 0 && (
+                {(data.items?.length ?? 0) === 0 && (
                   <TableRow>
                     <TableCell colSpan={4} className="text-center text-muted-foreground">
                       <div className="flex flex-col items-center gap-3 py-8">
@@ -177,7 +177,7 @@ export function EmailRouteEditor({ faxNumberId }: { faxNumberId: string }) {
                     </TableCell>
                   </TableRow>
                 )}
-                {data.items.map((route) => (
+                {(data.items ?? []).map((route) => (
                   <EmailRouteRow
                     key={route.id}
                     route={route}
@@ -190,7 +190,7 @@ export function EmailRouteEditor({ faxNumberId }: { faxNumberId: string }) {
               </TableBody>
             </Table>
           </div>
-          {data.items.length > 0 && (
+          {(data.items?.length ?? 0) > 0 && (
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4 text-sm">
                 <span className="flex items-center gap-1.5">
@@ -202,7 +202,7 @@ export function EmailRouteEditor({ faxNumberId }: { faxNumberId: string }) {
                   <span className="text-muted-foreground">{totalCount - activeCount} inactive</span>
                 </span>
               </div>
-              {totalCount > 1 && <BulkToggleButton faxNumberId={faxNumberId} routes={data.items} allActive={allActive} allInactive={allInactive} />}
+              {totalCount > 1 && <BulkToggleButton faxNumberId={faxNumberId} routes={data.items ?? []} allActive={allActive} allInactive={allInactive} />}
             </div>
           )}
         </CardContent>
@@ -229,7 +229,16 @@ export function EmailRouteEditor({ faxNumberId }: { faxNumberId: string }) {
   )
 }
 
-function BulkToggleButton({ faxNumberId, routes, allActive }: { faxNumberId: string; routes: Array<{ id: string; isActive: boolean }>; allActive: boolean; allInactive: boolean }) {
+function BulkToggleButton({
+  faxNumberId,
+  routes,
+  allActive,
+}: {
+  faxNumberId: string
+  routes: Array<{ id: string; isActive?: boolean }>
+  allActive: boolean
+  allInactive: boolean
+}) {
   const queryClient = useQueryClient()
   const [pending, setPending] = useState(false)
   const targetActive = !allActive

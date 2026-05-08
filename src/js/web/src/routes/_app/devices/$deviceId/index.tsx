@@ -367,7 +367,7 @@ function DeviceDetailPage() {
     router.navigate({ to: "/devices" })
   }
 
-  const lines = linesQuery.data?.items ?? []
+  const lines = linesQuery.data ?? []
 
   return (
     <PageContainer className="flex-1 space-y-8">

@@ -69,10 +69,10 @@ function FaxOverviewPage() {
 
   const isLoading = numbersLoading || messagesLoading
 
-  const activeCount = numbers?.items.filter((n) => n.isActive).length ?? 0
-  const failedCount = messages?.items.filter((m) => m.status === "failed").length ?? 0
-  const inboundCount = messages?.items.filter((m) => m.direction === "inbound").length ?? 0
-  const outboundCount = messages?.items.filter((m) => m.direction === "outbound").length ?? 0
+  const activeCount = numbers?.items?.filter((n) => n.isActive).length ?? 0
+  const failedCount = messages?.items?.filter((m) => m.status === "failed").length ?? 0
+  const inboundCount = messages?.items?.filter((m) => m.direction === "inbound").length ?? 0
+  const outboundCount = messages?.items?.filter((m) => m.direction === "outbound").length ?? 0
 
   const volumeChartData = useMemo(() => {
     const days: { date: string; label: string; inbound: number; outbound: number }[] = []
@@ -258,7 +258,7 @@ function FaxOverviewPage() {
         </SectionErrorBoundary>
       </PageSection>
 
-      {!isLoading && messages && messages.items.length > 0 && (
+      {!isLoading && messages && (messages.items?.length ?? 0) > 0 && (
         <PageSection delay={0.35}>
           <SectionErrorBoundary name="Recent Messages">
             <Card>
@@ -270,7 +270,7 @@ function FaxOverviewPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {messages.items.slice(0, 5).map((msg) => (
+                  {(messages.items ?? []).slice(0, 5).map((msg) => (
                     <Link
                       key={msg.id}
                       to="/fax/messages/$messageId"

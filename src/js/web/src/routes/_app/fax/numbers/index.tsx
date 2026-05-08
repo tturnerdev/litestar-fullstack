@@ -377,7 +377,7 @@ function FaxNumbersPage() {
   const activeFilterCount = statusFilter.length
 
   const hasData = filteredItems.length > 0
-  const hasAnyNumbers = (data?.items.length ?? 0) > 0
+  const hasAnyNumbers = (data?.items?.length ?? 0) > 0
   const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / pageSize))
 
   // Keyboard shortcuts: "/" to focus search, ArrowLeft/ArrowRight for pagination
@@ -901,7 +901,7 @@ function FaxNumberRow({
       )}
       {isColumnVisible("status") && (
         <TableCell className={cellClass}>
-          <StatusIndicator isActive={faxNumber.isActive} />
+          <StatusIndicator isActive={faxNumber.isActive ?? false} />
         </TableCell>
       )}
       {isColumnVisible("emailRoutes") && (

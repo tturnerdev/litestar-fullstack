@@ -182,7 +182,7 @@ function CreateEmailRouteDialog({ open, onOpenChange }: { open: boolean; onOpenC
                 <SelectValue placeholder="Select a fax number" />
               </SelectTrigger>
               <SelectContent>
-                {numbers?.items.map((n) => (
+                {numbers?.items?.map((n) => (
                   <SelectItem key={n.id} value={n.id}>
                     {n.number}
                     {n.label ? ` (${n.label})` : ""}
@@ -296,8 +296,8 @@ function EditEmailRouteDialog({ route, onOpenChange }: { route: FaxEmailRouteWit
   // Sync form fields when route changes
   if (route && emailAddress === "" && route.emailAddress !== "") {
     setEmailAddress(route.emailAddress)
-    setIsActive(route.isActive)
-    setNotifyOnFailure(route.notifyOnFailure)
+    setIsActive(route.isActive ?? false)
+    setNotifyOnFailure(route.notifyOnFailure ?? true)
   }
 
   return (

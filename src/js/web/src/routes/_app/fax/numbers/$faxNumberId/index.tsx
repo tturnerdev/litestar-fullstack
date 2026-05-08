@@ -418,7 +418,7 @@ function FaxNumberDetailPage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
-                        <FaxStatusBadge status={msg.status} />
+                        <FaxStatusBadge status={msg.status ?? ""} />
                         <Badge variant="outline" className="font-mono text-xs">
                           {msg.pageCount} pg{msg.pageCount === 1 ? "" : "s"}
                         </Badge>

@@ -303,8 +303,6 @@ function FaxMessagesPage() {
     page,
     pageSize,
     search: debouncedSearch || undefined,
-    direction: directionFilter.length === 1 ? directionFilter[0] : undefined,
-    status: statusFilter.length === 1 ? statusFilter[0] : undefined,
     orderBy: sortKey ?? undefined,
     sortOrder: sortDir ?? undefined,
     refetchInterval: autoRefresh ? AUTO_REFRESH_INTERVAL : false,
@@ -327,7 +325,7 @@ function FaxMessagesPage() {
     if (!data?.items) return []
     return data.items.filter((msg) => {
       if (directionFilter.length > 1 && !directionFilter.includes(msg.direction)) return false
-      if (statusFilter.length > 1 && !statusFilter.includes(msg.status)) return false
+      if (statusFilter.length > 1 && !statusFilter.includes(msg.status ?? "")) return false
       if ((startDate || endDate) && !isDateInRange(msg.receivedAt ?? msg.createdAt, startDate, endDate)) return false
       return true
     })
@@ -337,7 +335,7 @@ function FaxMessagesPage() {
   const statusCounts = useMemo(() => {
     const counts = new Map<string, number>()
     for (const msg of filteredItems) {
-      counts.set(msg.status, (counts.get(msg.status) ?? 0) + 1)
+      counts.set(msg.status ?? "", (counts.get(msg.status ?? "") ?? 0) + 1)
     }
     return counts
   }, [filteredItems])
@@ -443,7 +441,7 @@ function FaxMessagesPage() {
   const activeFilterCount = directionFilter.length + statusFilter.length + (startDate || endDate ? 1 : 0)
 
   const hasData = filteredItems.length > 0
-  const hasAnyMessages = (data?.items.length ?? 0) > 0 || !!search || activeFilterCount > 0
+  const hasAnyMessages = (data?.items?.length ?? 0) > 0 || !!search || activeFilterCount > 0
 
   // Keyboard shortcuts: "/" to focus search, ArrowLeft/ArrowRight for pagination
   useEffect(() => {
@@ -880,14 +878,14 @@ function FaxMessageRow({
         {isColumnVisible("pages") && (
           <TableCell className={cn("hidden md:table-cell", cellClass)}>
             <Badge variant="outline" className="font-mono text-xs">
-              {formatPages(msg.pageCount)}
+              {formatPages(msg.pageCount ?? 0)}
             </Badge>
           </TableCell>
         )}
         {isColumnVisible("status") && (
           <TableCell className={cellClass}>
             <div className="flex items-center gap-2">
-              <FaxStatusBadge status={msg.status} />
+              <FaxStatusBadge status={msg.status ?? ""} />
               {msg.errorMessage && (
                 <Tooltip>
                   <TooltipTrigger asChild>

@@ -98,7 +98,7 @@ export function DeviceLineConfig({ deviceId }: DeviceLineConfigProps) {
     )
   }
 
-  const currentLines = lines ?? (data?.items ?? []).map(toLineRow)
+  const currentLines = lines ?? (data ?? []).map(toLineRow)
 
   function updateLine(index: number, field: keyof LineRow, value: string | number | boolean) {
     const updated = [...currentLines]

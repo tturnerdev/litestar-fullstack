@@ -5,13 +5,18 @@ import {
   type Device,
   type DeviceCreate,
   type DeviceLineAssignment,
+  type DeviceLineAssignmentInput,
   type DeviceUpdate,
   deleteDevice,
   type ExtensionDeviceSummary,
   getDevice,
   type ListDevicesData,
+  listDeviceLines,
   listDevices,
   listExtensionDevices,
+  rebootDevice,
+  reprovisionDevice,
+  setDeviceLines,
   updateDevice,
 } from "@/lib/generated/api"
 import { client } from "@/lib/generated/api/client.gen"
@@ -185,7 +190,10 @@ export function useDeleteDevice() {
 export function useRebootDevice(deviceId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: () => apiFetch<{ message: string }>(`/api/devices/${deviceId}/reboot`, { method: "POST" }),
+    mutationFn: async () => {
+      const response = await rebootDevice({ path: { device_id: deviceId } })
+      return response.data
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["device", deviceId] })
       toast.success("Reboot command sent")
@@ -201,7 +209,10 @@ export function useRebootDevice(deviceId: string) {
 export function useReprovisionDevice(deviceId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: () => apiFetch<{ message: string }>(`/api/devices/${deviceId}/reprovision`, { method: "POST" }),
+    mutationFn: async () => {
+      const response = await reprovisionDevice({ path: { device_id: deviceId } })
+      return response.data
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["device", deviceId] })
       toast.success("Reprovisioning started")
@@ -221,27 +232,23 @@ export function useReprovisionDevice(deviceId: string) {
 export function useDeviceLines(deviceId: string) {
   return useQuery({
     queryKey: ["device", deviceId, "lines"],
-    queryFn: () => apiFetch<{ items: DeviceLineAssignment[]; total: number }>(`/api/devices/${deviceId}/lines`),
+    queryFn: async () => {
+      const response = await listDeviceLines({ path: { device_id: deviceId } })
+      return response.data as DeviceLineAssignment[]
+    },
     enabled: !!deviceId,
   })
 }
 
-export interface SetDeviceLinesPayload {
-  lineNumber: number
-  label: string
-  lineType: string
-  extensionId?: string | null
-  isActive?: boolean
-}
+export type SetDeviceLinesPayload = DeviceLineAssignmentInput
 
 export function useSetDeviceLines(deviceId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (lines: SetDeviceLinesPayload[]) =>
-      apiFetch<DeviceLineAssignment[]>(`/api/devices/${deviceId}/lines`, {
-        method: "PUT",
-        body: JSON.stringify(lines),
-      }),
+    mutationFn: async (lines: DeviceLineAssignmentInput[]) => {
+      const response = await setDeviceLines({ path: { device_id: deviceId }, body: { lines } })
+      return response.data
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["device", deviceId] })
       queryClient.invalidateQueries({ queryKey: ["device", deviceId, "lines"] })

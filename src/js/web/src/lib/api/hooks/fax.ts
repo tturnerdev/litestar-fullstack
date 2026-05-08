@@ -1,67 +1,45 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
-import { client } from "@/lib/generated/api/client.gen"
+import {
+  createFaxEmailRoute,
+  createFaxNumber,
+  deleteFaxEmailRoute,
+  deleteFaxMessage,
+  deleteFaxNumber,
+  getFaxMessage,
+  getFaxNumber,
+  listFaxEmailRoutes,
+  listFaxMessages,
+  listFaxNumbers,
+  sendFax,
+  updateFaxEmailRoute,
+  updateFaxNumber,
+} from "@/lib/generated/api"
 
 // ---------------------------------------------------------------------------
-// Types
+// Re-exported generated types
 // ---------------------------------------------------------------------------
 
-export interface FaxNumber {
-  id: string
-  userId: string
-  teamId: string | null
-  number: string
-  label: string | null
-  isActive: boolean
-  emailRoutes?: FaxEmailRoute[]
-  messageCount?: number
-  createdAt: string | null
-  updatedAt: string | null
-}
+export type {
+  FaxEmailRoute,
+  FaxEmailRouteCreate,
+  FaxEmailRouteUpdate,
+  FaxMessage,
+  FaxNumber,
+  FaxNumberCreate,
+  FaxNumberUpdate,
+  SendFax,
+} from "@/lib/generated/api"
 
-export interface FaxEmailRoute {
-  id: string
-  faxNumberId: string
-  emailAddress: string
-  isActive: boolean
-  notifyOnFailure: boolean
-  createdAt: string | null
-  updatedAt: string | null
-}
-
-export interface FaxMessage {
-  id: string
-  faxNumberId: string
-  direction: "inbound" | "outbound"
-  remoteNumber: string
-  remoteName: string | null
-  pageCount: number
-  status: "queued" | "received" | "delivered" | "failed" | "sending" | "sent"
-  filePath: string
-  fileSizeBytes: number
-  errorMessage: string | null
-  deliveredToEmails: string[] | null
-  receivedAt: string | null
-  createdAt: string | null
-  updatedAt: string | null
-}
-
-interface PaginatedResponse<T> {
-  items: T[]
-  total: number
-}
+import type { FaxEmailRoute, FaxEmailRouteUpdate, FaxNumber, FaxNumberUpdate, SendFax } from "@/lib/generated/api"
 
 // ---------------------------------------------------------------------------
-// Fetch helpers (manual since generated client doesn't include fax yet)
+// Local composite type
 // ---------------------------------------------------------------------------
 
-async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
-  const response = await client.request({
-    method: (options?.method as "GET") ?? "GET",
-    url,
-    body: options?.body ? JSON.parse(options.body as string) : undefined,
-  })
-  return response.data as T
+export interface FaxEmailRouteWithNumber extends FaxEmailRoute {
+  faxNumber: string
+  faxNumberLabel: string | null
 }
 
 // ---------------------------------------------------------------------------
@@ -71,11 +49,9 @@ async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
 export function useCreateFaxNumber() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (payload: { number: string; label?: string; isActive?: boolean; teamId?: string }) => {
-      return apiFetch<FaxNumber>("/api/fax/numbers", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      })
+    mutationFn: async (payload: Parameters<typeof createFaxNumber>[0]["body"]) => {
+      const response = await createFaxNumber({ body: payload })
+      return response.data as Required<FaxNumber>
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["fax", "numbers"] })
@@ -93,7 +69,8 @@ export function useFaxNumbers(page = 1, pageSize = 25) {
   return useQuery({
     queryKey: ["fax", "numbers", page, pageSize],
     queryFn: async () => {
-      return apiFetch<PaginatedResponse<FaxNumber>>(`/api/fax/numbers?currentPage=${page}&pageSize=${pageSize}`)
+      const response = await listFaxNumbers({ query: { currentPage: page, pageSize } })
+      return response.data
     },
   })
 }
@@ -102,7 +79,8 @@ export function useFaxNumber(id: string) {
   return useQuery({
     queryKey: ["fax", "number", id],
     queryFn: async () => {
-      return apiFetch<FaxNumber>(`/api/fax/numbers/${id}`)
+      const response = await getFaxNumber({ path: { fax_number_id: id } })
+      return response.data as Required<FaxNumber>
     },
     enabled: !!id,
   })
@@ -111,11 +89,9 @@ export function useFaxNumber(id: string) {
 export function useUpdateFaxNumber(id: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (payload: Record<string, unknown>) => {
-      return apiFetch<FaxNumber>(`/api/fax/numbers/${id}`, {
-        method: "PATCH",
-        body: JSON.stringify(payload),
-      })
+    mutationFn: async (payload: FaxNumberUpdate) => {
+      const response = await updateFaxNumber({ path: { fax_number_id: id }, body: payload })
+      return response.data as Required<FaxNumber>
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["fax", "numbers"] })
@@ -134,9 +110,7 @@ export function useDeleteFaxNumber() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (faxNumberId: string) => {
-      return apiFetch<void>(`/api/fax/numbers/${faxNumberId}`, {
-        method: "DELETE",
-      })
+      await deleteFaxNumber({ path: { fax_number_id: faxNumberId } })
     },
     onSuccess: (_data, faxNumberId) => {
       queryClient.invalidateQueries({ queryKey: ["fax", "numbers"] })
@@ -159,7 +133,11 @@ export function useFaxEmailRoutes(faxNumberId: string, page = 1, pageSize = 25) 
   return useQuery({
     queryKey: ["fax", "emailRoutes", faxNumberId, page, pageSize],
     queryFn: async () => {
-      return apiFetch<PaginatedResponse<FaxEmailRoute>>(`/api/fax/numbers/${faxNumberId}/email-routes?currentPage=${page}&pageSize=${pageSize}`)
+      const response = await listFaxEmailRoutes({
+        path: { fax_number_id: faxNumberId },
+        query: { currentPage: page, pageSize },
+      })
+      return response.data
     },
     enabled: !!faxNumberId,
   })
@@ -168,11 +146,9 @@ export function useFaxEmailRoutes(faxNumberId: string, page = 1, pageSize = 25) 
 export function useCreateFaxEmailRoute(faxNumberId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (payload: { emailAddress: string; isActive?: boolean; notifyOnFailure?: boolean }) => {
-      return apiFetch<FaxEmailRoute>(`/api/fax/numbers/${faxNumberId}/email-routes`, {
-        method: "POST",
-        body: JSON.stringify(payload),
-      })
+    mutationFn: async (payload: Parameters<typeof createFaxEmailRoute>[0]["body"]) => {
+      const response = await createFaxEmailRoute({ path: { fax_number_id: faxNumberId }, body: payload })
+      return response.data as Required<FaxEmailRoute>
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["fax", "emailRoutes", faxNumberId] })
@@ -190,11 +166,12 @@ export function useCreateFaxEmailRoute(faxNumberId: string) {
 export function useUpdateFaxEmailRoute(faxNumberId: string, routeId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (payload: Record<string, unknown>) => {
-      return apiFetch<FaxEmailRoute>(`/api/fax/numbers/${faxNumberId}/email-routes/${routeId}`, {
-        method: "PATCH",
-        body: JSON.stringify(payload),
+    mutationFn: async (payload: FaxEmailRouteUpdate) => {
+      const response = await updateFaxEmailRoute({
+        path: { fax_number_id: faxNumberId, route_id: routeId },
+        body: payload,
       })
+      return response.data as Required<FaxEmailRoute>
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["fax", "emailRoutes", faxNumberId] })
@@ -212,9 +189,7 @@ export function useDeleteFaxEmailRoute(faxNumberId: string) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (routeId: string) => {
-      return apiFetch<void>(`/api/fax/numbers/${faxNumberId}/email-routes/${routeId}`, {
-        method: "DELETE",
-      })
+      await deleteFaxEmailRoute({ path: { fax_number_id: faxNumberId, route_id: routeId } })
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["fax", "emailRoutes", faxNumberId] })
@@ -236,27 +211,26 @@ export function useDeleteFaxEmailRoute(faxNumberId: string) {
 export function useFaxMessages(params: {
   page?: number
   pageSize?: number
-  direction?: string
-  status?: string
   search?: string
   orderBy?: string
-  sortOrder?: string
+  sortOrder?: "asc" | "desc"
   /** When set, the query will automatically refetch on this interval (ms). */
   refetchInterval?: number | false
 }) {
-  const { page = 1, pageSize = 25, direction, status, search, orderBy, sortOrder, refetchInterval } = params
+  const { page = 1, pageSize = 25, search, orderBy, sortOrder, refetchInterval } = params
   return useQuery({
-    queryKey: ["fax", "messages", page, pageSize, direction, status, search, orderBy, sortOrder],
+    queryKey: ["fax", "messages", page, pageSize, search, orderBy, sortOrder],
     queryFn: async () => {
-      const searchParams = new URLSearchParams()
-      searchParams.set("currentPage", String(page))
-      searchParams.set("pageSize", String(pageSize))
-      if (direction) searchParams.set("direction", direction)
-      if (status) searchParams.set("status", status)
-      if (search) searchParams.set("search", search)
-      if (orderBy) searchParams.set("orderBy", orderBy)
-      if (sortOrder) searchParams.set("sortOrder", sortOrder)
-      return apiFetch<PaginatedResponse<FaxMessage>>(`/api/fax/messages?${searchParams.toString()}`)
+      const response = await listFaxMessages({
+        query: {
+          currentPage: page,
+          pageSize,
+          ...(search ? { searchString: search } : {}),
+          ...(orderBy ? { orderBy } : {}),
+          ...(sortOrder ? { sortOrder } : {}),
+        },
+      })
+      return response.data
     },
     ...(refetchInterval !== undefined ? { refetchInterval } : {}),
   })
@@ -266,7 +240,8 @@ export function useFaxMessage(id: string) {
   return useQuery({
     queryKey: ["fax", "message", id],
     queryFn: async () => {
-      return apiFetch<FaxMessage>(`/api/fax/messages/${id}`)
+      const response = await getFaxMessage({ path: { message_id: id } })
+      return response.data
     },
     enabled: !!id,
   })
@@ -276,9 +251,7 @@ export function useDeleteFaxMessage() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (messageId: string) => {
-      return apiFetch<void>(`/api/fax/messages/${messageId}`, {
-        method: "DELETE",
-      })
+      await deleteFaxMessage({ path: { message_id: messageId } })
     },
     onSuccess: (_data, messageId) => {
       queryClient.invalidateQueries({ queryKey: ["fax", "messages"] })
@@ -319,24 +292,23 @@ export function useDownloadFaxDocument(messageId: string) {
 // All Email Routes (aggregated across fax numbers)
 // ---------------------------------------------------------------------------
 
-export interface FaxEmailRouteWithNumber extends FaxEmailRoute {
-  faxNumber: string
-  faxNumberLabel: string | null
-}
-
 export function useAllFaxEmailRoutes() {
   return useQuery({
     queryKey: ["fax", "emailRoutes", "all"],
     queryFn: async () => {
-      const numbersResp = await apiFetch<PaginatedResponse<FaxNumber>>("/api/fax/numbers?currentPage=1&pageSize=200")
+      const numbersResp = await listFaxNumbers({ query: { currentPage: 1, pageSize: 200 } })
+      const numbers = numbersResp.data?.items ?? []
       const allRoutes: FaxEmailRouteWithNumber[] = []
-      for (const num of numbersResp.items) {
-        const routesResp = await apiFetch<PaginatedResponse<FaxEmailRoute>>(`/api/fax/numbers/${num.id}/email-routes?currentPage=1&pageSize=200`)
-        for (const route of routesResp.items) {
+      for (const num of numbers) {
+        const routesResp = await listFaxEmailRoutes({
+          path: { fax_number_id: num.id },
+          query: { currentPage: 1, pageSize: 200 },
+        })
+        for (const route of routesResp.data?.items ?? []) {
           allRoutes.push({
             ...route,
             faxNumber: num.number,
-            faxNumberLabel: num.label,
+            faxNumberLabel: num.label ?? null,
           })
         }
       }
@@ -352,11 +324,9 @@ export function useAllFaxEmailRoutes() {
 export function useSendFax() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (payload: { faxNumberId: string; destinationNumber: string; subject?: string; body?: string }) => {
-      return apiFetch<FaxMessage>("/api/fax/send", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      })
+    mutationFn: async (payload: SendFax) => {
+      const response = await sendFax({ body: payload })
+      return response.data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["fax", "messages"] })
