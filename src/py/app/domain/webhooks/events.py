@@ -168,6 +168,9 @@ class WebhookEventType(StrEnum):
     TICKET_MESSAGE_UPDATED = "ticket.message.updated"
     TICKET_ATTACHMENT_DELETED = "ticket.attachment.deleted"
 
+    # Feedback events
+    FEEDBACK_SUBMITTED = "feedback.submitted"
+
     # Tag events
     TAG_CREATED = "tag.created"
     TAG_UPDATED = "tag.updated"
@@ -354,6 +357,8 @@ EVENT_DESCRIPTIONS: dict[WebhookEventType, str] = {
     WebhookEventType.TICKET_MESSAGE_DELETED: "A ticket message was deleted",
     WebhookEventType.TICKET_MESSAGE_UPDATED: "A ticket message was updated",
     WebhookEventType.TICKET_ATTACHMENT_DELETED: "A ticket attachment was deleted",
+    # Feedback events
+    WebhookEventType.FEEDBACK_SUBMITTED: "User feedback was submitted",
     # Tag events
     WebhookEventType.TAG_CREATED: "A new tag was created",
     WebhookEventType.TAG_UPDATED: "A tag was updated",

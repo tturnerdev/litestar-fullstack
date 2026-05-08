@@ -150,6 +150,8 @@ EVENT_MAP: dict[str, WebhookEventType] = {
     "ticket_message_deleted": WebhookEventType.TICKET_MESSAGE_DELETED,
     "ticket_message_updated": WebhookEventType.TICKET_MESSAGE_UPDATED,
     "ticket_attachment_deleted": WebhookEventType.TICKET_ATTACHMENT_DELETED,
+    # Feedback events
+    "feedback_submitted": WebhookEventType.FEEDBACK_SUBMITTED,
     # Tag events
     "tag_created": WebhookEventType.TAG_CREATED,
     "tag_updated": WebhookEventType.TAG_UPDATED,

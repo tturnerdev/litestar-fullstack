@@ -54,7 +54,7 @@ export function PhoneNumberEditSheet({ phoneNumber, open, onOpenChange }: PhoneN
         <form onSubmit={handleSubmit} className="flex flex-1 flex-col gap-6 overflow-y-auto px-4">
           <div className="space-y-2">
             <Label htmlFor="edit-label">Label</Label>
-            <Input id="edit-label" placeholder="e.g. Main Line, Sales" value={label} onChange={(e) => setLabel(e.target.value)} />
+            <Input id="edit-label" placeholder="e.g. Main Line, Sales" value={label} onChange={(e) => setLabel(e.target.value)} maxLength={100} />
             <p className="text-xs text-muted-foreground">A friendly name to identify this number.</p>
           </div>
           <div className="space-y-2">

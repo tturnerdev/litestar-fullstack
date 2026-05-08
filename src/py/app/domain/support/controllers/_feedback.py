@@ -271,4 +271,6 @@ class FeedbackController(Controller):
             request=request,
         )
 
+        request.app.emit(event_id="feedback_submitted", user_id=current_user.id)
+
         return Message(message="Feedback submitted successfully.")
