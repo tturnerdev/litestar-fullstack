@@ -172,9 +172,6 @@ class DeviceService(service.SQLAlchemyAsyncRepositoryService[m.Device]):
             schemas.append(schema)
         return schemas
 
-    async def update(self, data: ModelDictT[m.Device], item_id: Any | None = None, **kwargs: Any) -> m.Device:
-        return await super().update(data, item_id=item_id, **kwargs)
-
     async def reboot_device(self, device_id: UUID) -> m.Device:
         return await self.update(
             item_id=device_id,

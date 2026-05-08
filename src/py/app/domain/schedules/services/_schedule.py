@@ -57,14 +57,6 @@ class ScheduleService(service.SQLAlchemyAsyncRepositoryService[m.Schedule]):
             data["name"] = data["name"].strip()
         return data
 
-    async def update(self, data: ModelDictT[m.Schedule], item_id: Any | None = None, **kwargs: Any) -> m.Schedule:
-        """Update a schedule.
-
-        Returns:
-            The updated schedule object.
-        """
-        return await super().update(data, item_id=item_id, **kwargs)
-
     async def check_schedule(
         self,
         schedule_id: UUID,

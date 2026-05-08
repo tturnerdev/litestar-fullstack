@@ -174,10 +174,3 @@ class E911RegistrationService(service.SQLAlchemyAsyncRepositoryService[m.E911Reg
         result = await self.repository.session.execute(stmt)
         return list(result.scalars().all())
 
-    async def update(self, data: Any, item_id: Any | None = None, **kwargs: Any) -> m.E911Registration:
-        """Update an E911 registration.
-
-        Returns:
-            The updated registration object.
-        """
-        return await super().update(data, item_id=item_id, **kwargs)

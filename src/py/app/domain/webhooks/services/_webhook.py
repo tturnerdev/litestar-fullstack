@@ -80,5 +80,3 @@ class WebhookService(service.SQLAlchemyAsyncRepositoryService[m.Webhook]):
                 data["description"] = data["description"].strip()
         return data
 
-    async def update(self, data: Any, item_id: Any | None = None, **kwargs: Any) -> m.Webhook:
-        return await super().update(data, item_id=item_id, **kwargs)
