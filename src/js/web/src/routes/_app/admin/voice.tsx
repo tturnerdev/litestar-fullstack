@@ -20,6 +20,7 @@ import { useDocumentTitle } from "@/hooks/use-document-title"
 import { useAdminExtensions, useAdminPhoneNumbers, useAdminVoiceStats } from "@/lib/api/hooks/admin"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import type { AdminExtensionSummary, AdminPhoneNumberSummary } from "@/lib/generated/api"
+import { adminListExtensions } from "@/lib/generated/api"
 import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/admin/voice")({
@@ -142,7 +143,7 @@ function AdminVoicePage() {
     dataUpdatedAt,
     isRefetching,
   } = useAdminPhoneNumbers(phoneNumberPage, PAGE_SIZE, debouncedPhoneSearch || undefined)
-  const { data: extensions, isLoading: extensionsLoading, isError: extensionsError, refetch: refetchExtensions } = useAdminExtensions()
+  const { data: extensionData, isLoading: extensionsLoading, isError: extensionsError, refetch: refetchExtensions } = useAdminExtensions(1, 8)
 
   const handleRefreshAll = useCallback(() => {
     refetchStats()
@@ -214,18 +215,20 @@ function AdminVoicePage() {
     return sorted
   }, [rawPhoneNumbers, sortKey, sortDir])
 
-  const typedExtensions = (Array.isArray(extensions) ? extensions : []) as AdminExtensionSummary[]
-  const recentExtensions = typedExtensions.slice(0, 8)
+  const typedExtensions = extensionData?.items ?? []
+  const recentExtensions = typedExtensions
 
   const handleExportPhoneNumbers = useCallback(() => {
     if (!phoneNumbers.length) return
     exportToCsv("admin-phone-numbers", phoneNumberCsvHeaders, phoneNumbers)
   }, [phoneNumbers])
 
-  const handleExportExtensions = useCallback(() => {
-    if (!typedExtensions.length) return
-    exportToCsv("admin-extensions", extensionCsvHeaders, typedExtensions)
-  }, [typedExtensions])
+  const handleExportExtensions = useCallback(async () => {
+    const response = await adminListExtensions({ query: { currentPage: 1, pageSize: 10000 } as never })
+    const all = (response.data as { items: AdminExtensionSummary[] })?.items ?? []
+    if (!all.length) return
+    exportToCsv("admin-extensions", extensionCsvHeaders, all)
+  }, [])
 
   return (
     <PageContainer className="flex-1 space-y-8">

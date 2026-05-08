@@ -2476,6 +2476,8 @@ export const CallQueueUpdateSchema = {
       ],
     },
     name: {
+      maxLength: 255,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
@@ -3294,6 +3296,8 @@ export const ConnectionUpdateSchema = {
       ],
     },
     name: {
+      maxLength: 255,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
@@ -3638,6 +3642,7 @@ export const DeviceCreateSchema = {
       ],
     },
     deviceType: {
+      maxLength: 100,
       type: "string",
     },
     locationId: {
@@ -3805,6 +3810,7 @@ export const DeviceLineAssignmentInputSchema = {
       type: "boolean",
     },
     label: {
+      maxLength: 255,
       type: "string",
     },
     lineNumber: {
@@ -3812,6 +3818,7 @@ export const DeviceLineAssignmentInputSchema = {
     },
     lineType: {
       default: "private",
+      maxLength: 100,
       type: "string",
     },
   },
@@ -4259,6 +4266,8 @@ export const DeviceUpdateSchema = {
       ],
     },
     name: {
+      maxLength: 255,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
@@ -4618,6 +4627,8 @@ export const E911RegistrationCreateSchema = {
     },
     country: {
       default: "US",
+      maxLength: 2,
+      minLength: 2,
       type: "string",
     },
     locationId: {
@@ -4665,6 +4676,8 @@ export const E911RegistrationCreateSchema = {
 export const E911RegistrationUpdateSchema = {
   properties: {
     addressLine1: {
+      maxLength: 255,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
@@ -4682,6 +4695,8 @@ export const E911RegistrationUpdateSchema = {
       ],
     },
     city: {
+      maxLength: 255,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
@@ -4689,6 +4704,8 @@ export const E911RegistrationUpdateSchema = {
       ],
     },
     country: {
+      maxLength: 2,
+      minLength: 2,
       oneOf: [
         {
           type: "string",
@@ -4718,6 +4735,8 @@ export const E911RegistrationUpdateSchema = {
       ],
     },
     postalCode: {
+      maxLength: 20,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
@@ -4725,6 +4744,8 @@ export const E911RegistrationUpdateSchema = {
       ],
     },
     state: {
+      maxLength: 255,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
@@ -5102,6 +5123,7 @@ export const ExtensionSyncResultSchema = {
 export const ExtensionUpdateSchema = {
   properties: {
     displayName: {
+      maxLength: 100,
       oneOf: [
         {
           type: "string",
@@ -5273,6 +5295,8 @@ export const FaxEmailRouteSchema = {
 export const FaxEmailRouteCreateSchema = {
   properties: {
     emailAddress: {
+      maxLength: 320,
+      minLength: 1,
       type: "string",
     },
     isActive: {
@@ -5292,6 +5316,7 @@ export const FaxEmailRouteCreateSchema = {
 export const FaxEmailRouteUpdateSchema = {
   properties: {
     emailAddress: {
+      maxLength: 320,
       oneOf: [
         {
           type: "string",
@@ -5672,6 +5697,8 @@ export const ForwardingRuleCreateSchema = {
       $ref: "#/components/schemas/ForwardingDestinationType",
     },
     destinationValue: {
+      maxLength: 255,
+      minLength: 1,
       type: "string",
     },
     isActive: {
@@ -5718,6 +5745,7 @@ export const ForwardingRuleUpdateSchema = {
       ],
     },
     destinationValue: {
+      maxLength: 255,
       oneOf: [
         {
           type: "string",
@@ -6070,6 +6098,8 @@ export const IvrMenuUpdateSchema = {
       ],
     },
     name: {
+      maxLength: 255,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
@@ -6391,6 +6421,8 @@ export const LocationUpdateSchema = {
       ],
     },
     name: {
+      maxLength: 255,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
@@ -6560,6 +6592,7 @@ export const MusicOnHoldCreateSchema = {
     },
     description: {
       default: "",
+      maxLength: 1000,
       type: "string",
     },
     fileList: {
@@ -6577,6 +6610,8 @@ export const MusicOnHoldCreateSchema = {
       type: "boolean",
     },
     name: {
+      maxLength: 255,
+      minLength: 1,
       type: "string",
     },
     randomOrder: {
@@ -6698,6 +6733,7 @@ export const MusicOnHoldUpdateSchema = {
       ],
     },
     description: {
+      maxLength: 1000,
       oneOf: [
         {
           type: "string",
@@ -6729,6 +6765,8 @@ export const MusicOnHoldUpdateSchema = {
       ],
     },
     name: {
+      maxLength: 255,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
@@ -8103,6 +8141,8 @@ export const RingGroupMemberUpdateSchema = {
 export const RingGroupUpdateSchema = {
   properties: {
     name: {
+      maxLength: 255,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
@@ -8653,6 +8693,8 @@ export const ScheduleUpdateSchema = {
       ],
     },
     name: {
+      maxLength: 255,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
@@ -8767,6 +8809,7 @@ export const SendFaxSchema = {
       ],
     },
     destinationNumber: {
+      maxLength: 20,
       type: "string",
     },
     faxNumberId: {
@@ -9476,6 +9519,7 @@ export const TicketAttachmentSchema = {
 export const TicketCreateSchema = {
   properties: {
     bodyMarkdown: {
+      maxLength: 50000,
       minLength: 1,
       type: "string",
     },
@@ -9491,6 +9535,7 @@ export const TicketCreateSchema = {
     },
     priority: {
       default: "medium",
+      maxLength: 50,
       type: "string",
     },
     subject: {
@@ -9582,6 +9627,8 @@ export const TicketMessageSchema = {
 export const TicketMessageCreateSchema = {
   properties: {
     bodyMarkdown: {
+      maxLength: 50000,
+      minLength: 1,
       type: "string",
     },
     isInternalNote: {
@@ -9618,6 +9665,7 @@ export const TicketUpdateSchema = {
       ],
     },
     priority: {
+      maxLength: 50,
       oneOf: [
         {
           type: "string",
@@ -9625,6 +9673,7 @@ export const TicketUpdateSchema = {
       ],
     },
     status: {
+      maxLength: 50,
       oneOf: [
         {
           type: "string",
@@ -9632,6 +9681,7 @@ export const TicketUpdateSchema = {
       ],
     },
     subject: {
+      maxLength: 255,
       oneOf: [
         {
           type: "string",
@@ -9802,6 +9852,8 @@ export const TimeConditionUpdateSchema = {
       ],
     },
     name: {
+      maxLength: 255,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
@@ -11553,6 +11605,7 @@ export const WebhookTestResultSchema = {
 export const WebhookUpdateSchema = {
   properties: {
     description: {
+      maxLength: 1000,
       oneOf: [
         {
           type: "string",
@@ -11587,6 +11640,8 @@ export const WebhookUpdateSchema = {
       ],
     },
     name: {
+      maxLength: 255,
+      minLength: 1,
       oneOf: [
         {
           type: "string",
@@ -11604,6 +11659,8 @@ export const WebhookUpdateSchema = {
       ],
     },
     url: {
+      maxLength: 2048,
+      minLength: 1,
       oneOf: [
         {
           type: "string",

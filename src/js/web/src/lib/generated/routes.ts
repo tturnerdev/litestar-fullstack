@@ -1425,7 +1425,11 @@ export interface RouteQueryParams {
   'list_entries': Record<string, never>;
   'list_event_types': Record<string, never>;
   'list_extension_devices': Record<string, never>;
-  'list_extensions': Record<string, never>;
+  'list_extensions': {
+    currentPage?: number;
+    pageSize?: number;
+    searchString?: string;
+  };
   'list_extensions_api_voice_extensions': {
     createdAfter?: DateTime;
     createdBefore?: DateTime;
@@ -3226,7 +3230,7 @@ export const routeDefinitions = {
     methods: ['GET'] as const,
     method: 'get',
     pathParams: [] as const,
-    queryParams: [] as const,
+    queryParams: ['currentPage', 'pageSize', 'searchString'] as const,
   },
   'list_extensions_api_voice_extensions': {
     path: '/api/voice/extensions',

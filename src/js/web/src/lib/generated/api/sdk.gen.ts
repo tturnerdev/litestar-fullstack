@@ -108,6 +108,7 @@ import type {
   AdminListDeviceTemplatesErrors,
   AdminListDeviceTemplatesResponses,
   AdminListExtensionsData,
+  AdminListExtensionsErrors,
   AdminListExtensionsResponses,
   AdminListFaxMessagesData,
   AdminListFaxMessagesResponses,
@@ -768,6 +769,7 @@ import type {
   ToggleVoicemailMessageReadErrors,
   ToggleVoicemailMessageReadResponses,
   TokenRefreshData,
+  TokenRefreshErrors,
   TokenRefreshResponses,
   UpdateAdminGatewaySettingsData,
   UpdateAdminGatewaySettingsErrors,
@@ -909,7 +911,7 @@ export type Options<
 };
 
 /**
- * ForgotPassword
+ * Request password reset
  */
 export const forgotPassword = <ThrowOnError extends boolean = false>(
   options: Options<ForgotPasswordData, ThrowOnError>,
@@ -929,7 +931,7 @@ export const forgotPassword = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * Login
+ * Log in
  */
 export const accountLogin = <ThrowOnError extends boolean = false>(
   options: Options<AccountLoginData, ThrowOnError>,
@@ -950,7 +952,7 @@ export const accountLogin = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * Logout
+ * Log out
  */
 export const accountLogout = <ThrowOnError extends boolean = false>(
   options?: Options<AccountLogoutData, ThrowOnError>,
@@ -966,14 +968,14 @@ export const accountLogout = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * RefreshToken
+ * Refresh access token
  */
 export const tokenRefresh = <ThrowOnError extends boolean = false>(
   options?: Options<TokenRefreshData, ThrowOnError>,
 ) =>
   (options?.client ?? client).post<
     TokenRefreshResponses,
-    unknown,
+    TokenRefreshErrors,
     ThrowOnError
   >({
     security: [{ scheme: "bearer", type: "http" }],
@@ -982,7 +984,7 @@ export const tokenRefresh = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ValidateResetToken
+ * Validate a password reset token
  */
 export const validateResetToken = <ThrowOnError extends boolean = false>(
   options: Options<ValidateResetTokenData, ThrowOnError>,
@@ -998,7 +1000,7 @@ export const validateResetToken = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ResetPasswordWithToken
+ * Reset password with token
  */
 export const resetPassword = <ThrowOnError extends boolean = false>(
   options: Options<ResetPasswordData, ThrowOnError>,
@@ -1018,7 +1020,7 @@ export const resetPassword = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * RevokeAllSessions
+ * Revoke all other sessions
  */
 export const revokeAllSessions = <ThrowOnError extends boolean = false>(
   options?: Options<RevokeAllSessionsData, ThrowOnError>,
@@ -1034,7 +1036,7 @@ export const revokeAllSessions = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetSessions
+ * List active sessions
  */
 export const getActiveSessions = <ThrowOnError extends boolean = false>(
   options?: Options<GetActiveSessionsData, ThrowOnError>,
@@ -1050,7 +1052,7 @@ export const getActiveSessions = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * RevokeSession
+ * Revoke a session
  */
 export const revokeSession = <ThrowOnError extends boolean = false>(
   options: Options<RevokeSessionData, ThrowOnError>,
@@ -1066,7 +1068,7 @@ export const revokeSession = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * Signup
+ * Register a new account
  */
 export const accountRegister = <ThrowOnError extends boolean = false>(
   options: Options<AccountRegisterData, ThrowOnError>,
@@ -1086,7 +1088,7 @@ export const accountRegister = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListLogs
+ * List audit logs
  */
 export const adminListAuditLogs = <ThrowOnError extends boolean = false>(
   options?: Options<AdminListAuditLogsData, ThrowOnError>,
@@ -1102,7 +1104,7 @@ export const adminListAuditLogs = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ExportLogs
+ * Export audit logs as CSV
  */
 export const adminExportAuditLog = <ThrowOnError extends boolean = false>(
   options?: Options<AdminExportAuditLogData, ThrowOnError>,
@@ -1118,7 +1120,7 @@ export const adminExportAuditLog = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetTargetLogs
+ * Get audit logs for a target
  */
 export const adminGetTargetAuditLogs = <ThrowOnError extends boolean = false>(
   options: Options<AdminGetTargetAuditLogsData, ThrowOnError>,
@@ -1134,7 +1136,7 @@ export const adminGetTargetAuditLogs = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetUserLogs
+ * Get audit logs for a user
  */
 export const adminGetUserAuditLogs = <ThrowOnError extends boolean = false>(
   options: Options<AdminGetUserAuditLogsData, ThrowOnError>,
@@ -1150,7 +1152,7 @@ export const adminGetUserAuditLogs = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetLog
+ * Get audit log details
  */
 export const adminGetAuditLog = <ThrowOnError extends boolean = false>(
   options: Options<AdminGetAuditLogData, ThrowOnError>,
@@ -1166,7 +1168,7 @@ export const adminGetAuditLog = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ImportDevices
+ * Import devices from CSV
  */
 export const adminImportDevices = <ThrowOnError extends boolean = false>(
   options: Options<AdminImportDevicesData, ThrowOnError>,
@@ -1187,7 +1189,7 @@ export const adminImportDevices = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ImportExtensions
+ * Import extensions from CSV
  */
 export const adminImportExtensions = <ThrowOnError extends boolean = false>(
   options: Options<AdminImportExtensionsData, ThrowOnError>,
@@ -1208,7 +1210,7 @@ export const adminImportExtensions = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * PreviewDeviceImport
+ * Preview device CSV import
  */
 export const adminPreviewDeviceImport = <ThrowOnError extends boolean = false>(
   options: Options<AdminPreviewDeviceImportData, ThrowOnError>,
@@ -1229,7 +1231,7 @@ export const adminPreviewDeviceImport = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * PreviewExtensionImport
+ * Preview extension CSV import
  */
 export const adminPreviewExtensionImport = <
   ThrowOnError extends boolean = false,
@@ -1252,7 +1254,7 @@ export const adminPreviewExtensionImport = <
   });
 
 /**
- * GetActivity
+ * Get recent activity
  */
 export const getRecentActivity = <ThrowOnError extends boolean = false>(
   options?: Options<GetRecentActivityData, ThrowOnError>,
@@ -1268,7 +1270,7 @@ export const getRecentActivity = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetStats
+ * Get dashboard statistics
  */
 export const getDashboardStats = <ThrowOnError extends boolean = false>(
   options?: Options<GetDashboardStatsData, ThrowOnError>,
@@ -1300,7 +1302,7 @@ export const getDashboardTrends = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListTemplates
+ * List device templates
  */
 export const adminListDeviceTemplates = <ThrowOnError extends boolean = false>(
   options?: Options<AdminListDeviceTemplatesData, ThrowOnError>,
@@ -1316,7 +1318,7 @@ export const adminListDeviceTemplates = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * CreateTemplate
+ * Create a device template
  */
 export const adminCreateDeviceTemplate = <ThrowOnError extends boolean = false>(
   options: Options<AdminCreateDeviceTemplateData, ThrowOnError>,
@@ -1336,7 +1338,7 @@ export const adminCreateDeviceTemplate = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * DeleteTemplate
+ * Delete a device template
  */
 export const adminDeleteDeviceTemplate = <ThrowOnError extends boolean = false>(
   options: Options<AdminDeleteDeviceTemplateData, ThrowOnError>,
@@ -1352,7 +1354,7 @@ export const adminDeleteDeviceTemplate = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetTemplate
+ * Get device template details
  */
 export const adminGetDeviceTemplate = <ThrowOnError extends boolean = false>(
   options: Options<AdminGetDeviceTemplateData, ThrowOnError>,
@@ -1368,7 +1370,7 @@ export const adminGetDeviceTemplate = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * UpdateTemplate
+ * Update a device template
  */
 export const adminUpdateDeviceTemplate = <ThrowOnError extends boolean = false>(
   options: Options<AdminUpdateDeviceTemplateData, ThrowOnError>,
@@ -1388,7 +1390,7 @@ export const adminUpdateDeviceTemplate = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListDevices
+ * List devices (admin)
  */
 export const adminListDevices = <ThrowOnError extends boolean = false>(
   options?: Options<AdminListDevicesData, ThrowOnError>,
@@ -1404,7 +1406,7 @@ export const adminListDevices = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetStats
+ * Get device statistics (admin)
  */
 export const adminGetDeviceStats = <ThrowOnError extends boolean = false>(
   options?: Options<AdminGetDeviceStatsData, ThrowOnError>,
@@ -1420,7 +1422,7 @@ export const adminGetDeviceStats = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListFaxMessages
+ * List fax messages (admin)
  */
 export const adminListFaxMessages = <ThrowOnError extends boolean = false>(
   options?: Options<AdminListFaxMessagesData, ThrowOnError>,
@@ -1436,7 +1438,7 @@ export const adminListFaxMessages = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListFaxNumbers
+ * List fax numbers (admin)
  */
 export const adminListFaxNumbers = <ThrowOnError extends boolean = false>(
   options?: Options<AdminListFaxNumbersData, ThrowOnError>,
@@ -1452,7 +1454,7 @@ export const adminListFaxNumbers = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetStats
+ * Get fax statistics (admin)
  */
 export const adminGetFaxStats = <ThrowOnError extends boolean = false>(
   options?: Options<AdminGetFaxStatsData, ThrowOnError>,
@@ -1468,7 +1470,7 @@ export const adminGetFaxStats = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetGatewaySettings
+ * Get gateway settings
  */
 export const getAdminGatewaySettings = <ThrowOnError extends boolean = false>(
   options?: Options<GetAdminGatewaySettingsData, ThrowOnError>,
@@ -1484,7 +1486,7 @@ export const getAdminGatewaySettings = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * UpdateGatewaySettings
+ * Update gateway settings
  */
 export const updateAdminGatewaySettings = <
   ThrowOnError extends boolean = false,
@@ -1506,7 +1508,7 @@ export const updateAdminGatewaySettings = <
   });
 
 /**
- * ListMusicOnHold
+ * List music on hold classes
  */
 export const adminListMusicOnHold = <ThrowOnError extends boolean = false>(
   options?: Options<AdminListMusicOnHoldData, ThrowOnError>,
@@ -1522,7 +1524,7 @@ export const adminListMusicOnHold = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * CreateMusicOnHold
+ * Create a music on hold class
  */
 export const adminCreateMusicOnHold = <ThrowOnError extends boolean = false>(
   options: Options<AdminCreateMusicOnHoldData, ThrowOnError>,
@@ -1542,7 +1544,7 @@ export const adminCreateMusicOnHold = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * DeleteMusicOnHold
+ * Delete a music on hold class
  */
 export const adminDeleteMusicOnHold = <ThrowOnError extends boolean = false>(
   options: Options<AdminDeleteMusicOnHoldData, ThrowOnError>,
@@ -1558,7 +1560,7 @@ export const adminDeleteMusicOnHold = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetMusicOnHold
+ * Get music on hold details
  */
 export const adminGetMusicOnHold = <ThrowOnError extends boolean = false>(
   options: Options<AdminGetMusicOnHoldData, ThrowOnError>,
@@ -1574,7 +1576,7 @@ export const adminGetMusicOnHold = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * UpdateMusicOnHold
+ * Update a music on hold class
  */
 export const adminUpdateMusicOnHold = <ThrowOnError extends boolean = false>(
   options: Options<AdminUpdateMusicOnHoldData, ThrowOnError>,
@@ -1594,7 +1596,7 @@ export const adminUpdateMusicOnHold = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ExecuteImport
+ * Execute phone number bulk import
  */
 export const adminExecutePhoneNumberBulkImport = <
   ThrowOnError extends boolean = false,
@@ -1616,7 +1618,7 @@ export const adminExecutePhoneNumberBulkImport = <
   });
 
 /**
- * PreviewImport
+ * Preview phone number bulk import
  */
 export const adminPreviewPhoneNumberBulkImport = <
   ThrowOnError extends boolean = false,
@@ -1639,7 +1641,7 @@ export const adminPreviewPhoneNumberBulkImport = <
   });
 
 /**
- * GetStats
+ * Get support statistics (admin)
  */
 export const adminGetSupportStats = <ThrowOnError extends boolean = false>(
   options?: Options<AdminGetSupportStatsData, ThrowOnError>,
@@ -1655,7 +1657,7 @@ export const adminGetSupportStats = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListTickets
+ * List tickets (admin)
  */
 export const adminListTickets = <ThrowOnError extends boolean = false>(
   options?: Options<AdminListTicketsData, ThrowOnError>,
@@ -1671,7 +1673,7 @@ export const adminListTickets = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetSystemStatus
+ * Get system status
  */
 export const getAdminSystemStatus = <ThrowOnError extends boolean = false>(
   options?: Options<GetAdminSystemStatusData, ThrowOnError>,
@@ -1687,7 +1689,7 @@ export const getAdminSystemStatus = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListTasks
+ * List background tasks (admin)
  */
 export const adminListTasks = <ThrowOnError extends boolean = false>(
   options?: Options<AdminListTasksData, ThrowOnError>,
@@ -1703,7 +1705,7 @@ export const adminListTasks = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetTaskStats
+ * Get task statistics (admin)
  */
 export const getAdminTaskStats = <ThrowOnError extends boolean = false>(
   options?: Options<GetAdminTaskStatsData, ThrowOnError>,
@@ -1719,7 +1721,7 @@ export const getAdminTaskStats = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * DeleteTask
+ * Delete a background task (admin)
  */
 export const adminDeleteTask = <ThrowOnError extends boolean = false>(
   options: Options<AdminDeleteTaskData, ThrowOnError>,
@@ -1735,7 +1737,7 @@ export const adminDeleteTask = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * CancelTask
+ * Cancel a background task (admin)
  */
 export const adminCancelTask = <ThrowOnError extends boolean = false>(
   options: Options<AdminCancelTaskData, ThrowOnError>,
@@ -1751,7 +1753,7 @@ export const adminCancelTask = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListTeams
+ * List teams (admin)
  */
 export const adminListTeams = <ThrowOnError extends boolean = false>(
   options?: Options<AdminListTeamsData, ThrowOnError>,
@@ -1767,7 +1769,7 @@ export const adminListTeams = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * DeleteTeam
+ * Delete a team (admin)
  */
 export const adminDeleteTeam = <ThrowOnError extends boolean = false>(
   options: Options<AdminDeleteTeamData, ThrowOnError>,
@@ -1783,7 +1785,7 @@ export const adminDeleteTeam = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetTeam
+ * Get team details (admin)
  */
 export const adminGetTeam = <ThrowOnError extends boolean = false>(
   options: Options<AdminGetTeamData, ThrowOnError>,
@@ -1799,7 +1801,7 @@ export const adminGetTeam = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * UpdateTeam
+ * Update a team (admin)
  */
 export const adminUpdateTeam = <ThrowOnError extends boolean = false>(
   options: Options<AdminUpdateTeamData, ThrowOnError>,
@@ -1819,7 +1821,7 @@ export const adminUpdateTeam = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListUsers
+ * List users (admin)
  */
 export const adminListUsers = <ThrowOnError extends boolean = false>(
   options?: Options<AdminListUsersData, ThrowOnError>,
@@ -1835,7 +1837,7 @@ export const adminListUsers = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * DeleteUser
+ * Delete a user (admin)
  */
 export const adminDeleteUser = <ThrowOnError extends boolean = false>(
   options: Options<AdminDeleteUserData, ThrowOnError>,
@@ -1851,7 +1853,7 @@ export const adminDeleteUser = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetUser
+ * Get user details (admin)
  */
 export const adminGetUser = <ThrowOnError extends boolean = false>(
   options: Options<AdminGetUserData, ThrowOnError>,
@@ -1867,7 +1869,7 @@ export const adminGetUser = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * UpdateUser
+ * Update a user (admin)
  */
 export const adminUpdateUser = <ThrowOnError extends boolean = false>(
   options: Options<AdminUpdateUserData, ThrowOnError>,
@@ -1887,14 +1889,14 @@ export const adminUpdateUser = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListExtensions
+ * List extensions (admin)
  */
 export const adminListExtensions = <ThrowOnError extends boolean = false>(
   options?: Options<AdminListExtensionsData, ThrowOnError>,
 ) =>
   (options?.client ?? client).get<
     AdminListExtensionsResponses,
-    unknown,
+    AdminListExtensionsErrors,
     ThrowOnError
   >({
     security: [{ scheme: "bearer", type: "http" }],
@@ -1903,7 +1905,7 @@ export const adminListExtensions = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListPhoneNumbers
+ * List phone numbers (admin)
  */
 export const adminListPhoneNumbers = <ThrowOnError extends boolean = false>(
   options?: Options<AdminListPhoneNumbersData, ThrowOnError>,
@@ -1919,7 +1921,7 @@ export const adminListPhoneNumbers = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetStats
+ * Get voice statistics (admin)
  */
 export const adminGetVoiceStats = <ThrowOnError extends boolean = false>(
   options?: Options<AdminGetVoiceStatsData, ThrowOnError>,
@@ -1935,7 +1937,7 @@ export const adminGetVoiceStats = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetByExtension
+ * Get calls by extension
  */
 export const getCallsByExtension = <ThrowOnError extends boolean = false>(
   options: Options<GetCallsByExtensionData, ThrowOnError>,
@@ -1951,7 +1953,7 @@ export const getCallsByExtension = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListCallRecords
+ * List call records
  */
 export const listCallRecords = <ThrowOnError extends boolean = false>(
   options?: Options<ListCallRecordsData, ThrowOnError>,
@@ -1967,7 +1969,7 @@ export const listCallRecords = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * CreateCallRecord
+ * Create a call record
  */
 export const createCallRecord = <ThrowOnError extends boolean = false>(
   options: Options<CreateCallRecordData, ThrowOnError>,
@@ -1987,7 +1989,7 @@ export const createCallRecord = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ExportCallRecords
+ * Export call records as CSV
  */
 export const exportCallRecords = <ThrowOnError extends boolean = false>(
   options?: Options<ExportCallRecordsData, ThrowOnError>,
@@ -2003,7 +2005,7 @@ export const exportCallRecords = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetCallRecord
+ * Get call record details
  */
 export const getCallRecord = <ThrowOnError extends boolean = false>(
   options: Options<GetCallRecordData, ThrowOnError>,
@@ -2019,7 +2021,7 @@ export const getCallRecord = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetSummary
+ * Get call analytics summary
  */
 export const getCallSummary = <ThrowOnError extends boolean = false>(
   options: Options<GetCallSummaryData, ThrowOnError>,
@@ -2035,7 +2037,7 @@ export const getCallSummary = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetVolume
+ * Get call volume over time
  */
 export const getCallVolume = <ThrowOnError extends boolean = false>(
   options: Options<GetCallVolumeData, ThrowOnError>,
@@ -2051,7 +2053,7 @@ export const getCallVolume = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GithubAuthorize
+ * Initiate GitHub OAuth
  */
 export const gitHubOAuthAuthorize = <ThrowOnError extends boolean = false>(
   options?: Options<GitHubOAuthAuthorizeData, ThrowOnError>,
@@ -2067,7 +2069,7 @@ export const gitHubOAuthAuthorize = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GithubCallback
+ * Handle GitHub OAuth callback
  */
 export const gitHubOAuthCallback = <ThrowOnError extends boolean = false>(
   options?: Options<GitHubOAuthCallbackData, ThrowOnError>,
@@ -2083,7 +2085,7 @@ export const gitHubOAuthCallback = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GoogleAuthorize
+ * Initiate Google OAuth
  */
 export const googleOAuthAuthorize = <ThrowOnError extends boolean = false>(
   options?: Options<GoogleOAuthAuthorizeData, ThrowOnError>,
@@ -2099,7 +2101,7 @@ export const googleOAuthAuthorize = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GoogleCallback
+ * Handle Google OAuth callback
  */
 export const googleOAuthCallback = <ThrowOnError extends boolean = false>(
   options?: Options<GoogleOAuthCallbackData, ThrowOnError>,
@@ -2115,7 +2117,7 @@ export const googleOAuthCallback = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListCallQueues
+ * List call queues
  */
 export const listCallQueues = <ThrowOnError extends boolean = false>(
   options?: Options<ListCallQueuesData, ThrowOnError>,
@@ -2131,7 +2133,7 @@ export const listCallQueues = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * CreateCallQueue
+ * Create a call queue
  */
 export const createCallQueue = <ThrowOnError extends boolean = false>(
   options: Options<CreateCallQueueData, ThrowOnError>,
@@ -2151,7 +2153,7 @@ export const createCallQueue = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * DeleteCallQueue
+ * Delete a call queue
  */
 export const deleteCallQueue = <ThrowOnError extends boolean = false>(
   options: Options<DeleteCallQueueData, ThrowOnError>,
@@ -2167,7 +2169,7 @@ export const deleteCallQueue = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetCallQueue
+ * Get call queue details
  */
 export const getCallQueue = <ThrowOnError extends boolean = false>(
   options: Options<GetCallQueueData, ThrowOnError>,
@@ -2183,7 +2185,7 @@ export const getCallQueue = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * UpdateCallQueue
+ * Update a call queue
  */
 export const updateCallQueue = <ThrowOnError extends boolean = false>(
   options: Options<UpdateCallQueueData, ThrowOnError>,
@@ -2203,7 +2205,7 @@ export const updateCallQueue = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListMembers
+ * List call queue members
  */
 export const listCallQueueMembers = <ThrowOnError extends boolean = false>(
   options: Options<ListCallQueueMembersData, ThrowOnError>,
@@ -2219,7 +2221,7 @@ export const listCallQueueMembers = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * CreateMember
+ * Add a call queue member
  */
 export const createCallQueueMember = <ThrowOnError extends boolean = false>(
   options: Options<CreateCallQueueMemberData, ThrowOnError>,
@@ -2239,7 +2241,7 @@ export const createCallQueueMember = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * DeleteMember
+ * Remove a call queue member
  */
 export const deleteCallQueueMember = <ThrowOnError extends boolean = false>(
   options: Options<DeleteCallQueueMemberData, ThrowOnError>,
@@ -2255,7 +2257,7 @@ export const deleteCallQueueMember = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * UpdateMember
+ * Update a call queue member
  */
 export const updateCallQueueMember = <ThrowOnError extends boolean = false>(
   options: Options<UpdateCallQueueMemberData, ThrowOnError>,
@@ -2275,7 +2277,7 @@ export const updateCallQueueMember = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * PauseMember
+ * Pause or unpause a call queue member
  */
 export const pauseCallQueueMember = <ThrowOnError extends boolean = false>(
   options: Options<PauseCallQueueMemberData, ThrowOnError>,
@@ -2307,7 +2309,7 @@ export const oAuthConfig = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListConnections
+ * List connections
  */
 export const listConnections = <ThrowOnError extends boolean = false>(
   options?: Options<ListConnectionsData, ThrowOnError>,
@@ -2323,7 +2325,7 @@ export const listConnections = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * CreateConnection
+ * Create a connection
  */
 export const createConnection = <ThrowOnError extends boolean = false>(
   options: Options<CreateConnectionData, ThrowOnError>,
@@ -2343,7 +2345,7 @@ export const createConnection = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * DeleteConnection
+ * Delete a connection
  */
 export const deleteConnection = <ThrowOnError extends boolean = false>(
   options: Options<DeleteConnectionData, ThrowOnError>,
@@ -2359,7 +2361,7 @@ export const deleteConnection = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetConnection
+ * Get connection details
  */
 export const getConnection = <ThrowOnError extends boolean = false>(
   options: Options<GetConnectionData, ThrowOnError>,
@@ -2375,7 +2377,7 @@ export const getConnection = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * UpdateConnection
+ * Update a connection
  */
 export const updateConnection = <ThrowOnError extends boolean = false>(
   options: Options<UpdateConnectionData, ThrowOnError>,
@@ -2395,7 +2397,7 @@ export const updateConnection = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * TestConnection
+ * Test a connection
  */
 export const testConnection = <ThrowOnError extends boolean = false>(
   options: Options<TestConnectionData, ThrowOnError>,
@@ -2411,7 +2413,7 @@ export const testConnection = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListDevices
+ * List devices
  */
 export const listDevices = <ThrowOnError extends boolean = false>(
   options?: Options<ListDevicesData, ThrowOnError>,
@@ -2427,7 +2429,7 @@ export const listDevices = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * CreateDevice
+ * Register a device
  */
 export const createDevice = <ThrowOnError extends boolean = false>(
   options: Options<CreateDeviceData, ThrowOnError>,
@@ -2447,7 +2449,7 @@ export const createDevice = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * LookupTemplate
+ * Look up device template
  */
 export const lookupDeviceTemplate = <ThrowOnError extends boolean = false>(
   options: Options<LookupDeviceTemplateData, ThrowOnError>,
@@ -2463,7 +2465,7 @@ export const lookupDeviceTemplate = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * DeleteDevice
+ * Delete a device
  */
 export const deleteDevice = <ThrowOnError extends boolean = false>(
   options: Options<DeleteDeviceData, ThrowOnError>,
@@ -2479,7 +2481,7 @@ export const deleteDevice = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetDevice
+ * Get device details
  */
 export const getDevice = <ThrowOnError extends boolean = false>(
   options: Options<GetDeviceData, ThrowOnError>,
@@ -2495,7 +2497,7 @@ export const getDevice = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * UpdateDevice
+ * Update a device
  */
 export const updateDevice = <ThrowOnError extends boolean = false>(
   options: Options<UpdateDeviceData, ThrowOnError>,
@@ -2515,7 +2517,7 @@ export const updateDevice = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListDeviceLines
+ * List device line assignments
  */
 export const listDeviceLines = <ThrowOnError extends boolean = false>(
   options: Options<ListDeviceLinesData, ThrowOnError>,
@@ -2531,7 +2533,7 @@ export const listDeviceLines = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * SetDeviceLines
+ * Set device line assignments
  */
 export const setDeviceLines = <ThrowOnError extends boolean = false>(
   options: Options<SetDeviceLinesData, ThrowOnError>,
@@ -2551,7 +2553,7 @@ export const setDeviceLines = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * RebootDevice
+ * Reboot a device
  */
 export const rebootDevice = <ThrowOnError extends boolean = false>(
   options: Options<RebootDeviceData, ThrowOnError>,
@@ -2567,7 +2569,7 @@ export const rebootDevice = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ReprovisionDevice
+ * Reprovision a device
  */
 export const reprovisionDevice = <ThrowOnError extends boolean = false>(
   options: Options<ReprovisionDeviceData, ThrowOnError>,
@@ -2583,7 +2585,7 @@ export const reprovisionDevice = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListRegistrations
+ * List E911 registrations
  */
 export const listE911Registrations = <ThrowOnError extends boolean = false>(
   options?: Options<ListE911RegistrationsData, ThrowOnError>,
@@ -2599,7 +2601,7 @@ export const listE911Registrations = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * CreateRegistration
+ * Create an E911 registration
  */
 export const createE911Registration = <ThrowOnError extends boolean = false>(
   options: Options<CreateE911RegistrationData, ThrowOnError>,
@@ -2619,7 +2621,7 @@ export const createE911Registration = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListUnregistered
+ * List unregistered phone numbers
  */
 export const listUnregisteredPhoneNumbers = <
   ThrowOnError extends boolean = false,
@@ -2637,7 +2639,7 @@ export const listUnregisteredPhoneNumbers = <
   });
 
 /**
- * DeleteRegistration
+ * Delete an E911 registration
  */
 export const deleteE911Registration = <ThrowOnError extends boolean = false>(
   options: Options<DeleteE911RegistrationData, ThrowOnError>,
@@ -2653,7 +2655,7 @@ export const deleteE911Registration = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetRegistration
+ * Get E911 registration details
  */
 export const getE911Registration = <ThrowOnError extends boolean = false>(
   options: Options<GetE911RegistrationData, ThrowOnError>,
@@ -2669,7 +2671,7 @@ export const getE911Registration = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * UpdateRegistration
+ * Update an E911 registration
  */
 export const updateE911Registration = <ThrowOnError extends boolean = false>(
   options: Options<UpdateE911RegistrationData, ThrowOnError>,
@@ -2689,7 +2691,7 @@ export const updateE911Registration = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ValidateRegistration
+ * Validate an E911 registration
  */
 export const validateE911Registration = <ThrowOnError extends boolean = false>(
   options: Options<ValidateE911RegistrationData, ThrowOnError>,
@@ -2705,7 +2707,7 @@ export const validateE911Registration = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * RequestVerification
+ * Request email verification
  */
 export const requestEmailVerification = <ThrowOnError extends boolean = false>(
   options: Options<RequestEmailVerificationData, ThrowOnError>,
@@ -2725,7 +2727,7 @@ export const requestEmailVerification = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetVerificationStatus
+ * Get email verification status
  */
 export const getEmailVerificationStatus = <
   ThrowOnError extends boolean = false,
@@ -2743,7 +2745,7 @@ export const getEmailVerificationStatus = <
   });
 
 /**
- * VerifyEmail
+ * Verify email address
  */
 export const verifyEmail = <ThrowOnError extends boolean = false>(
   options: Options<VerifyEmailData, ThrowOnError>,
@@ -2763,7 +2765,7 @@ export const verifyEmail = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListFaxMessages
+ * List fax messages
  */
 export const listFaxMessages = <ThrowOnError extends boolean = false>(
   options?: Options<ListFaxMessagesData, ThrowOnError>,
@@ -2779,7 +2781,7 @@ export const listFaxMessages = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * DeleteFaxMessage
+ * Delete a fax message
  */
 export const deleteFaxMessage = <ThrowOnError extends boolean = false>(
   options: Options<DeleteFaxMessageData, ThrowOnError>,
@@ -2795,7 +2797,7 @@ export const deleteFaxMessage = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetFaxMessage
+ * Get fax message details
  */
 export const getFaxMessage = <ThrowOnError extends boolean = false>(
   options: Options<GetFaxMessageData, ThrowOnError>,
@@ -2811,7 +2813,7 @@ export const getFaxMessage = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListFaxNumbers
+ * List fax numbers
  */
 export const listFaxNumbers = <ThrowOnError extends boolean = false>(
   options?: Options<ListFaxNumbersData, ThrowOnError>,
@@ -2827,7 +2829,7 @@ export const listFaxNumbers = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * CreateFaxNumber
+ * Create a fax number
  */
 export const createFaxNumber = <ThrowOnError extends boolean = false>(
   options: Options<CreateFaxNumberData, ThrowOnError>,
@@ -2847,7 +2849,7 @@ export const createFaxNumber = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * DeleteFaxNumber
+ * Delete a fax number
  */
 export const deleteFaxNumber = <ThrowOnError extends boolean = false>(
   options: Options<DeleteFaxNumberData, ThrowOnError>,
@@ -2863,7 +2865,7 @@ export const deleteFaxNumber = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetFaxNumber
+ * Get fax number details
  */
 export const getFaxNumber = <ThrowOnError extends boolean = false>(
   options: Options<GetFaxNumberData, ThrowOnError>,
@@ -2879,7 +2881,7 @@ export const getFaxNumber = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * UpdateFaxNumber
+ * Update a fax number
  */
 export const updateFaxNumber = <ThrowOnError extends boolean = false>(
   options: Options<UpdateFaxNumberData, ThrowOnError>,
@@ -2899,7 +2901,7 @@ export const updateFaxNumber = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListFaxEmailRoutes
+ * List fax email routes
  */
 export const listFaxEmailRoutes = <ThrowOnError extends boolean = false>(
   options: Options<ListFaxEmailRoutesData, ThrowOnError>,
@@ -2915,7 +2917,7 @@ export const listFaxEmailRoutes = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * CreateFaxEmailRoute
+ * Create a fax email route
  */
 export const createFaxEmailRoute = <ThrowOnError extends boolean = false>(
   options: Options<CreateFaxEmailRouteData, ThrowOnError>,
@@ -2935,7 +2937,7 @@ export const createFaxEmailRoute = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * DeleteFaxEmailRoute
+ * Delete a fax email route
  */
 export const deleteFaxEmailRoute = <ThrowOnError extends boolean = false>(
   options: Options<DeleteFaxEmailRouteData, ThrowOnError>,
@@ -2951,7 +2953,7 @@ export const deleteFaxEmailRoute = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * UpdateFaxEmailRoute
+ * Update a fax email route
  */
 export const updateFaxEmailRoute = <ThrowOnError extends boolean = false>(
   options: Options<UpdateFaxEmailRouteData, ThrowOnError>,
@@ -2971,7 +2973,7 @@ export const updateFaxEmailRoute = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * SendFax
+ * Send a fax
  */
 export const sendFax = <ThrowOnError extends boolean = false>(
   options: Options<SendFaxData, ThrowOnError>,
@@ -2991,7 +2993,7 @@ export const sendFax = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetDeviceData
+ * Look up a device by MAC address
  */
 export const gatewayLookupDevice = <ThrowOnError extends boolean = false>(
   options: Options<GatewayLookupDeviceData, ThrowOnError>,
@@ -3007,7 +3009,7 @@ export const gatewayLookupDevice = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetExtensionData
+ * Look up an extension
  */
 export const gatewayLookupExtension = <ThrowOnError extends boolean = false>(
   options: Options<GatewayLookupExtensionData, ThrowOnError>,
@@ -3023,7 +3025,7 @@ export const gatewayLookupExtension = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetNumberData
+ * Look up a phone number
  */
 export const gatewayLookupNumber = <ThrowOnError extends boolean = false>(
   options: Options<GatewayLookupNumberData, ThrowOnError>,
@@ -3039,7 +3041,7 @@ export const gatewayLookupNumber = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListIvrMenus
+ * List IVR menus
  */
 export const listIvrMenus = <ThrowOnError extends boolean = false>(
   options?: Options<ListIvrMenusData, ThrowOnError>,
@@ -3055,7 +3057,7 @@ export const listIvrMenus = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * CreateIvrMenu
+ * Create an IVR menu
  */
 export const createIvrMenu = <ThrowOnError extends boolean = false>(
   options: Options<CreateIvrMenuData, ThrowOnError>,
@@ -3075,7 +3077,7 @@ export const createIvrMenu = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * DeleteIvrMenu
+ * Delete an IVR menu
  */
 export const deleteIvrMenu = <ThrowOnError extends boolean = false>(
   options: Options<DeleteIvrMenuData, ThrowOnError>,
@@ -3091,7 +3093,7 @@ export const deleteIvrMenu = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetIvrMenu
+ * Get IVR menu details
  */
 export const getIvrMenu = <ThrowOnError extends boolean = false>(
   options: Options<GetIvrMenuData, ThrowOnError>,
@@ -3107,7 +3109,7 @@ export const getIvrMenu = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * UpdateIvrMenu
+ * Update an IVR menu
  */
 export const updateIvrMenu = <ThrowOnError extends boolean = false>(
   options: Options<UpdateIvrMenuData, ThrowOnError>,
@@ -3127,7 +3129,7 @@ export const updateIvrMenu = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListOptions
+ * List IVR menu options
  */
 export const listIvrMenuOptions = <ThrowOnError extends boolean = false>(
   options: Options<ListIvrMenuOptionsData, ThrowOnError>,
@@ -3143,7 +3145,7 @@ export const listIvrMenuOptions = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * CreateOption
+ * Add an IVR menu option
  */
 export const createIvrMenuOption = <ThrowOnError extends boolean = false>(
   options: Options<CreateIvrMenuOptionData, ThrowOnError>,
@@ -3163,7 +3165,7 @@ export const createIvrMenuOption = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * DeleteOption
+ * Delete an IVR menu option
  */
 export const deleteIvrMenuOption = <ThrowOnError extends boolean = false>(
   options: Options<DeleteIvrMenuOptionData, ThrowOnError>,
@@ -3179,7 +3181,7 @@ export const deleteIvrMenuOption = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * UpdateOption
+ * Update an IVR menu option
  */
 export const updateIvrMenuOption = <ThrowOnError extends boolean = false>(
   options: Options<UpdateIvrMenuOptionData, ThrowOnError>,
@@ -3199,7 +3201,7 @@ export const updateIvrMenuOption = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * RemoveAccount
+ * Delete account
  */
 export const accountDelete = <ThrowOnError extends boolean = false>(
   options?: Options<AccountDeleteData, ThrowOnError>,
@@ -3233,7 +3235,7 @@ export const accountProfile = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * UpdateProfile
+ * Update profile
  */
 export const accountProfileUpdate = <ThrowOnError extends boolean = false>(
   options: Options<AccountProfileUpdateData, ThrowOnError>,
@@ -3253,7 +3255,7 @@ export const accountProfileUpdate = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * UpdatePassword
+ * Update password
  */
 export const accountPasswordUpdate = <ThrowOnError extends boolean = false>(
   options: Options<AccountPasswordUpdateData, ThrowOnError>,
@@ -3291,7 +3293,7 @@ export const getSecurityActivity = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * VerifyChallenge
+ * Verify MFA challenge
  */
 export const verifyMfaChallenge = <ThrowOnError extends boolean = false>(
   options: Options<VerifyMfaChallengeData, ThrowOnError>,
@@ -3311,7 +3313,7 @@ export const verifyMfaChallenge = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ConfirmSetup
+ * Confirm MFA setup
  */
 export const confirmMfaSetup = <ThrowOnError extends boolean = false>(
   options: Options<ConfirmMfaSetupData, ThrowOnError>,
@@ -3331,7 +3333,7 @@ export const confirmMfaSetup = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * DisableMfa
+ * Disable MFA
  */
 export const disableMfa = <ThrowOnError extends boolean = false>(
   options: Options<DisableMfaData, ThrowOnError>,
@@ -3351,7 +3353,7 @@ export const disableMfa = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * InitiateDisableMfaOauth
+ * Initiate MFA disable via OAuth
  */
 export const initiateDisableMfaOAuth = <ThrowOnError extends boolean = false>(
   options: Options<InitiateDisableMfaOAuthData, ThrowOnError>,
@@ -3367,7 +3369,7 @@ export const initiateDisableMfaOAuth = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * InitiateSetup
+ * Initiate MFA setup
  */
 export const initiateMfaSetup = <ThrowOnError extends boolean = false>(
   options?: Options<InitiateMfaSetupData, ThrowOnError>,
@@ -3383,7 +3385,7 @@ export const initiateMfaSetup = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * RegenerateBackupCodes
+ * Regenerate MFA backup codes
  */
 export const regenerateMfaBackupCodes = <ThrowOnError extends boolean = false>(
   options: Options<RegenerateMfaBackupCodesData, ThrowOnError>,
@@ -3403,7 +3405,7 @@ export const regenerateMfaBackupCodes = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetMfaStatus
+ * Get MFA status
  */
 export const getMfaStatus = <ThrowOnError extends boolean = false>(
   options?: Options<GetMfaStatusData, ThrowOnError>,
@@ -3417,7 +3419,7 @@ export const getMfaStatus = <ThrowOnError extends boolean = false>(
   );
 
 /**
- * ListNotifications
+ * List notifications
  */
 export const listNotifications = <ThrowOnError extends boolean = false>(
   options?: Options<ListNotificationsData, ThrowOnError>,
@@ -3433,7 +3435,7 @@ export const listNotifications = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * MarkAllRead
+ * Mark all notifications as read
  */
 export const markAllNotificationsRead = <ThrowOnError extends boolean = false>(
   options?: Options<MarkAllNotificationsReadData, ThrowOnError>,
@@ -3511,7 +3513,7 @@ export const deleteReadNotifications = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetUnreadCount
+ * Get unread notification count
  */
 export const getUnreadNotificationCount = <
   ThrowOnError extends boolean = false,
@@ -3529,7 +3531,7 @@ export const getUnreadNotificationCount = <
   });
 
 /**
- * DeleteNotification
+ * Delete a notification
  */
 export const deleteNotification = <ThrowOnError extends boolean = false>(
   options: Options<DeleteNotificationData, ThrowOnError>,
@@ -3545,7 +3547,7 @@ export const deleteNotification = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * MarkRead
+ * Mark a notification as read
  */
 export const markNotificationRead = <ThrowOnError extends boolean = false>(
   options: Options<MarkNotificationReadData, ThrowOnError>,
@@ -3561,7 +3563,7 @@ export const markNotificationRead = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetOrganization
+ * Get organization details
  */
 export const getOrganization = <ThrowOnError extends boolean = false>(
   options?: Options<GetOrganizationData, ThrowOnError>,
@@ -3577,7 +3579,7 @@ export const getOrganization = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * UpdateOrganization
+ * Update organization settings
  */
 export const updateOrganization = <ThrowOnError extends boolean = false>(
   options: Options<UpdateOrganizationData, ThrowOnError>,
@@ -3597,7 +3599,7 @@ export const updateOrganization = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListPhoneNumbers
+ * List phone numbers
  */
 export const manageListPhoneNumbers = <ThrowOnError extends boolean = false>(
   options?: Options<ManageListPhoneNumbersData, ThrowOnError>,
@@ -3613,7 +3615,7 @@ export const manageListPhoneNumbers = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * CreatePhoneNumber
+ * Create a phone number
  */
 export const manageCreatePhoneNumber = <ThrowOnError extends boolean = false>(
   options: Options<ManageCreatePhoneNumberData, ThrowOnError>,
@@ -3633,7 +3635,7 @@ export const manageCreatePhoneNumber = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * DeletePhoneNumber
+ * Delete a phone number
  */
 export const manageDeletePhoneNumber = <ThrowOnError extends boolean = false>(
   options: Options<ManageDeletePhoneNumberData, ThrowOnError>,
@@ -3649,7 +3651,7 @@ export const manageDeletePhoneNumber = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetPhoneNumber
+ * Get a phone number
  */
 export const manageGetPhoneNumber = <ThrowOnError extends boolean = false>(
   options: Options<ManageGetPhoneNumberData, ThrowOnError>,
@@ -3665,7 +3667,7 @@ export const manageGetPhoneNumber = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * UpdatePhoneNumber
+ * Update a phone number
  */
 export const manageUpdatePhoneNumber = <ThrowOnError extends boolean = false>(
   options: Options<ManageUpdatePhoneNumberData, ThrowOnError>,
@@ -3685,7 +3687,7 @@ export const manageUpdatePhoneNumber = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListAccounts
+ * List linked OAuth accounts
  */
 export const profileOAuthAccounts = <ThrowOnError extends boolean = false>(
   options?: Options<ProfileOAuthAccountsData, ThrowOnError>,
@@ -3701,7 +3703,7 @@ export const profileOAuthAccounts = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * Unlink
+ * Unlink an OAuth account
  */
 export const profileOAuthUnlink = <ThrowOnError extends boolean = false>(
   options: Options<ProfileOAuthUnlinkData, ThrowOnError>,
@@ -3717,7 +3719,7 @@ export const profileOAuthUnlink = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * StartLink
+ * Link an OAuth account
  */
 export const profileOAuthLink = <ThrowOnError extends boolean = false>(
   options: Options<ProfileOAuthLinkData, ThrowOnError>,
@@ -3733,7 +3735,7 @@ export const profileOAuthLink = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * UpgradeScopes
+ * Upgrade OAuth scopes
  */
 export const profileOAuthUpgradeScopes = <ThrowOnError extends boolean = false>(
   options: Options<ProfileOAuthUpgradeScopesData, ThrowOnError>,
@@ -3749,7 +3751,7 @@ export const profileOAuthUpgradeScopes = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListRingGroups
+ * List ring groups
  */
 export const listRingGroups = <ThrowOnError extends boolean = false>(
   options?: Options<ListRingGroupsData, ThrowOnError>,
@@ -3765,7 +3767,7 @@ export const listRingGroups = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * CreateRingGroup
+ * Create a ring group
  */
 export const createRingGroup = <ThrowOnError extends boolean = false>(
   options: Options<CreateRingGroupData, ThrowOnError>,
@@ -3785,7 +3787,7 @@ export const createRingGroup = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * DeleteRingGroup
+ * Delete a ring group
  */
 export const deleteRingGroup = <ThrowOnError extends boolean = false>(
   options: Options<DeleteRingGroupData, ThrowOnError>,
@@ -3801,7 +3803,7 @@ export const deleteRingGroup = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetRingGroup
+ * Get ring group details
  */
 export const getRingGroup = <ThrowOnError extends boolean = false>(
   options: Options<GetRingGroupData, ThrowOnError>,
@@ -3817,7 +3819,7 @@ export const getRingGroup = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * UpdateRingGroup
+ * Update a ring group
  */
 export const updateRingGroup = <ThrowOnError extends boolean = false>(
   options: Options<UpdateRingGroupData, ThrowOnError>,
@@ -3837,7 +3839,7 @@ export const updateRingGroup = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListMembers
+ * List ring group members
  */
 export const listRingGroupMembers = <ThrowOnError extends boolean = false>(
   options: Options<ListRingGroupMembersData, ThrowOnError>,
@@ -3853,7 +3855,7 @@ export const listRingGroupMembers = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * CreateMember
+ * Add a ring group member
  */
 export const createRingGroupMember = <ThrowOnError extends boolean = false>(
   options: Options<CreateRingGroupMemberData, ThrowOnError>,
@@ -3873,7 +3875,7 @@ export const createRingGroupMember = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * DeleteMember
+ * Remove a ring group member
  */
 export const deleteRingGroupMember = <ThrowOnError extends boolean = false>(
   options: Options<DeleteRingGroupMemberData, ThrowOnError>,
@@ -3889,7 +3891,7 @@ export const deleteRingGroupMember = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * UpdateMember
+ * Update a ring group member
  */
 export const updateRingGroupMember = <ThrowOnError extends boolean = false>(
   options: Options<UpdateRingGroupMemberData, ThrowOnError>,
@@ -3909,7 +3911,7 @@ export const updateRingGroupMember = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListRoles
+ * List roles
  */
 export const listRoles = <ThrowOnError extends boolean = false>(
   options?: Options<ListRolesData, ThrowOnError>,
@@ -3925,7 +3927,7 @@ export const listRoles = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * CreateRole
+ * Create a role
  */
 export const createRole = <ThrowOnError extends boolean = false>(
   options: Options<CreateRoleData, ThrowOnError>,
@@ -3945,7 +3947,7 @@ export const createRole = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * DeleteRole
+ * Delete a role
  */
 export const deleteRole = <ThrowOnError extends boolean = false>(
   options: Options<DeleteRoleData, ThrowOnError>,
@@ -3961,7 +3963,7 @@ export const deleteRole = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetRole
+ * Get role details
  */
 export const getRole = <ThrowOnError extends boolean = false>(
   options: Options<GetRoleData, ThrowOnError>,
@@ -3975,7 +3977,7 @@ export const getRole = <ThrowOnError extends boolean = false>(
   );
 
 /**
- * UpdateRole
+ * Update a role
  */
 export const updateRole = <ThrowOnError extends boolean = false>(
   options: Options<UpdateRoleData, ThrowOnError>,
@@ -3995,7 +3997,7 @@ export const updateRole = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * AssignRole
+ * Assign a role to a user
  */
 export const assignRole = <ThrowOnError extends boolean = false>(
   options: Options<AssignRoleData, ThrowOnError>,
@@ -4015,7 +4017,7 @@ export const assignRole = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * RevokeRole
+ * Revoke a role from a user
  */
 export const revokeRole = <ThrowOnError extends boolean = false>(
   options: Options<RevokeRoleData, ThrowOnError>,
@@ -4035,7 +4037,7 @@ export const revokeRole = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListSchedules
+ * List schedules
  */
 export const listSchedules = <ThrowOnError extends boolean = false>(
   options?: Options<ListSchedulesData, ThrowOnError>,
@@ -4051,7 +4053,7 @@ export const listSchedules = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * CreateSchedule
+ * Create a schedule
  */
 export const createSchedule = <ThrowOnError extends boolean = false>(
   options: Options<CreateScheduleData, ThrowOnError>,
@@ -4071,7 +4073,7 @@ export const createSchedule = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * DeleteSchedule
+ * Delete a schedule
  */
 export const deleteSchedule = <ThrowOnError extends boolean = false>(
   options: Options<DeleteScheduleData, ThrowOnError>,
@@ -4087,7 +4089,7 @@ export const deleteSchedule = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetSchedule
+ * Get schedule details
  */
 export const getSchedule = <ThrowOnError extends boolean = false>(
   options: Options<GetScheduleData, ThrowOnError>,
@@ -4103,7 +4105,7 @@ export const getSchedule = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * UpdateSchedule
+ * Update a schedule
  */
 export const updateSchedule = <ThrowOnError extends boolean = false>(
   options: Options<UpdateScheduleData, ThrowOnError>,
@@ -4123,7 +4125,7 @@ export const updateSchedule = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * CheckSchedule
+ * Check schedule status
  */
 export const checkSchedule = <ThrowOnError extends boolean = false>(
   options: Options<CheckScheduleData, ThrowOnError>,
@@ -4139,7 +4141,7 @@ export const checkSchedule = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListEntries
+ * List schedule entries
  */
 export const listScheduleEntries = <ThrowOnError extends boolean = false>(
   options: Options<ListScheduleEntriesData, ThrowOnError>,
@@ -4155,7 +4157,7 @@ export const listScheduleEntries = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * CreateEntry
+ * Create a schedule entry
  */
 export const createScheduleEntry = <ThrowOnError extends boolean = false>(
   options: Options<CreateScheduleEntryData, ThrowOnError>,
@@ -4175,7 +4177,7 @@ export const createScheduleEntry = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * DeleteEntry
+ * Delete a schedule entry
  */
 export const deleteScheduleEntry = <ThrowOnError extends boolean = false>(
   options: Options<DeleteScheduleEntryData, ThrowOnError>,
@@ -4191,7 +4193,7 @@ export const deleteScheduleEntry = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * UpdateEntry
+ * Update a schedule entry
  */
 export const updateScheduleEntry = <ThrowOnError extends boolean = false>(
   options: Options<UpdateScheduleEntryData, ThrowOnError>,
@@ -4227,7 +4229,7 @@ export const globalSearch = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * DeleteAttachment
+ * Delete an attachment
  */
 export const deleteAttachment = <ThrowOnError extends boolean = false>(
   options: Options<DeleteAttachmentData, ThrowOnError>,
@@ -4243,7 +4245,7 @@ export const deleteAttachment = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetAttachment
+ * Get attachment details
  */
 export const getAttachment = <ThrowOnError extends boolean = false>(
   options: Options<GetAttachmentData, ThrowOnError>,
@@ -4259,7 +4261,7 @@ export const getAttachment = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * SubmitFeedback
+ * Submit portal feedback
  */
 export const submitFeedback = <ThrowOnError extends boolean = false>(
   options: Options<SubmitFeedbackData, ThrowOnError>,
@@ -4280,7 +4282,7 @@ export const submitFeedback = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListTickets
+ * List tickets
  */
 export const listTickets = <ThrowOnError extends boolean = false>(
   options?: Options<ListTicketsData, ThrowOnError>,
@@ -4296,7 +4298,7 @@ export const listTickets = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * CreateTicket
+ * Create a ticket
  */
 export const createTicket = <ThrowOnError extends boolean = false>(
   options: Options<CreateTicketData, ThrowOnError>,
@@ -4316,7 +4318,7 @@ export const createTicket = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * DeleteTicket
+ * Delete a ticket
  */
 export const deleteTicket = <ThrowOnError extends boolean = false>(
   options: Options<DeleteTicketData, ThrowOnError>,
@@ -4332,7 +4334,7 @@ export const deleteTicket = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetTicket
+ * Get ticket details
  */
 export const getTicket = <ThrowOnError extends boolean = false>(
   options: Options<GetTicketData, ThrowOnError>,
@@ -4348,7 +4350,7 @@ export const getTicket = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * UpdateTicket
+ * Update a ticket
  */
 export const updateTicket = <ThrowOnError extends boolean = false>(
   options: Options<UpdateTicketData, ThrowOnError>,
@@ -4368,7 +4370,7 @@ export const updateTicket = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * UploadAttachment
+ * Upload a ticket attachment
  */
 export const uploadAttachment = <ThrowOnError extends boolean = false>(
   options: Options<UploadAttachmentData, ThrowOnError>,
@@ -4384,7 +4386,7 @@ export const uploadAttachment = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * CloseTicket
+ * Close a ticket
  */
 export const closeTicket = <ThrowOnError extends boolean = false>(
   options: Options<CloseTicketData, ThrowOnError>,
@@ -4400,7 +4402,7 @@ export const closeTicket = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListMessages
+ * List ticket messages
  */
 export const listTicketMessages = <ThrowOnError extends boolean = false>(
   options: Options<ListTicketMessagesData, ThrowOnError>,
@@ -4416,7 +4418,7 @@ export const listTicketMessages = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * CreateMessage
+ * Create a ticket message
  */
 export const createTicketMessage = <ThrowOnError extends boolean = false>(
   options: Options<CreateTicketMessageData, ThrowOnError>,
@@ -4436,7 +4438,7 @@ export const createTicketMessage = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * DeleteMessage
+ * Delete a ticket message
  */
 export const deleteTicketMessage = <ThrowOnError extends boolean = false>(
   options: Options<DeleteTicketMessageData, ThrowOnError>,
@@ -4452,7 +4454,7 @@ export const deleteTicketMessage = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * UpdateMessage
+ * Update a ticket message
  */
 export const updateTicketMessage = <ThrowOnError extends boolean = false>(
   options: Options<UpdateTicketMessageData, ThrowOnError>,
@@ -4472,7 +4474,7 @@ export const updateTicketMessage = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * PasteImage
+ * Upload a pasted image
  */
 export const pasteImage = <ThrowOnError extends boolean = false>(
   options: Options<PasteImageData, ThrowOnError>,
@@ -4488,7 +4490,7 @@ export const pasteImage = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ReopenTicket
+ * Reopen a ticket
  */
 export const reopenTicket = <ThrowOnError extends boolean = false>(
   options: Options<ReopenTicketData, ThrowOnError>,
@@ -4520,7 +4522,7 @@ export const syncEntity = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListTags
+ * List tags
  */
 export const listTags = <ThrowOnError extends boolean = false>(
   options?: Options<ListTagsData, ThrowOnError>,
@@ -4536,7 +4538,7 @@ export const listTags = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * CreateTag
+ * Create a tag
  */
 export const createTag = <ThrowOnError extends boolean = false>(
   options: Options<CreateTagData, ThrowOnError>,
@@ -4556,7 +4558,7 @@ export const createTag = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * DeleteTag
+ * Delete a tag
  */
 export const deleteTag = <ThrowOnError extends boolean = false>(
   options: Options<DeleteTagData, ThrowOnError>,
@@ -4572,7 +4574,7 @@ export const deleteTag = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetTag
+ * Get a tag
  */
 export const getTag = <ThrowOnError extends boolean = false>(
   options: Options<GetTagData, ThrowOnError>,
@@ -4584,7 +4586,7 @@ export const getTag = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * UpdateTag
+ * Update a tag
  */
 export const updateTag = <ThrowOnError extends boolean = false>(
   options: Options<UpdateTagData, ThrowOnError>,
@@ -4604,7 +4606,7 @@ export const updateTag = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListTasks
+ * List background tasks
  */
 export const listTasks = <ThrowOnError extends boolean = false>(
   options?: Options<ListTasksData, ThrowOnError>,
@@ -4620,7 +4622,7 @@ export const listTasks = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListActiveTasks
+ * List active background tasks
  */
 export const listActiveTasks = <ThrowOnError extends boolean = false>(
   options?: Options<ListActiveTasksData, ThrowOnError>,
@@ -4636,7 +4638,7 @@ export const listActiveTasks = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * DeleteTask
+ * Delete a background task
  */
 export const deleteTask = <ThrowOnError extends boolean = false>(
   options: Options<DeleteTaskData, ThrowOnError>,
@@ -4652,7 +4654,7 @@ export const deleteTask = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetTask
+ * Get background task details
  */
 export const getTask = <ThrowOnError extends boolean = false>(
   options: Options<GetTaskData, ThrowOnError>,
@@ -4666,7 +4668,7 @@ export const getTask = <ThrowOnError extends boolean = false>(
   );
 
 /**
- * CancelTask
+ * Cancel a background task
  */
 export const cancelTask = <ThrowOnError extends boolean = false>(
   options: Options<CancelTaskData, ThrowOnError>,
@@ -4682,7 +4684,7 @@ export const cancelTask = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListTeams
+ * List teams
  */
 export const listTeams = <ThrowOnError extends boolean = false>(
   options?: Options<ListTeamsData, ThrowOnError>,
@@ -4698,7 +4700,7 @@ export const listTeams = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * CreateTeam
+ * Create a team
  */
 export const createTeam = <ThrowOnError extends boolean = false>(
   options: Options<CreateTeamData, ThrowOnError>,
@@ -4718,7 +4720,7 @@ export const createTeam = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * DeleteTeam
+ * Delete a team
  */
 export const deleteTeam = <ThrowOnError extends boolean = false>(
   options: Options<DeleteTeamData, ThrowOnError>,
@@ -4734,7 +4736,7 @@ export const deleteTeam = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetTeam
+ * Get team details
  */
 export const getTeam = <ThrowOnError extends boolean = false>(
   options: Options<GetTeamData, ThrowOnError>,
@@ -4748,7 +4750,7 @@ export const getTeam = <ThrowOnError extends boolean = false>(
   );
 
 /**
- * UpdateTeam
+ * Update a team
  */
 export const updateTeam = <ThrowOnError extends boolean = false>(
   options: Options<UpdateTeamData, ThrowOnError>,
@@ -4768,7 +4770,7 @@ export const updateTeam = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListTeamInvitations
+ * List team invitations
  */
 export const listTeamInvitations = <ThrowOnError extends boolean = false>(
   options: Options<ListTeamInvitationsData, ThrowOnError>,
@@ -4784,7 +4786,7 @@ export const listTeamInvitations = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * CreateTeamInvitation
+ * Create a team invitation
  */
 export const createTeamInvitation = <ThrowOnError extends boolean = false>(
   options: Options<CreateTeamInvitationData, ThrowOnError>,
@@ -4804,7 +4806,7 @@ export const createTeamInvitation = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * DeleteTeamInvitation
+ * Delete a team invitation
  */
 export const deleteTeamInvitation = <ThrowOnError extends boolean = false>(
   options: Options<DeleteTeamInvitationData, ThrowOnError>,
@@ -4820,7 +4822,7 @@ export const deleteTeamInvitation = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * AcceptTeamInvitation
+ * Accept a team invitation
  */
 export const acceptTeamInvitation = <ThrowOnError extends boolean = false>(
   options: Options<AcceptTeamInvitationData, ThrowOnError>,
@@ -4836,7 +4838,7 @@ export const acceptTeamInvitation = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * RejectTeamInvitation
+ * Reject a team invitation
  */
 export const rejectTeamInvitation = <ThrowOnError extends boolean = false>(
   options: Options<RejectTeamInvitationData, ThrowOnError>,
@@ -4852,7 +4854,7 @@ export const rejectTeamInvitation = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListLocations
+ * List locations
  */
 export const listLocations = <ThrowOnError extends boolean = false>(
   options: Options<ListLocationsData, ThrowOnError>,
@@ -4868,7 +4870,7 @@ export const listLocations = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * CreateLocation
+ * Create a location
  */
 export const createLocation = <ThrowOnError extends boolean = false>(
   options: Options<CreateLocationData, ThrowOnError>,
@@ -4888,7 +4890,7 @@ export const createLocation = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * DeleteLocation
+ * Delete a location
  */
 export const deleteLocation = <ThrowOnError extends boolean = false>(
   options: Options<DeleteLocationData, ThrowOnError>,
@@ -4904,7 +4906,7 @@ export const deleteLocation = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetLocation
+ * Get location details
  */
 export const getLocation = <ThrowOnError extends boolean = false>(
   options: Options<GetLocationData, ThrowOnError>,
@@ -4920,7 +4922,7 @@ export const getLocation = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * UpdateLocation
+ * Update a location
  */
 export const updateLocation = <ThrowOnError extends boolean = false>(
   options: Options<UpdateLocationData, ThrowOnError>,
@@ -4940,7 +4942,7 @@ export const updateLocation = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * RemoveMemberFromTeam
+ * Remove a team member
  */
 export const removeMemberFromTeam = <ThrowOnError extends boolean = false>(
   options: Options<RemoveMemberFromTeamData, ThrowOnError>,
@@ -4960,7 +4962,7 @@ export const removeMemberFromTeam = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * AddMemberToTeam
+ * Add a team member
  */
 export const addMemberToTeam = <ThrowOnError extends boolean = false>(
   options: Options<AddMemberToTeamData, ThrowOnError>,
@@ -4980,7 +4982,7 @@ export const addMemberToTeam = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * UpdateTeamMember
+ * Update a team member's role
  */
 export const updateTeamMember = <ThrowOnError extends boolean = false>(
   options: Options<UpdateTeamMemberData, ThrowOnError>,
@@ -5000,7 +5002,7 @@ export const updateTeamMember = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListTeamPermissions
+ * List team permissions
  */
 export const listTeamPermissions = <ThrowOnError extends boolean = false>(
   options: Options<ListTeamPermissionsData, ThrowOnError>,
@@ -5016,7 +5018,7 @@ export const listTeamPermissions = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * UpdateTeamPermissions
+ * Update team permissions
  */
 export const updateTeamPermissions = <ThrowOnError extends boolean = false>(
   options: Options<UpdateTeamPermissionsData, ThrowOnError>,
@@ -5036,7 +5038,7 @@ export const updateTeamPermissions = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListTimeConditions
+ * List time conditions
  */
 export const listTimeConditions = <ThrowOnError extends boolean = false>(
   options?: Options<ListTimeConditionsData, ThrowOnError>,
@@ -5052,7 +5054,7 @@ export const listTimeConditions = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * CreateTimeCondition
+ * Create a time condition
  */
 export const createTimeCondition = <ThrowOnError extends boolean = false>(
   options: Options<CreateTimeConditionData, ThrowOnError>,
@@ -5072,7 +5074,7 @@ export const createTimeCondition = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * DeleteTimeCondition
+ * Delete a time condition
  */
 export const deleteTimeCondition = <ThrowOnError extends boolean = false>(
   options: Options<DeleteTimeConditionData, ThrowOnError>,
@@ -5088,7 +5090,7 @@ export const deleteTimeCondition = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetTimeCondition
+ * Get time condition details
  */
 export const getTimeCondition = <ThrowOnError extends boolean = false>(
   options: Options<GetTimeConditionData, ThrowOnError>,
@@ -5104,7 +5106,7 @@ export const getTimeCondition = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * UpdateTimeCondition
+ * Update a time condition
  */
 export const updateTimeCondition = <ThrowOnError extends boolean = false>(
   options: Options<UpdateTimeConditionData, ThrowOnError>,
@@ -5124,7 +5126,7 @@ export const updateTimeCondition = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * SetOverride
+ * Set time condition override
  */
 export const setTimeConditionOverride = <ThrowOnError extends boolean = false>(
   options: Options<SetTimeConditionOverrideData, ThrowOnError>,
@@ -5144,7 +5146,7 @@ export const setTimeConditionOverride = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListUsers
+ * List users
  */
 export const listUsers = <ThrowOnError extends boolean = false>(
   options?: Options<ListUsersData, ThrowOnError>,
@@ -5160,7 +5162,7 @@ export const listUsers = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * CreateUser
+ * Create a user
  */
 export const createUser = <ThrowOnError extends boolean = false>(
   options: Options<CreateUserData, ThrowOnError>,
@@ -5180,7 +5182,7 @@ export const createUser = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * RevokeRole
+ * Revoke a role from a user
  */
 export const revokeUserRole = <ThrowOnError extends boolean = false>(
   options: Options<RevokeUserRoleData, ThrowOnError>,
@@ -5200,7 +5202,7 @@ export const revokeUserRole = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * AssignRole
+ * Assign a role to a user
  */
 export const assignUserRole = <ThrowOnError extends boolean = false>(
   options: Options<AssignUserRoleData, ThrowOnError>,
@@ -5220,7 +5222,7 @@ export const assignUserRole = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * DeleteUser
+ * Delete a user
  */
 export const deleteUser = <ThrowOnError extends boolean = false>(
   options: Options<DeleteUserData, ThrowOnError>,
@@ -5236,7 +5238,7 @@ export const deleteUser = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetUser
+ * Get user details
  */
 export const getUser = <ThrowOnError extends boolean = false>(
   options: Options<GetUserData, ThrowOnError>,
@@ -5250,7 +5252,7 @@ export const getUser = <ThrowOnError extends boolean = false>(
   );
 
 /**
- * UpdateUser
+ * Update a user
  */
 export const updateUser = <ThrowOnError extends boolean = false>(
   options: Options<UpdateUserData, ThrowOnError>,
@@ -5270,7 +5272,7 @@ export const updateUser = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListExtensions
+ * List extensions
  */
 export const listExtensions = <ThrowOnError extends boolean = false>(
   options?: Options<ListExtensionsData, ThrowOnError>,
@@ -5286,7 +5288,7 @@ export const listExtensions = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * CreateExtension
+ * Create an extension
  */
 export const createExtension = <ThrowOnError extends boolean = false>(
   options: Options<CreateExtensionData, ThrowOnError>,
@@ -5306,7 +5308,7 @@ export const createExtension = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * SyncExtensions
+ * Sync extensions from PBX
  */
 export const syncExtensions = <ThrowOnError extends boolean = false>(
   options?: Options<SyncExtensionsData, ThrowOnError>,
@@ -5322,7 +5324,7 @@ export const syncExtensions = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * DeleteExtension
+ * Delete an extension
  */
 export const deleteExtension = <ThrowOnError extends boolean = false>(
   options: Options<DeleteExtensionData, ThrowOnError>,
@@ -5338,7 +5340,7 @@ export const deleteExtension = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetExtension
+ * Get extension details
  */
 export const getExtension = <ThrowOnError extends boolean = false>(
   options: Options<GetExtensionData, ThrowOnError>,
@@ -5354,7 +5356,7 @@ export const getExtension = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * UpdateExtension
+ * Update an extension
  */
 export const updateExtension = <ThrowOnError extends boolean = false>(
   options: Options<UpdateExtensionData, ThrowOnError>,
@@ -5374,7 +5376,7 @@ export const updateExtension = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListExtensionDevices
+ * List devices for an extension
  */
 export const listExtensionDevices = <ThrowOnError extends boolean = false>(
   options: Options<ListExtensionDevicesData, ThrowOnError>,
@@ -5390,7 +5392,7 @@ export const listExtensionDevices = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetDndSettings
+ * Get do-not-disturb settings
  */
 export const getDndSettings = <ThrowOnError extends boolean = false>(
   options: Options<GetDndSettingsData, ThrowOnError>,
@@ -5406,7 +5408,7 @@ export const getDndSettings = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * UpdateDndSettings
+ * Update do-not-disturb settings
  */
 export const updateDndSettings = <ThrowOnError extends boolean = false>(
   options: Options<UpdateDndSettingsData, ThrowOnError>,
@@ -5426,7 +5428,7 @@ export const updateDndSettings = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ToggleDnd
+ * Toggle do-not-disturb
  */
 export const toggleDnd = <ThrowOnError extends boolean = false>(
   options: Options<ToggleDndData, ThrowOnError>,
@@ -5442,7 +5444,7 @@ export const toggleDnd = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListForwardingRules
+ * List forwarding rules
  */
 export const listForwardingRules = <ThrowOnError extends boolean = false>(
   options: Options<ListForwardingRulesData, ThrowOnError>,
@@ -5458,7 +5460,7 @@ export const listForwardingRules = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * CreateForwardingRule
+ * Create a forwarding rule
  */
 export const createForwardingRule = <ThrowOnError extends boolean = false>(
   options: Options<CreateForwardingRuleData, ThrowOnError>,
@@ -5478,7 +5480,7 @@ export const createForwardingRule = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * SetForwardingRules
+ * Replace all forwarding rules
  */
 export const setForwardingRules = <ThrowOnError extends boolean = false>(
   options: Options<SetForwardingRulesData, ThrowOnError>,
@@ -5498,7 +5500,7 @@ export const setForwardingRules = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * DeleteForwardingRule
+ * Delete a forwarding rule
  */
 export const deleteForwardingRule = <ThrowOnError extends boolean = false>(
   options: Options<DeleteForwardingRuleData, ThrowOnError>,
@@ -5514,7 +5516,7 @@ export const deleteForwardingRule = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * UpdateForwardingRule
+ * Update a forwarding rule
  */
 export const updateForwardingRule = <ThrowOnError extends boolean = false>(
   options: Options<UpdateForwardingRuleData, ThrowOnError>,
@@ -5534,7 +5536,7 @@ export const updateForwardingRule = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetVoicemailSettings
+ * Get voicemail settings
  */
 export const getVoicemailSettings = <ThrowOnError extends boolean = false>(
   options: Options<GetVoicemailSettingsData, ThrowOnError>,
@@ -5550,7 +5552,7 @@ export const getVoicemailSettings = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * UpdateVoicemailSettings
+ * Update voicemail settings
  */
 export const updateVoicemailSettings = <ThrowOnError extends boolean = false>(
   options: Options<UpdateVoicemailSettingsData, ThrowOnError>,
@@ -5570,7 +5572,7 @@ export const updateVoicemailSettings = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListVoicemailMessages
+ * List voicemail messages
  */
 export const listVoicemailMessages = <ThrowOnError extends boolean = false>(
   options: Options<ListVoicemailMessagesData, ThrowOnError>,
@@ -5586,7 +5588,7 @@ export const listVoicemailMessages = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * DeleteVoicemailMessage
+ * Delete a voicemail message
  */
 export const deleteVoicemailMessage = <ThrowOnError extends boolean = false>(
   options: Options<DeleteVoicemailMessageData, ThrowOnError>,
@@ -5602,7 +5604,7 @@ export const deleteVoicemailMessage = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetVoicemailMessage
+ * Get a voicemail message
  */
 export const getVoicemailMessage = <ThrowOnError extends boolean = false>(
   options: Options<GetVoicemailMessageData, ThrowOnError>,
@@ -5618,7 +5620,7 @@ export const getVoicemailMessage = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * UpdateVoicemailMessage
+ * Update a voicemail message
  */
 export const updateVoicemailMessage = <ThrowOnError extends boolean = false>(
   options: Options<UpdateVoicemailMessageData, ThrowOnError>,
@@ -5638,7 +5640,7 @@ export const updateVoicemailMessage = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListPhoneNumbers
+ * List phone numbers
  */
 export const listPhoneNumbers = <ThrowOnError extends boolean = false>(
   options?: Options<ListPhoneNumbersData, ThrowOnError>,
@@ -5654,7 +5656,7 @@ export const listPhoneNumbers = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * CreatePhoneNumber
+ * Create a phone number
  */
 export const createPhoneNumber = <ThrowOnError extends boolean = false>(
   options: Options<CreatePhoneNumberData, ThrowOnError>,
@@ -5674,7 +5676,7 @@ export const createPhoneNumber = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListUnregisteredE911
+ * List phone numbers without E911
  */
 export const listUnregisteredE911PhoneNumbers = <
   ThrowOnError extends boolean = false,
@@ -5692,7 +5694,7 @@ export const listUnregisteredE911PhoneNumbers = <
   });
 
 /**
- * DeletePhoneNumber
+ * Delete a phone number
  */
 export const deletePhoneNumber = <ThrowOnError extends boolean = false>(
   options: Options<DeletePhoneNumberData, ThrowOnError>,
@@ -5708,7 +5710,7 @@ export const deletePhoneNumber = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetPhoneNumber
+ * Get phone number details
  */
 export const getPhoneNumber = <ThrowOnError extends boolean = false>(
   options: Options<GetPhoneNumberData, ThrowOnError>,
@@ -5724,7 +5726,7 @@ export const getPhoneNumber = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * UpdatePhoneNumber
+ * Update a phone number
  */
 export const updatePhoneNumber = <ThrowOnError extends boolean = false>(
   options: Options<UpdatePhoneNumberData, ThrowOnError>,
@@ -5744,7 +5746,7 @@ export const updatePhoneNumber = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListVoicemailBoxes
+ * List voicemail boxes
  */
 export const listVoicemailBoxes = <ThrowOnError extends boolean = false>(
   options?: Options<ListVoicemailBoxesData, ThrowOnError>,
@@ -5760,7 +5762,7 @@ export const listVoicemailBoxes = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * CreateVoicemailBox
+ * Create a voicemail box
  */
 export const createVoicemailBox = <ThrowOnError extends boolean = false>(
   options: Options<CreateVoicemailBoxData, ThrowOnError>,
@@ -5780,7 +5782,7 @@ export const createVoicemailBox = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * DeleteVoicemailBox
+ * Delete a voicemail box
  */
 export const deleteVoicemailBox = <ThrowOnError extends boolean = false>(
   options: Options<DeleteVoicemailBoxData, ThrowOnError>,
@@ -5796,7 +5798,7 @@ export const deleteVoicemailBox = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetVoicemailBox
+ * Get voicemail box details
  */
 export const getVoicemailBox = <ThrowOnError extends boolean = false>(
   options: Options<GetVoicemailBoxData, ThrowOnError>,
@@ -5812,7 +5814,7 @@ export const getVoicemailBox = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * UpdateVoicemailBox
+ * Update a voicemail box
  */
 export const updateVoicemailBox = <ThrowOnError extends boolean = false>(
   options: Options<UpdateVoicemailBoxData, ThrowOnError>,
@@ -5832,7 +5834,7 @@ export const updateVoicemailBox = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListBoxMessages
+ * List voicemail box messages
  */
 export const listVoicemailBoxMessages = <ThrowOnError extends boolean = false>(
   options: Options<ListVoicemailBoxMessagesData, ThrowOnError>,
@@ -5848,7 +5850,7 @@ export const listVoicemailBoxMessages = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetUnreadCount
+ * Get unread voicemail count
  */
 export const getVoicemailBoxUnreadCount = <
   ThrowOnError extends boolean = false,
@@ -5866,7 +5868,7 @@ export const getVoicemailBoxUnreadCount = <
   });
 
 /**
- * ListVoicemailMessages
+ * List all voicemail messages
  */
 export const listAllVoicemailMessages = <ThrowOnError extends boolean = false>(
   options?: Options<ListAllVoicemailMessagesData, ThrowOnError>,
@@ -5882,7 +5884,7 @@ export const listAllVoicemailMessages = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * DeleteVoicemailMessage
+ * Delete a voicemail message
  */
 export const deleteVoicemailMessageById = <
   ThrowOnError extends boolean = false,
@@ -5900,7 +5902,7 @@ export const deleteVoicemailMessageById = <
   });
 
 /**
- * GetVoicemailMessage
+ * Get voicemail message details
  */
 export const getVoicemailMessageById = <ThrowOnError extends boolean = false>(
   options: Options<GetVoicemailMessageByIdData, ThrowOnError>,
@@ -5916,7 +5918,7 @@ export const getVoicemailMessageById = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ToggleReadStatus
+ * Toggle voicemail message read status
  */
 export const toggleVoicemailMessageRead = <
   ThrowOnError extends boolean = false,
@@ -5938,7 +5940,7 @@ export const toggleVoicemailMessageRead = <
   });
 
 /**
- * ListWebhooks
+ * List webhooks
  */
 export const listWebhooks = <ThrowOnError extends boolean = false>(
   options?: Options<ListWebhooksData, ThrowOnError>,
@@ -5954,7 +5956,7 @@ export const listWebhooks = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * CreateWebhook
+ * Create a webhook
  */
 export const createWebhook = <ThrowOnError extends boolean = false>(
   options: Options<CreateWebhookData, ThrowOnError>,
@@ -5974,7 +5976,7 @@ export const createWebhook = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListEndpoints
+ * List webhook endpoints
  */
 export const listWebhookEndpoints = <ThrowOnError extends boolean = false>(
   options?: Options<ListWebhookEndpointsData, ThrowOnError>,
@@ -5990,7 +5992,7 @@ export const listWebhookEndpoints = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * CreateEndpoint
+ * Create a webhook endpoint
  */
 export const createWebhookEndpoint = <ThrowOnError extends boolean = false>(
   options: Options<CreateWebhookEndpointData, ThrowOnError>,
@@ -6010,7 +6012,7 @@ export const createWebhookEndpoint = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListEventTypes
+ * List webhook event types
  */
 export const listWebhookEventTypes = <ThrowOnError extends boolean = false>(
   options?: Options<ListWebhookEventTypesData, ThrowOnError>,
@@ -6026,7 +6028,7 @@ export const listWebhookEventTypes = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * DeleteEndpoint
+ * Delete a webhook endpoint
  */
 export const deleteWebhookEndpoint = <ThrowOnError extends boolean = false>(
   options: Options<DeleteWebhookEndpointData, ThrowOnError>,
@@ -6042,7 +6044,7 @@ export const deleteWebhookEndpoint = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetEndpoint
+ * Get webhook endpoint details
  */
 export const getWebhookEndpoint = <ThrowOnError extends boolean = false>(
   options: Options<GetWebhookEndpointData, ThrowOnError>,
@@ -6058,7 +6060,7 @@ export const getWebhookEndpoint = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * UpdateEndpoint
+ * Update a webhook endpoint
  */
 export const updateWebhookEndpoint = <ThrowOnError extends boolean = false>(
   options: Options<UpdateWebhookEndpointData, ThrowOnError>,
@@ -6078,7 +6080,7 @@ export const updateWebhookEndpoint = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * DeleteWebhook
+ * Delete a webhook
  */
 export const deleteWebhook = <ThrowOnError extends boolean = false>(
   options: Options<DeleteWebhookData, ThrowOnError>,
@@ -6094,7 +6096,7 @@ export const deleteWebhook = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * GetWebhook
+ * Get webhook details
  */
 export const getWebhook = <ThrowOnError extends boolean = false>(
   options: Options<GetWebhookData, ThrowOnError>,
@@ -6110,7 +6112,7 @@ export const getWebhook = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * UpdateWebhook
+ * Update a webhook
  */
 export const updateWebhook = <ThrowOnError extends boolean = false>(
   options: Options<UpdateWebhookData, ThrowOnError>,
@@ -6130,7 +6132,7 @@ export const updateWebhook = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * ListDeliveries
+ * List webhook deliveries
  */
 export const listWebhookDeliveries = <ThrowOnError extends boolean = false>(
   options: Options<ListWebhookDeliveriesData, ThrowOnError>,
@@ -6146,7 +6148,7 @@ export const listWebhookDeliveries = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * RedeliverDelivery
+ * Redeliver a webhook
  */
 export const redeliverWebhookDelivery = <ThrowOnError extends boolean = false>(
   options: Options<RedeliverWebhookDeliveryData, ThrowOnError>,
@@ -6162,7 +6164,7 @@ export const redeliverWebhookDelivery = <ThrowOnError extends boolean = false>(
   });
 
 /**
- * TestWebhook
+ * Send a test webhook
  */
 export const testWebhook = <ThrowOnError extends boolean = false>(
   options: Options<TestWebhookData, ThrowOnError>,

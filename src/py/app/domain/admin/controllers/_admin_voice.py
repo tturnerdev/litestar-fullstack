@@ -5,11 +5,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Annotated
 from uuid import UUID
 
+from advanced_alchemy.filters import LimitOffset, SearchFilter
 from advanced_alchemy.service.pagination import OffsetPagination
 from litestar import Controller, get
 from litestar.datastructures import CacheControlHeader
 from litestar.di import Provide
-from litestar.params import Dependency
+from litestar.params import Dependency, Parameter
 from sqlalchemy import func, select
 from sqlalchemy.orm import selectinload
 
@@ -79,11 +80,20 @@ class AdminVoiceController(Controller):
     async def list_extensions(
         self,
         extension_service: ExtensionService,
-    ) -> list[AdminExtensionSummary]:
-        results = await extension_service.list(
+        current_page: int = Parameter(query="currentPage", ge=1, default=1),
+        page_size: int = Parameter(query="pageSize", ge=1, le=100, default=25),
+        search_string: str | None = Parameter(query="searchString", default=None),
+    ) -> OffsetPagination[AdminExtensionSummary]:
+        ext_filters: list[LimitOffset | SearchFilter] = [
+            LimitOffset(limit=page_size, offset=(current_page - 1) * page_size),
+        ]
+        if search_string:
+            ext_filters.append(SearchFilter(field_name={"extension_number", "display_name"}, value=search_string, ignore_case=True))
+        results, total = await extension_service.list_and_count(
+            *ext_filters,
             load=[selectinload(m.Extension.user), selectinload(m.Extension.phone_number)],
         )
-        return [
+        items = [
             AdminExtensionSummary(
                 id=ext.id,
                 extension_number=ext.extension_number,
@@ -95,6 +105,12 @@ class AdminVoiceController(Controller):
             )
             for ext in results
         ]
+        return OffsetPagination(
+            items=items,
+            total=total,
+            limit=page_size,
+            offset=(current_page - 1) * page_size,
+        )
 
     @get(
         operation_id="AdminGetVoiceStats",

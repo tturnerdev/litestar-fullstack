@@ -3084,6 +3084,9 @@ export type ForgotPasswordResponse =
 
 export type AccountLoginData = {
   body: AccountLogin;
+  headers?: {
+    "user-agent"?: string;
+  };
   path?: never;
   query?: never;
   url: "/api/access/login";
@@ -3133,10 +3136,31 @@ export type AccountLogoutResponse =
 
 export type TokenRefreshData = {
   body?: never;
+  headers?: {
+    "user-agent"?: string;
+  };
   path?: never;
   query?: never;
   url: "/api/access/refresh";
 };
+
+export type TokenRefreshErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type TokenRefreshError = TokenRefreshErrors[keyof TokenRefreshErrors];
 
 export type TokenRefreshResponses = {
   /**
@@ -3399,10 +3423,10 @@ export type AdminListAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetIdIn?: Array<string> | null;
-    actionIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3478,10 +3502,10 @@ export type AdminExportAuditLogData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetIdIn?: Array<string> | null;
-    actionIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     action?: string | null;
     domain?: string | null;
     end_date?: string | null;
@@ -3546,10 +3570,10 @@ export type AdminGetTargetAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetIdIn?: Array<string> | null;
-    actionIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -3626,10 +3650,10 @@ export type AdminGetUserAuditLogsData = {
      * Field to search
      */
     sortOrder?: "asc" | "desc" | null;
-    targetIdIn?: Array<string> | null;
-    actionIn?: Array<string> | null;
-    actorIdIn?: Array<string> | null;
     targetTypeIn?: Array<string> | null;
+    targetIdIn?: Array<string> | null;
+    actorIdIn?: Array<string> | null;
+    actionIn?: Array<string> | null;
     action?: string | null;
     end_date?: string | null;
   };
@@ -5424,15 +5448,52 @@ export type AdminUpdateUserResponse =
 export type AdminListExtensionsData = {
   body?: never;
   path?: never;
-  query?: never;
+  query?: {
+    currentPage?: number;
+    pageSize?: number;
+    searchString?: string | null;
+  };
   url: "/api/admin/voice/extensions";
 };
+
+export type AdminListExtensionsErrors = {
+  /**
+   * Validation Exception
+   */
+  400: {
+    detail: string;
+    extra?:
+      | null
+      | {
+          [key: string]: unknown;
+        }
+      | Array<unknown>;
+    status_code: number;
+  };
+};
+
+export type AdminListExtensionsError =
+  AdminListExtensionsErrors[keyof AdminListExtensionsErrors];
 
 export type AdminListExtensionsResponses = {
   /**
    * Request fulfilled, document follows
    */
-  200: Array<AdminExtensionSummary>;
+  200: {
+    items?: Array<AdminExtensionSummary>;
+    /**
+     * Maximal number of items to send.
+     */
+    limit?: number;
+    /**
+     * Offset from the beginning of the query.
+     */
+    offset?: number;
+    /**
+     * Total number of items.
+     */
+    total?: number;
+  };
 };
 
 export type AdminListExtensionsResponse =
@@ -8970,6 +9031,9 @@ export type GetSecurityActivityResponse =
 
 export type VerifyMfaChallengeData = {
   body: MfaChallenge;
+  headers?: {
+    "user-agent"?: string;
+  };
   path?: never;
   query?: never;
   url: "/api/mfa/challenge/verify";

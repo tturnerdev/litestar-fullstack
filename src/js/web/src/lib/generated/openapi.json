@@ -2560,6 +2560,8 @@
             ]
           },
           "name": {
+            "maxLength": 255,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
@@ -3391,6 +3393,8 @@
             ]
           },
           "name": {
+            "maxLength": 255,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
@@ -3731,6 +3735,7 @@
             ]
           },
           "deviceType": {
+            "maxLength": 100,
             "type": "string"
           },
           "locationId": {
@@ -3905,6 +3910,7 @@
             "type": "boolean"
           },
           "label": {
+            "maxLength": 255,
             "type": "string"
           },
           "lineNumber": {
@@ -3912,6 +3918,7 @@
           },
           "lineType": {
             "default": "private",
+            "maxLength": 100,
             "type": "string"
           }
         },
@@ -4356,6 +4363,8 @@
             ]
           },
           "name": {
+            "maxLength": 255,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
@@ -4725,6 +4734,8 @@
           },
           "country": {
             "default": "US",
+            "maxLength": 2,
+            "minLength": 2,
             "type": "string"
           },
           "locationId": {
@@ -4777,6 +4788,8 @@
       "E911RegistrationUpdate": {
         "properties": {
           "addressLine1": {
+            "maxLength": 255,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
@@ -4794,6 +4807,8 @@
             ]
           },
           "city": {
+            "maxLength": 255,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
@@ -4801,6 +4816,8 @@
             ]
           },
           "country": {
+            "maxLength": 2,
+            "minLength": 2,
             "oneOf": [
               {
                 "type": "string"
@@ -4830,6 +4847,8 @@
             ]
           },
           "postalCode": {
+            "maxLength": 20,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
@@ -4837,6 +4856,8 @@
             ]
           },
           "state": {
+            "maxLength": 255,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
@@ -5221,6 +5242,7 @@
       "ExtensionUpdate": {
         "properties": {
           "displayName": {
+            "maxLength": 100,
             "oneOf": [
               {
                 "type": "string"
@@ -5396,6 +5418,8 @@
       "FaxEmailRouteCreate": {
         "properties": {
           "emailAddress": {
+            "maxLength": 320,
+            "minLength": 1,
             "type": "string"
           },
           "isActive": {
@@ -5416,6 +5440,7 @@
       "FaxEmailRouteUpdate": {
         "properties": {
           "emailAddress": {
+            "maxLength": 320,
             "oneOf": [
               {
                 "type": "string"
@@ -5810,6 +5835,8 @@
             "$ref": "#/components/schemas/ForwardingDestinationType"
           },
           "destinationValue": {
+            "maxLength": 255,
+            "minLength": 1,
             "type": "string"
           },
           "isActive": {
@@ -5863,6 +5890,7 @@
             ]
           },
           "destinationValue": {
+            "maxLength": 255,
             "oneOf": [
               {
                 "type": "string"
@@ -6224,6 +6252,8 @@
             ]
           },
           "name": {
+            "maxLength": 255,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
@@ -6553,6 +6583,8 @@
             ]
           },
           "name": {
+            "maxLength": 255,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
@@ -6727,6 +6759,7 @@
           },
           "description": {
             "default": "",
+            "maxLength": 1000,
             "type": "string"
           },
           "fileList": {
@@ -6744,6 +6777,8 @@
             "type": "boolean"
           },
           "name": {
+            "maxLength": 255,
+            "minLength": 1,
             "type": "string"
           },
           "randomOrder": {
@@ -6864,6 +6899,7 @@
             ]
           },
           "description": {
+            "maxLength": 1000,
             "oneOf": [
               {
                 "type": "string"
@@ -6895,6 +6931,8 @@
             ]
           },
           "name": {
+            "maxLength": 255,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
@@ -8319,6 +8357,8 @@
       "RingGroupUpdate": {
         "properties": {
           "name": {
+            "maxLength": 255,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
@@ -8897,6 +8937,8 @@
             ]
           },
           "name": {
+            "maxLength": 255,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
@@ -9022,6 +9064,7 @@
             ]
           },
           "destinationNumber": {
+            "maxLength": 20,
             "type": "string"
           },
           "faxNumberId": {
@@ -9791,6 +9834,7 @@
       "TicketCreate": {
         "properties": {
           "bodyMarkdown": {
+            "maxLength": 50000,
             "minLength": 1,
             "type": "string"
           },
@@ -9806,6 +9850,7 @@
           },
           "priority": {
             "default": "medium",
+            "maxLength": 50,
             "type": "string"
           },
           "subject": {
@@ -9902,6 +9947,8 @@
       "TicketMessageCreate": {
         "properties": {
           "bodyMarkdown": {
+            "maxLength": 50000,
+            "minLength": 1,
             "type": "string"
           },
           "isInternalNote": {
@@ -9939,6 +9986,7 @@
             ]
           },
           "priority": {
+            "maxLength": 50,
             "oneOf": [
               {
                 "type": "string"
@@ -9946,6 +9994,7 @@
             ]
           },
           "status": {
+            "maxLength": 50,
             "oneOf": [
               {
                 "type": "string"
@@ -9953,6 +10002,7 @@
             ]
           },
           "subject": {
+            "maxLength": 255,
             "oneOf": [
               {
                 "type": "string"
@@ -10127,6 +10177,8 @@
             ]
           },
           "name": {
+            "maxLength": 255,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
@@ -11926,6 +11978,7 @@
       "WebhookUpdate": {
         "properties": {
           "description": {
+            "maxLength": 1000,
             "oneOf": [
               {
                 "type": "string"
@@ -11960,6 +12013,8 @@
             ]
           },
           "name": {
+            "maxLength": 255,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
@@ -11977,6 +12032,8 @@
             ]
           },
           "url": {
+            "maxLength": 2048,
+            "minLength": 1,
             "oneOf": [
               {
                 "type": "string"
@@ -12282,7 +12339,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ForgotPassword",
+        "summary": "Request password reset",
         "tags": [
           "Access"
         ]
@@ -12292,6 +12349,18 @@
       "post": {
         "deprecated": false,
         "operationId": "AccountLogin",
+        "parameters": [
+          {
+            "deprecated": false,
+            "in": "header",
+            "name": "user-agent",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -12351,7 +12420,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "Login",
+        "summary": "Log in",
         "tags": [
           "Access"
         ]
@@ -12374,7 +12443,7 @@
             "headers": {}
           }
         },
-        "summary": "Logout",
+        "summary": "Log out",
         "tags": [
           "Access"
         ]
@@ -12384,6 +12453,18 @@
       "post": {
         "deprecated": false,
         "operationId": "TokenRefresh",
+        "parameters": [
+          {
+            "deprecated": false,
+            "in": "header",
+            "name": "user-agent",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "201": {
             "content": {
@@ -12395,9 +12476,47 @@
             },
             "description": "Document created, URL follows",
             "headers": {}
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "detail": "Bad Request",
+                      "extra": {},
+                      "status_code": 400
+                    }
+                  ],
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    },
+                    "status_code": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "RefreshToken",
+        "summary": "Refresh access token",
         "tags": [
           "Access"
         ]
@@ -12473,7 +12592,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ValidateResetToken",
+        "summary": "Validate a password reset token",
         "tags": [
           "Access"
         ]
@@ -12542,7 +12661,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ResetPasswordWithToken",
+        "summary": "Reset password with token",
         "tags": [
           "Access"
         ]
@@ -12565,7 +12684,7 @@
             "headers": {}
           }
         },
-        "summary": "RevokeAllSessions",
+        "summary": "Revoke all other sessions",
         "tags": [
           "Access"
         ]
@@ -12752,7 +12871,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetSessions",
+        "summary": "List active sessions",
         "tags": [
           "Access"
         ]
@@ -12825,7 +12944,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "RevokeSession",
+        "summary": "Revoke a session",
         "tags": [
           "Access"
         ]
@@ -12896,7 +13015,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "Signup",
+        "summary": "Register a new account",
         "tags": [
           "Access"
         ]
@@ -13079,7 +13198,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetIdIn",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13100,7 +13219,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
+            "name": "targetIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13142,7 +13261,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13285,7 +13404,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListLogs",
+        "summary": "List audit logs",
         "tags": [
           "Admin"
         ]
@@ -13468,7 +13587,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetIdIn",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13489,7 +13608,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
+            "name": "targetIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13531,7 +13650,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13654,7 +13773,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ExportLogs",
+        "summary": "Export audit logs as CSV",
         "tags": [
           "Admin"
         ]
@@ -13855,7 +13974,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetIdIn",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13876,7 +13995,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
+            "name": "targetIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -13918,7 +14037,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -14043,7 +14162,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetTargetLogs",
+        "summary": "Get audit logs for a target",
         "tags": [
           "Admin"
         ]
@@ -14236,7 +14355,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetIdIn",
+            "name": "targetTypeIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -14257,7 +14376,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "actionIn",
+            "name": "targetIdIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -14299,7 +14418,7 @@
             "allowReserved": false,
             "deprecated": false,
             "in": "query",
-            "name": "targetTypeIn",
+            "name": "actionIn",
             "required": false,
             "schema": {
               "oneOf": [
@@ -14424,7 +14543,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetUserLogs",
+        "summary": "Get audit logs for a user",
         "tags": [
           "Admin"
         ]
@@ -14497,7 +14616,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetLog",
+        "summary": "Get audit log details",
         "tags": [
           "Admin"
         ]
@@ -14569,7 +14688,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ImportDevices",
+        "summary": "Import devices from CSV",
         "tags": [
           "Admin"
         ]
@@ -14641,7 +14760,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ImportExtensions",
+        "summary": "Import extensions from CSV",
         "tags": [
           "Admin"
         ]
@@ -14713,7 +14832,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "PreviewDeviceImport",
+        "summary": "Preview device CSV import",
         "tags": [
           "Admin"
         ]
@@ -14785,7 +14904,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "PreviewExtensionImport",
+        "summary": "Preview extension CSV import",
         "tags": [
           "Admin"
         ]
@@ -14880,7 +14999,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetActivity",
+        "summary": "Get recent activity",
         "tags": [
           "Admin"
         ]
@@ -14911,7 +15030,7 @@
             }
           }
         },
-        "summary": "GetStats",
+        "summary": "Get dashboard statistics",
         "tags": [
           "Admin"
         ]
@@ -15238,7 +15357,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListTemplates",
+        "summary": "List device templates",
         "tags": [
           "Admin"
         ]
@@ -15307,7 +15426,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "CreateTemplate",
+        "summary": "Create a device template",
         "tags": [
           "Admin"
         ]
@@ -15376,7 +15495,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "DeleteTemplate",
+        "summary": "Delete a device template",
         "tags": [
           "Admin"
         ]
@@ -15450,7 +15569,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetTemplate",
+        "summary": "Get device template details",
         "tags": [
           "Admin"
         ]
@@ -15534,7 +15653,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpdateTemplate",
+        "summary": "Update a device template",
         "tags": [
           "Admin"
         ]
@@ -15822,7 +15941,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListDevices",
+        "summary": "List devices (admin)",
         "tags": [
           "Admin"
         ]
@@ -15853,7 +15972,7 @@
             }
           }
         },
-        "summary": "GetStats",
+        "summary": "Get device statistics (admin)",
         "tags": [
           "Admin"
         ]
@@ -15879,7 +15998,7 @@
             "headers": {}
           }
         },
-        "summary": "ListFaxMessages",
+        "summary": "List fax messages (admin)",
         "tags": [
           "Admin"
         ]
@@ -16129,7 +16248,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListFaxNumbers",
+        "summary": "List fax numbers (admin)",
         "tags": [
           "Admin"
         ]
@@ -16160,7 +16279,7 @@
             }
           }
         },
-        "summary": "GetStats",
+        "summary": "Get fax statistics (admin)",
         "tags": [
           "Admin"
         ]
@@ -16183,7 +16302,7 @@
             "headers": {}
           }
         },
-        "summary": "GetGatewaySettings",
+        "summary": "Get gateway settings",
         "tags": [
           "Admin"
         ]
@@ -16252,7 +16371,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpdateGatewaySettings",
+        "summary": "Update gateway settings",
         "tags": [
           "Admin"
         ]
@@ -16548,7 +16667,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListMusicOnHold",
+        "summary": "List music on hold classes",
         "tags": [
           "Admin"
         ]
@@ -16617,7 +16736,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "CreateMusicOnHold",
+        "summary": "Create a music on hold class",
         "tags": [
           "Admin"
         ]
@@ -16686,7 +16805,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "DeleteMusicOnHold",
+        "summary": "Delete a music on hold class",
         "tags": [
           "Admin"
         ]
@@ -16760,7 +16879,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetMusicOnHold",
+        "summary": "Get music on hold details",
         "tags": [
           "Admin"
         ]
@@ -16844,7 +16963,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpdateMusicOnHold",
+        "summary": "Update a music on hold class",
         "tags": [
           "Admin"
         ]
@@ -16915,7 +17034,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ExecuteImport",
+        "summary": "Execute phone number bulk import",
         "tags": [
           "Admin",
           "Phone Numbers"
@@ -16994,7 +17113,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "PreviewImport",
+        "summary": "Preview phone number bulk import",
         "tags": [
           "Admin",
           "Phone Numbers"
@@ -17026,7 +17145,7 @@
             }
           }
         },
-        "summary": "GetStats",
+        "summary": "Get support statistics (admin)",
         "tags": [
           "Admin"
         ]
@@ -17314,7 +17433,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListTickets",
+        "summary": "List tickets (admin)",
         "tags": [
           "Admin"
         ]
@@ -17345,7 +17464,7 @@
             }
           }
         },
-        "summary": "GetSystemStatus",
+        "summary": "Get system status",
         "tags": [
           "Admin"
         ]
@@ -17696,7 +17815,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListTasks",
+        "summary": "List background tasks (admin)",
         "tags": [
           "Admin"
         ]
@@ -17727,7 +17846,7 @@
             }
           }
         },
-        "summary": "GetTaskStats",
+        "summary": "Get task statistics (admin)",
         "tags": [
           "Admin"
         ]
@@ -17796,7 +17915,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "DeleteTask",
+        "summary": "Delete a background task (admin)",
         "tags": [
           "Admin"
         ]
@@ -17872,7 +17991,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "CancelTask",
+        "summary": "Cancel a background task (admin)",
         "tags": [
           "Admin"
         ]
@@ -18160,7 +18279,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListTeams",
+        "summary": "List teams (admin)",
         "tags": [
           "Admin"
         ]
@@ -18233,7 +18352,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "DeleteTeam",
+        "summary": "Delete a team (admin)",
         "tags": [
           "Admin"
         ]
@@ -18304,7 +18423,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetTeam",
+        "summary": "Get team details (admin)",
         "tags": [
           "Admin"
         ]
@@ -18385,7 +18504,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpdateTeam",
+        "summary": "Update a team (admin)",
         "tags": [
           "Admin"
         ]
@@ -18673,7 +18792,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListUsers",
+        "summary": "List users (admin)",
         "tags": [
           "Admin"
         ]
@@ -18746,7 +18865,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "DeleteUser",
+        "summary": "Delete a user (admin)",
         "tags": [
           "Admin"
         ]
@@ -18817,7 +18936,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetUser",
+        "summary": "Get user details (admin)",
         "tags": [
           "Admin"
         ]
@@ -18898,7 +19017,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpdateUser",
+        "summary": "Update a user (admin)",
         "tags": [
           "Admin"
         ]
@@ -18908,23 +19027,125 @@
       "get": {
         "deprecated": false,
         "operationId": "AdminListExtensions",
+        "parameters": [
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "currentPage",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1.0,
+              "type": "integer"
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "pageSize",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 100.0,
+              "minimum": 1.0,
+              "type": "integer"
+            }
+          },
+          {
+            "allowEmptyValue": false,
+            "allowReserved": false,
+            "deprecated": false,
+            "in": "query",
+            "name": "searchString",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/AdminExtensionSummary"
+                  "properties": {
+                    "items": {
+                      "items": {
+                        "$ref": "#/components/schemas/AdminExtensionSummary"
+                      },
+                      "type": "array"
+                    },
+                    "limit": {
+                      "description": "Maximal number of items to send.",
+                      "type": "integer"
+                    },
+                    "offset": {
+                      "description": "Offset from the beginning of the query.",
+                      "type": "integer"
+                    },
+                    "total": {
+                      "description": "Total number of items.",
+                      "type": "integer"
+                    }
                   },
-                  "type": "array"
+                  "type": "object"
                 }
               }
             },
             "description": "Request fulfilled, document follows",
             "headers": {}
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "detail": "Bad Request",
+                      "extra": {},
+                      "status_code": 400
+                    }
+                  ],
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    },
+                    "status_code": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListExtensions",
+        "summary": "List extensions (admin)",
         "tags": [
           "Admin"
         ]
@@ -19174,7 +19395,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListPhoneNumbers",
+        "summary": "List phone numbers (admin)",
         "tags": [
           "Admin"
         ]
@@ -19205,7 +19426,7 @@
             }
           }
         },
-        "summary": "GetStats",
+        "summary": "Get voice statistics (admin)",
         "tags": [
           "Admin"
         ]
@@ -19307,7 +19528,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetByExtension",
+        "summary": "Get calls by extension",
         "tags": [
           "Analytics"
         ]
@@ -19741,7 +19962,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListCallRecords",
+        "summary": "List call records",
         "tags": [
           "Analytics"
         ]
@@ -19810,7 +20031,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "CreateCallRecord",
+        "summary": "Create a call record",
         "tags": [
           "Analytics"
         ]
@@ -19947,7 +20168,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ExportCallRecords",
+        "summary": "Export call records as CSV",
         "tags": [
           "Analytics"
         ]
@@ -20023,7 +20244,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetCallRecord",
+        "summary": "Get call record details",
         "tags": [
           "Analytics"
         ]
@@ -20122,7 +20343,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetSummary",
+        "summary": "Get call analytics summary",
         "tags": [
           "Analytics"
         ]
@@ -20236,7 +20457,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetVolume",
+        "summary": "Get call volume over time",
         "tags": [
           "Analytics"
         ]
@@ -20317,7 +20538,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GithubAuthorize",
+        "summary": "Initiate GitHub OAuth",
         "tags": [
           "OAuth Authentication"
         ]
@@ -20454,7 +20675,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GithubCallback",
+        "summary": "Handle GitHub OAuth callback",
         "tags": [
           "OAuth Authentication"
         ]
@@ -20535,7 +20756,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GoogleAuthorize",
+        "summary": "Initiate Google OAuth",
         "tags": [
           "OAuth Authentication"
         ]
@@ -20654,7 +20875,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GoogleCallback",
+        "summary": "Handle Google OAuth callback",
         "tags": [
           "OAuth Authentication"
         ]
@@ -20942,9 +21163,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListCallQueues",
+        "summary": "List call queues",
         "tags": [
-          "Call Routing - Call Queues"
+          "Call Routing"
         ]
       },
       "post": {
@@ -21011,9 +21232,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "CreateCallQueue",
+        "summary": "Create a call queue",
         "tags": [
-          "Call Routing - Call Queues"
+          "Call Routing"
         ]
       }
     },
@@ -21080,9 +21301,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "DeleteCallQueue",
+        "summary": "Delete a call queue",
         "tags": [
-          "Call Routing - Call Queues"
+          "Call Routing"
         ]
       },
       "get": {
@@ -21154,9 +21375,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetCallQueue",
+        "summary": "Get call queue details",
         "tags": [
-          "Call Routing - Call Queues"
+          "Call Routing"
         ]
       },
       "patch": {
@@ -21238,9 +21459,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpdateCallQueue",
+        "summary": "Update a call queue",
         "tags": [
-          "Call Routing - Call Queues"
+          "Call Routing"
         ]
       }
     },
@@ -21317,9 +21538,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListMembers",
+        "summary": "List call queue members",
         "tags": [
-          "Call Routing - Call Queues"
+          "Call Routing"
         ]
       },
       "post": {
@@ -21401,9 +21622,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "CreateMember",
+        "summary": "Add a call queue member",
         "tags": [
-          "Call Routing - Call Queues"
+          "Call Routing"
         ]
       }
     },
@@ -21483,9 +21704,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "DeleteMember",
+        "summary": "Remove a call queue member",
         "tags": [
-          "Call Routing - Call Queues"
+          "Call Routing"
         ]
       },
       "patch": {
@@ -21580,9 +21801,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpdateMember",
+        "summary": "Update a call queue member",
         "tags": [
-          "Call Routing - Call Queues"
+          "Call Routing"
         ]
       }
     },
@@ -21679,9 +21900,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "PauseMember",
+        "summary": "Pause or unpause a call queue member",
         "tags": [
-          "Call Routing - Call Queues"
+          "Call Routing"
         ]
       }
     },
@@ -22017,7 +22238,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListConnections",
+        "summary": "List connections",
         "tags": [
           "Connections"
         ]
@@ -22086,7 +22307,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "CreateConnection",
+        "summary": "Create a connection",
         "tags": [
           "Connections"
         ]
@@ -22155,7 +22376,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "DeleteConnection",
+        "summary": "Delete a connection",
         "tags": [
           "Connections"
         ]
@@ -22229,7 +22450,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetConnection",
+        "summary": "Get connection details",
         "tags": [
           "Connections"
         ]
@@ -22313,7 +22534,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpdateConnection",
+        "summary": "Update a connection",
         "tags": [
           "Connections"
         ]
@@ -22389,7 +22610,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "TestConnection",
+        "summary": "Test a connection",
         "tags": [
           "Connections"
         ]
@@ -22677,7 +22898,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListDevices",
+        "summary": "List devices",
         "tags": [
           "Devices"
         ]
@@ -22746,7 +22967,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "CreateDevice",
+        "summary": "Register a device",
         "tags": [
           "Devices"
         ]
@@ -22839,7 +23060,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "LookupTemplate",
+        "summary": "Look up device template",
         "tags": [
           "Devices"
         ]
@@ -22908,7 +23129,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "DeleteDevice",
+        "summary": "Delete a device",
         "tags": [
           "Devices"
         ]
@@ -22982,7 +23203,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetDevice",
+        "summary": "Get device details",
         "tags": [
           "Devices"
         ]
@@ -23066,7 +23287,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpdateDevice",
+        "summary": "Update a device",
         "tags": [
           "Devices"
         ]
@@ -23145,9 +23366,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListDeviceLines",
+        "summary": "List device line assignments",
         "tags": [
-          "Devices"
+          "Device Actions"
         ]
       },
       "put": {
@@ -23229,9 +23450,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "SetDeviceLines",
+        "summary": "Set device line assignments",
         "tags": [
-          "Devices"
+          "Device Actions"
         ]
       }
     },
@@ -23305,9 +23526,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "RebootDevice",
+        "summary": "Reboot a device",
         "tags": [
-          "Devices"
+          "Device Actions"
         ]
       }
     },
@@ -23381,9 +23602,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ReprovisionDevice",
+        "summary": "Reprovision a device",
         "tags": [
-          "Devices"
+          "Device Actions"
         ]
       }
     },
@@ -23691,7 +23912,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListRegistrations",
+        "summary": "List E911 registrations",
         "tags": [
           "E911"
         ]
@@ -23760,7 +23981,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "CreateRegistration",
+        "summary": "Create an E911 registration",
         "tags": [
           "E911"
         ]
@@ -23841,7 +24062,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListUnregistered",
+        "summary": "List unregistered phone numbers",
         "tags": [
           "E911"
         ]
@@ -23910,7 +24131,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "DeleteRegistration",
+        "summary": "Delete an E911 registration",
         "tags": [
           "E911"
         ]
@@ -23984,7 +24205,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetRegistration",
+        "summary": "Get E911 registration details",
         "tags": [
           "E911"
         ]
@@ -24068,7 +24289,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpdateRegistration",
+        "summary": "Update an E911 registration",
         "tags": [
           "E911"
         ]
@@ -24144,7 +24365,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ValidateRegistration",
+        "summary": "Validate an E911 registration",
         "tags": [
           "E911"
         ]
@@ -24215,7 +24436,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "RequestVerification",
+        "summary": "Request email verification",
         "tags": [
           "Access"
         ]
@@ -24288,7 +24509,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetVerificationStatus",
+        "summary": "Get email verification status",
         "tags": [
           "Access"
         ]
@@ -24359,7 +24580,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "VerifyEmail",
+        "summary": "Verify email address",
         "tags": [
           "Access"
         ]
@@ -24647,7 +24868,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListFaxMessages",
+        "summary": "List fax messages",
         "tags": [
           "Fax Messages"
         ]
@@ -24716,7 +24937,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "DeleteFaxMessage",
+        "summary": "Delete a fax message",
         "tags": [
           "Fax Messages"
         ]
@@ -24790,7 +25011,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetFaxMessage",
+        "summary": "Get fax message details",
         "tags": [
           "Fax Messages"
         ]
@@ -25078,7 +25299,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListFaxNumbers",
+        "summary": "List fax numbers",
         "tags": [
           "Fax Numbers"
         ]
@@ -25147,7 +25368,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "CreateFaxNumber",
+        "summary": "Create a fax number",
         "tags": [
           "Fax Numbers"
         ]
@@ -25216,7 +25437,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "DeleteFaxNumber",
+        "summary": "Delete a fax number",
         "tags": [
           "Fax Numbers"
         ]
@@ -25290,7 +25511,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetFaxNumber",
+        "summary": "Get fax number details",
         "tags": [
           "Fax Numbers"
         ]
@@ -25374,7 +25595,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpdateFaxNumber",
+        "summary": "Update a fax number",
         "tags": [
           "Fax Numbers"
         ]
@@ -25651,7 +25872,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListFaxEmailRoutes",
+        "summary": "List fax email routes",
         "tags": [
           "Fax Email Routes"
         ]
@@ -25732,7 +25953,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "CreateFaxEmailRoute",
+        "summary": "Create a fax email route",
         "tags": [
           "Fax Email Routes"
         ]
@@ -25811,7 +26032,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "DeleteFaxEmailRoute",
+        "summary": "Delete a fax email route",
         "tags": [
           "Fax Email Routes"
         ]
@@ -25905,7 +26126,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpdateFaxEmailRoute",
+        "summary": "Update a fax email route",
         "tags": [
           "Fax Email Routes"
         ]
@@ -25976,7 +26197,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "SendFax",
+        "summary": "Send a fax",
         "tags": [
           "Fax Messages"
         ]
@@ -26065,9 +26286,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetDeviceData",
+        "summary": "Look up a device by MAC address",
         "tags": [
-          "Gateway - Devices"
+          "Gateway Devices"
         ]
       }
     },
@@ -26154,9 +26375,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetExtensionData",
+        "summary": "Look up an extension",
         "tags": [
-          "Gateway - Extensions"
+          "Gateway Extensions"
         ]
       }
     },
@@ -26243,9 +26464,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetNumberData",
+        "summary": "Look up a phone number",
         "tags": [
-          "Gateway - Numbers"
+          "Gateway Numbers"
         ]
       }
     },
@@ -26531,9 +26752,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListIvrMenus",
+        "summary": "List IVR menus",
         "tags": [
-          "Call Routing - IVR Menus"
+          "Call Routing"
         ]
       },
       "post": {
@@ -26600,9 +26821,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "CreateIvrMenu",
+        "summary": "Create an IVR menu",
         "tags": [
-          "Call Routing - IVR Menus"
+          "Call Routing"
         ]
       }
     },
@@ -26669,9 +26890,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "DeleteIvrMenu",
+        "summary": "Delete an IVR menu",
         "tags": [
-          "Call Routing - IVR Menus"
+          "Call Routing"
         ]
       },
       "get": {
@@ -26743,9 +26964,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetIvrMenu",
+        "summary": "Get IVR menu details",
         "tags": [
-          "Call Routing - IVR Menus"
+          "Call Routing"
         ]
       },
       "patch": {
@@ -26827,9 +27048,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpdateIvrMenu",
+        "summary": "Update an IVR menu",
         "tags": [
-          "Call Routing - IVR Menus"
+          "Call Routing"
         ]
       }
     },
@@ -26906,9 +27127,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListOptions",
+        "summary": "List IVR menu options",
         "tags": [
-          "Call Routing - IVR Menus"
+          "Call Routing"
         ]
       },
       "post": {
@@ -26990,9 +27211,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "CreateOption",
+        "summary": "Add an IVR menu option",
         "tags": [
-          "Call Routing - IVR Menus"
+          "Call Routing"
         ]
       }
     },
@@ -27072,9 +27293,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "DeleteOption",
+        "summary": "Delete an IVR menu option",
         "tags": [
-          "Call Routing - IVR Menus"
+          "Call Routing"
         ]
       },
       "patch": {
@@ -27169,9 +27390,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpdateOption",
+        "summary": "Update an IVR menu option",
         "tags": [
-          "Call Routing - IVR Menus"
+          "Call Routing"
         ]
       }
     },
@@ -27185,7 +27406,7 @@
             "headers": {}
           }
         },
-        "summary": "RemoveAccount",
+        "summary": "Delete account",
         "tags": [
           "Access"
         ]
@@ -27276,7 +27497,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpdateProfile",
+        "summary": "Update profile",
         "tags": [
           "Access"
         ]
@@ -27347,7 +27568,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpdatePassword",
+        "summary": "Update password",
         "tags": [
           "Access"
         ]
@@ -27384,6 +27605,18 @@
       "post": {
         "deprecated": false,
         "operationId": "VerifyMfaChallenge",
+        "parameters": [
+          {
+            "deprecated": false,
+            "in": "header",
+            "name": "user-agent",
+            "required": false,
+            "schema": {
+              "default": "",
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -27445,7 +27678,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "VerifyChallenge",
+        "summary": "Verify MFA challenge",
         "tags": [
           "MFA"
         ]
@@ -27516,7 +27749,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ConfirmSetup",
+        "summary": "Confirm MFA setup",
         "tags": [
           "MFA"
         ]
@@ -27587,7 +27820,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "DisableMfa",
+        "summary": "Disable MFA",
         "tags": [
           "MFA"
         ]
@@ -27659,7 +27892,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "InitiateDisableMfaOauth",
+        "summary": "Initiate MFA disable via OAuth",
         "tags": [
           "MFA"
         ]
@@ -27682,7 +27915,7 @@
             "headers": {}
           }
         },
-        "summary": "InitiateSetup",
+        "summary": "Initiate MFA setup",
         "tags": [
           "MFA"
         ]
@@ -27753,7 +27986,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "RegenerateBackupCodes",
+        "summary": "Regenerate MFA backup codes",
         "tags": [
           "MFA"
         ]
@@ -27776,7 +28009,7 @@
             "headers": {}
           }
         },
-        "summary": "GetMfaStatus",
+        "summary": "Get MFA status",
         "tags": [
           "MFA"
         ]
@@ -28064,7 +28297,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListNotifications",
+        "summary": "List notifications",
         "tags": [
           "Notifications"
         ]
@@ -28087,7 +28320,7 @@
             "headers": {}
           }
         },
-        "summary": "MarkAllRead",
+        "summary": "Mark all notifications as read",
         "tags": [
           "Notifications"
         ]
@@ -28221,7 +28454,7 @@
             "headers": {}
           }
         },
-        "summary": "GetUnreadCount",
+        "summary": "Get unread notification count",
         "tags": [
           "Notifications"
         ]
@@ -28290,7 +28523,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "DeleteNotification",
+        "summary": "Delete a notification",
         "tags": [
           "Notifications"
         ]
@@ -28366,7 +28599,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "MarkRead",
+        "summary": "Mark a notification as read",
         "tags": [
           "Notifications"
         ]
@@ -28397,7 +28630,7 @@
             }
           }
         },
-        "summary": "GetOrganization",
+        "summary": "Get organization details",
         "tags": [
           "Organization"
         ]
@@ -28466,7 +28699,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpdateOrganization",
+        "summary": "Update organization settings",
         "tags": [
           "Organization"
         ]
@@ -28754,7 +28987,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListPhoneNumbers",
+        "summary": "List phone numbers",
         "tags": [
           "Phone Numbers"
         ]
@@ -28823,7 +29056,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "CreatePhoneNumber",
+        "summary": "Create a phone number",
         "tags": [
           "Phone Numbers"
         ]
@@ -28896,7 +29129,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "DeletePhoneNumber",
+        "summary": "Delete a phone number",
         "tags": [
           "Phone Numbers"
         ]
@@ -28967,7 +29200,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetPhoneNumber",
+        "summary": "Get a phone number",
         "tags": [
           "Phone Numbers"
         ]
@@ -29048,7 +29281,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpdatePhoneNumber",
+        "summary": "Update a phone number",
         "tags": [
           "Phone Numbers"
         ]
@@ -29277,7 +29510,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListAccounts",
+        "summary": "List linked OAuth accounts",
         "tags": [
           "Profile"
         ]
@@ -29349,7 +29582,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "Unlink",
+        "summary": "Unlink an OAuth account",
         "tags": [
           "Profile"
         ]
@@ -29439,7 +29672,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "StartLink",
+        "summary": "Link an OAuth account",
         "tags": [
           "Profile"
         ]
@@ -29529,7 +29762,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpgradeScopes",
+        "summary": "Upgrade OAuth scopes",
         "tags": [
           "Profile"
         ]
@@ -29817,9 +30050,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListRingGroups",
+        "summary": "List ring groups",
         "tags": [
-          "Call Routing - Ring Groups"
+          "Call Routing"
         ]
       },
       "post": {
@@ -29886,9 +30119,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "CreateRingGroup",
+        "summary": "Create a ring group",
         "tags": [
-          "Call Routing - Ring Groups"
+          "Call Routing"
         ]
       }
     },
@@ -29955,9 +30188,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "DeleteRingGroup",
+        "summary": "Delete a ring group",
         "tags": [
-          "Call Routing - Ring Groups"
+          "Call Routing"
         ]
       },
       "get": {
@@ -30029,9 +30262,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetRingGroup",
+        "summary": "Get ring group details",
         "tags": [
-          "Call Routing - Ring Groups"
+          "Call Routing"
         ]
       },
       "patch": {
@@ -30113,9 +30346,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpdateRingGroup",
+        "summary": "Update a ring group",
         "tags": [
-          "Call Routing - Ring Groups"
+          "Call Routing"
         ]
       }
     },
@@ -30192,9 +30425,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListMembers",
+        "summary": "List ring group members",
         "tags": [
-          "Call Routing - Ring Groups"
+          "Call Routing"
         ]
       },
       "post": {
@@ -30276,9 +30509,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "CreateMember",
+        "summary": "Add a ring group member",
         "tags": [
-          "Call Routing - Ring Groups"
+          "Call Routing"
         ]
       }
     },
@@ -30358,9 +30591,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "DeleteMember",
+        "summary": "Remove a ring group member",
         "tags": [
-          "Call Routing - Ring Groups"
+          "Call Routing"
         ]
       },
       "patch": {
@@ -30455,9 +30688,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpdateMember",
+        "summary": "Update a ring group member",
         "tags": [
-          "Call Routing - Ring Groups"
+          "Call Routing"
         ]
       }
     },
@@ -30675,7 +30908,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListRoles",
+        "summary": "List roles",
         "tags": [
           "Roles"
         ]
@@ -30744,7 +30977,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "CreateRole",
+        "summary": "Create a role",
         "tags": [
           "Roles"
         ]
@@ -30813,7 +31046,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "DeleteRole",
+        "summary": "Delete a role",
         "tags": [
           "Roles"
         ]
@@ -30887,7 +31120,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetRole",
+        "summary": "Get role details",
         "tags": [
           "Roles"
         ]
@@ -30971,7 +31204,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpdateRole",
+        "summary": "Update a role",
         "tags": [
           "Roles"
         ]
@@ -31056,7 +31289,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "AssignRole",
+        "summary": "Assign a role to a user",
         "tags": [
           "Roles"
         ]
@@ -31141,7 +31374,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "RevokeRole",
+        "summary": "Revoke a role from a user",
         "tags": [
           "Roles"
         ]
@@ -31472,7 +31705,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListSchedules",
+        "summary": "List schedules",
         "tags": [
           "Schedules"
         ]
@@ -31541,7 +31774,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "CreateSchedule",
+        "summary": "Create a schedule",
         "tags": [
           "Schedules"
         ]
@@ -31610,7 +31843,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "DeleteSchedule",
+        "summary": "Delete a schedule",
         "tags": [
           "Schedules"
         ]
@@ -31684,7 +31917,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetSchedule",
+        "summary": "Get schedule details",
         "tags": [
           "Schedules"
         ]
@@ -31768,7 +32001,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpdateSchedule",
+        "summary": "Update a schedule",
         "tags": [
           "Schedules"
         ]
@@ -31866,7 +32099,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "CheckSchedule",
+        "summary": "Check schedule status",
         "tags": [
           "Schedules"
         ]
@@ -31945,7 +32178,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListEntries",
+        "summary": "List schedule entries",
         "tags": [
           "Schedules"
         ]
@@ -32029,7 +32262,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "CreateEntry",
+        "summary": "Create a schedule entry",
         "tags": [
           "Schedules"
         ]
@@ -32111,7 +32344,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "DeleteEntry",
+        "summary": "Delete a schedule entry",
         "tags": [
           "Schedules"
         ]
@@ -32208,7 +32441,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpdateEntry",
+        "summary": "Update a schedule entry",
         "tags": [
           "Schedules"
         ]
@@ -32364,9 +32597,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "DeleteAttachment",
+        "summary": "Delete an attachment",
         "tags": [
-          "Support"
+          "Ticket Attachments"
         ]
       },
       "get": {
@@ -32438,9 +32671,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetAttachment",
+        "summary": "Get attachment details",
         "tags": [
-          "Support"
+          "Ticket Attachments"
         ]
       }
     },
@@ -32510,9 +32743,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "SubmitFeedback",
+        "summary": "Submit portal feedback",
         "tags": [
-          "Support"
+          "Feedback"
         ]
       }
     },
@@ -32798,9 +33031,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListTickets",
+        "summary": "List tickets",
         "tags": [
-          "Support"
+          "Support Tickets"
         ]
       },
       "post": {
@@ -32867,9 +33100,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "CreateTicket",
+        "summary": "Create a ticket",
         "tags": [
-          "Support"
+          "Support Tickets"
         ]
       }
     },
@@ -32936,9 +33169,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "DeleteTicket",
+        "summary": "Delete a ticket",
         "tags": [
-          "Support"
+          "Support Tickets"
         ]
       },
       "get": {
@@ -33010,9 +33243,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetTicket",
+        "summary": "Get ticket details",
         "tags": [
-          "Support"
+          "Support Tickets"
         ]
       },
       "patch": {
@@ -33094,9 +33327,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpdateTicket",
+        "summary": "Update a ticket",
         "tags": [
-          "Support"
+          "Support Tickets"
         ]
       }
     },
@@ -33168,9 +33401,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UploadAttachment",
+        "summary": "Upload a ticket attachment",
         "tags": [
-          "Support"
+          "Ticket Attachments"
         ]
       }
     },
@@ -33244,9 +33477,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "CloseTicket",
+        "summary": "Close a ticket",
         "tags": [
-          "Support"
+          "Support Tickets"
         ]
       }
     },
@@ -33505,9 +33738,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListMessages",
+        "summary": "List ticket messages",
         "tags": [
-          "Support"
+          "Ticket Messages"
         ]
       },
       "post": {
@@ -33587,9 +33820,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "CreateMessage",
+        "summary": "Create a ticket message",
         "tags": [
-          "Support"
+          "Ticket Messages"
         ]
       }
     },
@@ -33667,9 +33900,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "DeleteMessage",
+        "summary": "Delete a ticket message",
         "tags": [
-          "Support"
+          "Ticket Messages"
         ]
       },
       "patch": {
@@ -33762,9 +33995,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpdateMessage",
+        "summary": "Update a ticket message",
         "tags": [
-          "Support"
+          "Ticket Messages"
         ]
       }
     },
@@ -33836,9 +34069,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "PasteImage",
+        "summary": "Upload a pasted image",
         "tags": [
-          "Support"
+          "Ticket Attachments"
         ]
       }
     },
@@ -33912,9 +34145,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ReopenTicket",
+        "summary": "Reopen a ticket",
         "tags": [
-          "Support"
+          "Support Tickets"
         ]
       }
     },
@@ -34290,7 +34523,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListTags",
+        "summary": "List tags",
         "tags": [
           "Tags"
         ]
@@ -34359,7 +34592,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "CreateTag",
+        "summary": "Create a tag",
         "tags": [
           "Tags"
         ]
@@ -34428,7 +34661,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "DeleteTag",
+        "summary": "Delete a tag",
         "tags": [
           "Tags"
         ]
@@ -34502,7 +34735,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetTag",
+        "summary": "Get a tag",
         "tags": [
           "Tags"
         ]
@@ -34586,7 +34819,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpdateTag",
+        "summary": "Update a tag",
         "tags": [
           "Tags"
         ]
@@ -34959,7 +35192,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListTasks",
+        "summary": "List background tasks",
         "tags": [
           "Background Tasks"
         ]
@@ -34985,7 +35218,7 @@
             "headers": {}
           }
         },
-        "summary": "ListActiveTasks",
+        "summary": "List active background tasks",
         "tags": [
           "Background Tasks"
         ]
@@ -35061,7 +35294,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "DeleteTask",
+        "summary": "Delete a background task",
         "tags": [
           "Background Tasks"
         ]
@@ -35135,7 +35368,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetTask",
+        "summary": "Get background task details",
         "tags": [
           "Background Tasks"
         ]
@@ -35211,7 +35444,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "CancelTask",
+        "summary": "Cancel a background task",
         "tags": [
           "Background Tasks"
         ]
@@ -35499,7 +35732,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListTeams",
+        "summary": "List teams",
         "tags": [
           "Teams"
         ]
@@ -35568,7 +35801,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "CreateTeam",
+        "summary": "Create a team",
         "tags": [
           "Teams"
         ]
@@ -35637,7 +35870,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "DeleteTeam",
+        "summary": "Delete a team",
         "tags": [
           "Teams"
         ]
@@ -35711,7 +35944,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetTeam",
+        "summary": "Get team details",
         "tags": [
           "Teams"
         ]
@@ -35795,7 +36028,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpdateTeam",
+        "summary": "Update a team",
         "tags": [
           "Teams"
         ]
@@ -36072,9 +36305,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListTeamInvitations",
+        "summary": "List team invitations",
         "tags": [
-          "Teams"
+          "Team Invitations"
         ]
       },
       "post": {
@@ -36153,9 +36386,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "CreateTeamInvitation",
+        "summary": "Create a team invitation",
         "tags": [
-          "Teams"
+          "Team Invitations"
         ]
       }
     },
@@ -36229,9 +36462,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "DeleteTeamInvitation",
+        "summary": "Delete a team invitation",
         "tags": [
-          "Teams"
+          "Team Invitations"
         ]
       }
     },
@@ -36312,9 +36545,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "AcceptTeamInvitation",
+        "summary": "Accept a team invitation",
         "tags": [
-          "Teams"
+          "Team Invitations"
         ]
       }
     },
@@ -36395,9 +36628,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "RejectTeamInvitation",
+        "summary": "Reject a team invitation",
         "tags": [
-          "Teams"
+          "Team Invitations"
         ]
       }
     },
@@ -36717,7 +36950,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListLocations",
+        "summary": "List locations",
         "tags": [
           "Locations"
         ]
@@ -36801,7 +37034,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "CreateLocation",
+        "summary": "Create a location",
         "tags": [
           "Locations"
         ]
@@ -36883,7 +37116,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "DeleteLocation",
+        "summary": "Delete a location",
         "tags": [
           "Locations"
         ]
@@ -36970,7 +37203,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetLocation",
+        "summary": "Get location details",
         "tags": [
           "Locations"
         ]
@@ -37067,7 +37300,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpdateLocation",
+        "summary": "Update a location",
         "tags": [
           "Locations"
         ]
@@ -37153,7 +37386,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "RemoveMemberFromTeam",
+        "summary": "Remove a team member",
         "tags": [
           "Team Members"
         ]
@@ -37237,7 +37470,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "AddMemberToTeam",
+        "summary": "Add a team member",
         "tags": [
           "Team Members"
         ]
@@ -37336,7 +37569,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpdateTeamMember",
+        "summary": "Update a team member's role",
         "tags": [
           "Team Members"
         ]
@@ -37415,7 +37648,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListTeamPermissions",
+        "summary": "List team permissions",
         "tags": [
           "Team Permissions"
         ]
@@ -37502,7 +37735,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpdateTeamPermissions",
+        "summary": "Update team permissions",
         "tags": [
           "Team Permissions"
         ]
@@ -37790,9 +38023,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListTimeConditions",
+        "summary": "List time conditions",
         "tags": [
-          "Call Routing - Time Conditions"
+          "Call Routing"
         ]
       },
       "post": {
@@ -37859,9 +38092,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "CreateTimeCondition",
+        "summary": "Create a time condition",
         "tags": [
-          "Call Routing - Time Conditions"
+          "Call Routing"
         ]
       }
     },
@@ -37928,9 +38161,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "DeleteTimeCondition",
+        "summary": "Delete a time condition",
         "tags": [
-          "Call Routing - Time Conditions"
+          "Call Routing"
         ]
       },
       "get": {
@@ -38002,9 +38235,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetTimeCondition",
+        "summary": "Get time condition details",
         "tags": [
-          "Call Routing - Time Conditions"
+          "Call Routing"
         ]
       },
       "patch": {
@@ -38086,9 +38319,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpdateTimeCondition",
+        "summary": "Update a time condition",
         "tags": [
-          "Call Routing - Time Conditions"
+          "Call Routing"
         ]
       }
     },
@@ -38172,9 +38405,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "SetOverride",
+        "summary": "Set time condition override",
         "tags": [
-          "Call Routing - Time Conditions"
+          "Call Routing"
         ]
       }
     },
@@ -38460,7 +38693,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListUsers",
+        "summary": "List users",
         "tags": [
           "User Accounts"
         ]
@@ -38529,7 +38762,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "CreateUser",
+        "summary": "Create a user",
         "tags": [
           "User Accounts"
         ]
@@ -38616,7 +38849,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "RevokeRole",
+        "summary": "Revoke a role from a user",
         "tags": [
           "User Account Roles"
         ]
@@ -38701,7 +38934,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "AssignRole",
+        "summary": "Assign a role to a user",
         "tags": [
           "User Account Roles"
         ]
@@ -38770,7 +39003,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "DeleteUser",
+        "summary": "Delete a user",
         "tags": [
           "User Accounts"
         ]
@@ -38844,7 +39077,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetUser",
+        "summary": "Get user details",
         "tags": [
           "User Accounts"
         ]
@@ -38928,7 +39161,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpdateUser",
+        "summary": "Update a user",
         "tags": [
           "User Accounts"
         ]
@@ -39216,9 +39449,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListExtensions",
+        "summary": "List extensions",
         "tags": [
-          "Voice - Extensions"
+          "Voice Extensions"
         ]
       },
       "post": {
@@ -39285,9 +39518,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "CreateExtension",
+        "summary": "Create an extension",
         "tags": [
-          "Voice - Extensions"
+          "Voice Extensions"
         ]
       }
     },
@@ -39308,9 +39541,9 @@
             "headers": {}
           }
         },
-        "summary": "SyncExtensions",
+        "summary": "Sync extensions from PBX",
         "tags": [
-          "Voice - Extensions"
+          "Voice Extensions"
         ]
       }
     },
@@ -39377,9 +39610,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "DeleteExtension",
+        "summary": "Delete an extension",
         "tags": [
-          "Voice - Extensions"
+          "Voice Extensions"
         ]
       },
       "get": {
@@ -39451,9 +39684,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetExtension",
+        "summary": "Get extension details",
         "tags": [
-          "Voice - Extensions"
+          "Voice Extensions"
         ]
       },
       "patch": {
@@ -39535,9 +39768,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpdateExtension",
+        "summary": "Update an extension",
         "tags": [
-          "Voice - Extensions"
+          "Voice Extensions"
         ]
       }
     },
@@ -39614,9 +39847,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListExtensionDevices",
+        "summary": "List devices for an extension",
         "tags": [
-          "Voice - Extensions"
+          "Voice Extensions"
         ]
       }
     },
@@ -39690,9 +39923,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetDndSettings",
+        "summary": "Get do-not-disturb settings",
         "tags": [
-          "Voice - DND"
+          "Voice DND"
         ]
       },
       "patch": {
@@ -39774,9 +40007,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpdateDndSettings",
+        "summary": "Update do-not-disturb settings",
         "tags": [
-          "Voice - DND"
+          "Voice DND"
         ]
       }
     },
@@ -39850,9 +40083,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ToggleDnd",
+        "summary": "Toggle do-not-disturb",
         "tags": [
-          "Voice - DND"
+          "Voice DND"
         ]
       }
     },
@@ -40151,9 +40384,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListForwardingRules",
+        "summary": "List forwarding rules",
         "tags": [
-          "Voice - Forwarding"
+          "Voice Forwarding"
         ]
       },
       "post": {
@@ -40235,9 +40468,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "CreateForwardingRule",
+        "summary": "Create a forwarding rule",
         "tags": [
-          "Voice - Forwarding"
+          "Voice Forwarding"
         ]
       },
       "put": {
@@ -40325,9 +40558,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "SetForwardingRules",
+        "summary": "Replace all forwarding rules",
         "tags": [
-          "Voice - Forwarding"
+          "Voice Forwarding"
         ]
       }
     },
@@ -40407,9 +40640,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "DeleteForwardingRule",
+        "summary": "Delete a forwarding rule",
         "tags": [
-          "Voice - Forwarding"
+          "Voice Forwarding"
         ]
       },
       "patch": {
@@ -40504,9 +40737,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpdateForwardingRule",
+        "summary": "Update a forwarding rule",
         "tags": [
-          "Voice - Forwarding"
+          "Voice Forwarding"
         ]
       }
     },
@@ -40580,9 +40813,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetVoicemailSettings",
+        "summary": "Get voicemail settings",
         "tags": [
-          "Voice - Voicemail"
+          "Voice Voicemail"
         ]
       },
       "patch": {
@@ -40664,9 +40897,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpdateVoicemailSettings",
+        "summary": "Update voicemail settings",
         "tags": [
-          "Voice - Voicemail"
+          "Voice Voicemail"
         ]
       }
     },
@@ -40965,9 +41198,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListVoicemailMessages",
+        "summary": "List voicemail messages",
         "tags": [
-          "Voice - Voicemail"
+          "Voice Voicemail"
         ]
       }
     },
@@ -41047,9 +41280,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "DeleteVoicemailMessage",
+        "summary": "Delete a voicemail message",
         "tags": [
-          "Voice - Voicemail"
+          "Voice Voicemail"
         ]
       },
       "get": {
@@ -41134,9 +41367,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetVoicemailMessage",
+        "summary": "Get a voicemail message",
         "tags": [
-          "Voice - Voicemail"
+          "Voice Voicemail"
         ]
       },
       "patch": {
@@ -41231,9 +41464,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpdateVoicemailMessage",
+        "summary": "Update a voicemail message",
         "tags": [
-          "Voice - Voicemail"
+          "Voice Voicemail"
         ]
       }
     },
@@ -41519,9 +41752,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListPhoneNumbers",
+        "summary": "List phone numbers",
         "tags": [
-          "Voice - Phone Numbers"
+          "Voice Phone Numbers"
         ]
       },
       "post": {
@@ -41588,9 +41821,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "CreatePhoneNumber",
+        "summary": "Create a phone number",
         "tags": [
-          "Voice - Phone Numbers"
+          "Voice Phone Numbers"
         ]
       }
     },
@@ -41669,9 +41902,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListUnregisteredE911",
+        "summary": "List phone numbers without E911",
         "tags": [
-          "Voice - Phone Numbers"
+          "Voice Phone Numbers"
         ]
       }
     },
@@ -41738,9 +41971,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "DeletePhoneNumber",
+        "summary": "Delete a phone number",
         "tags": [
-          "Voice - Phone Numbers"
+          "Voice Phone Numbers"
         ]
       },
       "get": {
@@ -41812,9 +42045,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetPhoneNumber",
+        "summary": "Get phone number details",
         "tags": [
-          "Voice - Phone Numbers"
+          "Voice Phone Numbers"
         ]
       },
       "patch": {
@@ -41896,9 +42129,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpdatePhoneNumber",
+        "summary": "Update a phone number",
         "tags": [
-          "Voice - Phone Numbers"
+          "Voice Phone Numbers"
         ]
       }
     },
@@ -42184,7 +42417,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListVoicemailBoxes",
+        "summary": "List voicemail boxes",
         "tags": [
           "Voicemail"
         ]
@@ -42253,7 +42486,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "CreateVoicemailBox",
+        "summary": "Create a voicemail box",
         "tags": [
           "Voicemail"
         ]
@@ -42322,7 +42555,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "DeleteVoicemailBox",
+        "summary": "Delete a voicemail box",
         "tags": [
           "Voicemail"
         ]
@@ -42396,7 +42629,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetVoicemailBox",
+        "summary": "Get voicemail box details",
         "tags": [
           "Voicemail"
         ]
@@ -42480,7 +42713,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpdateVoicemailBox",
+        "summary": "Update a voicemail box",
         "tags": [
           "Voicemail"
         ]
@@ -42777,7 +43010,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListBoxMessages",
+        "summary": "List voicemail box messages",
         "tags": [
           "Voicemail"
         ]
@@ -42853,7 +43086,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetUnreadCount",
+        "summary": "Get unread voicemail count",
         "tags": [
           "Voicemail"
         ]
@@ -43137,7 +43370,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListVoicemailMessages",
+        "summary": "List all voicemail messages",
         "tags": [
           "Voicemail"
         ]
@@ -43206,7 +43439,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "DeleteVoicemailMessage",
+        "summary": "Delete a voicemail message",
         "tags": [
           "Voicemail"
         ]
@@ -43280,7 +43513,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetVoicemailMessage",
+        "summary": "Get voicemail message details",
         "tags": [
           "Voicemail"
         ]
@@ -43366,7 +43599,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ToggleReadStatus",
+        "summary": "Toggle voicemail message read status",
         "tags": [
           "Voicemail"
         ]
@@ -43654,7 +43887,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListWebhooks",
+        "summary": "List webhooks",
         "tags": [
           "Webhooks"
         ]
@@ -43723,7 +43956,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "CreateWebhook",
+        "summary": "Create a webhook",
         "tags": [
           "Webhooks"
         ]
@@ -44011,9 +44244,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListEndpoints",
+        "summary": "List webhook endpoints",
         "tags": [
-          "Webhooks"
+          "Webhook Endpoints"
         ]
       },
       "post": {
@@ -44080,9 +44313,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "CreateEndpoint",
+        "summary": "Create a webhook endpoint",
         "tags": [
-          "Webhooks"
+          "Webhook Endpoints"
         ]
       }
     },
@@ -44114,9 +44347,9 @@
             }
           }
         },
-        "summary": "ListEventTypes",
+        "summary": "List webhook event types",
         "tags": [
-          "Webhooks"
+          "Webhook Endpoints"
         ]
       }
     },
@@ -44181,9 +44414,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "DeleteEndpoint",
+        "summary": "Delete a webhook endpoint",
         "tags": [
-          "Webhooks"
+          "Webhook Endpoints"
         ]
       },
       "get": {
@@ -44253,9 +44486,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetEndpoint",
+        "summary": "Get webhook endpoint details",
         "tags": [
-          "Webhooks"
+          "Webhook Endpoints"
         ]
       },
       "patch": {
@@ -44335,9 +44568,9 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpdateEndpoint",
+        "summary": "Update a webhook endpoint",
         "tags": [
-          "Webhooks"
+          "Webhook Endpoints"
         ]
       }
     },
@@ -44404,7 +44637,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "DeleteWebhook",
+        "summary": "Delete a webhook",
         "tags": [
           "Webhooks"
         ]
@@ -44478,7 +44711,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "GetWebhook",
+        "summary": "Get webhook details",
         "tags": [
           "Webhooks"
         ]
@@ -44562,7 +44795,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "UpdateWebhook",
+        "summary": "Update a webhook",
         "tags": [
           "Webhooks"
         ]
@@ -44641,7 +44874,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "ListDeliveries",
+        "summary": "List webhook deliveries",
         "tags": [
           "Webhooks"
         ]
@@ -44730,7 +44963,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "RedeliverDelivery",
+        "summary": "Redeliver a webhook",
         "tags": [
           "Webhooks"
         ]
@@ -44806,7 +45039,7 @@
             "description": "Bad request syntax or unsupported method"
           }
         },
-        "summary": "TestWebhook",
+        "summary": "Send a test webhook",
         "tags": [
           "Webhooks"
         ]

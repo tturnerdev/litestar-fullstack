@@ -2045,6 +2045,11 @@
       "methods": [
         "GET"
       ],
+      "queryParameters": {
+        "currentPage": "number | undefined",
+        "pageSize": "number | undefined",
+        "searchString": "string | undefined"
+      },
       "uri": "/api/admin/voice/extensions"
     },
     "list_extensions_api_voice_extensions": {

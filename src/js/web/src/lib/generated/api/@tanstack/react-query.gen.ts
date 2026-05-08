@@ -412,6 +412,7 @@ import type {
   AdminListDeviceTemplatesError,
   AdminListDeviceTemplatesResponse,
   AdminListExtensionsData,
+  AdminListExtensionsError,
   AdminListExtensionsResponse,
   AdminListFaxMessagesData,
   AdminListFaxMessagesResponse,
@@ -1070,6 +1071,7 @@ import type {
   ToggleVoicemailMessageReadError,
   ToggleVoicemailMessageReadResponse,
   TokenRefreshData,
+  TokenRefreshError,
   TokenRefreshResponse,
   UpdateAdminGatewaySettingsData,
   UpdateAdminGatewaySettingsError,
@@ -1194,7 +1196,7 @@ import type {
 } from "../types.gen";
 
 /**
- * ForgotPassword
+ * Request password reset
  */
 export const forgotPasswordMutation = (
   options?: Partial<Options<ForgotPasswordData>>,
@@ -1221,7 +1223,7 @@ export const forgotPasswordMutation = (
 };
 
 /**
- * Login
+ * Log in
  */
 export const accountLoginMutation = (
   options?: Partial<Options<AccountLoginData>>,
@@ -1248,7 +1250,7 @@ export const accountLoginMutation = (
 };
 
 /**
- * Logout
+ * Log out
  */
 export const accountLogoutMutation = (
   options?: Partial<Options<AccountLogoutData>>,
@@ -1275,18 +1277,18 @@ export const accountLogoutMutation = (
 };
 
 /**
- * RefreshToken
+ * Refresh access token
  */
 export const tokenRefreshMutation = (
   options?: Partial<Options<TokenRefreshData>>,
 ): UseMutationOptions<
   TokenRefreshResponse,
-  DefaultError,
+  TokenRefreshError,
   Options<TokenRefreshData>
 > => {
   const mutationOptions: UseMutationOptions<
     TokenRefreshResponse,
-    DefaultError,
+    TokenRefreshError,
     Options<TokenRefreshData>
   > = {
     mutationFn: async (fnOptions) => {
@@ -1346,7 +1348,7 @@ export const validateResetTokenQueryKey = (
 ) => createQueryKey("validateResetToken", options);
 
 /**
- * ValidateResetToken
+ * Validate a password reset token
  */
 export const validateResetTokenOptions = (
   options: Options<ValidateResetTokenData>,
@@ -1370,7 +1372,7 @@ export const validateResetTokenOptions = (
   });
 
 /**
- * ResetPasswordWithToken
+ * Reset password with token
  */
 export const resetPasswordMutation = (
   options?: Partial<Options<ResetPasswordData>>,
@@ -1397,7 +1399,7 @@ export const resetPasswordMutation = (
 };
 
 /**
- * RevokeAllSessions
+ * Revoke all other sessions
  */
 export const revokeAllSessionsMutation = (
   options?: Partial<Options<RevokeAllSessionsData>>,
@@ -1428,7 +1430,7 @@ export const getActiveSessionsQueryKey = (
 ) => createQueryKey("getActiveSessions", options);
 
 /**
- * GetSessions
+ * List active sessions
  */
 export const getActiveSessionsOptions = (
   options?: Options<GetActiveSessionsData>,
@@ -1452,7 +1454,7 @@ export const getActiveSessionsOptions = (
   });
 
 /**
- * RevokeSession
+ * Revoke a session
  */
 export const revokeSessionMutation = (
   options?: Partial<Options<RevokeSessionData>>,
@@ -1479,7 +1481,7 @@ export const revokeSessionMutation = (
 };
 
 /**
- * Signup
+ * Register a new account
  */
 export const accountRegisterMutation = (
   options?: Partial<Options<AccountRegisterData>>,
@@ -1510,7 +1512,7 @@ export const adminListAuditLogsQueryKey = (
 ) => createQueryKey("adminListAuditLogs", options);
 
 /**
- * ListLogs
+ * List audit logs
  */
 export const adminListAuditLogsOptions = (
   options?: Options<AdminListAuditLogsData>,
@@ -1538,7 +1540,7 @@ export const adminExportAuditLogQueryKey = (
 ) => createQueryKey("adminExportAuditLog", options);
 
 /**
- * ExportLogs
+ * Export audit logs as CSV
  */
 export const adminExportAuditLogOptions = (
   options?: Options<AdminExportAuditLogData>,
@@ -1566,7 +1568,7 @@ export const adminGetTargetAuditLogsQueryKey = (
 ) => createQueryKey("adminGetTargetAuditLogs", options);
 
 /**
- * GetTargetLogs
+ * Get audit logs for a target
  */
 export const adminGetTargetAuditLogsOptions = (
   options: Options<AdminGetTargetAuditLogsData>,
@@ -1594,7 +1596,7 @@ export const adminGetUserAuditLogsQueryKey = (
 ) => createQueryKey("adminGetUserAuditLogs", options);
 
 /**
- * GetUserLogs
+ * Get audit logs for a user
  */
 export const adminGetUserAuditLogsOptions = (
   options: Options<AdminGetUserAuditLogsData>,
@@ -1622,7 +1624,7 @@ export const adminGetAuditLogQueryKey = (
 ) => createQueryKey("adminGetAuditLog", options);
 
 /**
- * GetLog
+ * Get audit log details
  */
 export const adminGetAuditLogOptions = (
   options: Options<AdminGetAuditLogData>,
@@ -1646,7 +1648,7 @@ export const adminGetAuditLogOptions = (
   });
 
 /**
- * ImportDevices
+ * Import devices from CSV
  */
 export const adminImportDevicesMutation = (
   options?: Partial<Options<AdminImportDevicesData>>,
@@ -1673,7 +1675,7 @@ export const adminImportDevicesMutation = (
 };
 
 /**
- * ImportExtensions
+ * Import extensions from CSV
  */
 export const adminImportExtensionsMutation = (
   options?: Partial<Options<AdminImportExtensionsData>>,
@@ -1700,7 +1702,7 @@ export const adminImportExtensionsMutation = (
 };
 
 /**
- * PreviewDeviceImport
+ * Preview device CSV import
  */
 export const adminPreviewDeviceImportMutation = (
   options?: Partial<Options<AdminPreviewDeviceImportData>>,
@@ -1727,7 +1729,7 @@ export const adminPreviewDeviceImportMutation = (
 };
 
 /**
- * PreviewExtensionImport
+ * Preview extension CSV import
  */
 export const adminPreviewExtensionImportMutation = (
   options?: Partial<Options<AdminPreviewExtensionImportData>>,
@@ -1758,7 +1760,7 @@ export const getRecentActivityQueryKey = (
 ) => createQueryKey("getRecentActivity", options);
 
 /**
- * GetActivity
+ * Get recent activity
  */
 export const getRecentActivityOptions = (
   options?: Options<GetRecentActivityData>,
@@ -1786,7 +1788,7 @@ export const getDashboardStatsQueryKey = (
 ) => createQueryKey("getDashboardStats", options);
 
 /**
- * GetStats
+ * Get dashboard statistics
  */
 export const getDashboardStatsOptions = (
   options?: Options<GetDashboardStatsData>,
@@ -1842,7 +1844,7 @@ export const adminListDeviceTemplatesQueryKey = (
 ) => createQueryKey("adminListDeviceTemplates", options);
 
 /**
- * ListTemplates
+ * List device templates
  */
 export const adminListDeviceTemplatesOptions = (
   options?: Options<AdminListDeviceTemplatesData>,
@@ -1866,7 +1868,7 @@ export const adminListDeviceTemplatesOptions = (
   });
 
 /**
- * CreateTemplate
+ * Create a device template
  */
 export const adminCreateDeviceTemplateMutation = (
   options?: Partial<Options<AdminCreateDeviceTemplateData>>,
@@ -1893,7 +1895,7 @@ export const adminCreateDeviceTemplateMutation = (
 };
 
 /**
- * DeleteTemplate
+ * Delete a device template
  */
 export const adminDeleteDeviceTemplateMutation = (
   options?: Partial<Options<AdminDeleteDeviceTemplateData>>,
@@ -1924,7 +1926,7 @@ export const adminGetDeviceTemplateQueryKey = (
 ) => createQueryKey("adminGetDeviceTemplate", options);
 
 /**
- * GetTemplate
+ * Get device template details
  */
 export const adminGetDeviceTemplateOptions = (
   options: Options<AdminGetDeviceTemplateData>,
@@ -1948,7 +1950,7 @@ export const adminGetDeviceTemplateOptions = (
   });
 
 /**
- * UpdateTemplate
+ * Update a device template
  */
 export const adminUpdateDeviceTemplateMutation = (
   options?: Partial<Options<AdminUpdateDeviceTemplateData>>,
@@ -1979,7 +1981,7 @@ export const adminListDevicesQueryKey = (
 ) => createQueryKey("adminListDevices", options);
 
 /**
- * ListDevices
+ * List devices (admin)
  */
 export const adminListDevicesOptions = (
   options?: Options<AdminListDevicesData>,
@@ -2007,7 +2009,7 @@ export const adminGetDeviceStatsQueryKey = (
 ) => createQueryKey("adminGetDeviceStats", options);
 
 /**
- * GetStats
+ * Get device statistics (admin)
  */
 export const adminGetDeviceStatsOptions = (
   options?: Options<AdminGetDeviceStatsData>,
@@ -2035,7 +2037,7 @@ export const adminListFaxMessagesQueryKey = (
 ) => createQueryKey("adminListFaxMessages", options);
 
 /**
- * ListFaxMessages
+ * List fax messages (admin)
  */
 export const adminListFaxMessagesOptions = (
   options?: Options<AdminListFaxMessagesData>,
@@ -2063,7 +2065,7 @@ export const adminListFaxNumbersQueryKey = (
 ) => createQueryKey("adminListFaxNumbers", options);
 
 /**
- * ListFaxNumbers
+ * List fax numbers (admin)
  */
 export const adminListFaxNumbersOptions = (
   options?: Options<AdminListFaxNumbersData>,
@@ -2091,7 +2093,7 @@ export const adminGetFaxStatsQueryKey = (
 ) => createQueryKey("adminGetFaxStats", options);
 
 /**
- * GetStats
+ * Get fax statistics (admin)
  */
 export const adminGetFaxStatsOptions = (
   options?: Options<AdminGetFaxStatsData>,
@@ -2119,7 +2121,7 @@ export const getAdminGatewaySettingsQueryKey = (
 ) => createQueryKey("getAdminGatewaySettings", options);
 
 /**
- * GetGatewaySettings
+ * Get gateway settings
  */
 export const getAdminGatewaySettingsOptions = (
   options?: Options<GetAdminGatewaySettingsData>,
@@ -2143,7 +2145,7 @@ export const getAdminGatewaySettingsOptions = (
   });
 
 /**
- * UpdateGatewaySettings
+ * Update gateway settings
  */
 export const updateAdminGatewaySettingsMutation = (
   options?: Partial<Options<UpdateAdminGatewaySettingsData>>,
@@ -2174,7 +2176,7 @@ export const adminListMusicOnHoldQueryKey = (
 ) => createQueryKey("adminListMusicOnHold", options);
 
 /**
- * ListMusicOnHold
+ * List music on hold classes
  */
 export const adminListMusicOnHoldOptions = (
   options?: Options<AdminListMusicOnHoldData>,
@@ -2198,7 +2200,7 @@ export const adminListMusicOnHoldOptions = (
   });
 
 /**
- * CreateMusicOnHold
+ * Create a music on hold class
  */
 export const adminCreateMusicOnHoldMutation = (
   options?: Partial<Options<AdminCreateMusicOnHoldData>>,
@@ -2225,7 +2227,7 @@ export const adminCreateMusicOnHoldMutation = (
 };
 
 /**
- * DeleteMusicOnHold
+ * Delete a music on hold class
  */
 export const adminDeleteMusicOnHoldMutation = (
   options?: Partial<Options<AdminDeleteMusicOnHoldData>>,
@@ -2256,7 +2258,7 @@ export const adminGetMusicOnHoldQueryKey = (
 ) => createQueryKey("adminGetMusicOnHold", options);
 
 /**
- * GetMusicOnHold
+ * Get music on hold details
  */
 export const adminGetMusicOnHoldOptions = (
   options: Options<AdminGetMusicOnHoldData>,
@@ -2280,7 +2282,7 @@ export const adminGetMusicOnHoldOptions = (
   });
 
 /**
- * UpdateMusicOnHold
+ * Update a music on hold class
  */
 export const adminUpdateMusicOnHoldMutation = (
   options?: Partial<Options<AdminUpdateMusicOnHoldData>>,
@@ -2307,7 +2309,7 @@ export const adminUpdateMusicOnHoldMutation = (
 };
 
 /**
- * ExecuteImport
+ * Execute phone number bulk import
  */
 export const adminExecutePhoneNumberBulkImportMutation = (
   options?: Partial<Options<AdminExecutePhoneNumberBulkImportData>>,
@@ -2334,7 +2336,7 @@ export const adminExecutePhoneNumberBulkImportMutation = (
 };
 
 /**
- * PreviewImport
+ * Preview phone number bulk import
  */
 export const adminPreviewPhoneNumberBulkImportMutation = (
   options?: Partial<Options<AdminPreviewPhoneNumberBulkImportData>>,
@@ -2365,7 +2367,7 @@ export const adminGetSupportStatsQueryKey = (
 ) => createQueryKey("adminGetSupportStats", options);
 
 /**
- * GetStats
+ * Get support statistics (admin)
  */
 export const adminGetSupportStatsOptions = (
   options?: Options<AdminGetSupportStatsData>,
@@ -2393,7 +2395,7 @@ export const adminListTicketsQueryKey = (
 ) => createQueryKey("adminListTickets", options);
 
 /**
- * ListTickets
+ * List tickets (admin)
  */
 export const adminListTicketsOptions = (
   options?: Options<AdminListTicketsData>,
@@ -2421,7 +2423,7 @@ export const getAdminSystemStatusQueryKey = (
 ) => createQueryKey("getAdminSystemStatus", options);
 
 /**
- * GetSystemStatus
+ * Get system status
  */
 export const getAdminSystemStatusOptions = (
   options?: Options<GetAdminSystemStatusData>,
@@ -2448,7 +2450,7 @@ export const adminListTasksQueryKey = (options?: Options<AdminListTasksData>) =>
   createQueryKey("adminListTasks", options);
 
 /**
- * ListTasks
+ * List background tasks (admin)
  */
 export const adminListTasksOptions = (options?: Options<AdminListTasksData>) =>
   queryOptions<
@@ -2474,7 +2476,7 @@ export const getAdminTaskStatsQueryKey = (
 ) => createQueryKey("getAdminTaskStats", options);
 
 /**
- * GetTaskStats
+ * Get task statistics (admin)
  */
 export const getAdminTaskStatsOptions = (
   options?: Options<GetAdminTaskStatsData>,
@@ -2498,7 +2500,7 @@ export const getAdminTaskStatsOptions = (
   });
 
 /**
- * DeleteTask
+ * Delete a background task (admin)
  */
 export const adminDeleteTaskMutation = (
   options?: Partial<Options<AdminDeleteTaskData>>,
@@ -2525,7 +2527,7 @@ export const adminDeleteTaskMutation = (
 };
 
 /**
- * CancelTask
+ * Cancel a background task (admin)
  */
 export const adminCancelTaskMutation = (
   options?: Partial<Options<AdminCancelTaskData>>,
@@ -2555,7 +2557,7 @@ export const adminListTeamsQueryKey = (options?: Options<AdminListTeamsData>) =>
   createQueryKey("adminListTeams", options);
 
 /**
- * ListTeams
+ * List teams (admin)
  */
 export const adminListTeamsOptions = (options?: Options<AdminListTeamsData>) =>
   queryOptions<
@@ -2577,7 +2579,7 @@ export const adminListTeamsOptions = (options?: Options<AdminListTeamsData>) =>
   });
 
 /**
- * DeleteTeam
+ * Delete a team (admin)
  */
 export const adminDeleteTeamMutation = (
   options?: Partial<Options<AdminDeleteTeamData>>,
@@ -2607,7 +2609,7 @@ export const adminGetTeamQueryKey = (options: Options<AdminGetTeamData>) =>
   createQueryKey("adminGetTeam", options);
 
 /**
- * GetTeam
+ * Get team details (admin)
  */
 export const adminGetTeamOptions = (options: Options<AdminGetTeamData>) =>
   queryOptions<
@@ -2629,7 +2631,7 @@ export const adminGetTeamOptions = (options: Options<AdminGetTeamData>) =>
   });
 
 /**
- * UpdateTeam
+ * Update a team (admin)
  */
 export const adminUpdateTeamMutation = (
   options?: Partial<Options<AdminUpdateTeamData>>,
@@ -2659,7 +2661,7 @@ export const adminListUsersQueryKey = (options?: Options<AdminListUsersData>) =>
   createQueryKey("adminListUsers", options);
 
 /**
- * ListUsers
+ * List users (admin)
  */
 export const adminListUsersOptions = (options?: Options<AdminListUsersData>) =>
   queryOptions<
@@ -2681,7 +2683,7 @@ export const adminListUsersOptions = (options?: Options<AdminListUsersData>) =>
   });
 
 /**
- * DeleteUser
+ * Delete a user (admin)
  */
 export const adminDeleteUserMutation = (
   options?: Partial<Options<AdminDeleteUserData>>,
@@ -2711,7 +2713,7 @@ export const adminGetUserQueryKey = (options: Options<AdminGetUserData>) =>
   createQueryKey("adminGetUser", options);
 
 /**
- * GetUser
+ * Get user details (admin)
  */
 export const adminGetUserOptions = (options: Options<AdminGetUserData>) =>
   queryOptions<
@@ -2733,7 +2735,7 @@ export const adminGetUserOptions = (options: Options<AdminGetUserData>) =>
   });
 
 /**
- * UpdateUser
+ * Update a user (admin)
  */
 export const adminUpdateUserMutation = (
   options?: Partial<Options<AdminUpdateUserData>>,
@@ -2764,14 +2766,14 @@ export const adminListExtensionsQueryKey = (
 ) => createQueryKey("adminListExtensions", options);
 
 /**
- * ListExtensions
+ * List extensions (admin)
  */
 export const adminListExtensionsOptions = (
   options?: Options<AdminListExtensionsData>,
 ) =>
   queryOptions<
     AdminListExtensionsResponse,
-    DefaultError,
+    AdminListExtensionsError,
     AdminListExtensionsResponse,
     ReturnType<typeof adminListExtensionsQueryKey>
   >({
@@ -2792,7 +2794,7 @@ export const adminListPhoneNumbersQueryKey = (
 ) => createQueryKey("adminListPhoneNumbers", options);
 
 /**
- * ListPhoneNumbers
+ * List phone numbers (admin)
  */
 export const adminListPhoneNumbersOptions = (
   options?: Options<AdminListPhoneNumbersData>,
@@ -2820,7 +2822,7 @@ export const adminGetVoiceStatsQueryKey = (
 ) => createQueryKey("adminGetVoiceStats", options);
 
 /**
- * GetStats
+ * Get voice statistics (admin)
  */
 export const adminGetVoiceStatsOptions = (
   options?: Options<AdminGetVoiceStatsData>,
@@ -2848,7 +2850,7 @@ export const getCallsByExtensionQueryKey = (
 ) => createQueryKey("getCallsByExtension", options);
 
 /**
- * GetByExtension
+ * Get calls by extension
  */
 export const getCallsByExtensionOptions = (
   options: Options<GetCallsByExtensionData>,
@@ -2876,7 +2878,7 @@ export const listCallRecordsQueryKey = (
 ) => createQueryKey("listCallRecords", options);
 
 /**
- * ListCallRecords
+ * List call records
  */
 export const listCallRecordsOptions = (
   options?: Options<ListCallRecordsData>,
@@ -2900,7 +2902,7 @@ export const listCallRecordsOptions = (
   });
 
 /**
- * CreateCallRecord
+ * Create a call record
  */
 export const createCallRecordMutation = (
   options?: Partial<Options<CreateCallRecordData>>,
@@ -2931,7 +2933,7 @@ export const exportCallRecordsQueryKey = (
 ) => createQueryKey("exportCallRecords", options);
 
 /**
- * ExportCallRecords
+ * Export call records as CSV
  */
 export const exportCallRecordsOptions = (
   options?: Options<ExportCallRecordsData>,
@@ -2958,7 +2960,7 @@ export const getCallRecordQueryKey = (options: Options<GetCallRecordData>) =>
   createQueryKey("getCallRecord", options);
 
 /**
- * GetCallRecord
+ * Get call record details
  */
 export const getCallRecordOptions = (options: Options<GetCallRecordData>) =>
   queryOptions<
@@ -2983,7 +2985,7 @@ export const getCallSummaryQueryKey = (options: Options<GetCallSummaryData>) =>
   createQueryKey("getCallSummary", options);
 
 /**
- * GetSummary
+ * Get call analytics summary
  */
 export const getCallSummaryOptions = (options: Options<GetCallSummaryData>) =>
   queryOptions<
@@ -3008,7 +3010,7 @@ export const getCallVolumeQueryKey = (options: Options<GetCallVolumeData>) =>
   createQueryKey("getCallVolume", options);
 
 /**
- * GetVolume
+ * Get call volume over time
  */
 export const getCallVolumeOptions = (options: Options<GetCallVolumeData>) =>
   queryOptions<
@@ -3034,7 +3036,7 @@ export const gitHubOAuthAuthorizeQueryKey = (
 ) => createQueryKey("gitHubOAuthAuthorize", options);
 
 /**
- * GithubAuthorize
+ * Initiate GitHub OAuth
  */
 export const gitHubOAuthAuthorizeOptions = (
   options?: Options<GitHubOAuthAuthorizeData>,
@@ -3062,7 +3064,7 @@ export const gitHubOAuthCallbackQueryKey = (
 ) => createQueryKey("gitHubOAuthCallback", options);
 
 /**
- * GithubCallback
+ * Handle GitHub OAuth callback
  */
 export const gitHubOAuthCallbackOptions = (
   options?: Options<GitHubOAuthCallbackData>,
@@ -3090,7 +3092,7 @@ export const googleOAuthAuthorizeQueryKey = (
 ) => createQueryKey("googleOAuthAuthorize", options);
 
 /**
- * GoogleAuthorize
+ * Initiate Google OAuth
  */
 export const googleOAuthAuthorizeOptions = (
   options?: Options<GoogleOAuthAuthorizeData>,
@@ -3118,7 +3120,7 @@ export const googleOAuthCallbackQueryKey = (
 ) => createQueryKey("googleOAuthCallback", options);
 
 /**
- * GoogleCallback
+ * Handle Google OAuth callback
  */
 export const googleOAuthCallbackOptions = (
   options?: Options<GoogleOAuthCallbackData>,
@@ -3145,7 +3147,7 @@ export const listCallQueuesQueryKey = (options?: Options<ListCallQueuesData>) =>
   createQueryKey("listCallQueues", options);
 
 /**
- * ListCallQueues
+ * List call queues
  */
 export const listCallQueuesOptions = (options?: Options<ListCallQueuesData>) =>
   queryOptions<
@@ -3167,7 +3169,7 @@ export const listCallQueuesOptions = (options?: Options<ListCallQueuesData>) =>
   });
 
 /**
- * CreateCallQueue
+ * Create a call queue
  */
 export const createCallQueueMutation = (
   options?: Partial<Options<CreateCallQueueData>>,
@@ -3194,7 +3196,7 @@ export const createCallQueueMutation = (
 };
 
 /**
- * DeleteCallQueue
+ * Delete a call queue
  */
 export const deleteCallQueueMutation = (
   options?: Partial<Options<DeleteCallQueueData>>,
@@ -3224,7 +3226,7 @@ export const getCallQueueQueryKey = (options: Options<GetCallQueueData>) =>
   createQueryKey("getCallQueue", options);
 
 /**
- * GetCallQueue
+ * Get call queue details
  */
 export const getCallQueueOptions = (options: Options<GetCallQueueData>) =>
   queryOptions<
@@ -3246,7 +3248,7 @@ export const getCallQueueOptions = (options: Options<GetCallQueueData>) =>
   });
 
 /**
- * UpdateCallQueue
+ * Update a call queue
  */
 export const updateCallQueueMutation = (
   options?: Partial<Options<UpdateCallQueueData>>,
@@ -3277,7 +3279,7 @@ export const listCallQueueMembersQueryKey = (
 ) => createQueryKey("listCallQueueMembers", options);
 
 /**
- * ListMembers
+ * List call queue members
  */
 export const listCallQueueMembersOptions = (
   options: Options<ListCallQueueMembersData>,
@@ -3301,7 +3303,7 @@ export const listCallQueueMembersOptions = (
   });
 
 /**
- * CreateMember
+ * Add a call queue member
  */
 export const createCallQueueMemberMutation = (
   options?: Partial<Options<CreateCallQueueMemberData>>,
@@ -3328,7 +3330,7 @@ export const createCallQueueMemberMutation = (
 };
 
 /**
- * DeleteMember
+ * Remove a call queue member
  */
 export const deleteCallQueueMemberMutation = (
   options?: Partial<Options<DeleteCallQueueMemberData>>,
@@ -3355,7 +3357,7 @@ export const deleteCallQueueMemberMutation = (
 };
 
 /**
- * UpdateMember
+ * Update a call queue member
  */
 export const updateCallQueueMemberMutation = (
   options?: Partial<Options<UpdateCallQueueMemberData>>,
@@ -3382,7 +3384,7 @@ export const updateCallQueueMemberMutation = (
 };
 
 /**
- * PauseMember
+ * Pause or unpause a call queue member
  */
 export const pauseCallQueueMemberMutation = (
   options?: Partial<Options<PauseCallQueueMemberData>>,
@@ -3438,7 +3440,7 @@ export const listConnectionsQueryKey = (
 ) => createQueryKey("listConnections", options);
 
 /**
- * ListConnections
+ * List connections
  */
 export const listConnectionsOptions = (
   options?: Options<ListConnectionsData>,
@@ -3462,7 +3464,7 @@ export const listConnectionsOptions = (
   });
 
 /**
- * CreateConnection
+ * Create a connection
  */
 export const createConnectionMutation = (
   options?: Partial<Options<CreateConnectionData>>,
@@ -3489,7 +3491,7 @@ export const createConnectionMutation = (
 };
 
 /**
- * DeleteConnection
+ * Delete a connection
  */
 export const deleteConnectionMutation = (
   options?: Partial<Options<DeleteConnectionData>>,
@@ -3519,7 +3521,7 @@ export const getConnectionQueryKey = (options: Options<GetConnectionData>) =>
   createQueryKey("getConnection", options);
 
 /**
- * GetConnection
+ * Get connection details
  */
 export const getConnectionOptions = (options: Options<GetConnectionData>) =>
   queryOptions<
@@ -3541,7 +3543,7 @@ export const getConnectionOptions = (options: Options<GetConnectionData>) =>
   });
 
 /**
- * UpdateConnection
+ * Update a connection
  */
 export const updateConnectionMutation = (
   options?: Partial<Options<UpdateConnectionData>>,
@@ -3568,7 +3570,7 @@ export const updateConnectionMutation = (
 };
 
 /**
- * TestConnection
+ * Test a connection
  */
 export const testConnectionMutation = (
   options?: Partial<Options<TestConnectionData>>,
@@ -3598,7 +3600,7 @@ export const listDevicesQueryKey = (options?: Options<ListDevicesData>) =>
   createQueryKey("listDevices", options);
 
 /**
- * ListDevices
+ * List devices
  */
 export const listDevicesOptions = (options?: Options<ListDevicesData>) =>
   queryOptions<
@@ -3620,7 +3622,7 @@ export const listDevicesOptions = (options?: Options<ListDevicesData>) =>
   });
 
 /**
- * CreateDevice
+ * Register a device
  */
 export const createDeviceMutation = (
   options?: Partial<Options<CreateDeviceData>>,
@@ -3651,7 +3653,7 @@ export const lookupDeviceTemplateQueryKey = (
 ) => createQueryKey("lookupDeviceTemplate", options);
 
 /**
- * LookupTemplate
+ * Look up device template
  */
 export const lookupDeviceTemplateOptions = (
   options: Options<LookupDeviceTemplateData>,
@@ -3675,7 +3677,7 @@ export const lookupDeviceTemplateOptions = (
   });
 
 /**
- * DeleteDevice
+ * Delete a device
  */
 export const deleteDeviceMutation = (
   options?: Partial<Options<DeleteDeviceData>>,
@@ -3705,7 +3707,7 @@ export const getDeviceQueryKey = (options: Options<GetDeviceData>) =>
   createQueryKey("getDevice", options);
 
 /**
- * GetDevice
+ * Get device details
  */
 export const getDeviceOptions = (options: Options<GetDeviceData>) =>
   queryOptions<
@@ -3727,7 +3729,7 @@ export const getDeviceOptions = (options: Options<GetDeviceData>) =>
   });
 
 /**
- * UpdateDevice
+ * Update a device
  */
 export const updateDeviceMutation = (
   options?: Partial<Options<UpdateDeviceData>>,
@@ -3758,7 +3760,7 @@ export const listDeviceLinesQueryKey = (
 ) => createQueryKey("listDeviceLines", options);
 
 /**
- * ListDeviceLines
+ * List device line assignments
  */
 export const listDeviceLinesOptions = (options: Options<ListDeviceLinesData>) =>
   queryOptions<
@@ -3780,7 +3782,7 @@ export const listDeviceLinesOptions = (options: Options<ListDeviceLinesData>) =>
   });
 
 /**
- * SetDeviceLines
+ * Set device line assignments
  */
 export const setDeviceLinesMutation = (
   options?: Partial<Options<SetDeviceLinesData>>,
@@ -3807,7 +3809,7 @@ export const setDeviceLinesMutation = (
 };
 
 /**
- * RebootDevice
+ * Reboot a device
  */
 export const rebootDeviceMutation = (
   options?: Partial<Options<RebootDeviceData>>,
@@ -3834,7 +3836,7 @@ export const rebootDeviceMutation = (
 };
 
 /**
- * ReprovisionDevice
+ * Reprovision a device
  */
 export const reprovisionDeviceMutation = (
   options?: Partial<Options<ReprovisionDeviceData>>,
@@ -3865,7 +3867,7 @@ export const listE911RegistrationsQueryKey = (
 ) => createQueryKey("listE911Registrations", options);
 
 /**
- * ListRegistrations
+ * List E911 registrations
  */
 export const listE911RegistrationsOptions = (
   options?: Options<ListE911RegistrationsData>,
@@ -3889,7 +3891,7 @@ export const listE911RegistrationsOptions = (
   });
 
 /**
- * CreateRegistration
+ * Create an E911 registration
  */
 export const createE911RegistrationMutation = (
   options?: Partial<Options<CreateE911RegistrationData>>,
@@ -3920,7 +3922,7 @@ export const listUnregisteredPhoneNumbersQueryKey = (
 ) => createQueryKey("listUnregisteredPhoneNumbers", options);
 
 /**
- * ListUnregistered
+ * List unregistered phone numbers
  */
 export const listUnregisteredPhoneNumbersOptions = (
   options: Options<ListUnregisteredPhoneNumbersData>,
@@ -3944,7 +3946,7 @@ export const listUnregisteredPhoneNumbersOptions = (
   });
 
 /**
- * DeleteRegistration
+ * Delete an E911 registration
  */
 export const deleteE911RegistrationMutation = (
   options?: Partial<Options<DeleteE911RegistrationData>>,
@@ -3975,7 +3977,7 @@ export const getE911RegistrationQueryKey = (
 ) => createQueryKey("getE911Registration", options);
 
 /**
- * GetRegistration
+ * Get E911 registration details
  */
 export const getE911RegistrationOptions = (
   options: Options<GetE911RegistrationData>,
@@ -3999,7 +4001,7 @@ export const getE911RegistrationOptions = (
   });
 
 /**
- * UpdateRegistration
+ * Update an E911 registration
  */
 export const updateE911RegistrationMutation = (
   options?: Partial<Options<UpdateE911RegistrationData>>,
@@ -4026,7 +4028,7 @@ export const updateE911RegistrationMutation = (
 };
 
 /**
- * ValidateRegistration
+ * Validate an E911 registration
  */
 export const validateE911RegistrationMutation = (
   options?: Partial<Options<ValidateE911RegistrationData>>,
@@ -4053,7 +4055,7 @@ export const validateE911RegistrationMutation = (
 };
 
 /**
- * RequestVerification
+ * Request email verification
  */
 export const requestEmailVerificationMutation = (
   options?: Partial<Options<RequestEmailVerificationData>>,
@@ -4084,7 +4086,7 @@ export const getEmailVerificationStatusQueryKey = (
 ) => createQueryKey("getEmailVerificationStatus", options);
 
 /**
- * GetVerificationStatus
+ * Get email verification status
  */
 export const getEmailVerificationStatusOptions = (
   options: Options<GetEmailVerificationStatusData>,
@@ -4108,7 +4110,7 @@ export const getEmailVerificationStatusOptions = (
   });
 
 /**
- * VerifyEmail
+ * Verify email address
  */
 export const verifyEmailMutation = (
   options?: Partial<Options<VerifyEmailData>>,
@@ -4139,7 +4141,7 @@ export const listFaxMessagesQueryKey = (
 ) => createQueryKey("listFaxMessages", options);
 
 /**
- * ListFaxMessages
+ * List fax messages
  */
 export const listFaxMessagesOptions = (
   options?: Options<ListFaxMessagesData>,
@@ -4163,7 +4165,7 @@ export const listFaxMessagesOptions = (
   });
 
 /**
- * DeleteFaxMessage
+ * Delete a fax message
  */
 export const deleteFaxMessageMutation = (
   options?: Partial<Options<DeleteFaxMessageData>>,
@@ -4193,7 +4195,7 @@ export const getFaxMessageQueryKey = (options: Options<GetFaxMessageData>) =>
   createQueryKey("getFaxMessage", options);
 
 /**
- * GetFaxMessage
+ * Get fax message details
  */
 export const getFaxMessageOptions = (options: Options<GetFaxMessageData>) =>
   queryOptions<
@@ -4218,7 +4220,7 @@ export const listFaxNumbersQueryKey = (options?: Options<ListFaxNumbersData>) =>
   createQueryKey("listFaxNumbers", options);
 
 /**
- * ListFaxNumbers
+ * List fax numbers
  */
 export const listFaxNumbersOptions = (options?: Options<ListFaxNumbersData>) =>
   queryOptions<
@@ -4240,7 +4242,7 @@ export const listFaxNumbersOptions = (options?: Options<ListFaxNumbersData>) =>
   });
 
 /**
- * CreateFaxNumber
+ * Create a fax number
  */
 export const createFaxNumberMutation = (
   options?: Partial<Options<CreateFaxNumberData>>,
@@ -4267,7 +4269,7 @@ export const createFaxNumberMutation = (
 };
 
 /**
- * DeleteFaxNumber
+ * Delete a fax number
  */
 export const deleteFaxNumberMutation = (
   options?: Partial<Options<DeleteFaxNumberData>>,
@@ -4297,7 +4299,7 @@ export const getFaxNumberQueryKey = (options: Options<GetFaxNumberData>) =>
   createQueryKey("getFaxNumber", options);
 
 /**
- * GetFaxNumber
+ * Get fax number details
  */
 export const getFaxNumberOptions = (options: Options<GetFaxNumberData>) =>
   queryOptions<
@@ -4319,7 +4321,7 @@ export const getFaxNumberOptions = (options: Options<GetFaxNumberData>) =>
   });
 
 /**
- * UpdateFaxNumber
+ * Update a fax number
  */
 export const updateFaxNumberMutation = (
   options?: Partial<Options<UpdateFaxNumberData>>,
@@ -4350,7 +4352,7 @@ export const listFaxEmailRoutesQueryKey = (
 ) => createQueryKey("listFaxEmailRoutes", options);
 
 /**
- * ListFaxEmailRoutes
+ * List fax email routes
  */
 export const listFaxEmailRoutesOptions = (
   options: Options<ListFaxEmailRoutesData>,
@@ -4374,7 +4376,7 @@ export const listFaxEmailRoutesOptions = (
   });
 
 /**
- * CreateFaxEmailRoute
+ * Create a fax email route
  */
 export const createFaxEmailRouteMutation = (
   options?: Partial<Options<CreateFaxEmailRouteData>>,
@@ -4401,7 +4403,7 @@ export const createFaxEmailRouteMutation = (
 };
 
 /**
- * DeleteFaxEmailRoute
+ * Delete a fax email route
  */
 export const deleteFaxEmailRouteMutation = (
   options?: Partial<Options<DeleteFaxEmailRouteData>>,
@@ -4428,7 +4430,7 @@ export const deleteFaxEmailRouteMutation = (
 };
 
 /**
- * UpdateFaxEmailRoute
+ * Update a fax email route
  */
 export const updateFaxEmailRouteMutation = (
   options?: Partial<Options<UpdateFaxEmailRouteData>>,
@@ -4455,7 +4457,7 @@ export const updateFaxEmailRouteMutation = (
 };
 
 /**
- * SendFax
+ * Send a fax
  */
 export const sendFaxMutation = (
   options?: Partial<Options<SendFaxData>>,
@@ -4482,7 +4484,7 @@ export const gatewayLookupDeviceQueryKey = (
 ) => createQueryKey("gatewayLookupDevice", options);
 
 /**
- * GetDeviceData
+ * Look up a device by MAC address
  */
 export const gatewayLookupDeviceOptions = (
   options: Options<GatewayLookupDeviceData>,
@@ -4510,7 +4512,7 @@ export const gatewayLookupExtensionQueryKey = (
 ) => createQueryKey("gatewayLookupExtension", options);
 
 /**
- * GetExtensionData
+ * Look up an extension
  */
 export const gatewayLookupExtensionOptions = (
   options: Options<GatewayLookupExtensionData>,
@@ -4538,7 +4540,7 @@ export const gatewayLookupNumberQueryKey = (
 ) => createQueryKey("gatewayLookupNumber", options);
 
 /**
- * GetNumberData
+ * Look up a phone number
  */
 export const gatewayLookupNumberOptions = (
   options: Options<GatewayLookupNumberData>,
@@ -4565,7 +4567,7 @@ export const listIvrMenusQueryKey = (options?: Options<ListIvrMenusData>) =>
   createQueryKey("listIvrMenus", options);
 
 /**
- * ListIvrMenus
+ * List IVR menus
  */
 export const listIvrMenusOptions = (options?: Options<ListIvrMenusData>) =>
   queryOptions<
@@ -4587,7 +4589,7 @@ export const listIvrMenusOptions = (options?: Options<ListIvrMenusData>) =>
   });
 
 /**
- * CreateIvrMenu
+ * Create an IVR menu
  */
 export const createIvrMenuMutation = (
   options?: Partial<Options<CreateIvrMenuData>>,
@@ -4614,7 +4616,7 @@ export const createIvrMenuMutation = (
 };
 
 /**
- * DeleteIvrMenu
+ * Delete an IVR menu
  */
 export const deleteIvrMenuMutation = (
   options?: Partial<Options<DeleteIvrMenuData>>,
@@ -4644,7 +4646,7 @@ export const getIvrMenuQueryKey = (options: Options<GetIvrMenuData>) =>
   createQueryKey("getIvrMenu", options);
 
 /**
- * GetIvrMenu
+ * Get IVR menu details
  */
 export const getIvrMenuOptions = (options: Options<GetIvrMenuData>) =>
   queryOptions<
@@ -4666,7 +4668,7 @@ export const getIvrMenuOptions = (options: Options<GetIvrMenuData>) =>
   });
 
 /**
- * UpdateIvrMenu
+ * Update an IVR menu
  */
 export const updateIvrMenuMutation = (
   options?: Partial<Options<UpdateIvrMenuData>>,
@@ -4697,7 +4699,7 @@ export const listIvrMenuOptionsQueryKey = (
 ) => createQueryKey("listIvrMenuOptions", options);
 
 /**
- * ListOptions
+ * List IVR menu options
  */
 export const listIvrMenuOptionsOptions = (
   options: Options<ListIvrMenuOptionsData>,
@@ -4721,7 +4723,7 @@ export const listIvrMenuOptionsOptions = (
   });
 
 /**
- * CreateOption
+ * Add an IVR menu option
  */
 export const createIvrMenuOptionMutation = (
   options?: Partial<Options<CreateIvrMenuOptionData>>,
@@ -4748,7 +4750,7 @@ export const createIvrMenuOptionMutation = (
 };
 
 /**
- * DeleteOption
+ * Delete an IVR menu option
  */
 export const deleteIvrMenuOptionMutation = (
   options?: Partial<Options<DeleteIvrMenuOptionData>>,
@@ -4775,7 +4777,7 @@ export const deleteIvrMenuOptionMutation = (
 };
 
 /**
- * UpdateOption
+ * Update an IVR menu option
  */
 export const updateIvrMenuOptionMutation = (
   options?: Partial<Options<UpdateIvrMenuOptionData>>,
@@ -4802,7 +4804,7 @@ export const updateIvrMenuOptionMutation = (
 };
 
 /**
- * RemoveAccount
+ * Delete account
  */
 export const accountDeleteMutation = (
   options?: Partial<Options<AccountDeleteData>>,
@@ -4856,7 +4858,7 @@ export const accountProfileOptions = (options?: Options<AccountProfileData>) =>
   });
 
 /**
- * UpdateProfile
+ * Update profile
  */
 export const accountProfileUpdateMutation = (
   options?: Partial<Options<AccountProfileUpdateData>>,
@@ -4883,7 +4885,7 @@ export const accountProfileUpdateMutation = (
 };
 
 /**
- * UpdatePassword
+ * Update password
  */
 export const accountPasswordUpdateMutation = (
   options?: Partial<Options<AccountPasswordUpdateData>>,
@@ -4940,7 +4942,7 @@ export const getSecurityActivityOptions = (
   });
 
 /**
- * VerifyChallenge
+ * Verify MFA challenge
  */
 export const verifyMfaChallengeMutation = (
   options?: Partial<Options<VerifyMfaChallengeData>>,
@@ -4967,7 +4969,7 @@ export const verifyMfaChallengeMutation = (
 };
 
 /**
- * ConfirmSetup
+ * Confirm MFA setup
  */
 export const confirmMfaSetupMutation = (
   options?: Partial<Options<ConfirmMfaSetupData>>,
@@ -4994,7 +4996,7 @@ export const confirmMfaSetupMutation = (
 };
 
 /**
- * DisableMfa
+ * Disable MFA
  */
 export const disableMfaMutation = (
   options?: Partial<Options<DisableMfaData>>,
@@ -5025,7 +5027,7 @@ export const initiateDisableMfaOAuthQueryKey = (
 ) => createQueryKey("initiateDisableMfaOAuth", options);
 
 /**
- * InitiateDisableMfaOauth
+ * Initiate MFA disable via OAuth
  */
 export const initiateDisableMfaOAuthOptions = (
   options: Options<InitiateDisableMfaOAuthData>,
@@ -5049,7 +5051,7 @@ export const initiateDisableMfaOAuthOptions = (
   });
 
 /**
- * InitiateSetup
+ * Initiate MFA setup
  */
 export const initiateMfaSetupMutation = (
   options?: Partial<Options<InitiateMfaSetupData>>,
@@ -5076,7 +5078,7 @@ export const initiateMfaSetupMutation = (
 };
 
 /**
- * RegenerateBackupCodes
+ * Regenerate MFA backup codes
  */
 export const regenerateMfaBackupCodesMutation = (
   options?: Partial<Options<RegenerateMfaBackupCodesData>>,
@@ -5106,7 +5108,7 @@ export const getMfaStatusQueryKey = (options?: Options<GetMfaStatusData>) =>
   createQueryKey("getMfaStatus", options);
 
 /**
- * GetMfaStatus
+ * Get MFA status
  */
 export const getMfaStatusOptions = (options?: Options<GetMfaStatusData>) =>
   queryOptions<
@@ -5132,7 +5134,7 @@ export const listNotificationsQueryKey = (
 ) => createQueryKey("listNotifications", options);
 
 /**
- * ListNotifications
+ * List notifications
  */
 export const listNotificationsOptions = (
   options?: Options<ListNotificationsData>,
@@ -5156,7 +5158,7 @@ export const listNotificationsOptions = (
   });
 
 /**
- * MarkAllRead
+ * Mark all notifications as read
  */
 export const markAllNotificationsReadMutation = (
   options?: Partial<Options<MarkAllNotificationsReadData>>,
@@ -5275,7 +5277,7 @@ export const getUnreadNotificationCountQueryKey = (
 ) => createQueryKey("getUnreadNotificationCount", options);
 
 /**
- * GetUnreadCount
+ * Get unread notification count
  */
 export const getUnreadNotificationCountOptions = (
   options?: Options<GetUnreadNotificationCountData>,
@@ -5299,7 +5301,7 @@ export const getUnreadNotificationCountOptions = (
   });
 
 /**
- * DeleteNotification
+ * Delete a notification
  */
 export const deleteNotificationMutation = (
   options?: Partial<Options<DeleteNotificationData>>,
@@ -5326,7 +5328,7 @@ export const deleteNotificationMutation = (
 };
 
 /**
- * MarkRead
+ * Mark a notification as read
  */
 export const markNotificationReadMutation = (
   options?: Partial<Options<MarkNotificationReadData>>,
@@ -5357,7 +5359,7 @@ export const getOrganizationQueryKey = (
 ) => createQueryKey("getOrganization", options);
 
 /**
- * GetOrganization
+ * Get organization details
  */
 export const getOrganizationOptions = (
   options?: Options<GetOrganizationData>,
@@ -5381,7 +5383,7 @@ export const getOrganizationOptions = (
   });
 
 /**
- * UpdateOrganization
+ * Update organization settings
  */
 export const updateOrganizationMutation = (
   options?: Partial<Options<UpdateOrganizationData>>,
@@ -5412,7 +5414,7 @@ export const manageListPhoneNumbersQueryKey = (
 ) => createQueryKey("manageListPhoneNumbers", options);
 
 /**
- * ListPhoneNumbers
+ * List phone numbers
  */
 export const manageListPhoneNumbersOptions = (
   options?: Options<ManageListPhoneNumbersData>,
@@ -5436,7 +5438,7 @@ export const manageListPhoneNumbersOptions = (
   });
 
 /**
- * CreatePhoneNumber
+ * Create a phone number
  */
 export const manageCreatePhoneNumberMutation = (
   options?: Partial<Options<ManageCreatePhoneNumberData>>,
@@ -5463,7 +5465,7 @@ export const manageCreatePhoneNumberMutation = (
 };
 
 /**
- * DeletePhoneNumber
+ * Delete a phone number
  */
 export const manageDeletePhoneNumberMutation = (
   options?: Partial<Options<ManageDeletePhoneNumberData>>,
@@ -5494,7 +5496,7 @@ export const manageGetPhoneNumberQueryKey = (
 ) => createQueryKey("manageGetPhoneNumber", options);
 
 /**
- * GetPhoneNumber
+ * Get a phone number
  */
 export const manageGetPhoneNumberOptions = (
   options: Options<ManageGetPhoneNumberData>,
@@ -5518,7 +5520,7 @@ export const manageGetPhoneNumberOptions = (
   });
 
 /**
- * UpdatePhoneNumber
+ * Update a phone number
  */
 export const manageUpdatePhoneNumberMutation = (
   options?: Partial<Options<ManageUpdatePhoneNumberData>>,
@@ -5549,7 +5551,7 @@ export const profileOAuthAccountsQueryKey = (
 ) => createQueryKey("profileOAuthAccounts", options);
 
 /**
- * ListAccounts
+ * List linked OAuth accounts
  */
 export const profileOAuthAccountsOptions = (
   options?: Options<ProfileOAuthAccountsData>,
@@ -5573,7 +5575,7 @@ export const profileOAuthAccountsOptions = (
   });
 
 /**
- * Unlink
+ * Unlink an OAuth account
  */
 export const profileOAuthUnlinkMutation = (
   options?: Partial<Options<ProfileOAuthUnlinkData>>,
@@ -5600,7 +5602,7 @@ export const profileOAuthUnlinkMutation = (
 };
 
 /**
- * StartLink
+ * Link an OAuth account
  */
 export const profileOAuthLinkMutation = (
   options?: Partial<Options<ProfileOAuthLinkData>>,
@@ -5627,7 +5629,7 @@ export const profileOAuthLinkMutation = (
 };
 
 /**
- * UpgradeScopes
+ * Upgrade OAuth scopes
  */
 export const profileOAuthUpgradeScopesMutation = (
   options?: Partial<Options<ProfileOAuthUpgradeScopesData>>,
@@ -5657,7 +5659,7 @@ export const listRingGroupsQueryKey = (options?: Options<ListRingGroupsData>) =>
   createQueryKey("listRingGroups", options);
 
 /**
- * ListRingGroups
+ * List ring groups
  */
 export const listRingGroupsOptions = (options?: Options<ListRingGroupsData>) =>
   queryOptions<
@@ -5679,7 +5681,7 @@ export const listRingGroupsOptions = (options?: Options<ListRingGroupsData>) =>
   });
 
 /**
- * CreateRingGroup
+ * Create a ring group
  */
 export const createRingGroupMutation = (
   options?: Partial<Options<CreateRingGroupData>>,
@@ -5706,7 +5708,7 @@ export const createRingGroupMutation = (
 };
 
 /**
- * DeleteRingGroup
+ * Delete a ring group
  */
 export const deleteRingGroupMutation = (
   options?: Partial<Options<DeleteRingGroupData>>,
@@ -5736,7 +5738,7 @@ export const getRingGroupQueryKey = (options: Options<GetRingGroupData>) =>
   createQueryKey("getRingGroup", options);
 
 /**
- * GetRingGroup
+ * Get ring group details
  */
 export const getRingGroupOptions = (options: Options<GetRingGroupData>) =>
   queryOptions<
@@ -5758,7 +5760,7 @@ export const getRingGroupOptions = (options: Options<GetRingGroupData>) =>
   });
 
 /**
- * UpdateRingGroup
+ * Update a ring group
  */
 export const updateRingGroupMutation = (
   options?: Partial<Options<UpdateRingGroupData>>,
@@ -5789,7 +5791,7 @@ export const listRingGroupMembersQueryKey = (
 ) => createQueryKey("listRingGroupMembers", options);
 
 /**
- * ListMembers
+ * List ring group members
  */
 export const listRingGroupMembersOptions = (
   options: Options<ListRingGroupMembersData>,
@@ -5813,7 +5815,7 @@ export const listRingGroupMembersOptions = (
   });
 
 /**
- * CreateMember
+ * Add a ring group member
  */
 export const createRingGroupMemberMutation = (
   options?: Partial<Options<CreateRingGroupMemberData>>,
@@ -5840,7 +5842,7 @@ export const createRingGroupMemberMutation = (
 };
 
 /**
- * DeleteMember
+ * Remove a ring group member
  */
 export const deleteRingGroupMemberMutation = (
   options?: Partial<Options<DeleteRingGroupMemberData>>,
@@ -5867,7 +5869,7 @@ export const deleteRingGroupMemberMutation = (
 };
 
 /**
- * UpdateMember
+ * Update a ring group member
  */
 export const updateRingGroupMemberMutation = (
   options?: Partial<Options<UpdateRingGroupMemberData>>,
@@ -5897,7 +5899,7 @@ export const listRolesQueryKey = (options?: Options<ListRolesData>) =>
   createQueryKey("listRoles", options);
 
 /**
- * ListRoles
+ * List roles
  */
 export const listRolesOptions = (options?: Options<ListRolesData>) =>
   queryOptions<
@@ -5919,7 +5921,7 @@ export const listRolesOptions = (options?: Options<ListRolesData>) =>
   });
 
 /**
- * CreateRole
+ * Create a role
  */
 export const createRoleMutation = (
   options?: Partial<Options<CreateRoleData>>,
@@ -5946,7 +5948,7 @@ export const createRoleMutation = (
 };
 
 /**
- * DeleteRole
+ * Delete a role
  */
 export const deleteRoleMutation = (
   options?: Partial<Options<DeleteRoleData>>,
@@ -5976,7 +5978,7 @@ export const getRoleQueryKey = (options: Options<GetRoleData>) =>
   createQueryKey("getRole", options);
 
 /**
- * GetRole
+ * Get role details
  */
 export const getRoleOptions = (options: Options<GetRoleData>) =>
   queryOptions<
@@ -5998,7 +6000,7 @@ export const getRoleOptions = (options: Options<GetRoleData>) =>
   });
 
 /**
- * UpdateRole
+ * Update a role
  */
 export const updateRoleMutation = (
   options?: Partial<Options<UpdateRoleData>>,
@@ -6025,7 +6027,7 @@ export const updateRoleMutation = (
 };
 
 /**
- * AssignRole
+ * Assign a role to a user
  */
 export const assignRoleMutation = (
   options?: Partial<Options<AssignRoleData>>,
@@ -6052,7 +6054,7 @@ export const assignRoleMutation = (
 };
 
 /**
- * RevokeRole
+ * Revoke a role from a user
  */
 export const revokeRoleMutation = (
   options?: Partial<Options<RevokeRoleData>>,
@@ -6082,7 +6084,7 @@ export const listSchedulesQueryKey = (options?: Options<ListSchedulesData>) =>
   createQueryKey("listSchedules", options);
 
 /**
- * ListSchedules
+ * List schedules
  */
 export const listSchedulesOptions = (options?: Options<ListSchedulesData>) =>
   queryOptions<
@@ -6104,7 +6106,7 @@ export const listSchedulesOptions = (options?: Options<ListSchedulesData>) =>
   });
 
 /**
- * CreateSchedule
+ * Create a schedule
  */
 export const createScheduleMutation = (
   options?: Partial<Options<CreateScheduleData>>,
@@ -6131,7 +6133,7 @@ export const createScheduleMutation = (
 };
 
 /**
- * DeleteSchedule
+ * Delete a schedule
  */
 export const deleteScheduleMutation = (
   options?: Partial<Options<DeleteScheduleData>>,
@@ -6161,7 +6163,7 @@ export const getScheduleQueryKey = (options: Options<GetScheduleData>) =>
   createQueryKey("getSchedule", options);
 
 /**
- * GetSchedule
+ * Get schedule details
  */
 export const getScheduleOptions = (options: Options<GetScheduleData>) =>
   queryOptions<
@@ -6183,7 +6185,7 @@ export const getScheduleOptions = (options: Options<GetScheduleData>) =>
   });
 
 /**
- * UpdateSchedule
+ * Update a schedule
  */
 export const updateScheduleMutation = (
   options?: Partial<Options<UpdateScheduleData>>,
@@ -6213,7 +6215,7 @@ export const checkScheduleQueryKey = (options: Options<CheckScheduleData>) =>
   createQueryKey("checkSchedule", options);
 
 /**
- * CheckSchedule
+ * Check schedule status
  */
 export const checkScheduleOptions = (options: Options<CheckScheduleData>) =>
   queryOptions<
@@ -6239,7 +6241,7 @@ export const listScheduleEntriesQueryKey = (
 ) => createQueryKey("listScheduleEntries", options);
 
 /**
- * ListEntries
+ * List schedule entries
  */
 export const listScheduleEntriesOptions = (
   options: Options<ListScheduleEntriesData>,
@@ -6263,7 +6265,7 @@ export const listScheduleEntriesOptions = (
   });
 
 /**
- * CreateEntry
+ * Create a schedule entry
  */
 export const createScheduleEntryMutation = (
   options?: Partial<Options<CreateScheduleEntryData>>,
@@ -6290,7 +6292,7 @@ export const createScheduleEntryMutation = (
 };
 
 /**
- * DeleteEntry
+ * Delete a schedule entry
  */
 export const deleteScheduleEntryMutation = (
   options?: Partial<Options<DeleteScheduleEntryData>>,
@@ -6317,7 +6319,7 @@ export const deleteScheduleEntryMutation = (
 };
 
 /**
- * UpdateEntry
+ * Update a schedule entry
  */
 export const updateScheduleEntryMutation = (
   options?: Partial<Options<UpdateScheduleEntryData>>,
@@ -6369,7 +6371,7 @@ export const globalSearchOptions = (options?: Options<GlobalSearchData>) =>
   });
 
 /**
- * DeleteAttachment
+ * Delete an attachment
  */
 export const deleteAttachmentMutation = (
   options?: Partial<Options<DeleteAttachmentData>>,
@@ -6399,7 +6401,7 @@ export const getAttachmentQueryKey = (options: Options<GetAttachmentData>) =>
   createQueryKey("getAttachment", options);
 
 /**
- * GetAttachment
+ * Get attachment details
  */
 export const getAttachmentOptions = (options: Options<GetAttachmentData>) =>
   queryOptions<
@@ -6421,7 +6423,7 @@ export const getAttachmentOptions = (options: Options<GetAttachmentData>) =>
   });
 
 /**
- * SubmitFeedback
+ * Submit portal feedback
  */
 export const submitFeedbackMutation = (
   options?: Partial<Options<SubmitFeedbackData>>,
@@ -6451,7 +6453,7 @@ export const listTicketsQueryKey = (options?: Options<ListTicketsData>) =>
   createQueryKey("listTickets", options);
 
 /**
- * ListTickets
+ * List tickets
  */
 export const listTicketsOptions = (options?: Options<ListTicketsData>) =>
   queryOptions<
@@ -6473,7 +6475,7 @@ export const listTicketsOptions = (options?: Options<ListTicketsData>) =>
   });
 
 /**
- * CreateTicket
+ * Create a ticket
  */
 export const createTicketMutation = (
   options?: Partial<Options<CreateTicketData>>,
@@ -6500,7 +6502,7 @@ export const createTicketMutation = (
 };
 
 /**
- * DeleteTicket
+ * Delete a ticket
  */
 export const deleteTicketMutation = (
   options?: Partial<Options<DeleteTicketData>>,
@@ -6530,7 +6532,7 @@ export const getTicketQueryKey = (options: Options<GetTicketData>) =>
   createQueryKey("getTicket", options);
 
 /**
- * GetTicket
+ * Get ticket details
  */
 export const getTicketOptions = (options: Options<GetTicketData>) =>
   queryOptions<
@@ -6552,7 +6554,7 @@ export const getTicketOptions = (options: Options<GetTicketData>) =>
   });
 
 /**
- * UpdateTicket
+ * Update a ticket
  */
 export const updateTicketMutation = (
   options?: Partial<Options<UpdateTicketData>>,
@@ -6579,7 +6581,7 @@ export const updateTicketMutation = (
 };
 
 /**
- * UploadAttachment
+ * Upload a ticket attachment
  */
 export const uploadAttachmentMutation = (
   options?: Partial<Options<UploadAttachmentData>>,
@@ -6606,7 +6608,7 @@ export const uploadAttachmentMutation = (
 };
 
 /**
- * CloseTicket
+ * Close a ticket
  */
 export const closeTicketMutation = (
   options?: Partial<Options<CloseTicketData>>,
@@ -6637,7 +6639,7 @@ export const listTicketMessagesQueryKey = (
 ) => createQueryKey("listTicketMessages", options);
 
 /**
- * ListMessages
+ * List ticket messages
  */
 export const listTicketMessagesOptions = (
   options: Options<ListTicketMessagesData>,
@@ -6661,7 +6663,7 @@ export const listTicketMessagesOptions = (
   });
 
 /**
- * CreateMessage
+ * Create a ticket message
  */
 export const createTicketMessageMutation = (
   options?: Partial<Options<CreateTicketMessageData>>,
@@ -6688,7 +6690,7 @@ export const createTicketMessageMutation = (
 };
 
 /**
- * DeleteMessage
+ * Delete a ticket message
  */
 export const deleteTicketMessageMutation = (
   options?: Partial<Options<DeleteTicketMessageData>>,
@@ -6715,7 +6717,7 @@ export const deleteTicketMessageMutation = (
 };
 
 /**
- * UpdateMessage
+ * Update a ticket message
  */
 export const updateTicketMessageMutation = (
   options?: Partial<Options<UpdateTicketMessageData>>,
@@ -6742,7 +6744,7 @@ export const updateTicketMessageMutation = (
 };
 
 /**
- * PasteImage
+ * Upload a pasted image
  */
 export const pasteImageMutation = (
   options?: Partial<Options<PasteImageData>>,
@@ -6769,7 +6771,7 @@ export const pasteImageMutation = (
 };
 
 /**
- * ReopenTicket
+ * Reopen a ticket
  */
 export const reopenTicketMutation = (
   options?: Partial<Options<ReopenTicketData>>,
@@ -6824,7 +6826,7 @@ export const listTagsQueryKey = (options?: Options<ListTagsData>) =>
   createQueryKey("listTags", options);
 
 /**
- * ListTags
+ * List tags
  */
 export const listTagsOptions = (options?: Options<ListTagsData>) =>
   queryOptions<
@@ -6846,7 +6848,7 @@ export const listTagsOptions = (options?: Options<ListTagsData>) =>
   });
 
 /**
- * CreateTag
+ * Create a tag
  */
 export const createTagMutation = (
   options?: Partial<Options<CreateTagData>>,
@@ -6873,7 +6875,7 @@ export const createTagMutation = (
 };
 
 /**
- * DeleteTag
+ * Delete a tag
  */
 export const deleteTagMutation = (
   options?: Partial<Options<DeleteTagData>>,
@@ -6903,7 +6905,7 @@ export const getTagQueryKey = (options: Options<GetTagData>) =>
   createQueryKey("getTag", options);
 
 /**
- * GetTag
+ * Get a tag
  */
 export const getTagOptions = (options: Options<GetTagData>) =>
   queryOptions<
@@ -6925,7 +6927,7 @@ export const getTagOptions = (options: Options<GetTagData>) =>
   });
 
 /**
- * UpdateTag
+ * Update a tag
  */
 export const updateTagMutation = (
   options?: Partial<Options<UpdateTagData>>,
@@ -6955,7 +6957,7 @@ export const listTasksQueryKey = (options?: Options<ListTasksData>) =>
   createQueryKey("listTasks", options);
 
 /**
- * ListTasks
+ * List background tasks
  */
 export const listTasksOptions = (options?: Options<ListTasksData>) =>
   queryOptions<
@@ -6981,7 +6983,7 @@ export const listActiveTasksQueryKey = (
 ) => createQueryKey("listActiveTasks", options);
 
 /**
- * ListActiveTasks
+ * List active background tasks
  */
 export const listActiveTasksOptions = (
   options?: Options<ListActiveTasksData>,
@@ -7005,7 +7007,7 @@ export const listActiveTasksOptions = (
   });
 
 /**
- * DeleteTask
+ * Delete a background task
  */
 export const deleteTaskMutation = (
   options?: Partial<Options<DeleteTaskData>>,
@@ -7035,7 +7037,7 @@ export const getTaskQueryKey = (options: Options<GetTaskData>) =>
   createQueryKey("getTask", options);
 
 /**
- * GetTask
+ * Get background task details
  */
 export const getTaskOptions = (options: Options<GetTaskData>) =>
   queryOptions<
@@ -7057,7 +7059,7 @@ export const getTaskOptions = (options: Options<GetTaskData>) =>
   });
 
 /**
- * CancelTask
+ * Cancel a background task
  */
 export const cancelTaskMutation = (
   options?: Partial<Options<CancelTaskData>>,
@@ -7087,7 +7089,7 @@ export const listTeamsQueryKey = (options?: Options<ListTeamsData>) =>
   createQueryKey("listTeams", options);
 
 /**
- * ListTeams
+ * List teams
  */
 export const listTeamsOptions = (options?: Options<ListTeamsData>) =>
   queryOptions<
@@ -7109,7 +7111,7 @@ export const listTeamsOptions = (options?: Options<ListTeamsData>) =>
   });
 
 /**
- * CreateTeam
+ * Create a team
  */
 export const createTeamMutation = (
   options?: Partial<Options<CreateTeamData>>,
@@ -7136,7 +7138,7 @@ export const createTeamMutation = (
 };
 
 /**
- * DeleteTeam
+ * Delete a team
  */
 export const deleteTeamMutation = (
   options?: Partial<Options<DeleteTeamData>>,
@@ -7166,7 +7168,7 @@ export const getTeamQueryKey = (options: Options<GetTeamData>) =>
   createQueryKey("getTeam", options);
 
 /**
- * GetTeam
+ * Get team details
  */
 export const getTeamOptions = (options: Options<GetTeamData>) =>
   queryOptions<
@@ -7188,7 +7190,7 @@ export const getTeamOptions = (options: Options<GetTeamData>) =>
   });
 
 /**
- * UpdateTeam
+ * Update a team
  */
 export const updateTeamMutation = (
   options?: Partial<Options<UpdateTeamData>>,
@@ -7219,7 +7221,7 @@ export const listTeamInvitationsQueryKey = (
 ) => createQueryKey("listTeamInvitations", options);
 
 /**
- * ListTeamInvitations
+ * List team invitations
  */
 export const listTeamInvitationsOptions = (
   options: Options<ListTeamInvitationsData>,
@@ -7243,7 +7245,7 @@ export const listTeamInvitationsOptions = (
   });
 
 /**
- * CreateTeamInvitation
+ * Create a team invitation
  */
 export const createTeamInvitationMutation = (
   options?: Partial<Options<CreateTeamInvitationData>>,
@@ -7270,7 +7272,7 @@ export const createTeamInvitationMutation = (
 };
 
 /**
- * DeleteTeamInvitation
+ * Delete a team invitation
  */
 export const deleteTeamInvitationMutation = (
   options?: Partial<Options<DeleteTeamInvitationData>>,
@@ -7297,7 +7299,7 @@ export const deleteTeamInvitationMutation = (
 };
 
 /**
- * AcceptTeamInvitation
+ * Accept a team invitation
  */
 export const acceptTeamInvitationMutation = (
   options?: Partial<Options<AcceptTeamInvitationData>>,
@@ -7324,7 +7326,7 @@ export const acceptTeamInvitationMutation = (
 };
 
 /**
- * RejectTeamInvitation
+ * Reject a team invitation
  */
 export const rejectTeamInvitationMutation = (
   options?: Partial<Options<RejectTeamInvitationData>>,
@@ -7354,7 +7356,7 @@ export const listLocationsQueryKey = (options: Options<ListLocationsData>) =>
   createQueryKey("listLocations", options);
 
 /**
- * ListLocations
+ * List locations
  */
 export const listLocationsOptions = (options: Options<ListLocationsData>) =>
   queryOptions<
@@ -7376,7 +7378,7 @@ export const listLocationsOptions = (options: Options<ListLocationsData>) =>
   });
 
 /**
- * CreateLocation
+ * Create a location
  */
 export const createLocationMutation = (
   options?: Partial<Options<CreateLocationData>>,
@@ -7403,7 +7405,7 @@ export const createLocationMutation = (
 };
 
 /**
- * DeleteLocation
+ * Delete a location
  */
 export const deleteLocationMutation = (
   options?: Partial<Options<DeleteLocationData>>,
@@ -7433,7 +7435,7 @@ export const getLocationQueryKey = (options: Options<GetLocationData>) =>
   createQueryKey("getLocation", options);
 
 /**
- * GetLocation
+ * Get location details
  */
 export const getLocationOptions = (options: Options<GetLocationData>) =>
   queryOptions<
@@ -7455,7 +7457,7 @@ export const getLocationOptions = (options: Options<GetLocationData>) =>
   });
 
 /**
- * UpdateLocation
+ * Update a location
  */
 export const updateLocationMutation = (
   options?: Partial<Options<UpdateLocationData>>,
@@ -7482,7 +7484,7 @@ export const updateLocationMutation = (
 };
 
 /**
- * RemoveMemberFromTeam
+ * Remove a team member
  */
 export const removeMemberFromTeamMutation = (
   options?: Partial<Options<RemoveMemberFromTeamData>>,
@@ -7509,7 +7511,7 @@ export const removeMemberFromTeamMutation = (
 };
 
 /**
- * AddMemberToTeam
+ * Add a team member
  */
 export const addMemberToTeamMutation = (
   options?: Partial<Options<AddMemberToTeamData>>,
@@ -7536,7 +7538,7 @@ export const addMemberToTeamMutation = (
 };
 
 /**
- * UpdateTeamMember
+ * Update a team member's role
  */
 export const updateTeamMemberMutation = (
   options?: Partial<Options<UpdateTeamMemberData>>,
@@ -7567,7 +7569,7 @@ export const listTeamPermissionsQueryKey = (
 ) => createQueryKey("listTeamPermissions", options);
 
 /**
- * ListTeamPermissions
+ * List team permissions
  */
 export const listTeamPermissionsOptions = (
   options: Options<ListTeamPermissionsData>,
@@ -7591,7 +7593,7 @@ export const listTeamPermissionsOptions = (
   });
 
 /**
- * UpdateTeamPermissions
+ * Update team permissions
  */
 export const updateTeamPermissionsMutation = (
   options?: Partial<Options<UpdateTeamPermissionsData>>,
@@ -7622,7 +7624,7 @@ export const listTimeConditionsQueryKey = (
 ) => createQueryKey("listTimeConditions", options);
 
 /**
- * ListTimeConditions
+ * List time conditions
  */
 export const listTimeConditionsOptions = (
   options?: Options<ListTimeConditionsData>,
@@ -7646,7 +7648,7 @@ export const listTimeConditionsOptions = (
   });
 
 /**
- * CreateTimeCondition
+ * Create a time condition
  */
 export const createTimeConditionMutation = (
   options?: Partial<Options<CreateTimeConditionData>>,
@@ -7673,7 +7675,7 @@ export const createTimeConditionMutation = (
 };
 
 /**
- * DeleteTimeCondition
+ * Delete a time condition
  */
 export const deleteTimeConditionMutation = (
   options?: Partial<Options<DeleteTimeConditionData>>,
@@ -7704,7 +7706,7 @@ export const getTimeConditionQueryKey = (
 ) => createQueryKey("getTimeCondition", options);
 
 /**
- * GetTimeCondition
+ * Get time condition details
  */
 export const getTimeConditionOptions = (
   options: Options<GetTimeConditionData>,
@@ -7728,7 +7730,7 @@ export const getTimeConditionOptions = (
   });
 
 /**
- * UpdateTimeCondition
+ * Update a time condition
  */
 export const updateTimeConditionMutation = (
   options?: Partial<Options<UpdateTimeConditionData>>,
@@ -7755,7 +7757,7 @@ export const updateTimeConditionMutation = (
 };
 
 /**
- * SetOverride
+ * Set time condition override
  */
 export const setTimeConditionOverrideMutation = (
   options?: Partial<Options<SetTimeConditionOverrideData>>,
@@ -7785,7 +7787,7 @@ export const listUsersQueryKey = (options?: Options<ListUsersData>) =>
   createQueryKey("listUsers", options);
 
 /**
- * ListUsers
+ * List users
  */
 export const listUsersOptions = (options?: Options<ListUsersData>) =>
   queryOptions<
@@ -7807,7 +7809,7 @@ export const listUsersOptions = (options?: Options<ListUsersData>) =>
   });
 
 /**
- * CreateUser
+ * Create a user
  */
 export const createUserMutation = (
   options?: Partial<Options<CreateUserData>>,
@@ -7834,7 +7836,7 @@ export const createUserMutation = (
 };
 
 /**
- * RevokeRole
+ * Revoke a role from a user
  */
 export const revokeUserRoleMutation = (
   options?: Partial<Options<RevokeUserRoleData>>,
@@ -7861,7 +7863,7 @@ export const revokeUserRoleMutation = (
 };
 
 /**
- * AssignRole
+ * Assign a role to a user
  */
 export const assignUserRoleMutation = (
   options?: Partial<Options<AssignUserRoleData>>,
@@ -7888,7 +7890,7 @@ export const assignUserRoleMutation = (
 };
 
 /**
- * DeleteUser
+ * Delete a user
  */
 export const deleteUserMutation = (
   options?: Partial<Options<DeleteUserData>>,
@@ -7918,7 +7920,7 @@ export const getUserQueryKey = (options: Options<GetUserData>) =>
   createQueryKey("getUser", options);
 
 /**
- * GetUser
+ * Get user details
  */
 export const getUserOptions = (options: Options<GetUserData>) =>
   queryOptions<
@@ -7940,7 +7942,7 @@ export const getUserOptions = (options: Options<GetUserData>) =>
   });
 
 /**
- * UpdateUser
+ * Update a user
  */
 export const updateUserMutation = (
   options?: Partial<Options<UpdateUserData>>,
@@ -7970,7 +7972,7 @@ export const listExtensionsQueryKey = (options?: Options<ListExtensionsData>) =>
   createQueryKey("listExtensions", options);
 
 /**
- * ListExtensions
+ * List extensions
  */
 export const listExtensionsOptions = (options?: Options<ListExtensionsData>) =>
   queryOptions<
@@ -7992,7 +7994,7 @@ export const listExtensionsOptions = (options?: Options<ListExtensionsData>) =>
   });
 
 /**
- * CreateExtension
+ * Create an extension
  */
 export const createExtensionMutation = (
   options?: Partial<Options<CreateExtensionData>>,
@@ -8019,7 +8021,7 @@ export const createExtensionMutation = (
 };
 
 /**
- * SyncExtensions
+ * Sync extensions from PBX
  */
 export const syncExtensionsMutation = (
   options?: Partial<Options<SyncExtensionsData>>,
@@ -8046,7 +8048,7 @@ export const syncExtensionsMutation = (
 };
 
 /**
- * DeleteExtension
+ * Delete an extension
  */
 export const deleteExtensionMutation = (
   options?: Partial<Options<DeleteExtensionData>>,
@@ -8076,7 +8078,7 @@ export const getExtensionQueryKey = (options: Options<GetExtensionData>) =>
   createQueryKey("getExtension", options);
 
 /**
- * GetExtension
+ * Get extension details
  */
 export const getExtensionOptions = (options: Options<GetExtensionData>) =>
   queryOptions<
@@ -8098,7 +8100,7 @@ export const getExtensionOptions = (options: Options<GetExtensionData>) =>
   });
 
 /**
- * UpdateExtension
+ * Update an extension
  */
 export const updateExtensionMutation = (
   options?: Partial<Options<UpdateExtensionData>>,
@@ -8129,7 +8131,7 @@ export const listExtensionDevicesQueryKey = (
 ) => createQueryKey("listExtensionDevices", options);
 
 /**
- * ListExtensionDevices
+ * List devices for an extension
  */
 export const listExtensionDevicesOptions = (
   options: Options<ListExtensionDevicesData>,
@@ -8156,7 +8158,7 @@ export const getDndSettingsQueryKey = (options: Options<GetDndSettingsData>) =>
   createQueryKey("getDndSettings", options);
 
 /**
- * GetDndSettings
+ * Get do-not-disturb settings
  */
 export const getDndSettingsOptions = (options: Options<GetDndSettingsData>) =>
   queryOptions<
@@ -8178,7 +8180,7 @@ export const getDndSettingsOptions = (options: Options<GetDndSettingsData>) =>
   });
 
 /**
- * UpdateDndSettings
+ * Update do-not-disturb settings
  */
 export const updateDndSettingsMutation = (
   options?: Partial<Options<UpdateDndSettingsData>>,
@@ -8205,7 +8207,7 @@ export const updateDndSettingsMutation = (
 };
 
 /**
- * ToggleDnd
+ * Toggle do-not-disturb
  */
 export const toggleDndMutation = (
   options?: Partial<Options<ToggleDndData>>,
@@ -8236,7 +8238,7 @@ export const listForwardingRulesQueryKey = (
 ) => createQueryKey("listForwardingRules", options);
 
 /**
- * ListForwardingRules
+ * List forwarding rules
  */
 export const listForwardingRulesOptions = (
   options: Options<ListForwardingRulesData>,
@@ -8260,7 +8262,7 @@ export const listForwardingRulesOptions = (
   });
 
 /**
- * CreateForwardingRule
+ * Create a forwarding rule
  */
 export const createForwardingRuleMutation = (
   options?: Partial<Options<CreateForwardingRuleData>>,
@@ -8287,7 +8289,7 @@ export const createForwardingRuleMutation = (
 };
 
 /**
- * SetForwardingRules
+ * Replace all forwarding rules
  */
 export const setForwardingRulesMutation = (
   options?: Partial<Options<SetForwardingRulesData>>,
@@ -8314,7 +8316,7 @@ export const setForwardingRulesMutation = (
 };
 
 /**
- * DeleteForwardingRule
+ * Delete a forwarding rule
  */
 export const deleteForwardingRuleMutation = (
   options?: Partial<Options<DeleteForwardingRuleData>>,
@@ -8341,7 +8343,7 @@ export const deleteForwardingRuleMutation = (
 };
 
 /**
- * UpdateForwardingRule
+ * Update a forwarding rule
  */
 export const updateForwardingRuleMutation = (
   options?: Partial<Options<UpdateForwardingRuleData>>,
@@ -8372,7 +8374,7 @@ export const getVoicemailSettingsQueryKey = (
 ) => createQueryKey("getVoicemailSettings", options);
 
 /**
- * GetVoicemailSettings
+ * Get voicemail settings
  */
 export const getVoicemailSettingsOptions = (
   options: Options<GetVoicemailSettingsData>,
@@ -8396,7 +8398,7 @@ export const getVoicemailSettingsOptions = (
   });
 
 /**
- * UpdateVoicemailSettings
+ * Update voicemail settings
  */
 export const updateVoicemailSettingsMutation = (
   options?: Partial<Options<UpdateVoicemailSettingsData>>,
@@ -8427,7 +8429,7 @@ export const listVoicemailMessagesQueryKey = (
 ) => createQueryKey("listVoicemailMessages", options);
 
 /**
- * ListVoicemailMessages
+ * List voicemail messages
  */
 export const listVoicemailMessagesOptions = (
   options: Options<ListVoicemailMessagesData>,
@@ -8451,7 +8453,7 @@ export const listVoicemailMessagesOptions = (
   });
 
 /**
- * DeleteVoicemailMessage
+ * Delete a voicemail message
  */
 export const deleteVoicemailMessageMutation = (
   options?: Partial<Options<DeleteVoicemailMessageData>>,
@@ -8482,7 +8484,7 @@ export const getVoicemailMessageQueryKey = (
 ) => createQueryKey("getVoicemailMessage", options);
 
 /**
- * GetVoicemailMessage
+ * Get a voicemail message
  */
 export const getVoicemailMessageOptions = (
   options: Options<GetVoicemailMessageData>,
@@ -8506,7 +8508,7 @@ export const getVoicemailMessageOptions = (
   });
 
 /**
- * UpdateVoicemailMessage
+ * Update a voicemail message
  */
 export const updateVoicemailMessageMutation = (
   options?: Partial<Options<UpdateVoicemailMessageData>>,
@@ -8537,7 +8539,7 @@ export const listPhoneNumbersQueryKey = (
 ) => createQueryKey("listPhoneNumbers", options);
 
 /**
- * ListPhoneNumbers
+ * List phone numbers
  */
 export const listPhoneNumbersOptions = (
   options?: Options<ListPhoneNumbersData>,
@@ -8561,7 +8563,7 @@ export const listPhoneNumbersOptions = (
   });
 
 /**
- * CreatePhoneNumber
+ * Create a phone number
  */
 export const createPhoneNumberMutation = (
   options?: Partial<Options<CreatePhoneNumberData>>,
@@ -8592,7 +8594,7 @@ export const listUnregisteredE911PhoneNumbersQueryKey = (
 ) => createQueryKey("listUnregisteredE911PhoneNumbers", options);
 
 /**
- * ListUnregisteredE911
+ * List phone numbers without E911
  */
 export const listUnregisteredE911PhoneNumbersOptions = (
   options: Options<ListUnregisteredE911PhoneNumbersData>,
@@ -8616,7 +8618,7 @@ export const listUnregisteredE911PhoneNumbersOptions = (
   });
 
 /**
- * DeletePhoneNumber
+ * Delete a phone number
  */
 export const deletePhoneNumberMutation = (
   options?: Partial<Options<DeletePhoneNumberData>>,
@@ -8646,7 +8648,7 @@ export const getPhoneNumberQueryKey = (options: Options<GetPhoneNumberData>) =>
   createQueryKey("getPhoneNumber", options);
 
 /**
- * GetPhoneNumber
+ * Get phone number details
  */
 export const getPhoneNumberOptions = (options: Options<GetPhoneNumberData>) =>
   queryOptions<
@@ -8668,7 +8670,7 @@ export const getPhoneNumberOptions = (options: Options<GetPhoneNumberData>) =>
   });
 
 /**
- * UpdatePhoneNumber
+ * Update a phone number
  */
 export const updatePhoneNumberMutation = (
   options?: Partial<Options<UpdatePhoneNumberData>>,
@@ -8699,7 +8701,7 @@ export const listVoicemailBoxesQueryKey = (
 ) => createQueryKey("listVoicemailBoxes", options);
 
 /**
- * ListVoicemailBoxes
+ * List voicemail boxes
  */
 export const listVoicemailBoxesOptions = (
   options?: Options<ListVoicemailBoxesData>,
@@ -8723,7 +8725,7 @@ export const listVoicemailBoxesOptions = (
   });
 
 /**
- * CreateVoicemailBox
+ * Create a voicemail box
  */
 export const createVoicemailBoxMutation = (
   options?: Partial<Options<CreateVoicemailBoxData>>,
@@ -8750,7 +8752,7 @@ export const createVoicemailBoxMutation = (
 };
 
 /**
- * DeleteVoicemailBox
+ * Delete a voicemail box
  */
 export const deleteVoicemailBoxMutation = (
   options?: Partial<Options<DeleteVoicemailBoxData>>,
@@ -8781,7 +8783,7 @@ export const getVoicemailBoxQueryKey = (
 ) => createQueryKey("getVoicemailBox", options);
 
 /**
- * GetVoicemailBox
+ * Get voicemail box details
  */
 export const getVoicemailBoxOptions = (options: Options<GetVoicemailBoxData>) =>
   queryOptions<
@@ -8803,7 +8805,7 @@ export const getVoicemailBoxOptions = (options: Options<GetVoicemailBoxData>) =>
   });
 
 /**
- * UpdateVoicemailBox
+ * Update a voicemail box
  */
 export const updateVoicemailBoxMutation = (
   options?: Partial<Options<UpdateVoicemailBoxData>>,
@@ -8834,7 +8836,7 @@ export const listVoicemailBoxMessagesQueryKey = (
 ) => createQueryKey("listVoicemailBoxMessages", options);
 
 /**
- * ListBoxMessages
+ * List voicemail box messages
  */
 export const listVoicemailBoxMessagesOptions = (
   options: Options<ListVoicemailBoxMessagesData>,
@@ -8862,7 +8864,7 @@ export const getVoicemailBoxUnreadCountQueryKey = (
 ) => createQueryKey("getVoicemailBoxUnreadCount", options);
 
 /**
- * GetUnreadCount
+ * Get unread voicemail count
  */
 export const getVoicemailBoxUnreadCountOptions = (
   options: Options<GetVoicemailBoxUnreadCountData>,
@@ -8890,7 +8892,7 @@ export const listAllVoicemailMessagesQueryKey = (
 ) => createQueryKey("listAllVoicemailMessages", options);
 
 /**
- * ListVoicemailMessages
+ * List all voicemail messages
  */
 export const listAllVoicemailMessagesOptions = (
   options?: Options<ListAllVoicemailMessagesData>,
@@ -8914,7 +8916,7 @@ export const listAllVoicemailMessagesOptions = (
   });
 
 /**
- * DeleteVoicemailMessage
+ * Delete a voicemail message
  */
 export const deleteVoicemailMessageByIdMutation = (
   options?: Partial<Options<DeleteVoicemailMessageByIdData>>,
@@ -8945,7 +8947,7 @@ export const getVoicemailMessageByIdQueryKey = (
 ) => createQueryKey("getVoicemailMessageById", options);
 
 /**
- * GetVoicemailMessage
+ * Get voicemail message details
  */
 export const getVoicemailMessageByIdOptions = (
   options: Options<GetVoicemailMessageByIdData>,
@@ -8969,7 +8971,7 @@ export const getVoicemailMessageByIdOptions = (
   });
 
 /**
- * ToggleReadStatus
+ * Toggle voicemail message read status
  */
 export const toggleVoicemailMessageReadMutation = (
   options?: Partial<Options<ToggleVoicemailMessageReadData>>,
@@ -8999,7 +9001,7 @@ export const listWebhooksQueryKey = (options?: Options<ListWebhooksData>) =>
   createQueryKey("listWebhooks", options);
 
 /**
- * ListWebhooks
+ * List webhooks
  */
 export const listWebhooksOptions = (options?: Options<ListWebhooksData>) =>
   queryOptions<
@@ -9021,7 +9023,7 @@ export const listWebhooksOptions = (options?: Options<ListWebhooksData>) =>
   });
 
 /**
- * CreateWebhook
+ * Create a webhook
  */
 export const createWebhookMutation = (
   options?: Partial<Options<CreateWebhookData>>,
@@ -9052,7 +9054,7 @@ export const listWebhookEndpointsQueryKey = (
 ) => createQueryKey("listWebhookEndpoints", options);
 
 /**
- * ListEndpoints
+ * List webhook endpoints
  */
 export const listWebhookEndpointsOptions = (
   options?: Options<ListWebhookEndpointsData>,
@@ -9076,7 +9078,7 @@ export const listWebhookEndpointsOptions = (
   });
 
 /**
- * CreateEndpoint
+ * Create a webhook endpoint
  */
 export const createWebhookEndpointMutation = (
   options?: Partial<Options<CreateWebhookEndpointData>>,
@@ -9107,7 +9109,7 @@ export const listWebhookEventTypesQueryKey = (
 ) => createQueryKey("listWebhookEventTypes", options);
 
 /**
- * ListEventTypes
+ * List webhook event types
  */
 export const listWebhookEventTypesOptions = (
   options?: Options<ListWebhookEventTypesData>,
@@ -9131,7 +9133,7 @@ export const listWebhookEventTypesOptions = (
   });
 
 /**
- * DeleteEndpoint
+ * Delete a webhook endpoint
  */
 export const deleteWebhookEndpointMutation = (
   options?: Partial<Options<DeleteWebhookEndpointData>>,
@@ -9162,7 +9164,7 @@ export const getWebhookEndpointQueryKey = (
 ) => createQueryKey("getWebhookEndpoint", options);
 
 /**
- * GetEndpoint
+ * Get webhook endpoint details
  */
 export const getWebhookEndpointOptions = (
   options: Options<GetWebhookEndpointData>,
@@ -9186,7 +9188,7 @@ export const getWebhookEndpointOptions = (
   });
 
 /**
- * UpdateEndpoint
+ * Update a webhook endpoint
  */
 export const updateWebhookEndpointMutation = (
   options?: Partial<Options<UpdateWebhookEndpointData>>,
@@ -9213,7 +9215,7 @@ export const updateWebhookEndpointMutation = (
 };
 
 /**
- * DeleteWebhook
+ * Delete a webhook
  */
 export const deleteWebhookMutation = (
   options?: Partial<Options<DeleteWebhookData>>,
@@ -9243,7 +9245,7 @@ export const getWebhookQueryKey = (options: Options<GetWebhookData>) =>
   createQueryKey("getWebhook", options);
 
 /**
- * GetWebhook
+ * Get webhook details
  */
 export const getWebhookOptions = (options: Options<GetWebhookData>) =>
   queryOptions<
@@ -9265,7 +9267,7 @@ export const getWebhookOptions = (options: Options<GetWebhookData>) =>
   });
 
 /**
- * UpdateWebhook
+ * Update a webhook
  */
 export const updateWebhookMutation = (
   options?: Partial<Options<UpdateWebhookData>>,
@@ -9296,7 +9298,7 @@ export const listWebhookDeliveriesQueryKey = (
 ) => createQueryKey("listWebhookDeliveries", options);
 
 /**
- * ListDeliveries
+ * List webhook deliveries
  */
 export const listWebhookDeliveriesOptions = (
   options: Options<ListWebhookDeliveriesData>,
@@ -9320,7 +9322,7 @@ export const listWebhookDeliveriesOptions = (
   });
 
 /**
- * RedeliverDelivery
+ * Redeliver a webhook
  */
 export const redeliverWebhookDeliveryMutation = (
   options?: Partial<Options<RedeliverWebhookDeliveryData>>,
@@ -9347,7 +9349,7 @@ export const redeliverWebhookDeliveryMutation = (
 };
 
 /**
- * TestWebhook
+ * Send a test webhook
  */
 export const testWebhookMutation = (
   options?: Partial<Options<TestWebhookData>>,

@@ -631,12 +631,12 @@ export function useAdminPhoneNumbers(page = 1, pageSize = 25, search?: string) {
   })
 }
 
-export function useAdminExtensions() {
+export function useAdminExtensions(page = 1, pageSize = 25, search?: string) {
   return useQuery({
-    queryKey: ["admin", "voice", "extensions"],
+    queryKey: ["admin", "voice", "extensions", page, pageSize, search],
     queryFn: async () => {
-      const response = await adminListExtensions()
-      return response.data as AdminExtensionSummary[]
+      const response = await adminListExtensions({ query: { currentPage: page, pageSize, searchString: search } as never })
+      return response.data as { items: AdminExtensionSummary[]; total: number }
     },
   })
 }

@@ -6,9 +6,6 @@ export * from "./api/types.gen"
 
 // Import specific operation types for mapping
 import type {
-  AccountLoginData,
-  AccountLoginErrors,
-  AccountLoginResponses,
   AccountLogoutData,
   AccountLogoutResponses,
   AccountPasswordUpdateData,
@@ -37,8 +34,6 @@ import type {
   AdminGetSupportStatsResponses,
   AdminGetVoiceStatsData,
   AdminGetVoiceStatsResponses,
-  AdminListExtensionsData,
-  AdminListExtensionsResponses,
   AdminListFaxMessagesData,
   AdminListFaxMessagesResponses,
   ConfirmMfaSetupData,
@@ -157,8 +152,6 @@ import type {
   SyncExtensionsResponses,
   SystemHealthData,
   SystemHealthResponses,
-  TokenRefreshData,
-  TokenRefreshResponses,
   UpdateAdminGatewaySettingsData,
   UpdateAdminGatewaySettingsErrors,
   UpdateAdminGatewaySettingsResponses,
@@ -170,10 +163,7 @@ import type {
   UpdateOrganizationResponses,
   VerifyEmailData,
   VerifyEmailErrors,
-  VerifyEmailResponses,
-  VerifyMfaChallengeData,
-  VerifyMfaChallengeErrors,
-  VerifyMfaChallengeResponses
+  VerifyEmailResponses
 } from "./api/types.gen"
 
 // ============================================================================
@@ -241,7 +231,6 @@ export type OperationName =
   | 'list_devices_api_devices'
   | 'list_endpoints'
   | 'list_event_types'
-  | 'list_extensions'
   | 'list_extensions_api_voice_extensions'
   | 'list_fax_messages'
   | 'list_fax_numbers_api_fax_numbers'
@@ -261,10 +250,8 @@ export type OperationName =
   | 'list_users_api_users'
   | 'list_voicemail_boxes'
   | 'list_webhooks'
-  | 'login'
   | 'logout'
   | 'mark_all_read'
-  | 'refresh_token'
   | 'regenerate_backup_codes'
   | 'remove_account'
   | 'request_verification'
@@ -281,7 +268,6 @@ export type OperationName =
   | 'update_preferences'
   | 'update_profile'
   | 'validate_reset_token'
-  | 'verify_challenge'
   | 'verify_email'
 
 /**
@@ -341,7 +327,6 @@ export interface OperationDataTypes {
   'list_devices_api_devices': CreateDeviceData
   'list_endpoints': CreateWebhookEndpointData
   'list_event_types': ListWebhookEventTypesData
-  'list_extensions': AdminListExtensionsData
   'list_extensions_api_voice_extensions': CreateExtensionData
   'list_fax_messages': AdminListFaxMessagesData
   'list_fax_numbers_api_fax_numbers': CreateFaxNumberData
@@ -361,10 +346,8 @@ export interface OperationDataTypes {
   'list_users_api_users': CreateUserData
   'list_voicemail_boxes': CreateVoicemailBoxData
   'list_webhooks': CreateWebhookData
-  'login': AccountLoginData
   'logout': AccountLogoutData
   'mark_all_read': MarkAllNotificationsReadData
-  'refresh_token': TokenRefreshData
   'regenerate_backup_codes': RegenerateMfaBackupCodesData
   'remove_account': AccountProfileUpdateData
   'request_verification': RequestEmailVerificationData
@@ -381,7 +364,6 @@ export interface OperationDataTypes {
   'update_preferences': UpdateNotificationPreferencesData
   'update_profile': AccountProfileUpdateData
   'validate_reset_token': ResetPasswordData
-  'verify_challenge': VerifyMfaChallengeData
   'verify_email': VerifyEmailData
 }
 
@@ -442,7 +424,6 @@ export interface OperationResponseTypes {
   'list_devices_api_devices': CreateDeviceResponses
   'list_endpoints': CreateWebhookEndpointResponses
   'list_event_types': ListWebhookEventTypesResponses
-  'list_extensions': AdminListExtensionsResponses
   'list_extensions_api_voice_extensions': CreateExtensionResponses
   'list_fax_messages': AdminListFaxMessagesResponses
   'list_fax_numbers_api_fax_numbers': CreateFaxNumberResponses
@@ -462,10 +443,8 @@ export interface OperationResponseTypes {
   'list_users_api_users': CreateUserResponses
   'list_voicemail_boxes': CreateVoicemailBoxResponses
   'list_webhooks': CreateWebhookResponses
-  'login': AccountLoginResponses
   'logout': AccountLogoutResponses
   'mark_all_read': MarkAllNotificationsReadResponses
-  'refresh_token': TokenRefreshResponses
   'regenerate_backup_codes': RegenerateMfaBackupCodesResponses
   'remove_account': AccountProfileUpdateResponses
   'request_verification': RequestEmailVerificationResponses
@@ -482,7 +461,6 @@ export interface OperationResponseTypes {
   'update_preferences': UpdateNotificationPreferencesResponses
   'update_profile': AccountProfileUpdateResponses
   'validate_reset_token': ResetPasswordResponses
-  'verify_challenge': VerifyMfaChallengeResponses
   'verify_email': VerifyEmailResponses
 }
 
@@ -543,7 +521,6 @@ export interface OperationErrorTypes {
   'list_devices_api_devices': CreateDeviceErrors
   'list_endpoints': CreateWebhookEndpointErrors
   'list_event_types': never
-  'list_extensions': never
   'list_extensions_api_voice_extensions': CreateExtensionErrors
   'list_fax_messages': never
   'list_fax_numbers_api_fax_numbers': CreateFaxNumberErrors
@@ -563,10 +540,8 @@ export interface OperationErrorTypes {
   'list_users_api_users': CreateUserErrors
   'list_voicemail_boxes': CreateVoicemailBoxErrors
   'list_webhooks': CreateWebhookErrors
-  'login': AccountLoginErrors
   'logout': never
   'mark_all_read': never
-  'refresh_token': never
   'regenerate_backup_codes': RegenerateMfaBackupCodesErrors
   'remove_account': AccountProfileUpdateErrors
   'request_verification': RequestEmailVerificationErrors
@@ -583,7 +558,6 @@ export interface OperationErrorTypes {
   'update_preferences': UpdateNotificationPreferencesErrors
   'update_profile': AccountProfileUpdateErrors
   'validate_reset_token': ResetPasswordErrors
-  'verify_challenge': VerifyMfaChallengeErrors
   'verify_email': VerifyEmailErrors
 }
 
