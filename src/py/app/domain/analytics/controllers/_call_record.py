@@ -58,14 +58,14 @@ class CallRecordController(Controller):
         call_records_service: CallRecordService,
         current_user: m.User,
         filters: Annotated[list[FilterTypes], Dependency(skip_validation=True)],
-        start_date: Annotated[datetime | None, Parameter(query="startDate", required=False)] = None,
-        end_date: Annotated[datetime | None, Parameter(query="endDate", required=False)] = None,
+        start_date: Annotated[datetime | None, Parameter(required=False)] = None,
+        end_date: Annotated[datetime | None, Parameter(required=False)] = None,
         direction: Annotated[str | None, Parameter(query="direction", required=False)] = None,
         disposition: Annotated[str | None, Parameter(query="disposition", required=False)] = None,
         source: Annotated[str | None, Parameter(query="source", required=False)] = None,
         destination: Annotated[str | None, Parameter(query="destination", required=False)] = None,
-        min_duration: Annotated[int | None, Parameter(query="minDuration", required=False)] = None,
-        max_duration: Annotated[int | None, Parameter(query="maxDuration", required=False)] = None,
+        min_duration: Annotated[int | None, Parameter(required=False)] = None,
+        max_duration: Annotated[int | None, Parameter(required=False)] = None,
     ) -> OffsetPagination[CallRecordList]:
         """List call detail records with filtering.
 
@@ -172,8 +172,8 @@ class CallRecordController(Controller):
         self,
         call_records_service: CallRecordService,
         current_user: m.User,
-        start_date: Annotated[datetime | None, Parameter(query="startDate", required=False)] = None,
-        end_date: Annotated[datetime | None, Parameter(query="endDate", required=False)] = None,
+        start_date: Annotated[datetime | None, Parameter(required=False)] = None,
+        end_date: Annotated[datetime | None, Parameter(required=False)] = None,
         direction: Annotated[str | None, Parameter(query="direction", required=False)] = None,
         disposition: Annotated[str | None, Parameter(query="disposition", required=False)] = None,
     ) -> Response[bytes]:

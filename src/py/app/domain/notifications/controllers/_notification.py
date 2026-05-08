@@ -10,12 +10,11 @@ from litestar import Controller, Request, delete, get, patch, post
 from litestar.di import Provide
 from litestar.exceptions import NotFoundException, PermissionDeniedException
 from litestar.params import Dependency, Parameter
-from litestar.response import Response
 from sqlalchemy import inspect as sa_inspect
 
 from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
-from app.domain.notifications.schemas import Notification, NotificationUpdate, UnreadCount
+from app.domain.notifications.schemas import Notification, UnreadCount
 from app.domain.notifications.services import NotificationService
 from app.lib.deps import create_service_dependencies
 

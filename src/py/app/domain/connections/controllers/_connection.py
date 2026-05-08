@@ -13,8 +13,8 @@ from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.connections.guards import requires_connections_admin
 from app.domain.connections.schemas import ConnectionCreate, ConnectionDetail, ConnectionList, ConnectionUpdate
-from app.domain.teams.guards import requires_feature_permission
 from app.domain.connections.services import ConnectionService
+from app.domain.teams.guards import requires_feature_permission
 from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
 from app.lib.schema import Message

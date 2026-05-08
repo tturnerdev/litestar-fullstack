@@ -13,7 +13,6 @@ from sqlalchemy.orm import joinedload
 from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.e911.guards import requires_team_membership
-from app.domain.teams.guards import requires_feature_permission
 from app.domain.e911.schemas import (
     E911Registration,
     E911RegistrationCreate,
@@ -21,6 +20,7 @@ from app.domain.e911.schemas import (
     UnregisteredPhoneNumber,
 )
 from app.domain.e911.services import E911RegistrationService
+from app.domain.teams.guards import requires_feature_permission
 from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
 

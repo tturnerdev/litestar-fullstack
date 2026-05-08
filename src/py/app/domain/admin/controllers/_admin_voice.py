@@ -13,7 +13,7 @@ from litestar.params import Dependency
 from app.db import models as m
 from app.domain.accounts.guards import requires_superuser
 from app.domain.admin.schemas import AdminExtensionSummary, AdminPhoneNumberSummary, AdminVoiceStats
-from app.domain.voice.deps import provide_dnd_service, provide_extensions_service, provide_phone_numbers_service
+from app.domain.voice.deps import provide_dnd_service, provide_extensions_service
 from app.domain.voice.services import DoNotDisturbService, ExtensionService, PhoneNumberService
 from app.lib.deps import create_service_dependencies
 

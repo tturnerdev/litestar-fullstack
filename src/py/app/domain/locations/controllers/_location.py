@@ -14,8 +14,8 @@ from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.locations.guards import requires_location_team_membership
 from app.domain.locations.schemas import Location, LocationCreate, LocationUpdate
-from app.domain.teams.guards import requires_feature_permission
 from app.domain.locations.services import LocationService
+from app.domain.teams.guards import requires_feature_permission
 from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
 

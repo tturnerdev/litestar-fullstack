@@ -13,8 +13,8 @@ from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.support.guards import requires_ticket_access
 from app.domain.support.schemas import TicketAttachment
-from app.domain.teams.guards import requires_feature_permission
 from app.domain.support.services import TicketAttachmentService
+from app.domain.teams.guards import requires_feature_permission
 from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
 

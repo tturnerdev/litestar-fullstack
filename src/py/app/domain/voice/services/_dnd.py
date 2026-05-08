@@ -1,14 +1,10 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
 from uuid import UUID
 
 from advanced_alchemy.extensions.litestar import repository, service
 
 from app.db import models as m
-
-if TYPE_CHECKING:
-    pass
 
 
 class DoNotDisturbService(service.SQLAlchemyAsyncRepositoryService[m.DoNotDisturb]):

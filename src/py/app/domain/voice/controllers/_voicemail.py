@@ -6,19 +6,18 @@ from typing import TYPE_CHECKING, Annotated, Any
 from uuid import UUID
 
 import msgspec
-from structlog import get_logger
 from litestar import Controller, delete, get, patch
 from litestar.di import Provide
 from litestar.params import Dependency, Parameter
-
 from sqlalchemy.orm import selectinload
+from structlog import get_logger
 
 from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.gateway.deps import provide_gateway_connections
 from app.domain.gateway.providers import FreePBXProvider
-from app.domain.voice.deps import provide_extensions_service
 from app.domain.teams.guards import requires_feature_permission
+from app.domain.voice.deps import provide_extensions_service
 from app.domain.voice.guards import requires_extension_ownership
 from app.domain.voice.schemas import (
     VoicemailMessage,

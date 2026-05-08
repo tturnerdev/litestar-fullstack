@@ -138,7 +138,7 @@ def _find_next_open(
     """
     local_date = check_time.date()
 
-    for day_offset in range(0, 8):
+    for day_offset in range(8):
         candidate_date = local_date + timedelta(days=day_offset)
         candidate_weekday = candidate_date.weekday()
 

@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.254.0 (2026-05-07)
+
+### Added
+- **Webhook endpoint infrastructure** — `WebhookEndpoint` model, controller, service, schemas, and dispatcher wired into webhooks domain for managing webhook delivery targets
+
+### Fixed
+- **Ruff auto-format across 72 Python files** — import sorting, unused import removal (`LimitOffset`, `TicketCategory`, `String`, `field`, `timedelta`, `patch`), Python modernization (`timezone.utc` → `UTC`, `typing.Sequence` → `collections.abc.Sequence`)
+- **Removed redundant camelCase query param aliases** — Litestar's `CamelizedBaseStruct` handles conversion automatically
+- **Simplified audit snapshot** — combined `datetime`/`date` isinstance branches in `capture_snapshot`
+
 ## v0.252.0 (2026-05-03)
 
 ### Added

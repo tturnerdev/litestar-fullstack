@@ -10,8 +10,8 @@ import httpx
 import structlog
 
 from app.db import models as m
-from app.domain.gateway.providers._base import GatewayProvider, ProviderResult
 from app.domain.gateway.providers import register_provider
+from app.domain.gateway.providers._base import GatewayProvider, ProviderResult
 
 logger = structlog.get_logger()
 

@@ -5,7 +5,7 @@ from __future__ import annotations
 import html
 import logging
 import mimetypes
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from typing import TYPE_CHECKING, Annotated, Any
 from uuid import UUID
 
@@ -259,7 +259,7 @@ class FeedbackController(Controller):
 
         user_name = current_user.name or current_user.email
         user_email = current_user.email
-        submitted_at = datetime.now(tz=timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+        submitted_at = datetime.now(tz=UTC).strftime("%Y-%m-%d %H:%M:%S UTC")
 
         html_content = _build_feedback_html(
             title=title,
@@ -301,7 +301,7 @@ class FeedbackController(Controller):
             subject=subject,
             html_content=html_content,
             reply_to=user_email,
-            attachments=attachments if attachments else None,
+            attachments=attachments or None,
         )
 
         logger.info(

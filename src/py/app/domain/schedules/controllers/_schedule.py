@@ -14,8 +14,6 @@ from sqlalchemy.orm import selectinload
 from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.schedules.deps import provide_schedule_entries_service
-from app.domain.schedules.guards import requires_schedule_team_membership
-from app.domain.teams.guards import requires_feature_permission
 from app.domain.schedules.schemas import (
     ScheduleCheckResponse,
     ScheduleCreate,
@@ -28,6 +26,7 @@ from app.domain.schedules.schemas import (
     ScheduleUpdate,
 )
 from app.domain.schedules.services import ScheduleEntryService, ScheduleService
+from app.domain.teams.guards import requires_feature_permission
 from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
 

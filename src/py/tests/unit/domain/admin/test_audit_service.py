@@ -11,8 +11,8 @@ Tests service methods with mocked repositories. Focuses on:
 
 from __future__ import annotations
 
-from datetime import UTC, datetime, timedelta
-from unittest.mock import AsyncMock, Mock, patch
+from datetime import UTC, datetime
+from unittest.mock import AsyncMock, Mock
 from uuid import uuid4
 
 import pytest

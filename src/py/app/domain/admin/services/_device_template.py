@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from advanced_alchemy.extensions.litestar import repository, service
 
@@ -26,7 +26,7 @@ class DeviceTemplateService(service.SQLAlchemyAsyncRepositoryService[m.DeviceTem
     async def to_model(
         self,
         data: ModelDictT[m.DeviceTemplate],
-        operation: Optional[str] = None,
+        operation: str | None = None,
     ) -> m.DeviceTemplate:
         # DeviceTemplate has a column named "model" which collides with
         # model_from_dict(model=..., **data).  Construct directly when dict.

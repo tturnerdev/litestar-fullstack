@@ -5,12 +5,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Annotated, Any
 from uuid import UUID
 
-from structlog import get_logger
 from litestar import Controller, delete, get, patch, post
 from litestar.di import Provide
 from litestar.exceptions import ClientException
 from litestar.params import Dependency, Parameter
 from sqlalchemy.orm import joinedload
+from structlog import get_logger
 
 from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
@@ -21,7 +21,13 @@ from app.domain.tasks.deps import provide_background_tasks_service
 from app.domain.teams.guards import requires_feature_permission
 from app.domain.voice.guards import requires_extension_ownership
 from app.domain.voice.jobs import extension_create_job, extension_delete_job, extension_update_job
-from app.domain.voice.schemas import Extension, ExtensionCreate, ExtensionDeviceSummary, ExtensionSyncResult, ExtensionUpdate
+from app.domain.voice.schemas import (
+    Extension,
+    ExtensionCreate,
+    ExtensionDeviceSummary,
+    ExtensionSyncResult,
+    ExtensionUpdate,
+)
 from app.domain.voice.services import ExtensionService
 from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies

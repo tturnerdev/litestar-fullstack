@@ -14,6 +14,6 @@ __all__ = (
     "FaxNumber",
     "FaxNumberCreate",
     "FaxNumberUpdate",
-    "SendFax",
     "Message",
+    "SendFax",
 )

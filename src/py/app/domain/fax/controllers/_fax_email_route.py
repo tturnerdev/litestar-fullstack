@@ -16,8 +16,8 @@ from app.domain.fax.controllers._fax_number import _can_access_fax_number
 from app.domain.fax.deps import provide_fax_numbers_service
 from app.domain.fax.guards import requires_fax_number_access
 from app.domain.fax.schemas import FaxEmailRoute, FaxEmailRouteCreate, FaxEmailRouteUpdate
-from app.domain.teams.guards import requires_feature_permission
 from app.domain.fax.services import FaxEmailRouteService
+from app.domain.teams.guards import requires_feature_permission
 from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
 

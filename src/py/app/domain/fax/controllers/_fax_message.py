@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Annotated, Any
 from uuid import UUID
 
@@ -15,6 +15,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from app.db import models as m
+from app.db.models._fax_enums import FaxDirection, FaxStatus
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.fax.controllers._fax_number import _can_access_fax_number
 from app.domain.fax.guards import requires_fax_message_access
@@ -25,7 +26,6 @@ from app.domain.notifications.deps import provide_notifications_service
 from app.domain.tasks.deps import provide_background_tasks_service
 from app.domain.tasks.schemas import BackgroundTaskDetail
 from app.domain.teams.guards import requires_feature_permission
-from app.db.models._fax_enums import FaxDirection, FaxStatus
 from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
 
@@ -235,7 +235,7 @@ class FaxMessageController(Controller):
                 "page_count": 0,
                 "file_path": "",
                 "file_size_bytes": 0,
-                "received_at": datetime.now(tz=timezone.utc),
+                "received_at": datetime.now(tz=UTC),
             }
         )
 

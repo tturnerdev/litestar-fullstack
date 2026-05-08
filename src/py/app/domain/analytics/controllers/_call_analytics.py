@@ -14,7 +14,6 @@ from app.db import models as m
 from app.domain.analytics.deps import provide_call_records_service
 from app.domain.analytics.guards import requires_analytics_access
 from app.domain.analytics.schemas import CallAnalyticsSummary, CallVolumePoint, ExtensionStats
-
 from app.domain.analytics.services import CallRecordService
 
 
@@ -32,9 +31,9 @@ class CallAnalyticsController(Controller):
         self,
         call_records_service: CallRecordService,
         current_user: m.User,
-        team_id: Annotated[UUID, Parameter(query="teamId", required=True)],
-        start_date: Annotated[datetime, Parameter(query="startDate", required=True)],
-        end_date: Annotated[datetime, Parameter(query="endDate", required=True)],
+        team_id: Annotated[UUID, Parameter(required=True)],
+        start_date: Annotated[datetime, Parameter(required=True)],
+        end_date: Annotated[datetime, Parameter(required=True)],
     ) -> CallAnalyticsSummary:
         """Get aggregate call statistics for a team within a date range.
 
@@ -56,9 +55,9 @@ class CallAnalyticsController(Controller):
         self,
         call_records_service: CallRecordService,
         current_user: m.User,
-        team_id: Annotated[UUID, Parameter(query="teamId", required=True)],
-        start_date: Annotated[datetime, Parameter(query="startDate", required=True)],
-        end_date: Annotated[datetime, Parameter(query="endDate", required=True)],
+        team_id: Annotated[UUID, Parameter(required=True)],
+        start_date: Annotated[datetime, Parameter(required=True)],
+        end_date: Annotated[datetime, Parameter(required=True)],
         interval: Annotated[str, Parameter(query="interval", required=False)] = "day",
     ) -> list[CallVolumePoint]:
         """Get call volume over time for charting.
@@ -82,9 +81,9 @@ class CallAnalyticsController(Controller):
         self,
         call_records_service: CallRecordService,
         current_user: m.User,
-        team_id: Annotated[UUID, Parameter(query="teamId", required=True)],
-        start_date: Annotated[datetime, Parameter(query="startDate", required=True)],
-        end_date: Annotated[datetime, Parameter(query="endDate", required=True)],
+        team_id: Annotated[UUID, Parameter(required=True)],
+        start_date: Annotated[datetime, Parameter(required=True)],
+        end_date: Annotated[datetime, Parameter(required=True)],
     ) -> list[ExtensionStats]:
         """Get per-extension call statistics.
 

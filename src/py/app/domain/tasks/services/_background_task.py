@@ -287,7 +287,7 @@ class BackgroundTaskService(CompositeServiceMixin, service.SQLAlchemyAsyncReposi
         Returns a dict with status counts, average duration per task type,
         today's total, and this week's total.
         """
-        from sqlalchemy import case, extract, func, select
+        from sqlalchemy import extract, func, select
 
         now = datetime.now(UTC)
         today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)

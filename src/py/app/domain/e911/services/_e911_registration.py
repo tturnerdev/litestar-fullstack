@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from datetime import UTC, datetime
-from typing import Any, Sequence
+from typing import Any
 from uuid import UUID
 
 from advanced_alchemy.extensions.litestar import repository, service

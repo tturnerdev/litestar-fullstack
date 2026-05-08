@@ -70,7 +70,7 @@ class EventStreamController(Controller):
 
                 async for event_type, data in event_subscriber.listen():
                     sse_data = msgspec.json.encode(data).decode("utf-8")
-                    yield f"event: {event_type}\ndata: {sse_data}\n\n".encode("utf-8")
+                    yield f"event: {event_type}\ndata: {sse_data}\n\n".encode()
 
                     # Send periodic heartbeats between events
                     now = asyncio.get_running_loop().time()

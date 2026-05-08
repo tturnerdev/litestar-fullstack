@@ -11,6 +11,7 @@ from uuid import uuid4
 
 import pytest
 
+from app.domain.accounts.schemas import User
 from app.domain.admin.schemas import (
     ActivityLogEntry,
     AdminTeamDetail,
@@ -25,7 +26,6 @@ from app.domain.admin.schemas import (
     TrendPoint,
 )
 from app.domain.admin.schemas._teams import AdminTeamMember, AdminTeamUpdate
-from app.domain.accounts.schemas import User
 
 pytestmark = [pytest.mark.unit]
 

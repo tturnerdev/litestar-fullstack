@@ -14,7 +14,6 @@ from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.call_routing.deps import provide_ring_group_members_service
 from app.domain.call_routing.guards import requires_call_routing_access
-from app.domain.teams.guards import requires_feature_permission
 from app.domain.call_routing.schemas import (
     RingGroup,
     RingGroupCreate,
@@ -24,6 +23,7 @@ from app.domain.call_routing.schemas import (
     RingGroupUpdate,
 )
 from app.domain.call_routing.services import RingGroupMemberService, RingGroupService
+from app.domain.teams.guards import requires_feature_permission
 from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
 

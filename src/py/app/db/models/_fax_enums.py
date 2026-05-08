@@ -3,7 +3,6 @@ from __future__ import annotations
 from enum import StrEnum
 
 
-
 class FaxDirection(StrEnum):
     """Valid values for fax message direction."""
 

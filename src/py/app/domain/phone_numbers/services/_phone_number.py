@@ -30,9 +30,7 @@ def normalize_phone_number(raw: str) -> str:
 
     if len(digits) == 10 and not has_plus:
         result = f"+1{digits}"
-    elif has_plus:
-        result = f"+{digits}"
-    elif len(digits) == 11 and digits.startswith("1"):
+    elif has_plus or (len(digits) == 11 and digits.startswith("1")):
         result = f"+{digits}"
     else:
         result = f"+{digits}"

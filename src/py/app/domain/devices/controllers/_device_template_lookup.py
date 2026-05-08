@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 from litestar import Controller, get
 from litestar.di import Provide
 from litestar.exceptions import NotFoundException

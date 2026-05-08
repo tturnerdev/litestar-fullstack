@@ -45,8 +45,8 @@ from app.domain.gateway.providers._telnyx import TelnyxProvider
 from app.domain.gateway.providers._unifi import UnifiProvider
 
 __all__ = (
-    "FreePBXProvider",
     "PROVIDER_REGISTRY",
+    "FreePBXProvider",
     "GatewayProvider",
     "ProviderResult",
     "TelnyxProvider",

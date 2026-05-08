@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from litestar.exceptions import PermissionDeniedException
-
 from app.lib import constants
 
 if TYPE_CHECKING:

@@ -23,7 +23,7 @@ from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
 
 if TYPE_CHECKING:
-    from advanced_alchemy.filters import FilterTypes, LimitOffset
+    from advanced_alchemy.filters import FilterTypes
     from litestar import Request
     from litestar.security.jwt import Token
 

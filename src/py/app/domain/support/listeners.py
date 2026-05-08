@@ -14,7 +14,6 @@ from app.lib.deps import provide_services
 if TYPE_CHECKING:
     from uuid import UUID
 
-    from app.lib.email import AppEmailService
 
 logger = structlog.get_logger()
 

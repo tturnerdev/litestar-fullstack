@@ -175,10 +175,9 @@ def requires_feature_permission(
                 allowed = perm.can_edit if action == "edit" else perm.can_view
                 if allowed:
                     return
-            else:
-                # No entry exists — apply default: ADMIN=allow, MEMBER=deny.
-                if role == m.TeamRoles.ADMIN:
-                    return
+            # No entry exists — apply default: ADMIN=allow, MEMBER=deny.
+            elif role == m.TeamRoles.ADMIN:
+                return
                 # MEMBER without explicit entry -> denied for this team, continue checking.
 
         raise PermissionDeniedException(detail="Insufficient permissions.")

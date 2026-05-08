@@ -8,7 +8,7 @@ from advanced_alchemy.base import UUIDv7AuditBase
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.db.models._ticket_status import TicketCategory, TicketPriority, TicketStatus
+from app.db.models._ticket_status import TicketPriority, TicketStatus
 
 if TYPE_CHECKING:
     from app.db.models._ticket_attachment import TicketAttachment

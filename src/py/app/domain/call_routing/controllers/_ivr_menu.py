@@ -14,7 +14,6 @@ from app.db import models as m
 from app.domain.admin.deps import provide_audit_log_service
 from app.domain.call_routing.deps import provide_ivr_menu_options_service
 from app.domain.call_routing.guards import requires_call_routing_access
-from app.domain.teams.guards import requires_feature_permission
 from app.domain.call_routing.schemas import (
     IvrMenu,
     IvrMenuCreate,
@@ -24,6 +23,7 @@ from app.domain.call_routing.schemas import (
     IvrMenuUpdate,
 )
 from app.domain.call_routing.services import IvrMenuOptionService, IvrMenuService
+from app.domain.teams.guards import requires_feature_permission
 from app.lib.audit import capture_snapshot, log_audit
 from app.lib.deps import create_service_dependencies
 

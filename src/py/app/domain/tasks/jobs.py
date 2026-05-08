@@ -2,17 +2,18 @@
 
 from __future__ import annotations
 
-from contextlib import asynccontextmanager
 from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from typing import TYPE_CHECKING
 
 from app.domain.tasks import deps as task_deps
 from app.lib.deps import provide_services
 
 if TYPE_CHECKING:
+    from saq.types import Context
+
     from app.db.models._background_task import BackgroundTask
     from app.domain.tasks.services import BackgroundTaskService
-    from saq.types import Context
 
 
 @asynccontextmanager

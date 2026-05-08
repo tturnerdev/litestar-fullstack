@@ -16,7 +16,7 @@ from app.domain.devices.services import DeviceService
 from app.lib.deps import create_service_dependencies
 
 if TYPE_CHECKING:
-    from advanced_alchemy.filters import FilterTypes, LimitOffset
+    from advanced_alchemy.filters import FilterTypes
 
 
 class AdminDevicesController(Controller):

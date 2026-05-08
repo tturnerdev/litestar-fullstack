@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
-from typing import Any, Sequence
+from collections.abc import Sequence
+from datetime import UTC, datetime
+from typing import Any
 from uuid import UUID
 
 from advanced_alchemy.extensions.litestar import repository, service
@@ -39,7 +40,7 @@ class ConnectionService(service.SQLAlchemyAsyncRepositoryService[m.Connection]):
             A tuple of (success, error_message).
         """
         db_obj = await self.get(connection_id)
-        now = datetime.now(tz=timezone.utc)
+        now = datetime.now(tz=UTC)
 
         # Lazy import to avoid circular dependency between domains.
         from app.domain.gateway.providers import get_provider
@@ -105,7 +106,7 @@ class ConnectionService(service.SQLAlchemyAsyncRepositoryService[m.Connection]):
         total: int | None = None,
         filters: Any | None = None,
         *,
-        schema_type: type[ConnectionList] | type[ConnectionDetail] = ConnectionList,
+        schema_type: type[ConnectionList | ConnectionDetail] = ConnectionList,
     ) -> Any:
         """Convert model(s) to schema with computed managed_device_count.
 

@@ -64,9 +64,7 @@ def capture_snapshot(obj: Any, *, exclude: frozenset[str] | None = None) -> dict
         # Convert non-JSON-native types to serializable forms
         if isinstance(value, UUID):
             value = str(value)
-        elif isinstance(value, datetime):
-            value = value.isoformat()
-        elif isinstance(value, date):
+        elif isinstance(value, datetime) or isinstance(value, date):
             value = value.isoformat()
         result[key] = value
     return result

@@ -14,7 +14,7 @@ from litestar.params import Dependency
 from app.db import models as m
 from app.domain.accounts.guards import requires_superuser
 from app.domain.admin.schemas import AdminFaxMessageSummary, AdminFaxNumberSummary, AdminFaxStats
-from app.domain.fax.deps import provide_fax_messages_service, provide_fax_numbers_service
+from app.domain.fax.deps import provide_fax_messages_service
 from app.domain.fax.services import FaxMessageService, FaxNumberService
 from app.lib.deps import create_service_dependencies
 

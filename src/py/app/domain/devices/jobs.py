@@ -9,8 +9,9 @@ from structlog import get_logger
 from app.domain.tasks.jobs import broadcast_entity_event, provide_task_context
 
 if TYPE_CHECKING:
-    from app.db.models._background_task import BackgroundTask
     from saq.types import Context
+
+    from app.db.models._background_task import BackgroundTask
 
 __all__ = ("device_provision_job", "device_reboot_job", "device_reprovision_job", "device_status_sync_job")
 

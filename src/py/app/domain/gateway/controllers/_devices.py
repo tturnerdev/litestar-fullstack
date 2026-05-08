@@ -7,12 +7,12 @@ from typing import Annotated
 from litestar import Controller, get
 from litestar.di import Provide
 from litestar.params import Parameter
+from redis.asyncio import Redis
 
 from app.db import models as m
 from app.domain.gateway.deps import provide_gateway_connections, provide_gateway_redis
 from app.domain.gateway.schemas import DeviceGatewayResponse
 from app.domain.gateway.services import GatewayService
-from redis.asyncio import Redis
 from app.lib.settings import get_settings
 
 
