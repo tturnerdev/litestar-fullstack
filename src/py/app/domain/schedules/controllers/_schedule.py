@@ -132,7 +132,7 @@ class ScheduleController(Controller):
                 raise PermissionDeniedException(detail="You do not have access to this team")
         obj = data.to_dict()
         db_obj = await schedules_service.create(obj)
-        request.app.emit(event_id="schedule_created", entity_id=db_obj.id)
+        request.app.emit(event_id="schedule_created", schedule_id=db_obj.id)
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,

@@ -116,7 +116,7 @@ class LocationController(Controller):
         obj = data.to_dict()
         obj["team_id"] = team_id
         db_obj = await locations_service.create(obj)
-        request.app.emit(event_id="location_created", entity_id=db_obj.id)
+        request.app.emit(event_id="location_created", location_id=db_obj.id)
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,

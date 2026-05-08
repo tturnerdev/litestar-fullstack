@@ -115,7 +115,7 @@ class VoicemailBoxController(Controller):
         """
         obj = data.to_dict()
         db_obj = await voicemail_boxes_service.create(obj)
-        request.app.emit(event_id="voicemail_box_created", entity_id=db_obj.id)
+        request.app.emit(event_id="voicemail_box_created", voicemail_box_id=db_obj.id)
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,

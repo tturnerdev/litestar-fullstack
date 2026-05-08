@@ -126,7 +126,7 @@ class ConnectionController(Controller):
                 raise PermissionDeniedException(detail="You do not have access to this team")
         obj = data.to_dict()
         db_obj = await connections_service.create(obj)
-        request.app.emit(event_id="connection_created", entity_id=db_obj.id)
+        request.app.emit(event_id="connection_created", connection_id=db_obj.id)
         after = capture_snapshot(db_obj)
         await log_audit(
             audit_service,
