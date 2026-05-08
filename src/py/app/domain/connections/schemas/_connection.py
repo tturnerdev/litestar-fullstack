@@ -63,9 +63,9 @@ class ConnectionCreate(CamelizedBaseStruct):
 
     name: Annotated[str, Meta(min_length=1, max_length=255)]
     connection_type: Annotated[str, Meta(min_length=1, max_length=50)]
-    provider: Annotated[str, Meta(min_length=1, max_length=50)]
+    provider: Annotated[str, Meta(min_length=1, max_length=100)]
     team_id: UUID | None = None
-    host: Annotated[str, Meta(min_length=1, max_length=255)] | None = None
+    host: Annotated[str, Meta(min_length=1, max_length=500)] | None = None
     port: Annotated[int, Meta(ge=1, le=65535)] | None = None
     auth_type: Annotated[str, Meta(min_length=1, max_length=50)] = "none"
     credentials: dict | None = None
@@ -79,8 +79,8 @@ class ConnectionUpdate(CamelizedBaseStruct, omit_defaults=True):
 
     name: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType = msgspec.UNSET
     connection_type: Annotated[str, Meta(min_length=1, max_length=50)] | msgspec.UnsetType = msgspec.UNSET
-    provider: Annotated[str, Meta(min_length=1, max_length=50)] | msgspec.UnsetType = msgspec.UNSET
-    host: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
+    provider: Annotated[str, Meta(min_length=1, max_length=100)] | msgspec.UnsetType = msgspec.UNSET
+    host: Annotated[str, Meta(min_length=1, max_length=500)] | msgspec.UnsetType | None = msgspec.UNSET
     port: Annotated[int, Meta(ge=1, le=65535)] | msgspec.UnsetType | None = msgspec.UNSET
     auth_type: Annotated[str, Meta(min_length=1, max_length=50)] | msgspec.UnsetType = msgspec.UNSET
     credentials: dict | msgspec.UnsetType | None = msgspec.UNSET

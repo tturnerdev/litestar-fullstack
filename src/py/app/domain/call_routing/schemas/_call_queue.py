@@ -72,7 +72,7 @@ class CallQueueCreate(CamelizedBaseStruct):
     """Schema for creating a call queue."""
 
     name: Annotated[str, Meta(min_length=1, max_length=255)]
-    number: Annotated[str, Meta(min_length=1, max_length=50)]
+    number: Annotated[str, Meta(min_length=1, max_length=20)]
     strategy: Annotated[str, Meta(min_length=1, max_length=50)] = "ring_all"
     ring_time: Annotated[int, Meta(ge=1, le=600)] = 15
     max_wait_time: Annotated[int, Meta(ge=0, le=3600)] = 300
@@ -90,7 +90,7 @@ class CallQueueUpdate(CamelizedBaseStruct, omit_defaults=True):
     """Schema for updating a call queue."""
 
     name: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType = msgspec.UNSET
-    number: Annotated[str, Meta(min_length=1, max_length=50)] | msgspec.UnsetType = msgspec.UNSET
+    number: Annotated[str, Meta(min_length=1, max_length=20)] | msgspec.UnsetType = msgspec.UNSET
     strategy: Annotated[str, Meta(min_length=1, max_length=50)] | msgspec.UnsetType = msgspec.UNSET
     ring_time: Annotated[int, Meta(ge=1, le=600)] | msgspec.UnsetType = msgspec.UNSET
     max_wait_time: Annotated[int, Meta(ge=0, le=3600)] | msgspec.UnsetType = msgspec.UNSET

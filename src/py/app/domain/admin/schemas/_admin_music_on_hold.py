@@ -41,8 +41,8 @@ class MusicOnHoldDetail(CamelizedBaseStruct, kw_only=True):
 class MusicOnHoldCreate(CamelizedBaseStruct):
     """Schema for creating a Music on Hold class."""
 
-    name: Annotated[str, Meta(min_length=1, max_length=255)]
-    description: Annotated[str, Meta(max_length=1000)] = ""
+    name: Annotated[str, Meta(min_length=1, max_length=100)]
+    description: Annotated[str, Meta(max_length=500)] = ""
     category: Annotated[str, Meta(min_length=1, max_length=50)] = "custom"
     is_default: bool = False
     is_active: bool = True
@@ -53,8 +53,8 @@ class MusicOnHoldCreate(CamelizedBaseStruct):
 class MusicOnHoldUpdate(CamelizedBaseStruct, omit_defaults=True):
     """Schema for updating a Music on Hold class."""
 
-    name: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType = msgspec.UNSET
-    description: Annotated[str, Meta(max_length=1000)] | msgspec.UnsetType = msgspec.UNSET
+    name: Annotated[str, Meta(min_length=1, max_length=100)] | msgspec.UnsetType = msgspec.UNSET
+    description: Annotated[str, Meta(max_length=500)] | msgspec.UnsetType = msgspec.UNSET
     category: Annotated[str, Meta(min_length=1, max_length=50)] | msgspec.UnsetType = msgspec.UNSET
     is_default: bool | msgspec.UnsetType = msgspec.UNSET
     is_active: bool | msgspec.UnsetType = msgspec.UNSET

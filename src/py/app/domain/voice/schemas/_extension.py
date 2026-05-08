@@ -38,7 +38,7 @@ class Extension(CamelizedBaseStruct):
 class ExtensionCreate(CamelizedBaseStruct):
     """Extension create properties."""
 
-    extension_number: Annotated[str, Meta(min_length=1, max_length=20)]
+    extension_number: Annotated[str, Meta(min_length=1, max_length=10)]
     display_name: Annotated[str, Meta(max_length=100)] = ""
     phone_number_id: UUID | None = None
     is_active: bool = True
@@ -51,14 +51,14 @@ class ExtensionUpdate(CamelizedBaseStruct, omit_defaults=True):
     phone_number_id: UUID | msgspec.UnsetType | None = msgspec.UNSET
     is_active: bool | msgspec.UnsetType = msgspec.UNSET
     forward_always_enabled: bool | msgspec.UnsetType = msgspec.UNSET
-    forward_always_destination: Annotated[str, Meta(max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
+    forward_always_destination: Annotated[str, Meta(max_length=100)] | msgspec.UnsetType | None = msgspec.UNSET
     forward_busy_enabled: bool | msgspec.UnsetType = msgspec.UNSET
-    forward_busy_destination: Annotated[str, Meta(max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
+    forward_busy_destination: Annotated[str, Meta(max_length=100)] | msgspec.UnsetType | None = msgspec.UNSET
     forward_no_answer_enabled: bool | msgspec.UnsetType = msgspec.UNSET
-    forward_no_answer_destination: Annotated[str, Meta(max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
+    forward_no_answer_destination: Annotated[str, Meta(max_length=100)] | msgspec.UnsetType | None = msgspec.UNSET
     forward_no_answer_ring_count: Annotated[int, Meta(ge=1, le=20)] | msgspec.UnsetType = msgspec.UNSET
     forward_unreachable_enabled: bool | msgspec.UnsetType = msgspec.UNSET
-    forward_unreachable_destination: Annotated[str, Meta(max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
+    forward_unreachable_destination: Annotated[str, Meta(max_length=100)] | msgspec.UnsetType | None = msgspec.UNSET
     dnd_enabled: bool | msgspec.UnsetType = msgspec.UNSET
 
 
