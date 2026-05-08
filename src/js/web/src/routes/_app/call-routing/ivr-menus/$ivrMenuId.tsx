@@ -246,12 +246,12 @@ function validateIvrMenuField(field: keyof IvrMenuFieldErrors, value: string | n
     }
     case "timeout": {
       const n = Number(value)
-      if (!Number.isFinite(n) || n < 1 || n > 300) return "Timeout must be between 1 and 300"
+      if (!Number.isFinite(n) || n < 1 || n > 120) return "Timeout must be between 1 and 120"
       return undefined
     }
     case "maxRetries": {
       const n = Number(value)
-      if (!Number.isFinite(n) || n < 1 || n > 10) return "Retries must be between 1 and 10"
+      if (!Number.isFinite(n) || n < 0 || n > 10) return "Retries must be between 0 and 10"
       return undefined
     }
     case "timeoutDestination": {

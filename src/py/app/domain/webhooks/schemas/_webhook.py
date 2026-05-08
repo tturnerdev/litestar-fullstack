@@ -35,6 +35,7 @@ class WebhookDetail(CamelizedBaseStruct):
     url: str
     events: list[str]
     is_active: bool
+    user_id: UUID
     secret: str | None = None
     headers: dict[str, str] = {}
     description: str = ""
@@ -43,7 +44,6 @@ class WebhookDetail(CamelizedBaseStruct):
     failure_count: int = 0
     validation_status: str | None = None
     last_validated_at: datetime | None = None
-    user_id: UUID | None = None
     created_at: datetime | None = None
     updated_at: datetime | None = None
 
