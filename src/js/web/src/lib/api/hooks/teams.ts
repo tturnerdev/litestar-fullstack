@@ -79,8 +79,9 @@ export function useDeleteTeam() {
     mutationFn: async (teamId: string) => {
       await deleteTeam({ path: { team_id: teamId } })
     },
-    onSuccess: () => {
+    onSuccess: (_data, teamId) => {
       queryClient.invalidateQueries({ queryKey: ["teams"] })
+      queryClient.invalidateQueries({ queryKey: ["team", teamId] })
       toast.success("Team deleted")
     },
     onError: (error) => {

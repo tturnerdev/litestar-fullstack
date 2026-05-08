@@ -138,8 +138,9 @@ export function useDeleteFaxNumber() {
         method: "DELETE",
       })
     },
-    onSuccess: () => {
+    onSuccess: (_data, faxNumberId) => {
       queryClient.invalidateQueries({ queryKey: ["fax", "numbers"] })
+      queryClient.invalidateQueries({ queryKey: ["fax", "number", faxNumberId] })
       toast.success("Fax number deleted")
     },
     onError: (error) => {
@@ -279,8 +280,9 @@ export function useDeleteFaxMessage() {
         method: "DELETE",
       })
     },
-    onSuccess: () => {
+    onSuccess: (_data, messageId) => {
       queryClient.invalidateQueries({ queryKey: ["fax", "messages"] })
+      queryClient.invalidateQueries({ queryKey: ["fax", "message", messageId] })
       toast.success("Fax message deleted")
     },
     onError: (error) => {

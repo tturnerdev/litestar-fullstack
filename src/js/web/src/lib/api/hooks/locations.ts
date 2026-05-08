@@ -185,8 +185,9 @@ export function useDeleteLocation(teamId: string) {
         method: "DELETE",
       })
     },
-    onSuccess: () => {
+    onSuccess: (_data, locationId) => {
       queryClient.invalidateQueries({ queryKey: ["locations", teamId] })
+      queryClient.invalidateQueries({ queryKey: ["location", teamId, locationId] })
       toast.success("Location deleted")
     },
     onError: (error) => {

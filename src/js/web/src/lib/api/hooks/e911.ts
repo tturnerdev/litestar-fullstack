@@ -187,8 +187,9 @@ export function useDeleteE911Registration() {
       apiFetch<void>(`/api/e911/${registrationId}`, {
         method: "DELETE",
       }),
-    onSuccess: () => {
+    onSuccess: (_data, registrationId) => {
       queryClient.invalidateQueries({ queryKey: ["e911"] })
+      queryClient.invalidateQueries({ queryKey: ["e911", "registration", registrationId] })
       toast.success("E911 registration deleted")
     },
     onError: (error) => {

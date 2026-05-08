@@ -187,8 +187,9 @@ export function useDeletePhoneNumber() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (phoneNumberId: string) => apiFetch<void>(`/api/voice/phone-numbers/${phoneNumberId}`, { method: "DELETE" }),
-    onSuccess: () => {
+    onSuccess: (_data, phoneNumberId) => {
       queryClient.invalidateQueries({ queryKey: ["voice", "phone-numbers"] })
+      queryClient.invalidateQueries({ queryKey: ["voice", "phone-number", phoneNumberId] })
       toast.success("Phone number deleted")
     },
     onError: (error) => {
@@ -319,8 +320,9 @@ export function useDeleteExtension() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (extensionId: string) => apiFetch<void>(`/api/voice/extensions/${extensionId}`, { method: "DELETE" }),
-    onSuccess: () => {
+    onSuccess: (_data, extensionId) => {
       queryClient.invalidateQueries({ queryKey: ["voice", "extensions"] })
+      queryClient.invalidateQueries({ queryKey: ["voice", "extension", extensionId] })
       toast.success("Extension deleted")
     },
     onError: (error) => {
