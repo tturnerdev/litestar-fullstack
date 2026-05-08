@@ -18,6 +18,7 @@ class TeamInvitation(UUIDv7AuditBase):
     """Team Invite."""
 
     __tablename__ = "team_invitation"
+    __table_args__ = {"comment": "Pending team membership invitations"}
     team_id: Mapped[UUID] = mapped_column(ForeignKey("team.id", ondelete="cascade"))
     email: Mapped[str] = mapped_column(index=True)
     role: Mapped[TeamRoles] = mapped_column(String(length=50), default=TeamRoles.MEMBER)

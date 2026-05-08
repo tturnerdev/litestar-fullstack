@@ -14,6 +14,7 @@ class Role(UUIDv7AuditBase, SlugKey):
     """Role."""
 
     __tablename__ = "role"
+    __table_args__ = {"comment": "Application roles for access control"}
 
     name: Mapped[str] = mapped_column(unique=True)
     description: Mapped[str | None]

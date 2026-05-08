@@ -16,6 +16,7 @@ class Organization(UUIDv7AuditBase, SlugKey):
     """
 
     __tablename__ = "organization"
+    __table_args__ = {"comment": "Tenant organization settings and profile"}
     __pii_columns__ = {"name", "email", "phone", "website"}
 
     name: Mapped[str] = mapped_column(nullable=False, index=True)

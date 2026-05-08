@@ -22,6 +22,7 @@ class Team(UUIDv7AuditBase, SlugKey):
     """
 
     __tablename__ = "team"
+    __table_args__ = {"comment": "Teams of users with shared permissions and resources"}
     __pii_columns__ = {"name", "description"}
     name: Mapped[str] = mapped_column(nullable=False, index=True)
     description: Mapped[str | None] = mapped_column(String(length=500), nullable=True, default=None)

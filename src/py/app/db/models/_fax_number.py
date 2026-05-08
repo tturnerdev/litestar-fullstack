@@ -18,6 +18,7 @@ class FaxNumber(UUIDv7AuditBase):
     """A fax DID assigned to a user."""
 
     __tablename__ = "fax_number"
+    __table_args__ = {"comment": "Fax DIDs assigned to user accounts"}
     __pii_columns__ = {"number", "label"}
     user_id: Mapped[UUID] = mapped_column(ForeignKey("user_account.id", ondelete="cascade"), nullable=False)
     team_id: Mapped[UUID | None] = mapped_column(ForeignKey("team.id", ondelete="set null"), nullable=True, default=None)

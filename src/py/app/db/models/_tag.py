@@ -22,6 +22,7 @@ class Tag(UUIDv7AuditBase, SlugKey, UniqueMixin):
     """Tag."""
 
     __tablename__ = "tag"
+    __table_args__ = {"comment": "Tags for organizing and categorizing resources"}
     name: Mapped[str] = mapped_column(index=False)
     description: Mapped[str | None] = mapped_column(String(length=255), index=False, nullable=True)
 
