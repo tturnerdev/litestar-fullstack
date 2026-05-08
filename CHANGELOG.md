@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.328.0 (2026-05-08)
+
+### Fixed
+- **Comprehensive schema validation** — Added min_length/max_length constraints to all remaining unconstrained string fields and ge/le to numeric fields across: user create/update, ticket update, webhook endpoint update (removed 6 type:ignore comments), device template, password reset, roles, admin teams, notifications, profile, team invitations, call records, and phone numbers
+
 ## v0.325.0 (2026-05-08)
 
 ### Security
