@@ -3,6 +3,16 @@ import { AlertCircle, AlertTriangle, Loader2 } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -109,7 +119,7 @@ function EditTeamPage() {
   const justSubmittedRef = useRef(false)
 
   // Block navigation when form is dirty
-  useBlocker({
+  const blocker = useBlocker({
     shouldBlockFn: () => formDirty && !justSubmittedRef.current,
     withResolver: true,
   })
@@ -249,134 +259,152 @@ function EditTeamPage() {
   // ── Render ──────────────────────────────────────────────────────────
 
   return (
-    <PageContainer className="flex-1 space-y-8">
-      <PageHeader
-        eyebrow="Teams"
-        title="Edit Team"
-        description={`Editing ${data.name}`}
-        breadcrumbs={
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link to="/home">Home</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link to="/teams">Teams</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link to="/teams/$teamId" params={{ teamId }}>
-                    {data.name}
-                  </Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Edit</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        }
-      />
+    <>
+      <PageContainer className="flex-1 space-y-8">
+        <PageHeader
+          eyebrow="Teams"
+          title="Edit Team"
+          description={`Editing ${data.name}`}
+          breadcrumbs={
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link to="/home">Home</Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link to="/teams">Teams</Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link to="/teams/$teamId" params={{ teamId }}>
+                      {data.name}
+                    </Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Edit</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          }
+        />
 
-      <PageSection>
-        <SectionErrorBoundary name="Edit Team Form">
-          <Card className="max-w-2xl">
-            <CardHeader>
-              <CardTitle className="text-lg">Team Details</CardTitle>
-              <CardDescription>
-                Fields marked with <span className="text-destructive">*</span> are required.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Name */}
-                <div className="space-y-2">
-                  <Label htmlFor="team-name">
-                    Name <RequiredMark />
-                  </Label>
-                  <Input
-                    id="team-name"
-                    placeholder="e.g., Engineering"
-                    value={name}
-                    onChange={(e) => handleNameChange(e.target.value)}
-                    onBlur={() => handleFieldBlur("name", name)}
-                    aria-invalid={!!fieldErrors.name}
-                    maxLength={NAME_MAX}
-                    required
-                  />
-                  <div className="flex items-center justify-between">
-                    {fieldErrors.name ? <FieldError message={fieldErrors.name} /> : <FieldHint>A descriptive name for the team.</FieldHint>}
-                    <p
-                      className={cn("shrink-0 text-xs", name.length >= NAME_MAX ? "text-destructive" : name.length >= NAME_MAX * 0.8 ? "text-amber-500" : "text-muted-foreground")}
-                    >
-                      {name.length}/{NAME_MAX}
-                    </p>
+        <PageSection>
+          <SectionErrorBoundary name="Edit Team Form">
+            <Card className="max-w-2xl">
+              <CardHeader>
+                <CardTitle className="text-lg">Team Details</CardTitle>
+                <CardDescription>
+                  Fields marked with <span className="text-destructive">*</span> are required.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  {/* Name */}
+                  <div className="space-y-2">
+                    <Label htmlFor="team-name">
+                      Name <RequiredMark />
+                    </Label>
+                    <Input
+                      id="team-name"
+                      placeholder="e.g., Engineering"
+                      value={name}
+                      onChange={(e) => handleNameChange(e.target.value)}
+                      onBlur={() => handleFieldBlur("name", name)}
+                      aria-invalid={!!fieldErrors.name}
+                      maxLength={NAME_MAX}
+                      required
+                    />
+                    <div className="flex items-center justify-between">
+                      {fieldErrors.name ? <FieldError message={fieldErrors.name} /> : <FieldHint>A descriptive name for the team.</FieldHint>}
+                      <p
+                        className={cn(
+                          "shrink-0 text-xs",
+                          name.length >= NAME_MAX ? "text-destructive" : name.length >= NAME_MAX * 0.8 ? "text-amber-500" : "text-muted-foreground",
+                        )}
+                      >
+                        {name.length}/{NAME_MAX}
+                      </p>
+                    </div>
                   </div>
-                </div>
 
-                {/* Description */}
-                <div className="space-y-2">
-                  <Label htmlFor="team-description">Description</Label>
-                  <Textarea
-                    id="team-description"
-                    placeholder="Optional description of this team"
-                    value={description}
-                    onChange={(e) => handleDescriptionChange(e.target.value)}
-                    onBlur={() => handleFieldBlur("description", description)}
-                    aria-invalid={!!fieldErrors.description}
-                    maxLength={DESC_MAX}
-                    rows={3}
-                  />
-                  <div className="flex items-center justify-between">
-                    {fieldErrors.description ? <FieldError message={fieldErrors.description} /> : <FieldHint>Optional notes about the purpose of this team.</FieldHint>}
-                    <p
-                      className={cn(
-                        "shrink-0 text-xs",
-                        description.length >= DESC_MAX ? "text-destructive" : description.length >= DESC_MAX * 0.8 ? "text-amber-500" : "text-muted-foreground",
-                      )}
-                    >
-                      {description.length}/{DESC_MAX}
-                    </p>
+                  {/* Description */}
+                  <div className="space-y-2">
+                    <Label htmlFor="team-description">Description</Label>
+                    <Textarea
+                      id="team-description"
+                      placeholder="Optional description of this team"
+                      value={description}
+                      onChange={(e) => handleDescriptionChange(e.target.value)}
+                      onBlur={() => handleFieldBlur("description", description)}
+                      aria-invalid={!!fieldErrors.description}
+                      maxLength={DESC_MAX}
+                      rows={3}
+                    />
+                    <div className="flex items-center justify-between">
+                      {fieldErrors.description ? <FieldError message={fieldErrors.description} /> : <FieldHint>Optional notes about the purpose of this team.</FieldHint>}
+                      <p
+                        className={cn(
+                          "shrink-0 text-xs",
+                          description.length >= DESC_MAX ? "text-destructive" : description.length >= DESC_MAX * 0.8 ? "text-amber-500" : "text-muted-foreground",
+                        )}
+                      >
+                        {description.length}/{DESC_MAX}
+                      </p>
+                    </div>
                   </div>
-                </div>
 
-                {/* Tags */}
-                <div className="space-y-2">
-                  <Label htmlFor="team-tags">Tags</Label>
-                  <Input id="team-tags" placeholder="e.g., engineering, backend, platform" value={tagsInput} onChange={(e) => setTagsInput(e.target.value)} />
-                  <FieldHint>Comma-separated list of tags to categorize this team.</FieldHint>
-                </div>
+                  {/* Tags */}
+                  <div className="space-y-2">
+                    <Label htmlFor="team-tags">Tags</Label>
+                    <Input id="team-tags" placeholder="e.g., engineering, backend, platform" value={tagsInput} onChange={(e) => setTagsInput(e.target.value)} />
+                    <FieldHint>Comma-separated list of tags to categorize this team.</FieldHint>
+                  </div>
 
-                {/* Submit */}
-                <div className="flex items-center justify-end gap-2 pt-2">
-                  <Button type="button" variant="ghost" onClick={() => router.navigate({ to: "/teams/$teamId", params: { teamId } })}>
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={!isValid || updateTeam.isPending}>
-                    {updateTeam.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Save Changes
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        </SectionErrorBoundary>
-      </PageSection>
+                  {/* Submit */}
+                  <div className="flex items-center justify-end gap-2 pt-2">
+                    <Button type="button" variant="ghost" onClick={() => router.navigate({ to: "/teams/$teamId", params: { teamId } })}>
+                      Cancel
+                    </Button>
+                    <Button type="submit" disabled={!isValid || updateTeam.isPending}>
+                      {updateTeam.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Save Changes
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </SectionErrorBoundary>
+        </PageSection>
 
-      {/* Unsaved changes alert */}
-      {formDirty && (
-        <Alert variant="warning" className="fixed right-6 bottom-6 z-50 w-auto max-w-sm shadow-lg">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertDescription>You have unsaved changes on this form.</AlertDescription>
-        </Alert>
-      )}
-    </PageContainer>
+        {/* Unsaved changes alert */}
+        {formDirty && (
+          <Alert variant="warning" className="fixed right-6 bottom-6 z-50 w-auto max-w-sm shadow-lg">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>You have unsaved changes on this form.</AlertDescription>
+          </Alert>
+        )}
+      </PageContainer>
+
+      <AlertDialog open={blocker.status === "blocked"} onOpenChange={() => blocker.reset?.()}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
+            <AlertDialogDescription>You have unsaved changes to this team. Are you sure you want to leave? Your changes will be lost.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => blocker.reset?.()}>Stay on page</AlertDialogCancel>
+            <AlertDialogAction onClick={() => blocker.proceed?.()}>Discard changes</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }

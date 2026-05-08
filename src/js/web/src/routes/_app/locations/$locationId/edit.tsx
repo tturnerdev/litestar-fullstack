@@ -3,6 +3,16 @@ import { AlertCircle, AlertTriangle, Loader2 } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -174,7 +184,7 @@ function EditLocationPage() {
   const justSubmittedRef = useRef(false)
 
   // Block navigation when form is dirty
-  useBlocker({
+  const blocker = useBlocker({
     shouldBlockFn: () => formDirty && !justSubmittedRef.current,
     withResolver: true,
   })
@@ -285,207 +295,225 @@ function EditLocationPage() {
   // ── Render ──────────────────────────────────────────────────────────
 
   return (
-    <PageContainer className="flex-1 space-y-8">
-      <PageHeader
-        eyebrow="Locations"
-        title="Edit Location"
-        description={`Editing ${data.name}`}
-        breadcrumbs={
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link to="/home">Home</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link to="/locations">Locations</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link to="/locations/$locationId" params={{ locationId }}>
-                    {data.name}
-                  </Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Edit</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        }
-      />
+    <>
+      <PageContainer className="flex-1 space-y-8">
+        <PageHeader
+          eyebrow="Locations"
+          title="Edit Location"
+          description={`Editing ${data.name}`}
+          breadcrumbs={
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link to="/home">Home</Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link to="/locations">Locations</Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link to="/locations/$locationId" params={{ locationId }}>
+                      {data.name}
+                    </Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Edit</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          }
+        />
 
-      <PageSection>
-        <SectionErrorBoundary name="Edit Location Form">
-          <Card className="max-w-2xl">
-            <CardHeader>
-              <CardTitle className="text-lg">Location Details</CardTitle>
-              <CardDescription>
-                Fields marked with <span className="text-destructive">*</span> are required.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Name */}
-                <div className="space-y-2">
-                  <Label htmlFor="location-name">
-                    Name <RequiredMark />
-                  </Label>
-                  <Input
-                    id="location-name"
-                    placeholder="e.g., Main Office"
-                    value={name}
-                    onChange={(e) => handleFieldChange("name", e.target.value, setName)}
-                    onBlur={() => handleFieldBlur("name", name)}
-                    aria-invalid={!!fieldErrors.name}
-                    maxLength={NAME_MAX}
-                    required
-                  />
-                  <div className="flex items-center justify-between">
-                    {fieldErrors.name ? <FieldError message={fieldErrors.name} /> : <FieldHint>A descriptive name for this location.</FieldHint>}
-                    <p
-                      className={cn("shrink-0 text-xs", name.length >= NAME_MAX ? "text-destructive" : name.length >= NAME_MAX * 0.8 ? "text-amber-500" : "text-muted-foreground")}
-                    >
-                      {name.length}/{NAME_MAX}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Description */}
-                <div className="space-y-2">
-                  <Label htmlFor="location-description">Description</Label>
-                  <Textarea
-                    id="location-description"
-                    placeholder="Optional description of this location"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    maxLength={DESC_MAX}
-                    rows={3}
-                  />
-                  <div className="flex items-center justify-between">
-                    <FieldHint>Optional notes about this location.</FieldHint>
-                    <p
-                      className={cn(
-                        "shrink-0 text-xs",
-                        description.length >= DESC_MAX ? "text-destructive" : description.length >= DESC_MAX * 0.8 ? "text-amber-500" : "text-muted-foreground",
-                      )}
-                    >
-                      {description.length}/{DESC_MAX}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Address fields (ADDRESSED type only) */}
-                {isAddressed && (
-                  <>
-                    <Separator />
-                    <h3 className="text-sm font-medium">Address</h3>
-
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="location-address1">
-                          Address Line 1 <RequiredMark />
-                        </Label>
-                        <Input
-                          id="location-address1"
-                          placeholder="e.g., 123 Main Street"
-                          value={addressLine1}
-                          onChange={(e) => handleFieldChange("addressLine1", e.target.value, setAddressLine1)}
-                          onBlur={() => handleFieldBlur("addressLine1", addressLine1)}
-                          aria-invalid={!!fieldErrors.addressLine1}
-                        />
-                        <FieldError message={fieldErrors.addressLine1} />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="location-address2">Address Line 2</Label>
-                        <Input id="location-address2" placeholder="e.g., Suite 400" value={addressLine2} onChange={(e) => setAddressLine2(e.target.value)} />
-                      </div>
-
-                      <div className="grid gap-4 md:grid-cols-2">
-                        <div className="space-y-2">
-                          <Label htmlFor="location-city">
-                            City <RequiredMark />
-                          </Label>
-                          <Input
-                            id="location-city"
-                            placeholder="e.g., San Francisco"
-                            value={city}
-                            onChange={(e) => handleFieldChange("city", e.target.value, setCity)}
-                            onBlur={() => handleFieldBlur("city", city)}
-                            aria-invalid={!!fieldErrors.city}
-                          />
-                          <FieldError message={fieldErrors.city} />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="location-state">
-                            State <RequiredMark />
-                          </Label>
-                          <Input
-                            id="location-state"
-                            placeholder="e.g., CA"
-                            value={state}
-                            onChange={(e) => handleFieldChange("state", e.target.value, setState)}
-                            onBlur={() => handleFieldBlur("state", state)}
-                            aria-invalid={!!fieldErrors.state}
-                          />
-                          <FieldError message={fieldErrors.state} />
-                        </div>
-                      </div>
-
-                      <div className="grid gap-4 md:grid-cols-2">
-                        <div className="space-y-2">
-                          <Label htmlFor="location-postal">
-                            Postal Code <RequiredMark />
-                          </Label>
-                          <Input
-                            id="location-postal"
-                            placeholder="e.g., 94105"
-                            value={postalCode}
-                            onChange={(e) => handleFieldChange("postalCode", e.target.value, setPostalCode)}
-                            onBlur={() => handleFieldBlur("postalCode", postalCode)}
-                            aria-invalid={!!fieldErrors.postalCode}
-                          />
-                          <FieldError message={fieldErrors.postalCode} />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="location-country">Country</Label>
-                          <Input id="location-country" placeholder="e.g., US" value={country} onChange={(e) => setCountry(e.target.value)} />
-                        </div>
-                      </div>
+        <PageSection>
+          <SectionErrorBoundary name="Edit Location Form">
+            <Card className="max-w-2xl">
+              <CardHeader>
+                <CardTitle className="text-lg">Location Details</CardTitle>
+                <CardDescription>
+                  Fields marked with <span className="text-destructive">*</span> are required.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  {/* Name */}
+                  <div className="space-y-2">
+                    <Label htmlFor="location-name">
+                      Name <RequiredMark />
+                    </Label>
+                    <Input
+                      id="location-name"
+                      placeholder="e.g., Main Office"
+                      value={name}
+                      onChange={(e) => handleFieldChange("name", e.target.value, setName)}
+                      onBlur={() => handleFieldBlur("name", name)}
+                      aria-invalid={!!fieldErrors.name}
+                      maxLength={NAME_MAX}
+                      required
+                    />
+                    <div className="flex items-center justify-between">
+                      {fieldErrors.name ? <FieldError message={fieldErrors.name} /> : <FieldHint>A descriptive name for this location.</FieldHint>}
+                      <p
+                        className={cn(
+                          "shrink-0 text-xs",
+                          name.length >= NAME_MAX ? "text-destructive" : name.length >= NAME_MAX * 0.8 ? "text-amber-500" : "text-muted-foreground",
+                        )}
+                      >
+                        {name.length}/{NAME_MAX}
+                      </p>
                     </div>
-                  </>
-                )}
+                  </div>
 
-                {/* Submit */}
-                <div className="flex items-center justify-end gap-2 pt-2">
-                  <Button type="button" variant="ghost" onClick={() => router.navigate({ to: "/locations/$locationId", params: { locationId } })}>
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={!isValid || updateLocation.isPending}>
-                    {updateLocation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Save Changes
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        </SectionErrorBoundary>
-      </PageSection>
+                  {/* Description */}
+                  <div className="space-y-2">
+                    <Label htmlFor="location-description">Description</Label>
+                    <Textarea
+                      id="location-description"
+                      placeholder="Optional description of this location"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      maxLength={DESC_MAX}
+                      rows={3}
+                    />
+                    <div className="flex items-center justify-between">
+                      <FieldHint>Optional notes about this location.</FieldHint>
+                      <p
+                        className={cn(
+                          "shrink-0 text-xs",
+                          description.length >= DESC_MAX ? "text-destructive" : description.length >= DESC_MAX * 0.8 ? "text-amber-500" : "text-muted-foreground",
+                        )}
+                      >
+                        {description.length}/{DESC_MAX}
+                      </p>
+                    </div>
+                  </div>
 
-      {/* Unsaved changes alert */}
-      {formDirty && (
-        <Alert variant="warning" className="fixed right-6 bottom-6 z-50 w-auto max-w-sm shadow-lg">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertDescription>You have unsaved changes on this form.</AlertDescription>
-        </Alert>
-      )}
-    </PageContainer>
+                  {/* Address fields (ADDRESSED type only) */}
+                  {isAddressed && (
+                    <>
+                      <Separator />
+                      <h3 className="text-sm font-medium">Address</h3>
+
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="location-address1">
+                            Address Line 1 <RequiredMark />
+                          </Label>
+                          <Input
+                            id="location-address1"
+                            placeholder="e.g., 123 Main Street"
+                            value={addressLine1}
+                            onChange={(e) => handleFieldChange("addressLine1", e.target.value, setAddressLine1)}
+                            onBlur={() => handleFieldBlur("addressLine1", addressLine1)}
+                            aria-invalid={!!fieldErrors.addressLine1}
+                          />
+                          <FieldError message={fieldErrors.addressLine1} />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="location-address2">Address Line 2</Label>
+                          <Input id="location-address2" placeholder="e.g., Suite 400" value={addressLine2} onChange={(e) => setAddressLine2(e.target.value)} />
+                        </div>
+
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <div className="space-y-2">
+                            <Label htmlFor="location-city">
+                              City <RequiredMark />
+                            </Label>
+                            <Input
+                              id="location-city"
+                              placeholder="e.g., San Francisco"
+                              value={city}
+                              onChange={(e) => handleFieldChange("city", e.target.value, setCity)}
+                              onBlur={() => handleFieldBlur("city", city)}
+                              aria-invalid={!!fieldErrors.city}
+                            />
+                            <FieldError message={fieldErrors.city} />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="location-state">
+                              State <RequiredMark />
+                            </Label>
+                            <Input
+                              id="location-state"
+                              placeholder="e.g., CA"
+                              value={state}
+                              onChange={(e) => handleFieldChange("state", e.target.value, setState)}
+                              onBlur={() => handleFieldBlur("state", state)}
+                              aria-invalid={!!fieldErrors.state}
+                            />
+                            <FieldError message={fieldErrors.state} />
+                          </div>
+                        </div>
+
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <div className="space-y-2">
+                            <Label htmlFor="location-postal">
+                              Postal Code <RequiredMark />
+                            </Label>
+                            <Input
+                              id="location-postal"
+                              placeholder="e.g., 94105"
+                              value={postalCode}
+                              onChange={(e) => handleFieldChange("postalCode", e.target.value, setPostalCode)}
+                              onBlur={() => handleFieldBlur("postalCode", postalCode)}
+                              aria-invalid={!!fieldErrors.postalCode}
+                            />
+                            <FieldError message={fieldErrors.postalCode} />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="location-country">Country</Label>
+                            <Input id="location-country" placeholder="e.g., US" value={country} onChange={(e) => setCountry(e.target.value)} />
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {/* Submit */}
+                  <div className="flex items-center justify-end gap-2 pt-2">
+                    <Button type="button" variant="ghost" onClick={() => router.navigate({ to: "/locations/$locationId", params: { locationId } })}>
+                      Cancel
+                    </Button>
+                    <Button type="submit" disabled={!isValid || updateLocation.isPending}>
+                      {updateLocation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Save Changes
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </SectionErrorBoundary>
+        </PageSection>
+
+        {/* Unsaved changes alert */}
+        {formDirty && (
+          <Alert variant="warning" className="fixed right-6 bottom-6 z-50 w-auto max-w-sm shadow-lg">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>You have unsaved changes on this form.</AlertDescription>
+          </Alert>
+        )}
+      </PageContainer>
+
+      <AlertDialog open={blocker.status === "blocked"} onOpenChange={() => blocker.reset?.()}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
+            <AlertDialogDescription>You have unsaved changes to this location. Are you sure you want to leave? Your changes will be lost.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => blocker.reset?.()}>Stay on page</AlertDialogCancel>
+            <AlertDialogAction onClick={() => blocker.proceed?.()}>Discard changes</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }
