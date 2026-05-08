@@ -63,7 +63,7 @@ class OrganizationUpdate(CamelizedBaseStruct, omit_defaults=True):
 
     name: Annotated[str, Meta(max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
     description: Annotated[str, Meta(max_length=1000)] | msgspec.UnsetType | None = msgspec.UNSET
-    logo_url: Annotated[str, Meta(max_length=500)] | msgspec.UnsetType | None = msgspec.UNSET
+    logo_url: Annotated[str, Meta(min_length=1, max_length=500)] | msgspec.UnsetType | None = msgspec.UNSET
     website: Annotated[str, Meta(max_length=500)] | msgspec.UnsetType | None = msgspec.UNSET
     email: Annotated[str, Meta(max_length=320)] | msgspec.UnsetType | None = msgspec.UNSET
     phone: Annotated[str, Meta(max_length=20)] | msgspec.UnsetType | None = msgspec.UNSET

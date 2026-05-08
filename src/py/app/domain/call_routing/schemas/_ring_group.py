@@ -58,7 +58,7 @@ class RingGroupCreate(CamelizedBaseStruct):
     number: Annotated[str, Meta(min_length=1, max_length=50)]
     strategy: Annotated[str, Meta(min_length=1, max_length=50)] = "ring_all"
     ring_time: Annotated[int, Meta(ge=1, le=600)] = 20
-    no_answer_destination: Annotated[str, Meta(max_length=255)] | None = None
+    no_answer_destination: Annotated[str, Meta(min_length=1, max_length=255)] | None = None
 
 
 class RingGroupUpdate(CamelizedBaseStruct, omit_defaults=True):
@@ -68,4 +68,4 @@ class RingGroupUpdate(CamelizedBaseStruct, omit_defaults=True):
     number: Annotated[str, Meta(min_length=1, max_length=50)] | msgspec.UnsetType = msgspec.UNSET
     strategy: Annotated[str, Meta(min_length=1, max_length=50)] | msgspec.UnsetType = msgspec.UNSET
     ring_time: Annotated[int, Meta(ge=1, le=600)] | msgspec.UnsetType = msgspec.UNSET
-    no_answer_destination: Annotated[str, Meta(max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET
+    no_answer_destination: Annotated[str, Meta(min_length=1, max_length=255)] | msgspec.UnsetType | None = msgspec.UNSET

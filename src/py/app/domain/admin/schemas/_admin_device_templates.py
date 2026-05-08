@@ -51,7 +51,7 @@ class DeviceTemplateCreate(CamelizedBaseStruct):
     wireframe_data: dict[str, Any]
     provisioning_template: Annotated[str, Meta(max_length=50000)] | None = None
     template_variables: dict[str, Any] | None = None
-    image_url: Annotated[str, Meta(max_length=500)] | None = None
+    image_url: Annotated[str, Meta(min_length=1, max_length=500)] | None = None
     is_active: bool = True
 
 
@@ -65,7 +65,7 @@ class DeviceTemplateUpdate(CamelizedBaseStruct, omit_defaults=True):
     wireframe_data: dict[str, Any] | msgspec.UnsetType = msgspec.UNSET
     provisioning_template: Annotated[str, Meta(max_length=50000)] | msgspec.UnsetType | None = msgspec.UNSET
     template_variables: dict[str, Any] | msgspec.UnsetType | None = msgspec.UNSET
-    image_url: Annotated[str, Meta(max_length=500)] | msgspec.UnsetType | None = msgspec.UNSET
+    image_url: Annotated[str, Meta(min_length=1, max_length=500)] | msgspec.UnsetType | None = msgspec.UNSET
     is_active: bool | msgspec.UnsetType = msgspec.UNSET
 
 
