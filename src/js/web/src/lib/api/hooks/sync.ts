@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { client } from "@/lib/generated/api/client.gen"
 
@@ -17,7 +17,24 @@ interface SyncResponse {
   syncedAt: string
 }
 
+const DOMAIN_QUERY_KEYS: Record<string, string[][]> = {
+  extensions: [
+    ["voice", "extensions"],
+    ["voice", "extension"],
+  ],
+  "phone-numbers": [
+    ["voice", "phone-numbers"],
+    ["voice", "phone-number"],
+  ],
+  devices: [["devices"], ["device"]],
+  "fax-numbers": [
+    ["fax", "numbers"],
+    ["fax", "number"],
+  ],
+}
+
 export function useSyncEntity() {
+  const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async ({ domain, field, value }: SyncParams) => {
       const { data } = await client.get({
@@ -27,7 +44,13 @@ export function useSyncEntity() {
       })
       return data as SyncResponse
     },
-    onSuccess: () => {
+    onSuccess: (_data, { domain }) => {
+      const keys = DOMAIN_QUERY_KEYS[domain]
+      if (keys) {
+        for (const queryKey of keys) {
+          queryClient.invalidateQueries({ queryKey })
+        }
+      }
       toast.success("Sync complete")
     },
     onError: (error) => {

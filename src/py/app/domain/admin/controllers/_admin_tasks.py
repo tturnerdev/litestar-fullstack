@@ -130,6 +130,7 @@ class AdminTasksController(Controller):
         existing = await task_service.get(task_id)
         previous_status = existing.status
         db_obj = await task_service.cancel_task(task_id)
+        request.app.emit(event_id="background_task_cancelled", task_id=task_id)
         await log_audit(
             audit_service,
             action="admin.task.cancelled",

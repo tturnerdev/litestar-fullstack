@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.337.0 (2026-05-08)
+
+### Fixed
+- **Delete endpoint standardization** — Converted last 5 delete endpoints (MFA disable, OAuth unlink, session revoke, revoke all, task delete) from 200+Message to 204 No Content
+- **Sync query invalidation** — `useSyncEntity` now invalidates relevant domain queries (extensions, phone numbers, devices, fax numbers) after successful sync, preventing stale data display
+
+### Added
+- **Security event emissions** — Added webhook events for `mfa_disabled`, `oauth_account_unlinked`, `session_revoked`, `sessions_revoked_all`, `background_task_cancelled`
+- **Model `__repr__` methods** — Added `__repr__` to `UserOAuthAccount` (missed in v0.335.0 due to class name mismatch)
+
 ## v0.335.0 (2026-05-08)
 
 ### Added
