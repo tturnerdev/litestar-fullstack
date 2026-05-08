@@ -8,6 +8,7 @@ from uuid import UUID
 from litestar import Controller, delete, get, patch, post
 from litestar.di import Provide
 from litestar.params import Dependency, Parameter
+from litestar.exceptions import ClientException
 from litestar.status_codes import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from sqlalchemy.orm import selectinload
 
@@ -237,6 +238,12 @@ class LocationController(Controller):
             location_id: Location ID
         """
         db_obj = await locations_service.get(location_id)
+        device_count = await locations_service.get_device_count(location_id)
+        if device_count > 0:
+            raise ClientException(
+                detail=f"Cannot delete location with {device_count} assigned device(s). Reassign devices first.",
+                status_code=409,
+            )
         before = capture_snapshot(db_obj)
         target_label = db_obj.name
         request.app.emit(event_id="location_deleted", entity_id=location_id)

@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Annotated, Any
 from uuid import UUID
 
 from litestar import Controller, Request, delete, get, patch, post
-from litestar.exceptions import PermissionDeniedException
+from litestar.exceptions import ClientException, PermissionDeniedException
 from litestar.di import Provide
 from litestar.params import Dependency, Parameter
 from litestar.status_codes import HTTP_201_CREATED, HTTP_204_NO_CONTENT
@@ -248,6 +248,12 @@ class ConnectionController(Controller):
             connection_id: Connection ID
         """
         db_obj = await connections_service.get(connection_id)
+        device_count = await connections_service.get_device_count(connection_id)
+        if device_count > 0:
+            raise ClientException(
+                detail=f"Cannot delete connection with {device_count} managed device(s). Reassign devices first.",
+                status_code=409,
+            )
         before = capture_snapshot(db_obj)
         target_label = db_obj.name
         request.app.emit(event_id="connection_deleted", entity_id=connection_id)

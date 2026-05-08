@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.353.0 (2026-05-08)
+
+### Fixed
+- **Pre-delete referential integrity** — Location and connection deletion now checks for assigned/managed devices and returns 409 Conflict with a descriptive message instead of allowing deletion of records with dependent devices
+
 ## v0.352.0 (2026-05-08)
 
 ### Fixed
