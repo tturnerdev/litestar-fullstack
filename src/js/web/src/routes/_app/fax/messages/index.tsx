@@ -1,7 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { AlertCircle, Download, Eye, FileText, Home, MoreVertical, Search, Send, SlidersHorizontal, Trash2, X } from "lucide-react"
+import { AlertCircle, AlertTriangle, Download, Eye, FileText, Home, MoreVertical, Search, Send, SlidersHorizontal, Trash2, X } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { DirectionBadge, FaxStatusBadge } from "@/components/fax/fax-status-badge"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { BulkActionBar, createBulkDeleteAction, createExportAction } from "@/components/ui/bulk-action-bar"
@@ -809,107 +819,137 @@ function FaxMessageRow({
   cellClass: string
   isColumnVisible: (col: string) => boolean
 }) {
+  const [deleteOpen, setDeleteOpen] = useState(false)
+
   return (
-    <TableRow
-      data-state={selected ? "selected" : undefined}
-      className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`}
-      onClick={(e) => {
-        const target = e.target as HTMLElement
-        if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) {
-          return
-        }
-        onRowClick()
-      }}
-    >
-      <TableCell className={cellClass}>
-        <Checkbox
-          checked={selected}
-          onChange={(e) => {
-            e.stopPropagation()
-            onToggle()
-          }}
-          aria-label={`Select message from ${msg.remoteNumber}`}
-        />
-      </TableCell>
-      {isColumnVisible("created") && (
-        <TableCell className={cn("hidden md:table-cell", cellClass)}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="cursor-default whitespace-nowrap text-xs text-muted-foreground">{formatRelativeTimeShort(msg.receivedAt ?? msg.createdAt)}</span>
-            </TooltipTrigger>
-            <TooltipContent>{formatDateTime(msg.receivedAt ?? msg.createdAt)}</TooltipContent>
-          </Tooltip>
-        </TableCell>
-      )}
-      {isColumnVisible("direction") && (
-        <TableCell className={cn("hidden md:table-cell", cellClass)}>
-          <DirectionBadge direction={msg.direction} />
-        </TableCell>
-      )}
-      <TableCell className={cellClass}>
-        <div className="flex flex-col gap-0.5">
-          <Link to="/fax/messages/$messageId" params={{ messageId: msg.id }} className="font-mono text-sm hover:underline" onClick={(e) => e.stopPropagation()}>
-            {msg.remoteNumber}
-          </Link>
-          {msg.remoteName && <span className="text-xs text-muted-foreground">{msg.remoteName}</span>}
-        </div>
-      </TableCell>
-      {isColumnVisible("faxLine") && (
-        <TableCell className={cn("hidden md:table-cell", cellClass)}>
-          <span className="text-sm text-muted-foreground">{faxLineName || "--"}</span>
-        </TableCell>
-      )}
-      {isColumnVisible("pages") && (
-        <TableCell className={cn("hidden md:table-cell", cellClass)}>
-          <Badge variant="outline" className="font-mono text-xs">
-            {formatPages(msg.pageCount)}
-          </Badge>
-        </TableCell>
-      )}
-      {isColumnVisible("status") && (
+    <>
+      <TableRow
+        data-state={selected ? "selected" : undefined}
+        className={`cursor-pointer hover:bg-muted/50 transition-colors ${index % 2 === 1 ? "bg-muted/20" : ""}`}
+        onClick={(e) => {
+          const target = e.target as HTMLElement
+          if (target.closest("[role=checkbox]") || target.closest("[data-slot=dropdown]") || target.closest("button") || target.closest("a")) {
+            return
+          }
+          onRowClick()
+        }}
+      >
         <TableCell className={cellClass}>
-          <div className="flex items-center gap-2">
-            <FaxStatusBadge status={msg.status} />
-            {msg.errorMessage && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <AlertCircle className="h-3.5 w-3.5 cursor-help text-destructive" />
-                </TooltipTrigger>
-                <TooltipContent className="max-w-xs">{msg.errorMessage}</TooltipContent>
-              </Tooltip>
-            )}
+          <Checkbox
+            checked={selected}
+            onChange={(e) => {
+              e.stopPropagation()
+              onToggle()
+            }}
+            aria-label={`Select message from ${msg.remoteNumber}`}
+          />
+        </TableCell>
+        {isColumnVisible("created") && (
+          <TableCell className={cn("hidden md:table-cell", cellClass)}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="cursor-default whitespace-nowrap text-xs text-muted-foreground">{formatRelativeTimeShort(msg.receivedAt ?? msg.createdAt)}</span>
+              </TooltipTrigger>
+              <TooltipContent>{formatDateTime(msg.receivedAt ?? msg.createdAt)}</TooltipContent>
+            </Tooltip>
+          </TableCell>
+        )}
+        {isColumnVisible("direction") && (
+          <TableCell className={cn("hidden md:table-cell", cellClass)}>
+            <DirectionBadge direction={msg.direction} />
+          </TableCell>
+        )}
+        <TableCell className={cellClass}>
+          <div className="flex flex-col gap-0.5">
+            <Link to="/fax/messages/$messageId" params={{ messageId: msg.id }} className="font-mono text-sm hover:underline" onClick={(e) => e.stopPropagation()}>
+              {msg.remoteNumber}
+            </Link>
+            {msg.remoteName && <span className="text-xs text-muted-foreground">{msg.remoteName}</span>}
           </div>
         </TableCell>
-      )}
-      <TableCell className={cn("text-right", cellClass)}>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" data-slot="dropdown" onClick={(e) => e.stopPropagation()}>
-              <MoreVertical className="h-4 w-4" />
-              <span className="sr-only">Actions for message from {msg.remoteNumber}</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem asChild>
-              <Link to="/fax/messages/$messageId" params={{ messageId: msg.id }}>
-                <Eye className="mr-2 h-4 w-4" />
-                View details
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <a href={`/api/fax/messages/${msg.id}/download`} target="_blank" rel="noopener noreferrer">
-                <Download className="mr-2 h-4 w-4" />
-                Download
-              </a>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={onDelete}>
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </TableCell>
-    </TableRow>
+        {isColumnVisible("faxLine") && (
+          <TableCell className={cn("hidden md:table-cell", cellClass)}>
+            <span className="text-sm text-muted-foreground">{faxLineName || "--"}</span>
+          </TableCell>
+        )}
+        {isColumnVisible("pages") && (
+          <TableCell className={cn("hidden md:table-cell", cellClass)}>
+            <Badge variant="outline" className="font-mono text-xs">
+              {formatPages(msg.pageCount)}
+            </Badge>
+          </TableCell>
+        )}
+        {isColumnVisible("status") && (
+          <TableCell className={cellClass}>
+            <div className="flex items-center gap-2">
+              <FaxStatusBadge status={msg.status} />
+              {msg.errorMessage && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <AlertCircle className="h-3.5 w-3.5 cursor-help text-destructive" />
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs">{msg.errorMessage}</TooltipContent>
+                </Tooltip>
+              )}
+            </div>
+          </TableCell>
+        )}
+        <TableCell className={cn("text-right", cellClass)}>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" data-slot="dropdown" onClick={(e) => e.stopPropagation()}>
+                <MoreVertical className="h-4 w-4" />
+                <span className="sr-only">Actions for message from {msg.remoteNumber}</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild>
+                <Link to="/fax/messages/$messageId" params={{ messageId: msg.id }}>
+                  <Eye className="mr-2 h-4 w-4" />
+                  View details
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <a href={`/api/fax/messages/${msg.id}/download`} target="_blank" rel="noopener noreferrer">
+                  <Download className="mr-2 h-4 w-4" />
+                  Download
+                </a>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setDeleteOpen(true)}>
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </TableCell>
+      </TableRow>
+
+      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Delete fax message?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete this fax message from <strong>{msg.remoteNumber}</strong>. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                onDelete()
+                setDeleteOpen(false)
+              }}
+            >
+              Delete Message
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }
