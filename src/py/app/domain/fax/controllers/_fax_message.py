@@ -231,6 +231,9 @@ class FaxMessageController(Controller):
         Returns:
             BackgroundTaskDetail with the tracked task info (HTTP 202)
         """
+        if not current_user.is_superuser:
+            if not any(tm.team_id == data.team_id for tm in current_user.teams):
+                raise PermissionDeniedException(detail="You do not have access to this team")
         fax_number = await fax_numbers_service.get(data.fax_number_id)
         if not _can_access_fax_number(current_user, fax_number):
             raise PermissionDeniedException(detail="Insufficient permissions to send from this fax number.")

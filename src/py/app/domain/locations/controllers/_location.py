@@ -88,7 +88,7 @@ class LocationController(Controller):
         operation_id="CreateLocation",
         summary="Create a location",
         path="/api/teams/{team_id:uuid}/locations",
-        guards=[requires_feature_permission("locations", "edit")],
+        guards=[requires_feature_permission("locations", "edit"), requires_location_team_membership],
         status_code=HTTP_201_CREATED,
     )
     async def create_location(
