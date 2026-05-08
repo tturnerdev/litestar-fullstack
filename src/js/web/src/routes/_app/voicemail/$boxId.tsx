@@ -62,6 +62,7 @@ import {
   useUpdateVoicemailBox,
   useVoicemailBox,
   useVoicemailMessages,
+  type VoicemailBoxUpdate,
   type VoicemailMessage,
 } from "@/lib/api/hooks/voicemail"
 import { formatDateTime, formatFullDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
@@ -101,7 +102,7 @@ function VoicemailBoxDetailPage() {
   const deleteBoxMutation = useDeleteVoicemailBox()
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
-  const boxLabel = box?.extensionNumber ? `Ext. ${box.extensionNumber}` : (box?.mailboxNumber ?? "Voicemail Box")
+  const boxLabel = "Voicemail Box"
 
   useDocumentTitle(isLoading ? "Voicemail Box" : `${boxLabel} - Voicemail`)
 
@@ -155,7 +156,7 @@ function VoicemailBoxDetailPage() {
       <PageHeader
         eyebrow="Voicemail"
         title={boxLabel}
-        description={box.email ? `Notifications to ${box.email}` : undefined}
+        description={box.emailAddress ? `Notifications to ${box.emailAddress}` : undefined}
         breadcrumbs={
           <Breadcrumb>
             <BreadcrumbList>
@@ -183,12 +184,6 @@ function VoicemailBoxDetailPage() {
               <Badge variant="outline" className="gap-1.5 text-muted-foreground">
                 <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
                 Disabled
-              </Badge>
-            )}
-            {box.isEnabled && box.unreadCount > 0 && (
-              <Badge variant="secondary" className="gap-1.5">
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
-                {box.unreadCount} unread
               </Badge>
             )}
             {box.extensionId && (
@@ -374,7 +369,7 @@ function BoxSettingsForm({ boxId }: { boxId: string }) {
     if (data) {
       setFormData({
         isEnabled: data.isEnabled,
-        email: data.email ?? "",
+        email: data.emailAddress ?? "",
         pin: "",
         greetingType: data.greetingType,
         maxLength: String(data.maxMessageLengthSeconds),
@@ -394,7 +389,7 @@ function BoxSettingsForm({ boxId }: { boxId: string }) {
     if (!editing || !data) return false
     return (
       formData.isEnabled !== data.isEnabled ||
-      formData.email !== (data.email ?? "") ||
+      formData.email !== (data.emailAddress ?? "") ||
       formData.pin !== "" ||
       formData.greetingType !== data.greetingType ||
       formData.maxLength !== String(data.maxMessageLengthSeconds) ||
@@ -432,7 +427,7 @@ function BoxSettingsForm({ boxId }: { boxId: string }) {
     const payload: Record<string, unknown> = {}
     if (formData.isEnabled !== data.isEnabled) payload.isEnabled = formData.isEnabled
     if (formData.pin) payload.pin = formData.pin
-    if (formData.email !== (data.email ?? "")) payload.emailAddress = formData.email || null
+    if (formData.email !== (data.emailAddress ?? "")) payload.emailAddress = formData.email || null
     if (formData.greetingType !== data.greetingType) payload.greetingType = formData.greetingType
     if (formData.maxLength !== String(data.maxMessageLengthSeconds)) payload.maxMessageLengthSeconds = Number(formData.maxLength)
     if (formData.emailNotification !== data.emailNotification) payload.emailNotification = formData.emailNotification
@@ -447,7 +442,7 @@ function BoxSettingsForm({ boxId }: { boxId: string }) {
       return
     }
 
-    updateMutation.mutate(payload, {
+    updateMutation.mutate(payload as VoicemailBoxUpdate, {
       onSuccess: () => {
         setEditing(false)
         setShowPin(false)
@@ -557,7 +552,7 @@ function BoxSettingsForm({ boxId }: { boxId: string }) {
                 disabled={updateMutation.isPending}
               />
             ) : (
-              <p className="text-sm">{data.email || <span className="text-muted-foreground italic">Not set</span>}</p>
+              <p className="text-sm">{data.emailAddress || <span className="text-muted-foreground italic">Not set</span>}</p>
             )}
           </div>
 
@@ -1166,7 +1161,7 @@ function BoxMessageRow({
                 <span className="text-sm">{formatDateTime(message.receivedAt)}</span>
               </TooltipTrigger>
               <TooltipContent>
-                <p>{formatFullDateTime(message.receivedAt)}</p>
+                <p>{formatFullDateTime(message.receivedAt ?? "")}</p>
               </TooltipContent>
             </Tooltip>
             {message.isUrgent && (

@@ -1,64 +1,23 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
-import { client } from "@/lib/generated/api/client.gen"
+import {
+  deleteVoicemailBox as deleteBoxApi,
+  deleteVoicemailMessageById,
+  getVoicemailBox,
+  getVoicemailMessageById,
+  listAllVoicemailMessages,
+  listVoicemailBoxes,
+  listVoicemailBoxMessages,
+  toggleVoicemailMessageRead,
+  updateVoicemailBox as updateBoxApi,
+  type VoicemailBox,
+  type VoicemailBoxUpdate,
+  type VoicemailSchemasVoicemailMessageVoicemailMessage,
+} from "@/lib/generated/api"
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
+export type VoicemailMessage = Required<VoicemailSchemasVoicemailMessageVoicemailMessage>
 
-export interface VoicemailBox {
-  id: string
-  extensionId: string | null
-  extensionNumber: string | null
-  mailboxNumber: string
-  pin: string | null
-  email: string | null
-  isEnabled: boolean
-  greetingType: "default" | "custom" | "name_only"
-  greetingFilePath: string | null
-  maxMessageLengthSeconds: number
-  emailNotification: boolean
-  emailAttachAudio: boolean
-  transcriptionEnabled: boolean
-  autoDeleteDays: number | null
-  unreadCount: number
-  totalCount: number
-  createdAt: string | null
-  updatedAt: string | null
-}
-
-export interface VoicemailMessage {
-  id: string
-  voicemailBoxId: string
-  callerNumber: string
-  callerName: string | null
-  durationSeconds: number
-  audioFilePath: string
-  transcription: string | null
-  isRead: boolean
-  isUrgent: boolean
-  receivedAt: string
-  createdAt: string | null
-  updatedAt: string | null
-}
-
-interface PaginatedResponse<T> {
-  items: T[]
-  total: number
-}
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
-  const response = await client.request({
-    method: (options?.method as "GET") ?? "GET",
-    url,
-    body: options?.body ? JSON.parse(options.body as string) : undefined,
-  })
-  return response.data as T
-}
+export type { VoicemailBox, VoicemailBoxUpdate }
 
 // ---------------------------------------------------------------------------
 // Voicemail Boxes
@@ -74,12 +33,15 @@ export function useVoicemailBoxes(options: UseVoicemailBoxesOptions = {}) {
   const { page = 1, pageSize = 25, search } = options
   return useQuery({
     queryKey: ["voicemail", "boxes", page, pageSize, search],
-    queryFn: () => {
-      const params = new URLSearchParams()
-      params.set("currentPage", String(page))
-      params.set("pageSize", String(pageSize))
-      if (search) params.set("search", search)
-      return apiFetch<PaginatedResponse<VoicemailBox>>(`/api/voicemail/boxes?${params.toString()}`)
+    queryFn: async () => {
+      const response = await listVoicemailBoxes({
+        query: {
+          currentPage: page,
+          pageSize,
+          searchString: search,
+        },
+      })
+      return response.data as { items: Required<VoicemailBox>[]; total: number }
     },
   })
 }
@@ -87,7 +49,12 @@ export function useVoicemailBoxes(options: UseVoicemailBoxesOptions = {}) {
 export function useVoicemailBox(boxId: string) {
   return useQuery({
     queryKey: ["voicemail", "box", boxId],
-    queryFn: () => apiFetch<VoicemailBox>(`/api/voicemail/boxes/${boxId}`),
+    queryFn: async () => {
+      const response = await getVoicemailBox({
+        path: { box_id: boxId },
+      })
+      return response.data as Required<VoicemailBox>
+    },
     enabled: !!boxId,
   })
 }
@@ -95,11 +62,13 @@ export function useVoicemailBox(boxId: string) {
 export function useUpdateVoicemailBox(boxId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (payload: Record<string, unknown>) =>
-      apiFetch<VoicemailBox>(`/api/voicemail/boxes/${boxId}`, {
-        method: "PUT",
-        body: JSON.stringify(payload),
-      }),
+    mutationFn: async (payload: VoicemailBoxUpdate) => {
+      const response = await updateBoxApi({
+        path: { box_id: boxId },
+        body: payload,
+      })
+      return response.data as Required<VoicemailBox>
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["voicemail", "boxes"] })
       queryClient.invalidateQueries({ queryKey: ["voicemail", "box", boxId] })
@@ -116,10 +85,11 @@ export function useUpdateVoicemailBox(boxId: string) {
 export function useDeleteVoicemailBox() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (boxId: string) =>
-      apiFetch<void>(`/api/voicemail/boxes/${boxId}`, {
-        method: "DELETE",
-      }),
+    mutationFn: async (boxId: string) => {
+      await deleteBoxApi({
+        path: { box_id: boxId },
+      })
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["voicemail", "boxes"] })
       toast.success("Voicemail box deleted")
@@ -149,18 +119,18 @@ export function useVoicemailMessages(options: UseVoicemailMessagesOptions = {}) 
   const { boxId, page = 1, pageSize = 25, isRead, startDate, endDate } = options
   return useQuery({
     queryKey: ["voicemail", "messages", boxId, page, pageSize, isRead, startDate, endDate],
-    queryFn: () => {
-      const params = new URLSearchParams()
-      params.set("currentPage", String(page))
-      params.set("pageSize", String(pageSize))
-      if (isRead !== null && isRead !== undefined) params.set("isRead", String(isRead))
-      if (startDate) params.set("startDate", startDate)
-      if (endDate) params.set("endDate", endDate)
-
+    queryFn: async () => {
       if (boxId) {
-        return apiFetch<PaginatedResponse<VoicemailMessage>>(`/api/voicemail/boxes/${boxId}/messages?${params.toString()}`)
+        const response = await listVoicemailBoxMessages({
+          path: { box_id: boxId },
+          query: { currentPage: page, pageSize },
+        })
+        return response.data as { items: VoicemailMessage[]; total: number }
       }
-      return apiFetch<PaginatedResponse<VoicemailMessage>>(`/api/voicemail/messages?${params.toString()}`)
+      const response = await listAllVoicemailMessages({
+        query: { currentPage: page, pageSize },
+      })
+      return response.data as { items: VoicemailMessage[]; total: number }
     },
   })
 }
@@ -168,7 +138,12 @@ export function useVoicemailMessages(options: UseVoicemailMessagesOptions = {}) 
 export function useVoicemailMessage(messageId: string) {
   return useQuery({
     queryKey: ["voicemail", "message", messageId],
-    queryFn: () => apiFetch<VoicemailMessage>(`/api/voicemail/messages/${messageId}`),
+    queryFn: async () => {
+      const response = await getVoicemailMessageById({
+        path: { message_id: messageId },
+      })
+      return response.data as VoicemailMessage
+    },
     enabled: !!messageId,
   })
 }
@@ -176,10 +151,13 @@ export function useVoicemailMessage(messageId: string) {
 export function useMarkVoicemailRead(messageId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: () =>
-      apiFetch<VoicemailMessage>(`/api/voicemail/messages/${messageId}/read`, {
-        method: "PUT",
-      }),
+    mutationFn: async () => {
+      const response = await toggleVoicemailMessageRead({
+        path: { message_id: messageId },
+        body: { isRead: true },
+      })
+      return response.data as VoicemailMessage
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["voicemail", "messages"] })
       queryClient.invalidateQueries({ queryKey: ["voicemail", "message", messageId] })
@@ -196,11 +174,13 @@ export function useMarkVoicemailRead(messageId: string) {
 export function useToggleVoicemailRead() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ messageId, isRead }: { messageId: string; isRead: boolean }) =>
-      apiFetch<VoicemailMessage>(`/api/voicemail/messages/${messageId}/read`, {
-        method: "PUT",
-        body: JSON.stringify({ isRead }),
-      }),
+    mutationFn: async ({ messageId, isRead }: { messageId: string; isRead: boolean }) => {
+      const response = await toggleVoicemailMessageRead({
+        path: { message_id: messageId },
+        body: { isRead },
+      })
+      return response.data as VoicemailMessage
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["voicemail", "messages"] })
       queryClient.invalidateQueries({ queryKey: ["voicemail", "boxes"] })
@@ -216,10 +196,11 @@ export function useToggleVoicemailRead() {
 export function useDeleteVoicemailMessage() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (messageId: string) =>
-      apiFetch<void>(`/api/voicemail/messages/${messageId}`, {
-        method: "DELETE",
-      }),
+    mutationFn: async (messageId: string) => {
+      await deleteVoicemailMessageById({
+        path: { message_id: messageId },
+      })
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["voicemail", "messages"] })
       queryClient.invalidateQueries({ queryKey: ["voicemail", "boxes"] })
@@ -243,8 +224,9 @@ export function useBulkMarkVoicemailRead() {
     mutationFn: async (messageIds: string[]) => {
       await Promise.all(
         messageIds.map((messageId) =>
-          apiFetch<VoicemailMessage>(`/api/voicemail/messages/${messageId}/read`, {
-            method: "PUT",
+          toggleVoicemailMessageRead({
+            path: { message_id: messageId },
+            body: { isRead: true },
           }),
         ),
       )
@@ -268,8 +250,8 @@ export function useBulkDeleteVoicemailMessages() {
     mutationFn: async (messageIds: string[]) => {
       await Promise.all(
         messageIds.map((messageId) =>
-          apiFetch<void>(`/api/voicemail/messages/${messageId}`, {
-            method: "DELETE",
+          deleteVoicemailMessageById({
+            path: { message_id: messageId },
           }),
         ),
       )

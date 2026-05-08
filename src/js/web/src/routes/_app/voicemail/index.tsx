@@ -243,8 +243,8 @@ function MessagesTab() {
           bVal = b.durationSeconds
           break
         case "date":
-          aVal = a.receivedAt
-          bVal = b.receivedAt
+          aVal = a.receivedAt ?? ""
+          bVal = b.receivedAt ?? ""
           break
         default:
           return 0
@@ -553,7 +553,7 @@ function MessagesTab() {
                           <span className="text-sm">{formatDateTime(msg.receivedAt)}</span>
                         </TooltipTrigger>
                         <TooltipContent>
-                          <p>{formatFullDateTime(msg.receivedAt)}</p>
+                          <p>{formatFullDateTime(msg.receivedAt ?? "")}</p>
                         </TooltipContent>
                       </Tooltip>
                     </TableCell>
@@ -784,7 +784,7 @@ function MessageDetailDialog({
           <DialogDescription>
             {message.callerName && <span className="font-mono text-xs">{message.callerNumber}</span>}
             {message.callerName && " — "}
-            {formatFullDateTime(message.receivedAt)} — {formatDuration(message.durationSeconds)}
+            {formatFullDateTime(message.receivedAt ?? "")} — {formatDuration(message.durationSeconds)}
           </DialogDescription>
         </DialogHeader>
 
@@ -896,12 +896,8 @@ function BoxesTab() {
       let bVal: string | number
       switch (sortKey) {
         case "name":
-          aVal = (a.extensionNumber ?? a.mailboxNumber).toLowerCase()
-          bVal = (b.extensionNumber ?? b.mailboxNumber).toLowerCase()
-          break
-        case "unread":
-          aVal = a.unreadCount
-          bVal = b.unreadCount
+          aVal = a.extensionId.toLowerCase()
+          bVal = b.extensionId.toLowerCase()
           break
         default:
           return 0
@@ -1108,11 +1104,11 @@ function BoxRow({ box }: { box: VoicemailBox }) {
       >
         <TableCell>
           <Link to="/voicemail/$boxId" params={{ boxId: box.id }} className="group flex flex-col gap-0.5" onClick={(e) => e.stopPropagation()}>
-            <span className="font-mono font-medium group-hover:underline">{box.extensionNumber ?? box.mailboxNumber}</span>
+            <span className="font-mono font-medium group-hover:underline">{box.extensionId.slice(0, 8)}</span>
           </Link>
         </TableCell>
         <TableCell>
-          <span className="text-sm text-muted-foreground">{box.email ?? "---"}</span>
+          <span className="text-sm text-muted-foreground">{box.emailAddress ?? "---"}</span>
         </TableCell>
         <TableCell>
           {box.isEnabled ? (
@@ -1137,21 +1133,14 @@ function BoxRow({ box }: { box: VoicemailBox }) {
           )}
         </TableCell>
         <TableCell>
-          {box.unreadCount > 0 ? (
-            <Badge variant="secondary" className="gap-1">
-              <Mail className="h-3 w-3" />
-              {box.unreadCount}
-            </Badge>
-          ) : (
-            <span className="text-xs text-muted-foreground">0</span>
-          )}
+          <span className="text-xs text-muted-foreground">---</span>
         </TableCell>
         <TableCell className="text-right">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="h-8 w-8 p-0" data-slot="dropdown" onClick={(e) => e.stopPropagation()}>
                 <MoreVertical className="h-4 w-4" />
-                <span className="sr-only">Actions for {box.extensionNumber ?? box.mailboxNumber}</span>
+                <span className="sr-only">Actions for {box.extensionId.slice(0, 8)}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -1179,8 +1168,8 @@ function BoxRow({ box }: { box: VoicemailBox }) {
               Delete voicemail box
             </AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete the voicemail box for <span className="font-medium text-foreground">{box.extensionNumber ?? box.mailboxNumber}</span> and all associated
-              messages. This action cannot be undone.
+              This will permanently delete the voicemail box for <span className="font-medium text-foreground">{box.extensionId.slice(0, 8)}</span> and all associated messages.
+              This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
