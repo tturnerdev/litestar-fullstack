@@ -61,9 +61,9 @@ export function formatFullDateTime(dateStr: string): string {
  * Format a date string using the browser's default locale string.
  * Returns "---" (or a custom fallback) for null/undefined input.
  */
-export function formatDateTime(dateStr: string | null | undefined, fallback = "---"): string {
+export function formatDateTime(dateStr: string | null | undefined, fallback = "---", options?: Intl.DateTimeFormatOptions): string {
   if (!dateStr) return fallback
-  return new Date(dateStr).toLocaleString()
+  return new Date(dateStr).toLocaleString(undefined, options)
 }
 
 /**

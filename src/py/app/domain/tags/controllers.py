@@ -190,6 +190,7 @@ class TagController(Controller):
             after=after,
             request=request,
         )
+        request.app.emit(event_id="tag_created", tag_id=db_obj.id)
         return tags_service.to_schema(db_obj, schema_type=Tag)
 
     @patch(operation_id="UpdateTag", summary="Update a tag", path="/{tag_id:uuid}", guards=[requires_superuser])
@@ -229,6 +230,7 @@ class TagController(Controller):
             after=after,
             request=request,
         )
+        request.app.emit(event_id="tag_updated", tag_id=tag_id)
         return tags_service.to_schema(fresh_obj, schema_type=Tag)
 
     @delete(operation_id="DeleteTag", summary="Delete a tag", path="/{tag_id:uuid}", guards=[requires_superuser], return_dto=None, status_code=HTTP_204_NO_CONTENT)

@@ -92,6 +92,7 @@ export function useImportExtensions() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["admin", "voice"] })
+      queryClient.invalidateQueries({ queryKey: ["voice", "extensions"] })
       toast.success("Extension import complete", {
         description: `${data.created} created, ${data.updated} updated, ${data.skipped} skipped`,
       })

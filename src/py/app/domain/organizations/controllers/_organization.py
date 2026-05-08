@@ -105,6 +105,7 @@ class OrganizationController(Controller):
                 after=after,
                 request=request,
             )
+            request.app.emit(event_id="organization_created", entity_id=db_obj.id)
         else:
             before = capture_snapshot(db_obj)
             db_obj = await organization_service.update(
