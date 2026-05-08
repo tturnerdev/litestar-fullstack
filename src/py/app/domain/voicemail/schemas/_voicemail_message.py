@@ -35,7 +35,7 @@ class VoicemailMessageCreate(CamelizedBaseStruct):
     caller_name: Annotated[str, Meta(min_length=1, max_length=100)] | None = None
     duration_seconds: Annotated[int, Meta(ge=0)] = 0
     audio_file_path: Annotated[str, Meta(max_length=500)] = ""
-    transcription: str | None = None
+    transcription: Annotated[str, Meta(max_length=10000)] | None = None
     is_urgent: bool = False
     received_at: datetime | None = None
 
@@ -45,7 +45,7 @@ class VoicemailMessageUpdate(CamelizedBaseStruct, omit_defaults=True):
 
     is_read: bool | msgspec.UnsetType = msgspec.UNSET
     is_urgent: bool | msgspec.UnsetType = msgspec.UNSET
-    transcription: str | msgspec.UnsetType | None = msgspec.UNSET
+    transcription: Annotated[str, Meta(max_length=10000)] | msgspec.UnsetType | None = msgspec.UNSET
 
 
 class VoicemailReadToggle(CamelizedBaseStruct):
