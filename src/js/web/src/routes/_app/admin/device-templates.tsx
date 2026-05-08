@@ -40,6 +40,13 @@ import type { DeviceTemplateList } from "@/lib/generated/api"
 import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/admin/device-templates")({
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): {
+    q?: string
+  } => ({
+    q: typeof search.q === "string" && search.q ? search.q : undefined,
+  }),
   component: AdminDeviceTemplatesPage,
 })
 
@@ -334,10 +341,14 @@ function TemplateFormDialog({ mode, templateId, open, onOpenChange }: { mode: "c
 
 function AdminDeviceTemplatesPage() {
   useDocumentTitle("Device Templates - Admin")
+  const { q: searchParam } = Route.useSearch()
+  const navigate = Route.useNavigate()
+
+  const search = searchParam ?? ""
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(getStoredPageSize)
-  const [search, setSearch] = useState("")
-  const debouncedSearch = useDebouncedValue(search)
+  const [searchInput, setSearchInput] = useState(search)
+  const debouncedSearch = useDebouncedValue(searchInput)
   const [createOpen, setCreateOpen] = useState(false)
   const [editId, setEditId] = useState<string | null>(null)
 
@@ -366,10 +377,22 @@ function AdminDeviceTemplatesPage() {
     }
   }, [])
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional — reset page when search changes
+  // Sync URL when debounced search value settles
   useEffect(() => {
     setPage(1)
-  }, [debouncedSearch])
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        q: debouncedSearch || undefined,
+      }),
+      replace: true,
+    })
+  }, [debouncedSearch, navigate])
+
+  // Keep local input in sync if URL search param changes externally (back/forward)
+  useEffect(() => {
+    setSearchInput(search)
+  }, [search])
 
   const { data, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useAdminDeviceTemplates(page, pageSize, debouncedSearch || undefined)
   const deleteMutation = useDeleteDeviceTemplate()
@@ -451,11 +474,11 @@ function AdminDeviceTemplatesPage() {
                 <div className="flex items-center gap-3">
                   <div className="relative max-w-sm">
                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input placeholder="Search templates..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 pr-8" />
-                    {search && (
+                    <Input placeholder="Search templates..." value={searchInput} onChange={(e) => setSearchInput(e.target.value)} className="pl-9 pr-8" />
+                    {searchInput && (
                       <button
                         type="button"
-                        onClick={() => setSearch("")}
+                        onClick={() => setSearchInput("")}
                         className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
                       >
                         <X className="h-3.5 w-3.5" />
@@ -491,7 +514,7 @@ function AdminDeviceTemplatesPage() {
                   description={search ? "No templates match your search." : "Create your first device template to get started."}
                   action={
                     search ? (
-                      <Button variant="outline" size="sm" onClick={() => setSearch("")}>
+                      <Button variant="outline" size="sm" onClick={() => setSearchInput("")}>
                         Clear search
                       </Button>
                     ) : (

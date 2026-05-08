@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { AlertCircle, AlertTriangle, Bell, BellOff, Copy, Download, Eye, Mail, MailPlus, MoreVertical, Pencil, Search, Trash2, X } from "lucide-react"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 import {
   AlertDialog,
@@ -42,6 +42,13 @@ import { client } from "@/lib/generated/api/client.gen"
 import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_app/fax/email-routes")({
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): {
+    q?: string
+  } => ({
+    q: typeof search.q === "string" && search.q ? search.q : undefined,
+  }),
   component: FaxEmailRoutesPage,
 })
 
@@ -374,15 +381,34 @@ function DeleteEmailRouteDialog({ route, onOpenChange }: { route: FaxEmailRouteW
 
 function FaxEmailRoutesPage() {
   useDocumentTitle("Fax Email Routes")
+  const { q: searchParam } = Route.useSearch()
+  const navigate = Route.useNavigate()
   const { data: routes, isLoading, isError, refetch, dataUpdatedAt, isRefetching } = useAllFaxEmailRoutes()
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [editRoute, setEditRoute] = useState<FaxEmailRouteWithNumber | null>(null)
   const [deleteRoute, setDeleteRoute] = useState<FaxEmailRouteWithNumber | null>(null)
 
   // Search & filter state
-  const [search, setSearch] = useState("")
-  const debouncedSearch = useDebouncedValue(search)
+  const search = searchParam ?? ""
+  const [searchInput, setSearchInput] = useState(search)
+  const debouncedSearch = useDebouncedValue(searchInput)
   const [statusFilter, setStatusFilter] = useState<string[]>([])
+
+  // Sync URL when debounced search value settles
+  useEffect(() => {
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        q: debouncedSearch || undefined,
+      }),
+      replace: true,
+    })
+  }, [debouncedSearch, navigate])
+
+  // Keep local input in sync if URL search param changes externally (back/forward)
+  useEffect(() => {
+    setSearchInput(search)
+  }, [search])
 
   // Sort state
   const [sortKey, setSortKey] = useState<string | null>(null)
@@ -574,15 +600,15 @@ function FaxEmailRoutesPage() {
                   <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     placeholder="Search by email or fax number..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
                     className="pl-9 pr-9"
                     aria-label="Search email routes"
                   />
-                  {search && (
+                  {searchInput && (
                     <button
                       type="button"
-                      onClick={() => setSearch("")}
+                      onClick={() => setSearchInput("")}
                       className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                       aria-label="Clear search"
                     >
@@ -597,7 +623,7 @@ function FaxEmailRoutesPage() {
                     size="sm"
                     className="text-xs text-muted-foreground"
                     onClick={() => {
-                      setSearch("")
+                      setSearchInput("")
                       setStatusFilter([])
                     }}
                   >
@@ -621,7 +647,7 @@ function FaxEmailRoutesPage() {
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        setSearch("")
+                        setSearchInput("")
                         setStatusFilter([])
                       }}
                     >

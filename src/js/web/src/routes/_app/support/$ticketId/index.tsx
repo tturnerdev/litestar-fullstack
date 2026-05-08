@@ -768,14 +768,34 @@ function TicketDetailPage() {
           editing ? <Input value={editSubject} onChange={(e) => setEditSubject(e.target.value)} className="h-9 text-lg font-semibold" maxLength={200} autoFocus /> : ticket.subject
         }
         description={
-          <span className="inline-flex items-center gap-1">
+          <span className="inline-flex flex-wrap items-center gap-x-2 gap-y-1">
             <span className="group/tktcopy inline-flex items-center gap-0.5">
               {ticket.ticketNumber}
               <span className="opacity-0 transition-opacity group-hover/tktcopy:opacity-100">
                 <CopyButton value={ticket.ticketNumber} label="ticket number" />
               </span>
             </span>
-            <span>· Created {formatDateTime(ticket.createdAt, "")}</span>
+            <span className="text-muted-foreground/40">·</span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="cursor-default">{formatRelativeTimeShort(ticket.createdAt)}</span>
+              </TooltipTrigger>
+              <TooltipContent>Created {formatDateTime(ticket.createdAt, "")}</TooltipContent>
+            </Tooltip>
+            {ticket.assignedTo && (
+              <>
+                <span className="text-muted-foreground/40">·</span>
+                <span className="inline-flex items-center gap-1 text-muted-foreground">
+                  <Users className="h-3 w-3" />
+                  <span className="text-foreground/80">{ticket.assignedTo.name ?? ticket.assignedTo.email}</span>
+                </span>
+              </>
+            )}
+            <span className="text-muted-foreground/40">·</span>
+            <span className="inline-flex items-center gap-1.5">
+              <TicketStatusBadge status={ticket.status} />
+              <TicketPriorityBadge priority={ticket.priority} size="sm" />
+            </span>
           </span>
         }
         breadcrumbs={
@@ -812,9 +832,22 @@ function TicketDetailPage() {
                 </Button>
               </>
             ) : (
-              <Button variant="outline" size="sm" onClick={handleStartEditing}>
-                <Pencil className="mr-2 h-4 w-4" /> Edit
-              </Button>
+              <>
+                <Button variant="outline" size="sm" onClick={handleStartEditing}>
+                  <Pencil className="mr-2 h-4 w-4" /> Edit
+                </Button>
+                {isClosed ? (
+                  <Button variant="outline" size="sm" onClick={() => reopenTicket.mutate()} disabled={reopenTicket.isPending}>
+                    {reopenTicket.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Unlock className="mr-2 h-4 w-4" />}
+                    Reopen
+                  </Button>
+                ) : (
+                  <Button variant="outline" size="sm" onClick={() => closeTicket.mutate()} disabled={closeTicket.isPending}>
+                    {closeTicket.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Lock className="mr-2 h-4 w-4" />}
+                    Close
+                  </Button>
+                )}
+              </>
             )}
             <Button variant="outline" size="sm" asChild>
               <Link to="/support">
@@ -838,18 +871,6 @@ function TicketDetailPage() {
                   <Copy className="mr-2 h-4 w-4" />
                   Copy Ticket ID
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                {isClosed ? (
-                  <DropdownMenuItem onClick={() => reopenTicket.mutate()} disabled={reopenTicket.isPending}>
-                    {reopenTicket.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Unlock className="mr-2 h-4 w-4" />}
-                    Reopen Ticket
-                  </DropdownMenuItem>
-                ) : (
-                  <DropdownMenuItem onClick={() => closeTicket.mutate()} disabled={closeTicket.isPending}>
-                    {closeTicket.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Lock className="mr-2 h-4 w-4" />}
-                    Close Ticket
-                  </DropdownMenuItem>
-                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setShowDeleteDialog(true)}>
                   <Trash2 className="mr-2 h-4 w-4" />

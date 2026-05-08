@@ -42,6 +42,7 @@ import {
   useReorderCallQueueMembers,
   useUpdateCallQueue,
 } from "@/lib/api/hooks/call-routing"
+import { type Extension, useExtensions } from "@/lib/api/hooks/voice"
 
 export const Route = createFileRoute("/_app/call-routing/call-queues/$callQueueId")({
   component: CallQueueDetailPage,
@@ -294,7 +295,7 @@ function EditCallQueueDialog({ queue, open, onOpenChange }: EditCallQueueDialogP
 
 // -- Add Member Inline --------------------------------------------------------
 
-function AddMemberRow({ queueId }: { queueId: string }) {
+function AddMemberRow({ queueId, extensions }: { queueId: string; extensions: Extension[] }) {
   const createMember = useCreateCallQueueMember(queueId)
   const [adding, setAdding] = useState(false)
   const [extensionId, setExtensionId] = useState("")
@@ -303,7 +304,7 @@ function AddMemberRow({ queueId }: { queueId: string }) {
 
   const handleSave = () => {
     createMember.mutate(
-      { extensionId: extensionId.trim() || null, priority, penalty, isPaused: false },
+      { extensionId: extensionId || null, priority, penalty, isPaused: false },
       {
         onSuccess: () => {
           setAdding(false)
@@ -327,8 +328,19 @@ function AddMemberRow({ queueId }: { queueId: string }) {
     <div className="space-y-3 rounded-lg border border-border/60 bg-muted/20 p-4">
       <div className="grid gap-3 sm:grid-cols-3">
         <div className="space-y-2">
-          <Label>Extension ID</Label>
-          <Input placeholder="Extension UUID" value={extensionId} onChange={(e) => setExtensionId(e.target.value)} />
+          <Label>Extension</Label>
+          <Select value={extensionId} onValueChange={setExtensionId}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select extension" />
+            </SelectTrigger>
+            <SelectContent>
+              {extensions.map((ext) => (
+                <SelectItem key={ext.id} value={ext.id}>
+                  {ext.extensionNumber} — {ext.displayName}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div className="space-y-2">
           <Label>Priority</Label>
@@ -340,7 +352,7 @@ function AddMemberRow({ queueId }: { queueId: string }) {
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <Button size="sm" onClick={handleSave} disabled={createMember.isPending}>
+        <Button size="sm" onClick={handleSave} disabled={!extensionId || createMember.isPending}>
           {createMember.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Add
         </Button>
@@ -363,6 +375,7 @@ function MemberRow({
   onMoveUp,
   onMoveDown,
   isReordering,
+  extensionLookup,
 }: {
   member: CallQueueMember
   queueId: string
@@ -372,16 +385,19 @@ function MemberRow({
   onMoveUp: () => void
   onMoveDown: () => void
   isReordering: boolean
+  extensionLookup: Map<string, Extension>
 }) {
   const deleteMember = useDeleteCallQueueMember(queueId)
   const pauseMember = usePauseCallQueueMember(queueId)
+  const ext = member.extensionId ? extensionLookup.get(member.extensionId) : undefined
 
   return (
     <TableRow className={isHighlighted ? "animate-highlight-row" : ""}>
       <TableCell>
         {member.extensionId ? (
-          <Link to="/voice/extensions/$extensionId" params={{ extensionId: member.extensionId }} className="text-primary hover:underline font-mono text-sm">
-            {`${member.extensionId.slice(0, 8)}...`}
+          <Link to="/voice/extensions/$extensionId" params={{ extensionId: member.extensionId }} className="text-primary hover:underline">
+            <span className="font-mono text-sm">{ext?.extensionNumber ?? member.extensionId.slice(0, 8)}</span>
+            {ext?.displayName && <span className="ml-1.5 text-xs text-muted-foreground">{ext.displayName}</span>}
           </Link>
         ) : (
           <span className="font-mono text-xs">---</span>
@@ -456,6 +472,7 @@ function CallQueueDetailPage() {
   const router = useRouter()
 
   const { data, isLoading, isError, refetch } = useCallQueue(callQueueId)
+  const { data: extensionsData } = useExtensions(1, 200)
   const deleteMutation = useDeleteCallQueue()
 
   const [showEditDialog, setShowEditDialog] = useState(false)
@@ -475,6 +492,8 @@ function CallQueueDetailPage() {
   const members = data?.members ?? []
   const sortedMembers = [...members].sort((a, b) => a.priority - b.priority)
   const activeMemberCount = members.filter((m) => !m.isPaused).length
+  const allExtensions = extensionsData?.items ?? []
+  const extensionLookup = useMemo(() => new Map(allExtensions.map((e) => [e.id, e])), [allExtensions])
 
   const handleReorder = useCallback(
     (index: number, direction: "up" | "down") => {
@@ -712,6 +731,7 @@ function CallQueueDetailPage() {
                               isReordering={reorderMutation.isPending}
                               onMoveUp={() => handleReorder(idx, "up")}
                               onMoveDown={() => handleReorder(idx, "down")}
+                              extensionLookup={extensionLookup}
                             />
                           ))}
                         </TableBody>
@@ -720,7 +740,7 @@ function CallQueueDetailPage() {
                   ) : (
                     <p className="text-sm text-muted-foreground py-4 text-center">No members assigned.</p>
                   )}
-                  <AddMemberRow queueId={callQueueId} />
+                  <AddMemberRow queueId={callQueueId} extensions={allExtensions} />
                 </CardContent>
               </Card>
             </SectionErrorBoundary>

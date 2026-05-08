@@ -98,7 +98,8 @@ export function TicketMessage({ message, ticketId, isFirstMessage = false, onRep
           leftBorderColor,
           isInternal && "border-amber-500/30 bg-amber-500/5",
           isFirstMessage && "border-primary/20 bg-primary/[0.02]",
-          !isInternal && !isFirstMessage && "border-border/60",
+          !isInternal && !isFirstMessage && isOwnMessage && "border-border/60 bg-primary/[0.02]",
+          !isInternal && !isFirstMessage && !isOwnMessage && "border-border/60",
         )}
       >
         <CardHeader className="pb-2">
