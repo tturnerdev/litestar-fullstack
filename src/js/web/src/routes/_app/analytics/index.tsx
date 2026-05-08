@@ -55,8 +55,24 @@ import { formatDateTime } from "@/lib/date-utils"
 
 export const Route = createFileRoute("/_app/analytics/")({
   component: AnalyticsPage,
-  validateSearch: (search: Record<string, unknown>): { tab?: string } => ({
-    tab: (search.tab as string) || undefined,
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): {
+    tab?: string
+    q?: string
+    page?: number
+    startDate?: string
+    endDate?: string
+    direction?: string
+    disposition?: string
+  } => ({
+    tab: typeof search.tab === "string" && search.tab ? search.tab : undefined,
+    q: typeof search.q === "string" && search.q ? search.q : undefined,
+    page: Number(search.page) > 1 ? Number(search.page) : undefined,
+    startDate: typeof search.startDate === "string" && search.startDate ? search.startDate : undefined,
+    endDate: typeof search.endDate === "string" && search.endDate ? search.endDate : undefined,
+    direction: typeof search.direction === "string" && search.direction ? search.direction : undefined,
+    disposition: typeof search.disposition === "string" && search.disposition ? search.disposition : undefined,
   }),
 })
 
@@ -914,17 +930,42 @@ function CallVolumeSection({ items }: { items: CallRecord[] }) {
 // -- Call Records tab ---------------------------------------------------------
 
 function CallRecordsTab() {
-  // Filter state
-  const [search, setSearch] = useState("")
-  const debouncedSearch = useDebouncedValue(search)
-  const [directionFilter, setDirectionFilter] = useState<string[]>([])
-  const [dispositionFilter, setDispositionFilter] = useState<string[]>([])
+  // URL-persisted filter state
+  const { q: searchParam, page: pageParam, startDate: startDateParam, endDate: endDateParam, direction: directionParam, disposition: dispositionParam } = Route.useSearch()
+  const navigate = Route.useNavigate()
+
+  // Derive filter state from URL search params
   const defaultDates = getPresetDates(7)
-  const [startDate, setStartDate] = useState(defaultDates.start)
-  const [endDate, setEndDate] = useState(defaultDates.end)
+  const startDate = startDateParam ?? defaultDates.start
+  const endDate = endDateParam ?? defaultDates.end
+  const page = pageParam ?? 1
+  const directionFilter = useMemo(() => (directionParam ? directionParam.split(",").filter(Boolean) : []), [directionParam])
+  const dispositionFilter = useMemo(() => (dispositionParam ? dispositionParam.split(",").filter(Boolean) : []), [dispositionParam])
+
+  // Local input state for search (so typing is smooth before debounce)
+  const [searchInput, setSearchInput] = useState(searchParam ?? "")
+  const debouncedSearch = useDebouncedValue(searchInput)
+
+  // Sync URL when debounced search value settles
+  useEffect(() => {
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        q: debouncedSearch || undefined,
+        page: undefined,
+      }),
+      replace: true,
+    })
+  }, [debouncedSearch, navigate])
+
+  // Keep local input in sync if URL search param changes externally (back/forward)
+  useEffect(() => {
+    setSearchInput(searchParam ?? "")
+  }, [searchParam])
+
+  // Duration filters remain local-only (not URL-persisted)
   const [minDuration, setMinDuration] = useState("")
   const [maxDuration, setMaxDuration] = useState("")
-  const [page, setPage] = useState(1)
 
   // Row selection
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -1000,12 +1041,20 @@ function CallRecordsTab() {
   const hasData = filteredItems.length > 0
   const hasAnyRecords = (data?.items?.length ?? 0) > 0
 
-  const handleDatePreset = useCallback((days: number) => {
-    const { start, end } = getPresetDates(days)
-    setStartDate(start)
-    setEndDate(end)
-    setPage(1)
-  }, [])
+  const handleDatePreset = useCallback(
+    (days: number) => {
+      const { start, end } = getPresetDates(days)
+      navigate({
+        search: (prev) => ({
+          ...prev,
+          startDate: start || undefined,
+          endDate: end || undefined,
+          page: undefined,
+        }),
+      })
+    },
+    [navigate],
+  )
 
   const handleExportAll = useCallback(() => {
     if (!filteredItems.length) return
@@ -1015,15 +1064,21 @@ function CallRecordsTab() {
   const activeFilterCount = directionFilter.length + dispositionFilter.length + (startDate || endDate ? 1 : 0) + (minDuration || maxDuration ? 1 : 0)
 
   const handleClearFilters = useCallback(() => {
-    setSearch("")
-    setDirectionFilter([])
-    setDispositionFilter([])
-    setStartDate("")
-    setEndDate("")
+    setSearchInput("")
     setMinDuration("")
     setMaxDuration("")
-    setPage(1)
-  }, [])
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        q: undefined,
+        direction: undefined,
+        disposition: undefined,
+        startDate: undefined,
+        endDate: undefined,
+        page: undefined,
+      }),
+    })
+  }, [navigate])
 
   return (
     <div className="space-y-4">
@@ -1034,22 +1089,11 @@ function CallRecordsTab() {
       <div className="flex flex-wrap items-center gap-3 print:hidden">
         <div className="relative max-w-sm flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search source or destination..."
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value)
-              setPage(1)
-            }}
-            className="pl-9 pr-8"
-          />
-          {search && (
+          <Input placeholder="Search source or destination..." value={searchInput} onChange={(e) => setSearchInput(e.target.value)} className="pl-9 pr-8" />
+          {searchInput && (
             <button
               type="button"
-              onClick={() => {
-                setSearch("")
-                setPage(1)
-              }}
+              onClick={() => setSearchInput("")}
               className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
             >
               <X className="h-3.5 w-3.5" />
@@ -1063,12 +1107,10 @@ function CallRecordsTab() {
           startDate={startDate}
           endDate={endDate}
           onStartDateChange={(v) => {
-            setStartDate(v)
-            setPage(1)
+            navigate({ search: (prev) => ({ ...prev, startDate: v || undefined, page: undefined }) })
           }}
           onEndDateChange={(v) => {
-            setEndDate(v)
-            setPage(1)
+            navigate({ search: (prev) => ({ ...prev, endDate: v || undefined, page: undefined }) })
           }}
           onPreset={handleDatePreset}
           label="Date range"
@@ -1078,8 +1120,13 @@ function CallRecordsTab() {
           options={directionOptions}
           selected={directionFilter}
           onChange={(v) => {
-            setDirectionFilter(v)
-            setPage(1)
+            navigate({
+              search: (prev) => ({
+                ...prev,
+                direction: v.length > 0 ? v.join(",") : undefined,
+                page: undefined,
+              }),
+            })
           }}
         />
         <FilterDropdown
@@ -1087,8 +1134,13 @@ function CallRecordsTab() {
           options={dispositionOptions}
           selected={dispositionFilter}
           onChange={(v) => {
-            setDispositionFilter(v)
-            setPage(1)
+            navigate({
+              search: (prev) => ({
+                ...prev,
+                disposition: v.length > 0 ? v.join(",") : undefined,
+                page: undefined,
+              }),
+            })
           }}
         />
         {/* Duration range inputs */}
@@ -1099,7 +1151,7 @@ function CallRecordsTab() {
             value={minDuration}
             onChange={(e) => {
               setMinDuration(e.target.value)
-              setPage(1)
+              navigate({ search: (prev) => ({ ...prev, page: undefined }), replace: true })
             }}
             className="h-9 w-20 text-xs"
             min={0}
@@ -1111,13 +1163,13 @@ function CallRecordsTab() {
             value={maxDuration}
             onChange={(e) => {
               setMaxDuration(e.target.value)
-              setPage(1)
+              navigate({ search: (prev) => ({ ...prev, page: undefined }), replace: true })
             }}
             className="h-9 w-20 text-xs"
             min={0}
           />
         </div>
-        {activeFilterCount > 0 && (
+        {(activeFilterCount > 0 || searchInput) && (
           <Button variant="ghost" size="sm" className="text-xs text-muted-foreground" onClick={handleClearFilters}>
             Clear all filters
           </Button>
@@ -1167,7 +1219,7 @@ function CallRecordsTab() {
               </Button>
             }
           />
-        ) : !hasAnyRecords && !search && activeFilterCount === 0 ? (
+        ) : !hasAnyRecords && !searchInput && activeFilterCount === 0 ? (
           <EmptyState icon={FileText} title="No call records yet" description="Call detail records will appear here once calls are processed." />
         ) : !hasData ? (
           <EmptyState
@@ -1252,10 +1304,10 @@ function CallRecordsTab() {
             {/* Pagination */}
             {totalPages > 1 && (
               <div className="flex items-center justify-end gap-2 print:hidden">
-                <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>
+                <Button variant="outline" size="sm" onClick={() => navigate({ search: (prev) => ({ ...prev, page: page - 1 > 1 ? page - 1 : undefined }) })} disabled={page <= 1}>
                   Previous
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>
+                <Button variant="outline" size="sm" onClick={() => navigate({ search: (prev) => ({ ...prev, page: page + 1 }) })} disabled={page >= totalPages}>
                   Next
                 </Button>
               </div>
@@ -1337,7 +1389,7 @@ function AnalyticsPage() {
       <PageHeader eyebrow="Insights" title="Analytics" description="Call analytics, volume trends, and detailed call records." breadcrumbs={breadcrumbs} />
 
       <PageSection>
-        <Tabs value={tab} onValueChange={(value) => navigate({ search: () => ({ tab: value }), replace: true })}>
+        <Tabs value={tab} onValueChange={(value) => navigate({ search: (prev) => ({ ...prev, tab: value }), replace: true })}>
           <TabsList className="print:hidden">
             <TabsTrigger value="dashboard" className="gap-1.5">
               <BarChart3 className="h-4 w-4" />

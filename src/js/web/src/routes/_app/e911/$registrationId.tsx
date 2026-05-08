@@ -18,7 +18,7 @@ import {
   Users,
   XCircle,
 } from "lucide-react"
-import { useState } from "react"
+import { useCallback, useRef, useState } from "react"
 import { toast } from "sonner"
 import { EntityActivityPanel } from "@/components/shared/entity-activity-panel"
 import {
@@ -132,6 +132,49 @@ function DeleteConfirmDialog({
   )
 }
 
+// -- Validation ---------------------------------------------------------------
+
+interface E911FieldErrors {
+  addressLine1?: string
+  city?: string
+  state?: string
+  postalCode?: string
+  country?: string
+  callerName?: string
+}
+
+function validateE911Field(field: keyof E911FieldErrors, value: string): string | undefined {
+  switch (field) {
+    case "addressLine1":
+      if (value.trim() === "") return "Address is required"
+      if (value.trim().length < 3) return "Address must be at least 3 characters"
+      return undefined
+    case "city":
+      if (value.trim() === "") return "City is required"
+      if (value.trim().length < 2) return "City must be at least 2 characters"
+      return undefined
+    case "state":
+      if (value.trim() === "") return "State is required"
+      return undefined
+    case "postalCode":
+      if (value.trim() === "") return "Postal code is required"
+      if (!/^\d{5}(-\d{4})?$/.test(value.trim()) && !/^[A-Za-z0-9\s-]{3,10}$/.test(value.trim())) return "Enter a valid postal code (e.g., 12345 or 12345-6789)"
+      return undefined
+    case "country":
+      if (value.trim() === "") return "Country is required"
+      return undefined
+    case "callerName":
+      if (value.trim() === "") return "Caller name is required"
+      if (value.trim().length < 2) return "Caller name must be at least 2 characters"
+      return undefined
+  }
+}
+
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null
+  return <p className="text-sm text-destructive">{message}</p>
+}
+
 // -- Main page ----------------------------------------------------------------
 
 function E911DetailPage() {
@@ -154,6 +197,36 @@ function E911DetailPage() {
   const [editPostalCode, setEditPostalCode] = useState("")
   const [editCountry, setEditCountry] = useState("")
 
+  // Validation state
+  const [fieldErrors, setFieldErrors] = useState<E911FieldErrors>({})
+  const touchedRef = useRef<Record<string, boolean>>({})
+
+  const validateField = useCallback((field: keyof E911FieldErrors, value: string) => {
+    const error = validateE911Field(field, value)
+    setFieldErrors((prev) => ({ ...prev, [field]: error }))
+    return error
+  }, [])
+
+  const handleFieldBlur = useCallback(
+    (field: keyof E911FieldErrors, value: string) => {
+      touchedRef.current[field] = true
+      validateField(field, value)
+    },
+    [validateField],
+  )
+
+  const handleFieldChange = useCallback(
+    (field: keyof E911FieldErrors, value: string, setter: (v: string) => void) => {
+      setter(value)
+      if (touchedRef.current[field]) {
+        validateField(field, value)
+      }
+    },
+    [validateField],
+  )
+
+  const hasValidationErrors = Object.values(fieldErrors).some((e) => !!e)
+
   function startEditing() {
     if (!data) return
     setEditAddr1(data.addressLine1)
@@ -162,11 +235,26 @@ function E911DetailPage() {
     setEditState(data.state)
     setEditPostalCode(data.postalCode)
     setEditCountry(data.country)
+    setFieldErrors({})
+    touchedRef.current = {}
     setEditing(true)
   }
 
   function handleSave() {
     if (!data) return
+
+    // Validate all required fields before submit
+    const addr1Err = validateField("addressLine1", editAddr1)
+    const cityErr = validateField("city", editCity)
+    const stateErr = validateField("state", editState)
+    const postalErr = validateField("postalCode", editPostalCode)
+    const countryErr = validateField("country", editCountry)
+    // Mark all as touched so errors display
+    for (const f of ["addressLine1", "city", "state", "postalCode", "country"] as const) {
+      touchedRef.current[f] = true
+    }
+    if (addr1Err || cityErr || stateErr || postalErr || countryErr) return
+
     const payload: Record<string, unknown> = {}
     if (editAddr1 !== data.addressLine1) payload.addressLine1 = editAddr1
     if (editAddr2 !== (data.addressLine2 ?? "")) payload.addressLine2 = editAddr2 || null
@@ -175,8 +263,18 @@ function E911DetailPage() {
     if (editPostalCode !== data.postalCode) payload.postalCode = editPostalCode
     if (editCountry !== data.country) payload.country = editCountry
     updateMutation.mutate(payload, {
-      onSuccess: () => setEditing(false),
+      onSuccess: () => {
+        setEditing(false)
+        setFieldErrors({})
+        touchedRef.current = {}
+      },
     })
+  }
+
+  function handleCancelEdit() {
+    setEditing(false)
+    setFieldErrors({})
+    touchedRef.current = {}
   }
 
   const handleDelete = async () => {
@@ -342,10 +440,10 @@ function E911DetailPage() {
               </CardTitle>
               {editing && (
                 <div className="flex gap-2">
-                  <Button variant="ghost" size="sm" onClick={() => setEditing(false)}>
+                  <Button variant="ghost" size="sm" onClick={handleCancelEdit}>
                     Cancel
                   </Button>
-                  <Button size="sm" onClick={handleSave} disabled={updateMutation.isPending}>
+                  <Button size="sm" onClick={handleSave} disabled={updateMutation.isPending || hasValidationErrors}>
                     {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Save
                   </Button>
@@ -357,28 +455,68 @@ function E911DetailPage() {
                 <div className="space-y-4">
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
-                      <Label>Address Line 1</Label>
-                      <Input value={editAddr1} onChange={(e) => setEditAddr1(e.target.value)} />
+                      <Label>
+                        Address Line 1 <span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        value={editAddr1}
+                        onChange={(e) => handleFieldChange("addressLine1", e.target.value, setEditAddr1)}
+                        onBlur={() => handleFieldBlur("addressLine1", editAddr1)}
+                        aria-invalid={!!fieldErrors.addressLine1}
+                      />
+                      <FieldError message={fieldErrors.addressLine1} />
                     </div>
                     <div className="space-y-2">
                       <Label>Address Line 2</Label>
                       <Input value={editAddr2} onChange={(e) => setEditAddr2(e.target.value)} placeholder="Suite, Apt, etc." />
                     </div>
                     <div className="space-y-2">
-                      <Label>City</Label>
-                      <Input value={editCity} onChange={(e) => setEditCity(e.target.value)} />
+                      <Label>
+                        City <span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        value={editCity}
+                        onChange={(e) => handleFieldChange("city", e.target.value, setEditCity)}
+                        onBlur={() => handleFieldBlur("city", editCity)}
+                        aria-invalid={!!fieldErrors.city}
+                      />
+                      <FieldError message={fieldErrors.city} />
                     </div>
                     <div className="space-y-2">
-                      <Label>State</Label>
-                      <Input value={editState} onChange={(e) => setEditState(e.target.value)} />
+                      <Label>
+                        State <span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        value={editState}
+                        onChange={(e) => handleFieldChange("state", e.target.value, setEditState)}
+                        onBlur={() => handleFieldBlur("state", editState)}
+                        aria-invalid={!!fieldErrors.state}
+                      />
+                      <FieldError message={fieldErrors.state} />
                     </div>
                     <div className="space-y-2">
-                      <Label>Postal Code</Label>
-                      <Input value={editPostalCode} onChange={(e) => setEditPostalCode(e.target.value)} />
+                      <Label>
+                        Postal Code <span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        value={editPostalCode}
+                        onChange={(e) => handleFieldChange("postalCode", e.target.value, setEditPostalCode)}
+                        onBlur={() => handleFieldBlur("postalCode", editPostalCode)}
+                        aria-invalid={!!fieldErrors.postalCode}
+                      />
+                      <FieldError message={fieldErrors.postalCode} />
                     </div>
                     <div className="space-y-2">
-                      <Label>Country</Label>
-                      <Input value={editCountry} onChange={(e) => setEditCountry(e.target.value)} />
+                      <Label>
+                        Country <span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        value={editCountry}
+                        onChange={(e) => handleFieldChange("country", e.target.value, setEditCountry)}
+                        onBlur={() => handleFieldBlur("country", editCountry)}
+                        aria-invalid={!!fieldErrors.country}
+                      />
+                      <FieldError message={fieldErrors.country} />
                     </div>
                   </div>
                 </div>

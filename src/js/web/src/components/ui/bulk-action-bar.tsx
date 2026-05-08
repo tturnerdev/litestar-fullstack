@@ -30,6 +30,8 @@ export interface BulkAction {
   confirm?: {
     title: string
     description: string
+    /** Label for the confirm button. Defaults to "Delete N items" for destructive actions. */
+    confirmLabel?: string
   }
   /** Async handler executed when the action is confirmed */
   onExecute: (selectedIds: string[]) => Promise<void>
@@ -126,13 +128,14 @@ export function BulkActionBar({ selectedCount, selectedIds, onClearSelection, ac
         )}
       </AnimatePresence>
 
-      {/* Confirmation dialog for destructive actions */}
+      {/* Confirmation dialog for actions that require confirmation */}
       <AlertDialog open={pendingAction !== null} onOpenChange={(open) => !open && !executing && setPendingAction(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{pendingAction?.confirm?.title ?? "Confirm"}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete {selectedIds.length} {selectedIds.length === 1 ? "item" : "items"}. This action cannot be undone.
+              {pendingAction?.confirm?.description ??
+                `This will permanently delete ${selectedIds.length} ${selectedIds.length === 1 ? "item" : "items"}. This action cannot be undone.`}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -145,7 +148,7 @@ export function BulkActionBar({ selectedCount, selectedIds, onClearSelection, ac
               className={pendingAction?.variant === "destructive" ? "bg-destructive text-white hover:bg-destructive/90" : ""}
             >
               {executing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Delete {selectedIds.length} {selectedIds.length === 1 ? "item" : "items"}
+              {pendingAction?.confirm?.confirmLabel ?? `Delete ${selectedIds.length} ${selectedIds.length === 1 ? "item" : "items"}`}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

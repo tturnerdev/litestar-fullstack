@@ -40,6 +40,7 @@ import { E911StatusBadge } from "@/components/voice/e911-status-badge"
 import { PhoneNumberDeleteDialog } from "@/components/voice/phone-number-delete-dialog"
 import { PhoneNumberEditSheet } from "@/components/voice/phone-number-edit-sheet"
 import { useDocumentTitle } from "@/hooks/use-document-title"
+import { useE911Registration } from "@/lib/api/hooks/e911"
 import { useGatewayLookupNumber } from "@/lib/api/hooks/gateway"
 import { useTeam } from "@/lib/api/hooks/teams"
 import { useExtensionsByPhoneNumber, usePhoneNumber, useUpdatePhoneNumber } from "@/lib/api/hooks/voice"
@@ -81,6 +82,7 @@ function PhoneNumberDetailPage() {
   const gatewayQuery = useGatewayLookupNumber(data?.number ?? "", tab === "external")
   const extensionsQuery = useExtensionsByPhoneNumber(phoneNumberId)
   const teamQuery = useTeam(data?.teamId ?? "")
+  const e911Query = useE911Registration(data?.e911RegistrationId ?? "")
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
 
@@ -605,7 +607,9 @@ function PhoneNumberDetailPage() {
                         </div>
                         <div className="min-w-0 flex-1">
                           <p className="text-xs text-muted-foreground">E911 Registration</p>
-                          <p className="truncate text-sm font-medium group-hover:text-primary">{data.e911RegistrationId.slice(0, 8)}...</p>
+                          <p className="truncate text-sm font-medium group-hover:text-primary">
+                            {e911Query.data ? `${e911Query.data.addressLine1}, ${e911Query.data.city}` : "Loading..."}
+                          </p>
                         </div>
                         <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
                       </Link>

@@ -30,7 +30,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { useDocumentTitle } from "@/hooks/use-document-title"
-import { useDeleteDevice, useDevices, useRebootDevice, useReprovisionDevice, useUpdateDevice } from "@/lib/api/hooks/devices"
+import { apiFetch, useDeleteDevice, useDevices, useRebootDevice, useReprovisionDevice, useUpdateDevice } from "@/lib/api/hooks/devices"
 import { type CsvHeader, exportToCsv } from "@/lib/csv-export"
 import { formatDateTime, formatRelativeTimeShort } from "@/lib/date-utils"
 import { type Device, deleteDevice } from "@/lib/generated/api"
@@ -345,6 +345,60 @@ function DevicesPage() {
   // Bulk actions
   const bulkActions = useMemo(
     () => [
+      {
+        key: "reboot",
+        label: "Reboot Selected",
+        icon: <RefreshCw className="h-4 w-4" />,
+        variant: "outline" as const,
+        confirm: {
+          title: "Reboot selected devices?",
+          description: `This will send a reboot command to ${selectedIds.size} device${selectedIds.size === 1 ? "" : "s"}. Devices will be temporarily unavailable during restart.`,
+          confirmLabel: `Reboot ${selectedIds.size} device${selectedIds.size === 1 ? "" : "s"}`,
+        },
+        onExecute: async (ids: string[]) => {
+          const errors: string[] = []
+          for (const id of ids) {
+            try {
+              await apiFetch<{ message: string }>(`/api/devices/${id}/reboot`, { method: "POST" })
+            } catch {
+              errors.push(id)
+            }
+          }
+          const { toast } = await import("sonner")
+          if (errors.length > 0) {
+            toast.error(`Failed to reboot ${errors.length} of ${ids.length} devices`)
+          } else {
+            toast.success(`Reboot command sent to ${ids.length} device${ids.length === 1 ? "" : "s"}`)
+          }
+        },
+      },
+      {
+        key: "reprovision",
+        label: "Reprovision Selected",
+        icon: <RotateCcw className="h-4 w-4" />,
+        variant: "outline" as const,
+        confirm: {
+          title: "Reprovision selected devices?",
+          description: `This will reprovision ${selectedIds.size} device${selectedIds.size === 1 ? "" : "s"}. Devices will download updated configuration files.`,
+          confirmLabel: `Reprovision ${selectedIds.size} device${selectedIds.size === 1 ? "" : "s"}`,
+        },
+        onExecute: async (ids: string[]) => {
+          const errors: string[] = []
+          for (const id of ids) {
+            try {
+              await apiFetch<{ message: string }>(`/api/devices/${id}/reprovision`, { method: "POST" })
+            } catch {
+              errors.push(id)
+            }
+          }
+          const { toast } = await import("sonner")
+          if (errors.length > 0) {
+            toast.error(`Failed to reprovision ${errors.length} of ${ids.length} devices`)
+          } else {
+            toast.success(`Reprovisioning started for ${ids.length} device${ids.length === 1 ? "" : "s"}`)
+          }
+        },
+      },
       createBulkDeleteAction(
         async (id) => {
           await deleteDevice({ path: { device_id: id } })
@@ -356,7 +410,7 @@ function DevicesPage() {
       ),
       createExportAction<Device>("devices-selected", csvHeaders, (ids) => filteredItems.filter((d) => ids.includes(d.id))),
     ],
-    [filteredItems, deleteMutation],
+    [filteredItems, deleteMutation, selectedIds.size],
   )
 
   // Export all visible
